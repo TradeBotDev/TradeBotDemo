@@ -14,7 +14,7 @@ service OrderManager {
 		Подписывает на ордера по выбранному типу и статусу.
 		Возвращает поток, по которому передается полная информация об ордере
 	*/
-	rpc SubscribeOrders (SubscribeOrderRequest) returns stream (SubscribeOrderReply);
+	rpc SubscribeOrders (SubscribeOrderRequest) returns (stream SubscribeOrderReply);
 	/*
 		Пытается создать ордер на бирже.
 		Возвращает ошибку если биржа не приняла оредр по переданным параметрам
@@ -26,8 +26,8 @@ service OrderManager {
 
 message SubscribeOrderRequest{
 	Meta meta = 0;
-	OrderType = 1;
-	OrderStatus = 2;
+	OrderType type = 1;
+	OrderStatus type = 2;
 }
 
 message SubscribeOrderReply {

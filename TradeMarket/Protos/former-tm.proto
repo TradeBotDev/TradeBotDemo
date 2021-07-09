@@ -1,0 +1,13 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "TradeMarket";
+import "google/protobuf/timestamp.proto";
+import public "../Protos/common.proto";
+import public "../Protos/former-tm.proto";
+
+
+package formertm;
+
+
+
+
