@@ -1,0 +1,84 @@
+﻿syntax = "proto3";
+
+import public "../Protos/common.proto";
+import "google/protobuf/timestamp.proto";
+option csharp_namespace = "TradeMarket";
+
+
+
+package formertm;
+
+
+// The greeting service definition.
+service TradeMarket {
+	/*
+		Запрос аутентификации пользователя на бирже по его токену
+		Возвращает ошибку если аутентификация не была успешна
+	*/
+	rpc AuthenticateUser (AuthenticateUserRequest) returns AuthenticateUserReply;
+	/*
+		Получает Список имплементированных бирж на сервисе
+	*/
+	rpc GetTradeMarketNames (GetTradeMarketNamesRequest) returns GetTradeMarketNamesReply;
+	/*
+		Получает список Слотов на выбранной бирже
+		Возвращает ошибку если переданная биржа не имплементированна
+	*/
+	rpc GetSlotNames(GetSlotNamesRequest) returns  GetSlotNamesReply;
+
+	/*
+		Возвращает поток, в котором передаются изменения баланса пользователя на бирже
+	*/
+	rpc SubscribeBalance(SubscribeBalanceRequest) returns stream (SubscribeBalanceReply);
+
+	/*
+		Возвращает поток, в котором передаются логи по данной сессии сервисов
+	*/
+	rpc SubscribeLogs(SubscribeLogsRequest) returns stream (SubscribeLogsReply);
+}
+
+message SubscribeLogsRequest{
+	Meta meta = 1;
+	UserInfo info = 2;
+}
+
+message SubscribeLogsReply{
+	Log log = 1;
+}
+
+message SubscribeBalanceRequest{
+	Meta meta = 1;
+	UserInfo info = 2;
+}
+
+message SubscribeBalanceReply{
+	double new_balance = 1;
+}
+
+message AuthenticateUserRequest{
+	Meta meta = 1;
+	string token = 2;
+}
+message AuthenticateUserReply{
+	DefaultReply reply = 1;
+}
+
+message GetTradeMarketNamesRequest{
+	Meta meta = 1;
+}
+
+message GetTradeMarketNamesReply{
+	repeated string name = 1;
+}
+
+message GetSlotNamesRequest{
+	Meta meta = 1;
+	string trade_market_name = 2;
+}
+
+message GetSlotNamesReply{
+	repeated string name = 1;
+}
+
+
+
