@@ -4,37 +4,44 @@ option csharp_namespace = "TradeBotCommon";
 import "google/protobuf/timestamp.proto";
 
 package common;
-
-message Meta{
-	UserInfo user_info = 1;
-	Config config = 2;
+/*
+enum Reply{
+	succeed = 0;
+	failure = 1;
+}
+*/
+message DefaultReply{
+	//Reply reply = 1;
+	string message = 2;
 }
 
+message Meta{
+	//UserInfo user_info = 1;
+	//Config config = 2;
+} 
+/*
 message UserInfo{
 	string session_id = 1;
 }
 
-message Order {
+
+*/message Order {
 	double quantity = 1;
-	double price = 2;
-	double fee = 3;
-	enum order_status {
-		order_status_open = 1;
-		order_status_closed = 2;
-	}
-	enum order_type {
-		sell = 1;
-		buy = 2;
-	}
-	int32 id = 4;
-	timestamp last_update_time = 5;
+	double price = 20;
+	double fee = 30;
+	OrderStatus status = 40;
+	OrderType type = 43;
+	int32 id = 45;
+	google.protobuf.Timestamp last_update_time = 5;
 }
+
+/*
 
 message AlgorithmInfo{
     //интервал анализа
-	timestamp interval = 1;
+	google.protobuf.Timestamp interval = 1;
 	//количество точек в интервале (между точками берется среднее)
-	int point_split_count = 2;
+	int32 point_split_count = 2;
 }
 
 message Config{
@@ -56,12 +63,20 @@ message Config{
 
 message Log {
 	//когда произошла запись
-	timestamp when = 1;
+	google.protobuf.Timestamp when = 1;
 	// на каком микросервисе и в каком методе прозошла запись
 	string where = 2;
 	//сообщение лога
 	string log_message = 3;
 
 }
-
-
+*/
+enum OrderStatus {
+		open = 0;
+		closed = 1;
+	}
+enum OrderType {
+		sell = 0;
+		buy = 1;
+	}
+	

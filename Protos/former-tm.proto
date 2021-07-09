@@ -1,7 +1,7 @@
 ﻿syntax = "proto3";
 
-import public "../Protos/common.proto";
-import "google.protobuf.timestamp.proto";
+import "common.proto";
+import "google/protobuf/timestamp.proto";
 option csharp_namespace = "TradeMarket";
 
 
@@ -19,15 +19,15 @@ service OrderManager {
 		Пытается создать ордер на бирже.
 		Возвращает ошибку если биржа не приняла оредр по переданным параметрам
 	*/
-	rpc InsertOrder(InsertOrderRequest) returns InsertOrderReply;
+	rpc InsertOrder(InsertOrderRequest) returns (InsertOrderReply);
 }
 
 
 
 message SubscribeOrderRequest{
-	Meta meta = 0;
-	OrderType type = 1;
-	OrderStatus type = 2;
+	common.Meta meta = 1;
+	common.OrderType type = 2;
+	common.OrderStatus status = 3;
 }
 
 message SubscribeOrderReply {
@@ -35,11 +35,11 @@ message SubscribeOrderReply {
 }
 
 message FullOrderInfo{
-	Meta meta = 0;
-	Order order = 1;
-	int32 remove_time = 2;
-	timestamp remove_date = 3;
-	double stop_loss_price_delta = 4;
+	common.Meta meta = 1;
+	//common.Order order = 2;
+	int32 remove_time = 3;
+	google.protobuf.Timestamp remove_date = 4;
+	double stop_loss_price_delta = 5;
 }
 
 message InsertOrderRequest{
@@ -47,7 +47,7 @@ message InsertOrderRequest{
 }
 
 message InsertOrderReply {
-	DefaultReply reply = 1;
+	//common.DefaultReply reply = 1;
 	FullOrderInfo confirm_info = 2;
 }
 
