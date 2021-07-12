@@ -25,6 +25,11 @@ enum OrderType{
 	order_type_buy = 1;
 }
 
+message OrderSignature{
+	OrderStatus status = 1;
+	OrderType type = 2;
+}
+
 message Order {
 	double quantity = 1;
 	double price = 2;
