@@ -5,6 +5,16 @@ import "google/protobuf/timestamp.proto";
 
 package TradeBot.Common;
 
+enum ReplyCode{
+	reply_code_succeed = 0;
+	reply_code_failure = 1;
+}
+
+message DefaultReply{
+	ReplyCode code = 1;
+	string message = 2;
+}
+
 enum OrderStatus{
 	order_status_open = 0;
 	order_status_closed = 1;
