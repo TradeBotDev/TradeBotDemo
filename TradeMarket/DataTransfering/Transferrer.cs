@@ -6,6 +6,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using TradeMarket.Model;
 
+/// <summary>
+///Этот класс должен отслеживать изменения данных на бирже и отсылать их другим сервисам
+/// </summary>
 namespace TradeMarket.DataTransfering
 {
     public delegate void OrdersAddedEventHandler(object sender, OrdersAddedEventArgs args);
