@@ -12,8 +12,7 @@ service OrderProviderService{
 	rpc SubscribeOrders(SubscribeOrdersRequest) returns (SubscribeOrdersReply);
 }
 message SubscribeOrdersRequest{
-	TradeBot.Common.OrderStatus status = 1;
-	TradeBot.Common.OrderType type = 2; 
+	TradeBot.Common.OrderSignature signatures = 1;
 }
 
 message SubscribeOrdersReply{
