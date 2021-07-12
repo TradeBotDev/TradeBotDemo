@@ -1,6 +1,6 @@
 ﻿syntax = "proto3";
 
-option csharp_namespace = "TradeBotCommon";
+option csharp_namespace = "TradeBot.Common";
 import "google/protobuf/timestamp.proto";
 
 package TradeBot.Common;
@@ -42,7 +42,7 @@ message AlgorithmInfo{
     //интервал анализа
 	google.protobuf.Timestamp interval = 1;
 	//количество точек в интервале (между точками берется среднее)
-	int point_split_count = 2;
+	int32 point_split_count = 2;
 }
 
 message Config{
@@ -64,7 +64,7 @@ message Config{
 
 message Log {
 	//когда произошла запись
-	timestamp when = 1;
+	google.protobuf.Timestamp when = 1;
 	// на каком микросервисе и в каком методе прозошла запись
 	string where = 2;
 	//сообщение лога
