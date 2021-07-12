@@ -1,15 +1,13 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <Protobuf Include="Protos\greet.proto" GrpcServices="Server" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.34.0" />
+    <Protobuf Include="../Proto/common.proto" GrpcServices="Both" ProtoRoot="../Proto"/>
+    <Protobuf Include="../Proto/algorithm_former.proto" GrpcServices="Both" ProtoRoot="../Proto"/>
   </ItemGroup>
 
 </Project>
