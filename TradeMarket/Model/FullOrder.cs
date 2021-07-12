@@ -17,7 +17,7 @@ namespace TradeMarket.Model
         public double RemovePrice { get; set; }
         public DateTime LastUpdateDate { get; set; }
         public DateTime RemoveDate { get; set; }
-        public OrderSignature signature { get; set; }
+        public OrderSignature Signature { get; set; }
        
     }
 }
