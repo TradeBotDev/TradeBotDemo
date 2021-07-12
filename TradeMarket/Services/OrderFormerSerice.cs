@@ -9,11 +9,13 @@ using TradeMarket.Former;
 
 namespace TradeMarket.Services
 {
-    public class OrderFormerSerice : TradeMarket.Former.OrderFormerService.OrderFormerServiceBase
+    public class OrderFormerSerice : TradeMarket.Former.OrderFormerService.OrderFormerServiceBase , IDisposable
     {
         private Transferrer _transferrer;
 
         private List<SubscribeOrdersReply> _replies;
+
+        private IServerStreamWriter<SubscribeOrdersReply> _stream;
 
         public  OrderFormerSerice(Transferrer transferrer)
         {
@@ -65,11 +67,16 @@ namespace TradeMarket.Services
 
         public override async Task SubscribeOrders(SubscribeOrdersRequest request, IServerStreamWriter<SubscribeOrdersReply> responseStream, ServerCallContext context)
         {
-            
+            _stream = responseStream;
             foreach (var order in _replies)
             {
-                await responseStream.WriteAsync(order);
+                await _stream.WriteAsync(order);
             }
+        }
+
+        public void Dispose()
+        {
+            //TODO тут должен диспозиться стрим
         }
     }
 }
