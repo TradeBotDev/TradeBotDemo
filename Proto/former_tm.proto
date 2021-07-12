@@ -26,8 +26,7 @@ message BuyOrderReply{
 }
 
 message SubscribeOrdersRequest{
-	TradeBot.Common.OrderStatus status = 1;
-	TradeBot.Common.OrderType type = 2; 
+	TradeBot.Common.OrderSignature signature = 1;
 }
 
 message SubscribeOrdersReply{
