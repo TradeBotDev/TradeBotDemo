@@ -5,7 +5,7 @@ import "google/protobuf/timestamp.proto";
 import "common.proto";
 package TradeBot.TradeMarket.Former;
 
-service OrderFormer {
+service OrderFormerService {
 	/*
 		Подписывается на ордера выбранного типа
 	*/
