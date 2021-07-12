@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option csharp_namespace = "Relay";
+import "google/protobuf/timestamp.proto";
+
+package TradeBot.Algorithm.Relay;
+
+service SendToAlgorithm {
+	rpc GetOrders (GetOrdersRequest) returns (stream GetOrdersReply);
+	rpc GetConfig (GetConfigRequest) returns (GetConfigReply);
+}
+
+message GetOrdersRequest {
+	Order orders = 1;
+}
+message GetOrdersReply {
+	TradeBot.Common.DefaultReply reply = 1;
+}
+
+message GetConfigRequest {
+	Config config = 1;
+}
+
+message GetConfigReply {
+	TradeBot.Common.DefaultReply reply = 1;
+}

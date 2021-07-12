@@ -63,7 +63,4 @@ message Log {
 	string where = 2;
 	//сообщение лога
 	string log_message = 3;
-
 }
-
-
