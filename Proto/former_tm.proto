@@ -1,0 +1,40 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "TradeMarket";
+import "google/protobuf/timestamp.proto";
+import "common.proto";
+package TradeBot.TradeMarket.Former;
+
+service OrderFormerService {
+	/*
+		Подписывается на ордера выбранного типа
+	*/
+	rpc SubscribeOrders(SubscribeOrdersRequest) returns (SubscribeOrdersReply);
+
+	/*
+		Покупает ордер по указанному ид и возвращает результат покупики (получилось / не получилось)
+	*/
+	rpc BuyOrder(BuyOrderRequest) returns (BuyOrderReply);
+}
+
+message BuyOrderRequest{
+	string id = 1;
+}
+
+message BuyOrderReply{
+	TradeBot.Common.DefaultReply reply = 1;
+}
+
+message SubscribeOrdersRequest{
+	TradeBot.Common.OrderStatus status = 1;
+	TradeBot.Common.OrderType type = 2; 
+}
+
+message SubscribeOrdersReply{
+	TradeBot.Common.Order simple_order_info = 1; 
+	google.protobuf.Timestamp remove_date = 2;
+	double remove_price = 3;
+	string id = 4;
+
+
+}

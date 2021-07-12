@@ -25,11 +25,17 @@ enum OrderType{
 	order_type_buy = 1;
 }
 
+message OrderSignature{
+	OrderStatus status = 1;
+	OrderType type = 2;
+}
+
 message Order {
 	double quantity = 1;
 	double price = 2;
-	OrderStatus status = 3;
-	OrderType type = 4;
+	OrderSignature signature = 3;
+	google.protobuf.Timestamp last_update_date = 4;
+
 }
 
 message AlgorithmInfo{
