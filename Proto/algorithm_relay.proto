@@ -1,26 +1,33 @@
 syntax = "proto3";
 
-option csharp_namespace = "Algorithm";
+option csharp_namespace = "TradeBot.Algorithm.Relay";
 import "google/protobuf/timestamp.proto";
+import "common.proto";
 
 package TradeBot.Algorithm.Relay;
 
 service SendToAlgorithm {
+	//Получение алгоритмом множества ордеров
 	rpc GetOrders (GetOrdersRequest) returns (stream GetOrdersReply);
+	//Получение алгоритмом конфига
 	rpc GetConfig (GetConfigRequest) returns (GetConfigReply);
 }
 
 message GetOrdersRequest {
-	Order orders = 1;
+	//Передача алгоритму ордера
+	TradeBot.Common.Order orders = 1;
 }
 message GetOrdersReply {
+	//Ответ алгоритма на передачу множества ордеров
 	TradeBot.Common.DefaultReply reply = 1;
 }
 
 message GetConfigRequest {
-	Config config = 1;
+	//Передача алгоритму конфига
+	TradeBot.Common.Config config = 1;
 }
 
 message GetConfigReply {
+	//Ответ алгоритма на передачу конфига
 	TradeBot.Common.DefaultReply reply = 1;
 }

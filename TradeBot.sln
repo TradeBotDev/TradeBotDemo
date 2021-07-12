@@ -15,6 +15,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TradeMarket", "TradeMarket\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Facade", "Facade\Facade.csproj", "{E6EC140F-4AA1-40F4-BC1B-28717433CE4E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Proto", "Proto", "{A80EAB58-0B2A-43C2-930F-2025E7C563F3}"
+	ProjectSection(SolutionItems) = preProject
+		Proto\algorithm_relay.proto = Proto\algorithm_relay.proto
+		Proto\common.proto = Proto\common.proto
+		Proto\facade_tm.proto = Proto\facade_tm.proto
+		Proto\former_algorithm.proto = Proto\former_algorithm.proto
+		Proto\former_tm.proto = Proto\former_tm.proto
+		Proto\relay_tm.proto = Proto\relay_tm.proto
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

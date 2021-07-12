@@ -34,6 +34,4 @@ message SubscribeOrdersReply{
 	google.protobuf.Timestamp remove_date = 2;
 	double remove_price = 3;
 	string id = 4;
-
-
 }
