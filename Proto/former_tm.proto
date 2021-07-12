@@ -12,7 +12,7 @@ service OrderFormer {
 	rpc SubscribeOrders(SubscribeOrdersRequest) returns (SubscribeOrdersReply);
 
 	/*
-		Покупает ордер по указанному ид
+		Покупает ордер по указанному ид и возвращает результат покупики (получилось / не получилось)
 	*/
 	rpc BuyOrder(BuyOrderRequest) returns (BuyOrderReply);
 }
