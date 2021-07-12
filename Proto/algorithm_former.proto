@@ -5,7 +5,7 @@ import "common.proto";
 
 package TradeBot.Algorithm.Former;
 
-service GetPrice
+service AlgorithmAnswerService
 {	
 	/*
 		Подписываемся на алгоритм с целью узнать оптимальную цену, ниже которой можно будет покупать
@@ -18,5 +18,5 @@ message SubscribePurchasePriceRequest
 }
 message SubscribePurchasePriceReply
 {
-	TradeBot.Common.DefaultReply huinia = 1;
+	
 }
