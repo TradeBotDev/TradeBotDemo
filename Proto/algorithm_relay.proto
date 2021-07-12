@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option csharp_namespace = "Relay";
+option csharp_namespace = "Algorithm";
 import "google/protobuf/timestamp.proto";
 
 package TradeBot.Algorithm.Relay;

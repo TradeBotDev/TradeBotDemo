@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+option csharp_namespace = "Relay";
+import "google/protobuf/timestamp.proto";
+
+package TradeBot.Relay.Facade;
+
+service SendToRelay {
+	rpc StartBot (StartBotRequest) returns (StartBotReply);
+	rpc SubscribeLogs (SubscribeLogsRequest) returns (SubscribeLogsReply);
+}
+
+message StartBotRequest {
+	Config config = 1;
+}
+
+message StartBotReply {
+	TradeBot.Common.DefaultReply reply = 1;
+}
+
+message SubscribeLogsRequest {
+	Log log = 1;
+}
+
+message SubscribeLogsReply {
+	TradeBot.Common.DefaultReply reply = 1;
+}
