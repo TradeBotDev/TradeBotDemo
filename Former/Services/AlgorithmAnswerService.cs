@@ -7,30 +7,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using TradeMarket;
 using TradeBot.Common;
+using TradeMarket.Former;
 
 namespace Former
 {
-    class BuyOrder 
-    {
-        string id;
-        Order simple_order_info;
-        DateTime RemoveDate;
-        double RemovePrice;
-    }
-    class Order 
-    {
-        double Quantity;
-        double Price;
-        OrderSignature Signature;
-        DateTime LastUpdateDate;
-    }
-    class OrderSignature
-    {
-        double quantity = 1;
-        double price = 2;
-        OrderSignature signature = 3;
-        google.protobuf.Timestamp last_update_date = 4;
-    }
+    
 
 
     public class AlgorithmAnswerService : Algorithm.AlgorithmAnswerService.AlgorithmAnswerServiceClient
@@ -58,7 +39,7 @@ namespace Former
 
             await foreach (var response in call.ResponseStream.ReadAllAsync())
             {
-                response.
+                //response.
             }
 
         }
