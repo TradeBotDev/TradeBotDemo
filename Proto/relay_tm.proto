@@ -1,0 +1,20 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "TradeMarket";
+import "google/protobuf/timestamp.proto";
+
+package TradeBot.TradeMarket.Relay;
+
+service OrderProviderService{
+	/*
+		Подписывается на ордера выбранного типа
+	*/
+	rpc SubscribeOrders(SubscribeOrdersRequest) returns (SubscribeOrdersReply);
+}
+message SubscribeOrdersRequest{
+	TradeBot.Common.OrderSignature signatures = 1;
+}
+
+message SubscribeOrdersReply{
+	TradeBot.Common.Order simple_order_info = 1; 
+}
