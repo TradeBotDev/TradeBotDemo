@@ -3,36 +3,28 @@
 option csharp_namespace = "TradeBotCommon";
 import "google/protobuf/timestamp.proto";
 
-package common;
+package TradeBot.Common;
 
-message Meta{
-	UserInfo user_info = 1;
-	Config config = 2;
+enum OrderStatus{
+	order_status_open = 0;
+	order_status_closed = 1;
 }
 
-message UserInfo{
-	string session_id = 1;
+enum OrderType{
+	order_type_sell = 0;
+	order_type_buy = 1;
 }
 
 message Order {
 	double quantity = 1;
 	double price = 2;
-	double fee = 3;
-	enum order_status {
-		order_status_open = 1;
-		order_status_closed = 2;
-	}
-	enum order_type {
-		sell = 1;
-		buy = 2;
-	}
-	int32 id = 4;
-	timestamp last_update_time = 5;
+	OrderStatus status = 3;
+	OrderType type = 4;
 }
 
 message AlgorithmInfo{
     //интервал анализа
-	timestamp interval = 1;
+	google.protobuf.Timestamp interval = 1;
 	//количество точек в интервале (между точками берется среднее)
 	int point_split_count = 2;
 }
