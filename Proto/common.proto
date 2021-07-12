@@ -30,6 +30,8 @@ message Order {
 	double price = 2;
 	OrderStatus status = 3;
 	OrderType type = 4;
+	google.protobuf.Timestamp last_update_date = 5;
+
 }
 
 message AlgorithmInfo{
