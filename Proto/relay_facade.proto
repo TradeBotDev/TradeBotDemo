@@ -1,7 +1,8 @@
 syntax = "proto3";
 
-option csharp_namespace = "Relay";
+option csharp_namespace = "TradeBot.Relay.Facade";
 import "google/protobuf/timestamp.proto";
+import "common.proto";
 
 package TradeBot.Relay.Facade;
 
@@ -11,7 +12,7 @@ service SendToRelay {
 }
 
 message StartBotRequest {
-	Config config = 1;
+	TradeBot.Common.Config config = 1;
 }
 
 message StartBotReply {
@@ -19,7 +20,7 @@ message StartBotReply {
 }
 
 message SubscribeLogsRequest {
-	Log log = 1;
+	TradeBot.Common.Log log = 1;
 }
 
 message SubscribeLogsReply {

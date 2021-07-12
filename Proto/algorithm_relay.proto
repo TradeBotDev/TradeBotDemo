@@ -1,7 +1,8 @@
 syntax = "proto3";
 
-option csharp_namespace = "Algorithm";
+option csharp_namespace = "TradeBot.Algorithm.Relay";
 import "google/protobuf/timestamp.proto";
+import "common.proto";
 
 package TradeBot.Algorithm.Relay;
 
@@ -11,14 +12,14 @@ service SendToAlgorithm {
 }
 
 message GetOrdersRequest {
-	Order orders = 1;
+	TradeBot.Common.Order orders = 1;
 }
 message GetOrdersReply {
 	TradeBot.Common.DefaultReply reply = 1;
 }
 
 message GetConfigRequest {
-	Config config = 1;
+	TradeBot.Common.Config config = 1;
 }
 
 message GetConfigReply {
