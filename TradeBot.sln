@@ -13,7 +13,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Former", "Former\Former.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TradeMarket", "TradeMarket\TradeMarket.csproj", "{1EE2C3F1-966D-4D23-9CDF-3F3F9661FB8A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Facade", "Facade\Facade.csproj", "{E6EC140F-4AA1-40F4-BC1B-28717433CE4E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Facade", "Facade\Facade.csproj", "{E6EC140F-4AA1-40F4-BC1B-28717433CE4E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Proto", "Proto", "{A80EAB58-0B2A-43C2-930F-2025E7C563F3}"
+	ProjectSection(SolutionItems) = preProject
+		Proto\algorithm_relay.proto = Proto\algorithm_relay.proto
+		Proto\common.proto = Proto\common.proto
+		Proto\facade_tm.proto = Proto\facade_tm.proto
+		Proto\former_algorithm.proto = Proto\former_algorithm.proto
+		Proto\former_tm.proto = Proto\former_tm.proto
+		Proto\relay_tm.proto = Proto\relay_tm.proto
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
