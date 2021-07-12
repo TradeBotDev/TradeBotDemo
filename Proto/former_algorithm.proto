@@ -18,5 +18,5 @@ message SubscribePurchasePriceRequest
 }
 message SubscribePurchasePriceReply
 {
-	
+	double PurchasePrice = 1;
 }
