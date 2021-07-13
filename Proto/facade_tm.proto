@@ -13,6 +13,11 @@ service UIInfoService{
 		Подписка на изменение баланса пользователя (ЕДИНСТВЕННОГО)
 	*/
 	rpc SubscribeBalance(SubscribeBalanceRequest) returns (SubscribeBalanceReply);
+	
+	/*
+		Подписка на логи
+	*/
+	rpc SubscribeLogs(SubscribeLogsRequest) returns (SubscribeLogsReply);
 
 	/*
 		Аутентификция на бирже по токену
@@ -24,6 +29,14 @@ service UIInfoService{
 	*/
 	rpc Slots(SlotsRequest) returns (stream SlotsReply);
 
+}
+
+message SubscribeLogsRequest{
+	google.protobuf.Empty empty = 1;
+}
+
+message SubscribeLogsReply{
+	TradeBot.Common.Log logs = 1;
 }
 
 message SlotsRequest{
@@ -42,6 +55,10 @@ message AuthenticateTokenReply{
 	TradeBot.Common.DefaultReply reply = 1;
 }
 message SubscribeBalanceRequest{
+	//Тут потом должно быть обращение к конкретной бирже, но она пока одна
+	google.protobuf.Empty empty = 1;
+}
+message SubscribeBalanceReply{
 	//Тут потом должно быть обращение к конкретной бирже, но она пока одна
 	google.protobuf.Empty empty = 1;
 }
