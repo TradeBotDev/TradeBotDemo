@@ -4,13 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Common;
-using Algorithm;
 using System.Threading;
+using Algorithm.Former;
 
 namespace Algorithm.Services
 {
 
-    public class PriceSenderService : AlgorithmAnswerService.AlgorithmAnswerServiceBase
+    public class PriceSenderService : AlgorithmObserverService.AlgorithmObserverServiceBase
     {
         private static IServerStreamWriter<SubscribePurchasePriceReply> streamWriter;
         public override async Task SubscribePurchasePrice(SubscribePurchasePriceRequest request, IServerStreamWriter<SubscribePurchasePriceReply> sw, ServerCallContext context)
