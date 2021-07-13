@@ -49,7 +49,8 @@ namespace TradeMarket.Services
             
         }
 
-        public override Task<BuyOrderReply> BuyOrder(BuyOrderRequest request, ServerCallContext context)
+
+        /*public override Task<BuyOrderReply> BuyOrder(BuyOrderRequest request, ServerCallContext context)
         {
             return Task.FromResult(new BuyOrderReply
             {
@@ -59,7 +60,7 @@ namespace TradeMarket.Services
                     Message = "Order placed"
                 }
             }) ;
-        }
+        }*/
 
         public override int GetHashCode()
         {

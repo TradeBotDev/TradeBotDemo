@@ -29,13 +29,6 @@ namespace Facade
             responseStream.WriteAsync(new SubscribeBalanceReply { Currency="ubrat",Value="i eto ubrat" });
         }
 
-        public override async Task SubscribeLogs(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsReply> responseStream, ServerCallContext context)
-        {
-            //var response = clientTM.SubscribeBalance(new SubscribeBalanceRequest { });
-            SubscribeLogsReply
-            responseStream.WriteAsync(new SubscribeLogsReply { });
-        }
-
         public override Task<AuthenticateTokenReply> AuthenticateToken(AuthenticateTokenRequest request, ServerCallContext context)
         {
             //var response = clientTM.AuthenticateToken(new AuthenticateTokenRequest {Token = request.Token});
@@ -52,7 +45,7 @@ namespace Facade
         {
             //TODO все исправить
             //using var response = clientTM.Slots(request);
-            //while(await /*response.ResponseStream.MoveNext()*/)
+            //while(await response.ResponseStream.MoveNext())
             //{
                 _ = responseStream.WriteAsync(new SlotsReply { SlotName = "nu tip slot name"/*response.ResponseStream.Current.SlotName*/ });
             //}
