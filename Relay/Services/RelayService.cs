@@ -42,7 +42,7 @@ namespace Relay
                 }
             };
 
-            client.GetOrders(); //пустышка!
+            //client.GetOrders(); //пустышка!
             client.GetConfigAsync(configRequest, null);
 
             DefaultReply reply = new DefaultReply
