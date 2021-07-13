@@ -14,7 +14,7 @@ namespace TradeMarket
         public static async Task Main(string[] args)
         {
             CreateHostBuilder(args).Build().Run();
-            await Transferrer.GetInstance().FillOrdersAsync();
+            await FakeOrderSubscriber.GetInstance().SimulateOrders();
         }
 
         // Additional configuration is required to successfully run gRPC on macOS.

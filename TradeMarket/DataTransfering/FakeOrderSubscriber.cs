@@ -6,36 +6,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using TradeMarket.Model;
 
-/// <summary>
-///Этот класс должен отслеживать изменения данных на бирже и отсылать их другим сервисам
-/// </summary>
 namespace TradeMarket.DataTransfering
 {
-    public delegate void OrdersAddedEventHandler(object sender, OrdersAddedEventArgs args);
-
-    public class OrdersAddedEventArgs : EventArgs
+  
+    public class FakeOrderSubscriber : Subscriber<FullOrder>
     {
-        public IEnumerable<FullOrder> addedOrders { get; internal set; }
-
-        public OrdersAddedEventArgs(IEnumerable<FullOrder> addedOrders)
-        {
-            this.addedOrders = addedOrders;
-        }
-    }
-
-    public class Transferrer
-    {
-        private static Transferrer _transferrer = null;
-        public static Transferrer GetInstance()
-        {
-            if(_transferrer == null)
-            {
-                _transferrer = new Transferrer();
-            }
-            return _transferrer;
-        }
-        public event OrdersAddedEventHandler ordersChanged;
-
 
         private List<FullOrder> sampleOrders = new List<FullOrder>
         {
@@ -56,13 +31,15 @@ namespace TradeMarket.DataTransfering
             }
         };
 
-        public async Task FillOrdersAsync()
+        public event Subscriber<FullOrder>.ChangedEventHandler Changed;
+
+        public async Task SimulateOrders()
         {
             var random = new Random();
             foreach(var order in sampleOrders)
             {
                 await Task.Delay(random.Next(0,2000));
-                ordersChanged(this, new OrdersAddedEventArgs(new List<FullOrder> { order }));
+                Changed(this, new (order));
             }
         }
         
