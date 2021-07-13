@@ -35,7 +35,7 @@ namespace Former.Services
         public Observer() 
         {
             AlgorithmChannel = GrpcChannel.ForAddress("https://localhost:5001");
-            TradeMarketChannel = GrpcChannel.ForAddress("https://localhost:5001");
+            TradeMarketChannel = GrpcChannel.ForAddress("https://localhost:5005");
             
             AlgorithmClient = new AlgorithmObserverService.AlgorithmObserverServiceClient(AlgorithmChannel);
             TradeMarketClient = new OrderFormerService.OrderFormerServiceClient(TradeMarketChannel);

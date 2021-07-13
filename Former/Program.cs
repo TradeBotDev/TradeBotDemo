@@ -14,7 +14,7 @@ namespace Former.Services
         {
             Observer observer = new Observer();
             observer.ObserveAlgorithm();
-            observer.ObserveTradeMarket();
+            //observer.ObserveTradeMarket();
             CreateHostBuilder(args).Build().Run();
         }
 
