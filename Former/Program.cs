@@ -6,15 +6,12 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Former.Services
+namespace Former
 {
     public class Program
     {
         public static void Main(string[] args)
         {
-            Observer observer = new Observer();
-            observer.ObserveAlgorithm();
-            observer.ObserveTradeMarket();
             CreateHostBuilder(args).Build().Run();
         }
 

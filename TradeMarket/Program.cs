@@ -5,18 +5,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using TradeMarket.DataTransfering;
 
 namespace TradeMarket
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             CreateHostBuilder(args).Build().Run();
-<<<<<<< HEAD
-            await FakeOrderSubscriber.GetInstance().SimulateOrders();
-=======
->>>>>>> 5e7940516bfb3d9a58c8f53430f872ae5b42d6a7
+            //await FakeOrderSubscriber.GetInstance().SimulateOrders();
         }
 
         // Additional configuration is required to successfully run gRPC on macOS.
