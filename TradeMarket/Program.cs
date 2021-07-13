@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
@@ -14,16 +15,7 @@ namespace TradeMarket
         public static async Task Main(string[] args)
         {
             CreateHostBuilder(args).Build().Run();
-            //Ожидание пока все со всеми сконекнятся
-            await Task.Delay(1_500);
-
-            //запуск подписок
-            Task[] tasks =
-            {
-                FakeOrderSubscriber.GetInstance().Simulate(),
-                FakeBalanceSubscriber.GetInstance().Simulate()
-            };
-            await Task.WhenAll(tasks);
+            
         }
 
         // Additional configuration is required to successfully run gRPC on macOS.
@@ -33,6 +25,8 @@ namespace TradeMarket
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+                }).ConfigureServices(services => {
+                    services.AddHostedService<Worker>();
                 });
     }
 }

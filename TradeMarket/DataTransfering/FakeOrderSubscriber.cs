@@ -135,7 +135,7 @@ namespace TradeMarket.DataTransfering
             foreach(var order in sampleOrders)
             {
                 await Task.Delay(random.Next(0,2000));
-                Changed(this, new (order));
+                Changed?.Invoke(this, new (order));
             }
         }
         
