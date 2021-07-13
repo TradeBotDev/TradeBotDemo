@@ -5,10 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="10.1.1" />
     <PackageReference Include="Grpc.AspNetCore" Version="2.34.0" />
-    <Protobuf Include="../Proto/common.proto" GrpcServices="Both" ProtoRoot="../Proto"/>
-    <Protobuf Include="../Proto/former_algorithm.proto" GrpcServices="Both" ProtoRoot="../Proto"/>
-    <Protobuf Include="../Proto/former_tm.proto" GrpcServices="Both" ProtoRoot="../Proto"/>
+    <Protobuf Include="../Proto/common.proto" GrpcServices="Both" ProtoRoot="../Proto" />
+    <Protobuf Include="../Proto/former_algorithm.proto" GrpcServices="Both" ProtoRoot="../Proto" />
+    <Protobuf Include="../Proto/former_tm.proto" GrpcServices="Both" ProtoRoot="../Proto" />
   </ItemGroup>
 
 </Project>

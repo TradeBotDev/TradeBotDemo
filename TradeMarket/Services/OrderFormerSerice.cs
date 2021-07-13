@@ -46,17 +46,17 @@ namespace TradeMarket.Services
             }));
         }
 
-        public override Task<BuyOrderReply> BuyOrder(BuyOrderRequest request, ServerCallContext context)
-        {
-            return Task.FromResult(new BuyOrderReply
-            {
-                Reply = new TradeBot.Common.DefaultReply
-                {
-                    Code = TradeBot.Common.ReplyCode.Succeed,
-                    Message = "Order placed"
-                }
-            }) ;
-        }
+        //public override Task<BuyOrderReply> BuyOrder(BuyOrderRequest request, ServerCallContext context)
+        //{
+        //    return Task.FromResult(new BuyOrderReply
+        //    {
+        //        Reply = new TradeBot.Common.DefaultReply
+        //        {
+        //            Code = TradeBot.Common.ReplyCode.Succeed,
+        //            Message = "Order placed"
+        //        }
+        //    }) ;
+        //}
 
         public override int GetHashCode()
         {
