@@ -14,20 +14,36 @@ namespace Relay
         private readonly ILogger<RelayService> _logger;
         public RelayService(ILogger<RelayService> logger) => _logger = logger;
 
-        //public override Task<RelayService> StartBot(StartBotRequest request, ServerCallContext context)
-        //{
-        //    DefaultReply reply = new DefaultReply
-        //    {
-        //        Code = ReplyCode.Succeed,
-        //        Message = "Бот запущен успешно"
-        //    };
+        public override Task<StartBotReply> StartBot(StartBotRequest request, ServerCallContext context)
+        {
+            DefaultReply reply = new DefaultReply
+            {
+                Code = ReplyCode.Succeed,
+                Message = "Бот запущен успешно"
+            };
 
-        //    StartBotReply result = new StartBotReply
-        //    {
-        //        Reply = reply
-        //    };
+            StartBotReply result = new StartBotReply
+            {
+                Reply = reply
+            };
 
-            
-        //}
+            return Task.FromResult<StartBotReply>(result);
+        }
+
+        public override Task<SubscribeLogsReply> SubscribeLogs(IAsyncStreamReader<SubscribeLogsRequest> request, ServerCallContext context)
+        {
+            DefaultReply reply = new DefaultReply
+            {
+                Code = ReplyCode.Succeed,
+                Message = "Подписка на логи совершена"
+            };
+
+            SubscribeLogsReply result = new SubscribeLogsReply
+            {
+                Reply = reply
+            };
+
+            return Task.FromResult<SubscribeLogsReply>(result);
+        }
     }
 }

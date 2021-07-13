@@ -8,8 +8,11 @@
     <PackageReference Include="Grpc.AspNetCore" Version="2.34.0" />
   </ItemGroup>
 
+<<<<<<< HEAD
   <ItemGroup>
     <ProjectReference Include="..\Former\Former.csproj" />
   </ItemGroup>
 
+=======
+>>>>>>> 6d817fb429fab6c59dad485aa15e862a09368245
 </Project>

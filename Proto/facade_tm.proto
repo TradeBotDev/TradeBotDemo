@@ -12,7 +12,8 @@ service UIInfoService{
 	/*
 		Подписка на изменение баланса пользователя (ЕДИНСТВЕННОГО)
 	*/
-	rpc SubscribeBalance(SubscribeBalanceRequest) returns (SubscribeBalanceReply);
+	//TODO Тут на вход должна подаваться пара валют и ответом будет пара валют и балансы на них
+	rpc SubscribeBalance(SubscribeBalanceRequest) returns (stream SubscribeBalanceReply);
 
 	/*
 		Аутентификция на бирже по токену
@@ -47,5 +48,6 @@ message SubscribeBalanceRequest{
 }
 
 message SubscribeBalanceReply{
-	map<string,string> balance = 1;	
+	string Currency = 1;
+	string value = 2;
 }
