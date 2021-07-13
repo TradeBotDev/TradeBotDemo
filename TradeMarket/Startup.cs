@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TradeMarket.DataTransfering;
+using TradeMarket.Services;
 
 namespace TradeMarket
 {
@@ -17,6 +19,8 @@ namespace TradeMarket
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddGrpc();
+            services.AddSingleton(FakeOrderSubscriber.GetInstance());
+            services.AddSingleton(FakeOrderSubscriber.GetInstance());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -32,6 +36,10 @@ namespace TradeMarket
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapGrpcService<GreeterService>();
+                endpoints.MapGrpcService<FormerService>();
+                endpoints.MapGrpcService<FacadeService>();
+                endpoints.MapGrpcService<RelayService>();
+
 
                 endpoints.MapGet("/", async context =>
                 {
