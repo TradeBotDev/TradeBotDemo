@@ -12,7 +12,7 @@ using TradeMarket.Model;
 
 namespace TradeMarket.Services
 {
-    public class FormerService : TradeMarket.Former.OrderFormerService.OrderFormerServiceBase
+    public class FormerService : TradeMarket.Former.FormerService.FormerServiceBase
     {
         private SubscriptionService<SubscribeOrdersRequest, SubscribeOrdersReply,FullOrder, FormerService> _subscriptionService;
 
