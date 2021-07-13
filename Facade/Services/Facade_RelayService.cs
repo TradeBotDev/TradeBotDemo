@@ -6,12 +6,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Common;
-using Relay;
-using static Relay.SendToRelay;
+using TradeBot.Relay.Facade;
+using static TradeBot.Relay.Facade.SendToRelay;
 
 namespace Facade
 {
-    public class SendToRelay : Relay.SendToRelay.SendToRelayBase
+    public class SendToRelay : TradeBot.Relay.Facade.SendToRelay.SendToRelayBase
     {
         //private SendToRelayClient clientRelay = new SendToRelayClient(GrpcChannel.ForAddress(""/*адрес ТМ*/));
         private readonly ILogger<UIInfoService> _logger;
@@ -35,14 +35,25 @@ namespace Facade
             });
         }
 
-        public override Task<SubscribeLogsReply> SubscribeLogs (SubscribeLogsRequest request,ServerCallContext context)
+        public override async Task<SubscribeLogsReply> SubscribeLogs(IAsyncStreamReader<SubscribeLogsRequest> requestStream, ServerCallContext context)
         {
             //var response = clientRelay.StartBot(new StartBotRequest {Log = request.Log });
-            return Task.FromResult(new SubscribeLogsReply
-            { 
-                    //Reply = request.reply
-                    Reply = new DefaultReply { Message = "est contact", Code = ReplyCode.Succeed }
-            });
+            await foreach (var item in requestStream.ReadAllAsync())
+            {
+                
+            }
+            SubscribeLogsReply subscribeLogsReply = new SubscribeLogsReply();
+
+            subscribeLogsReply.Reply = new DefaultReply { Message = (new Random().Next()).ToString(), Code = ReplyCode.Succeed };
+            return subscribeLogsReply;
         }
+
+
+        //return Task.FromResult(new SubscribeLogsReply
+        //{ 
+        //        //Reply = request.reply
+        //        Reply = new DefaultReply { Message = "est contact", Code = ReplyCode.Succeed }
+        //});
     }
 }
+

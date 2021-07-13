@@ -20,13 +20,7 @@ namespace Facade
         {
             _logger = logger;
         }
-        /// <summary>
-        /// Подписка на баланс
-        /// </summary>
-        /// TODO мб сделать стримом 
-        /// <param name="request"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
+        
         public override Task<SubscribeBalanceReply> SubscribeBalance(SubscribeBalanceRequest request, ServerCallContext context)
         {
             //var response = clientTM.SubscribeBalance(new SubscribeBalanceRequest { });
@@ -35,13 +29,7 @@ namespace Facade
                 //TODO чет вернуть
             });
         }
-        /// <summary>
-        /// Подписка на логи
-        /// </summary>
-        /// TODO стрим?
-        /// <param name="request"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
+
         public override Task<SubscribeLogsReply> SubscribeLogs(SubscribeLogsRequest request, ServerCallContext context)
         {
             //var response = clientTM.SubscribeBalance(new SubscribeBalanceRequest { });
@@ -51,13 +39,6 @@ namespace Facade
             });
         }
 
-        /// <summary>
-        /// Получает токен пользователя и отдает статус
-        /// </summary>
-        /// TODO подключиться к ТМ-у 
-        /// <param name="request"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
         public override Task<AuthenticateTokenReply> AuthenticateToken(AuthenticateTokenRequest request, ServerCallContext context)
         {
             //var response = clientTM.AuthenticateToken(new AuthenticateTokenRequest {Token = request.Token});
@@ -70,6 +51,15 @@ namespace Facade
             }); 
         }
 
+        public override async Task Slots(SlotsRequest request, IServerStreamWriter<SlotsReply> responseStream, ServerCallContext context)
+        {
+            //TODO все исправить
+            //using var response = clientTM.Slots(request);
+            //while(await /*response.ResponseStream.MoveNext()*/)
+            //{
+                _ = responseStream.WriteAsync(new SlotsReply { SlotName = "nu tip slot name"/*response.ResponseStream.Current.SlotName*/ });
+            //}
+        }
     }
 
 }
