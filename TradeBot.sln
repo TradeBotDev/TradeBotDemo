@@ -22,6 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Proto", "Proto", "{A80EAB58
 		Proto\facade_tm.proto = Proto\facade_tm.proto
 		Proto\former_algorithm.proto = Proto\former_algorithm.proto
 		Proto\former_tm.proto = Proto\former_tm.proto
+		Proto\relay_facade.proto = Proto\relay_facade.proto
 		Proto\relay_tm.proto = Proto\relay_tm.proto
 	EndProjectSection
 EndProject
