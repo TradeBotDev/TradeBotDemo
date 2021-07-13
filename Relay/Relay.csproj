@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -6,11 +6,6 @@
 
   <ItemGroup>
     <Protobuf Include="Protos\greet.proto" GrpcServices="Server" />
-    <Protobuf Include="../Proto/common.proto" GrpcServices="Both" ProtoRoot="../Proto" />
-    <!-- <Protobuf Include="../Proto/relay_facade.proto" GrpcServices="Both" ProtoRoot="../Proto"/> -->
-    <Protobuf Include="../Proto/relay_facade.proto" GrpcServices="Both" ProtoRoot="../Proto"/>
-    <Protobuf Include="../Proto/algorithm_relay.proto" GrpcServices="Both" ProtoRoot="../Proto"/>
-    
   </ItemGroup>
 
   <ItemGroup>
