@@ -12,15 +12,15 @@ using TradeMarket.Model;
 
 namespace TradeMarket.Services
 {
-    public class FormerService : TradeMarket.Former.FormerService.FormerServiceBase
+    public class FormerService : Former.FormerService.FormerServiceBase
     {
         private SubscriptionService<SubscribeOrdersRequest, SubscribeOrdersReply,FullOrder, FormerService> _subscriptionService;
 
         private ILogger<FormerService> _logger;
 
-        private static TradeMarket.Former.SubscribeOrdersReply Convert(FullOrder order)
+        private static SubscribeOrdersReply Convert(FullOrder order)
         {
-            return new TradeMarket.Former.SubscribeOrdersReply
+            return new SubscribeOrdersReply
             {
                 SimpleOrderInfo = new TradeBot.Common.Order
                 {
@@ -70,7 +70,6 @@ namespace TradeMarket.Services
         public override async Task SubscribeOrders(SubscribeOrdersRequest request, IServerStreamWriter<SubscribeOrdersReply> responseStream, ServerCallContext context)
         {
             await _subscriptionService.Subscribe(request, responseStream, context);
-            
         }
     }
 }

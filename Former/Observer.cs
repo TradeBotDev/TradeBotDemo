@@ -29,7 +29,7 @@ namespace Former.Services
         static List<SubscribeOrdersReply> CurrentBuyOrders = new List<SubscribeOrdersReply>();
         static GrpcChannel AlgorithmChannel;
         static GrpcChannel TradeMarketChannel;
-        static OrderFormerService.OrderFormerServiceClient TradeMarketClient;
+        static FormerService.FormerServiceClient TradeMarketClient;
         static AlgorithmObserverService.AlgorithmObserverServiceClient AlgorithmClient;
 
         public Observer() 
@@ -38,7 +38,7 @@ namespace Former.Services
             TradeMarketChannel = GrpcChannel.ForAddress("https://localhost:5005");
             
             AlgorithmClient = new AlgorithmObserverService.AlgorithmObserverServiceClient(AlgorithmChannel);
-            TradeMarketClient = new OrderFormerService.OrderFormerServiceClient(TradeMarketChannel);
+            TradeMarketClient = new FormerService.FormerServiceClient(TradeMarketChannel);
         }
 
         private void EventHandler()
@@ -49,7 +49,7 @@ namespace Former.Services
 
         private async void SendShopingListToTM(List<string> formedShoppingList) 
         {
-            var sendOrderClient = new OrderFormerService.OrderFormerServiceClient(TradeMarketChannel);
+            var sendOrderClient = new FormerService.FormerServiceClient(TradeMarketChannel);
             using var call = sendOrderClient.BuyOrder();
 
             var readTask = Task.Run(async ()=> 
@@ -96,6 +96,7 @@ namespace Former.Services
         {
             Events instance = new Events();
             instance.Event += new EventDelegate(EventHandler);
+            await Task.Delay(10000);
             var orderSignature = new OrderSignature
             {
                 Status = OrderStatus.Open,
