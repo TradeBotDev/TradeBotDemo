@@ -1,4 +1,4 @@
-syntax = "proto3";
+п»їsyntax = "proto3";
 
 option csharp_namespace = "TradeBot.Algorithm.Relay";
 import "google/protobuf/timestamp.proto";
@@ -7,27 +7,27 @@ import "common.proto";
 package TradeBot.Algorithm.Relay;
 
 service SendToAlgorithm {
-	//Получение алгоритмом множества ордеров
+	//РџРѕР»СѓС‡РµРЅРёРµ Р°Р»РіРѕСЂРёС‚РјРѕРј РјРЅРѕР¶РµСЃС‚РІР° РѕСЂРґРµСЂРѕРІ
 	rpc GetOrders (GetOrdersRequest) returns (stream GetOrdersReply);
-	//Получение алгоритмом конфига
+	//РџРѕР»СѓС‡РµРЅРёРµ Р°Р»РіРѕСЂРёС‚РјРѕРј РєРѕРЅС„РёРіР°
 	rpc GetConfig (GetConfigRequest) returns (GetConfigReply);
 }
 
 message GetOrdersRequest {
-	//Передача алгоритму ордера
+	//РџРµСЂРµРґР°С‡Р° Р°Р»РіРѕСЂРёС‚РјСѓ РѕСЂРґРµСЂР°
 	TradeBot.Common.Order orders = 1;
 }
 message GetOrdersReply {
-	//Ответ алгоритма на передачу множества ордеров
+	//РћС‚РІРµС‚ Р°Р»РіРѕСЂРёС‚РјР° РЅР° РїРµСЂРµРґР°С‡Сѓ РјРЅРѕР¶РµСЃС‚РІР° РѕСЂРґРµСЂРѕРІ
 	TradeBot.Common.DefaultReply reply = 1;
 }
 
 message GetConfigRequest {
-	//Передача алгоритму конфига
+	//РџРµСЂРµРґР°С‡Р° Р°Р»РіРѕСЂРёС‚РјСѓ РєРѕРЅС„РёРіР°
 	TradeBot.Common.Config config = 1;
 }
 
 message GetConfigReply {
-	//Ответ алгоритма на передачу конфига
+	//РћС‚РІРµС‚ Р°Р»РіРѕСЂРёС‚РјР° РЅР° РїРµСЂРµРґР°С‡Сѓ РєРѕРЅС„РёРіР°
 	TradeBot.Common.DefaultReply reply = 1;
 }
