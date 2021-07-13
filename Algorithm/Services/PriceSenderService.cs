@@ -4,17 +4,30 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Common;
+using Algorithm;
+using System.Threading;
 
 namespace Algorithm.Services
 {
+
     public class PriceSenderService : AlgorithmAnswerService.AlgorithmAnswerServiceBase
     {
-
-        public override Task<SubscribePurchasePriceReply> SubscribePurchasePrice(SubscribePurchasePriceRequest request, IServerStreamWriter<SubscribePurchasePriceReply> sw,ServerCallContext context)
+        private static IServerStreamWriter<SubscribePurchasePriceReply> streamWriter;
+        public override async Task SubscribePurchasePrice(SubscribePurchasePriceRequest request, IServerStreamWriter<SubscribePurchasePriceReply> sw, ServerCallContext context)
         {
+            streamWriter = sw;
             AlgorithmEmulator algo = new AlgorithmEmulator();
-            return Task.FromResult(new SubscribePurchasePriceReply { PurchasePrice = algo.CalculateSuggestedPrice(new List<Order> { }, new TradeBot.Common.AlgorithmInfo()) });
+            Random rnd = new Random();
+            
+            while (true) 
+            {
+                Thread.Sleep(rnd.Next(0, 10000));
+                await streamWriter.WriteAsync(new SubscribePurchasePriceReply { PurchasePrice = algo.CalculateSuggestedPrice() });
+            }
+
         }
+
+
 
     }
 }

@@ -8,6 +8,6 @@ namespace Algorithm
 {
     interface IAlgorithm
     {
-        public double CalculateSuggestedPrice(IEnumerable<Order> orders, AlgorithmInfo algorithmInfo);
+        public double CalculateSuggestedPrice();
     }
 }
