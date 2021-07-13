@@ -43,8 +43,8 @@ namespace Former.Services
 
         private void EventHandler()
         {
-            List<string> formedShoppingListById = FormShoppingList(CurrentBuyOrders);
-            SendShopingListToTM(formedShoppingListById);
+            //List<string> formedShoppingListById = FormShoppingList(CurrentBuyOrders);
+            //SendShopingListToTM(formedShoppingListById);
         }
 
         private async void SendShopingListToTM(List<string> formedShoppingList) 
@@ -86,7 +86,8 @@ namespace Former.Services
             while (await call.ResponseStream.MoveNext())
             {
                 AveragePrice = call.ResponseStream.Current.PurchasePrice;
-                instance.InvokeEvent();
+                //instance.InvokeEvent();
+                Console.WriteLine("Принял" + AveragePrice);
             }
             AlgorithmChannel.Dispose();
         }
