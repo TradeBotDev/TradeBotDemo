@@ -19,7 +19,8 @@ namespace TradeMarket
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddGrpc();
-            //services.AddSingleton<FakeOrderSubscriber>(FakeOrderSubscriber.GetInstance());
+            services.AddSingleton(FakeOrderSubscriber.GetInstance());
+            services.AddSingleton(FakeOrderSubscriber.GetInstance());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -36,6 +37,9 @@ namespace TradeMarket
             {
                 endpoints.MapGrpcService<GreeterService>();
                 endpoints.MapGrpcService<FormerService>();
+                endpoints.MapGrpcService<FacadeService>();
+                endpoints.MapGrpcService<RelayService>();
+
 
                 endpoints.MapGet("/", async context =>
                 {

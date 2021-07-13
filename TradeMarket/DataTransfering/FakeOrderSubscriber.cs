@@ -9,13 +9,13 @@ using TradeMarket.Model;
 namespace TradeMarket.DataTransfering
 {
   
-    public class FakeOrderSubscriber : Subscriber<FullOrder>
+    public class FakeOrderSubscriber : Subscriber<FullOrder>,FakeDataSubscriber
     {
-        private FakeOrderSubscriber _fakeOrderSubscriber = null;
+        private static FakeOrderSubscriber _fakeOrderSubscriber = null;
 
         private FakeOrderSubscriber() { }
 
-        public FakeOrderSubscriber GetInstance()
+        public static FakeOrderSubscriber GetInstance()
         {
             if(_fakeOrderSubscriber == null)
             {
@@ -40,12 +40,96 @@ namespace TradeMarket.DataTransfering
                     Status = TradeBot.Common.OrderStatus.Open,
                     Type = TradeBot.Common.OrderType.Buy
                 }
+            },
+            new FullOrder
+            {
+                Id = "2",
+                Quantity = 2,
+                Price = 16.2D,
+                RemovePrice = 15D,
+                LastUpdateDate = DateTime.Now.AddDays(3),
+                RemoveDate = DateTime.Now.AddDays(4),
+                Signature = new TradeBot.Common.OrderSignature
+                {
+                    Status = TradeBot.Common.OrderStatus.Open,
+                    Type = TradeBot.Common.OrderType.Buy
+                }
+            },
+            new FullOrder
+            {
+                Id = "3",
+                Quantity = 2,
+                Price = 16.2D,
+                RemovePrice = 15D,
+                LastUpdateDate = DateTime.Now.AddDays(3),
+                RemoveDate = DateTime.Now.AddDays(4),
+                Signature = new TradeBot.Common.OrderSignature
+                {
+                    Status = TradeBot.Common.OrderStatus.Open,
+                    Type = TradeBot.Common.OrderType.Buy
+                }
+            },
+            new FullOrder
+            {
+                Id = "4",
+                Quantity = 2,
+                Price = 16.2D,
+                RemovePrice = 15D,
+                LastUpdateDate = DateTime.Now.AddDays(3),
+                RemoveDate = DateTime.Now.AddDays(4),
+                Signature = new TradeBot.Common.OrderSignature
+                {
+                    Status = TradeBot.Common.OrderStatus.Open,
+                    Type = TradeBot.Common.OrderType.Buy
+                }
+            },
+            new FullOrder
+            {
+                Id = "5",
+                Quantity = 2,
+                Price = 16.2D,
+                RemovePrice = 15D,
+                LastUpdateDate = DateTime.Now.AddDays(3),
+                RemoveDate = DateTime.Now.AddDays(4),
+                Signature = new TradeBot.Common.OrderSignature
+                {
+                    Status = TradeBot.Common.OrderStatus.Open,
+                    Type = TradeBot.Common.OrderType.Buy
+                }
+            },
+            new FullOrder
+            {
+                Id = "6",
+                Quantity = 2,
+                Price = 16.2D,
+                RemovePrice = 15D,
+                LastUpdateDate = DateTime.Now.AddDays(3),
+                RemoveDate = DateTime.Now.AddDays(4),
+                Signature = new TradeBot.Common.OrderSignature
+                {
+                    Status = TradeBot.Common.OrderStatus.Open,
+                    Type = TradeBot.Common.OrderType.Buy
+                }
+            },
+            new FullOrder
+            {
+                Id = "7",
+                Quantity = 2,
+                Price = 16.2D,
+                RemovePrice = 15D,
+                LastUpdateDate = DateTime.Now.AddDays(3),
+                RemoveDate = DateTime.Now.AddDays(4),
+                Signature = new TradeBot.Common.OrderSignature
+                {
+                    Status = TradeBot.Common.OrderStatus.Open,
+                    Type = TradeBot.Common.OrderType.Buy
+                }
             }
         };
 
         public event Subscriber<FullOrder>.ChangedEventHandler Changed;
 
-        public async Task SimulateOrders()
+        public async Task Simulate()
         {
             var random = new Random();
             foreach(var order in sampleOrders)

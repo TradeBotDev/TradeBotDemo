@@ -6,15 +6,15 @@ using TradeMarket.Model;
 
 namespace TradeMarket.DataTransfering
 {
-    public class FakeBalanceSubscriber : Subscriber<Balance>
+    public class FakeBalanceSubscriber : Subscriber<Balance>, FakeDataSubscriber
     {
-        private FakeBalanceSubscriber _fakeBalanceSubscriber = null;
+        private static FakeBalanceSubscriber _fakeBalanceSubscriber = null;
         private FakeBalanceSubscriber()
         {
 
         }
 
-        public FakeBalanceSubscriber GetInstance()
+        public static FakeBalanceSubscriber GetInstance()
         {
             if(_fakeBalanceSubscriber == null)
             {
@@ -34,7 +34,7 @@ namespace TradeMarket.DataTransfering
 
         public event Subscriber<Balance>.ChangedEventHandler Changed;
 
-        public async Task SimulateOrders()
+        public async Task Simulate()
         {
             var random = new Random();
             foreach (var order in balanceChangingInTime)
