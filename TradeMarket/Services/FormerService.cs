@@ -42,7 +42,7 @@ namespace TradeMarket.Services
         }
     
 
-    private FormerService(FakeOrderSubscriber subscriber,ILogger<FormerService> logger)
+        public FormerService(FakeOrderSubscriber subscriber,ILogger<FormerService> logger)
         {
             _subscriptionService = new(subscriber, logger, Convert);
             _logger = logger;
