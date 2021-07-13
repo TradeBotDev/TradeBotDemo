@@ -6,6 +6,10 @@
 
   <ItemGroup>
     <Protobuf Include="Protos\greet.proto" GrpcServices="Server" />
+    <Protobuf Link="Protos/common.proto" Include="../Proto/common.proto" GrpcServices="Both" ProtoRoot="../Proto" />
+    <Protobuf Link="Protos/facade_tm.proto" Include="../Proto/facade_tm.proto" GrpcServices="Both" ProtoRoot="../Proto" />
+    <Protobuf Link="Protos/relay_facade.proto" Include="../Proto/relay_facade.proto" GrpcServices="Both" ProtoRoot="../Proto" />
+
   </ItemGroup>
 
   <ItemGroup>
