@@ -1,4 +1,4 @@
-п»їsyntax = "proto3";
+syntax = "proto3";
 
 option csharp_namespace = "TradeBot.Relay.Facade";
 import "google/protobuf/timestamp.proto";
@@ -7,28 +7,28 @@ import "common.proto";
 package TradeBot.Relay.Facade;
 
 service SendToRelay {
-	//Р—Р°РїСЂРѕСЃ Рє Relay РЅР° Р·Р°РїСѓСЃРє Р±РѕС‚Р°
+	//Запрос к Relay на запуск бота
 	rpc StartBot (StartBotRequest) returns (StartBotReply);
-	//РџРѕРґРїРёСЃРєР° РЅР° Р»РѕРіРё
+	//Подписка на логи
 	rpc SubscribeLogs (stream SubscribeLogsRequest) returns (SubscribeLogsReply);
 }
 
 message StartBotRequest {
-	//РџРµСЂРµРґР°С‡Р° СЃРµСЂРІРёСЃСѓ РєРѕРЅС„РёРіР°
+	//Передача сервису конфига
 	TradeBot.Common.Config config = 1;
 }
 
 message StartBotReply {
-	//РћС‚РІРµС‚ РЅР° РїРµСЂРµРґР°С‡Сѓ РєРѕРЅС„РёРіР°
+	//Ответ на передачу конфига
 	TradeBot.Common.DefaultReply reply = 1;
 }
 
 message SubscribeLogsRequest {
-	//РџРµСЂРµРґР°С‡Р° СЃРµСЂРІРёСЃСѓ Р»РѕРіРѕРІ
+	//Передача сервису логов
 	TradeBot.Common.Log log = 1;
 }
 
 message SubscribeLogsReply {
-	//РѕС‚РІРµС‚ РЅР° РїРµСЂРµРґР°С‡Сѓ Р»РѕРіРѕРІ
+	//ответ на передачу логов
 	TradeBot.Common.DefaultReply reply = 1;
 }

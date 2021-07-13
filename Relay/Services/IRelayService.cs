@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Relay.Services
+namespace Relay
 {
     interface IRelayService
     {
-
+        
     }
 }

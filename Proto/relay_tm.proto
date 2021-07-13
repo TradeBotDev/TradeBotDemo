@@ -10,7 +10,7 @@ service OrderProviderService{
 	/*
 		Подписывается на ордера выбранного типа
 	*/
-	rpc SubscribeOrders(SubscribeOrdersRequest) returns (SubscribeOrdersReply);
+	rpc SubscribeOrders(SubscribeOrdersRequest) returns (stream SubscribeOrdersReply);
 }
 message SubscribeOrdersRequest{
 	TradeBot.Common.OrderSignature signatures = 1;
