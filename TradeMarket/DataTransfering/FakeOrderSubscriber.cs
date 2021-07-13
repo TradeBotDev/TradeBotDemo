@@ -11,6 +11,18 @@ namespace TradeMarket.DataTransfering
   
     public class FakeOrderSubscriber : Subscriber<FullOrder>
     {
+        private FakeOrderSubscriber _fakeOrderSubscriber = null;
+
+        private FakeOrderSubscriber() { }
+
+        public FakeOrderSubscriber GetInstance()
+        {
+            if(_fakeOrderSubscriber == null)
+            {
+                _fakeOrderSubscriber = new FakeOrderSubscriber();
+            }
+            return _fakeOrderSubscriber;
+        }
 
         private List<FullOrder> sampleOrders = new List<FullOrder>
         {

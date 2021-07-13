@@ -8,6 +8,21 @@ namespace TradeMarket.DataTransfering
 {
     public class FakeBalanceSubscriber : Subscriber<Balance>
     {
+        private FakeBalanceSubscriber _fakeBalanceSubscriber = null;
+        private FakeBalanceSubscriber()
+        {
+
+        }
+
+        public FakeBalanceSubscriber GetInstance()
+        {
+            if(_fakeBalanceSubscriber == null)
+            {
+                _fakeBalanceSubscriber = new FakeBalanceSubscriber();
+            }
+            return _fakeBalanceSubscriber;
+        }
+
         private List<Balance> balanceChangingInTime = new List<Balance>
         {
             //у меня тут один биток равен одному доллару
