@@ -7,8 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TradeMarket.DataTransfering;
-using TradeMarket.Services;
 
 namespace TradeMarket
 {
@@ -35,7 +33,10 @@ namespace TradeMarket
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapGrpcService<GreeterService>();
+<<<<<<< HEAD
                 endpoints.MapGrpcService<FormerService>();
+=======
+>>>>>>> 5e7940516bfb3d9a58c8f53430f872ae5b42d6a7
 
                 endpoints.MapGet("/", async context =>
                 {

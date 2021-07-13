@@ -14,11 +14,11 @@ service OrderFormerService {
 	/*
 		Покупает ордер по указанному ид и возвращает результат покупики (получилось / не получилось)
 	*/
-	rpc BuyOrder(BuyOrderRequest) returns (BuyOrderReply);
+	rpc BuyOrder(stream BuyOrderRequest) returns (stream BuyOrderReply);
 }
 
 message BuyOrderRequest{
-	string id = 1;
+   string id = 1;
 }
 
 message BuyOrderReply{

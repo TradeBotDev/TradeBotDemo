@@ -12,17 +12,7 @@ service UIInfoService{
 	/*
 		Подписка на изменение баланса пользователя (ЕДИНСТВЕННОГО)
 	*/
-<<<<<<< HEAD
-	//TODO Тут на вход должна подаваться пара валют и ответом будет пара валют и балансы на них
-	rpc SubscribeBalance(SubscribeBalanceRequest) returns (stream SubscribeBalanceReply);
-=======
 	rpc SubscribeBalance(SubscribeBalanceRequest) returns (SubscribeBalanceReply);
-	
-	/*
-		Подписка на логи
-	*/
-	rpc SubscribeLogs(SubscribeLogsRequest) returns (SubscribeLogsReply);
->>>>>>> 5e7940516bfb3d9a58c8f53430f872ae5b42d6a7
 
 	/*
 		Аутентификция на бирже по токену
@@ -34,14 +24,6 @@ service UIInfoService{
 	*/
 	rpc Slots(SlotsRequest) returns (stream SlotsReply);
 
-}
-
-message SubscribeLogsRequest{
-	google.protobuf.Empty empty = 1;
-}
-
-message SubscribeLogsReply{
-	TradeBot.Common.Log logs = 1;
 }
 
 message SlotsRequest{
@@ -68,7 +50,6 @@ message SubscribeBalanceReply{
 	google.protobuf.Empty empty = 1;
 }
 
-message SubscribeBalanceReply{
-	string Currency = 1;
-	string value = 2;
+message SubscribeOrdersReply{
+	map<string,string> balance = 1;	
 }
