@@ -5,15 +5,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Common;
 using System.Threading;
-using Algorithm.Former;
+using TradeBot.Algorithm.PriceService.v1;
 
 namespace Algorithm.Services
 {
 
-    public class PriceSenderService : AlgorithmObserverService.AlgorithmObserverServiceBase
+    public class PriceSenderService : PriceService.PriceServiceBase
     {
-        private static IServerStreamWriter<SubscribePurchasePriceReply> streamWriter;
-        public override async Task SubscribePurchasePrice(SubscribePurchasePriceRequest request, IServerStreamWriter<SubscribePurchasePriceReply> sw, ServerCallContext context)
+        private static IServerStreamWriter<SubscribePurchasePriceResponse> streamWriter;
+        public override async Task SubscribePurchasePrice(SubscribePurchasePriceRequest request, IServerStreamWriter<SubscribePurchasePriceResponse> sw, ServerCallContext context)
         {
             streamWriter = sw;
             AlgorithmEmulator algo = new AlgorithmEmulator();
@@ -22,7 +22,7 @@ namespace Algorithm.Services
             while (true) 
             {
                 Thread.Sleep(rnd.Next(0, 10000));
-                await streamWriter.WriteAsync(new SubscribePurchasePriceReply { PurchasePrice = algo.CalculateSuggestedPrice() });
+                await streamWriter.WriteAsync(new SubscribePurchasePriceResponse { PurchasePrice = algo.CalculateSuggestedPrice() });
             }
 
         }

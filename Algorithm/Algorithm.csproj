@@ -12,9 +12,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <Protobuf Include="../Proto/common.proto" GrpcServices="Both" ProtoRoot="../Proto" />
-    <Protobuf Include="../Proto/algorithm_relay.proto" GrpcServices="Both" ProtoRoot="../Proto" />
-    <Protobuf Include="../Proto/former_algorithm.proto" GrpcServices="Both" ProtoRoot="../Proto" />
   </ItemGroup>
 
   <ItemGroup>
