@@ -1,9 +1,9 @@
 ﻿syntax = "proto3";
 
-option csharp_namespace = "TradeBot.Algorithm";
+option csharp_namespace = "TradeBot.Algorithm.PriceService.v1";
 import "google/protobuf/empty.proto";
 
-package TradeBot.Algorithm;
+package tradebot.algorithm.price_service.v1;
 
 service PriceService
 {	

@@ -1,11 +1,11 @@
 ﻿syntax = "proto3";
 
-option csharp_namespace = "TradeBot.Algorithm";
+option csharp_namespace = "TradeBot.Algorithm.DataService.v1";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 import "TradeBot/Common/common.proto";
 
-package TradeBot.Algorithm;
+package tradebot.algorithm.data_service.v1;
 
 //посылается алгоритму
 service DataService {

@@ -6,7 +6,7 @@ import "google/protobuf/empty.proto";
 
 import "TradeBot/Common/common.proto";
 
-package TradeBot.Common;
+package tradebot.common.user_info_service.v1;
 
 service UserInfoService{
 	/*
