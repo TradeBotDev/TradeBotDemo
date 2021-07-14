@@ -1,4 +1,5 @@
-﻿option csharp_namespace = "TradeMarket.Facade.FacadeService.v1";
+﻿syntax = "proto3";
+option csharp_namespace = "TradeMarket.Facade.FacadeService.v1";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 
@@ -31,15 +32,32 @@ service FacadeService{
 		Подписка на логи нужного сервиса
 	*/
 	//TODO в каждом сервисе нужно написать 
-	rpc SubscribeLogs(tradebot.common.v1.SubscribeLogsRequest) returns (stream tradebot.common.v1.SubscribeLogsResponse);
+	rpc SubscribeLogs(SubscribeLogsRequest) returns (stream SubscribeLogsResponse);
 
 }
 
-message UpdateServerConfigRequest {
-	tradebot.common.v1.Config config = 1;
+message SubscribeLogsRequest{
+	tradebot.common.v1.SubscribeLogsRequest r = 1;
 }
-message UpdateServerConfigResponse {
-	google.protobuf.Empty empty = 1;
+
+message SubscribeLogsResponse{
+	tradebot.common.v1.SubscribeLogsResponse response = 1;
+}
+
+message UpdateServerConfigRequest{
+	tradebot.common.v1.UpdateServerConfigRequest request = 1;
+}
+
+message UpdateServerConfigResponse{
+	tradebot.common.v1.UpdateServerConfigResponse response = 1;
+}
+
+message SubscribeBalanceRequest{
+	tradebot.common.v1.SubscribeBalanceRequest request = 1;
+}
+
+message SubscribeBalanceResponse{
+	tradebot.common.v1.SubscribeBalanceResponse response = 1;
 }
 
 message SlotsRequest{
@@ -56,13 +74,4 @@ message AuthenticateTokenRequest{
 
 message AuthenticateTokenResponse{
 	tradebot.common.v1.DefaultResponse response = 1;
-}
-message SubscribeBalanceRequest{
-	//Тут потом должно быть обращение к конкретной бирже, но она пока одна
-	google.protobuf.Empty empty = 1;
-}
-
-message SubscribeBalanceResponse{
-	string Currency = 1;
-	string value = 2;
 }

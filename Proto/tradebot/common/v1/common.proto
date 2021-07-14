@@ -101,4 +101,20 @@ message UpdateServerConfigRequest {
 message UpdateServerConfigResponse {
 	google.protobuf.Empty empty = 1;
 }
+message SubscribeBalanceRequest{
+	//Тут потом должно быть обращение к конкретной бирже, но она пока одна
+	google.protobuf.Empty empty = 1;
+}
 
+message SubscribeBalanceResponse{
+	string Currency = 1;
+	string value = 2;
+}
+
+message SubscribeOrdersRequest{
+	OrderSignature signature = 1; 
+}
+
+message SubscribeOrdersResponse{
+	Order Order = 1;
+}

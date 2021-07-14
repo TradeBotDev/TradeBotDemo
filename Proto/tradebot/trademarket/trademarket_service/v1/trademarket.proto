@@ -2,6 +2,8 @@
 
 option csharp_namespace = "TradeBot.TradeMarket.TradeMarketService.v1";
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
 import "tradebot/common/v1/common.proto";
 package tradebot.trademarket.trademarket_service.v1;
 
@@ -20,7 +22,7 @@ service TradeMarketService {
 	/*
 		Подписывается на ордера выбранного типа
 	*/
-	rpc SubscribeOrders(tradebot.common.v1.SubscribeOrdersRequest) returns (stream tradebot.common.v1.SubscribeOrdersResponse);
+	rpc SubscribeOrders(SubscribeOrdersRequest) returns (stream SubscribeOrdersResponse);
 
 	/*
 		Подписка на изменение баланса пользователя (ЕДИНСТВЕННОГО)
@@ -40,8 +42,34 @@ service TradeMarketService {
 	/*
 		Подписка на логи нужного сервиса
 	*/
-	rpc SubscribeLogs(tradebot.common.v1.SubscribeLogsRequest) returns (stream tradebot.common.v1.SubscribeLogsResponse);
+	rpc SubscribeLogs(SubscribeLogsRequest) returns (stream SubscribeLogsResponse);
 
+}
+
+message SubscribeOrdersRequest{
+	tradebot.common.v1.SubscribeOrdersRequest request = 1;
+	
+}
+
+message SubscribeOrdersResponse{
+	tradebot.common.v1.SubscribeOrdersResponse response = 1;
+
+}
+
+message SubscribeLogsRequest{
+	tradebot.common.v1.SubscribeLogsRequest request = 1;
+}
+
+message SubscribeLogsResponse{
+	tradebot.common.v1.SubscribeLogsResponse response = 1;
+}
+
+message SubscribeBalanceRequest{
+	tradebot.common.v1.SubscribeBalanceRequest request = 1;
+}
+
+message SubscribeBalanceResponse{
+	tradebot.common.v1.SubscribeBalanceResponse response = 1;
 }
 
 message PlaceOrderRequest{
@@ -73,12 +101,4 @@ message AuthenticateTokenRequest{
 message AuthenticateTokenResponse{
 	tradebot.common.v1.DefaultResponse response = 1;
 }
-message SubscribeBalanceRequest{
-	//Тут потом должно быть обращение к конкретной бирже, но она пока одна
-	google.protobuf.Empty empty = 1;
-}
 
-message SubscribeBalanceResponse{
-	string Currency = 1;
-	string value = 2;
-}

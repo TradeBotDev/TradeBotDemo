@@ -19,9 +19,36 @@ service FormerService{
 	/*
 		Подписывается на ордера выбранного типа
 	*/
-	rpc SubscribeOrders(tradebot.common.v1.SubscribeOrdersRequest) returns (stream tradebot.common.v1.SubscribeOrdersResponse);
+	rpc SubscribeOrders(SubscribeOrdersRequest) returns (stream SubscribeOrdersResponse);
 
 }
+
+message SubscribeOrdersRequest{
+	tradebot.common.v1.SubscribeOrdersRequest request = 1;
+	
+}
+
+message SubscribeOrdersResponse{
+	tradebot.common.v1.SubscribeOrdersResponse response = 1;
+
+}
+
+message SubscribeLogsRequest{
+	tradebot.common.v1.SubscribeLogsRequest request = 1;
+}
+
+message SubscribeLogsResponse{
+	tradebot.common.v1.SubscribeLogsResponse response = 1;
+}
+
+message UpdateServerConfigRequest{
+	tradebot.common.v1.UpdateServerConfigRequest request = 1;
+}
+
+message UpdateServerConfigResponse{
+	tradebot.common.v1.UpdateServerConfigResponse response = 1;
+}
+
 message PlaceOrderRequest{
 	double price = 1;
 	double value = 2;
