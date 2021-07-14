@@ -1,0 +1,21 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "TradeBot.Common";
+import "google/protobuf/timestamp.proto";
+import "TradeBot/Common/common.proto";
+package TradeBot.Common;
+
+service OrderSubscriberService {
+	/*
+		Подписывается на ордера выбранного типа
+	*/
+	rpc SubscribeOrders(SubscribeOrdersRequest) returns (stream SubscribeOrdersReply);
+}
+
+message SubscribeOrdersRequest{
+	TradeBot.Common.OrderSignature signature = 1;
+}
+
+message SubscribeOrdersReply{
+	TradeBot.Common.Order order = 1; 
+}

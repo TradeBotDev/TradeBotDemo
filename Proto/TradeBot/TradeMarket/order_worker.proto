@@ -1,0 +1,34 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "TradeMarket.TradeMarket";
+import "google/protobuf/timestamp.proto";
+import "TradeBot/Common/common.proto";
+package TradeBot.TradeMarket;
+
+service OrderWorkerService {
+
+	/*
+		Покупает ордер по указанному ид и возвращает результат покупики (получилось / не получилось)
+	*/
+	rpc CloseOrder(stream CloseOrderRequest) returns (stream CloseOrderReply);
+
+	/*
+		Запрос на размещение ордера
+	*/
+	rpc PlaceOrder(PlaceOrderRequest) returns (PlaceOrderReply);
+}
+
+message PlaceOrderRequest{
+	double price = 1;
+	double value = 2;
+}
+message PlaceOrderReply{
+	TradeBot.Common.DefaultReply reply = 1;
+}
+message CloseOrderRequest{
+	string id = 1;
+}
+
+message CloseOrderReply{
+	TradeBot.Common.DefaultReply reply = 1;
+}

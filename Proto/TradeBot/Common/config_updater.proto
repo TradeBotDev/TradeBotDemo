@@ -1,0 +1,26 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "TradeBot.Common";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "TradeBot/Common/common.proto";
+
+package TradeBot.Common;
+
+
+service ConfingUpdaterService {
+
+	/*
+		Клиент говорит обновиться серверу
+	*/
+	rpc UpdateServerConfig (UpdateServerConfigRequest) returns (UpdateServerConfigReply);
+
+}
+
+message UpdateServerConfigRequest {
+	TradeBot.Common.Config config = 1;
+}
+message UpdateServerConfigReply {
+	google.protobuf.Empty empty = 1;
+}
+

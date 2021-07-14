@@ -1,0 +1,25 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "TradeBot.Algorithm";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "TradeBot/Common/common.proto";
+
+package TradeBot.Algorithm;
+
+//посылается алгоритму
+service DataService {
+	/*
+		Перенаправляет стрим закрытых ордеров из ТМа к алгоритму
+	*/	
+	rpc AddOrder (stream AddOrderRequest) returns ( AddOrderReply);
+
+}
+
+message AddOrderRequest {
+	TradeBot.Common.Order orders = 1;
+}
+//Есть ли смысл делать отдельный ответ если ничего не возвращается ?
+message AddOrderReply {
+	google.protobuf.Empty empty = 1;
+}
