@@ -12,6 +12,8 @@
 
     <Protobuf ProtoRoot="../Proto" Include="../Proto/tradebot/facade/user_info_service/v1/user_info.proto" GrpcServices="Both" />
 
+    <Protobuf ProtoRoot="../Proto" Include="../Proto/tradebot/relay/starter_service/v1/starter.proto" GrpcServices="Both" />
+
   </ItemGroup>
 
   <ItemGroup>

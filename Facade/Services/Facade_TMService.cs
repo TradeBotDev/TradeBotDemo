@@ -1,54 +1,55 @@
 using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using TradeMarket;
-using TradeBot.Common;
-using static TradeMarket.UIInfoService;
-using TradeBot.Relay.Facade;
+using TradeMarket.Facade.UserInfoService.v1;
+using static TradeMarket.Facade.UserInfoService.v1.UserInfoService;
 
 namespace Facade
 {
-    public class UIInfoService : TradeMarket.UIInfoService.UIInfoServiceBase
+    public class FacadeTMService : TradeMarket.Facade.UserInfoService.v1.UserInfoService.UserInfoServiceBase
     {
-        //private UIInfoServiceClient clientTM = new UIInfoServiceClient(GrpcChannel.ForAddress(""/*адрес ТМ*/));
-        //TODO создать новый касс и вынести туда private UIInfoServiceClient clientRelay = new UIInfoServiceClient(GrpcChannel.ForAddress(""/*адрес Relay*/));
-        private readonly ILogger<UIInfoService> _logger;
-        public UIInfoService(ILogger<UIInfoService> logger)
+        private UserInfoServiceClient clientTM = new UserInfoServiceClient(GrpcChannel.ForAddress(""/*адрес ТМ*/));
+        private readonly ILogger<FacadeTMService> _logger;
+        public FacadeTMService(ILogger<FacadeTMService> logger)
         {
             _logger = logger;
         }
-        
-        public override async Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<SubscribeBalanceReply> responseStream, ServerCallContext context)
-        {
-            //var response = clientTM.SubscribeBalance(new SubscribeBalanceRequest { });
-            //TODO ИСПРАВИТЬ
-            responseStream.WriteAsync(new SubscribeBalanceReply { Currency="ubrat",Value="i eto ubrat" });
-        }
 
-        public override Task<AuthenticateTokenReply> AuthenticateToken(AuthenticateTokenRequest request, ServerCallContext context)
+        public override async Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<SubscribeBalanceResponse> responseStream, ServerCallContext context)
         {
-            //var response = clientTM.AuthenticateToken(new AuthenticateTokenRequest {Token = request.Token});
-
-            return Task.FromResult(new AuthenticateTokenReply
+            using var response = clientTM.SubscribeBalance(request);
+            while (await response.ResponseStream.MoveNext())
             {
-                
-                Reply = new DefaultReply { Message = "asd", Code = ReplyCode.Succeed }
-                //Reply = response.Reply
-            }); 
+                await responseStream.WriteAsync(new SubscribeBalanceResponse
+                {
+                    Currency = response.ResponseStream.Current.Currency,
+                    Value = response.ResponseStream.Current.Value
+                });
+            }
         }
 
-        public override async Task Slots(SlotsRequest request, IServerStreamWriter<SlotsReply> responseStream, ServerCallContext context)
+        public override Task<AuthenticateTokenResponse> AuthenticateToken(AuthenticateTokenRequest request, ServerCallContext context)
         {
-            //TODO все исправить
-            //using var response = clientTM.Slots(request);
-            //while(await response.ResponseStream.MoveNext())
-            //{
-                _ = responseStream.WriteAsync(new SlotsReply { SlotName = "nu tip slot name"/*response.ResponseStream.Current.SlotName*/ });
-            //}
+            var response = clientTM.AuthenticateToken(new AuthenticateTokenRequest { Token = request.Token });
+
+            return Task.FromResult(new AuthenticateTokenResponse
+            {
+                Response = response.Response
+            });
+        }
+
+        public override async Task Slots(SlotsRequest request, IServerStreamWriter<SlotsResponse> responseStream, ServerCallContext context)
+        {
+            using var response = clientTM.Slots(request);
+
+            while (await response.ResponseStream.MoveNext())
+            {
+                await responseStream.WriteAsync(new SlotsResponse
+                {
+                    SlotName = response.ResponseStream.Current.SlotName
+                });
+            }
         }
     }
 

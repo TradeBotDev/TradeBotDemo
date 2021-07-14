@@ -6,35 +6,30 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Common;
-using TradeBot.Relay.Facade;
-using static TradeBot.Relay.Facade.SendToRelay;
+using TradeBot.Relay.StarterService.v1;
+using static TradeBot.Relay.StarterService.v1.Starter;
 
 namespace Facade
 {
-    public class SendToRelay : TradeBot.Relay.Facade.SendToRelay.SendToRelayBase
+    public class FacadeRelayService : TradeBot.Relay.StarterService.v1.Starter.StarterBase
     {
-        //private SendToRelayClient clientRelay = new SendToRelayClient(GrpcChannel.ForAddress(""/*адрес ТМ*/));
-        private readonly ILogger<UIInfoService> _logger;
-        public SendToRelay(ILogger<UIInfoService> logger)
+        private StarterClient clientRelay = new StarterClient(GrpcChannel.ForAddress("https://localhost:5004"));
+        private readonly ILogger<FacadeRelayService> _logger;
+        public FacadeRelayService(ILogger<FacadeRelayService> logger)
         {
             _logger = logger;
         }
 
-        /// <summary>
-        /// Запускает бота
-        /// </summary>
-        /// <param name="request"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        public override Task<StartBotReply> StartBot(StartBotRequest request, ServerCallContext context)
+        public override Task<StartBotResponse> StartBot(StartBotRequest request, ServerCallContext context)
         {
-            //var response = clientRelay.StartBot(new StartBotRequest {Config = request.Config });
-            return Task.FromResult(new StartBotReply
+            var response = clientRelay.StartBot(new StartBotRequest {Config = request.Config });
+            return Task.FromResult(new StartBotResponse
             {
-                Reply = new DefaultReply { Message = "est contact", Code = ReplyCode.Succeed }
+                Response = response.Response 
             });
         }
-
+        /*
+         * пока не удалять мб пригодиться
         public override async Task<SubscribeLogsReply> SubscribeLogs(IAsyncStreamReader<SubscribeLogsRequest> requestStream, ServerCallContext context)
         {
             //var response = clientRelay.StartBot(new StartBotRequest {Log = request.Log });
@@ -47,13 +42,7 @@ namespace Facade
             subscribeLogsReply.Reply = new DefaultReply { Message = (new Random().Next()).ToString(), Code = ReplyCode.Succeed };
             return subscribeLogsReply;
         }
-
-
-        //return Task.FromResult(new SubscribeLogsReply
-        //{ 
-        //        //Reply = request.reply
-        //        Reply = new DefaultReply { Message = "est contact", Code = ReplyCode.Succeed }
-        //});
+        */
     }
 }
 
