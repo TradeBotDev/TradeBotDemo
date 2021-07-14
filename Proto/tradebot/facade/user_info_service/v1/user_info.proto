@@ -1,12 +1,12 @@
 ﻿syntax = "proto3";
 
-option csharp_namespace = "TradeMarket.Common";
+option csharp_namespace = "TradeMarket.Facade.UserInfoService.v1";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 
-import "tradebot/Common/v1/common.proto";
+import "tradebot/common/v1/common.proto";
 
-package tradebot.common.user_info_service.v1;
+package tradebot.facade.user_info_service.v1;
 
 service UserInfoService{
 	/*

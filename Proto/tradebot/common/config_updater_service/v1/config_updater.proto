@@ -1,6 +1,6 @@
 ﻿syntax = "proto3";
 
-option csharp_namespace = "TradeBot.Common";
+option csharp_namespace = "TradeBot.Common.ConfingUpdaterService.v1";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 import "tradebot/common/v1/common.proto";
@@ -18,7 +18,7 @@ service ConfingUpdaterService {
 }
 
 message UpdateServerConfigRequest {
-	TradeBot.Common.Config config = 1;
+	tradebot.common.v1.Config config = 1;
 }
 message UpdateServerConfigResponse {
 	google.protobuf.Empty empty = 1;

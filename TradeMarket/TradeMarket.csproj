@@ -6,12 +6,14 @@
 
   <ItemGroup>
     <Protobuf Include="Protos\greet.proto" GrpcServices="Server" />
-    <Protobuf Link="Protos/common.proto" ProtoRoot="../Proto" Include="../Proto/common.proto" GrpcServices="Both" />
-    <Protobuf Link="Protos/relay_tm.proto" ProtoRoot="../Proto" Include="../Proto/relay_tm.proto" GrpcServices="Both" />
-    <Protobuf Link="Protos/former_tm.proto" ProtoRoot="../Proto" Include="../Proto/former_tm.proto" GrpcServices="Both" />
-    <Protobuf Link="Protos/facade_tm.proto" ProtoRoot="../Proto" Include="../Proto/facade_tm.proto" GrpcServices="Both" />
-    
-  
+    <Protobuf ProtoRoot="../Proto" Include="../Proto/tradebot/common/v1/common.proto" GrpcServices="Both" />
+    <Protobuf ProtoRoot="../Proto" Include="../Proto/tradebot/common/logger_service/v1/logger.proto" GrpcServices="Both" />
+    <Protobuf ProtoRoot="../Proto" Include="../Proto/tradebot/common/order_subscriber_service/v1/order_subscriber_updater.proto" GrpcServices="Both" />
+    <Protobuf ProtoRoot="../Proto" Include="../Proto/tradebot/trademarket/order_worker_service/v1/order_worker_subscriber_updater.proto" GrpcServices="Both" />
+
+
+
+
   </ItemGroup>
 
   <ItemGroup>
