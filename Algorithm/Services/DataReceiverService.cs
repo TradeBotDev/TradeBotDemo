@@ -16,6 +16,7 @@ namespace Algorithm.Services
             while (await requestStream.MoveNext())
             {
                 var order = requestStream.Current;
+                DataCollector.orders.Add(order.Order);
                 Console.WriteLine("Got something");
             }
             AddOrderResponse response = new AddOrderResponse();

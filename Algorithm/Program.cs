@@ -17,6 +17,7 @@ namespace Algorithm
 
             var relayAddress = GrpcChannel.ForAddress("https://localhost:5004");
 
+
         }
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
