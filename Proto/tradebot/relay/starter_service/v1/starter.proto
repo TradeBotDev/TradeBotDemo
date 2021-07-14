@@ -2,7 +2,7 @@ syntax = "proto3";
 
 option csharp_namespace = "TradeBot.Relay.StarterService.v1";
 import "google/protobuf/timestamp.proto";
-import "TradeBot/Common/v1/common.proto";
+import "tradebot/common/v1/common.proto";
 
 package tradebot.relay.starter_service.v1;
 

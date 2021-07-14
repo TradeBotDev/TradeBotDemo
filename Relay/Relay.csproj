@@ -6,11 +6,20 @@
 
   <ItemGroup>
     <Protobuf Include="Protos\greet.proto" GrpcServices="Server" />
-    <Protobuf Include="../Proto/common.proto" GrpcServices="Both" ProtoRoot="../Proto" />
-    <!-- <Protobuf Include="../Proto/relay_facade.proto" GrpcServices="Both" ProtoRoot="../Proto"/> -->
-    <Protobuf Include="../Proto/relay_facade.proto" GrpcServices="Both" ProtoRoot="../Proto"/>
-    <Protobuf Include="../Proto/algorithm_relay.proto" GrpcServices="Both" ProtoRoot="../Proto"/>
-    
+
+    <Protobuf ProtoRoot="../Proto" Include="../Proto/relay/starter_service/v1/starter.proto" GrpcServices="Both" />
+
+
+    <Protobuf ProtoRoot="../Proto" Include="../Proto/tradebot/common/v1/common.proto" GrpcServices="Both" />
+    <Protobuf ProtoRoot="../Proto" Include="../Proto/tradebot/common/logger_service/v1/logger.proto" GrpcServices="Both" />
+    <Protobuf ProtoRoot="../Proto" Include="../Proto/tradebot/common/config_updater_service/v1/config_updater.proto" GrpcServices="Both" />
+    <Protobuf ProtoRoot="../Proto" Include="../Proto/tradebot/common/order_subscriber_service/v1/order_subscriber_updater.proto" GrpcServices="Both" />
+
+    <Protobuf ProtoRoot="../Proto" Include="../Proto/tradebot/algorithm/data_service/v1/data_service.proto" GrpcServices="Both" />
+
+
+    <Protobuf ProtoRoot="../Proto" Include="../Proto/tradebot/facade/user_info_service/v1/user_info.proto" GrpcServices="Both" />
+
   </ItemGroup>
 
   <ItemGroup>

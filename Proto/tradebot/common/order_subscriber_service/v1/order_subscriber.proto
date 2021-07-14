@@ -1,8 +1,8 @@
 ﻿syntax = "proto3";
 
-option csharp_namespace = "TradeBot.Common";
+option csharp_namespace = "TradeBot.Common.OrderSubscriberService.v1";
 import "google/protobuf/timestamp.proto";
-import "TradeBot/Common/v1/common.proto";
+import "tradebot/common/v1/common.proto";
 package tradebot.common.order_subscriber_service.v1;
 
 service OrderSubscriberService {
@@ -17,5 +17,5 @@ message SubscribeOrdersRequest{
 }
 
 message SubscribeOrdersResponse{
-	tradebot.common.v1..Order order = 1; 
+	tradebot.common.v1.Order order = 1; 
 }

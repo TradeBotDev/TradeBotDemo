@@ -1,8 +1,8 @@
 ﻿syntax = "proto3";
 
-option csharp_namespace = "TradeBot.Common";
+option csharp_namespace = "TradeBot.Common.LoggerService.v1";
 import "google/protobuf/empty.proto";
-import "google/protobuf/datestamp.proto";
+import "google/protobuf/timestamp.proto";
 
 
 //ок так делать что используем один package на комон и логер?

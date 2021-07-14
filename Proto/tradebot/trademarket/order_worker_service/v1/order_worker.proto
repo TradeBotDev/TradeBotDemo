@@ -2,7 +2,7 @@
 
 option csharp_namespace = "TradeBot.TradeMarket.OrderWorkerService.v1";
 import "google/protobuf/timestamp.proto";
-import "TradeBot/Common/v1/common.proto";
+import "tradebot/common/v1/common.proto";
 package tradebot.trademarket.order_worker_service.v1;
 
 service OrderWorkerService {

@@ -3,7 +3,7 @@
 option csharp_namespace = "TradeBot.Algorithm.DataService.v1";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
-import "TradeBot/Common/v1/common.proto";
+import "tradebot/common/v1/common.proto";
 
 package tradebot.algorithm.data_service.v1;
 

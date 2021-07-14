@@ -1,6 +1,6 @@
 ﻿syntax = "proto3";
 
-option csharp_namespace = "TradeBot.Common";
+option csharp_namespace = "TradeBot.Common.v1";
 import "google/protobuf/timestamp.proto";
 
 package tradebot.common.v1;
