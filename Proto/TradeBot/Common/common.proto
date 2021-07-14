@@ -63,6 +63,6 @@ message Config{
 	//когда снимать свои ордера с биржы
 	double order_update_price_range = 6;
 	//информация необходимая для работы алгоритма
-	AlgorithmInfo AlgorithmInfo = 7;
+	AlgorithmInfo algorithm_info = 7;
 }
 
