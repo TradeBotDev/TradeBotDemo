@@ -6,11 +6,8 @@
 
   <ItemGroup>
     <Protobuf Include="Protos\greet.proto" GrpcServices="Server" />
-    <Protobuf ProtoRoot="../Proto" Include="../Proto/tradebot/common/v1/common.proto" GrpcServices="Both" />
-    <Protobuf ProtoRoot="../Proto" Include="../Proto/tradebot/common/logger_service/v1/logger.proto" GrpcServices="Both" />
-    <Protobuf ProtoRoot="../Proto" Include="../Proto/tradebot/common/order_subscriber_service/v1/order_subscriber.proto" GrpcServices="Both" />
-    <Protobuf ProtoRoot="../Proto" Include="../Proto/tradebot/trademarket/order_worker_service/v1/order_worker.proto" GrpcServices="Both" />
-
+    <Protobuf Link ="Protos/trademarket.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/trademarket/trademarket_service/v1/trademarket.proto" GrpcServices="Both" />
+    <Protobuf Link ="Protos/common.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/common/v1/common.proto" GrpcServices="Both" />
 
 
 

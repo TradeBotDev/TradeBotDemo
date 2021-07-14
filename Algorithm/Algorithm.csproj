@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -9,11 +9,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf ProtoRoot="../Proto" Include="../Proto/tradebot/common/v1/common.proto" GrpcServices="Both" />
-    <Protobuf ProtoRoot="../Proto" Include="../Proto/tradebot/common/logger_service/v1/logger.proto" GrpcServices="Both" />
-    <Protobuf ProtoRoot="../Proto" Include="../Proto/tradebot/common/config_updater_service/v1/config_updater.proto" GrpcServices="Both" />
-
-    <Protobuf ProtoRoot="../Proto" Include="../Proto/tradebot/algorithm/*/v1/*.proto" GrpcServices="Both" />
+        <Protobuf Link ="Protos/algorithm.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/algorithm/algorithm_service/v1/algorithm.proto" GrpcServices="Both" />
+    <Protobuf Link ="Protos/common.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/common/v1/common.proto" GrpcServices="Both" />
 
 
   </ItemGroup>
