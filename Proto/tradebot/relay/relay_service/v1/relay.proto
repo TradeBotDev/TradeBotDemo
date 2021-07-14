@@ -1,0 +1,56 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "TradeBot.Relay.RelayService.v1";
+import "google/protobuf/timestamp.proto";
+import "tradebot/common/v1/common.proto";
+
+package tradebot.relay.relay_service.v1;
+
+service RelayService{
+	rpc StartBot (StartBotRequest) returns (StartBotResponse);
+
+	/*
+		Клиент говорит обновиться серверу
+	*/
+	rpc UpdateServerConfig (UpdateServerConfigRequest) returns (UpdateServerConfigResponse);
+
+	/*
+		Подписка на логи нужного сервиса
+	*/
+	//TODO в каждом сервисе нужно написать 
+	rpc SubscribeLogs(tradebot.common.v1.SubscribeLogsRequest) returns (stream tradebot.common.v1.SubscribeLogsResponse);
+
+	/*
+		Перенаправляет стрим закрытых ордеров из ТМа к алгоритму
+	*/	
+	rpc AddOrder (stream AddOrderRequest) returns ( AddOrderResponse);
+
+	/*
+		Подписывается на ордера выбранного типа
+	*/
+	rpc SubscribeOrders(tradebot.common.v1.SubscribeOrdersRequest) returns (stream tradebot.common.v1.SubscribeOrdersResponse);
+}
+
+
+message AddOrderRequest {
+	tradebot.common.v1.Order order = 1;
+}
+//Есть ли смысл делать отдельный ответ если ничего не возвращается ?
+message AddOrderResponse {
+	google.protobuf.Empty empty = 1;
+}
+
+message UpdateServerConfigRequest {
+	tradebot.common.v1.Config config = 1;
+}
+message UpdateServerConfigResponse {
+	google.protobuf.Empty empty = 1;
+}
+
+message StartBotRequest {
+	tradebot.common.v1.Config config = 1;
+}
+
+message StartBotResponse {
+	tradebot.common.v1.DefaultResponse response = 1;
+}

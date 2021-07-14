@@ -1,0 +1,49 @@
+﻿syntax = "proto3";
+option csharp_namespace = "TradeBot.Algorithm.AlgorithmService.v1";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "tradebot/common/v1/common.proto";
+
+package tradebot.algorithm.algorithm_service.v1;
+
+//посылается алгоритму
+service AlgorithmService {
+	/*
+		Перенаправляет стрим закрытых ордеров из ТМа к алгоритму
+	*/	
+	rpc AddOrder (stream AddOrderRequest) returns ( AddOrderResponse);
+
+	/*
+		подписка на ответ алгоритма
+	*/
+	rpc SubscribePurchasePrice (SubscribePurchasePriceRequest) returns (stream SubscribePurchasePriceResponse);
+
+	/*
+		Клиент говорит обновиться серверу
+	*/
+	rpc UpdateServerConfig (UpdateServerConfigRequest) returns (UpdateServerConfigResponse);
+
+	/*
+		Подписка на логи нужного сервиса
+	*/
+	//TODO в каждом сервисе нужно написать 
+	rpc SubscribeLogs(tradebot.common.v1.SubscribeLogsRequest) returns (stream tradebot.common.v1.SubscribeLogsResponse);
+
+}
+
+message SubscribePurchasePriceRequest
+{
+	google.protobuf.Empty empty = 1;
+}
+message SubscribePurchasePriceResponse
+{
+	double purchase_price = 1;
+}
+
+message AddOrderRequest {
+	tradebot.common.v1.Order order = 1;
+}
+//Есть ли смысл делать отдельный ответ если ничего не возвращается ?
+message AddOrderResponse {
+	google.protobuf.Empty empty = 1;
+}

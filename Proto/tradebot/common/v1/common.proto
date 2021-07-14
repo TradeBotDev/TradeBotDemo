@@ -2,6 +2,8 @@
 
 option csharp_namespace = "TradeBot.Common.v1";
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
 
 package tradebot.common.v1;
 
@@ -64,5 +66,39 @@ message Config{
 	double order_update_price_range = 6;
 	//информация необходимая для работы алгоритма
 	AlgorithmInfo algorithm_info = 7;
+}
+/*
+	пока мы используем microsoft logger то будем использовать его уровни
+	https://docs.microsoft.com/en-us/javascript/api/@aspnet/signalr/loglevel?view=signalr-js-latest
+*/
+enum LogLevel{
+	LOG_LEVEL_UNSPECIFIED = 0;
+	LOG_LEVEL_TRACE = 1;
+	LOG_LEVEL_DEBUG = 2;
+	LOG_LEVEL_INFORMATION = 3;
+	LOG_LEVEL_WARNING = 4;
+	LOG_LEVEL_ERROR = 5;
+	LOG_LEVEL_CRITICAL = 6;
+	LOG_LEVEL_NONE = 7;
+}
+
+message SubscribeLogsRequest{
+	LogLevel level = 1;
+}
+
+message SubscribeLogsResponse{
+	LogLevel level = 1;
+	//когда произошла запись
+	google.protobuf.Timestamp when = 2;
+	// на каком микросервисе и в каком методе прозошла запись
+	string where = 3;
+	string log_message = 4;
+}
+
+message UpdateServerConfigRequest {
+	Config config = 1;
+}
+message UpdateServerConfigResponse {
+	google.protobuf.Empty empty = 1;
 }
 
