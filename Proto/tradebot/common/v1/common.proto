@@ -1,28 +1,31 @@
 ﻿syntax = "proto3";
 
-option csharp_namespace = "TradeBot.Common";
+option csharp_namespace = "TradeBot.Common.v1";
 import "google/protobuf/timestamp.proto";
 
-package TradeBot.Common;
+package tradebot.common.v1;
 
 enum ReplyCode{
-	reply_code_succeed = 0;
-	reply_code_failure = 1;
+	REPLY_CODE_UNSPECIFIED = 0;
+	REPLY_CODE_SUCCEED = 1;
+	REPLY_CODE_FAILURE = 2;
 }
 
-message DefaultReply{
+message DefaultResponse{
 	ReplyCode code = 1;
 	string message = 2;
 }
 
 enum OrderStatus{
-	order_status_open = 0;
-	order_status_closed = 1;
+	ORDER_STATUS_UNSPECIFIED = 0;
+	ORDER_STATUS_OPEN = 1;
+	ORDER_STATUS_CLOSED = 2;
 }
 
 enum OrderType{
-	order_type_sell = 0;
-	order_type_buy = 1;
+	ORDER_TYPE_UNSPECIFIED = 0;
+	ORDER_TYPE_SELL = 1;
+	ORDER_TYPE_BUY = 2;
 }
 
 message OrderSignature{
@@ -35,6 +38,7 @@ message Order {
 	double price = 2;
 	OrderSignature signature = 3;
 	google.protobuf.Timestamp last_update_date = 4;
+	string id = 5;
 
 }
 
@@ -59,14 +63,6 @@ message Config{
 	//когда снимать свои ордера с биржы
 	double order_update_price_range = 6;
 	//информация необходимая для работы алгоритма
-	AlgorithmInfo AlgorithmInfo = 7;
+	AlgorithmInfo algorithm_info = 7;
 }
 
-message Log {
-	//когда произошла запись
-	google.protobuf.Timestamp when = 1;
-	// на каком микросервисе и в каком методе прозошла запись
-	string where = 2;
-	//сообщение лога
-	string log_message = 3;
-}
