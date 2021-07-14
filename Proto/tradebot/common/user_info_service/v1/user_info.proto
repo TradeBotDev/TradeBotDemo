@@ -4,7 +4,7 @@ option csharp_namespace = "TradeMarket.Common";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 
-import "TradeBot/Common/common.proto";
+import "tradebot/Common/v1/common.proto";
 
 package tradebot.common.user_info_service.v1;
 
@@ -12,17 +12,17 @@ service UserInfoService{
 	/*
 		Подписка на изменение баланса пользователя (ЕДИНСТВЕННОГО)
 	*/
-	rpc SubscribeBalance(SubscribeBalanceRequest) returns (stream SubscribeBalanceReply);
+	rpc SubscribeBalance(SubscribeBalanceRequest) returns (stream SubscribeBalanceResponse);
 
 	/*
 		Аутентификция на бирже по токену
 	*/
-	rpc AuthenticateToken(AuthenticateTokenRequest) returns (AuthenticateTokenReply);
+	rpc AuthenticateToken(AuthenticateTokenRequest) returns (AuthenticateTokenResponse);
 
 	/*
 		Список доступных слотов на бирже
 	*/
-	rpc Slots(SlotsRequest) returns (stream SlotsReply);
+	rpc Slots(SlotsRequest) returns (stream SlotsResponse);
 
 }
 
@@ -30,7 +30,7 @@ message SlotsRequest{
 	//TODO Тут должно быть обращение к конкретной бирже, но она пока одна
 	google.protobuf.Empty empty = 1;
 }
-message SlotsReply{
+message SlotsResponse{
 	string slot_name = 1;
 }
 
@@ -38,15 +38,15 @@ message AuthenticateTokenRequest{
 	string token = 1;
 }
 
-message AuthenticateTokenReply{
-	TradeBot.Common.DefaultReply reply = 1;
+message AuthenticateTokenResponse{
+	tradebot.common.v1.DefaultResponse response = 1;
 }
 message SubscribeBalanceRequest{
 	//Тут потом должно быть обращение к конкретной бирже, но она пока одна
 	google.protobuf.Empty empty = 1;
 }
 
-message SubscribeBalanceReply{
+message SubscribeBalanceResponse{
 	string Currency = 1;
 	string value = 2;
 }
