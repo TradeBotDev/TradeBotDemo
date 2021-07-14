@@ -22,7 +22,7 @@ namespace Former.Services
             Event.Invoke();
         }
     }
-   
+    
     public class Observer
     {
         static double AveragePrice = 0;
@@ -31,7 +31,7 @@ namespace Former.Services
         static GrpcChannel TradeMarketChannel;
         static FormerService.FormerServiceClient TradeMarketClient;
         static AlgorithmObserverService.AlgorithmObserverServiceClient AlgorithmClient;
-
+               
         public Observer() 
         {
             AlgorithmChannel = GrpcChannel.ForAddress("https://localhost:5001");
@@ -41,9 +41,33 @@ namespace Former.Services
             TradeMarketClient = new FormerService.FormerServiceClient(TradeMarketChannel);
         }
 
+        public class ReplyComparer : IComparer<SubscribeOrdersReply>
+        {
+            int IComparer<SubscribeOrdersReply>.Compare(SubscribeOrdersReply x, SubscribeOrdersReply y)
+            {
+                return x.SimpleOrderInfo.Price.CompareTo(y.SimpleOrderInfo.Price);
+            }
+        }
+
+        public static void Sort(List<SubscribeOrdersReply> list, IComparer<SubscribeOrdersReply> comparer)
+        {
+            for (int i = list.Count - 1; i > 0; i--)
+                for (int j = 1; j <= i; j++)
+                {
+                    var element1 = list[j - 1];
+                    var element2 = list[j];
+                    if (comparer.Compare(element1, element2) > 0)
+                    {
+                        var temporary = list[j];
+                        list[j] = list[j - 1];
+                        list[j - 1] = temporary;
+                    }
+                }
+        }
+
         private void EventHandler()
         {
-            //List<string> formedShoppingListById = FormShoppingList(CurrentBuyOrders);
+            List<string> formedShoppingListById = FormShoppingList(CurrentBuyOrders);
             //SendShopingListToTM(formedShoppingListById);
         }
 
@@ -79,6 +103,7 @@ namespace Former.Services
 
         public async void ObserveAlgorithm()
         {
+            await Task.Delay(2000);
             Events instance = new Events();
             instance.Event += new EventDelegate(EventHandler);
             using var call = AlgorithmClient.SubscribePurchasePrice(new SubscribePurchasePriceRequest());
@@ -86,7 +111,7 @@ namespace Former.Services
             while (await call.ResponseStream.MoveNext())
             {
                 AveragePrice = call.ResponseStream.Current.PurchasePrice;
-                //instance.InvokeEvent();
+                instance.InvokeEvent();
                 Console.WriteLine("Принял" + AveragePrice);
             }
             AlgorithmChannel.Dispose();
@@ -96,7 +121,7 @@ namespace Former.Services
         {
             Events instance = new Events();
             instance.Event += new EventDelegate(EventHandler);
-            await Task.Delay(10000);
+            await Task.Delay(2000);
             var orderSignature = new OrderSignature
             {
                 Status = OrderStatus.Open,
@@ -112,6 +137,7 @@ namespace Former.Services
             while (await call.ResponseStream.MoveNext())
             {
                 UpdateCurrentBuyOrders(call.ResponseStream.Current);
+                Console.WriteLine("Принял" + call.ResponseStream.Current);
             }
             TradeMarketChannel.Dispose();
         }
@@ -123,7 +149,7 @@ namespace Former.Services
                 int updatedIndex = CurrentBuyOrders.FindIndex(x => x.Id == orderNeededUpdate.Id);
                 CurrentBuyOrders.RemoveAt(updatedIndex);
                 CurrentBuyOrders.Insert(updatedIndex, orderNeededUpdate);
-                CurrentBuyOrders.Sort();
+                Sort(CurrentBuyOrders, new ReplyComparer());
             }
             else
             {
@@ -132,12 +158,12 @@ namespace Former.Services
                     CurrentBuyOrders.Sort();
                     CurrentBuyOrders.RemoveAt(9);
                     CurrentBuyOrders.Add(orderNeededUpdate);
-                    CurrentBuyOrders.Sort();
+                    Sort(CurrentBuyOrders, new ReplyComparer());
                 }
                 else
                 {
                     CurrentBuyOrders.Add(orderNeededUpdate);
-                    CurrentBuyOrders.Sort();
+                    Sort(CurrentBuyOrders, new ReplyComparer());
                 }
             }
         }

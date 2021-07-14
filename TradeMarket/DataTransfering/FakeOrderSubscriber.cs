@@ -31,7 +31,7 @@ namespace TradeMarket.DataTransfering
             {
                 Id = "1",
                 Quantity = 2,
-                Price = 16.2D,
+                Price = 4.2D,
                 RemovePrice = 15D,
                 LastUpdateDate = DateTime.Now.AddDays(3),
                 RemoveDate = DateTime.Now.AddDays(4),
@@ -45,7 +45,7 @@ namespace TradeMarket.DataTransfering
             {
                 Id = "2",
                 Quantity = 2,
-                Price = 16.2D,
+                Price = 9.2D,
                 RemovePrice = 15D,
                 LastUpdateDate = DateTime.Now.AddDays(3),
                 RemoveDate = DateTime.Now.AddDays(4),
@@ -73,7 +73,7 @@ namespace TradeMarket.DataTransfering
             {
                 Id = "4",
                 Quantity = 2,
-                Price = 16.2D,
+                Price = 20.2D,
                 RemovePrice = 15D,
                 LastUpdateDate = DateTime.Now.AddDays(3),
                 RemoveDate = DateTime.Now.AddDays(4),
@@ -87,7 +87,7 @@ namespace TradeMarket.DataTransfering
             {
                 Id = "5",
                 Quantity = 2,
-                Price = 16.2D,
+                Price = 8.2D,
                 RemovePrice = 15D,
                 LastUpdateDate = DateTime.Now.AddDays(3),
                 RemoveDate = DateTime.Now.AddDays(4),
@@ -101,7 +101,7 @@ namespace TradeMarket.DataTransfering
             {
                 Id = "6",
                 Quantity = 2,
-                Price = 16.2D,
+                Price = 18.2D,
                 RemovePrice = 15D,
                 LastUpdateDate = DateTime.Now.AddDays(3),
                 RemoveDate = DateTime.Now.AddDays(4),
@@ -115,7 +115,7 @@ namespace TradeMarket.DataTransfering
             {
                 Id = "7",
                 Quantity = 2,
-                Price = 16.2D,
+                Price = 40.2D,
                 RemovePrice = 15D,
                 LastUpdateDate = DateTime.Now.AddDays(3),
                 RemoveDate = DateTime.Now.AddDays(4),
