@@ -11,7 +11,7 @@ enum ReplyCode{
 	REPLY_CODE_FAILURE = 2;
 }
 
-message DefaultReply{
+message DefaultResponse{
 	ReplyCode code = 1;
 	string message = 2;
 }

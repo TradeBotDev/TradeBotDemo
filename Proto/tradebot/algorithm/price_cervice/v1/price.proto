@@ -10,13 +10,13 @@ service PriceService
 	/*
 		подписка на ответ алгоритма
 	*/
-	rpc SubscribePurchasePrice (SubscribePurchasePriceRequest) returns (stream SubscribePurchasePriceReply);
+	rpc SubscribePurchasePrice (SubscribePurchasePriceRequest) returns (stream SubscribePurchasePriceResponse);
 }
 message SubscribePurchasePriceRequest
 {
 	google.protobuf.Empty empty = 1;
 }
-message SubscribePurchasePriceReply
+message SubscribePurchasePriceResponse
 {
 	double PurchasePrice = 1;
 }

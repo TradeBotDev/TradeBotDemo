@@ -3,7 +3,7 @@
 option csharp_namespace = "TradeBot.Algorithm.DataService.v1";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
-import "TradeBot/Common/common.proto";
+import "TradeBot/Common/v1/common.proto";
 
 package tradebot.algorithm.data_service.v1;
 
@@ -12,14 +12,14 @@ service DataService {
 	/*
 		Перенаправляет стрим закрытых ордеров из ТМа к алгоритму
 	*/	
-	rpc AddOrder (stream AddOrderRequest) returns ( AddOrderReply);
+	rpc AddOrder (stream AddOrderRequest) returns ( AddOrderResponse);
 
 }
 
 message AddOrderRequest {
-	TradeBot.Common.Order orders = 1;
+	tradebot.common.v1.Order order = 1;
 }
 //Есть ли смысл делать отдельный ответ если ничего не возвращается ?
-message AddOrderReply {
+message AddOrderResponse {
 	google.protobuf.Empty empty = 1;
 }

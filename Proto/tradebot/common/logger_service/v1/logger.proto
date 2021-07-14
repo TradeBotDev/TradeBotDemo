@@ -1,7 +1,6 @@
 ﻿syntax = "proto3";
 
 option csharp_namespace = "TradeBot.Common";
-import "TradeBot/Common/common.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/datestamp.proto";
 
@@ -15,7 +14,7 @@ service LoggerService {
 		Подписка на логи нужного сервиса
 	*/
 	//TODO в каждом сервисе нужно написать 
-	rpc SubscribeLogs(SubscribeLogsRequest) returns (stream SubscribeLogsReply);
+	rpc SubscribeLogs(SubscribeLogsRequest) returns (stream SubscribeLogsResponse);
 }
 
 /*
@@ -37,7 +36,7 @@ message SubscribeLogsRequest{
 	LogLevel level = 1;
 }
 
-message SubscribeLogsReply{
+message SubscribeLogsResponse{
 	LogLevel level = 1;
 	//когда произошла запись
 	google.protobuf.Timestamp when = 2;

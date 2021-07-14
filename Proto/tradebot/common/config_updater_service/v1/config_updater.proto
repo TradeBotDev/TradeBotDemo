@@ -3,7 +3,7 @@
 option csharp_namespace = "TradeBot.Common";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
-import "TradeBot/Common/common.proto";
+import "tradebot/common/v1/common.proto";
 
 package tradebot.common.config_updater_service.v1;
 
@@ -13,14 +13,14 @@ service ConfingUpdaterService {
 	/*
 		Клиент говорит обновиться серверу
 	*/
-	rpc UpdateServerConfig (UpdateServerConfigRequest) returns (UpdateServerConfigReply);
+	rpc UpdateServerConfig (UpdateServerConfigRequest) returns (UpdateServerConfigResponse);
 
 }
 
 message UpdateServerConfigRequest {
 	TradeBot.Common.Config config = 1;
 }
-message UpdateServerConfigReply {
+message UpdateServerConfigResponse {
 	google.protobuf.Empty empty = 1;
 }
 

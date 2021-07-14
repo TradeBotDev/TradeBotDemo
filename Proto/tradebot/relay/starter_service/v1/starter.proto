@@ -2,19 +2,19 @@ syntax = "proto3";
 
 option csharp_namespace = "TradeBot.Relay.StarterService.v1";
 import "google/protobuf/timestamp.proto";
-import "common.proto";
+import "TradeBot/Common/v1/common.proto";
 
 package tradebot.relay.starter_service.v1;
 
 service Starter{
-	rpc StartBot (StartBotRequest) returns (StartBotReply);
+	rpc StartBot (StartBotRequest) returns (StartBotResponse);
 
 }
 
 message StartBotRequest {
-	TradeBot.Common.Config config = 1;
+	tradebot.common.v1.Config config = 1;
 }
 
-message StartBotReply {
-	TradeBot.Common.DefaultReply reply = 1;
+message StartBotResponse {
+	tradebot.common.v1.DefaultResponse response = 1;
 }
