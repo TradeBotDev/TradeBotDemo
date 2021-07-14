@@ -4,11 +4,11 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TradeBot.Common;
-using TradeMarket.Former;
+using TradeBot.Former.FormerService.v1;
 
 namespace Former
 {
-    public class Service : Algorithm.Former.AlgorithmObserverService.AlgorithmObserverServiceClient
+    public class Service : FormerService.FormerServiceBase
     {
         private readonly ILogger<Service> _logger;
         public Service(ILogger<Service> logger)

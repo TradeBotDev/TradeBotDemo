@@ -1,11 +1,10 @@
-﻿using Algorithm.Former;
-using Grpc.Core;
-using Grpc.Net.Client;
+﻿using Grpc.Core;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using TradeBot.Common;
-using TradeMarket.Former;
+using TradeBot.Former.FormerService.v1;
+using TradeBot.Common.v1;
+using SubscribeOrdersRequest = TradeBot.Former.FormerService.v1.SubscribeOrdersRequest;
 
 namespace Former.Services
 {
@@ -22,11 +21,9 @@ namespace Former.Services
 
     public class Observer
     {
-        
         public async void ObserveAlgorithm()
         {
-            var algorithmClient = new AlgorithmObserverService.AlgorithmObserverServiceClient (Channels.AlgorithmChannel);
-            await Task.Delay(2000);
+            var algorithmClient = new FormerService.FormerServiceClient(Channels.AlgorithmChannel);
             using var call = algorithmClient.SubscribePurchasePrice(new SubscribePurchasePriceRequest());
 
             while (await call.ResponseStream.MoveNext())
@@ -38,7 +35,6 @@ namespace Former.Services
         public async void ObserveTradeMarket()
         {
             var tradeMarketClient = new FormerService.FormerServiceClient(Channels.TradeMarketChannel);
-            await Task.Delay(2000);
             var orderSignature = new OrderSignature
             {
                 Status = OrderStatus.Open,
@@ -46,8 +42,9 @@ namespace Former.Services
             };
             var request = new SubscribeOrdersRequest()
             {
-                Signature = orderSignature
+                Request = orderSignature
             };
+
             using var call = tradeMarketClient.SubscribeOrders(request);
             while (await call.ResponseStream.MoveNext())
             {

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using TradeMarket.Former;
+using TradeBot.Former.FormerService.v1;
 
 namespace Former
 {
-    public delegate void EventDelegateForUpdating(SubscribeOrdersReply reply);
+    public delegate void EventDelegateForUpdating(SubscribeOrdersResponse reply);
     public delegate void EventDelegateForSending(List<string> list);
     public delegate void EventDelegateForForming(double num);
 
@@ -14,7 +14,7 @@ namespace Former
         public event EventDelegateForForming FormingList = null;
         public event EventDelegateForSending SendingFormedList = null;
 
-        public void InvokeUpdating(SubscribeOrdersReply reply)
+        public void InvokeUpdating(SubscribeOrdersResponse reply)
         {
             UpdatingCurrentBuyOrders.Invoke(reply);
         }

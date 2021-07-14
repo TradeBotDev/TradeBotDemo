@@ -2,6 +2,7 @@
 
 option csharp_namespace = "TradeBot.Former.FormerService.v1";
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
 import "tradebot/common/v1/common.proto";
 package tradebot.former.former_service.v1;
 
@@ -20,17 +21,27 @@ service FormerService{
 		Подписывается на ордера выбранного типа
 	*/
 	rpc SubscribeOrders(SubscribeOrdersRequest) returns (stream SubscribeOrdersResponse);
+	/*
+		подписка на ответ алгоритма
+	*/
+	rpc SubscribePurchasePrice (SubscribePurchasePriceRequest) returns (stream SubscribePurchasePriceResponse);
 
+}
+
+message SubscribePurchasePriceRequest{
+	google.protobuf.Empty empty = 1;
+}
+
+message SubscribePurchasePriceResponse{
+	double purchase_price = 1;
 }
 
 message SubscribeOrdersRequest{
-	tradebot.common.v1.SubscribeOrdersRequest request = 1;
-	
+	tradebot.common.v1.OrderSignature request = 1;
 }
 
 message SubscribeOrdersResponse{
-	tradebot.common.v1.SubscribeOrdersResponse response = 1;
-
+	tradebot.common.v1.Order response = 1;
 }
 
 message SubscribeLogsRequest{
