@@ -1,11 +1,7 @@
 ﻿using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using TradeBot.Common;
 using TradeBot.Relay.StarterService.v1;
 using static TradeBot.Relay.StarterService.v1.Starter;
 
@@ -22,14 +18,14 @@ namespace Facade
 
         public override Task<StartBotResponse> StartBot(StartBotRequest request, ServerCallContext context)
         {
-            var response = clientRelay.StartBot(new StartBotRequest {Config = request.Config });
+            var response = clientRelay.StartBot(new StartBotRequest { Config = request.Config });
             return Task.FromResult(new StartBotResponse
             {
-                Response = response.Response 
+                Response = response.Response
             });
         }
         /*
-         * пока не удалять мб пригодиться
+         * пока не удалять, мб пригодиться
         public override async Task<SubscribeLogsReply> SubscribeLogs(IAsyncStreamReader<SubscribeLogsRequest> requestStream, ServerCallContext context)
         {
             //var response = clientRelay.StartBot(new StartBotRequest {Log = request.Log });
