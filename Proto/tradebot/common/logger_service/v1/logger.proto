@@ -7,7 +7,7 @@ import "google/protobuf/datestamp.proto";
 
 
 //ок так делать что используем один package на комон и логер?
-package TradeBot.Common;
+package tradebot.common.logger_service.v1;
 
 service LoggerService {
 

@@ -3,7 +3,7 @@
 option csharp_namespace = "TradeBot.Common";
 import "google/protobuf/timestamp.proto";
 
-package TradeBot.Common;
+package tradebot.common.v1;
 
 enum ReplyCode{
 	REPLY_CODE_UNSPECIFIED = 0;

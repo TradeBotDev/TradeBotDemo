@@ -1,9 +1,9 @@
 ﻿syntax = "proto3";
 
-option csharp_namespace = "TradeMarket.TradeMarket";
+option csharp_namespace = "TradeBot.TradeMarket.OrderWorkerService.v1";
 import "google/protobuf/timestamp.proto";
 import "TradeBot/Common/common.proto";
-package TradeBot.TradeMarket;
+package tradebot.trademarket.order_worker_service.v1;
 
 service OrderWorkerService {
 

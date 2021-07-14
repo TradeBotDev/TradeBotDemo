@@ -3,7 +3,7 @@
 option csharp_namespace = "TradeBot.Common";
 import "google/protobuf/timestamp.proto";
 import "TradeBot/Common/common.proto";
-package TradeBot.Common;
+package tradebot.common.order_subscriber_service.v1;
 
 service OrderSubscriberService {
 	/*

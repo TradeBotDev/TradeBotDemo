@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-option csharp_namespace = "TradeBot.Relay.Facade";
+option csharp_namespace = "TradeBot.Relay.StarterService.v1";
 import "google/protobuf/timestamp.proto";
 import "common.proto";
 
-package TradeBot.Relay.Facade;
+package tradebot.relay.starter_service.v1;
 
 service Starter{
 	rpc StartBot (StartBotRequest) returns (StartBotReply);

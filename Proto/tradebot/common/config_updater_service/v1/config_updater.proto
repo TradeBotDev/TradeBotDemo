@@ -5,7 +5,7 @@ import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 import "TradeBot/Common/common.proto";
 
-package TradeBot.Common;
+package tradebot.common.config_updater_service.v1;
 
 
 service ConfingUpdaterService {
