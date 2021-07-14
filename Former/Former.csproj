@@ -7,9 +7,17 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.1.1" />
     <PackageReference Include="Grpc.AspNetCore" Version="2.34.0" />
-    <Protobuf Include="../Proto/common.proto" GrpcServices="Both" ProtoRoot="../Proto" />
-    <Protobuf Include="../Proto/former_algorithm.proto" GrpcServices="Both" ProtoRoot="../Proto" />
-    <Protobuf Include="../Proto/former_tm.proto" GrpcServices="Both" ProtoRoot="../Proto" />
+
+    <Protobuf ProtoRoot="../Proto" Include="../Proto/tradebot/common/v1/common.proto" GrpcServices="Both" />
+    <Protobuf ProtoRoot="../Proto" Include="../Proto/tradebot/common/logger_service/v1/logger.proto" GrpcServices="Both" />
+    <Protobuf ProtoRoot="../Proto" Include="../Proto/tradebot/common/config_updater_service/v1/config_updater.proto" GrpcServices="Both" />
+    <Protobuf ProtoRoot="../Proto" Include="../Proto/tradebot/common/order_subscriber_service/v1/order_subscriber_updater.proto" GrpcServices="Both" />
+
+    <Protobuf ProtoRoot="../Proto" Include="../Proto/tradebot/algorithm/price_service/v1/price_service.proto" GrpcServices="Both" />
+
+
+    <Protobuf ProtoRoot="../Proto" Include="../Proto/tradebot/facade/user_info_service/v1/user_info.proto" GrpcServices="Both" />
+
   </ItemGroup>
 
 </Project>
