@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option csharp_namespace = "TradeBot.Relay.Facade";
+import "google/protobuf/timestamp.proto";
+import "common.proto";
+
+package TradeBot.Relay.Facade;
+
+service Starter{
+	rpc StartBot (StartBotRequest) returns (StartBotReply);
+
+}
+
+message StartBotRequest {
+	TradeBot.Common.Config config = 1;
+}
+
+message StartBotReply {
+	TradeBot.Common.DefaultReply reply = 1;
+}

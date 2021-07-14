@@ -1,0 +1,22 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "TradeBot.Algorithm";
+import "google/protobuf/empty.proto";
+
+package TradeBot.Algorithm;
+
+service PriceService
+{	
+	/*
+		подписка на ответ алгоритма
+	*/
+	rpc SubscribePurchasePrice (SubscribePurchasePriceRequest) returns (stream SubscribePurchasePriceReply);
+}
+message SubscribePurchasePriceRequest
+{
+	google.protobuf.Empty empty = 1;
+}
+message SubscribePurchasePriceReply
+{
+	double PurchasePrice = 1;
+}
