@@ -9,7 +9,7 @@ namespace Facade
 {
     public class FacadeTMService : TradeMarket.Facade.UserInfoService.v1.UserInfoService.UserInfoServiceBase
     {
-        private UserInfoServiceClient clientTM = new UserInfoServiceClient(GrpcChannel.ForAddress(""/*адрес ТМ*/));
+        private UserInfoServiceClient clientTM = new UserInfoServiceClient(GrpcChannel.ForAddress("https://localhost:5005"));
         private readonly ILogger<FacadeTMService> _logger;
         public FacadeTMService(ILogger<FacadeTMService> logger)
         {
