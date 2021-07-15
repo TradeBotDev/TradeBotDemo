@@ -16,7 +16,7 @@ namespace Facade
             _logger = logger;
         }
 
-        public override async Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<Tradebot.Facade.FacadeService.v1.SubscribeBalanceResponse> responseStream, ServerCallContext context)
+        public override async Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<TradeBot.Facade.FacadeService.v1.SubscribeBalanceResponse> responseStream, ServerCallContext context)
         {
             using var response = clientTM.SubscribeBalance(request);
             while (await response.ResponseStream.MoveNext())
@@ -30,12 +30,32 @@ namespace Facade
 
         public override Task<AuthenticateTokenResponse> AuthenticateToken(AuthenticateTokenRequest request, ServerCallContext context)
         {
-            var response = clientTM.AuthenticateToken(new AuthenticateTokenRequest { Token = request.Token });
+            System.Console.WriteLine("Вызов метода AuthenticateToken спараметром: " + request.Token);
 
-            return Task.FromResult(new AuthenticateTokenResponse
+            try
             {
-                Response = response.Response
-            });
+                var response = clientTM.AuthenticateToken(new AuthenticateTokenRequest { Token = request.Token });
+                System.Console.WriteLine("Возврат значения из AuthenticateToken:" + response.Response.ToString());
+                return Task.FromResult(new AuthenticateTokenResponse
+                {
+                    Response = response.Response
+                });
+            }
+            catch (System.Exception e)
+            {
+                System.Console.WriteLine("Ошибка работы метода StarBot");
+                System.Console.WriteLine("Exception: " + e.Message);
+                var defaultResponse = new TradeBot.Common.v1.DefaultResponse
+                {
+                    Code = TradeBot.Common.v1.ReplyCode.Failure,
+                    Message = "Exception"
+                };
+                return Task.FromResult(new AuthenticateTokenResponse
+                {
+                    Response = defaultResponse
+                });
+            }
+            
         }
 
         public override async Task Slots(SlotsRequest request, IServerStreamWriter<SlotsResponse> responseStream, ServerCallContext context)
