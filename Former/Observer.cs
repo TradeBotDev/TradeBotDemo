@@ -15,9 +15,7 @@ namespace Former.Services
         static Dictionary<string, double> SuccessfulOrders = new();
         public static async void ObserveAlgorithm()
         {
-            await Task.Delay(10000);
-            using var AlgorithmChannel = GrpcChannel.ForAddress("https://localhost:5001");
-            var algorithmClient = new AlgorithmService.AlgorithmServiceClient(AlgorithmChannel);
+            var algorithmClient = new AlgorithmService.AlgorithmServiceClient(Channels.AlgorithmChannel);
             using var call = algorithmClient.SubscribePurchasePrice(new SubscribePurchasePriceRequest());
             while (await call.ResponseStream.MoveNext())
             {
@@ -41,7 +39,6 @@ namespace Former.Services
                 }
 
             };
-            await Task.Delay(10000);
             using var call = tradeMarketClient.SubscribeOrders(request);
             while (await call.ResponseStream.MoveNext())
             {

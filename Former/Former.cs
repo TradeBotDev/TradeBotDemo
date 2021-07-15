@@ -18,7 +18,7 @@ namespace Former
             Console.WriteLine("Получено от алгоритма: " + AvgPrice);
             foreach (var order in CurrentBuyOrders)
             {
-                if (order.Response.Order.Price <= AvgPrice) ShoppingList.Add(order.Response.Order.Id, AvgPrice + config.SlotFee + config.RequiredProfit);
+                if (order.Response.Order.Price <= AvgPrice) ShoppingList.Add(order.Response.Order.Id, AvgPrice/* + config.SlotFee + config.RequiredProfit*/);
             }
             Console.Write("\nСформировал список необходимых ордеров: \n{ ");
             foreach (var elem in ShoppingList)
