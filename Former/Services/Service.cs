@@ -15,6 +15,10 @@ namespace Former
         {
             _logger = logger;
         }
-        //private override 
+        public override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request, ServerCallContext context)
+        {
+            Former.config = request.Request;
+            return Task.FromResult(new UpdateServerConfigResponse());
+        }
     }
 }

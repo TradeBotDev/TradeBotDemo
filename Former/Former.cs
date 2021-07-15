@@ -1,16 +1,19 @@
-﻿using System;
+﻿using Former.Services;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TradeBot.Former.FormerService.v1;
+using TradeBot.Common.v1;
 
 namespace Former
 {
     public class Former
     {
-        private static List<SubscribeOrdersResponse> CurrentBuyOrders = new();
+        private static List<TradeBot.Common.v1.SubscribeOrdersResponse> CurrentBuyOrders = new();
         private static List<string> ShoppingList = new();
+        public static Config config;
 
-        public static void FormShoppingList(double AvgPrice)
+        public async static void FormShoppingList(double AvgPrice)
         {
             ShoppingList.Clear();
             Console.WriteLine("Получено от алгоритма: " + AvgPrice);
@@ -25,9 +28,10 @@ namespace Former
                 Console.Write(", ");
             }
             Console.WriteLine("\b\b }");
+            await Observer.SendShopingList(ShoppingList);
         }
 
-        public static async void UpdateCurrentOrders(SubscribeOrdersResponse orderNeededUpdate)
+        public static async void UpdateCurrentOrders(TradeBot.Common.v1.SubscribeOrdersResponse orderNeededUpdate)
         {
             Console.WriteLine("Принял от маркета заказ {0}: цена {1}, количество {2}", orderNeededUpdate.Response.Id, orderNeededUpdate.Response.Price, orderNeededUpdate.Response.Quantity);
             var task = Task.Run(() =>
