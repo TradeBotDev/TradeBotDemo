@@ -6,7 +6,7 @@ using TradeMarket.Model;
 
 namespace TradeMarket.DataTransfering
 {
-    public class FakeSlotSubscriber : Subscriber<Slot> , FakeDataSubscriber
+    public class FakeSlotSubscriber : ISubscriber<Slot> , IFakeDataSubscriber
     {
         private static FakeSlotSubscriber _fakeSlotSubscriber = null;
 
@@ -65,7 +65,7 @@ namespace TradeMarket.DataTransfering
             },
         };
 
-        public event Subscriber<Slot>.ChangedEventHandler Changed;
+        public event ISubscriber<Slot>.ChangedEventHandler Changed;
 
         public async Task Simulate()
         {

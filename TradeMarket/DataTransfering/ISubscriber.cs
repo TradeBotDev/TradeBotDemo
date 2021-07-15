@@ -9,7 +9,7 @@ namespace TradeMarket.DataTransfering
     /// Отвечает за оповещение об изменениях в выбранных типах
     /// </summary>
     /// <typeparam name="T">класс за изменением которого идет отслеживание</typeparam>
-    public interface Subscriber<T>
+    public interface ISubscriber<T>
     {
 
         public delegate void ChangedEventHandler(object sender, ChangedEventArgs args);
