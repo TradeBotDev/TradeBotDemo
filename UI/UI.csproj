@@ -7,17 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Protobuf Link="Protos/facade.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/facade/facade_service/v1/facade.proto" GrpcServices="Both" />
+    <Protobuf Link="Protos/common.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/common/v1/common.proto" GrpcServices="Both" />
+    <Protobuf Link="Protos/relay.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/relay/relay_service/v1/relay.proto" GrpcServices="Both" />
     <PackageReference Include="Google.Protobuf" Version="3.17.3" />
     <PackageReference Include="Grpc.Net.Client" Version="2.38.0" />
     <PackageReference Include="Grpc.Tools" Version="2.38.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Protobuf Link="Protos/facade.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/facade/facade_service/v1/facade.proto" GrpcServices="Both" />
-    <Protobuf Link="Protos/common.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/common/v1/common.proto" GrpcServices="Both" />
-    <Protobuf Link="Protos/relay.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/relay/relay_service/v1/relay.proto" GrpcServices="Both" />
   </ItemGroup>
 
 </Project>

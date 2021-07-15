@@ -31,17 +31,17 @@ namespace UI
         {
             this.StartButton = new System.Windows.Forms.Button();
             this.ConfigAvailableBalance = new System.Windows.Forms.TextBox();
-            this.textBox2 = new System.Windows.Forms.TextBox();
-            this.textBox3 = new System.Windows.Forms.TextBox();
-            this.textBox4 = new System.Windows.Forms.TextBox();
-            this.textBox5 = new System.Windows.Forms.TextBox();
-            this.textBox6 = new System.Windows.Forms.TextBox();
+            this.ConfigRequiredProfit = new System.Windows.Forms.TextBox();
+            this.ConfigVolumeOfContracts = new System.Windows.Forms.TextBox();
+            this.ConfigUpdatePriceRange = new System.Windows.Forms.TextBox();
+            this.ConfigIntervalOfAnalysis = new System.Windows.Forms.TextBox();
+            this.ConfigToken = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.ConfigRequiredProfit = new System.Windows.Forms.Label();
-            this.ConfigVolumeOfContracts = new System.Windows.Forms.Label();
-            this.ConfigUpdatePriceRange = new System.Windows.Forms.Label();
-            this.ConfigIntervalOfAnalysis = new System.Windows.Forms.Label();
-            this.ConfigToken = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // StartButton
@@ -60,41 +60,47 @@ namespace UI
             this.ConfigAvailableBalance.Name = "ConfigAvailableBalance";
             this.ConfigAvailableBalance.Size = new System.Drawing.Size(125, 27);
             this.ConfigAvailableBalance.TabIndex = 1;
+            this.ConfigAvailableBalance.Text = "1,0";
             // 
-            // textBox2
+            // ConfigRequiredProfit
             // 
-            this.textBox2.Location = new System.Drawing.Point(163, 58);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(125, 27);
-            this.textBox2.TabIndex = 2;
+            this.ConfigRequiredProfit.Location = new System.Drawing.Point(163, 58);
+            this.ConfigRequiredProfit.Name = "ConfigRequiredProfit";
+            this.ConfigRequiredProfit.Size = new System.Drawing.Size(125, 27);
+            this.ConfigRequiredProfit.TabIndex = 2;
+            this.ConfigRequiredProfit.Text = "0,01";
             // 
-            // textBox3
+            // ConfigVolumeOfContracts
             // 
-            this.textBox3.Location = new System.Drawing.Point(163, 91);
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(125, 27);
-            this.textBox3.TabIndex = 3;
+            this.ConfigVolumeOfContracts.Location = new System.Drawing.Point(163, 91);
+            this.ConfigVolumeOfContracts.Name = "ConfigVolumeOfContracts";
+            this.ConfigVolumeOfContracts.Size = new System.Drawing.Size(125, 27);
+            this.ConfigVolumeOfContracts.TabIndex = 3;
+            this.ConfigVolumeOfContracts.Text = "20,0";
             // 
-            // textBox4
+            // ConfigUpdatePriceRange
             // 
-            this.textBox4.Location = new System.Drawing.Point(163, 124);
-            this.textBox4.Name = "textBox4";
-            this.textBox4.Size = new System.Drawing.Size(125, 27);
-            this.textBox4.TabIndex = 4;
+            this.ConfigUpdatePriceRange.Location = new System.Drawing.Point(163, 124);
+            this.ConfigUpdatePriceRange.Name = "ConfigUpdatePriceRange";
+            this.ConfigUpdatePriceRange.Size = new System.Drawing.Size(125, 27);
+            this.ConfigUpdatePriceRange.TabIndex = 4;
+            this.ConfigUpdatePriceRange.Text = "0,08";
             // 
-            // textBox5
+            // ConfigIntervalOfAnalysis
             // 
-            this.textBox5.Location = new System.Drawing.Point(163, 157);
-            this.textBox5.Name = "textBox5";
-            this.textBox5.Size = new System.Drawing.Size(125, 27);
-            this.textBox5.TabIndex = 5;
+            this.ConfigIntervalOfAnalysis.Location = new System.Drawing.Point(163, 157);
+            this.ConfigIntervalOfAnalysis.Name = "ConfigIntervalOfAnalysis";
+            this.ConfigIntervalOfAnalysis.Size = new System.Drawing.Size(125, 27);
+            this.ConfigIntervalOfAnalysis.TabIndex = 5;
+            this.ConfigIntervalOfAnalysis.Text = "3600,0";
             // 
-            // textBox6
+            // ConfigToken
             // 
-            this.textBox6.Location = new System.Drawing.Point(163, 190);
-            this.textBox6.Name = "textBox6";
-            this.textBox6.Size = new System.Drawing.Size(125, 27);
-            this.textBox6.TabIndex = 6;
+            this.ConfigToken.Location = new System.Drawing.Point(163, 190);
+            this.ConfigToken.Name = "ConfigToken";
+            this.ConfigToken.Size = new System.Drawing.Size(125, 27);
+            this.ConfigToken.TabIndex = 6;
+            this.ConfigToken.Text = "token)";
             // 
             // label1
             // 
@@ -105,67 +111,67 @@ namespace UI
             this.label1.TabIndex = 7;
             this.label1.Text = "Available balance";
             // 
-            // ConfigRequiredProfit
+            // label2
             // 
-            this.ConfigRequiredProfit.AutoSize = true;
-            this.ConfigRequiredProfit.Location = new System.Drawing.Point(12, 61);
-            this.ConfigRequiredProfit.Name = "ConfigRequiredProfit";
-            this.ConfigRequiredProfit.Size = new System.Drawing.Size(110, 20);
-            this.ConfigRequiredProfit.TabIndex = 8;
-            this.ConfigRequiredProfit.Text = "Required profit";
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(12, 61);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(110, 20);
+            this.label2.TabIndex = 8;
+            this.label2.Text = "Required profit";
             // 
-            // ConfigVolumeOfContracts
+            // label3
             // 
-            this.ConfigVolumeOfContracts.AutoSize = true;
-            this.ConfigVolumeOfContracts.Location = new System.Drawing.Point(12, 94);
-            this.ConfigVolumeOfContracts.Name = "ConfigVolumeOfContracts";
-            this.ConfigVolumeOfContracts.Size = new System.Drawing.Size(141, 20);
-            this.ConfigVolumeOfContracts.TabIndex = 9;
-            this.ConfigVolumeOfContracts.Text = "Volume of contracts";
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(12, 94);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(141, 20);
+            this.label3.TabIndex = 9;
+            this.label3.Text = "Volume of contracts";
             // 
-            // ConfigUpdatePriceRange
+            // label4
             // 
-            this.ConfigUpdatePriceRange.AutoSize = true;
-            this.ConfigUpdatePriceRange.Location = new System.Drawing.Point(12, 127);
-            this.ConfigUpdatePriceRange.Name = "ConfigUpdatePriceRange";
-            this.ConfigUpdatePriceRange.Size = new System.Drawing.Size(137, 20);
-            this.ConfigUpdatePriceRange.TabIndex = 10;
-            this.ConfigUpdatePriceRange.Text = "Update price range";
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(12, 127);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(137, 20);
+            this.label4.TabIndex = 10;
+            this.label4.Text = "Update price range";
             // 
-            // ConfigIntervalOfAnalysis
+            // label5
             // 
-            this.ConfigIntervalOfAnalysis.AutoSize = true;
-            this.ConfigIntervalOfAnalysis.Location = new System.Drawing.Point(12, 160);
-            this.ConfigIntervalOfAnalysis.Name = "ConfigIntervalOfAnalysis";
-            this.ConfigIntervalOfAnalysis.Size = new System.Drawing.Size(131, 20);
-            this.ConfigIntervalOfAnalysis.TabIndex = 11;
-            this.ConfigIntervalOfAnalysis.Text = "Interval of analysis";
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(12, 160);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(131, 20);
+            this.label5.TabIndex = 11;
+            this.label5.Text = "Interval of analysis";
             // 
-            // ConfigToken
+            // label6
             // 
-            this.ConfigToken.AutoSize = true;
-            this.ConfigToken.Location = new System.Drawing.Point(12, 193);
-            this.ConfigToken.Name = "ConfigToken";
-            this.ConfigToken.Size = new System.Drawing.Size(48, 20);
-            this.ConfigToken.TabIndex = 12;
-            this.ConfigToken.Text = "Token";
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(12, 193);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(48, 20);
+            this.label6.TabIndex = 12;
+            this.label6.Text = "Token";
             // 
             // TradeBotUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(302, 304);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.ConfigToken);
             this.Controls.Add(this.ConfigIntervalOfAnalysis);
             this.Controls.Add(this.ConfigUpdatePriceRange);
             this.Controls.Add(this.ConfigVolumeOfContracts);
             this.Controls.Add(this.ConfigRequiredProfit);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.textBox6);
-            this.Controls.Add(this.textBox5);
-            this.Controls.Add(this.textBox4);
-            this.Controls.Add(this.textBox3);
-            this.Controls.Add(this.textBox2);
             this.Controls.Add(this.ConfigAvailableBalance);
             this.Controls.Add(this.StartButton);
             this.Name = "TradeBotUI";
@@ -180,17 +186,17 @@ namespace UI
 
         private System.Windows.Forms.Button StartButton;
         private System.Windows.Forms.TextBox ConfigAvailableBalance;
-        private System.Windows.Forms.TextBox textBox2;
-        private System.Windows.Forms.TextBox textBox3;
-        private System.Windows.Forms.TextBox textBox4;
-        private System.Windows.Forms.TextBox textBox5;
-        private System.Windows.Forms.TextBox textBox6;
+        private System.Windows.Forms.TextBox ConfigRequiredProfit;
+        private System.Windows.Forms.TextBox ConfigVolumeOfContracts;
+        private System.Windows.Forms.TextBox ConfigUpdatePriceRange;
+        private System.Windows.Forms.TextBox ConfigIntervalOfAnalysis;
+        private System.Windows.Forms.TextBox ConfigToken;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label ConfigRequiredProfit;
-        private System.Windows.Forms.Label ConfigVolumeOfContracts;
-        private System.Windows.Forms.Label ConfigUpdatePriceRange;
-        private System.Windows.Forms.Label ConfigIntervalOfAnalysis;
-        private System.Windows.Forms.Label ConfigToken;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label6;
     }
 }
 

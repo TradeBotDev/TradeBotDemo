@@ -16,7 +16,7 @@ namespace Facade
             _logger = logger;
         }
 
-        public override async Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<Tradebot.Facade.FacadeService.v1.SubscribeBalanceResponse> responseStream, ServerCallContext context)
+        public override async Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<TradeBot.Facade.FacadeService.v1.SubscribeBalanceResponse> responseStream, ServerCallContext context)
         {
             using var response = clientTM.SubscribeBalance(request);
             while (await response.ResponseStream.MoveNext())
