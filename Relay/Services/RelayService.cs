@@ -16,12 +16,12 @@ using TradeBot.TradeMarket.TradeMarketService.v1;
 
 namespace Relay
 {
-    class Relay : RelayService.RelayServiceBase
+    public class Relay : RelayService.RelayServiceBase
     {
         private readonly ILogger<Relay> _logger;
         public Relay(ILogger<Relay> logger) => _logger = logger;
 
-        private ObservableCollection<Order> orders = new ObservableCollection<Order>();
+        private static ObservableCollection<Order> orders = new ObservableCollection<Order>();
 
         private bool IsStarted = true;
         private Config config;
@@ -57,6 +57,8 @@ namespace Relay
             return base.SubscribeLogs(request, responseStream, context);
         }
 
+
+        
         //ДОПИСАН
         public override async Task<TradeBot.Relay.RelayService.v1.AddOrderResponse> AddOrder(IAsyncStreamReader<TradeBot.Relay.RelayService.v1.AddOrderRequest> requestStream,
             ServerCallContext context)
@@ -68,6 +70,7 @@ namespace Relay
             orders.CollectionChanged += async (source, args) =>
             {
                 await writeToStreamAsync(stream, args.NewItems);
+                Console.WriteLine(args.NewItems);
             };
 
             //while (await requestStream.MoveNext())
@@ -94,8 +97,7 @@ namespace Relay
                 }); 
             }
         }
-
-        public async override Task SubscribeOrders(TradeBot.Relay.RelayService.v1.SubscribeOrdersRequest request, IServerStreamWriter<TradeBot.Relay.RelayService.v1.SubscribeOrdersResponse> responseStream, ServerCallContext context)
+        public async static void SubscribeToTM() 
         {
             GrpcChannel channel = GrpcChannel.ForAddress("https://localhost:5005");
             var trademarketclient = new TradeMarketService.TradeMarketServiceClient(channel);
@@ -122,5 +124,9 @@ namespace Relay
                 Console.WriteLine($"Получен товар {call.ResponseStream.Current.Response.Order.Id} из TradeMarket");
             }
         }
+        //public async override Task SubscribeOrders(TradeBot.Relay.RelayService.v1.SubscribeOrdersRequest request, IServerStreamWriter<TradeBot.Relay.RelayService.v1.SubscribeOrdersResponse> responseStream, ServerCallContext context)
+        //{
+           
+        //}
     }
 }
