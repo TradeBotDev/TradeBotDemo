@@ -1,6 +1,7 @@
 ﻿using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Threading.Tasks;
 using TradeBot.Relay.RelayService.v1;
 using static TradeBot.Relay.RelayService.v1.RelayService;
@@ -18,11 +19,35 @@ namespace Facade
 
         public override Task<StartBotResponse> StartBot(StartBotRequest request, ServerCallContext context)
         {
-            var response = clientRelay.StartBot(new StartBotRequest { Config = request.Config });
-            return Task.FromResult(new StartBotResponse
+            System.Console.WriteLine("Вызов метода StartBot с параметром: " + request.Config.ToString());
+
+            try
             {
-                Response = response.Response
-            });
+
+                var response = clientRelay.StartBot(new StartBotRequest { Config = request.Config });
+
+                System.Console.WriteLine("Возврат значения из StartBot: " + response.Response.ToString());
+
+                return Task.FromResult(new StartBotResponse
+                {
+                    Response = response.Response
+                });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Ошибка работы метода StarBot");
+                Console.WriteLine("Exception: " + e.Message);
+                var defaultResponse = new TradeBot.Common.v1.DefaultResponse
+                {
+                    Code = TradeBot.Common.v1.ReplyCode.Failure,
+                    Message = "Exception"
+                };
+                return Task.FromResult(new StartBotResponse
+                {
+                    Response = defaultResponse
+                });
+            }
+
         }
 
         public override async Task SubscribeLogs(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
