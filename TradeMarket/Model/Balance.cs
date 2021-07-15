@@ -15,7 +15,14 @@ namespace TradeMarket.Model
         public static IOrderedEnumerable<Balance> AllCurrenciesBalance;
         #endregion
 
-        public string Currency { get; set; }
+        private Currency _currency;
+
+        public string Currency
+        {
+            get => _currency.Name;
+            set => _currency.Name = value;
+
+        }
 
         public double Value { get; set; }
 

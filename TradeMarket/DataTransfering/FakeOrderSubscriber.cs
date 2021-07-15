@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
+using TradeBot.Common.v1;
 using TradeMarket.Model;
 
 namespace TradeMarket.DataTransfering
@@ -35,10 +36,10 @@ namespace TradeMarket.DataTransfering
                 RemovePrice = 15D,
                 LastUpdateDate = DateTime.Now.AddDays(3),
                 RemoveDate = DateTime.Now.AddDays(4),
-                Signature = new TradeBot.Common.OrderSignature
+                Signature = new OrderSignature
                 {
-                    Status = TradeBot.Common.OrderStatus.Open,
-                    Type = TradeBot.Common.OrderType.Buy
+                    Status = OrderStatus.Open,
+                    Type = OrderType.Buy
                 }
             },
             new FullOrder
@@ -49,10 +50,10 @@ namespace TradeMarket.DataTransfering
                 RemovePrice = 15D,
                 LastUpdateDate = DateTime.Now.AddDays(3),
                 RemoveDate = DateTime.Now.AddDays(4),
-                Signature = new TradeBot.Common.OrderSignature
+                Signature = new OrderSignature
                 {
-                    Status = TradeBot.Common.OrderStatus.Open,
-                    Type = TradeBot.Common.OrderType.Buy
+                    Status = OrderStatus.Open,
+                    Type = OrderType.Buy
                 }
             },
             new FullOrder
@@ -63,10 +64,10 @@ namespace TradeMarket.DataTransfering
                 RemovePrice = 15D,
                 LastUpdateDate = DateTime.Now.AddDays(3),
                 RemoveDate = DateTime.Now.AddDays(4),
-                Signature = new TradeBot.Common.OrderSignature
+                Signature = new OrderSignature
                 {
-                    Status = TradeBot.Common.OrderStatus.Open,
-                    Type = TradeBot.Common.OrderType.Buy
+                    Status = OrderStatus.Open,
+                    Type = OrderType.Buy
                 }
             },
             new FullOrder
@@ -77,10 +78,10 @@ namespace TradeMarket.DataTransfering
                 RemovePrice = 15D,
                 LastUpdateDate = DateTime.Now.AddDays(3),
                 RemoveDate = DateTime.Now.AddDays(4),
-                Signature = new TradeBot.Common.OrderSignature
+                Signature = new OrderSignature
                 {
-                    Status = TradeBot.Common.OrderStatus.Open,
-                    Type = TradeBot.Common.OrderType.Buy
+                    Status = OrderStatus.Open,
+                    Type = OrderType.Buy
                 }
             },
             new FullOrder
@@ -91,10 +92,10 @@ namespace TradeMarket.DataTransfering
                 RemovePrice = 15D,
                 LastUpdateDate = DateTime.Now.AddDays(3),
                 RemoveDate = DateTime.Now.AddDays(4),
-                Signature = new TradeBot.Common.OrderSignature
+                Signature = new OrderSignature
                 {
-                    Status = TradeBot.Common.OrderStatus.Open,
-                    Type = TradeBot.Common.OrderType.Buy
+                    Status = OrderStatus.Open,
+                    Type = OrderType.Buy
                 }
             },
             new FullOrder
@@ -105,10 +106,10 @@ namespace TradeMarket.DataTransfering
                 RemovePrice = 15D,
                 LastUpdateDate = DateTime.Now.AddDays(3),
                 RemoveDate = DateTime.Now.AddDays(4),
-                Signature = new TradeBot.Common.OrderSignature
+                Signature = new OrderSignature
                 {
-                    Status = TradeBot.Common.OrderStatus.Open,
-                    Type = TradeBot.Common.OrderType.Buy
+                    Status = OrderStatus.Open,
+                    Type = OrderType.Buy
                 }
             },
             new FullOrder
@@ -119,10 +120,10 @@ namespace TradeMarket.DataTransfering
                 RemovePrice = 15D,
                 LastUpdateDate = DateTime.Now.AddDays(3),
                 RemoveDate = DateTime.Now.AddDays(4),
-                Signature = new TradeBot.Common.OrderSignature
+                Signature = new OrderSignature
                 {
-                    Status = TradeBot.Common.OrderStatus.Open,
-                    Type = TradeBot.Common.OrderType.Buy
+                    Status = OrderStatus.Open,
+                    Type = OrderType.Buy
                 }
             }
         };
