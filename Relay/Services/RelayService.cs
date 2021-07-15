@@ -65,8 +65,9 @@ namespace Relay
             return response;
         }
 
-        public override async Task SubscribeOrders(TradeBot.Relay.RelayService.v1.SubscribeOrdersRequest request, IServerStreamWriter<TradeBot.Relay.RelayService.v1.SubscribeOrdersResponse> responseStream, ServerCallContext context)
+        public override Task SubscribeOrders(TradeBot.Relay.RelayService.v1.SubscribeOrdersRequest request, IServerStreamWriter<TradeBot.Relay.RelayService.v1.SubscribeOrdersResponse> responseStream, ServerCallContext context)
         {
+            return base.SubscribeOrders(request, responseStream, context);
 
             //var tradeMarketClient = new FormerService.FormerServiceClient(Channels.TradeMarketChannel);
             //var orderSignature = new OrderSignature
