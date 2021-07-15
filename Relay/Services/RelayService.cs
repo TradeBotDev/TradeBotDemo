@@ -70,13 +70,13 @@ namespace Relay
                 await writeToStreamAsync(stream, args.NewItems);
             };
 
-            while (await requestStream.MoveNext())
-            {
-                var request = new TradeBot.Algorithm.AlgorithmService.v1.AddOrderRequest();
-                request.Order = requestStream.Current.Order;
-                await stream.RequestStream.WriteAsync(request);
-                Console.WriteLine($"Товар {request.Order.Id} отправлен алгоритму");
-            }
+            //while (await requestStream.MoveNext())
+            //{
+            //    var request = new TradeBot.Algorithm.AlgorithmService.v1.AddOrderRequest();
+            //    request.Order = requestStream.Current.Order;
+            //    await stream.RequestStream.WriteAsync(request);
+            //    Console.WriteLine($"Товар {request.Order.Id} отправлен алгоритму");
+            //}
             //await stream.RequestStream.CompleteAsync();
 
             var response = new TradeBot.Relay.RelayService.v1.AddOrderResponse();
