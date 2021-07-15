@@ -2,12 +2,12 @@ using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
-using Tradebot.Facade.FacadeService.v1;
-using static Tradebot.Facade.FacadeService.v1.FacadeService;
+using TradeBot.Facade.FacadeService.v1;
+using static TradeBot.Facade.FacadeService.v1.FacadeService;
 
 namespace Facade
 {
-    public class FacadeTMService : Tradebot.Facade.FacadeService.v1.FacadeService.FacadeServiceBase
+    public class FacadeTMService : TradeBot.Facade.FacadeService.v1.FacadeService.FacadeServiceBase
     {
         private FacadeServiceClient clientTM = new FacadeServiceClient(GrpcChannel.ForAddress("https://localhost:5005"));
         private readonly ILogger<FacadeTMService> _logger;
