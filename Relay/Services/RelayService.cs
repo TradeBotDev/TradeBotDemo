@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using TradeBot.Common;
 using TradeBot.Common.v1;
 using TradeBot.Relay.RelayService.v1;
+using TradeBot.Algorithm.AlgorithmService.v1;
+using TradeBot.Former.FormerService.v1;
 
 namespace Relay
 {
@@ -17,35 +19,72 @@ namespace Relay
         public Relay(ILogger<Relay> logger) => _logger = logger;
 
         private bool IsStarted = true;
+        private Config config;
 
+        //ДОПИСАН
         public override Task<StartBotResponse> StartBot(StartBotRequest request, ServerCallContext context)
         {
-            StartBotResponse result = new StartBotResponse
-            {
-                
-            };
-
+            StartBotResponse result = new StartBotResponse();
+            result.Response.Code = ReplyCode.Succeed;
+            if (IsStarted) result.Response.Message = "Бот успешно запущен";
             return Task.FromResult<StartBotResponse>(result);
         }
 
-        public override Task<TradeBot.Relay.RelayService.v1.UpdateServerConfigResponse> UpdateServerConfig(TradeBot.Relay.RelayService.v1.UpdateServerConfigRequest request, ServerCallContext context)
+        //ДОПИСАН
+        public override Task<TradeBot.Relay.RelayService.v1.UpdateServerConfigResponse> UpdateServerConfig(TradeBot.Relay.RelayService.v1.UpdateServerConfigRequest request,
+            ServerCallContext context)
         {
-            return base.UpdateServerConfig(request, context);
+            this.config = request.Request.Config;
+            var response = new TradeBot.Relay.RelayService.v1.UpdateServerConfigResponse();
+            return Task.FromResult(response);
         }
 
-        public override Task SubscribeLogs(TradeBot.Relay.RelayService.v1.SubscribeLogsRequest request, IServerStreamWriter<TradeBot.Relay.RelayService.v1.SubscribeLogsResponse> responseStream, ServerCallContext context)
+        public override Task SubscribeLogs(TradeBot.Relay.RelayService.v1.SubscribeLogsRequest request,
+            IServerStreamWriter<TradeBot.Relay.RelayService.v1.SubscribeLogsResponse> responseStream,
+            ServerCallContext context)
         {
             return base.SubscribeLogs(request, responseStream, context);
         }
 
-        public override Task<AddOrderResponse> AddOrder(IAsyncStreamReader<AddOrderRequest> requestStream, ServerCallContext context)
+        //ДОПИСАН
+        public override async Task<TradeBot.Relay.RelayService.v1.AddOrderResponse> AddOrder(IAsyncStreamReader<TradeBot.Relay.RelayService.v1.AddOrderRequest> requestStream,
+            ServerCallContext context)
         {
-            return base.AddOrder(requestStream, context);
+            GrpcChannel channel = GrpcChannel.ForAddress("https://localhost:5001");
+            var client = new AlgorithmService.AlgorithmServiceClient(channel);
+            var stream = client.AddOrder();
+            while (await requestStream.MoveNext())
+            {
+                var request = new TradeBot.Algorithm.AlgorithmService.v1.AddOrderRequest();
+                request.Order = requestStream.Current.Order;
+                await stream.RequestStream.WriteAsync(request);
+            }
+            await stream.RequestStream.CompleteAsync();
+
+            var response = new TradeBot.Relay.RelayService.v1.AddOrderResponse();
+            return response;
         }
 
-        public override Task SubscribeOrders(TradeBot.Relay.RelayService.v1.SubscribeOrdersRequest request, IServerStreamWriter<TradeBot.Relay.RelayService.v1.SubscribeOrdersResponse> responseStream, ServerCallContext context)
+        public override async Task SubscribeOrders(TradeBot.Relay.RelayService.v1.SubscribeOrdersRequest request, IServerStreamWriter<TradeBot.Relay.RelayService.v1.SubscribeOrdersResponse> responseStream, ServerCallContext context)
         {
-            return base.SubscribeOrders(request, responseStream, context);
+
+            //var tradeMarketClient = new FormerService.FormerServiceClient(Channels.TradeMarketChannel);
+            //var orderSignature = new OrderSignature
+            //{
+            //    Status = OrderStatus.Open,
+            //    Type = OrderType.Buy
+            //};
+            //var request = new SubscribeOrdersRequest()
+            //{
+            //    Signature = orderSignature
+            //};
+
+            //using var call = tradeMarketClient.SubscribeOrders(request);
+            //while (await call.ResponseStream.MoveNext())
+            //{
+            //    Former.UpdateCurrentOrders(call.ResponseStream.Current);
+            //}
+            //TODO выход из цикла и дальнейшее закрытие канала
         }
     }
 }
