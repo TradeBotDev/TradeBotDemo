@@ -5,74 +5,117 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TradeBot.Relay.Facade;
-using TradeBot.Algorithm.Relay;
 using TradeBot.Common;
+using TradeBot.Common.v1;
+using TradeBot.Relay.RelayService.v1;
+using TradeBot.Algorithm.AlgorithmService.v1;
+using TradeBot.Former.FormerService.v1;
+using System.Collections.ObjectModel;
+using System.Collections;
+using TradeBot.TradeMarket.TradeMarketService.v1;
 
 namespace Relay
 {
-    class RelayService : SendToRelay.SendToRelayBase
+    class Relay : RelayService.RelayServiceBase
     {
-        private readonly ILogger<RelayService> _logger;
-        public RelayService(ILogger<RelayService> logger) => _logger = logger;
+        private readonly ILogger<Relay> _logger;
+        public Relay(ILogger<Relay> logger) => _logger = logger;
 
-        public override Task<StartBotReply> StartBot(StartBotRequest request, ServerCallContext context)
+        private ObservableCollection<Order> orders = new ObservableCollection<Order>();
+
+        private bool IsStarted = true;
+        private Config config;
+
+        //ДОПИСАН
+        public override Task<StartBotResponse> StartBot(StartBotRequest request, ServerCallContext context)
         {
-            Random rnd = new Random(); //пока так
-
-            using var channel = GrpcChannel.ForAddress("https://localhost:5001");
-            var client = new SendToAlgorithm.SendToAlgorithmClient(channel);
-
-            var getOrdersRequest = new GetOrdersRequest();
-
-            var configRequest = new GetConfigRequest
+            StartBotResponse result = new StartBotResponse();
+            IsStarted = !IsStarted;
+            result.Response.Code = ReplyCode.Succeed;
+            if (IsStarted) result.Response.Message = "Бот успешно запущен";
+            else
             {
-                Config = new Config
-                {
-                    TotalBalance = rnd.Next(100, 1000),
-                    AvaibleBalance = rnd.Next(25, 100),
-                    RequiredProfit = 25,
-                    SlotFee = 0.25,
-                    OrderUpdatePriceRange = 15,
-                    AlgorithmInfo = new AlgorithmInfo
-                    {
-                        Interval = new Google.Protobuf.WellKnownTypes.Timestamp(),
-                        PointSplitCount = 1000
-                    }
-                }
-            };
-
-            //client.GetOrders(); //пустышка!
-            client.GetConfigAsync(configRequest, null);
-
-            DefaultReply reply = new DefaultReply
-            {
-                Code = ReplyCode.Succeed,
-                Message = "Бот запущен успешно"
-            };
-
-            StartBotReply result = new StartBotReply
-            {
-                Reply = reply
-            };
-
-            return Task.FromResult<StartBotReply>(result);
+                result.Response.Message = "Бот выключен";
+            }
+            return Task.FromResult<StartBotResponse>(result);
         }
 
-        public override async Task<SubscribeLogsReply> SubscribeLogs(IAsyncStreamReader<SubscribeLogsRequest> request, ServerCallContext context)
+        //ДОПИСАН
+        public override Task<TradeBot.Relay.RelayService.v1.UpdateServerConfigResponse> UpdateServerConfig(TradeBot.Relay.RelayService.v1.UpdateServerConfigRequest request,
+            ServerCallContext context)
         {
-            while (await request.MoveNext())
-            {
-                //пока ничего
-            }
+            this.config = request.Request.Config;
+            var response = new TradeBot.Relay.RelayService.v1.UpdateServerConfigResponse();
+            return Task.FromResult(response);
+        }
 
-            DefaultReply reply = new DefaultReply
+        public override Task SubscribeLogs(TradeBot.Relay.RelayService.v1.SubscribeLogsRequest request,
+            IServerStreamWriter<TradeBot.Relay.RelayService.v1.SubscribeLogsResponse> responseStream,
+            ServerCallContext context)
+        {
+            return base.SubscribeLogs(request, responseStream, context);
+        }
+
+        //ДОПИСАН
+        public override async Task<TradeBot.Relay.RelayService.v1.AddOrderResponse> AddOrder(IAsyncStreamReader<TradeBot.Relay.RelayService.v1.AddOrderRequest> requestStream,
+            ServerCallContext context)
+        {
+            GrpcChannel channel = GrpcChannel.ForAddress("https://localhost:5001");
+            var client = new AlgorithmService.AlgorithmServiceClient(channel);
+            var stream = client.AddOrder();
+            orders.CollectionChanged += async (source, args) =>
             {
-                Code = ReplyCode.Succeed,
-                Message = "Подписка на логи совершена"
+                await writeToStreamAsync(stream, args.NewItems);
+            };
+            while (await requestStream.MoveNext())
+            {
+                var request = new TradeBot.Algorithm.AlgorithmService.v1.AddOrderRequest();
+                request.Order = requestStream.Current.Order;
+                await stream.RequestStream.WriteAsync(request);
+            }
+            //await stream.RequestStream.CompleteAsync();
+
+            var response = new TradeBot.Relay.RelayService.v1.AddOrderResponse();
+            return response;
+        }
+
+        private async Task writeToStreamAsync(AsyncClientStreamingCall<TradeBot.Algorithm.AlgorithmService.v1.AddOrderRequest, TradeBot.Algorithm.AlgorithmService.v1.AddOrderResponse> stream, IList newItems)
+        {
+            //TODO тут вот пока синхронно
+            foreach (var order in newItems)
+            {
+                await stream.RequestStream.WriteAsync(new TradeBot.Algorithm.AlgorithmService.v1.AddOrderRequest
+                {
+                    Order = order as Order
+                }); 
+            }
+        }
+
+
+        public async  override Task SubscribeOrders(TradeBot.Relay.RelayService.v1.SubscribeOrdersRequest request, IServerStreamWriter<TradeBot.Relay.RelayService.v1.SubscribeOrdersResponse> responseStream, ServerCallContext context)
+        {
+            GrpcChannel channel = GrpcChannel.ForAddress("https://localhost:5005");
+            var trademarketclient = new TradeMarketService.TradeMarketServiceClient(channel);
+            var orderSignature = new OrderSignature
+            {
+                Status = OrderStatus.Closed,
+                //TODO пока только на продажу
+                Type = OrderType.Sell
+            };
+            var orderRequest = new TradeBot.TradeMarket.TradeMarketService.v1.SubscribeOrdersRequest()
+            {
+                Request = new TradeBot.Common.v1.SubscribeOrdersRequest
+                {
+                    Signature = orderSignature
+                 }
             };
 
-            return new SubscribeLogsReply { Reply = reply };
+            using var call = trademarketclient.SubscribeOrders(orderRequest);
+            while (await call.ResponseStream.MoveNext())
+            {
+                orders.Add(call.ResponseStream.Current.Response.Order);
+            }
+           
         }
     }
 }
