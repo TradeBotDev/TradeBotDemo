@@ -1,10 +1,12 @@
 ﻿using Grpc.Core;
-using TradeBot.Former.FormerService.v1;
 using TradeBot.Common.v1;
-using SubscribeOrdersRequest = TradeBot.Former.FormerService.v1.SubscribeOrdersRequest;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System;
+using Grpc.Net.Client;
+using TradeBot.Algorithm.AlgorithmService.v1;
+using TradeBot.TradeMarket.TradeMarketService.v1;
+using SubscribeOrdersRequest = TradeBot.TradeMarket.TradeMarketService.v1.SubscribeOrdersRequest;
 
 namespace Former.Services
 {
@@ -13,9 +15,10 @@ namespace Former.Services
         static List<string> SuccessfulOrders = new();
         public static async void ObserveAlgorithm()
         {
-            var algorithmClient = new FormerService.FormerServiceClient(Channels.AlgorithmChannel);
+            await Task.Delay(10000);
+            using var AlgorithmChannel = GrpcChannel.ForAddress("https://localhost:5001");
+            var algorithmClient = new AlgorithmService.AlgorithmServiceClient(AlgorithmChannel);
             using var call = algorithmClient.SubscribePurchasePrice(new SubscribePurchasePriceRequest());
-
             while (await call.ResponseStream.MoveNext())
             {
                 Former.FormShoppingList(call.ResponseStream.Current.PurchasePrice);
@@ -24,7 +27,7 @@ namespace Former.Services
         }
         public static async void ObserveTradeMarket()
         {
-            var tradeMarketClient = new FormerService.FormerServiceClient(Channels.TradeMarketChannel);
+            var tradeMarketClient = new TradeMarketService.TradeMarketServiceClient(Channels.TradeMarketChannel);
             var orderSignature = new OrderSignature
             {
                 Status = OrderStatus.Open,
@@ -32,19 +35,24 @@ namespace Former.Services
             };
             var request = new SubscribeOrdersRequest()
             {
-                Signature = orderSignature
-            };
+                Request = new TradeBot.Common.v1.SubscribeOrdersRequest()
+                {
+                    Signature = orderSignature
+                }
 
+            };
+            await Task.Delay(10000);
             using var call = tradeMarketClient.SubscribeOrders(request);
             while (await call.ResponseStream.MoveNext())
             {
-                Former.UpdateCurrentOrders(call.ResponseStream.Current);
+                Former.UpdateCurrentOrders(call.ResponseStream.Current.Response);
             }
             //TODO выход из цикла и дальнейшее закрытие канала
         }
         public static async Task SendShopingList(List<string> shoppingList)
         {
-            var client = new FormerService.FormerServiceClient(Channels.TradeMarketChannel);
+            SuccessfulOrders.Clear();
+            var client = new TradeMarketService.TradeMarketServiceClient(Channels.TradeMarketChannel);
             CloseOrderResponse response;
             foreach (var order in shoppingList)
             {
@@ -62,7 +70,7 @@ namespace Former.Services
         }
         public static async void PlaceSuccessfulOrders()
         {
-            var client = new FormerService.FormerServiceClient(Channels.TradeMarketChannel);
+            var client = new TradeMarketService.TradeMarketServiceClient(Channels.TradeMarketChannel);
             PlaceOrderResponse response;
             foreach (var order in SuccessfulOrders)
             {
@@ -70,9 +78,9 @@ namespace Former.Services
                 Console.Write("\nPlace order {0}", order);
                 if (response.Response.Code == ReplyCode.Succeed)
                 {
-                    Console.Write(" ...order placed");
+                    Console.Write(" ...order placed\n");
                 }
-                else Console.Write(" ...order not placed");
+                else Console.Write(" ...order not placed\n");
             }
         }
 

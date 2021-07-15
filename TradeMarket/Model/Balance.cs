@@ -28,7 +28,7 @@ namespace TradeMarket.Model
 
         public Balance(string currency, double value)
         {
-            Currency = currency;
+            _currency = new Currency(currency);
             Value = value;
         }
 
