@@ -19,8 +19,7 @@ namespace Algorithm.Services
                 DataCollector.orders.Add(order.Order);
                 Console.WriteLine("Got something");
             }
-            AddOrderResponse response = new AddOrderResponse();
-            return response;
+            return new AddOrderResponse();
         }
     }
 }
