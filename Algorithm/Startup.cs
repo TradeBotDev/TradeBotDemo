@@ -32,7 +32,7 @@ namespace Algorithm
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<PriceSenderService>();
+                endpoints.MapGrpcService<AlgorithmService>();
 
                 endpoints.MapGet("/", async context =>
                 {
