@@ -25,7 +25,8 @@ namespace TradeMarket
                 Task[] tasks =
                 {
                     FakeOrderSubscriber.GetInstance().Simulate(),
-                    FakeBalanceSubscriber.GetInstance().Simulate()
+                    FakeBalanceSubscriber.GetInstance().Simulate(),
+                    FakeSlotSubscriber.GetInstance().Simulate()
                 };
                 await Task.WhenAll(tasks);
             }

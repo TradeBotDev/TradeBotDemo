@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Common;
+using TradeBot.Common.v1;
 
 namespace TradeMarket.Model
 {
