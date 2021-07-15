@@ -5,74 +5,47 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TradeBot.Relay.Facade;
-using TradeBot.Algorithm.Relay;
 using TradeBot.Common;
+using TradeBot.Common.v1;
+using TradeBot.Relay.RelayService.v1;
 
 namespace Relay
 {
-    class RelayService : SendToRelay.SendToRelayBase
+    class Relay : RelayService.RelayServiceBase
     {
-        private readonly ILogger<RelayService> _logger;
-        public RelayService(ILogger<RelayService> logger) => _logger = logger;
+        private readonly ILogger<Relay> _logger;
+        public Relay(ILogger<Relay> logger) => _logger = logger;
 
-        public override Task<StartBotReply> StartBot(StartBotRequest request, ServerCallContext context)
+        private bool IsStarted = true;
+
+        public override Task<StartBotResponse> StartBot(StartBotRequest request, ServerCallContext context)
         {
-            Random rnd = new Random(); //пока так
-
-            using var channel = GrpcChannel.ForAddress("https://localhost:5001");
-            var client = new SendToAlgorithm.SendToAlgorithmClient(channel);
-
-            var getOrdersRequest = new GetOrdersRequest();
-
-            var configRequest = new GetConfigRequest
+            StartBotResponse result = new StartBotResponse
             {
-                Config = new Config
-                {
-                    TotalBalance = rnd.Next(100, 1000),
-                    AvaibleBalance = rnd.Next(25, 100),
-                    RequiredProfit = 25,
-                    SlotFee = 0.25,
-                    OrderUpdatePriceRange = 15,
-                    AlgorithmInfo = new AlgorithmInfo
-                    {
-                        Interval = new Google.Protobuf.WellKnownTypes.Timestamp(),
-                        PointSplitCount = 1000
-                    }
-                }
+                
             };
 
-            //client.GetOrders(); //пустышка!
-            client.GetConfigAsync(configRequest, null);
-
-            DefaultReply reply = new DefaultReply
-            {
-                Code = ReplyCode.Succeed,
-                Message = "Бот запущен успешно"
-            };
-
-            StartBotReply result = new StartBotReply
-            {
-                Reply = reply
-            };
-
-            return Task.FromResult<StartBotReply>(result);
+            return Task.FromResult<StartBotResponse>(result);
         }
 
-        public override async Task<SubscribeLogsReply> SubscribeLogs(IAsyncStreamReader<SubscribeLogsRequest> request, ServerCallContext context)
+        public override Task<TradeBot.Relay.RelayService.v1.UpdateServerConfigResponse> UpdateServerConfig(TradeBot.Relay.RelayService.v1.UpdateServerConfigRequest request, ServerCallContext context)
         {
-            while (await request.MoveNext())
-            {
-                //пока ничего
-            }
+            return base.UpdateServerConfig(request, context);
+        }
 
-            DefaultReply reply = new DefaultReply
-            {
-                Code = ReplyCode.Succeed,
-                Message = "Подписка на логи совершена"
-            };
+        public override Task SubscribeLogs(TradeBot.Relay.RelayService.v1.SubscribeLogsRequest request, IServerStreamWriter<TradeBot.Relay.RelayService.v1.SubscribeLogsResponse> responseStream, ServerCallContext context)
+        {
+            return base.SubscribeLogs(request, responseStream, context);
+        }
 
-            return new SubscribeLogsReply { Reply = reply };
+        public override Task<AddOrderResponse> AddOrder(IAsyncStreamReader<AddOrderRequest> requestStream, ServerCallContext context)
+        {
+            return base.AddOrder(requestStream, context);
+        }
+
+        public override Task SubscribeOrders(TradeBot.Relay.RelayService.v1.SubscribeOrdersRequest request, IServerStreamWriter<TradeBot.Relay.RelayService.v1.SubscribeOrdersResponse> responseStream, ServerCallContext context)
+        {
+            return base.SubscribeOrders(request, responseStream, context);
         }
     }
 }
