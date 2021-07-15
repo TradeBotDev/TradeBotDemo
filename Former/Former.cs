@@ -9,8 +9,8 @@ namespace Former
     public class Former
     {
         private static List<SubscribeOrdersResponse> CurrentBuyOrders = new();
-        private static List<string> ShoppingList = new();
         public static TradeBot.Common.v1.Config config;
+        private static Dictionary<string, double> ShoppingList = new();
 
         public static async void FormShoppingList(double AvgPrice)
         {
@@ -18,7 +18,7 @@ namespace Former
             Console.WriteLine("Получено от алгоритма: " + AvgPrice);
             foreach (var order in CurrentBuyOrders)
             {
-                if (order.Order.Price <= AvgPrice) ShoppingList.Add(order.Order.Id);
+                if (order.Order.Price <= AvgPrice) ShoppingList.Add(order.Order.Id, AvgPrice + config.SlotFee + config.RequiredProfit);
             }
             Console.Write("\nСформировал список необходимых ордеров: \n{ ");
             foreach (var elem in ShoppingList)

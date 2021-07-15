@@ -3,7 +3,6 @@ using Grpc.Net.Client;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using TradeBot.Common;
 using TradeBot.Former.FormerService.v1;
 
 namespace Former
