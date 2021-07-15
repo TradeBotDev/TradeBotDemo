@@ -2,14 +2,14 @@
 using Grpc.Net.Client;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
-using TradeBot.Relay.StarterService.v1;
-using static TradeBot.Relay.StarterService.v1.Starter;
+using TradeBot.Relay.RelayService.v1;
+using static TradeBot.Relay.RelayService.v1.RelayService;
 
 namespace Facade
 {
-    public class FacadeRelayService : TradeBot.Relay.StarterService.v1.Starter.StarterBase
+    public class FacadeRelayService : TradeBot.Relay.RelayService.v1.RelayService.RelayServiceBase
     {
-        private StarterClient clientRelay = new StarterClient(GrpcChannel.ForAddress("https://localhost:5004"));
+        private RelayServiceClient clientRelay = new RelayServiceClient(GrpcChannel.ForAddress("https://localhost:5004"));
         private readonly ILogger<FacadeRelayService> _logger;
         public FacadeRelayService(ILogger<FacadeRelayService> logger)
         {
@@ -23,6 +23,19 @@ namespace Facade
             {
                 Response = response.Response
             });
+        }
+
+        public override async Task SubscribeLogs(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
+        {
+            var response = clientRelay.SubscribeLogs(request);
+
+            while (await response.ResponseStream.MoveNext())
+            {
+                await responseStream.WriteAsync(new SubscribeLogsResponse
+                {
+                    Response = response.ResponseStream.Current.Response
+                });
+            }
         }
         /*
          * пока не удалять, мб пригодиться

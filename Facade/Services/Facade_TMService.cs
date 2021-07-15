@@ -2,29 +2,28 @@ using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
-using TradeMarket.Facade.UserInfoService.v1;
-using static TradeMarket.Facade.UserInfoService.v1.UserInfoService;
+using TradeMarket.Facade.FacadeService.v1;
+using static TradeMarket.Facade.FacadeService.v1.FacadeService;
 
 namespace Facade
 {
-    public class FacadeTMService : TradeMarket.Facade.UserInfoService.v1.UserInfoService.UserInfoServiceBase
+    public class FacadeTMService : TradeMarket.Facade.FacadeService.v1.FacadeService.FacadeServiceBase
     {
-        private UserInfoServiceClient clientTM = new UserInfoServiceClient(GrpcChannel.ForAddress("https://localhost:5005"));
+        private FacadeServiceClient clientTM = new FacadeServiceClient(GrpcChannel.ForAddress("https://localhost:5005"));
         private readonly ILogger<FacadeTMService> _logger;
         public FacadeTMService(ILogger<FacadeTMService> logger)
         {
             _logger = logger;
         }
 
-        public override async Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<SubscribeBalanceResponse> responseStream, ServerCallContext context)
+        public override async Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<TradeMarket.Facade.FacadeService.v1.SubscribeBalanceResponse> responseStream, ServerCallContext context)
         {
             using var response = clientTM.SubscribeBalance(request);
             while (await response.ResponseStream.MoveNext())
             {
                 await responseStream.WriteAsync(new SubscribeBalanceResponse
                 {
-                    Currency = response.ResponseStream.Current.Currency,
-                    Value = response.ResponseStream.Current.Value
+                    Response = response.ResponseStream.Current.Response
                 });
             }
         }
@@ -48,6 +47,27 @@ namespace Facade
                 await responseStream.WriteAsync(new SlotsResponse
                 {
                     SlotName = response.ResponseStream.Current.SlotName
+                });
+            }
+        }
+        public override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request, ServerCallContext context)
+        {
+            var response = clientTM.UpdateServerConfig(request);
+
+            return Task.FromResult(new UpdateServerConfigResponse
+            { 
+                Response= response.Response
+            });
+
+        }
+        public override async Task SubscribeLogs(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
+        {
+            using var response = clientTM.SubscribeLogs(request);
+            while(await response.ResponseStream.MoveNext())
+            {
+                await responseStream.WriteAsync(new SubscribeLogsResponse
+                { 
+                    Response = response.ResponseStream.Current.Response
                 });
             }
         }
