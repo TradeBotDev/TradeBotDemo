@@ -8,6 +8,10 @@
     <Protobuf Include="Protos\greet.proto" GrpcServices="Server" />
     <Protobuf Link ="Protos/trademarket.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/trademarket/trademarket_service/v1/trademarket.proto" GrpcServices="Both" />
     <Protobuf Link ="Protos/common.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/common/v1/common.proto" GrpcServices="Both" />
+<<<<<<< HEAD
+=======
+
+>>>>>>> 602bee8e3e782282c83059a41cbd38adb9477ac9
 
 
 
