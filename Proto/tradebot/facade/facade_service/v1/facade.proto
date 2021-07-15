@@ -1,5 +1,5 @@
 ﻿syntax = "proto3";
-option csharp_namespace = "Tradebot.Facade.FacadeService.v1";
+option csharp_namespace = "TradeBot.Facade.FacadeService.v1";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 
