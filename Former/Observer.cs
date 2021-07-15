@@ -45,7 +45,7 @@ namespace Former.Services
             using var call = tradeMarketClient.SubscribeOrders(request);
             while (await call.ResponseStream.MoveNext())
             {
-                Former.UpdateCurrentOrders(call.ResponseStream.Current.Response);
+                Former.UpdateCurrentOrders(call.ResponseStream.Current);
             }
             //TODO выход из цикла и дальнейшее закрытие канала
         }
