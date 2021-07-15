@@ -2,6 +2,7 @@
 
 option csharp_namespace = "TradeBot.Former.FormerService.v1";
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
 import "tradebot/common/v1/common.proto";
 package tradebot.former.former_service.v1;
 
@@ -20,17 +21,32 @@ service FormerService{
 		Подписывается на ордера выбранного типа
 	*/
 	rpc SubscribeOrders(SubscribeOrdersRequest) returns (stream SubscribeOrdersResponse);
+	/*
+		подписка на ответ алгоритма
+	*/
+	rpc SubscribePurchasePrice (SubscribePurchasePriceRequest) returns (stream SubscribePurchasePriceResponse);
+	/*
+		Клиент говорит обновиться серверу
+	*/
+	rpc UpdateServerConfig (UpdateServerConfigRequest) returns (UpdateServerConfigResponse);
 
 }
 
-message SubscribeOrdersRequest{
-	tradebot.common.v1.SubscribeOrdersRequest request = 1;
-	
+message UpdateServerConfigRequest{
+	tradebot.common.v1.Config request = 1;
 }
 
-message SubscribeOrdersResponse{
-	tradebot.common.v1.SubscribeOrdersResponse response = 1;
+message UpdateServerConfigResponse{
+	google.protobuf.Empty empty = 1;
+}
 
+message SubscribePurchasePriceRequest
+{
+	google.protobuf.Empty empty = 1;
+}
+message SubscribePurchasePriceResponse
+{
+	double purchase_price = 1;
 }
 
 message SubscribeLogsRequest{
@@ -41,14 +57,6 @@ message SubscribeLogsResponse{
 	tradebot.common.v1.SubscribeLogsResponse response = 1;
 }
 
-message UpdateServerConfigRequest{
-	tradebot.common.v1.UpdateServerConfigRequest request = 1;
-}
-
-message UpdateServerConfigResponse{
-	tradebot.common.v1.UpdateServerConfigResponse response = 1;
-}
-
 message PlaceOrderRequest{
 	double price = 1;
 	double value = 2;
@@ -56,10 +64,17 @@ message PlaceOrderRequest{
 message PlaceOrderResponse{
 	tradebot.common.v1.DefaultResponse response = 1;
 }
+
 message CloseOrderRequest{
 	string id = 1;
 }
-
 message CloseOrderResponse{
 	tradebot.common.v1.DefaultResponse response = 1;
+}
+message SubscribeOrdersRequest{
+	tradebot.common.v1.OrderSignature signature = 1; 
+}
+
+message SubscribeOrdersResponse{
+	tradebot.common.v1.Order Order = 1;
 }

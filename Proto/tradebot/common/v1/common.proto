@@ -41,7 +41,6 @@ message Order {
 	OrderSignature signature = 3;
 	google.protobuf.Timestamp last_update_date = 4;
 	string id = 5;
-
 }
 
 message AlgorithmInfo{
