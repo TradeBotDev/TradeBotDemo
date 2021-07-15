@@ -40,12 +40,13 @@ message UpdateServerConfigResponse{
 	google.protobuf.Empty empty = 1;
 }
 
-message SubscribePurchasePriceRequest{
+message SubscribePurchasePriceRequest
+{
 	google.protobuf.Empty empty = 1;
 }
-
-message SubscribeOrdersResponse{
-	tradebot.common.v1.Order response = 1;
+message SubscribePurchasePriceResponse
+{
+	double purchase_price = 1;
 }
 
 message SubscribeLogsRequest{
@@ -69,4 +70,11 @@ message CloseOrderRequest{
 }
 message CloseOrderResponse{
 	tradebot.common.v1.DefaultResponse response = 1;
+}
+message SubscribeOrdersRequest{
+	tradebot.common.v1.OrderSignature signature = 1; 
+}
+
+message SubscribeOrdersResponse{
+	tradebot.common.v1.Order Order = 1;
 }

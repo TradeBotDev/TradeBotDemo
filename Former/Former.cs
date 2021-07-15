@@ -3,15 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TradeBot.Former.FormerService.v1;
-using TradeBot.Common.v1;
 
 namespace Former
 {
     public class Former
     {
-        private static List<TradeBot.Common.v1.SubscribeOrdersResponse> CurrentBuyOrders = new();
+        private static List<SubscribeOrdersResponse> CurrentBuyOrders = new();
         private static List<string> ShoppingList = new();
-        public static Config config;
+        public static TradeBot.Common.v1.Config config;
 
         public async static void FormShoppingList(double AvgPrice)
         {
@@ -19,7 +18,7 @@ namespace Former
             Console.WriteLine("Получено от алгоритма: " + AvgPrice);
             foreach (var order in CurrentBuyOrders)
             {
-                if (order.Response.Price <= AvgPrice) ShoppingList.Add(order.Response.Id);
+                if (order.Order.Price <= AvgPrice) ShoppingList.Add(order.Order.Id);
             }
             Console.Write("\nСформировал список необходимых ордеров: \n{ ");
             foreach (var elem in ShoppingList)
@@ -31,14 +30,14 @@ namespace Former
             await Observer.SendShopingList(ShoppingList);
         }
 
-        public static async void UpdateCurrentOrders(TradeBot.Common.v1.SubscribeOrdersResponse orderNeededUpdate)
+        public static async void UpdateCurrentOrders(SubscribeOrdersResponse orderNeededUpdate)
         {
-            Console.WriteLine("Принял от маркета заказ {0}: цена {1}, количество {2}", orderNeededUpdate.Response.Id, orderNeededUpdate.Response.Price, orderNeededUpdate.Response.Quantity);
+            Console.WriteLine("Принял от маркета заказ {0}: цена {1}, количество {2}", orderNeededUpdate.Order.Id, orderNeededUpdate.Order.Price, orderNeededUpdate.Order.Quantity);
             var task = Task.Run(() =>
             {
-                if (CurrentBuyOrders.FindAll(x => x.Response.Id == orderNeededUpdate.Response.Id).Count != 0)
+                if (CurrentBuyOrders.FindAll(x => x.Order.Id == orderNeededUpdate.Order.Id).Count != 0)
                 {
-                    int updatedIndex = CurrentBuyOrders.FindIndex(x => x.Response.Id == orderNeededUpdate.Response.Id);
+                    int updatedIndex = CurrentBuyOrders.FindIndex(x => x.Order.Id == orderNeededUpdate.Order.Id);
                     CurrentBuyOrders.RemoveAt(updatedIndex);
                     CurrentBuyOrders.Insert(updatedIndex, orderNeededUpdate);
                     Array.Sort(CurrentBuyOrders.ToArray(), new ReplyComparator());
@@ -68,7 +67,7 @@ namespace Former
         {
             int IComparer<SubscribeOrdersResponse>.Compare(SubscribeOrdersResponse x, SubscribeOrdersResponse y)
             {
-                return x.Response.Price.CompareTo(y.Response.Price);
+                return x.Order.Price.CompareTo(y.Order.Price);
             }
         }
     }

@@ -32,7 +32,7 @@ namespace Former.Services
             };
             var request = new SubscribeOrdersRequest()
             {
-                Request = orderSignature
+                Signature = orderSignature
             };
 
             using var call = tradeMarketClient.SubscribeOrders(request);
