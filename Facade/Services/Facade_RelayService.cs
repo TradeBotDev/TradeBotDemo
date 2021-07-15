@@ -36,7 +36,7 @@ namespace Facade
             catch (Exception e)
             {
                 Console.WriteLine("Ошибка работы метода StarBot");
-                Console.WriteLine("Exception: "+e.Message);
+                Console.WriteLine("Exception: " + e.Message);
                 var defaultResponse = new TradeBot.Common.v1.DefaultResponse
                 {
                     Code = TradeBot.Common.v1.ReplyCode.Failure,
@@ -47,7 +47,7 @@ namespace Facade
                     Response = defaultResponse
                 });
             }
-            
+
         }
 
         public override async Task SubscribeLogs(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
