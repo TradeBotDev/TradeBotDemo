@@ -12,7 +12,7 @@ namespace Former
         private static List<string> ShoppingList = new();
         public static TradeBot.Common.v1.Config config;
 
-        public async static void FormShoppingList(double AvgPrice)
+        public static async void FormShoppingList(double AvgPrice)
         {
             ShoppingList.Clear();
             Console.WriteLine("Получено от алгоритма: " + AvgPrice);

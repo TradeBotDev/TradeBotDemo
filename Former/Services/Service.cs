@@ -11,6 +11,7 @@ namespace Former
     public class Service : FormerService.FormerServiceBase
     {
         private readonly ILogger<Service> _logger;
+        //private static TradeBot.Common.v1.Config config;
         public Service(ILogger<Service> logger)
         {
             _logger = logger;
