@@ -38,5 +38,10 @@ namespace Algorithm.Services
             return new AddOrderResponse();
         }
 
+        public override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request, ServerCallContext context)
+        {           
+            Console.WriteLine("Config Updated");
+            return Task.FromResult(new UpdateServerConfigResponse());
+        }
     }
 }
