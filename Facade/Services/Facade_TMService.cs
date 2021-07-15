@@ -3,13 +3,12 @@ using Grpc.Net.Client;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using TradeBot.Facade.FacadeService.v1;
-using static TradeBot.Facade.FacadeService.v1.FacadeService;
 
 namespace Facade
 {
     public class FacadeTMService : FacadeService.FacadeServiceBase
     {
-        private FacadeServiceClient clientTM = new FacadeServiceClient(GrpcChannel.ForAddress("https://localhost:5005"));
+        private TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceClient clientTM = new TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceClient(GrpcChannel.ForAddress("https://localhost:5005"));
         private readonly ILogger<FacadeTMService> _logger;
         public FacadeTMService(ILogger<FacadeTMService> logger)
         {
@@ -18,7 +17,7 @@ namespace Facade
         
         public override async Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<SubscribeBalanceResponse> responseStream, ServerCallContext context)
         {
-            using var response = clientTM.SubscribeBalance(request);
+            using var response = clientTM.SubscribeBalance(new TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceRequest {Request=request.Request });
             while (await response.ResponseStream.MoveNext())
             {
                 await responseStream.WriteAsync(new SubscribeBalanceResponse
@@ -35,7 +34,8 @@ namespace Facade
 
             try
             {
-                var response = clientTM.AuthenticateToken(new AuthenticateTokenRequest { Token = request.Token });
+                var response = clientTM.AuthenticateToken(new TradeBot.TradeMarket.TradeMarketService.v1.AuthenticateTokenRequest {Token=request.Token });
+
                 System.Console.WriteLine("Возврат значения из AuthenticateToken:" + response.Response.ToString());
                 return Task.FromResult(new AuthenticateTokenResponse
                 {
@@ -61,7 +61,7 @@ namespace Facade
 
         public override async Task Slots(SlotsRequest request, IServerStreamWriter<SlotsResponse> responseStream, ServerCallContext context)
         {
-            using var response = clientTM.Slots(request);
+            using var response = clientTM.Slots(new TradeBot.TradeMarket.TradeMarketService.v1.SlotsRequest { Empty=request.Empty});
 
             while (await response.ResponseStream.MoveNext())
             {
