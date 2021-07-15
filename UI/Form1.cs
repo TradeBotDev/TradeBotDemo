@@ -33,7 +33,7 @@ namespace UI
                 AvaibleBalance = double.Parse(ConfigAvailableBalance.Text),
                 RequiredProfit = double.Parse(ConfigRequiredProfit.Text),
                 ContractValue = double.Parse(ConfigVolumeOfContracts.Text),
-                AlgorithmInfo = new AlgorithmInfo() { Interval = new Google.Protobuf.WellKnownTypes.Timestamp() { Seconds = int.Parse(ConfigIntervalOfAnalysis.Text) } },
+                //AlgorithmInfo = new AlgorithmInfo() { Interval = new Google.Protobuf.WellKnownTypes.Timestamp() { Seconds = int.Parse(ConfigIntervalOfAnalysis.Text) } },
                 OrderUpdatePriceRange = double.Parse(ConfigUpdatePriceRange.Text),
                 SlotFee = 0.1D,
                 TotalBalance = 100.0
@@ -48,15 +48,11 @@ namespace UI
             {
                 Token = ConfigToken.Text
             };
-
-
             var call1 = await facadeClient.AuthenticateTokenAsync(requestForFacade);
             Console.WriteLine("Выслал facade: {0}", requestForFacade.Token);
 
             var call2 = await relayClient.StartBotAsync(requestForRelay);
             Console.WriteLine("Запустил бота с конфигом {0}", requestForRelay.Config);
-
-
         }
     }
 }
