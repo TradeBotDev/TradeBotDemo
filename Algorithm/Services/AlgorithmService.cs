@@ -13,21 +13,7 @@ namespace Algorithm.Services
     public class AlgorithmService : TradeBot.Algorithm.AlgorithmService.v1.AlgorithmService.AlgorithmServiceBase
     {
         private static IServerStreamWriter<SubscribePurchasePriceResponse> streamWriter;
-        public override async Task SubscribePurchasePrice(SubscribePurchasePriceRequest request, IServerStreamWriter<SubscribePurchasePriceResponse> sw, ServerCallContext context)
-        {
-            streamWriter = sw;
-            AlgorithmEmulator algo = new AlgorithmEmulator();
-            Random rnd = new Random();
-            
-            while (true) 
-            {
-                Thread.Sleep(rnd.Next(0, 5000));
-                double newPrice = algo.CalculateSuggestedPrice();
-                await streamWriter.WriteAsync(new SubscribePurchasePriceResponse { PurchasePrice = newPrice });
-                Console.WriteLine("Sent " + newPrice);
-            }
-
-        }
+        
         public override async Task<AddOrderResponse> AddOrder(IAsyncStreamReader<AddOrderRequest> requestStream, ServerCallContext context)
         {
             while (await requestStream.MoveNext())
