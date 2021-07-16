@@ -1,62 +1,70 @@
-﻿using Former.Services;
+﻿using Serilog;
+
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+
 using TradeBot.TradeMarket.TradeMarketService.v1;
 
 namespace Former
 {
     public class Former
     {
-        private static List<SubscribeOrdersResponse> CurrentBuyOrders = new();
-        public static TradeBot.Common.v1.Config config;
-        private static Dictionary<string, double> ShoppingList = new();
+        public TradeBot.Common.v1.Config Config;
 
-        public static async void FormShoppingList(double AvgPrice)
+        private const int OrdersCount = 9;
+
+        private readonly TradeMarketClient _tmClient;
+
+        private readonly List<SubscribeOrdersResponse> _currentBuyOrders;
+
+        public Former()
         {
-            ShoppingList.Clear();
-            Console.WriteLine("Получено от алгоритма: " + AvgPrice);
-            foreach (var order in CurrentBuyOrders)
-            {
-                if (order.Response.Order.Price <= AvgPrice) ShoppingList.Add(order.Response.Order.Id, AvgPrice/* + config.SlotFee + config.RequiredProfit*/);
-            }
-            Console.Write("\nСформировал список необходимых ордеров: \n{ ");
-            foreach (var elem in ShoppingList)
-            {
-                Console.Write(elem);
-                Console.Write(", ");
-            }
-            Console.WriteLine("\b\b }");
-            await TradeMarketClient.SendShopingList(ShoppingList);
+            _tmClient = TradeMarketClient.GetInstance();
+            _currentBuyOrders = new List<SubscribeOrdersResponse>();
         }
 
-        public static async void UpdateCurrentOrders(SubscribeOrdersResponse orderNeededUpdate)
+        public async void FormShoppingList(double avgPrice)
         {
-            Console.WriteLine("Принял от маркета заказ {0}: цена {1}, количество {2}", orderNeededUpdate.Response.Order.Id, orderNeededUpdate.Response.Order.Price, orderNeededUpdate.Response.Order.Quantity);
+            Log.Debug("Получено от алгоритма: {price}", avgPrice);
+
+            var selectedOrders = _currentBuyOrders.Where(order => order.Response.Order.Price <= avgPrice);
+
+            var shoppingList = selectedOrders.ToDictionary(order => order.Response.Order.Id, order => avgPrice);
+
+            Log.Debug("Сформировал список необходимых ордеров: {elements}", shoppingList.ToArray());
+            await _tmClient.SendShoppingList(shoppingList);
+        }
+
+        public async void UpdateCurrentOrders(SubscribeOrdersResponse orderNeededUpdate)
+        {
+            Log.Debug("Принял от маркета заказ {id}: цена {price}, количество {value}", orderNeededUpdate.Response.Order.Id, orderNeededUpdate.Response.Order.Price, orderNeededUpdate.Response.Order.Quantity);
+
             var task = Task.Run(() =>
             {
-                if (CurrentBuyOrders.FindAll(x => x.Response.Order.Id == orderNeededUpdate.Response.Order.Id).Count != 0)
+                if (_currentBuyOrders.FindAll(x => x.Response.Order.Id == orderNeededUpdate.Response.Order.Id).Count != 0)
                 {
-                    int updatedIndex = CurrentBuyOrders.FindIndex(x => x.Response.Order.Id == orderNeededUpdate.Response.Order.Id);
-                    CurrentBuyOrders.RemoveAt(updatedIndex);
-                    CurrentBuyOrders.Insert(updatedIndex, orderNeededUpdate);
-                    Array.Sort(CurrentBuyOrders.ToArray(), new ReplyComparator());
+                    var updatedIndex = _currentBuyOrders.FindIndex(x => x.Response.Order.Id == orderNeededUpdate.Response.Order.Id);
+                    _currentBuyOrders.RemoveAt(updatedIndex);
+                    _currentBuyOrders.Insert(updatedIndex, orderNeededUpdate);
+                    Array.Sort(_currentBuyOrders.ToArray(), new ReplyComparator());
                 }
                 else
                 {
                     //TODO разобраться с размером | стакана цен
                     //                            V                              
-                    if (CurrentBuyOrders.Count == 9)
+                    if (_currentBuyOrders.Count == OrdersCount)
                     {
-                        Array.Sort(CurrentBuyOrders.ToArray(), new ReplyComparator());
-                        CurrentBuyOrders.RemoveAt(9);
-                        CurrentBuyOrders.Add(orderNeededUpdate);
-                        Array.Sort(CurrentBuyOrders.ToArray(), new ReplyComparator());
+                        Array.Sort(_currentBuyOrders.ToArray(), new ReplyComparator());
+                        _currentBuyOrders.RemoveAt(OrdersCount);
+                        _currentBuyOrders.Add(orderNeededUpdate);
+                        Array.Sort(_currentBuyOrders.ToArray(), new ReplyComparator());
                     }
                     else
                     {
-                        CurrentBuyOrders.Add(orderNeededUpdate);
-                        Array.Sort(CurrentBuyOrders.ToArray(), new ReplyComparator());
+                        _currentBuyOrders.Add(orderNeededUpdate);
+                        Array.Sort(_currentBuyOrders.ToArray(), new ReplyComparator());
                     }
                 }
             });

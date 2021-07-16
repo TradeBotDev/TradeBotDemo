@@ -1,23 +1,16 @@
 using Grpc.Core;
-using Grpc.Net.Client;
-using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
+
 using System.Threading.Tasks;
+
 using TradeBot.Former.FormerService.v1;
 
 namespace Former
 {
-    public class Service : FormerService.FormerServiceBase
+    public class Listener : FormerService.FormerServiceBase
     {
-        private readonly ILogger<Service> _logger;
-        //private static TradeBot.Common.v1.Config config;
-        public Service(ILogger<Service> logger)
-        {
-            _logger = logger;
-        }
         public override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request, ServerCallContext context)
         {
-            Former.config = request.Request;
+            Former.Config = request.Request;
             return Task.FromResult(new UpdateServerConfigResponse());
         }
         public override Task<SendPurchasePriceResponse> SendPurchasePrice(SendPurchasePriceRequest request, ServerCallContext context)
@@ -25,6 +18,5 @@ namespace Former
             Former.FormShoppingList(request.PurchasePrice);
             return Task.FromResult(new SendPurchasePriceResponse());
         }
-
     }
 }
