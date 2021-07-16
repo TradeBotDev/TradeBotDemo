@@ -16,7 +16,7 @@ namespace Former.Services
         private static TradeMarketService.TradeMarketServiceClient Client = new TradeMarketService.TradeMarketServiceClient(TradeMarketChannel);
         private static Dictionary<string, double> SuccessfulOrders = new();
         
-        public static async void ObserveTradeMarket()
+        public static async void ObserveActualOrders()
         {  
             var orderSignature = new OrderSignature
             {
@@ -29,7 +29,6 @@ namespace Former.Services
                 {
                     Signature = orderSignature
                 }
-
             };
             using var call = Client.SubscribeOrders(request);
             while (await call.ResponseStream.MoveNext())
@@ -71,25 +70,28 @@ namespace Former.Services
             }
         }
 
-        //public static async void ObserveMyOrders(string id) 
-        //{
-        //    var tradeMarketClient = new FormerService.FormerServiceClient(Channels.TradeMarketChannel);
-        //    var orderSignature = new OrderSignature
-        //    {
-        //        Status = OrderStatus.Open,
-        //        Type = OrderType.Buy
-        //    };
-        //    var request = new SubscribeOrdersRequest()
-        //    {
-        //        Request = orderSignature
-        //    };
+        public static async void ObserveMyOrders(string id)
+        {
+            var tradeMarketClient = new TradeMarketService.TradeMarketServiceClient(TradeMarketChannel);
+            var orderSignature = new OrderSignature
+            {
+                Status = OrderStatus.Open,
+                Type = OrderType.Buy
+            };
+            var request = new SubscribeOrdersRequest()
+            {
+                Request = new TradeBot.Common.v1.SubscribeOrdersRequest()
+                {
+                    Signature = orderSignature
+                }
+            };
 
-        //    using var call = tradeMarketClient.SubscribeOrders(request);
-        //    while (await call.ResponseStream.MoveNext())
-        //    {
-        //        Former.UpdateCurrentOrders(call.ResponseStream.Current);
-        //    }
-        //}
+            using var call = tradeMarketClient.SubscribeOrders(request);
+            while (await call.ResponseStream.MoveNext())
+            {
+                Former.UpdateCurrentOrders(call.ResponseStream.Current);
+            }
+        }
         //private async static Task BeginObserveMyOrders() 
         //{
         //    foreach (var order in OrdersForObserving) 
