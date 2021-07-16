@@ -1,15 +1,16 @@
 using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Threading.Tasks;
 using TradeBot.Facade.FacadeService.v1;
-using static TradeBot.Facade.FacadeService.v1.FacadeService;
 
 namespace Facade
 {
-    public class FacadeTMService : FacadeService.FacadeServiceBase
+    public class FacadeTMService : TradeBot.Facade.FacadeService.v1.FacadeService.FacadeServiceBase
     {
-        private FacadeServiceClient clientTM = new FacadeServiceClient(GrpcChannel.ForAddress("https://localhost:5005"));
+        private TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceClient clientTM = new TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceClient(GrpcChannel.ForAddress("https://localhost:5005"));
+        private TradeBot.Relay.RelayService.v1.RelayService.RelayServiceClient clientRelay = new TradeBot.Relay.RelayService.v1.RelayService.RelayServiceClient(GrpcChannel.ForAddress("https://localhost:5004"));
         private readonly ILogger<FacadeTMService> _logger;
         public FacadeTMService(ILogger<FacadeTMService> logger)
         {
@@ -18,7 +19,7 @@ namespace Facade
         
         public override async Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<SubscribeBalanceResponse> responseStream, ServerCallContext context)
         {
-            using var response = clientTM.SubscribeBalance(request);
+            using var response = clientTM.SubscribeBalance(new TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceRequest {Request=request.Request });
             while (await response.ResponseStream.MoveNext())
             {
                 await responseStream.WriteAsync(new SubscribeBalanceResponse
@@ -35,10 +36,12 @@ namespace Facade
 
             try
             {
-                var response = clientTM.AuthenticateToken(new AuthenticateTokenRequest { Token = request.Token });
+                var response = clientTM.AuthenticateToken(new TradeBot.TradeMarket.TradeMarketService.v1.AuthenticateTokenRequest {Token=request.Token });
+
                 System.Console.WriteLine("Возврат значения из AuthenticateToken:" + response.Response.ToString());
                 return Task.FromResult(new AuthenticateTokenResponse
                 {
+                    //Response = new TradeBot.Common.v1.DefaultResponse { Code=TradeBot.Common.v1.ReplyCode.Succeed,Message="otvet"}
                     Response = response.Response
                 });
             }
@@ -61,13 +64,59 @@ namespace Facade
 
         public override async Task Slots(SlotsRequest request, IServerStreamWriter<SlotsResponse> responseStream, ServerCallContext context)
         {
-            using var response = clientTM.Slots(request);
+            using var response = clientTM.Slots(new TradeBot.TradeMarket.TradeMarketService.v1.SlotsRequest { Empty=request.Empty});
 
             while (await response.ResponseStream.MoveNext())
             {
                 await responseStream.WriteAsync(new SlotsResponse
                 {
                     SlotName = response.ResponseStream.Current.SlotName
+                });
+            }
+        }
+        public override Task<StartBotResponse> StartBotRPC(StartBotRequest request, ServerCallContext context)
+        {
+            System.Console.WriteLine("Вызов метода StartBot с параметром: " + request.Config.ToString());
+            try
+            {
+
+                var response = clientRelay.StartBot(new TradeBot.Relay.RelayService.v1.StartBotRequest{ Config = request.Config });
+
+                System.Console.WriteLine("Возврат значения из StartBot: " + response.Response.ToString());
+
+                return Task.FromResult(new StartBotResponse
+                {
+                    Response = response.Response
+                });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Ошибка работы метода StarBot");
+                Console.WriteLine("Exception: " + e.Message);
+                var defaultResponse = new TradeBot.Common.v1.DefaultResponse
+                {
+                    Code = TradeBot.Common.v1.ReplyCode.Failure,
+                    Message = "Exception"
+                };
+                return Task.FromResult(new StartBotResponse
+                {
+                    Response = defaultResponse
+                });
+            }
+
+        }
+
+        public override async Task SubscribeLogs(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
+        {
+            var response = clientRelay.SubscribeLogs(new TradeBot.Relay.RelayService.v1.SubscribeLogsRequest { Request = request.R }, cancellationToken: context.CancellationToken);
+
+            while (await response.ResponseStream.MoveNext())
+            {
+                //токен на эксепшен
+                context.CancellationToken.ThrowIfCancellationRequested();
+                await responseStream.WriteAsync(new SubscribeLogsResponse
+                {
+                    Response = response.ResponseStream.Current.Response
                 });
             }
         }

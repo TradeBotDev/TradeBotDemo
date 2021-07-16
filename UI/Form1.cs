@@ -25,36 +25,39 @@ namespace UI
         private async void StartButton_Click(object sender, EventArgs e)
         {
             using var channel = GrpcChannel.ForAddress("https://localhost:5002");
-            var relayClient = new RelayService.RelayServiceClient(channel);
-            var facadeClient = new FacadeService.FacadeServiceClient(channel);
+            //var relayClient = new RelayService.RelayServiceClient(channel);
+            var facadeClient = new TradeBot.Facade.FacadeService.v1.FacadeService.FacadeServiceClient(channel);
+
+            var per1 = double.Parse(ConfigAvailableBalance.Text);
+            var per2 = double.Parse(ConfigRequiredProfit.Text);
+            var per3 = double.Parse(ConfigVolumeOfContracts.Text);
+            var per4 = double.Parse(ConfigUpdatePriceRange.Text);
 
             Config config = new Config()
             {
-                AvaibleBalance = double.Parse(ConfigAvailableBalance.Text),
-                RequiredProfit = double.Parse(ConfigRequiredProfit.Text),
-                ContractValue = double.Parse(ConfigVolumeOfContracts.Text),
+                AvaibleBalance = per1,
+                RequiredProfit = per2,
+                ContractValue = per3,
                 //AlgorithmInfo = new AlgorithmInfo() { Interval = new Google.Protobuf.WellKnownTypes.Timestamp() { Seconds = int.Parse(ConfigIntervalOfAnalysis.Text) } },
-                OrderUpdatePriceRange = double.Parse(ConfigUpdatePriceRange.Text),
+                OrderUpdatePriceRange = per4,
                 SlotFee = 0.1D,
                 TotalBalance = 100.0
             };
-            
-            var requestForRelay = new StartBotRequest() 
+
+            var requestForRelay = new TradeBot.Facade.FacadeService.v1.StartBotRequest()
             {
                 Config = config
 
             };
             var requestForFacade = new AuthenticateTokenRequest()
             {
-                Token = ConfigToken.Text
+                Token = ConfigTokenl.Text
             };
-            var call2 = await relayClient.StartBotAsync(requestForRelay);
+            var call = await facadeClient.AuthenticateTokenAsync(requestForFacade);
+            Console.WriteLine("Выслал facade: {0}", requestForFacade.Token);
+
+            var call2 = facadeClient.StartBotRPC(requestForRelay);
             Console.WriteLine("Запустил бота с конфигом {0}", requestForRelay.Config);
-
-            var call1 = await facadeClient.AuthenticateTokenAsync(requestForFacade);
-            Console.WriteLine("Выслал в facade: {0}", requestForFacade.Token);
-
-            
         }
     }
 }
