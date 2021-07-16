@@ -15,7 +15,7 @@ namespace Algorithm
         public static List<Order> orders;
         public static bool initialAnalysisCompleted;
 
-        public static async void SendPurchasePrice()
+        public static void SendPurchasePrice()
         {
             using var channel = GrpcChannel.ForAddress("https://localhost:5003");
             var client = new FormerService.FormerServiceClient(channel);
