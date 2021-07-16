@@ -23,8 +23,8 @@ namespace Account
                 return Task.FromResult(new LoginReply
                 {
                     SessionId = 0,
-                    Message = validationResult.Item2,
-                    Result = validationResult.Item1
+                    Result = validationResult.Item1,
+                    Message = validationResult.Item2
                 });
             }
 
