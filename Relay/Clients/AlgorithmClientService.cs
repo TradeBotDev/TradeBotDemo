@@ -42,10 +42,10 @@ namespace Relay.Clients
 
     private readonly IClientStreamWriter<AddOrderRequest> _stream;
         private readonly AlgorithmService.AlgorithmServiceClient _client;
-        public AlgorithmClientService(AlgorithmService.AlgorithmServiceClient client)
+        public AlgorithmClientService(Uri uri)
         {
            
-            _client = client;
+            _client = new AlgorithmService.AlgorithmServiceClient(GrpcChannel.ForAddress(uri));
             _stream = _client.AddOrder().RequestStream;
 
         }

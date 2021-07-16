@@ -23,10 +23,16 @@ namespace Relay
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddGrpc();
-            services.AddGrpcClient<AlgorithmService.AlgorithmServiceClient>(x => x.Address = new Uri("https//localhost:5001"));
-            services.AddGrpcClient<TradeMarketService.TradeMarketServiceClient>(x => x.Address = new Uri("https//localhost:5005"));
-            services.AddGrpcClient<AlgorithmClientService>();
-            services.AddGrpcClient<TradeMarketClientService>();
+            //services.AddGrpcClient<AlgorithmService.AlgorithmServiceClient>(x => x.Address = new Uri("https//localhost:5001"));
+            //services.AddGrpcClient<TradeMarketService.TradeMarketServiceClient>(x => x.Address = new Uri("https//localhost:5005"));
+            services.AddGrpcClient<AlgorithmClientService>(options =>
+            {
+                options.Address = new Uri("https//localhost:5001");
+            });
+            services.AddGrpcClient<TradeMarketClientService>(options =>
+            {
+                options.Address = new Uri("https//localhost:5005");
+            });
 
         }
 
