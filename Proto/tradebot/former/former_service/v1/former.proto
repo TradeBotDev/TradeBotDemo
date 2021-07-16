@@ -11,7 +11,7 @@ service FormerService{
 	/*
 		подписка на ответ алгоритма
 	*/
-	rpc SubscribePurchasePrice (SubscribePurchasePriceRequest) returns (SubscribePurchasePriceResponse);
+	rpc SendPurchasePrice (SendPurchasePriceRequest) returns (SendPurchasePriceResponse);
 	/*
 		Клиент говорит обновиться серверу
 	*/
@@ -27,11 +27,11 @@ message UpdateServerConfigResponse{
 	google.protobuf.Empty empty = 1;
 }
 
-message SubscribePurchasePriceRequest
+message SendPurchasePriceRequest
 {
 	double purchase_price = 1;
 }
-message SubscribePurchasePriceResponse
+message SendPurchasePriceResponse
 {
 	google.protobuf.Empty empty = 1;
 }

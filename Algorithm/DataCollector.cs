@@ -19,7 +19,7 @@ namespace Algorithm
         {
             using var channel = GrpcChannel.ForAddress("https://localhost:5003");
             var client = new FormerService.FormerServiceClient(channel);
-            SubscribePurchasePriceResponse call;
+            SendPurchasePriceResponse call;
             AlgorithmEmulator algo = new AlgorithmEmulator();
             Random rnd = new Random();
 
@@ -27,7 +27,7 @@ namespace Algorithm
             {
                 Thread.Sleep(rnd.Next(0, 5000));
                 double newPrice = algo.CalculateSuggestedPrice();
-                call = client.SubscribePurchasePrice(new SubscribePurchasePriceRequest() { PurchasePrice = newPrice });
+                call = await client.SendPurchasePriceAsync(new SendPurchasePriceRequest() { PurchasePrice = newPrice });
                 Console.WriteLine("Sent " + newPrice);
             }
 
