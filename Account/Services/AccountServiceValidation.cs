@@ -11,27 +11,27 @@ namespace Account
     public partial class AccountService : AcountService.AcountServiceBase
     {
         // Метод, который проверяет, являются ли ланные для входа пустыми
-        private static ValidationCode ValidateLoginFields(LoginRequest request)
+        private static ActionCode ValidateLoginFields(LoginRequest request)
         {
             if (string.IsNullOrEmpty(request.Username)
                 || string.IsNullOrEmpty(request.Password))
-                return ValidationCode.EmptyField;
-            return ValidationCode.Successful;
+                return ActionCode.EmptyField;
+            return ActionCode.Successful;
         }
 
         // Метод, который проверяет, являются ли ланные для регистрации пустыми
-        private static ValidationCode ValidateRegisterFields(RegisterRequest request)
+        private static ActionCode ValidateRegisterFields(RegisterRequest request)
         {
             if (string.IsNullOrEmpty(request.Username)
                 || string.IsNullOrEmpty(request.Email)
                 || string.IsNullOrEmpty(request.Password)
                 || string.IsNullOrEmpty(request.VerifyPassword))
-                return ValidationCode.EmptyField;
+                return ActionCode.EmptyField;
 
             else if (request.Password != request.VerifyPassword)
-                return ValidationCode.PasswordMismatch;
+                return ActionCode.PasswordMismatch;
 
-            return ValidationCode.Successful;
+            return ActionCode.Successful;
         }
     }
 }

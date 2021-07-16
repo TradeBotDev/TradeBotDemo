@@ -7,7 +7,7 @@ package tradebot.account.account_service.v1;
 service AcountService {
 	//Сервис для входа в аккаунт или его регистрации.
 	rpc Login (LoginRequest) returns (LoginReply); //Метод входа в аккаунт
-	rpc Register (RegisterRequest) returns (LoginReply); //Метод регистрации аккаунта
+	rpc Register (RegisterRequest) returns (RegisterReply); //Метод регистрации аккаунта
 	rpc IsValidSession (SessionRequest) returns (SessionReply); //Проверка текущего пользователя на валидность по Id сессии
 	rpc CurrentUserData (SessionRequest) returns (CurrentUserReply); //Получение данных текущего пользователя
 }
@@ -20,7 +20,7 @@ message LoginRequest {
 
 message LoginReply {
 	//Ответ на запрос о входе в аккаунт.
-	ValidationCode result = 1;
+	ActionCode result = 1;
 	string message = 2;
 	int32 session_id = 3;
 }
@@ -36,7 +36,7 @@ message RegisterRequest {
 
 message RegisterReply {
 	//Ответ на запрос о регистрации аккаунта.
-	ValidationCode result = 1;
+	ActionCode result = 1;
 	string message = 2;
 }
 
@@ -53,7 +53,7 @@ message SessionReply {
 
 message CurrentUserReply {
 	//Получение данных текущего пользователя.
-	ValidationCode result = 1;
+	ActionCode result = 1;
 	string message = 2;
 	UserInfo current_user = 3;
 }
@@ -66,7 +66,7 @@ message UserInfo {
 	int32 phone_number = 4;
 }
 
-enum ValidationCode {
+enum ActionCode {
 	/*
 	* Код результата выполнения входа или регистрации:
 	* 0 - успешное выполнение,
@@ -75,9 +75,9 @@ enum ValidationCode {
 	* 3 - имеется пустое поле ввода,
 	* 4 - пароли не совпадают.
 	*/
-	VALIDATION_CODE_SUCCESSFUL = 0;
-	VALIDATION_CODE_USER_NOT_FOUND = 1;
-	VALIDATION_CODE_USER_EXISTS = 2;
-	VALIDATION_CODE_EMPTY_FIELD = 3;
-	VALIDATION_CODE_PASSWORD_MISMATCH = 4;
+	ACTION_CODE_SUCCESSFUL = 0;
+	ACTION_CODE_USER_NOT_FOUND = 1;
+	ACTION_CODE_USER_EXISTS = 2;
+	ACTION_CODE_EMPTY_FIELD = 3;
+	ACTION_CODE_PASSWORD_MISMATCH = 4;
 }

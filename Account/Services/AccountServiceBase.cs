@@ -19,7 +19,7 @@ namespace Account
         {
             var validationResult = ValidateLoginFields(request);
 
-            if (validationResult == ValidationCode.EmptyField)
+            if (validationResult == ActionCode.EmptyField)
             {
                 return Task.FromResult(new LoginReply
                 {
@@ -33,18 +33,38 @@ namespace Account
             {
                 SessionId = rnd.Next(100, 10000),
                 Message = "Вход в аккаунт завершен успешно.",
-                Result = ValidationCode.Successful
+                Result = ActionCode.Successful
             });
         }
 
-        public override Task<LoginReply> Register(RegisterRequest request, ServerCallContext context)
+        public override Task<RegisterReply> Register(RegisterRequest request, ServerCallContext context)
         {
-            return base.Register(request, context);
+            //return base.Register(request, context);
+            var validationResult = ValidateRegisterFields(request);
+
+            if (validationResult == ActionCode.EmptyField)
+            {
+                return Task.FromResult(new RegisterReply
+                {
+                    Result = validationResult,
+                    Message = "Произошла ошибка: присутствуют пустые поля. Проверьте правильность введенных данных."
+                });
+            }
+
+            return Task.FromResult(new RegisterReply
+            {
+                Result = ActionCode.Successful,
+                Message = "Регистрация завершена успешно."
+            });
         }
 
         public override Task<SessionReply> IsValidSession(SessionRequest request, ServerCallContext context)
         {
-            return base.IsValidSession(request, context);
+            return Task.FromResult(new SessionReply
+            {
+                IsValid = true,
+                Message = "Текущая сессия валидна"
+            });
         }
 
         public override Task<CurrentUserReply> CurrentUserData(SessionRequest request, ServerCallContext context)
