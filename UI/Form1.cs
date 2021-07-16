@@ -56,7 +56,7 @@ namespace UI
             var call = await facadeClient.AuthenticateTokenAsync(requestForFacade);
             Console.WriteLine("Выслал facade: {0}", requestForFacade.Token);
 
-            var call2 = facadeClient.StartBotRPC(requestForRelay);
+            var call2 = facadeClient.StartBotRPCAsync(requestForRelay);
             Console.WriteLine("Запустил бота с конфигом {0}", requestForRelay.Config);
         }
     }
