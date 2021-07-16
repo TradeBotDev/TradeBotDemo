@@ -31,24 +31,25 @@ namespace UI
         {
             this.StartButton = new System.Windows.Forms.Button();
             this.ConfigAvailableBalance = new System.Windows.Forms.TextBox();
-            this.textBox2 = new System.Windows.Forms.TextBox();
-            this.textBox3 = new System.Windows.Forms.TextBox();
-            this.textBox4 = new System.Windows.Forms.TextBox();
-            this.textBox5 = new System.Windows.Forms.TextBox();
-            this.textBox6 = new System.Windows.Forms.TextBox();
+            this.ConfigRequiredProfit = new System.Windows.Forms.TextBox();
+            this.ConfigVolumeOfContracts = new System.Windows.Forms.TextBox();
+            this.ConfigUpdatePriceRange = new System.Windows.Forms.TextBox();
+            this.ConfigIntervalOfAnalysis = new System.Windows.Forms.TextBox();
+            this.ConfigToken = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.ConfigRequiredProfit = new System.Windows.Forms.Label();
-            this.ConfigVolumeOfContracts = new System.Windows.Forms.Label();
-            this.ConfigUpdatePriceRange = new System.Windows.Forms.Label();
-            this.ConfigIntervalOfAnalysis = new System.Windows.Forms.Label();
-            this.ConfigToken = new System.Windows.Forms.Label();
+            this.ConfigRequiredProfitl = new System.Windows.Forms.Label();
+            this.ConfigVolumeOfContractsl = new System.Windows.Forms.Label();
+            this.ConfigUpdatePriceRangel = new System.Windows.Forms.Label();
+            this.ConfigIntervalOfAnalysisl = new System.Windows.Forms.Label();
+            this.ConfigTokenl = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // StartButton
             // 
-            this.StartButton.Location = new System.Drawing.Point(12, 235);
+            this.StartButton.Location = new System.Drawing.Point(10, 176);
+            this.StartButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.StartButton.Name = "StartButton";
-            this.StartButton.Size = new System.Drawing.Size(281, 60);
+            this.StartButton.Size = new System.Drawing.Size(246, 45);
             this.StartButton.TabIndex = 0;
             this.StartButton.Text = "Launch Bot";
             this.StartButton.UseVisualStyleBackColor = true;
@@ -56,118 +57,131 @@ namespace UI
             // 
             // ConfigAvailableBalance
             // 
-            this.ConfigAvailableBalance.Location = new System.Drawing.Point(163, 25);
+            this.ConfigAvailableBalance.Location = new System.Drawing.Point(143, 19);
+            this.ConfigAvailableBalance.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ConfigAvailableBalance.Name = "ConfigAvailableBalance";
-            this.ConfigAvailableBalance.Size = new System.Drawing.Size(125, 27);
+            this.ConfigAvailableBalance.Size = new System.Drawing.Size(110, 23);
             this.ConfigAvailableBalance.TabIndex = 1;
+            this.ConfigAvailableBalance.Text = "0,1";
             // 
-            // textBox2
+            // ConfigRequiredProfit
             // 
-            this.textBox2.Location = new System.Drawing.Point(163, 58);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(125, 27);
-            this.textBox2.TabIndex = 2;
+            this.ConfigRequiredProfit.Location = new System.Drawing.Point(143, 44);
+            this.ConfigRequiredProfit.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.ConfigRequiredProfit.Name = "ConfigRequiredProfit";
+            this.ConfigRequiredProfit.Size = new System.Drawing.Size(110, 23);
+            this.ConfigRequiredProfit.TabIndex = 2;
+            this.ConfigRequiredProfit.Text = "0,1";
             // 
-            // textBox3
+            // ConfigVolumeOfContracts
             // 
-            this.textBox3.Location = new System.Drawing.Point(163, 91);
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(125, 27);
-            this.textBox3.TabIndex = 3;
+            this.ConfigVolumeOfContracts.Location = new System.Drawing.Point(143, 68);
+            this.ConfigVolumeOfContracts.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.ConfigVolumeOfContracts.Name = "ConfigVolumeOfContracts";
+            this.ConfigVolumeOfContracts.Size = new System.Drawing.Size(110, 23);
+            this.ConfigVolumeOfContracts.TabIndex = 3;
+            this.ConfigVolumeOfContracts.Text = "0,1";
             // 
-            // textBox4
+            // ConfigUpdatePriceRange
             // 
-            this.textBox4.Location = new System.Drawing.Point(163, 124);
-            this.textBox4.Name = "textBox4";
-            this.textBox4.Size = new System.Drawing.Size(125, 27);
-            this.textBox4.TabIndex = 4;
+            this.ConfigUpdatePriceRange.Location = new System.Drawing.Point(143, 93);
+            this.ConfigUpdatePriceRange.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.ConfigUpdatePriceRange.Name = "ConfigUpdatePriceRange";
+            this.ConfigUpdatePriceRange.Size = new System.Drawing.Size(110, 23);
+            this.ConfigUpdatePriceRange.TabIndex = 4;
+            this.ConfigUpdatePriceRange.Text = "0,1";
             // 
-            // textBox5
+            // ConfigIntervalOfAnalysis
             // 
-            this.textBox5.Location = new System.Drawing.Point(163, 157);
-            this.textBox5.Name = "textBox5";
-            this.textBox5.Size = new System.Drawing.Size(125, 27);
-            this.textBox5.TabIndex = 5;
+            this.ConfigIntervalOfAnalysis.Location = new System.Drawing.Point(143, 118);
+            this.ConfigIntervalOfAnalysis.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.ConfigIntervalOfAnalysis.Name = "ConfigIntervalOfAnalysis";
+            this.ConfigIntervalOfAnalysis.Size = new System.Drawing.Size(110, 23);
+            this.ConfigIntervalOfAnalysis.TabIndex = 5;
+            this.ConfigIntervalOfAnalysis.Text = "0,1";
             // 
-            // textBox6
+            // ConfigToken
             // 
-            this.textBox6.Location = new System.Drawing.Point(163, 190);
-            this.textBox6.Name = "textBox6";
-            this.textBox6.Size = new System.Drawing.Size(125, 27);
-            this.textBox6.TabIndex = 6;
+            this.ConfigToken.Location = new System.Drawing.Point(143, 142);
+            this.ConfigToken.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.ConfigToken.Name = "ConfigToken";
+            this.ConfigToken.Size = new System.Drawing.Size(110, 23);
+            this.ConfigToken.TabIndex = 6;
+            this.ConfigToken.Text = "tokencool";
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 28);
+            this.label1.Location = new System.Drawing.Point(10, 21);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(127, 20);
+            this.label1.Size = new System.Drawing.Size(99, 15);
             this.label1.TabIndex = 7;
             this.label1.Text = "Available balance";
             // 
-            // ConfigRequiredProfit
+            // ConfigRequiredProfitl
             // 
-            this.ConfigRequiredProfit.AutoSize = true;
-            this.ConfigRequiredProfit.Location = new System.Drawing.Point(12, 61);
-            this.ConfigRequiredProfit.Name = "ConfigRequiredProfit";
-            this.ConfigRequiredProfit.Size = new System.Drawing.Size(110, 20);
-            this.ConfigRequiredProfit.TabIndex = 8;
-            this.ConfigRequiredProfit.Text = "Required profit";
+            this.ConfigRequiredProfitl.AutoSize = true;
+            this.ConfigRequiredProfitl.Location = new System.Drawing.Point(10, 46);
+            this.ConfigRequiredProfitl.Name = "ConfigRequiredProfitl";
+            this.ConfigRequiredProfitl.Size = new System.Drawing.Size(86, 15);
+            this.ConfigRequiredProfitl.TabIndex = 8;
+            this.ConfigRequiredProfitl.Text = "Required profit";
             // 
-            // ConfigVolumeOfContracts
+            // ConfigVolumeOfContractsl
             // 
-            this.ConfigVolumeOfContracts.AutoSize = true;
-            this.ConfigVolumeOfContracts.Location = new System.Drawing.Point(12, 94);
-            this.ConfigVolumeOfContracts.Name = "ConfigVolumeOfContracts";
-            this.ConfigVolumeOfContracts.Size = new System.Drawing.Size(141, 20);
-            this.ConfigVolumeOfContracts.TabIndex = 9;
-            this.ConfigVolumeOfContracts.Text = "Volume of contracts";
+            this.ConfigVolumeOfContractsl.AutoSize = true;
+            this.ConfigVolumeOfContractsl.Location = new System.Drawing.Point(10, 70);
+            this.ConfigVolumeOfContractsl.Name = "ConfigVolumeOfContractsl";
+            this.ConfigVolumeOfContractsl.Size = new System.Drawing.Size(113, 15);
+            this.ConfigVolumeOfContractsl.TabIndex = 9;
+            this.ConfigVolumeOfContractsl.Text = "Volume of contracts";
             // 
-            // ConfigUpdatePriceRange
+            // ConfigUpdatePriceRangel
             // 
-            this.ConfigUpdatePriceRange.AutoSize = true;
-            this.ConfigUpdatePriceRange.Location = new System.Drawing.Point(12, 127);
-            this.ConfigUpdatePriceRange.Name = "ConfigUpdatePriceRange";
-            this.ConfigUpdatePriceRange.Size = new System.Drawing.Size(137, 20);
-            this.ConfigUpdatePriceRange.TabIndex = 10;
-            this.ConfigUpdatePriceRange.Text = "Update price range";
+            this.ConfigUpdatePriceRangel.AutoSize = true;
+            this.ConfigUpdatePriceRangel.Location = new System.Drawing.Point(10, 95);
+            this.ConfigUpdatePriceRangel.Name = "ConfigUpdatePriceRangel";
+            this.ConfigUpdatePriceRangel.Size = new System.Drawing.Size(107, 15);
+            this.ConfigUpdatePriceRangel.TabIndex = 10;
+            this.ConfigUpdatePriceRangel.Text = "Update price range";
             // 
-            // ConfigIntervalOfAnalysis
+            // ConfigIntervalOfAnalysisl
             // 
-            this.ConfigIntervalOfAnalysis.AutoSize = true;
-            this.ConfigIntervalOfAnalysis.Location = new System.Drawing.Point(12, 160);
-            this.ConfigIntervalOfAnalysis.Name = "ConfigIntervalOfAnalysis";
-            this.ConfigIntervalOfAnalysis.Size = new System.Drawing.Size(131, 20);
-            this.ConfigIntervalOfAnalysis.TabIndex = 11;
-            this.ConfigIntervalOfAnalysis.Text = "Interval of analysis";
+            this.ConfigIntervalOfAnalysisl.AutoSize = true;
+            this.ConfigIntervalOfAnalysisl.Location = new System.Drawing.Point(10, 120);
+            this.ConfigIntervalOfAnalysisl.Name = "ConfigIntervalOfAnalysisl";
+            this.ConfigIntervalOfAnalysisl.Size = new System.Drawing.Size(104, 15);
+            this.ConfigIntervalOfAnalysisl.TabIndex = 11;
+            this.ConfigIntervalOfAnalysisl.Text = "Interval of analysis";
             // 
-            // ConfigToken
+            // ConfigTokenl
             // 
-            this.ConfigToken.AutoSize = true;
-            this.ConfigToken.Location = new System.Drawing.Point(12, 193);
-            this.ConfigToken.Name = "ConfigToken";
-            this.ConfigToken.Size = new System.Drawing.Size(48, 20);
-            this.ConfigToken.TabIndex = 12;
-            this.ConfigToken.Text = "Token";
+            this.ConfigTokenl.AutoSize = true;
+            this.ConfigTokenl.Location = new System.Drawing.Point(10, 145);
+            this.ConfigTokenl.Name = "ConfigTokenl";
+            this.ConfigTokenl.Size = new System.Drawing.Size(38, 15);
+            this.ConfigTokenl.TabIndex = 12;
+            this.ConfigTokenl.Text = "Token";
             // 
             // TradeBotUI
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(302, 304);
+            this.ClientSize = new System.Drawing.Size(264, 228);
+            this.Controls.Add(this.ConfigTokenl);
+            this.Controls.Add(this.ConfigIntervalOfAnalysisl);
+            this.Controls.Add(this.ConfigUpdatePriceRangel);
+            this.Controls.Add(this.ConfigVolumeOfContractsl);
+            this.Controls.Add(this.ConfigRequiredProfitl);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.ConfigToken);
             this.Controls.Add(this.ConfigIntervalOfAnalysis);
             this.Controls.Add(this.ConfigUpdatePriceRange);
             this.Controls.Add(this.ConfigVolumeOfContracts);
             this.Controls.Add(this.ConfigRequiredProfit);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.textBox6);
-            this.Controls.Add(this.textBox5);
-            this.Controls.Add(this.textBox4);
-            this.Controls.Add(this.textBox3);
-            this.Controls.Add(this.textBox2);
             this.Controls.Add(this.ConfigAvailableBalance);
             this.Controls.Add(this.StartButton);
+            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "TradeBotUI";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "TradeBot";
@@ -180,17 +194,17 @@ namespace UI
 
         private System.Windows.Forms.Button StartButton;
         private System.Windows.Forms.TextBox ConfigAvailableBalance;
-        private System.Windows.Forms.TextBox textBox2;
-        private System.Windows.Forms.TextBox textBox3;
-        private System.Windows.Forms.TextBox textBox4;
-        private System.Windows.Forms.TextBox textBox5;
-        private System.Windows.Forms.TextBox textBox6;
+        private System.Windows.Forms.TextBox ConfigRequiredProfit;
+        private System.Windows.Forms.TextBox ConfigVolumeOfContracts;
+        private System.Windows.Forms.TextBox ConfigUpdatePriceRange;
+        private System.Windows.Forms.TextBox ConfigIntervalOfAnalysis;
+        private System.Windows.Forms.TextBox ConfigToken;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label ConfigRequiredProfit;
-        private System.Windows.Forms.Label ConfigVolumeOfContracts;
-        private System.Windows.Forms.Label ConfigUpdatePriceRange;
-        private System.Windows.Forms.Label ConfigIntervalOfAnalysis;
-        private System.Windows.Forms.Label ConfigToken;
+        private System.Windows.Forms.Label ConfigRequiredProfitl;
+        private System.Windows.Forms.Label ConfigVolumeOfContractsl;
+        private System.Windows.Forms.Label ConfigUpdatePriceRangel;
+        private System.Windows.Forms.Label ConfigIntervalOfAnalysisl;
+        private System.Windows.Forms.Label ConfigTokenl;
     }
 }
 
