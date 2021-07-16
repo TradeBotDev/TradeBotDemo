@@ -7,15 +7,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using TradeMarket.Facade;
+
 
 namespace UI
 {
-    public partial class Form1 : Form
+    public partial class TradeBotUI : Form
     {
-        public Form1()
+        public TradeBotUI()
         {
             InitializeComponent();
         }
 
+        private void StartButton_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
