@@ -15,9 +15,8 @@ namespace Relay.Clients
     {
         private IAsyncStreamReader<SubscribeOrdersResponse> _stream;
 
-        public TradeMarketClientService(GrpcChannel channel)
+        public TradeMarketClientService(TradeMarketService.TradeMarketServiceClient client)
         {
-            var client = new TradeMarketService.TradeMarketServiceClient(channel);
             _stream = client.SubscribeOrders(new SubscribeOrdersRequest()
             {
                 Request = new TradeBot.Common.v1.SubscribeOrdersRequest()
