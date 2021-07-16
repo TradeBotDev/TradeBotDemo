@@ -12,12 +12,10 @@ namespace Former.Services
 {
     public class Observer
     {
-        static List<string> SuccessfulOrders = new();
+        static Dictionary<string, double> SuccessfulOrders = new();
         public static async void ObserveAlgorithm()
         {
-            await Task.Delay(10000);
-            using var AlgorithmChannel = GrpcChannel.ForAddress("https://localhost:5001");
-            var algorithmClient = new AlgorithmService.AlgorithmServiceClient(AlgorithmChannel);
+            var algorithmClient = new AlgorithmService.AlgorithmServiceClient(Channels.AlgorithmChannel);
             using var call = algorithmClient.SubscribePurchasePrice(new SubscribePurchasePriceRequest());
             while (await call.ResponseStream.MoveNext())
             {
@@ -41,26 +39,25 @@ namespace Former.Services
                 }
 
             };
-            await Task.Delay(10000);
             using var call = tradeMarketClient.SubscribeOrders(request);
             while (await call.ResponseStream.MoveNext())
             {
-                Former.UpdateCurrentOrders(call.ResponseStream.Current.Response);
+                Former.UpdateCurrentOrders(call.ResponseStream.Current);
             }
             //TODO выход из цикла и дальнейшее закрытие канала
         }
-        public static async Task SendShopingList(List<string> shoppingList)
+        public static async Task SendShopingList(Dictionary<string, double> shoppingList)
         {
             SuccessfulOrders.Clear();
             var client = new TradeMarketService.TradeMarketServiceClient(Channels.TradeMarketChannel);
             CloseOrderResponse response;
             foreach (var order in shoppingList)
             {
-                response = await client.CloseOrderAsync(new CloseOrderRequest() { Id = order });
+                response = await client.CloseOrderAsync(new CloseOrderRequest() { Id = order.Key });
                 Console.Write("\nRequested to buy {0}", order);
                 if (response.Response.Code == ReplyCode.Succeed)
                 {
-                    SuccessfulOrders.Add(order);
+                    SuccessfulOrders.Add(order.Key, order.Value);
                     Console.Write(" ...purchased");
                 }
                 else Console.Write(" ...not purchased");
@@ -74,8 +71,8 @@ namespace Former.Services
             PlaceOrderResponse response;
             foreach (var order in SuccessfulOrders)
             {
-                response = await client.PlaceOrderAsync(new PlaceOrderRequest() { Price = 30, Value = 2 });
-                Console.Write("\nPlace order {0}", order);
+                response = await client.PlaceOrderAsync(new PlaceOrderRequest() { Price = order.Value, Value = 2 });
+                Console.Write("\nPlace order {0}", order.Key);
                 if (response.Response.Code == ReplyCode.Succeed)
                 {
                     Console.Write(" ...order placed\n");
@@ -83,7 +80,6 @@ namespace Former.Services
                 else Console.Write(" ...order not placed\n");
             }
         }
-
 
         //public static async void ObserveMyOrders(string id) 
         //{
