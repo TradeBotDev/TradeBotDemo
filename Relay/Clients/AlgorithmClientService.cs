@@ -50,6 +50,12 @@ namespace Relay.Clients
 
         }
 
+        public AlgorithmClientService(AlgorithmClientService other)
+        {
+            _client = other._client;
+            _stream = other._stream;
+        }
+
         public async Task WriteOrder(IClientStreamWriter<AddOrderRequest> writer, Order order)
         {
             try

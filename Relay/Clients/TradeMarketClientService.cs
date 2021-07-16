@@ -31,6 +31,11 @@ namespace Relay.Clients
             }).ResponseStream;
         }
 
+        public TradeMarketClientService(TradeMarketClientService other)
+        {
+            _stream = other._stream;
+        }
+
         public delegate void OrderRecieved(object sender, OrderRecievedEventArgs args);
 
         public class OrderRecievedEventArgs
