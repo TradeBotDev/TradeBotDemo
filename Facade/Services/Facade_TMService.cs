@@ -74,12 +74,13 @@ namespace Facade
                 });
             }
         }
+
+        
         public override Task<StartBotResponse> StartBotRPC(StartBotRequest request, ServerCallContext context)
         {
             System.Console.WriteLine("Вызов метода StartBot с параметром: " + request.Config.ToString());
             try
             {
-
                 var response = clientRelay.StartBot(new TradeBot.Relay.RelayService.v1.StartBotRequest{ Config = request.Config });
 
                 System.Console.WriteLine("Возврат значения из StartBot: " + response.Response.ToString());
