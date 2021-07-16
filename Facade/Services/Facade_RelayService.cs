@@ -51,10 +51,12 @@ namespace Facade
 
         public override async Task SubscribeLogs(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
         {
-            var response = clientRelay.SubscribeLogs(new TradeBot.Relay.RelayService.v1.SubscribeLogsRequest { Request=request.R});
-
+            var response = clientRelay.SubscribeLogs(new TradeBot.Relay.RelayService.v1.SubscribeLogsRequest { Request=request.R},cancellationToken: context.CancellationToken);
+            
             while (await response.ResponseStream.MoveNext())
             {
+                //токен на эксепшен
+                context.CancellationToken.ThrowIfCancellationRequested();
                 await responseStream.WriteAsync(new SubscribeLogsResponse
                 {
                     Response = response.ResponseStream.Current.Response
