@@ -34,6 +34,17 @@ service FacadeService{
 	//TODO в каждом сервисе нужно написать 
 	rpc SubscribeLogs(SubscribeLogsRequest) returns (stream SubscribeLogsResponse);
 
+	/*
+		Старт бота
+	*/
+	rpc StartBotRPC (StartBotRequest) returns (StartBotResponse);
+}
+message StartBotRequest {
+	tradebot.common.v1.Config config = 1;
+}
+
+message StartBotResponse {
+	tradebot.common.v1.DefaultResponse response = 1;
 }
 
 message SubscribeLogsRequest{

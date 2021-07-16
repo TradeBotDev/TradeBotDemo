@@ -19,25 +19,6 @@ service RelayService{
 	//TODO в каждом сервисе нужно написать 
 	rpc SubscribeLogs(SubscribeLogsRequest) returns (stream SubscribeLogsResponse);
 
-	/*
-		Перенаправляет стрим закрытых ордеров из ТМа к алгоритму
-	*/	
-	rpc AddOrder (stream AddOrderRequest) returns (AddOrderResponse);
-
-	/*
-		Подписывается на ордера выбранного типа
-	*/
-	rpc SubscribeOrders(SubscribeOrdersRequest) returns (stream SubscribeOrdersResponse);
-}
-
-message SubscribeOrdersRequest{
-	tradebot.common.v1.SubscribeOrdersRequest request = 1;
-	
-}
-
-message SubscribeOrdersResponse{
-	tradebot.common.v1.SubscribeOrdersResponse response = 1;
-
 }
 
 message SubscribeLogsRequest{
