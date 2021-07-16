@@ -12,8 +12,7 @@ namespace Former.Services
     {
         public static void Main(string[] args)
         {
-            Observer.ObserveAlgorithm();
-            Observer.ObserveTradeMarket();
+            TradeMarketClient.ObserveTradeMarket();
             CreateHostBuilder(args).Build().Run();
         }
 
