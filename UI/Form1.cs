@@ -11,7 +11,7 @@ using System.Windows.Forms;
 using TradeBot.Facade.FacadeService.v1;
 using TradeBot.Relay.RelayService.v1;
 using TradeBot.Common.v1;
-
+using StartBotRequest = TradeBot.Relay.RelayService.v1.StartBotRequest;
 
 namespace UI
 {
