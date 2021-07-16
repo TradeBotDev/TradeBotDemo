@@ -50,5 +50,9 @@ namespace Relay.Services
         {
             return base.SubscribeLogs(request, responseStream, context);
         }
+        //public async override Task SubscribeOrders(TradeBot.Relay.RelayService.v1.SubscribeOrdersRequest request, IServerStreamWriter<TradeBot.Relay.RelayService.v1.SubscribeOrdersResponse> responseStream, ServerCallContext context)
+        //{
+           
+        //}
     }
 }

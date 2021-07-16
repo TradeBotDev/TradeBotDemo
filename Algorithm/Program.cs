@@ -13,6 +13,7 @@ namespace Algorithm
     {
         public static void Main(string[] args)
         {
+            DataCollector.SendPurchasePrice();
             CreateHostBuilder(args).Build().Run();
         }
         public static IHostBuilder CreateHostBuilder(string[] args) =>

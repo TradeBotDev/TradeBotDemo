@@ -7,24 +7,11 @@ import "tradebot/common/v1/common.proto";
 package tradebot.former.former_service.v1;
 
 service FormerService{
-	/*
-		Покупает ордер по указанному ид и возвращает результат покупики (получилось / не получилось)
-	*/
-	rpc CloseOrder(CloseOrderRequest) returns (CloseOrderResponse);
 
-	/*
-		Запрос на размещение ордера
-	*/
-	rpc PlaceOrder(PlaceOrderRequest) returns (PlaceOrderResponse);
-
-	/*
-		Подписывается на ордера выбранного типа
-	*/
-	rpc SubscribeOrders(SubscribeOrdersRequest) returns (stream SubscribeOrdersResponse);
 	/*
 		подписка на ответ алгоритма
 	*/
-	rpc SubscribePurchasePrice (SubscribePurchasePriceRequest) returns (stream SubscribePurchasePriceResponse);
+	rpc SendPurchasePrice (SendPurchasePriceRequest) returns (SendPurchasePriceResponse);
 	/*
 		Клиент говорит обновиться серверу
 	*/
@@ -40,13 +27,13 @@ message UpdateServerConfigResponse{
 	google.protobuf.Empty empty = 1;
 }
 
-message SubscribePurchasePriceRequest
-{
-	google.protobuf.Empty empty = 1;
-}
-message SubscribePurchasePriceResponse
+message SendPurchasePriceRequest
 {
 	double purchase_price = 1;
+}
+message SendPurchasePriceResponse
+{
+	google.protobuf.Empty empty = 1;
 }
 
 message SubscribeLogsRequest{
@@ -55,26 +42,4 @@ message SubscribeLogsRequest{
 
 message SubscribeLogsResponse{
 	tradebot.common.v1.SubscribeLogsResponse response = 1;
-}
-
-message PlaceOrderRequest{
-	double price = 1;
-	double value = 2;
-}
-message PlaceOrderResponse{
-	tradebot.common.v1.DefaultResponse response = 1;
-}
-
-message CloseOrderRequest{
-	string id = 1;
-}
-message CloseOrderResponse{
-	tradebot.common.v1.DefaultResponse response = 1;
-}
-message SubscribeOrdersRequest{
-	tradebot.common.v1.OrderSignature signature = 1; 
-}
-
-message SubscribeOrdersResponse{
-	tradebot.common.v1.Order Order = 1;
 }
