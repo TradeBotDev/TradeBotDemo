@@ -16,12 +16,12 @@ using TradeBot.TradeMarket.TradeMarketService.v1;
 
 namespace Relay
 {
-    class Relay : RelayService.RelayServiceBase
+    public class Relay : RelayService.RelayServiceBase
     {
         private readonly ILogger<Relay> _logger;
         public Relay(ILogger<Relay> logger) => _logger = logger;
 
-        private ObservableCollection<Order> orders = new ObservableCollection<Order>();
+        private static ObservableCollection<Order> orders = new ObservableCollection<Order>();
 
         private bool IsStarted = true;
         private Config config;
@@ -32,11 +32,11 @@ namespace Relay
             StartBotResponse result = new StartBotResponse();
             IsStarted = !IsStarted;
             result.Response.Code = ReplyCode.Succeed;
+
             if (IsStarted) result.Response.Message = "Бот успешно запущен";
-            else
-            {
-                result.Response.Message = "Бот выключен";
-            }
+            else result.Response.Message = "Бот выключен";
+            Console.WriteLine(result.Response.Message);
+
             return Task.FromResult<StartBotResponse>(result);
         }
 
@@ -46,6 +46,7 @@ namespace Relay
         {
             this.config = request.Request.Config;
             var response = new TradeBot.Relay.RelayService.v1.UpdateServerConfigResponse();
+            Console.WriteLine("Конфиг в Relay был обновлен");
             return Task.FromResult(response);
         }
 
@@ -56,6 +57,8 @@ namespace Relay
             return base.SubscribeLogs(request, responseStream, context);
         }
 
+
+        
         //ДОПИСАН
         public override async Task<TradeBot.Relay.RelayService.v1.AddOrderResponse> AddOrder(IAsyncStreamReader<TradeBot.Relay.RelayService.v1.AddOrderRequest> requestStream,
             ServerCallContext context)
@@ -63,16 +66,20 @@ namespace Relay
             GrpcChannel channel = GrpcChannel.ForAddress("https://localhost:5001");
             var client = new AlgorithmService.AlgorithmServiceClient(channel);
             var stream = client.AddOrder();
+
             orders.CollectionChanged += async (source, args) =>
             {
                 await writeToStreamAsync(stream, args.NewItems);
+                Console.WriteLine(args.NewItems);
             };
-            while (await requestStream.MoveNext())
-            {
-                var request = new TradeBot.Algorithm.AlgorithmService.v1.AddOrderRequest();
-                request.Order = requestStream.Current.Order;
-                await stream.RequestStream.WriteAsync(request);
-            }
+
+            //while (await requestStream.MoveNext())
+            //{
+            //    var request = new TradeBot.Algorithm.AlgorithmService.v1.AddOrderRequest();
+            //    request.Order = requestStream.Current.Order;
+            //    await stream.RequestStream.WriteAsync(request);
+            //    Console.WriteLine($"Товар {request.Order.Id} отправлен алгоритму");
+            //}
             //await stream.RequestStream.CompleteAsync();
 
             var response = new TradeBot.Relay.RelayService.v1.AddOrderResponse();
@@ -90,32 +97,36 @@ namespace Relay
                 }); 
             }
         }
-
-
-        public async  override Task SubscribeOrders(TradeBot.Relay.RelayService.v1.SubscribeOrdersRequest request, IServerStreamWriter<TradeBot.Relay.RelayService.v1.SubscribeOrdersResponse> responseStream, ServerCallContext context)
+        public async static void SubscribeToTM() 
         {
             GrpcChannel channel = GrpcChannel.ForAddress("https://localhost:5005");
             var trademarketclient = new TradeMarketService.TradeMarketServiceClient(channel);
+
             var orderSignature = new OrderSignature
             {
                 Status = OrderStatus.Closed,
                 //TODO пока только на продажу
                 Type = OrderType.Sell
             };
+
             var orderRequest = new TradeBot.TradeMarket.TradeMarketService.v1.SubscribeOrdersRequest()
             {
                 Request = new TradeBot.Common.v1.SubscribeOrdersRequest
                 {
                     Signature = orderSignature
-                 }
+                }
             };
 
             using var call = trademarketclient.SubscribeOrders(orderRequest);
             while (await call.ResponseStream.MoveNext())
             {
                 orders.Add(call.ResponseStream.Current.Response.Order);
+                Console.WriteLine($"Получен товар {call.ResponseStream.Current.Response.Order.Id} из TradeMarket");
             }
-           
         }
+        //public async override Task SubscribeOrders(TradeBot.Relay.RelayService.v1.SubscribeOrdersRequest request, IServerStreamWriter<TradeBot.Relay.RelayService.v1.SubscribeOrdersResponse> responseStream, ServerCallContext context)
+        //{
+           
+        //}
     }
 }

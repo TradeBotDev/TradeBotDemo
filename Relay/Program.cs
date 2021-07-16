@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using TradeBot.Relay.RelayService.v1;
 
 namespace Relay
 {
@@ -12,6 +13,7 @@ namespace Relay
     {
         public static void Main(string[] args)
         {
+            Relay.SubscribeToTM();
             CreateHostBuilder(args).Build().Run();
         }
 

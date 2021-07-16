@@ -32,6 +32,7 @@ namespace Relay
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapGrpcService<GreeterService>();
+                endpoints.MapGrpcService<Relay>();
 
                 endpoints.MapGet("/", async context =>
                 {
