@@ -3,28 +3,27 @@ using Grpc.Net.Client;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
-using TradeBot.Relay.RelayService.v1;
-using static TradeBot.Relay.RelayService.v1.RelayService;
+using TradeBot.Facade.FacadeService.v1;
 
 namespace Facade
 {
-    public class FacadeRelayService : TradeBot.Relay.RelayService.v1.RelayService.RelayServiceBase
+    public class FacadeRelayService : TradeBot.Facade.FacadeService.v1.FacadeService.FacadeServiceBase
     {
-        private RelayServiceClient clientRelay = new RelayServiceClient(GrpcChannel.ForAddress("https://localhost:5004"));
+        private TradeBot.Relay.RelayService.v1.RelayService.RelayServiceClient clientRelay = new TradeBot.Relay.RelayService.v1.RelayService.RelayServiceClient(GrpcChannel.ForAddress("https://localhost:5004"));
         private readonly ILogger<FacadeRelayService> _logger;
         public FacadeRelayService(ILogger<FacadeRelayService> logger)
         {
             _logger = logger;
         }
 
-        public override Task<StartBotResponse> StartBot(StartBotRequest request, ServerCallContext context)
+        public override Task<StartBotResponse> StartBotRPC(StartBotRequest request, ServerCallContext context)
         {
             System.Console.WriteLine("Вызов метода StartBot с параметром: " + request.Config.ToString());
 
             try
             {
 
-                var response = clientRelay.StartBot(new StartBotRequest { Config = request.Config });
+                var response = clientRelay.StartBot(new TradeBot.Relay.RelayService.v1.StartBotRequest { Config = request.Config });
 
                 System.Console.WriteLine("Возврат значения из StartBot: " + response.Response.ToString());
 
@@ -52,10 +51,12 @@ namespace Facade
 
         public override async Task SubscribeLogs(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
         {
-            var response = clientRelay.SubscribeLogs(request);
-
+            var response = clientRelay.SubscribeLogs(new TradeBot.Relay.RelayService.v1.SubscribeLogsRequest { Request=request.R},cancellationToken: context.CancellationToken);
+            
             while (await response.ResponseStream.MoveNext())
             {
+                //токен на эксепшен
+                context.CancellationToken.ThrowIfCancellationRequested();
                 await responseStream.WriteAsync(new SubscribeLogsResponse
                 {
                     Response = response.ResponseStream.Current.Response
