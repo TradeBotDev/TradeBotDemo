@@ -27,7 +27,7 @@ namespace Relay
             //services.AddGrpcClient<TradeMarketService.TradeMarketServiceClient>(x => x.Address = new Uri("https//localhost:5005"));
            /* services.AddGrpcClient<AlgorithmClientService>(options =>
             {
-                options.Address = new Uri("https//localhost:5001");
+                options.Address = new Uri("https://localhost:5001");
             });
             services.AddGrpcClient<TradeMarketClientService>(options =>
             {
