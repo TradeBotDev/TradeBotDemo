@@ -13,7 +13,7 @@ namespace Algorithm.Services
     public class AlgorithmService : TradeBot.Algorithm.AlgorithmService.v1.AlgorithmService.AlgorithmServiceBase
     {
         private static IServerStreamWriter<SubscribePurchasePriceResponse> streamWriter;
-        public override async Task SubscribePurchasePrice(SubscribePurchasePriceRequest request, IServerStreamWriter<SubscribePurchasePriceResponse> sw, ServerCallContext context)
+        public override async Task SubscribePurchasePrice(SubscribePurchasePriceRequest request, ServerCallContext context)
         {
             streamWriter = sw;
             AlgorithmEmulator algo = new AlgorithmEmulator();

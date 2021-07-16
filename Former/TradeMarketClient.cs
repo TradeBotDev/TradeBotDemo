@@ -10,22 +10,14 @@ using SubscribeOrdersRequest = TradeBot.TradeMarket.TradeMarketService.v1.Subscr
 
 namespace Former.Services
 {
-    public class Observer
+    public class TradeMarketClient
     {
-        static Dictionary<string, double> SuccessfulOrders = new();
-        public static async void ObserveAlgorithm()
-        {
-            var algorithmClient = new AlgorithmService.AlgorithmServiceClient(Channels.AlgorithmChannel);
-            using var call = algorithmClient.SubscribePurchasePrice(new SubscribePurchasePriceRequest());
-            while (await call.ResponseStream.MoveNext())
-            {
-                Former.FormShoppingList(call.ResponseStream.Current.PurchasePrice);
-            }
-            //TODO выход из цикла и дальнейшее закрытие канала
-        }
+        private static GrpcChannel TradeMarketChannel = GrpcChannel.ForAddress("https://localhost:5005");
+        private static TradeMarketService.TradeMarketServiceClient Client = new TradeMarketService.TradeMarketServiceClient(TradeMarketChannel);
+        private static Dictionary<string, double> SuccessfulOrders = new();
+        
         public static async void ObserveTradeMarket()
-        {
-            var tradeMarketClient = new TradeMarketService.TradeMarketServiceClient(Channels.TradeMarketChannel);
+        {  
             var orderSignature = new OrderSignature
             {
                 Status = OrderStatus.Open,
@@ -39,7 +31,7 @@ namespace Former.Services
                 }
 
             };
-            using var call = tradeMarketClient.SubscribeOrders(request);
+            using var call = Client.SubscribeOrders(request);
             while (await call.ResponseStream.MoveNext())
             {
                 Former.UpdateCurrentOrders(call.ResponseStream.Current);
@@ -49,11 +41,10 @@ namespace Former.Services
         public static async Task SendShopingList(Dictionary<string, double> shoppingList)
         {
             SuccessfulOrders.Clear();
-            var client = new TradeMarketService.TradeMarketServiceClient(Channels.TradeMarketChannel);
             CloseOrderResponse response;
             foreach (var order in shoppingList)
             {
-                response = await client.CloseOrderAsync(new CloseOrderRequest() { Id = order.Key });
+                response = await Client.CloseOrderAsync(new CloseOrderRequest() { Id = order.Key });
                 Console.Write("\nRequested to buy {0}", order);
                 if (response.Response.Code == ReplyCode.Succeed)
                 {
@@ -67,11 +58,10 @@ namespace Former.Services
         }
         public static async void PlaceSuccessfulOrders()
         {
-            var client = new TradeMarketService.TradeMarketServiceClient(Channels.TradeMarketChannel);
             PlaceOrderResponse response;
             foreach (var order in SuccessfulOrders)
             {
-                response = await client.PlaceOrderAsync(new PlaceOrderRequest() { Price = order.Value, Value = 2 });
+                response = await Client.PlaceOrderAsync(new PlaceOrderRequest() { Price = order.Value, Value = 2 });
                 Console.Write("\nPlace order {0}", order.Key);
                 if (response.Response.Code == ReplyCode.Succeed)
                 {

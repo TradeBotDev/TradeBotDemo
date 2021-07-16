@@ -16,7 +16,7 @@ service AlgorithmService {
 	/*
 		подписка на ответ алгоритма
 	*/
-	rpc SubscribePurchasePrice (SubscribePurchasePriceRequest) returns (stream SubscribePurchasePriceResponse);
+	rpc SubscribePurchasePrice (SubscribePurchasePriceRequest) returns (SubscribePurchasePriceResponse);
 
 	/*
 		Клиент говорит обновиться серверу

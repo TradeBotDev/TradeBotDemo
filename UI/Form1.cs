@@ -48,11 +48,13 @@ namespace UI
             {
                 Token = ConfigToken.Text
             };
-            var call1 = await facadeClient.AuthenticateTokenAsync(requestForFacade);
-            Console.WriteLine("Выслал facade: {0}", requestForFacade.Token);
-
             var call2 = await relayClient.StartBotAsync(requestForRelay);
             Console.WriteLine("Запустил бота с конфигом {0}", requestForRelay.Config);
+
+            var call1 = await facadeClient.AuthenticateTokenAsync(requestForFacade);
+            Console.WriteLine("Выслал в facade: {0}", requestForFacade.Token);
+
+            
         }
     }
 }
