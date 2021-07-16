@@ -21,9 +21,10 @@ namespace Algorithm.Services
             
             while (true) 
             {
-                Thread.Sleep(rnd.Next(0, 10000));
-                await streamWriter.WriteAsync(new SubscribePurchasePriceResponse { PurchasePrice = algo.CalculateSuggestedPrice() });
-                Console.WriteLine("Sent something");
+                Thread.Sleep(rnd.Next(0, 5000));
+                double newPrice = algo.CalculateSuggestedPrice();
+                await streamWriter.WriteAsync(new SubscribePurchasePriceResponse { PurchasePrice = newPrice });
+                Console.WriteLine("Sent " + newPrice);
             }
 
         }
@@ -33,7 +34,7 @@ namespace Algorithm.Services
             {
                 var order = requestStream.Current;
                 DataCollector.orders.Add(order.Order);
-                Console.WriteLine("Got something");
+                Console.WriteLine("Got " + order.Order.Id);
             }
             return new AddOrderResponse();
         }

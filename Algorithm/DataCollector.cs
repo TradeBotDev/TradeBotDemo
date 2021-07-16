@@ -9,6 +9,7 @@ namespace Algorithm
     public static class DataCollector
     {
         public static List<Order> orders;
+        public static bool initialAnalysisCompleted;
 
     }
 }
