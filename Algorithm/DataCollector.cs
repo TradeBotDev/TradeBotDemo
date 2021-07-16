@@ -12,10 +12,15 @@ namespace Algorithm
 {
     public class DataCollector
     {
-        public List<Order> orders;
-        public bool initialAnalysisCompleted;
+        public  List<Order> orders;
+        public  bool initialAnalysisCompleted;
 
-        public static void SendPurchasePrice()
+        public DataCollector()
+        {
+            orders = new List<Order>();
+        }
+
+        public static async Task SendPurchasePrice()
         {
             using var channel = GrpcChannel.ForAddress("https://localhost:5003");
             var client = new FormerService.FormerServiceClient(channel);
