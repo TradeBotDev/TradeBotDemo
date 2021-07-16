@@ -59,5 +59,10 @@ namespace UI
             var call2 = facadeClient.StartBotRPC(requestForRelay);
             Console.WriteLine("Запустил бота с конфигом {0}", requestForRelay.Config);
         }
+
+        private void TradeBotUI_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

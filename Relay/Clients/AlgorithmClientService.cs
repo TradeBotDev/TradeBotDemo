@@ -7,7 +7,7 @@ using Grpc.Net.Client;
 using TradeBot.Algorithm.AlgorithmService.v1;
 using TradeBot.Common.v1;
 using UpdateServerConfigRequest = TradeBot.Algorithm.AlgorithmService.v1.UpdateServerConfigRequest;
-
+using Grpc.Net.ClientFactory;
 namespace Relay.Clients
 {
     public class AlgorithmClientService
@@ -40,20 +40,15 @@ namespace Relay.Clients
             await WriteOrder(_stream, args.Recieved);
         }
 
-    private readonly IClientStreamWriter<AddOrderRequest> _stream;
+        private readonly IClientStreamWriter<AddOrderRequest> _stream;
         private readonly AlgorithmService.AlgorithmServiceClient _client;
+        
         public AlgorithmClientService(Uri uri)
         {
            
             _client = new AlgorithmService.AlgorithmServiceClient(GrpcChannel.ForAddress(uri));
             _stream = _client.AddOrder().RequestStream;
 
-        }
-
-        public AlgorithmClientService(AlgorithmClientService other)
-        {
-            _client = other._client;
-            _stream = other._stream;
         }
 
         public async Task WriteOrder(IClientStreamWriter<AddOrderRequest> writer, Order order)

@@ -25,11 +25,11 @@ namespace Relay.Services
             _tradeMarketClient = tradeMarket;
         }
 
-        public override Task<StartBotResponse> StartBot(StartBotRequest request, ServerCallContext context)
+        public override async Task<StartBotResponse> StartBot(StartBotRequest request, ServerCallContext context)
         {
             _algorithmClient.IsOn = true;
-            _tradeMarketClient.ReadOrders().Start();
-            return Task.FromResult(new StartBotResponse()
+            var readOrderTask = _tradeMarketClient.ReadOrders();
+            return await Task.FromResult(new StartBotResponse()
             {
                 Response = new DefaultResponse()
                 {

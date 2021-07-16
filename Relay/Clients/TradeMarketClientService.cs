@@ -11,7 +11,7 @@ using SubscribeOrdersResponse = TradeBot.TradeMarket.TradeMarketService.v1.Subsc
 
 namespace Relay.Clients
 {
-    public class TradeMarketClientService
+    public class TradeMarketClientService 
     {
         private IAsyncStreamReader<SubscribeOrdersResponse> _stream;
 
