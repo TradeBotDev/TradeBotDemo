@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Relay.Clients;
+using Relay.Services;
 
 namespace Relay
 {
@@ -17,6 +19,9 @@ namespace Relay
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddGrpc();
+            services.AddGrpcClient<AlgorithmClientService>();
+            services.AddGrpcClient<TradeMarketClientService>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -32,7 +37,7 @@ namespace Relay
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapGrpcService<GreeterService>();
-                endpoints.MapGrpcService<Relay>();
+                endpoints.MapGrpcService<RelayService>();
 
                 endpoints.MapGet("/", async context =>
                 {
