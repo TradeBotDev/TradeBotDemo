@@ -10,10 +10,10 @@ using TradeBot.Former.FormerService.v1;
 
 namespace Algorithm
 {
-    public static class DataCollector
+    public class DataCollector
     {
-        public static List<Order> orders;
-        public static bool initialAnalysisCompleted;
+        public List<Order> orders;
+        public bool initialAnalysisCompleted;
 
         public static void SendPurchasePrice()
         {
