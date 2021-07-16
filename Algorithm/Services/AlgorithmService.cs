@@ -11,9 +11,7 @@ namespace Algorithm.Services
 {
 
     public class AlgorithmService : TradeBot.Algorithm.AlgorithmService.v1.AlgorithmService.AlgorithmServiceBase
-    {
-        private static IServerStreamWriter<SubscribePurchasePriceResponse> streamWriter;
-        
+    {       
         public override async Task<AddOrderResponse> AddOrder(IAsyncStreamReader<AddOrderRequest> requestStream, ServerCallContext context)
         {
             while (await requestStream.MoveNext())
