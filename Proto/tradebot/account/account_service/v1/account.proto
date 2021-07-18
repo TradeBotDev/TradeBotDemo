@@ -1,32 +1,32 @@
-syntax = "proto3";
+п»їsyntax = "proto3";
 
 option csharp_namespace = "TradeBot.Account.AccountService.v1";
 
 package tradebot.account.account_service.v1;
 
 service AcountService {
-	//Сервис для входа в аккаунт или его регистрации.
-	rpc Login (LoginRequest) returns (LoginReply); //Метод входа в аккаунт
-	rpc Register (RegisterRequest) returns (RegisterReply); //Метод регистрации аккаунта
-	rpc IsValidSession (SessionRequest) returns (SessionReply); //Проверка текущего пользователя на валидность по Id сессии
-	rpc CurrentUserData (SessionRequest) returns (CurrentUserReply); //Получение данных текущего пользователя
+	//РЎРµСЂРІРёСЃ РґР»СЏ РІС…РѕРґР° РІ Р°РєРєР°СѓРЅС‚ РёР»Рё РµРіРѕ СЂРµРіРёСЃС‚СЂР°С†РёРё.
+	rpc Login (LoginRequest) returns (LoginReply); //РњРµС‚РѕРґ РІС…РѕРґР° РІ Р°РєРєР°СѓРЅС‚
+	rpc Register (RegisterRequest) returns (RegisterReply); //РњРµС‚РѕРґ СЂРµРіРёСЃС‚СЂР°С†РёРё Р°РєРєР°СѓРЅС‚Р°
+	rpc IsValidSession (SessionRequest) returns (SessionReply); //РџСЂРѕРІРµСЂРєР° С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РЅР° РІР°Р»РёРґРЅРѕСЃС‚СЊ РїРѕ Id СЃРµСЃСЃРёРё
+	rpc CurrentUserData (SessionRequest) returns (CurrentUserReply); //РџРѕР»СѓС‡РµРЅРёРµ РґР°РЅРЅС‹С… С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
 }
 
 message LoginRequest {
-	//Данные для входа в аккаунт.
+	//Р”Р°РЅРЅС‹Рµ РґР»СЏ РІС…РѕРґР° РІ Р°РєРєР°СѓРЅС‚.
 	string email = 1;
 	string password = 2;
 }
 
 message LoginReply {
-	//Ответ на запрос о входе в аккаунт.
+	//РћС‚РІРµС‚ РЅР° Р·Р°РїСЂРѕСЃ Рѕ РІС…РѕРґРµ РІ Р°РєРєР°СѓРЅС‚.
 	ActionCode result = 1;
 	string message = 2;
 	int32 session_id = 3;
 }
 
 message RegisterRequest {
-	//Данные для регистрации аккаунта.
+	//Р”Р°РЅРЅС‹Рµ РґР»СЏ СЂРµРіРёСЃС‚СЂР°С†РёРё Р°РєРєР°СѓРЅС‚Р°.
 	string email = 1;
 	string firstname = 2;
 	string lastname = 3;
@@ -36,31 +36,31 @@ message RegisterRequest {
 }
 
 message RegisterReply {
-	//Ответ на запрос о регистрации аккаунта.
+	//РћС‚РІРµС‚ РЅР° Р·Р°РїСЂРѕСЃ Рѕ СЂРµРіРёСЃС‚СЂР°С†РёРё Р°РєРєР°СѓРЅС‚Р°.
 	ActionCode result = 1;
 	string message = 2;
 }
 
 message SessionRequest {
-	//Запрос на передачу сессии.
+	//Р—Р°РїСЂРѕСЃ РЅР° РїРµСЂРµРґР°С‡Сѓ СЃРµСЃСЃРёРё.
 	int32 session_id = 1;
 }
 
 message SessionReply {
-	//Результат проверки сессии на валидность.
+	//Р РµР·СѓР»СЊС‚Р°С‚ РїСЂРѕРІРµСЂРєРё СЃРµСЃСЃРёРё РЅР° РІР°Р»РёРґРЅРѕСЃС‚СЊ.
 	bool is_valid = 1;
 	string message = 2;
 }
 
 message CurrentUserReply {
-	//Получение данных текущего пользователя.
+	//РџРѕР»СѓС‡РµРЅРёРµ РґР°РЅРЅС‹С… С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ.
 	ActionCode result = 1;
 	string message = 2;
 	UserInfo current_user = 3;
 }
 
 message UserInfo {
-	//Информация о пользователе, необходимая для отображения в UI
+	//РРЅС„РѕСЂРјР°С†РёСЏ Рѕ РїРѕР»СЊР·РѕРІР°С‚РµР»Рµ, РЅРµРѕР±С…РѕРґРёРјР°СЏ РґР»СЏ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ РІ UI
 	int32 id = 1;
 	string firstname = 2;
 	string lastname = 3;
@@ -70,12 +70,12 @@ message UserInfo {
 
 enum ActionCode {
 	/*
-	* Код результата выполнения входа или регистрации:
-	* 0 - успешное выполнение,
-	* 1 - пользователь не найден,
-	* 2 - пользователь уже существует,
-	* 3 - имеется пустое поле ввода,
-	* 4 - пароли не совпадают.
+	* РљРѕРґ СЂРµР·СѓР»СЊС‚Р°С‚Р° РІС‹РїРѕР»РЅРµРЅРёСЏ РІС…РѕРґР° РёР»Рё СЂРµРіРёСЃС‚СЂР°С†РёРё:
+	* 0 - СѓСЃРїРµС€РЅРѕРµ РІС‹РїРѕР»РЅРµРЅРёРµ,
+	* 1 - РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ РЅР°Р№РґРµРЅ,
+	* 2 - РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚,
+	* 3 - РёРјРµРµС‚СЃСЏ РїСѓСЃС‚РѕРµ РїРѕР»Рµ РІРІРѕРґР°,
+	* 4 - РїР°СЂРѕР»Рё РЅРµ СЃРѕРІРїР°РґР°СЋС‚.
 	*/
 	ACTION_CODE_SUCCESSFUL = 0;
 	ACTION_CODE_USER_NOT_FOUND = 1;
