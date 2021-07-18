@@ -14,7 +14,7 @@ service AcountService {
 
 message LoginRequest {
 	//Данные для входа в аккаунт.
-	string username = 1;
+	string email = 1;
 	string password = 2;
 }
 
@@ -27,11 +27,12 @@ message LoginReply {
 
 message RegisterRequest {
 	//Данные для регистрации аккаунта.
-	string username = 1;
-	string email = 2;
-	int32 phone_number = 3;
-	string password = 4;
-	string verify_password = 5;
+	string email = 1;
+	string firstname = 2;
+	string lastname = 3;
+	int32 phone_number = 4;
+	string password = 5;
+	string verify_password = 6;
 }
 
 message RegisterReply {
@@ -61,9 +62,10 @@ message CurrentUserReply {
 message UserInfo {
 	//Информация о пользователе, необходимая для отображения в UI
 	int32 id = 1;
-	string username = 2;
-	string email = 3;
-	int32 phone_number = 4;
+	string firstname = 2;
+	string lastname = 3;
+	string email = 4;
+	int32 phone_number = 5;
 }
 
 enum ActionCode {

@@ -13,7 +13,7 @@ namespace Account.Validation
         // Метод, который проверяет, являются ли ланные для входа пустыми
         public static (ActionCode, string) LoginFields(LoginRequest request)
         {
-            if (IsEmpty(request.Username, request.Password))
+            if (IsEmpty(request.Email, request.Password))
                 return (ActionCode.EmptyField, Messages.emptyField);
 
             return (ActionCode.Successful, Messages.valid);
@@ -22,7 +22,7 @@ namespace Account.Validation
         // Метод, который проверяет, являются ли ланные для регистрации пустыми
         public static (ActionCode, string) RegisterFields(RegisterRequest request)
         {
-            if (IsEmpty(request.Username, request.Email, request.Password, request.VerifyPassword))
+            if (IsEmpty(request.Email, request.Firstname, request.Lastname, request.Password, request.VerifyPassword))
                 return (ActionCode.EmptyField, Messages.emptyField);
 
             else if (request.Password != request.VerifyPassword)
