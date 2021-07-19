@@ -25,6 +25,11 @@ service TradeMarketService {
 	rpc SubscribeOrders(SubscribeOrdersRequest) returns (stream SubscribeOrdersResponse);
 
 	/*
+		подписка на изменения размещенных ордеров
+	*/
+	rpc SubscribyMyOrders(stream SubscribyMyOrdersRequest) returns (stream SubscribyMyOrdersResponse);
+
+	/*
 		Подписка на изменение баланса пользователя (ЕДИНСТВЕННОГО)
 	*/
 	rpc SubscribeBalance(SubscribeBalanceRequest) returns (stream SubscribeBalanceResponse);
@@ -43,6 +48,16 @@ service TradeMarketService {
 		Подписка на логи нужного сервиса
 	*/
 	rpc SubscribeLogs(SubscribeLogsRequest) returns (stream SubscribeLogsResponse);
+
+}
+
+message SubscribyMyOrdersRequest{
+	string order_id = 1;
+}
+
+message SubscribyMyOrdersResponse {
+	string order_id = 1;
+	tradebot.common.v1.Order changed = 2;
 
 }
 
@@ -66,10 +81,12 @@ message SubscribeLogsResponse{
 
 message SubscribeBalanceRequest{
 	tradebot.common.v1.SubscribeBalanceRequest request = 1;
+	optional string slot_name = 2;
 }
 
 message SubscribeBalanceResponse{
-	tradebot.common.v1.SubscribeBalanceResponse response = 1;
+	optional tradebot.common.v1.Balance balance_one = 2;
+	optional tradebot.common.v1.Balance balance_two = 3;
 }
 
 message PlaceOrderRequest{
