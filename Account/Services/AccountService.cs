@@ -39,11 +39,10 @@ namespace Account
                         Message = Messages.accountNotFound
                     });
 
-
                 return Task.FromResult(new LoginReply
                 {
                     SessionId = 1,
-                    Message = "Вход в аккаунт завершен успешно.",
+                    Message = Messages.successfulLogin,
                     Result = ActionCode.Successful
                 });
             }
@@ -84,7 +83,7 @@ namespace Account
                 return Task.FromResult(new RegisterReply
                 {
                     Result = ActionCode.Successful,
-                    Message = "Регистрация завершена успешно."
+                    Message = Messages.successfulPassword
                 });
             }
         }
