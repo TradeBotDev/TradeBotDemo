@@ -1,14 +1,18 @@
 ﻿using Serilog;
-
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
-using TradeBot.TradeMarket.TradeMarketService.v1;
+using TradeBot.Common.v1;
+using SubscribeOrdersResponse = TradeBot.TradeMarket.TradeMarketService.v1.SubscribeOrdersResponse;
 
 namespace Former
 {
+    class Balances
+    {
+        public double bal1 = 0;
+        public double bal2 = 0;
+    }
+
     public class Former
     {
         public TradeBot.Common.v1.Config Config;
@@ -17,36 +21,52 @@ namespace Former
 
         private readonly TradeMarketClient _tmClient;
 
-        private readonly SortedList<double, SubscribeOrdersResponse> _currentBuyOrders;
+        private readonly List<SubscribeOrdersResponse> _currentPurchaseOrders;
+
+        private readonly List</*cyka*/> _myOrders;
+
+        private readonly Balances balances;
 
         public Former()
         {
             _tmClient = TradeMarketClient.GetInstance();
-            _currentBuyOrders = new SortedList<double, SubscribeOrdersResponse>();
+            _currentPurchaseOrders = new List<SubscribeOrdersResponse>();
         }
 
-        //public async void FormShoppingList(double avgPrice)
-        //{
-        //    Log.Debug("Получено от алгоритма: {price}", avgPrice);
+        public async void FormShoppingList(double avgPrice)
+        {
+            Log.Debug("Получено от алгоритма: {price}", avgPrice);
 
-        //    var selectedOrders = _currentBuyOrders.Where(order => order.Key <= avgPrice);
+            var selectedOrders = _actualPurchaseOrders.Where(order => order.Response.Order.Price <= avgPrice);
 
-        //    var shoppingList = selectedOrders.ToDictionary(order => order.Response.Order.Id, order => avgPrice);
+            var shoppingList = selectedOrders.ToDictionary(order => order.Response.Order.Id, order => avgPrice);
 
-        //    Log.Debug("Сформировал список необходимых ордеров: {elements}", shoppingList.ToArray());
-        //    await _tmClient.SendShoppingList(shoppingList);
-        //}
+            Log.Debug("Сформировал список необходимых ордеров: {elements}", shoppingList.ToArray());
+            await _tmClient.SendShoppingList(shoppingList);
+        }
 
-        //public async void UpdateCurrentOrders(SubscribeOrdersResponse orderNeededUpdate)
-        //{
-        //    Log.Debug("Принял от маркета заказ {id}: цена {price}, количество {value}", orderNeededUpdate.Response.Order.Id, orderNeededUpdate.Response.Order.Price, orderNeededUpdate.Response.Order.Quantity);
+        public async void UpdateCurrentOrders(SubscribeOrdersResponse orderNeededUpdate)
+        {
+            Log.Debug("Принял от маркета заказ {id}: цена {price}, количество {value}", orderNeededUpdate.Response.Order.Id, orderNeededUpdate.Response.Order.Price, orderNeededUpdate.Response.Order.Quantity);
+            var task = Task.Run(() =>
+            {
+                int index = _currentPurchaseOrder_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrderss.FindIndex(x => x.Response.Order.Id == orderNeededUpdate.Response.Order.Id);
+                if (orderNeededUpdate.Response.Order.Signature.Status == OrderStatus.Open)
+                    if (_actualPurchaseOrders.Exists(x => x.Response.Order.Id == orderNeededUpdate.Response.Order.Id))
+                        _actualPurchaseOrders[index] = orderNeededUpdate;
+                    else _actualPurchaseOrders.Add(orderNeededUpdate);
+                else _actualPurchaseOrders.RemoveAt(index);
 
-        //    var task = Task.Run(() =>
-        //    {
-        //        if (orderNeededUpdate.)
-        //    });
-        //    await task;
-        //}
+                _actualPurchaseOrders.Sort(new ReplyComparator());
+            });
+            await task;
+        }
+
+        public void UpdateCurrentBalance(string bal1, string bal2)
+        {
+            balances.bal1 = double.Parse(bal1);
+            balances.bal2 = double.Parse(bal2);
+        }
 
         public class ReplyComparator : IComparer<SubscribeOrdersResponse>
         {

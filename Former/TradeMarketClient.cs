@@ -23,6 +23,7 @@ namespace Former
 
         private readonly Dictionary<string, double> _successfulOrders;
         private readonly TradeMarketService.TradeMarketServiceClient _client;
+        private readonly GrpcChannel _tradeMarketChannel;
 
         public static TradeMarketClient GetInstance()
         {
@@ -37,8 +38,8 @@ namespace Former
         private TradeMarketClient()
         {
             _successfulOrders = new Dictionary<string, double>();
-            var tradeMarketChannel = GrpcChannel.ForAddress(_connectionString);
-            _client = new TradeMarketService.TradeMarketServiceClient(tradeMarketChannel);
+            _tradeMarketChannel = GrpcChannel.ForAddress(_connectionString);
+            _client = new TradeMarketService.TradeMarketServiceClient(_tradeMarketChannel);
         }
 
         public async void ObserveActualOrders()
@@ -60,8 +61,9 @@ namespace Former
             using var call = _client.SubscribeOrders(request);
             while (await call.ResponseStream.MoveNext())
             {
-                //Former.UpdateCurrentOrders(call.ResponseStream.Current);
+                //Event
             }
+            _tradeMarketChannel.Dispose();
             //TODO выход из цикла и дальнейшее закрытие канала
         }
 
@@ -96,12 +98,36 @@ namespace Former
 
         private async void ObserveBalance()
         {
-
-
+            var request = new TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceRequest
+            {
+                Request = new TradeBot.Common.v1.SubscribeBalanceRequest()
+            };
+            using var call = _client.SubscribeBalance(request);
+            while (await call.ResponseStream.MoveNext())
+            {
+                //Event
+            }
+            _tradeMarketChannel.Dispose();
         }
 
         private async void ObserveMyOrders()
         {
+            using var call = _client.SubscribyMyOrders();
+
+
+            var responseReaderTask = Task.Run(async () =>
+            {
+                while (await call.ResponseStream.MoveNext())
+                {
+                    var note = call.ResponseStream.Current;
+                }
+            });
+            foreach (var order in _successfulOrders)
+            {
+                await call.RequestStream.WriteAsync(new SubscribyMyOrdersRequest{ OrderId = order.Key});
+            }
+            await call.RequestStream.CompleteAsync();
+            await responseReaderTask;
 
         }
 

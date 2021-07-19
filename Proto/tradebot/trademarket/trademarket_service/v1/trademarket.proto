@@ -81,7 +81,6 @@ message SubscribeLogsResponse{
 
 message SubscribeBalanceRequest{
 	tradebot.common.v1.SubscribeBalanceRequest request = 1;
-	optional string slot_name = 2;
 }
 
 message SubscribeBalanceResponse{
