@@ -106,12 +106,12 @@ namespace Account
                 return Task.FromResult(new SessionReply
                 {
                     IsValid = true,
-                    Message = "Текущая сессия валидна"
+                    Message = Messages.isValid
                 });
             else return Task.FromResult(new SessionReply
             {
                 IsValid = false,
-                Message = ""
+                Message = Messages.isNotValid
             });
         }
 
