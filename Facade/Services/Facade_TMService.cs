@@ -34,11 +34,11 @@ namespace Facade
                             BalanceTwo = response.ResponseStream.Current.BalanceTwo,
                         });
                     }
-                    await responseStream.WriteAsync(new TradeBot.Facade.FacadeService.v1.SubscribeBalanceResponse()
-                    {
-                        BalanceOne = new TradeBot.Common.v1.Balance { Currency = "11", Value = "22" },
-                        BalanceTwo = new TradeBot.Common.v1.Balance { Currency = "33", Value = "44" }
-                    });
+                    //await responseStream.WriteAsync(new TradeBot.Facade.FacadeService.v1.SubscribeBalanceResponse()
+                    //{
+                    //    BalanceOne = new TradeBot.Common.v1.Balance { Currency = "11", Value = "22" },
+                    //    BalanceTwo = new TradeBot.Common.v1.Balance { Currency = "33", Value = "44" }
+                    //});
                     break;
                 }
                 catch (Exception ex)
