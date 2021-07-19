@@ -9,7 +9,7 @@ service AcountService {
 	rpc Login (LoginRequest) returns (LoginReply); //Метод входа в аккаунт
 	rpc Register (RegisterRequest) returns (RegisterReply); //Метод регистрации аккаунта
 	rpc IsValidSession (SessionRequest) returns (SessionReply); //Проверка текущего пользователя на валидность по Id сессии
-	rpc CurrentUserData (SessionRequest) returns (CurrentUserReply); //Получение данных текущего пользователя
+	rpc CurrentAccountData (SessionRequest) returns (CurrentAccountReply); //Получение данных текущего пользователя
 }
 
 message LoginRequest {
@@ -52,7 +52,7 @@ message SessionReply {
 	string message = 2;
 }
 
-message CurrentUserReply {
+message CurrentAccountReply {
 	//Получение данных текущего пользователя.
 	ActionCode result = 1;
 	string message = 2;

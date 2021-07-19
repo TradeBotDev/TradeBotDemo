@@ -89,9 +89,9 @@ namespace Account
             });
         }
 
-        public override Task<CurrentUserReply> CurrentUserData(SessionRequest request, ServerCallContext context)
+        public override Task<CurrentAccountReply> CurrentAccountData(SessionRequest request, ServerCallContext context)
         {
-            return base.CurrentUserData(request, context);
+            return base.CurrentAccountData(request, context);
         }
     }
 }
