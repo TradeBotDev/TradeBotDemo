@@ -56,10 +56,10 @@ message CurrentUserReply {
 	//Получение данных текущего пользователя.
 	ActionCode result = 1;
 	string message = 2;
-	UserInfo current_user = 3;
+	AccountInfo current_user = 3;
 }
 
-message UserInfo {
+message AccountInfo {
 	//Информация о пользователе, необходимая для отображения в UI
 	int32 id = 1;
 	string firstname = 2;
@@ -78,8 +78,8 @@ enum ActionCode {
 	* 4 - пароли не совпадают.
 	*/
 	ACTION_CODE_SUCCESSFUL = 0;
-	ACTION_CODE_USER_NOT_FOUND = 1;
-	ACTION_CODE_USER_EXISTS = 2;
+	ACTION_CODE_ACCOUNT_NOT_FOUND = 1;
+	ACTION_CODE_ACCOUNT_EXISTS = 2;
 	ACTION_CODE_EMPTY_FIELD = 3;
 	ACTION_CODE_PASSWORD_MISMATCH = 4;
 	ACTION_CODE_IS_NOT_EMAIL = 5;

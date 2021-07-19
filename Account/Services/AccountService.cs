@@ -30,7 +30,15 @@ namespace Account
 
             using (var database = new Models.AccountContext())
             {
-                //var account = database.Accounts.Where(accounts => accounts.Email == request.Email && accounts.Password == request.Password);
+                var accounts = database.Accounts.Where(accounts => accounts.Email == request.Email && accounts.Password == request.Password);
+                if (accounts.Count() == 0)
+                    return Task.FromResult(new LoginReply
+                    {
+                        SessionId = 0,
+                        Result = ActionCode.AccountNotFound,
+                        Message = Messages.accountNotFound
+                    });
+
 
                 return Task.FromResult(new LoginReply
                 {
