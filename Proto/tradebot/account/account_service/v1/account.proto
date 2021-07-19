@@ -22,7 +22,7 @@ message LoginReply {
 	//Ответ на запрос о входе в аккаунт.
 	ActionCode result = 1;
 	string message = 2;
-	int32 session_id = 3;
+	string session_id = 3;
 }
 
 message RegisterRequest {
@@ -43,7 +43,7 @@ message RegisterReply {
 
 message SessionRequest {
 	//Запрос на передачу сессии.
-	int32 session_id = 1;
+	string session_id = 1;
 }
 
 message SessionReply {
@@ -56,7 +56,7 @@ message CurrentAccountReply {
 	//Получение данных текущего пользователя.
 	ActionCode result = 1;
 	string message = 2;
-	AccountInfo current_user = 3;
+	AccountInfo current_account = 3;
 }
 
 message AccountInfo {

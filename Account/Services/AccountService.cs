@@ -6,13 +6,21 @@ using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
 using Account.Validation;
+using System.Web;
 
 namespace Account
 {
     public class AccountService : AcountService.AcountServiceBase
     {
         private readonly ILogger<AccountService> _logger;
-        public AccountService(ILogger<AccountService> logger) => _logger = logger;
+
+        private Dictionary<string, Models.Account> loggedIn;
+
+        public AccountService(ILogger<AccountService> logger)
+        {
+            _logger = logger;
+            loggedIn = new Dictionary<string, Models.Account>();
+        }
 
         public override Task<LoginReply> Login(LoginRequest request, ServerCallContext context)
         {
@@ -22,7 +30,7 @@ namespace Account
             {
                 return Task.FromResult(new LoginReply
                 {
-                    SessionId = 0,
+                    SessionId = "Отсутствует",
                     Result = validationResult.Item1,
                     Message = validationResult.Item2
                 });
@@ -31,17 +39,21 @@ namespace Account
             using (var database = new Models.AccountContext())
             {
                 var accounts = database.Accounts.Where(accounts => accounts.Email == request.Email && accounts.Password == request.Password);
+                
                 if (accounts.Count() == 0)
                     return Task.FromResult(new LoginReply
                     {
-                        SessionId = 0,
+                        SessionId = "Отсутствует",
                         Result = ActionCode.AccountNotFound,
                         Message = Messages.accountNotFound
                     });
 
+                string sessionId = Guid.NewGuid().ToString();
+                loggedIn.Add(sessionId, accounts.First());
+
                 return Task.FromResult(new LoginReply
                 {
-                    SessionId = 1,
+                    SessionId = sessionId,
                     Message = Messages.successfulLogin,
                     Result = ActionCode.Successful
                 });
@@ -90,16 +102,41 @@ namespace Account
 
         public override Task<SessionReply> IsValidSession(SessionRequest request, ServerCallContext context)
         {
-            return Task.FromResult(new SessionReply
+            if (loggedIn.ContainsKey(request.SessionId))
+                return Task.FromResult(new SessionReply
+                {
+                    IsValid = true,
+                    Message = "Текущая сессия валидна"
+                });
+            else return Task.FromResult(new SessionReply
             {
-                IsValid = true,
-                Message = "Текущая сессия валидна"
+                IsValid = false,
+                Message = ""
             });
         }
 
         public override Task<CurrentAccountReply> CurrentAccountData(SessionRequest request, ServerCallContext context)
         {
-            return base.CurrentAccountData(request, context);
+            if (!loggedIn.ContainsKey(request.SessionId))
+                return Task.FromResult(new CurrentAccountReply
+                {
+                    Result = ActionCode.AccountNotFound,
+                    Message = Messages.accountNotFound,
+                    CurrentAccount = new AccountInfo()
+                });
+            else return Task.FromResult(new CurrentAccountReply
+            {
+                Result = ActionCode.Successful,
+                Message = Messages.successfulOperation,
+                CurrentAccount = new AccountInfo
+                {
+                    Id = loggedIn[request.SessionId].AccountId,
+                    Firstname = loggedIn[request.SessionId].Firstname,
+                    Lastname = loggedIn[request.SessionId].Lastname,
+                    Email = loggedIn[request.SessionId].Email,
+                    PhoneNumber = loggedIn[request.SessionId].PhoneNumber
+                }
+            });
         }
     }
 }
