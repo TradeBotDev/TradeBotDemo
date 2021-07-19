@@ -16,13 +16,18 @@ namespace Former
 {
     public class TradeMarketClient
     {
-        public delegate void OrderEvent(SubscribeOrdersResponse ordersResponse);
-        public OrderEvent NewOrder;
+        public delegate void CurrentPurchaseOrdersEvent(SubscribeOrdersResponse PurchaseOrdersToUpdate);
+        public CurrentPurchaseOrdersEvent UpdatePurchaseOrders;
+
+        public delegate void SuccessOrdersEvent(List<SubscribeOrdersResponse> successOrdersToUpdate);
+        public SuccessOrdersEvent SellSuccessOrders;
+
+        public delegate void BalanceEvent(Balance balanceToUpdate);
+        public BalanceEvent UpdateBalance;
 
         private static string _connectionString;
         private static TradeMarketClient _tradeMarketClient;
 
-        private readonly Dictionary<string, double> _successfulOrders;
         private readonly TradeMarketService.TradeMarketServiceClient _client;
         private readonly GrpcChannel _tradeMarketChannel;
 
@@ -32,7 +37,6 @@ namespace Former
             {
                 _tradeMarketClient = new TradeMarketClient();
             }
-
             return _tradeMarketClient;
         }
 
@@ -43,19 +47,17 @@ namespace Former
 
         private TradeMarketClient()
         {
-            _successfulOrders = new Dictionary<string, double>();
             _tradeMarketChannel = GrpcChannel.ForAddress(_connectionString);
             _client = new TradeMarketService.TradeMarketServiceClient(_tradeMarketChannel);
         }
 
-        public async void ObserveActualOrders()
+        public async void ObserveCurrentPurchaseOrders()
         {
             var orderSignature = new OrderSignature
             {
                 Status = OrderStatus.Open,
                 Type = OrderType.Buy
             };
-
             var request = new SubscribeOrdersRequest
             {
                 Request = new TradeBot.Common.v1.SubscribeOrdersRequest
@@ -63,46 +65,45 @@ namespace Former
                     Signature = orderSignature
                 }
             };
-
             using var call = _client.SubscribeOrders(request);
             while (await call.ResponseStream.MoveNext())
             {
-                NewOrder?.Invoke(call.ResponseStream.Current);
+                UpdatePurchaseOrders?.Invoke(call.ResponseStream.Current);
             }
             _tradeMarketChannel.Dispose();
             //TODO выход из цикла и дальнейшее закрытие канала
         }
 
-        public async Task SendShoppingList(Dictionary<string, double> shoppingList)
+        public async Task SendShoppingList(List<SubscribeOrdersResponse> shoppingList)
         {
-            _successfulOrders.Clear();
+            List<SubscribeOrdersResponse> succesfullyPurchasedOrders = new List<SubscribeOrdersResponse>();
             foreach (var order in shoppingList)
             {
-                var response = await _client.CloseOrderAsync(new CloseOrderRequest { Id = order.Key });
+                var response = await _client.CloseOrderAsync(new CloseOrderRequest { Id = order.Response.Order.Id });
                 Log.Debug("Requested to buy {0}", order);
                 if (response.Response.Code == ReplyCode.Succeed)
                 {
-                    _successfulOrders.Add(order.Key, order.Value);
+                    succesfullyPurchasedOrders.Add(order);
                     Log.Debug(" ...purchased");
                 }
                 else Log.Debug(" ...not purchased");
             }
-            PlaceSuccessfulOrders();
+            SellSuccessOrders?.Invoke(succesfullyPurchasedOrders);
         }
 
-        private async void PlaceSuccessfulOrders()
+        public async void PlaceSuccessfulOrders(List<SalesOrder> ordersForSale)
         {
-            foreach (var (key, value) in _successfulOrders)
+            foreach (var order in ordersForSale)
             {
-                var response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = value, Value = 2 });
-                Log.Debug("Place order {0}", key);
+                var response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = order.price, Value = order.value });
+                Log.Debug("Place order: price {0}, value {1}", order.price, order.value);
                 Log.Debug(response.Response.Code == ReplyCode.Succeed
                     ? " ...order placed"
                     : " ...order not placed");
             }
         }
 
-        private async void ObserveBalance()
+        public async void ObserveBalance()
         {
             var request = new TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceRequest
             {
@@ -111,12 +112,12 @@ namespace Former
             using var call = _client.SubscribeBalance(request);
             while (await call.ResponseStream.MoveNext())
             {
-                //Event
+                UpdateBalance?.Invoke(new Balance { bal1 = call.ResponseStream.Current.BalanceOne.Value, bal2 = call.ResponseStream.Current.BalanceTwo.Value});
             }
             _tradeMarketChannel.Dispose();
         }
 
-        private async void ObserveMyOrders()
+        private async void ObserveMyOrders(List<Order> myOrders)
         {
             using var call = _client.SubscribyMyOrders();
 
@@ -128,10 +129,10 @@ namespace Former
                     var note = call.ResponseStream.Current;
                 }
             });
-            foreach (var order in _successfulOrders)
-            {
-                await call.RequestStream.WriteAsync(new SubscribyMyOrdersRequest{ OrderId = order.Key});
-            }
+            //foreach (var order in _successfulOrders)
+            //{
+            //    await call.RequestStream.WriteAsync(new SubscribyMyOrdersRequest{ OrderId = order.Key});
+            //}
             await call.RequestStream.CompleteAsync();
             await responseReaderTask;
 

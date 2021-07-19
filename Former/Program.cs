@@ -14,7 +14,11 @@ namespace Former
                 .CreateLogger();
 
             TradeMarketClient.Configure("https://localhost:5005");
-            TradeMarketClient.GetInstance().ObserveActualOrders();
+
+            TradeMarketClient observers = TradeMarketClient.GetInstance();
+
+            observers.ObserveCurrentPurchaseOrders();
+            observers.ObserveBalance();
 
             CreateHostBuilder(args).Build().Run();
         }

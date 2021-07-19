@@ -1,5 +1,5 @@
 ﻿using Serilog;
-
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,10 +8,10 @@ using SubscribeOrdersResponse = TradeBot.TradeMarket.TradeMarketService.v1.Subsc
 
 namespace Former
 {
-    class Balances
+    public class SalesOrder 
     {
-        public double bal1 = 0;
-        public double bal2 = 0;
+        public double price;
+        public double value;
     }
 
     public class Former
@@ -22,75 +22,84 @@ namespace Former
 
         private readonly List<SubscribeOrdersResponse> _currentPurchaseOrders;
 
-        private readonly List</*cyka*/> _myOrders;
+        private List<SubscribeOrdersResponse> _successfulOrders;
 
-        private readonly Balances balances;
+        private List<SalesOrder> _ordersForSale;
 
-        public Former()
+        private readonly List<Order> _myOrders;
+
+        private double bal1;
+
+        private double bal2;
+
+        private Config config;
+
+        public Former(int ordersCount)
         {
             _ordersCount = ordersCount;
             _tmClient = TradeMarketClient.GetInstance();
-            _tmClient.NewOrder += NewOrder;
+            _tmClient.UpdatePurchaseOrders += UpdateCurrentPurchaseOrders;
+            _tmClient.SellSuccessOrders += UpdateSuccessfullyPurchasedOrders;
+            _tmClient.UpdateBalance += UpdateCurrentBalance;
 
-            _currentBuyOrders = new List<SubscribeOrdersResponse>();
+            _currentPurchaseOrders = new List<SubscribeOrdersResponse>();
+            _successfulOrders = new List<SubscribeOrdersResponse>();
+            _ordersForSale = new List<SalesOrder>();
         }
 
-        private async void NewOrder(SubscribeOrdersResponse ordersResponse)
+        private async void UpdateCurrentPurchaseOrders(SubscribeOrdersResponse orderNeededUpdate)
         {
-            Log.Debug("Принял от маркета заказ {id}: цена {price}, количество {value}", ordersResponse.Response.Order.Id, ordersResponse.Response.Order.Price, ordersResponse.Response.Order.Quantity);
+            Log.Debug("Принял от маркета заказ {id}: цена {price}, количество {value}", orderNeededUpdate.Response.Order.Id, orderNeededUpdate.Response.Order.Price, orderNeededUpdate.Response.Order.Quantity);
 
             var task = Task.Run(() =>
             {
-                var index = _currentBuyOrders.FindIndex(x => x.Response.Order.Id == ordersResponse.Response.Order.Id);
-                if (index != -1)
-                {
-                    _currentBuyOrders[index] = ordersResponse;
-                    _currentBuyOrders.Sort(new ReplyComparator());
-                }
-                else
-                {
-                    if (_currentBuyOrders.Count >= _ordersCount)
-                    {
-                        _currentBuyOrders.RemoveAt(_ordersCount);
-                        _currentBuyOrders.Add(ordersResponse);
-                        _currentBuyOrders.Sort(new ReplyComparator());
-                    }
-                    else
-                    {
-                        _currentBuyOrders.Add(ordersResponse);
-                        _currentBuyOrders.Sort(new ReplyComparator());
-                    }
-                }
-            });
-
-            await task;
-                int index = _currentPurchaseOrder_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrderss.FindIndex(x => x.Response.Order.Id == orderNeededUpdate.Response.Order.Id);
+                int index = _currentPurchaseOrders.FindIndex(x => x.Response.Order.Id == orderNeededUpdate.Response.Order.Id);
                 if (orderNeededUpdate.Response.Order.Signature.Status == OrderStatus.Open)
-                    if (_actualPurchaseOrders.Exists(x => x.Response.Order.Id == orderNeededUpdate.Response.Order.Id))
-                        _actualPurchaseOrders[index] = orderNeededUpdate;
-                    else _actualPurchaseOrders.Add(orderNeededUpdate);
-                else _actualPurchaseOrders.RemoveAt(index);
+                    if (_currentPurchaseOrders.Exists(x => x.Response.Order.Id == orderNeededUpdate.Response.Order.Id))
+                        _currentPurchaseOrders[index] = orderNeededUpdate;
+                    else _currentPurchaseOrders.Add(orderNeededUpdate);
+                else _currentPurchaseOrders.RemoveAt(index);
 
-                _actualPurchaseOrders.Sort(new ReplyComparator());
+                _currentPurchaseOrders.Sort(new ReplyComparator());
             });
             await task;
         }
 
-        public void UpdateCurrentBalance(string bal1, string bal2)
+        private void UpdateSuccessfullyPurchasedOrders(List<SubscribeOrdersResponse> successfulOrders)
         {
-            balances.bal1 = double.Parse(bal1);
-            balances.bal2 = double.Parse(bal2);
+            _successfulOrders = successfulOrders.ToList();
+            _ordersForSale.Clear();
+            double sellPrice;
+            foreach (var order in _successfulOrders)
+            {
+                sellPrice = order.Response.Order.Price + config.RequiredProfit + config.SlotFee;
+                _ordersForSale.Add(new SalesOrder { price = sellPrice, value = config.ContractValue });
+                _myOrders.Add(new Order 
+                { 
+                    Id = order.Response.Order.Id, 
+                    Price = sellPrice, 
+                    LastUpdateDate = new Google.Protobuf.WellKnownTypes.Timestamp(), 
+                    Quantity = config.ContractValue,
+                    Signature = new OrderSignature { Status = OrderStatus.Open, Type = OrderType.Sell }
+                });
+            }
+            _tmClient.PlaceSuccessfulOrders(_ordersForSale);
+        }
+
+        public void UpdateCurrentBalance(Balance balance)
+        {
+            bal1 = double.Parse(balance.bal1);
+            bal2 = double.Parse(balance.bal2);
         }
 
         public async void FormShoppingList(double avgPrice)
         {
             Log.Debug("Получено от алгоритма: {price}", avgPrice);
 
-            var selectedOrders = _currentBuyOrders.Where(order => order.Response.Order.Price <= avgPrice);
-            var shoppingList = selectedOrders.ToDictionary(order => order.Response.Order.Id, order => avgPrice);
+            var selectedOrders = _currentPurchaseOrders.Where(order => order.Response.Order.Price <= avgPrice).ToList();
 
-            Log.Debug("Сформировал список необходимых ордеров: {elements}", shoppingList.ToArray());
-            await _tmClient.SendShoppingList(shoppingList);
+            Log.Debug("Сформировал список необходимых ордеров: {elements}", selectedOrders.ToArray());
+            await _tmClient.SendShoppingList(selectedOrders);
         }
     }
 }
