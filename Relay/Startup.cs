@@ -7,6 +7,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Google.Protobuf.WellKnownTypes;
+using Grpc.Net.Client;
+using Relay.Clients;
+using Relay.Services;
+using TradeBot.Algorithm.AlgorithmService.v1;
+using TradeBot.TradeMarket.TradeMarketService.v1;
 
 namespace Relay
 {
@@ -17,6 +23,20 @@ namespace Relay
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddGrpc();
+            //services.AddGrpcClient<AlgorithmService.AlgorithmServiceClient>(x => x.Address = new Uri("https//localhost:5001"));
+            //services.AddGrpcClient<TradeMarketService.TradeMarketServiceClient>(x => x.Address = new Uri("https//localhost:5005"));
+            services.AddGrpcClient<AlgorithmClientService>(options =>
+            {
+                options.Address = new Uri("https://localhost:5001");
+            });
+            services.AddGrpcClient<TradeMarketClientService>(options =>
+            {
+                options.Address = new Uri("https://localhost:5005");
+            });
+            services.AddSingleton<AlgorithmClientService>();
+            services.AddSingleton<TradeMarketClientService >();
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -32,6 +52,7 @@ namespace Relay
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapGrpcService<GreeterService>();
+                endpoints.MapGrpcService<RelayService>();
 
                 endpoints.MapGet("/", async context =>
                 {
