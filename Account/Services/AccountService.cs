@@ -91,6 +91,7 @@ namespace Account
                     PhoneNumber = request.PhoneNumber,
                     Password = request.Password
                 });
+                database.SaveChanges();
 
                 return Task.FromResult(new RegisterReply
                 {

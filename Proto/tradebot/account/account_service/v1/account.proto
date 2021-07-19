@@ -30,7 +30,7 @@ message RegisterRequest {
 	string email = 1;
 	string firstname = 2;
 	string lastname = 3;
-	int32 phone_number = 4;
+	string phone_number = 4;
 	string password = 5;
 	string verify_password = 6;
 }
@@ -65,7 +65,7 @@ message AccountInfo {
 	string firstname = 2;
 	string lastname = 3;
 	string email = 4;
-	int32 phone_number = 5;
+	string phone_number = 5;
 }
 
 enum ActionCode {
