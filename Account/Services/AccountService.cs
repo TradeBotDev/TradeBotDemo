@@ -28,12 +28,17 @@ namespace Account
                 });
             }
 
-            return Task.FromResult(new LoginReply
+            using (var database = new Models.AccountContext())
             {
-                SessionId = 1,
-                Message = "Вход в аккаунт завершен успешно.",
-                Result = ActionCode.Successful
-            });
+                //var account = database.Accounts.Where(accounts => accounts.Email == request.Email && accounts.Password == request.Password);
+
+                return Task.FromResult(new LoginReply
+                {
+                    SessionId = 1,
+                    Message = "Вход в аккаунт завершен успешно.",
+                    Result = ActionCode.Successful
+                });
+            }
         }
 
         public override Task<RegisterReply> Register(RegisterRequest request, ServerCallContext context)
