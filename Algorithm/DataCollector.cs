@@ -10,12 +10,17 @@ using TradeBot.Former.FormerService.v1;
 
 namespace Algorithm
 {
-    public static class DataCollector
+    public class DataCollector
     {
-        public static List<Order> orders;
-        public static bool initialAnalysisCompleted;
+        public  List<Order> orders;
+        public  bool initialAnalysisCompleted;
 
-        public static async void SendPurchasePrice()
+        public DataCollector()
+        {
+            orders = new List<Order>();
+        }
+
+        public static async Task SendPurchasePrice()
         {
             using var channel = GrpcChannel.ForAddress("https://localhost:5003");
             var client = new FormerService.FormerServiceClient(channel);

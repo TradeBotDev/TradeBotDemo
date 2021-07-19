@@ -25,18 +25,24 @@ namespace Relay
             services.AddGrpc();
             //services.AddGrpcClient<AlgorithmService.AlgorithmServiceClient>(x => x.Address = new Uri("https//localhost:5001"));
             //services.AddGrpcClient<TradeMarketService.TradeMarketServiceClient>(x => x.Address = new Uri("https//localhost:5005"));
-            services.AddGrpcClient<AlgorithmClientService>(options =>
+           /* services.AddGrpcClient<AlgorithmClientService>(options =>
             {
                 options.Address = new Uri("https://localhost:5001");
             });
             services.AddGrpcClient<TradeMarketClientService>(options =>
             {
-                options.Address = new Uri("https://localhost:5005");
+                options.Address = new Uri("https//localhost:5005");
+            });*/
+            services.AddSingleton<AlgorithmClientService>(srp =>
+            {
+                AlgorithmClientService acs = new AlgorithmClientService(new Uri("https://localhost:5001"));
+                return acs;
             });
-            services.AddSingleton<AlgorithmClientService>();
-            services.AddSingleton<TradeMarketClientService >();
-
-
+            services.AddSingleton<TradeMarketClientService>(srp =>
+            {
+                TradeMarketClientService acs = new TradeMarketClientService(new Uri("https://localhost:5005"));
+                return acs;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
