@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using TradeBot.Common.v1;
 
 namespace Algorithm
 {
@@ -13,8 +14,14 @@ namespace Algorithm
     {
         public static void Main(string[] args)
         {
-            DataCollector.SendPurchasePrice();
-            CreateHostBuilder(args).Build().Run();
+            //commented out for testing purposes
+            //DataCollector.SendPurchasePrice();
+            //CreateHostBuilder(args).Build().Run();
+
+            for (int i = 0; i<10; i++)
+            {
+
+            }
         }
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)

@@ -12,9 +12,7 @@ namespace Algorithm
 {
     public class DataCollector
     {
-        public List<Order> orders;
-        public bool initialAnalysisCompleted;
-
+        public static List<Order> orders;
         public static void SendPurchasePrice()
         {
             using var channel = GrpcChannel.ForAddress("https://localhost:5003");
@@ -27,7 +25,7 @@ namespace Algorithm
             {
                 Thread.Sleep(rnd.Next(0, 5000));
                 double newPrice = algo.CalculateSuggestedPrice();
-                call = await client.SendPurchasePriceAsync(new SendPurchasePriceRequest() { PurchasePrice = newPrice });
+                call = client.SendPurchasePrice(new SendPurchasePriceRequest() { PurchasePrice = newPrice });
                 Console.WriteLine("Sent " + newPrice);
             }
 

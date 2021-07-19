@@ -18,7 +18,7 @@ namespace Algorithm.Services
             while (await requestStream.MoveNext())
             {
                 var order = requestStream.Current;
-                collector.orders.Add(order.Order);
+                DataCollector.orders.Add(order.Order);
                 Console.WriteLine("Got " + order.Order.Id);
             }
             return new AddOrderResponse();
