@@ -22,10 +22,14 @@ namespace Facade
             using var response = clientTM.SubscribeBalance(new TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceRequest {Request=request.Request });
             while (await response.ResponseStream.MoveNext())
             {
-                await responseStream.WriteAsync(new SubscribeBalanceResponse
-                {
-                    Response = response.ResponseStream.Current.Response
-                });
+                //TradeBot.Facade.FacadeService.v1.SubscribeBalanceResponse subscribeBalanceResponse = new SubscribeBalanceResponse()
+                //{
+                //    Response=response.ResponseStream.Current.BalanceOne
+                //};
+                //await responseStream.WriteAsync(new TradeBot.Facade.FacadeService.v1.SubscribeBalanceResponse
+                //{
+                //    R
+                //});
             }
         }
 
@@ -76,7 +80,7 @@ namespace Facade
         }
 
         
-        public override Task<StartBotResponse> SwitchBot(StartBotRequest request, ServerCallContext context)
+        public override Task<SwitchBotResponse> SwitchBot(SwitchBotRequest request, ServerCallContext context)
         {
             System.Console.WriteLine("Вызов метода StartBot с параметром: " + request.Config.ToString());
             try
@@ -86,7 +90,7 @@ namespace Facade
 
                 System.Console.WriteLine("Возврат значения из StartBot: " + response.Response.ToString());
 
-                return Task.FromResult(new StartBotResponse
+                return Task.FromResult(new SwitchBotResponse
                 {
                     Response = response.Response
                 });
@@ -100,7 +104,7 @@ namespace Facade
                     Code = TradeBot.Common.v1.ReplyCode.Failure,
                     Message = "Exception"
                 };
-                return Task.FromResult(new StartBotResponse
+                return Task.FromResult(new SwitchBotResponse
                 {
                     Response = defaultResponse
                 });
