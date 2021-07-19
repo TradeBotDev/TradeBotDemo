@@ -84,5 +84,7 @@ namespace Account
                 }
             });
         }
+
+        private void WriteLoggedAccountsState() { }
     }
 }
