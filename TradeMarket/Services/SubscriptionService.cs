@@ -37,6 +37,8 @@ namespace TradeMarket.Services
         {
             _subscriber.Changed += async (sender, args) =>
             {
+                _logger.LogInformation($"Recieved Order {args.Changed} ");
+
                 await WriteStreamAsync(responseStream, _converter(args.Changed));
             };
             await AwaitCancellation(context.CancellationToken);

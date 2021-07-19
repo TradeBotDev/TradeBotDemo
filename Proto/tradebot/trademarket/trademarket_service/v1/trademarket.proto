@@ -81,12 +81,11 @@ message SubscribeLogsResponse{
 
 message SubscribeBalanceRequest{
 	tradebot.common.v1.SubscribeBalanceRequest request = 1;
-	optional string slot_name = 2;
+	string slot_name = 2;
 }
 
 message SubscribeBalanceResponse{
-	optional tradebot.common.v1.Balance balance_one = 2;
-	optional tradebot.common.v1.Balance balance_two = 3;
+	tradebot.common.v1.SubscribeBalanceResponse response = 1;
 }
 
 message PlaceOrderRequest{
@@ -95,6 +94,7 @@ message PlaceOrderRequest{
 }
 message PlaceOrderResponse{
 	tradebot.common.v1.DefaultResponse response = 1;
+	string order_id = 2;
 }
 message CloseOrderRequest{
 	string id = 1;
