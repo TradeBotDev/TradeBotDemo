@@ -63,6 +63,15 @@ namespace Account
             }
 
             using (var database = new Models.AccountContext()) {
+                var accountsWithThisEmail = database.Accounts.Where(accounts => accounts.Email == request.Email);
+
+                if (accountsWithThisEmail.Count() > 0)
+                    return Task.FromResult(new RegisterReply
+                    {
+                        Result = ActionCode.AccountExists,
+                        Message = Messages.accountExists
+                    });
+
                 database.Add(new Models.Account()
                 {
                     Email = request.Email,
