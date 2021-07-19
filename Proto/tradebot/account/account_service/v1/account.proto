@@ -4,7 +4,7 @@ option csharp_namespace = "TradeBot.Account.AccountService.v1";
 
 package tradebot.account.account_service.v1;
 
-service AcountService {
+service Account {
 	//Сервис для входа в аккаунт или его регистрации.
 	rpc Login (LoginRequest) returns (LoginReply); //Метод входа в аккаунт
 	rpc Register (RegisterRequest) returns (RegisterReply); //Метод регистрации аккаунта

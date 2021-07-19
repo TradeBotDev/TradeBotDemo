@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TradeMarket", "TradeMarket\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Facade", "Facade\Facade.csproj", "{E6EC140F-4AA1-40F4-BC1B-28717433CE4E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Account", "Account\Account.csproj", "{D1613EDC-18D8-4573-B1E0-51EA8555847C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Account", "Account\Account.csproj", "{D1613EDC-18D8-4573-B1E0-51EA8555847C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

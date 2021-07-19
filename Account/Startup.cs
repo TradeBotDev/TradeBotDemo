@@ -33,7 +33,7 @@ namespace Account
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<AccountService>();
+                endpoints.MapGrpcService<AccountSystemService>();
 
                 endpoints.MapGet("/", async context =>
                 {
