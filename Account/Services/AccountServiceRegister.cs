@@ -9,7 +9,7 @@ using Account.Validation;
 
 namespace Account
 {
-    public partial class AccountSystemService : TradeBot.Account.AccountService.v1.Account.AccountBase
+    public partial class AccountService : TradeBot.Account.AccountService.v1.Account.AccountBase
     {
         // Метод регистрации аккаунта по запросу клиента. Вход в аккаунт после регистрации НЕ производится!
         public override Task<RegisterReply> Register(RegisterRequest request, ServerCallContext context)

@@ -11,16 +11,12 @@ namespace Account
 {
     public partial class AccountService : TradeBot.Account.AccountService.v1.Account.AccountBase
     {
-        private readonly ILogger<AccountSystemService> _logger;
+        private readonly ILogger<AccountService> _logger;
 
         // Хранит в себе всех вошедших в аккаунт пользователей, ключем является Id сессии.
-        private Dictionary<string, Models.Account> loggedIn;
+        private static Dictionary<string, Models.Account> loggedIn = new Dictionary<string, Models.Account>();
 
-        public AccountService(ILogger<AccountSystemService> logger)
-        {
-            _logger = logger;
-            loggedIn = new Dictionary<string, Models.Account>();
-        }
+        public AccountService(ILogger<AccountService> logger) => _logger = logger;
 
         // Метод проверки валидности текущей сессии.
         public override Task<SessionReply> IsValidSession(SessionRequest request, ServerCallContext context)
