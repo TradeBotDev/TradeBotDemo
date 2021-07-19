@@ -22,9 +22,11 @@ namespace Facade
             using var response = clientTM.SubscribeBalance(new TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceRequest {Request=request.Request });
             while (await response.ResponseStream.MoveNext())
             {
-                await responseStream.WriteAsync(new SubscribeBalanceResponse
+                
+                await responseStream.WriteAsync(new TradeBot.Facade.FacadeService.v1.SubscribeBalanceResponse
                 {
-                    Response = response.ResponseStream.Current.Response
+                    BalanceOne=response.ResponseStream.Current.BalanceOne,
+                    BalanceTwo=response.ResponseStream.Current.BalanceTwo
                 });
             }
         }
@@ -74,17 +76,19 @@ namespace Facade
                 });
             }
         }
-        public override Task<StartBotResponse> StartBotRPC(StartBotRequest request, ServerCallContext context)
+
+        
+        public override Task<SwitchBotResponse> SwitchBot(SwitchBotRequest request, ServerCallContext context)
         {
             System.Console.WriteLine("Вызов метода StartBot с параметром: " + request.Config.ToString());
             try
             {
-
+                
                 var response = clientRelay.StartBot(new TradeBot.Relay.RelayService.v1.StartBotRequest{ Config = request.Config });
-
+                
                 System.Console.WriteLine("Возврат значения из StartBot: " + response.Response.ToString());
 
-                return Task.FromResult(new StartBotResponse
+                return Task.FromResult(new SwitchBotResponse
                 {
                     Response = response.Response
                 });
@@ -98,7 +102,7 @@ namespace Facade
                     Code = TradeBot.Common.v1.ReplyCode.Failure,
                     Message = "Exception"
                 };
-                return Task.FromResult(new StartBotResponse
+                return Task.FromResult(new SwitchBotResponse
                 {
                     Response = defaultResponse
                 });

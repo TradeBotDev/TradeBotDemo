@@ -35,15 +35,15 @@ service FacadeService{
 	rpc SubscribeLogs(SubscribeLogsRequest) returns (stream SubscribeLogsResponse);
 
 	/*
-		Старт бота
+		 бота
 	*/
-	rpc StartBotRPC (StartBotRequest) returns (StartBotResponse);
+	rpc SwitchBot (SwitchBotRequest) returns (SwitchBotResponse);
 }
-message StartBotRequest {
+message SwitchBotRequest {
 	tradebot.common.v1.Config config = 1;
 }
 
-message StartBotResponse {
+message SwitchBotResponse {
 	tradebot.common.v1.DefaultResponse response = 1;
 }
 
@@ -68,7 +68,9 @@ message SubscribeBalanceRequest{
 }
 
 message SubscribeBalanceResponse{
-	tradebot.common.v1.SubscribeBalanceResponse response = 1;
+	//old version - tradebot.common.v1.SubscribeBalanceResponse response = 1;
+	optional tradebot.common.v1.Balance balance_one = 2;
+	optional tradebot.common.v1.Balance balance_two = 3;
 }
 
 message SlotsRequest{

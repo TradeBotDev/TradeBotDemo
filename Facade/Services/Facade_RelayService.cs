@@ -16,7 +16,7 @@ namespace Facade
             _logger = logger;
         }
 
-        public override Task<StartBotResponse> StartBotRPC(StartBotRequest request, ServerCallContext context)
+        public override Task<SwitchBotResponse> SwitchBot(SwitchBotRequest request, ServerCallContext context)
         {
             System.Console.WriteLine("Вызов метода StartBot с параметром: " + request.Config.ToString());
 
@@ -27,7 +27,7 @@ namespace Facade
 
                 System.Console.WriteLine("Возврат значения из StartBot: " + response.Response.ToString());
 
-                return Task.FromResult(new StartBotResponse
+                return Task.FromResult(new SwitchBotResponse
                 {
                     Response = response.Response
                 });
@@ -41,7 +41,7 @@ namespace Facade
                     Code = TradeBot.Common.v1.ReplyCode.Failure,
                     Message = "Exception"
                 };
-                return Task.FromResult(new StartBotResponse
+                return Task.FromResult(new SwitchBotResponse
                 {
                     Response = defaultResponse
                 });
