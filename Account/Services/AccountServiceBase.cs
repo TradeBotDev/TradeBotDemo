@@ -18,6 +18,25 @@ namespace Account
 
         public AccountService(ILogger<AccountService> logger) => _logger = logger;
 
+        // Метод выхода из аккаунта
+        public override Task<LogoutReply> Logout(SessionRequest request, ServerCallContext context)
+        {
+            // В случае успешного удаления аккаунта из списка, в которые пользователь зашел,
+            // сервер отвечает, что выход был успешно завершен.
+            if (loggedIn.Remove(request.SessionId))
+                return Task.FromResult(new LogoutReply
+                {
+                    Result = ActionCode.Successful,
+                    Message = Messages.successfulLogout
+                });
+            // В случае, если аккаунт не был удален (по причине отсутствия) появляется сообщение об ошибке.
+            else return Task.FromResult(new LogoutReply
+            {
+                Result = ActionCode.AccountNotFound,
+                Message = Messages.failedLogout
+            });
+        }
+
         // Метод проверки валидности текущей сессии.
         public override Task<SessionReply> IsValidSession(SessionRequest request, ServerCallContext context)
         {

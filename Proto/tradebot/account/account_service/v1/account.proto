@@ -5,28 +5,35 @@ option csharp_namespace = "TradeBot.Account.AccountService.v1";
 package tradebot.account.account_service.v1;
 
 service Account {
-	//Сервис для входа в аккаунт или его регистрации.
-	rpc Login (LoginRequest) returns (LoginReply); //Метод входа в аккаунт
-	rpc Register (RegisterRequest) returns (RegisterReply); //Метод регистрации аккаунта
-	rpc IsValidSession (SessionRequest) returns (SessionReply); //Проверка текущего пользователя на валидность по Id сессии
-	rpc CurrentAccountData (SessionRequest) returns (CurrentAccountReply); //Получение данных текущего пользователя
+	// Сервис для входа в аккаунт или его регистрации.
+	rpc Login (LoginRequest) returns (LoginReply); // Метод входа в аккаунт
+	rpc Logout (SessionRequest) returns (LogoutReply); // Метод выхода из аккаунта
+	rpc Register (RegisterRequest) returns (RegisterReply); // Метод регистрации аккаунта
+	rpc IsValidSession (SessionRequest) returns (SessionReply); // Проверка текущего пользователя на валидность по Id сессии
+	rpc CurrentAccountData (SessionRequest) returns (CurrentAccountReply); // Получение данных текущего пользователя
 }
 
 message LoginRequest {
-	//Данные для входа в аккаунт.
+	// Данные для входа в аккаунт.
 	string email = 1;
 	string password = 2;
 }
 
 message LoginReply {
-	//Ответ на запрос о входе в аккаунт.
+	// Ответ на запрос о входе в аккаунт.
 	ActionCode result = 1;
 	string message = 2;
 	string session_id = 3;
 }
 
+message LogoutReply {
+	// Ответ на запрос о выходе из аккаунта
+	ActionCode result = 1;
+	string message = 2;
+}
+
 message RegisterRequest {
-	//Данные для регистрации аккаунта.
+	// Данные для регистрации аккаунта.
 	string email = 1;
 	string firstname = 2;
 	string lastname = 3;
