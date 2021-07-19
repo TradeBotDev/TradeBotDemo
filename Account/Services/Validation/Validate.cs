@@ -16,7 +16,7 @@ namespace Account.Validation
             if (IsEmpty(request.Email, request.Password))
                 return (ActionCode.EmptyField, Messages.emptyField);
 
-            return (ActionCode.Successful, Messages.valid);
+            return (ActionCode.Successful, Messages.successfulValidation);
         }
 
         // Метод, который проверяет, являются ли ланные для регистрации пустыми
@@ -31,7 +31,7 @@ namespace Account.Validation
             else if (!request.Email.Contains('@'))
                 return (ActionCode.IsNotEmail, Messages.isNotEmail);
 
-            return (ActionCode.Successful, Messages.valid);
+            return (ActionCode.Successful, Messages.successfulValidation);
         }
 
         //Метод, который пробегается по всем предоставленным строкам и делает вывод, являются ли они пустыми

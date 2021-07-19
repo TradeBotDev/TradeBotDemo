@@ -7,6 +7,7 @@ namespace Account.Validation
 {
     public static class Messages
     {
+        public static readonly string successfulValidation = "Валидация завершена успешно.";
         public static readonly string successfulLogin = "Вход в аккаунт завершен успешно.";
         public static readonly string successfulRegister = "Регистрация завершена успешно.";
         public static readonly string accountNotFound = "Произошла ошибка: пользователь не найден.";
