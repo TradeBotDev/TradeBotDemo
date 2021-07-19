@@ -20,5 +20,11 @@ namespace Former
             Former.config = request.Request;
             return Task.FromResult(new UpdateServerConfigResponse());
         }
+        public override Task<SendPurchasePriceResponse> SendPurchasePrice(SendPurchasePriceRequest request, ServerCallContext context)
+        {
+            Former.FormShoppingList(request.PurchasePrice);
+            return Task.FromResult(new SendPurchasePriceResponse());
+        }
+
     }
 }

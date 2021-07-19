@@ -15,7 +15,7 @@ namespace Algorithm
         {
             Random rn = new Random();
             Thread.Sleep(rn.Next(0, 10000));
-            return 10;
+            return rn.Next(0, 20);
         }
 
     }

@@ -9,7 +9,7 @@
     <Protobuf Link ="Protos/facade.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/facade/facade_service/v1/facade.proto" GrpcServices="Both" />
     <Protobuf Link ="Protos/common.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/common/v1/common.proto" GrpcServices="Both" />
 
-    <Protobuf Link ="Protos/trademarket.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/trademarket/trademarket_service/v1/trademarket.proto" GrpcServices="Both" />
+    <Protobuf Link ="Protos/test_proto3_optional.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/trademarket/trademarket_service/v1/test_proto3_optional.proto" GrpcServices="Both" />
     <!--строку нижу удалить и создать протик для фасада и киента-->
     <Protobuf ProtoRoot="../Proto" Include="../Proto/tradebot/relay/relay_service/v1/relay.proto" GrpcServices="Both" />
 

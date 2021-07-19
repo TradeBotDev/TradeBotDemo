@@ -106,6 +106,10 @@ message SubscribeBalanceRequest{
 }
 
 message SubscribeBalanceResponse{
+	Balance balance = 1;
+}
+
+message Balance {
 	string Currency = 1;
 	string value = 2;
 }

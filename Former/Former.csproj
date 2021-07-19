@@ -9,7 +9,7 @@
     <PackageReference Include="Grpc.AspNetCore" Version="2.34.0" />
     <Protobuf Link="Protos/former.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/former/former_service/v1/former.proto" GrpcServices="Both" />
     <Protobuf Link="Protos/algorithm.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/algorithm/algorithm_service/v1/algorithm.proto" GrpcServices="Both" />
-    <Protobuf Link="Protos/trademarket.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/trademarket/trademarket_service/v1/trademarket.proto" GrpcServices="Both" />
+    <Protobuf Link="Protos/test_proto3_optional.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/trademarket/trademarket_service/v1/test_proto3_optional.proto" GrpcServices="Both" />
     <Protobuf Link="Protos/relay.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/relay/relay_service/v1/relay.proto" GrpcServices="Both" />
     <Protobuf Link="Protos/common.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/common/v1/common.proto" GrpcServices="Both" />
 

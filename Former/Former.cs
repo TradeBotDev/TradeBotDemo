@@ -27,7 +27,7 @@ namespace Former
                 Console.Write(", ");
             }
             Console.WriteLine("\b\b }");
-            await Observer.SendShopingList(ShoppingList);
+            await TradeMarketClient.SendShopingList(ShoppingList);
         }
 
         public static async void UpdateCurrentOrders(SubscribeOrdersResponse orderNeededUpdate)

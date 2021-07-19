@@ -14,9 +14,9 @@ service AlgorithmService {
 	rpc AddOrder (stream AddOrderRequest) returns ( AddOrderResponse);
 
 	/*
-		подписка на ответ алгоритма
+		отправка цены 
 	*/
-	rpc SubscribePurchasePrice (SubscribePurchasePriceRequest) returns (stream SubscribePurchasePriceResponse);
+	rpc SendPurchasePrice (SendPurchasePriceRequest) returns (SendPurchasePriceResponse);
 
 	/*
 		Клиент говорит обновиться серверу
@@ -48,13 +48,13 @@ message UpdateServerConfigResponse{
 	tradebot.common.v1.UpdateServerConfigResponse response = 1;
 }
 
-message SubscribePurchasePriceRequest
-{
-	google.protobuf.Empty empty = 1;
-}
-message SubscribePurchasePriceResponse
+message SendPurchasePriceRequest
 {
 	double purchase_price = 1;
+}
+message SendPurchasePriceResponse
+{
+	google.protobuf.Empty empty = 1;
 }
 
 message AddOrderRequest {

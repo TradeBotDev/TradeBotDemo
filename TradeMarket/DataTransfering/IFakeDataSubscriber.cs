@@ -2,7 +2,7 @@
 
 namespace TradeMarket.DataTransfering
 {
-    internal interface FakeDataSubscriber
+    internal interface IFakeDataSubscriber
     {
         public Task Simulate();
     }
