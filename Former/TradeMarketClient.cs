@@ -60,7 +60,7 @@ namespace Former
             using var call = _client.SubscribeOrders(request);
             while (await call.ResponseStream.MoveNext())
             {
-                Former.UpdateCurrentOrders(call.ResponseStream.Current);
+                //Former.UpdateCurrentOrders(call.ResponseStream.Current);
             }
             //TODO выход из цикла и дальнейшее закрытие канала
         }
@@ -93,5 +93,17 @@ namespace Former
                     : " ...order not placed");
             }
         }
+
+        private async void ObserveBalance()
+        {
+
+
+        }
+
+        private async void ObserveMyOrders()
+        {
+
+        }
+
     }
 }

@@ -13,7 +13,7 @@ namespace Former
                 .WriteTo.Console()
                 .CreateLogger();
 
-            TradeMarketClient.ObserveActualOrders();
+            TradeMarketClient.GetInstance().ObserveActualOrders();
             CreateHostBuilder(args).Build().Run();
         }
 
