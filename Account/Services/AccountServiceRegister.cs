@@ -15,7 +15,7 @@ namespace Account
         public override Task<RegisterReply> Register(RegisterRequest request, ServerCallContext context)
         {
             // Валидация полей запроса
-            var validationResult = Validate.RegisterFields(request);
+            (ActionCode, string) validationResult = Validate.RegisterFields(request);
 
             // В случае, если валидация не прошла успешно (к примеру, присутствуют пустые поля)
             // возвращается сообщение об одной из ошибок в запросе.
