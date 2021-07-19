@@ -2,6 +2,7 @@ using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using TradeBot.Facade.FacadeService.v1;
 
@@ -16,29 +17,62 @@ namespace Facade
         {
             _logger = logger;
         }
-        
+
         public override async Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<SubscribeBalanceResponse> responseStream, ServerCallContext context)
         {
-            using var response = clientTM.SubscribeBalance(new TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceRequest {Request=request.Request });
-            while (await response.ResponseStream.MoveNext())
+            AsyncServerStreamingCall<TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceResponse> response = null;
+            for (int i = 0; i < 4; i++)
             {
-                
-                await responseStream.WriteAsync(new TradeBot.Facade.FacadeService.v1.SubscribeBalanceResponse
+                try
                 {
-                    BalanceOne=response.ResponseStream.Current.BalanceOne,
-                    BalanceTwo=response.ResponseStream.Current.BalanceTwo
-                });
+                    response = clientTM.SubscribeBalance(new TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceRequest { Request = request.Request });
+                    while (await response.ResponseStream.MoveNext())
+                    {
+                        await responseStream.WriteAsync(new TradeBot.Facade.FacadeService.v1.SubscribeBalanceResponse
+                        {
+                            BalanceOne = response.ResponseStream.Current.BalanceOne,
+                            BalanceTwo = response.ResponseStream.Current.BalanceTwo,
+                        });
+                    }
+                    await responseStream.WriteAsync(new TradeBot.Facade.FacadeService.v1.SubscribeBalanceResponse()
+                    {
+                        BalanceOne = new TradeBot.Common.v1.Balance { Currency = "11", Value = "22" },
+                        BalanceTwo = new TradeBot.Common.v1.Balance { Currency = "33", Value = "44" }
+                    });
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    if (i == 0)
+                    {
+                        _logger.LogWarning("The server is not responding.\n");
+                    }
+                    _logger.LogWarning("Reconnection attempt... try " + i + "/3");
+                    Thread.Sleep(1000);
+                    if (i == 3)
+                    {
+                        _logger.LogWarning("timeout exceeded");
+                        _logger.LogWarning("Exception:\n" + ex);
+                        _ = responseStream.WriteAsync(new TradeBot.Facade.FacadeService.v1.SubscribeBalanceResponse()
+                        {
+                            Message = "Exception. The server doesnt answer"
+                        });
+                    }
+                }
+
             }
+
+
         }
 
-        
+
         public override Task<AuthenticateTokenResponse> AuthenticateToken(AuthenticateTokenRequest request, ServerCallContext context)
         {
             System.Console.WriteLine("Вызов метода AuthenticateToken спараметром: " + request.Token);
 
             try
             {
-                var response = clientTM.AuthenticateToken(new TradeBot.TradeMarket.TradeMarketService.v1.AuthenticateTokenRequest {Token=request.Token });
+                var response = clientTM.AuthenticateToken(new TradeBot.TradeMarket.TradeMarketService.v1.AuthenticateTokenRequest { Token = request.Token });
 
                 System.Console.WriteLine("Возврат значения из AuthenticateToken:" + response.Response.ToString());
                 return Task.FromResult(new AuthenticateTokenResponse
@@ -61,12 +95,12 @@ namespace Facade
                     Response = defaultResponse
                 });
             }
-            
+
         }
 
         public override async Task Slots(SlotsRequest request, IServerStreamWriter<SlotsResponse> responseStream, ServerCallContext context)
         {
-            using var response = clientTM.Slots(new TradeBot.TradeMarket.TradeMarketService.v1.SlotsRequest { Empty=request.Empty});
+            using var response = clientTM.Slots(new TradeBot.TradeMarket.TradeMarketService.v1.SlotsRequest { Empty = request.Empty });
 
             while (await response.ResponseStream.MoveNext())
             {
@@ -77,15 +111,15 @@ namespace Facade
             }
         }
 
-        
+
         public override Task<SwitchBotResponse> SwitchBot(SwitchBotRequest request, ServerCallContext context)
         {
             System.Console.WriteLine("Вызов метода StartBot с параметром: " + request.Config.ToString());
             try
             {
-                
-                var response = clientRelay.StartBot(new TradeBot.Relay.RelayService.v1.StartBotRequest{ Config = request.Config });
-                
+
+                var response = clientRelay.StartBot(new TradeBot.Relay.RelayService.v1.StartBotRequest { Config = request.Config });
+
                 System.Console.WriteLine("Возврат значения из StartBot: " + response.Response.ToString());
 
                 return Task.FromResult(new SwitchBotResponse
