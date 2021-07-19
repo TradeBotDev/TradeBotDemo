@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 namespace Account.Models
 {
+    // Описание таблицы аккаунтов пользователей.
     public class Account
     {
         public int AccountId { get; set; }

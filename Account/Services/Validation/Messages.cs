@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 namespace Account.Validation
 {
+    // Все сообщения об операциях, используемые при валидации и проверках при входе/регистрации.
     public static class Messages
     {
         public const string successfulOperation = "Операция завершена успешно.";
