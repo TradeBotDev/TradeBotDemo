@@ -3,7 +3,6 @@ using Grpc.Net.Client;
 
 using Serilog;
 
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -11,14 +10,16 @@ using TradeBot.Common.v1;
 using TradeBot.TradeMarket.TradeMarketService.v1;
 
 using SubscribeOrdersRequest = TradeBot.TradeMarket.TradeMarketService.v1.SubscribeOrdersRequest;
+using SubscribeOrdersResponse = TradeBot.TradeMarket.TradeMarketService.v1.SubscribeOrdersResponse;
 
 namespace Former
 {
     public class TradeMarketClient
     {
-        //"https://localhost:5005"
-        private string _connectionString;
+        public delegate void OrderEvent(SubscribeOrdersResponse ordersResponse);
+        public OrderEvent NewOrder;
 
+        private static string _connectionString;
         private static TradeMarketClient _tradeMarketClient;
 
         private readonly Dictionary<string, double> _successfulOrders;
@@ -27,10 +28,15 @@ namespace Former
 
         public static TradeMarketClient GetInstance()
         {
-            return _tradeMarketClient ??= new TradeMarketClient();
+            if (_tradeMarketClient == null)
+            {
+                _tradeMarketClient = new TradeMarketClient();
+            }
+
+            return _tradeMarketClient;
         }
 
-        public void Configure(string connectionString)
+        public static void Configure(string connectionString)
         {
             _connectionString = connectionString;
         }
@@ -61,7 +67,7 @@ namespace Former
             using var call = _client.SubscribeOrders(request);
             while (await call.ResponseStream.MoveNext())
             {
-                //Event
+                NewOrder?.Invoke(call.ResponseStream.Current);
             }
             _tradeMarketChannel.Dispose();
             //TODO выход из цикла и дальнейшее закрытие канала
@@ -77,9 +83,9 @@ namespace Former
                 if (response.Response.Code == ReplyCode.Succeed)
                 {
                     _successfulOrders.Add(order.Key, order.Value);
-                    Console.Write(" ...purchased");
+                    Log.Debug(" ...purchased");
                 }
-                else Console.Write(" ...not purchased");
+                else Log.Debug(" ...not purchased");
             }
             PlaceSuccessfulOrders();
         }

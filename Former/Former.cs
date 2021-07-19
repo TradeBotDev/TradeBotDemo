@@ -1,4 +1,5 @@
 ﻿using Serilog;
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,9 +16,7 @@ namespace Former
 
     public class Former
     {
-        public TradeBot.Common.v1.Config Config;
-
-        private const int OrdersCount = 9;
+        private readonly int _ordersCount;
 
         private readonly TradeMarketClient _tmClient;
 
@@ -29,27 +28,42 @@ namespace Former
 
         public Former()
         {
+            _ordersCount = ordersCount;
             _tmClient = TradeMarketClient.GetInstance();
-            _currentPurchaseOrders = new List<SubscribeOrdersResponse>();
+            _tmClient.NewOrder += NewOrder;
+
+            _currentBuyOrders = new List<SubscribeOrdersResponse>();
         }
 
-        public async void FormShoppingList(double avgPrice)
+        private async void NewOrder(SubscribeOrdersResponse ordersResponse)
         {
-            Log.Debug("Получено от алгоритма: {price}", avgPrice);
+            Log.Debug("Принял от маркета заказ {id}: цена {price}, количество {value}", ordersResponse.Response.Order.Id, ordersResponse.Response.Order.Price, ordersResponse.Response.Order.Quantity);
 
-            var selectedOrders = _actualPurchaseOrders.Where(order => order.Response.Order.Price <= avgPrice);
-
-            var shoppingList = selectedOrders.ToDictionary(order => order.Response.Order.Id, order => avgPrice);
-
-            Log.Debug("Сформировал список необходимых ордеров: {elements}", shoppingList.ToArray());
-            await _tmClient.SendShoppingList(shoppingList);
-        }
-
-        public async void UpdateCurrentOrders(SubscribeOrdersResponse orderNeededUpdate)
-        {
-            Log.Debug("Принял от маркета заказ {id}: цена {price}, количество {value}", orderNeededUpdate.Response.Order.Id, orderNeededUpdate.Response.Order.Price, orderNeededUpdate.Response.Order.Quantity);
             var task = Task.Run(() =>
             {
+                var index = _currentBuyOrders.FindIndex(x => x.Response.Order.Id == ordersResponse.Response.Order.Id);
+                if (index != -1)
+                {
+                    _currentBuyOrders[index] = ordersResponse;
+                    _currentBuyOrders.Sort(new ReplyComparator());
+                }
+                else
+                {
+                    if (_currentBuyOrders.Count >= _ordersCount)
+                    {
+                        _currentBuyOrders.RemoveAt(_ordersCount);
+                        _currentBuyOrders.Add(ordersResponse);
+                        _currentBuyOrders.Sort(new ReplyComparator());
+                    }
+                    else
+                    {
+                        _currentBuyOrders.Add(ordersResponse);
+                        _currentBuyOrders.Sort(new ReplyComparator());
+                    }
+                }
+            });
+
+            await task;
                 int index = _currentPurchaseOrder_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrders_currentPurchaseOrderss.FindIndex(x => x.Response.Order.Id == orderNeededUpdate.Response.Order.Id);
                 if (orderNeededUpdate.Response.Order.Signature.Status == OrderStatus.Open)
                     if (_actualPurchaseOrders.Exists(x => x.Response.Order.Id == orderNeededUpdate.Response.Order.Id))
@@ -68,12 +82,15 @@ namespace Former
             balances.bal2 = double.Parse(bal2);
         }
 
-        public class ReplyComparator : IComparer<SubscribeOrdersResponse>
+        public async void FormShoppingList(double avgPrice)
         {
-            int IComparer<SubscribeOrdersResponse>.Compare(SubscribeOrdersResponse x, SubscribeOrdersResponse y)
-            {
-                return x.Response.Order.Price.CompareTo(y.Response.Order.Price);
-            }
+            Log.Debug("Получено от алгоритма: {price}", avgPrice);
+
+            var selectedOrders = _currentBuyOrders.Where(order => order.Response.Order.Price <= avgPrice);
+            var shoppingList = selectedOrders.ToDictionary(order => order.Response.Order.Id, order => avgPrice);
+
+            Log.Debug("Сформировал список необходимых ордеров: {elements}", shoppingList.ToArray());
+            await _tmClient.SendShoppingList(shoppingList);
         }
     }
 }

@@ -13,6 +13,7 @@ namespace Former
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddGrpc();
+            services.AddSingleton(new Former(9));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -27,7 +28,7 @@ namespace Former
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<Listener>();
+                endpoints.MapGrpcService<ListenerImpl>();
 
                 endpoints.MapGet("/", async context =>
                 {
