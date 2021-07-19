@@ -74,7 +74,9 @@ namespace Facade
                 });
             }
         }
-        public override Task<StartBotResponse> StartBotRPC(StartBotRequest request, ServerCallContext context)
+
+        
+        public override Task<StartBotResponse> SwitchBot(StartBotRequest request, ServerCallContext context)
         {
             System.Console.WriteLine("Âûחמג לועמהא StartBot ס ןאנאלוענמל: " + request.Config.ToString());
             try

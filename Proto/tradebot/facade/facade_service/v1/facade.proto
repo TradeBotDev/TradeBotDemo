@@ -35,15 +35,15 @@ service FacadeService{
 	rpc SubscribeLogs(SubscribeLogsRequest) returns (stream SubscribeLogsResponse);
 
 	/*
-		Старт бота
+		 бота
 	*/
-	rpc StartBotRPC (StartBotRequest) returns (StartBotResponse);
+	rpc SwitchBot (SwitchBotRequest) returns (SwitchBotResponse);
 }
-message StartBotRequest {
+message SwitchBotRequest {
 	tradebot.common.v1.Config config = 1;
 }
 
-message StartBotResponse {
+message SwitchBotResponse {
 	tradebot.common.v1.DefaultResponse response = 1;
 }
 
