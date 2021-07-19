@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace Account.Validation
+﻿namespace Account.Validation
 {
     // Все сообщения об операциях, используемые при валидации и проверках при входе/регистрации.
     public static class Messages

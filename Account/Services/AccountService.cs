@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
 using Account.Validation;
-using System.Web;
 
 namespace Account
 {
