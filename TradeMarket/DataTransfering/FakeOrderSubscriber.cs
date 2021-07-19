@@ -10,7 +10,7 @@ using TradeMarket.Model;
 namespace TradeMarket.DataTransfering
 {
   
-    public class FakeOrderSubscriber : Subscriber<FullOrder>,FakeDataSubscriber
+    public class FakeOrderSubscriber : ISubscriber<FullOrder>,IFakeDataSubscriber
     {
         private static FakeOrderSubscriber _fakeOrderSubscriber = null;
 
@@ -128,7 +128,7 @@ namespace TradeMarket.DataTransfering
             }
         };
 
-        public event Subscriber<FullOrder>.ChangedEventHandler Changed;
+        public event ISubscriber<FullOrder>.ChangedEventHandler Changed;
 
         public async Task Simulate()
         {
