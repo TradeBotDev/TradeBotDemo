@@ -31,7 +31,8 @@ namespace Facade
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<GreeterService>();
+                endpoints.MapGrpcService<FacadeTMService>();
+                //endpoints.MapGrpcService<FacadeRelayService>();
 
                 endpoints.MapGet("/", async context =>
                 {

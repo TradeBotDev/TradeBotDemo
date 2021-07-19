@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -6,10 +6,17 @@
 
   <ItemGroup>
     <Protobuf Include="Protos\greet.proto" GrpcServices="Server" />
+    <Protobuf Link="Protos/relay.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/relay/relay_service/v1/relay.proto" GrpcServices="Both" />
+    <Protobuf Link="Protos/former.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/former/former_service/v1/former.proto" GrpcServices="Both" />
+    <Protobuf Link="Protos/algorithm.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/algorithm/algorithm_service/v1/algorithm.proto" GrpcServices="Both" />
+    <Protobuf Link="Protos/common.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/common/v1/common.proto" GrpcServices="Both" />
+    <Protobuf Link="Protos/trademarket.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/trademarket/trademarket_service/v1/trademarket.proto" GrpcServices="Both" />
+
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.34.0" />
+    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.38.0" />
   </ItemGroup>
 
 </Project>

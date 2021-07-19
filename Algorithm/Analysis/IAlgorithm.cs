@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TradeBot.Common;
 
-namespace TradeMarket
+namespace Algorithm
 {
-    public class OrderManagerService 
+    interface IAlgorithm
     {
+        public double CalculateSuggestedPrice();
     }
 }

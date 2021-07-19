@@ -1,0 +1,123 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "TradeBot.Common.v1";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+
+package tradebot.common.v1;
+
+enum ReplyCode{
+	REPLY_CODE_UNSPECIFIED = 0;
+	REPLY_CODE_SUCCEED = 1;
+	REPLY_CODE_FAILURE = 2;
+}
+
+message DefaultResponse{
+	ReplyCode code = 1;
+	string message = 2;
+}
+
+enum OrderStatus{
+	ORDER_STATUS_UNSPECIFIED = 0;
+	ORDER_STATUS_OPEN = 1;
+	ORDER_STATUS_CLOSED = 2;
+}
+
+enum OrderType{
+	ORDER_TYPE_UNSPECIFIED = 0;
+	ORDER_TYPE_SELL = 1;
+	ORDER_TYPE_BUY = 2;
+}
+
+message OrderSignature{
+	OrderStatus status = 1;
+	OrderType type = 2;
+}
+
+message Order {
+	double quantity = 1;
+	double price = 2;
+	OrderSignature signature = 3;
+	google.protobuf.Timestamp last_update_date = 4;
+	string id = 5;
+}
+
+message AlgorithmInfo{
+    //интервал анализа
+	google.protobuf.Timestamp interval = 1;
+	//количество точек в интервале (между точками берется среднее)
+	int32 point_split_count = 2;
+}
+
+message Config{
+	//общий баланс на счету 
+	double total_balance = 1;
+	//доступный процент из общего баланса
+	double avaible_balance = 2;
+	//сколько мы хотим прибыли получать с контракта
+	double required_profit = 3;
+	//налоги на слот
+	double slot_fee = 4;
+	//точный объем контракта
+	double contract_value = 5;
+	//когда снимать свои ордера с биржы
+	double order_update_price_range = 6;
+	//информация необходимая для работы алгоритма
+	AlgorithmInfo algorithm_info = 7;
+}
+/*
+	пока мы используем microsoft logger то будем использовать его уровни
+	https://docs.microsoft.com/en-us/javascript/api/@aspnet/signalr/loglevel?view=signalr-js-latest
+*/
+enum LogLevel{
+	LOG_LEVEL_UNSPECIFIED = 0;
+	LOG_LEVEL_TRACE = 1;
+	LOG_LEVEL_DEBUG = 2;
+	LOG_LEVEL_INFORMATION = 3;
+	LOG_LEVEL_WARNING = 4;
+	LOG_LEVEL_ERROR = 5;
+	LOG_LEVEL_CRITICAL = 6;
+	LOG_LEVEL_NONE = 7;
+}
+
+message SubscribeLogsRequest{
+	LogLevel level = 1;
+}
+
+message SubscribeLogsResponse{
+	LogLevel level = 1;
+	//когда произошла запись
+	google.protobuf.Timestamp when = 2;
+	// на каком микросервисе и в каком методе прозошла запись
+	string where = 3;
+	string log_message = 4;
+}
+
+message UpdateServerConfigRequest {
+	Config config = 1;
+}
+message UpdateServerConfigResponse {
+	google.protobuf.Empty empty = 1;
+}
+message SubscribeBalanceRequest{
+	//Тут потом должно быть обращение к конкретной бирже, но она пока одна
+	google.protobuf.Empty empty = 1;
+}
+
+message SubscribeBalanceResponse{
+	Balance balance = 1;
+}
+
+message Balance {
+	string Currency = 1;
+	string value = 2;
+}
+
+message SubscribeOrdersRequest{
+	OrderSignature signature = 1; 
+}
+
+message SubscribeOrdersResponse{
+	Order Order = 1;
+}

@@ -6,12 +6,13 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Former
+namespace Former.Services
 {
     public class Program
     {
         public static void Main(string[] args)
         {
+            TradeMarketClient.ObserveActualOrders();
             CreateHostBuilder(args).Build().Run();
         }
 

@@ -1,0 +1,45 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "TradeBot.Former.FormerService.v1";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "tradebot/common/v1/common.proto";
+package tradebot.former.former_service.v1;
+
+service FormerService{
+
+	/*
+		подписка на ответ алгоритма
+	*/
+	rpc SendPurchasePrice (SendPurchasePriceRequest) returns (SendPurchasePriceResponse);
+	/*
+		Клиент говорит обновиться серверу
+	*/
+	rpc UpdateServerConfig (UpdateServerConfigRequest) returns (UpdateServerConfigResponse);
+
+}
+
+message UpdateServerConfigRequest{
+	tradebot.common.v1.Config request = 1;
+}
+
+message UpdateServerConfigResponse{
+	google.protobuf.Empty empty = 1;
+}
+
+message SendPurchasePriceRequest
+{
+	double purchase_price = 1;
+}
+message SendPurchasePriceResponse
+{
+	google.protobuf.Empty empty = 1;
+}
+
+message SubscribeLogsRequest{
+	tradebot.common.v1.SubscribeLogsRequest request = 1;
+}
+
+message SubscribeLogsResponse{
+	tradebot.common.v1.SubscribeLogsResponse response = 1;
+}
