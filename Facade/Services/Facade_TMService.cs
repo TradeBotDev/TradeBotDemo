@@ -20,6 +20,7 @@ namespace Facade
 
         public override async Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<SubscribeBalanceResponse> responseStream, ServerCallContext context)
         {
+            //удалить и сделаь нормально!!!!
             AsyncServerStreamingCall<TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceResponse> response = null;
             for (int i = 0; i < 4; i++)
             {
@@ -34,38 +35,29 @@ namespace Facade
                             BalanceTwo = response.ResponseStream.Current.BalanceTwo,
                         });
                     }
-                    //await responseStream.WriteAsync(new TradeBot.Facade.FacadeService.v1.SubscribeBalanceResponse()
-                    //{
-                    //    BalanceOne = new TradeBot.Common.v1.Balance { Currency = "11", Value = "22" },
-                    //    BalanceTwo = new TradeBot.Common.v1.Balance { Currency = "33", Value = "44" }
-                    //});
+                    
                     break;
                 }
                 catch (Exception ex)
                 {
                     if (i == 0)
                     {
-                        _logger.LogWarning("The server is not responding.\n");
+                        _logger.LogError("The server is not responding.");
                     }
-                    _logger.LogWarning("Reconnection attempt... try " + i + "/3");
+                    _logger.LogError("Reconnection attempt... try " + i + "/3");
                     Thread.Sleep(1000);
                     if (i == 3)
                     {
-                        _logger.LogWarning("timeout exceeded");
-                        _logger.LogWarning("Exception:\n" + ex);
+                        _logger.LogError("timeout exceeded");
+                        _logger.LogError("Exception:\n" + ex);
                         _ = responseStream.WriteAsync(new TradeBot.Facade.FacadeService.v1.SubscribeBalanceResponse()
                         {
                             Message = "Exception. The server doesnt answer"
                         });
                     }
                 }
-
             }
-
-
         }
-
-
         public override Task<AuthenticateTokenResponse> AuthenticateToken(AuthenticateTokenRequest request, ServerCallContext context)
         {
             System.Console.WriteLine("Вызов метода AuthenticateToken спараметром: " + request.Token);
