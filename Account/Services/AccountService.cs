@@ -83,7 +83,7 @@ namespace Account
                 return Task.FromResult(new RegisterReply
                 {
                     Result = ActionCode.Successful,
-                    Message = Messages.successfulPassword
+                    Message = Messages.successfulRegister
                 });
             }
         }
