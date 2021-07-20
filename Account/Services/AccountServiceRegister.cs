@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
 using Account.Validation;
 using Account.Validation.Messages;
+using Account.AccountMessages;
 
 namespace Account
 {
@@ -37,13 +38,7 @@ namespace Account
                 // В случае наличия аккаунтов с таким же Email-адресом, как в запросе, возвращается
                 // ответ сервера с ошибкой, сообщающей об этом.
                 if (accountsWithThisEmail.Count() > 0)
-                {
-                    return Task.FromResult(new RegisterReply
-                    {
-                        Result = ActionCode.AccountExists,
-                        Message = Messages.accountExists
-                    });
-                }
+                    return Task.FromResult(RegisterReplies.AccountExists);
 
                 // В случае отсутствия пользователей с тем же Email-адресом, добавление в базу данных
                 // нового пользователя с данными из базы данных.
@@ -57,12 +52,7 @@ namespace Account
                 });
                 // Сохранение изменений базы данных.
                 database.SaveChanges();
-
-                return Task.FromResult(new RegisterReply
-                {
-                    Result = ActionCode.Successful,
-                    Message = Messages.successfulRegister
-                });
+                return Task.FromResult(RegisterReplies.SuccessfulRegister);
             }
         }
     }

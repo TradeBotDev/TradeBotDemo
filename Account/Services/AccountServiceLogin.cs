@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
 using Account.Validation;
 using Account.Validation.Messages;
+using Account.AccountMessages;
 
 namespace Account
 {
@@ -24,7 +25,7 @@ namespace Account
             {
                 return Task.FromResult(new LoginReply
                 {
-                    SessionId = "Отсутствует",
+                    SessionId = "none",
                     Result = validationResult.Code,
                     Message = validationResult.Message
                 });
@@ -40,28 +41,14 @@ namespace Account
                 // Проверка на наличие зарегистрированных аккаунтов с данными из запроса, и в
                 // случае их отсутствия отправляет ответ с сообщением об ошибке.
                 if (accounts.Count() == 0)
-                {
-                    return Task.FromResult(new LoginReply
-                    {
-                        SessionId = "Отсутствует",
-                        Result = ActionCode.AccountNotFound,
-                        Message = Messages.accountNotFound
-                    });
-                }
+                    return Task.FromResult(LoginReplies.AccountNotFound);
 
                 // Проверка на то, есть ли сессия с пользователем, который пытается войти в аккаунт, и
                 // в случае, если он вошел, возвращается его Id сессии
                 foreach (KeyValuePair<string, Models.Account> account in loggedIn)
                 {
                     if (request.Email == account.Value.Email)
-                    {
-                        return Task.FromResult(new LoginReply
-                        {
-                            SessionId = account.Key,
-                            Result = ActionCode.Successful,
-                            Message = Messages.alreadySignedIn
-                        });
-                    }
+                        return Task.FromResult(LoginReplies.AlreadySignedIn(account.Key));
                 }
 
                 // В случае наличия зарегистрированного аккаунта с данными из запроса генерируется
@@ -69,15 +56,12 @@ namespace Account
                 // пользователями.
                 string sessionId = Guid.NewGuid().ToString();
                 loggedIn.Add(sessionId, accounts.First());
+
+                // Сохранение текущего состояния в файл.
                 FileManagement.WriteState(loggedInFilename, loggedIn);
 
                 // Ответ сервера об успешном входе в аккаунт.
-                return Task.FromResult(new LoginReply
-                {
-                    SessionId = sessionId,
-                    Message = Messages.successfulLogin,
-                    Result = ActionCode.Successful
-                });
+                return Task.FromResult(LoginReplies.SuccessfulLogin(sessionId));
             }
         }
     }
