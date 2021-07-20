@@ -11,16 +11,44 @@ using static TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService;
 
 namespace Facade
 {
-    interface IClient
+    interface IPublic<T>
     {
-        
+        GrpcChannel channel { get; }
+        T client { get; }
     }
-    public class MyClass: IClient
+    interface IEmpty
     {
 
     }
+    public class TradeMarketClientClass:IPublic<TMClient>,IEmpty
+    {
+        //static GrpcChannel trademarketChannel = GrpcChannel.ForAddress("https://localhost:5005");
+        //public TMClient clientTradeMarket = new TMClient(trademarketChannel);
 
-    public class Repeater: TradeMarketServiceBase
+        public GrpcChannel channel => GrpcChannel.ForAddress("https://localhost:5005");
+        public TMClient client => new TMClient(channel);
+
+        public T SubBal<T>(T req)
+        {
+            //пустышка
+            T newT=req;
+            return newT;
+        }
+    }
+    class RelayClientClass : IPublic<RelayClient>,IEmpty
+    {
+        public GrpcChannel channel => GrpcChannel.ForAddress("https://localhost:5004");
+        public RelayClient client => new RelayClient(channel);
+
+        public T Switch<T>(T req)
+        {
+            //пустышка
+            T newT = req;
+            return newT;
+        }
+    }
+
+    public class Repeater
     {
         GrpcChannel trademarketChannel = GrpcChannel.ForAddress("https://localhost:5005");
         GrpcChannel relayChannel = GrpcChannel.ForAddress("https://localhost:5004");
@@ -29,9 +57,9 @@ namespace Facade
         TMClient clientTradeMarket;
         RelayClient clientRelay;
         //еще для аутентификации
-        
 
 
+        IEmpty empty1 = new TradeMarketClientClass();
         private static Repeater _repeater;
         private Repeater()
         {
@@ -45,11 +73,9 @@ namespace Facade
             return _repeater ??= new Repeater();
         }
         
-        public T1 RedirectToTheServer<T, T1>(T request)
+        public void RedirectToTheServer(IEmpty empty)
         {
-            T1 answer;
-
-            return;
+            empty
         }
 
         //public static T1 ReturnToTheClient<T,T1>(this T1 response, T response, string methodName)
