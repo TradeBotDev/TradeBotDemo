@@ -20,19 +20,16 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
                 e?.Invoke(nameof(BookPublisher), new(data));
             }
         };
-        private IObservable<BookResponse> _bookStream;
-        private String _slotName;
-        private SubscribeRequestBase _bookSubscribeRequest;
-        public BookPublisher(IObservable<BookResponse> bookStream,String slotName,SubscribeRequestBase bookSubscribeRequest) : base(_action)
+        private IObservable<BookResponse> _stream;
+
+        public BookPublisher(BitmexWebsocketClient client,IObservable<BookResponse> stream) : base(client,_action)
         {
-            _slotName = slotName;
-            _bookStream = bookStream;
-            _bookSubscribeRequest = bookSubscribeRequest;
+            _stream = stream;
         }
 
-        public async Task SubscribeAsync(CancellationToken token)
+        public async Task SubcribeAsync(SubscribeRequestBase bookSubscribeRequest,CancellationToken token) 
         {
-            await base.SubscribeAsync(_bookSubscribeRequest, _bookStream, token);
+            await base.SubscribeAsync(bookSubscribeRequest, _stream, token);
         }
     }
 }

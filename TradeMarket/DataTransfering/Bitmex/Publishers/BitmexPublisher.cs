@@ -17,7 +17,9 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         where TRequest : RequestBase
     {
 
-        private Action<TResponse, EventHandler<IPublisher<TModel>.ChangedEventArgs>> _invokeActionOnNext;
+        private readonly Action<TResponse, EventHandler<IPublisher<TModel>.ChangedEventArgs>> _invokeActionOnNext;
+
+        private readonly BitmexWebsocketClient _client;
 
         public event EventHandler<IPublisher<TModel>.ChangedEventArgs> Changed;
 
@@ -27,24 +29,17 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         }
 
 
-        public async Task SubscribeAsync(TRequest request,IObservable<TResponse> stream, CancellationToken token)
+        public async Task SubscribeAsync(TRequest request, IObservable<TResponse> stream, CancellationToken token)
         {
-            var exitEvent = new ManualResetEvent(false);
 
-            var url = BitmexValues.ApiWebsocketUrl;
+            _client.Send(request);
+            //TODO это просто жесть c действием. чувствую что нужно как-то по другому
+            stream.Subscribe(response => _invokeActionOnNext.Invoke(response, Changed));
+            //TODO строчки ниже должна жить в классе биржи
+            //await communicator.Start();
+            //exitEvent.WaitOne(TimeSpan.FromSeconds(30));
 
-            using (var communicator = new BitmexWebsocketCommunicator(url))
-            {
-                using (var client = new BitmexWebsocketClient(communicator))
-                {
-                    client.Send(request);
-                    //TODO это просто жесть c действием. чувствую что нужно как-то по другому
-                    stream.Subscribe(response => _invokeActionOnNext.Invoke(response,Changed));
-                    await communicator.Start();
-                    await AwaitCancellation(token);
-                    //exitEvent.WaitOne(TimeSpan.FromSeconds(30));
-                }
-            }
+            await AwaitCancellation(token);
         }
        
         private static Task AwaitCancellation(CancellationToken token)

@@ -15,13 +15,13 @@ namespace TradeMarket.Model
 
         public abstract Task<bool> AutheticateUser(string api, string secret);
 
-        public event EventHandler<FullOrder> Book25Updated;
+        public abstract event EventHandler<FullOrder> Book25Updated;
 
-        public event EventHandler<FullOrder> BookUpdated;
+        public abstract event EventHandler<FullOrder> BookUpdated;
 
-        public event EventHandler<FullOrder> UserOrdersUpdated;
+        public abstract event EventHandler<FullOrder> UserOrdersUpdated;
 
-        public event EventHandler<Balance> BalanceUpdated;
+        public abstract event EventHandler<Balance> BalanceUpdated;
 
         //TODO  нужен общий тип
         public event EventHandler<string> ErrorUpdated;

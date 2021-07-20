@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace TradeMarket.DataTransfering.Bitmex.Publishers
 {
-    public class UserWalletPublisher : BitmexPublisher<WalletResponse,WalletSubscribeRequest,Wallet>
+    public class UserWalletPublisher : BitmexPublisher<WalletResponse,WalletSubscribeRequest,Wallet>, IUltimatePublisher
     {
         internal static readonly Action<WalletResponse, EventHandler<IPublisher<Wallet>.ChangedEventArgs>> _action = (response, e) =>
         {
@@ -25,9 +25,10 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             _stream = stream;
         }
 
-        public async Task SubscribeAsync(CancellationToken token)
+        public async Task SubcribeAsync(CancellationToken token)
         {
             await base.SubscribeAsync(new WalletSubscribeRequest(), _stream, token);
+
         }
     }
 }

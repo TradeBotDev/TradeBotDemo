@@ -11,12 +11,22 @@ namespace TradeMarket.DataTransfering
     /// <typeparam name="T">класс за изменением которого идет отслеживание</typeparam>
     public interface IPublisher<T>
     {
+        public enum Action
+        {
+            Partial,
+            Insert,
+            Update,
+            Delete
+        }
         public class ChangedEventArgs : EventArgs
         {
+            
+            public Action Action;
             public T Changed { get; internal set; }
 
-            public ChangedEventArgs(T changed)
+            public ChangedEventArgs(T changed,Action action)
             {
+                this.Action = action;
                 this.Changed = changed;
                 //this.Changed = Convert(changed);
             }

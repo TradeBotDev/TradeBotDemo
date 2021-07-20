@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace TradeMarket.DataTransfering.Bitmex.Publishers
 {
-    public class UserOrderPublisher : BitmexPublisher<OrderResponse,OrderSubscribeRequest,Order>
+    public class UserOrderPublisher : BitmexPublisher<OrderResponse,OrderSubscribeRequest,Order>, IUltimatePublisher
     {
         internal static readonly Action<OrderResponse, EventHandler<IPublisher<Order>.ChangedEventArgs>> _action = (response, e) =>
         {
@@ -25,7 +25,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             _stream = orderStream;
         }
 
-        public async Task SubscribeAsync(CancellationToken token)
+        public async Task SubcribeAsync(CancellationToken token)
         {
             await base.SubscribeAsync(new OrderSubscribeRequest(), _stream, token);
         }
