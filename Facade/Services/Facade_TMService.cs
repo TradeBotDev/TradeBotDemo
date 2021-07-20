@@ -20,6 +20,7 @@ namespace Facade
 
         public override async Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<SubscribeBalanceResponse> responseStream, ServerCallContext context)
         {
+
             //удалить и сделаь нормально!!!!
             AsyncServerStreamingCall<TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceResponse> response = null;
             for (int i = 0; i < 4; i++)
@@ -60,27 +61,22 @@ namespace Facade
         }
         public override Task<AuthenticateTokenResponse> AuthenticateToken(AuthenticateTokenRequest request, ServerCallContext context)
         {
-            System.Console.WriteLine("Вызов метода AuthenticateToken спараметром: " + request.Token);
-
             try
             {
                 var response = clientTM.AuthenticateToken(new TradeBot.TradeMarket.TradeMarketService.v1.AuthenticateTokenRequest { Token = request.Token });
-
-                System.Console.WriteLine("Возврат значения из AuthenticateToken:" + response.Response.ToString());
                 return Task.FromResult(new AuthenticateTokenResponse
                 {
                     //Response = new TradeBot.Common.v1.DefaultResponse { Code=TradeBot.Common.v1.ReplyCode.Succeed,Message="otvet"}
                     Response = response.Response
                 });
             }
-            catch (System.Exception e)
+            catch (RpcException e)
             {
-                System.Console.WriteLine("Ошибка работы метода AuthenticateToken");
-                System.Console.WriteLine("Exception: " + e.Message);
+                System.Console.WriteLine("Exception: " + e.Status.DebugException.Message);
                 var defaultResponse = new TradeBot.Common.v1.DefaultResponse
                 {
                     Code = TradeBot.Common.v1.ReplyCode.Failure,
-                    Message = "Exception"
+                    Message = "Exception. The server doesnt answer"
                 };
                 return Task.FromResult(new AuthenticateTokenResponse
                 {
