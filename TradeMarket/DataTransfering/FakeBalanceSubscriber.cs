@@ -6,7 +6,7 @@ using TradeMarket.Model;
 
 namespace TradeMarket.DataTransfering
 {
-    public class FakeBalanceSubscriber : Subscriber<Balance>, FakeDataSubscriber
+    public class FakeBalanceSubscriber : ISubscriber<Balance>, IFakeDataSubscriber
     {
         private static FakeBalanceSubscriber _fakeBalanceSubscriber = null;
         private FakeBalanceSubscriber()
@@ -23,7 +23,7 @@ namespace TradeMarket.DataTransfering
             return _fakeBalanceSubscriber;
         }
 
-        private List<Balance> balanceChangingInTime = new List<Balance>
+        private List<Balance> _balanceChangingInTime = new List<Balance>
         {
             //у меня тут один биток равен одному доллару
             new Balance("USD",3D),
@@ -32,12 +32,12 @@ namespace TradeMarket.DataTransfering
             new Balance("XBT",1D)
         };
 
-        public event Subscriber<Balance>.ChangedEventHandler Changed;
+        public event ISubscriber<Balance>.ChangedEventHandler Changed;
 
         public async Task Simulate()
         {
             var random = new Random();
-            foreach (var order in balanceChangingInTime)
+            foreach (var order in _balanceChangingInTime)
             {
                 await Task.Delay(random.Next(0, 2000));
                 Changed?.Invoke(this, new(order));

@@ -3,18 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Common.v1;
+using System.Threading;
 
 namespace Algorithm.DataManipulation
 {
-    public class PointMaker : IPointRepository
+    //hardcoded for three second time intervals between points for now, 
+    //later will be decided by user
+    public class PointMaker
     {
-        public bool initialAnalysisDone = false;
-        public Dictionary<DateTime, double> GetPoints(string SlotID)
-        {
-            Dictionary<DateTime, double> requestedPoints = new Dictionary<DateTime, double>();
-            return requestedPoints;
-        }
-
+        public event EventHandler<KeyValuePair<DateTime, double>> PointMadeEvent;
         public KeyValuePair<DateTime, double> MakePoint(List<Order> orders, DateTime timestamp)
         {           
             double price = 0;
@@ -23,16 +20,28 @@ namespace Algorithm.DataManipulation
             {
                 price += order.Price;
             }
-            price = price / orders.Count();
-
+            price /= orders.Count;
+            Console.WriteLine("Made a point: " + timestamp.TimeOfDay + " " + price);
             return new KeyValuePair<DateTime, double> (timestamp, price); 
         }
 
-        public double CalculateEMA (Dictionary<DateTime, double> points)
+        public void Launch()
         {
-            SortedDictionary<DateTime, double> sortedPoints = new SortedDictionary<DateTime, double>(points);
+            List<Order> newOrders = new();
 
+            while (true)
+            {
+                Thread.Sleep(3000);
+                newOrders = DataCollector.orders;
+                KeyValuePair<DateTime, double> newPoint = MakePoint(newOrders, DateTime.Now);
 
+                //PointMadeEvent?.Invoke(this, newPoint);
+
+                newOrders.Clear();
+            }
         }
+
+        
+
     }
 }

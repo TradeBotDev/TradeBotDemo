@@ -5,18 +5,33 @@ using System.Threading.Tasks;
 
 namespace Algorithm.Analysis
 {
-    //alpha takes all the points, calculates average with and without the last point
-    //if the trend had been descending for three poins and then started rising we're buying 
-    public class AlgorithmAlpha : IAlgorithm
+    //if the trend has been descending for three points and is now on the rise we're buying
+    //hardcoded for five points for now, will change with user config
+    public class AlgorithmAlpha
     {
-        public double CalculateSuggestedPrice()
+        private Dictionary<DateTime, double> storage = new();
+        public double CalculateSMA(Dictionary<DateTime, double> points)
         {
-            throw new NotImplementedException();
+            double sum = 0;
+            foreach(KeyValuePair<DateTime, double> point in points)
+            {
+                sum += point.Value;
+            }
+
+            return sum/points.Count;
+
+        }
+        //hardcoded for five points!! 
+        //
+        public bool IsItTimeToBuy(Dictionary<DateTime, double> points)
+        {
+
+            return false;
         }
 
         public double CalculateSuggestedPrice(Dictionary<DateTime, double> points)
         {
-
+            return 0;
         }
     }
 }
