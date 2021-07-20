@@ -29,7 +29,9 @@ namespace Former
         public delegate void MyOrdersEvent(SubscribyMyOrdersResponse myOrderToUpdate);
         public MyOrdersEvent UpdateMyOrders;
 
+        private static int _retryDelay;
         private static string _connectionString;
+
         private static TradeMarketClient _tradeMarketClient;
 
         private readonly TradeMarketService.TradeMarketServiceClient _client;
@@ -44,9 +46,10 @@ namespace Former
             return _tradeMarketClient;
         }
 
-        public static void Configure(string connectionString)
+        public static void Configure(string connectionString, int retryDelay)
         {
             _connectionString = connectionString;
+            _retryDelay = retryDelay;
         }
 
         private TradeMarketClient()
@@ -81,11 +84,26 @@ namespace Former
                 }
                 catch (RpcException e)
                 {
-                    Thread.Sleep(10000);
+                    Thread.Sleep(_retryDelay);
                     Log.Debug("Exception in ObserveCurrentPurchaseOrders(). Retrying...\r\n{0}", e.Status.DebugException.Message);
                 }
             }
             _channel.Dispose();
+        }
+        private void TryConnect(Task task) 
+        {
+            while (true)
+            {
+                try
+                {
+                    task.Start();
+                }
+                catch (RpcException e)
+                {
+                    Thread.Sleep(_retryDelay);
+                    Log.Debug("Exception in ObserveBalance(). Retrying...\r\n{0}", e.Status.DebugException.Message);
+                }
+            }
         }
 
         public async void ObserveBalance()
@@ -106,7 +124,7 @@ namespace Former
                 }
                 catch (RpcException e)
                 {
-                    Thread.Sleep(10000);
+                    Thread.Sleep(_retryDelay);
                     Log.Debug("Exception in ObserveBalance(). Retrying...\r\n{0}", e.Status.DebugException.Message);
                 }
             }
@@ -127,7 +145,7 @@ namespace Former
                 }
                 catch (RpcException e)
                 {
-                    Thread.Sleep(10000);
+                    Thread.Sleep(_retryDelay);
                     Log.Debug("Exception in ObserveMyOrders(). Retrying...\r\n{0}", e.Status.DebugException.Message);
                 }
             }
@@ -150,7 +168,7 @@ namespace Former
                     }
                     catch (RpcException e)
                     {
-                        Thread.Sleep(10000);
+                        Thread.Sleep(_retryDelay);
                         Log.Debug("Exception in CloseOrders(). Retrying...\r\n{0}", e.Status.DebugException.Message);
                     }
                 }
@@ -179,7 +197,7 @@ namespace Former
                     }
                     catch (RpcException e)
                     {
-                        Thread.Sleep(10000);
+                        Thread.Sleep(_retryDelay);
                         Log.Debug("Exception in PlaceSuccessfulOrders(). Retrying...\r\n{0}", e.Status.DebugException.Message);
                     }
                 }

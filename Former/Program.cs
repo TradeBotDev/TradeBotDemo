@@ -14,7 +14,7 @@ namespace Former
                 .WriteTo.Console()
                 .CreateLogger();
 
-            TradeMarketClient.Configure("https://localhost:5005");
+            TradeMarketClient.Configure("https://localhost:5005", 10000);
 
             TradeMarketClient observers = TradeMarketClient.GetInstance();
 
