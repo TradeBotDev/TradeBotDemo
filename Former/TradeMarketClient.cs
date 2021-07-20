@@ -33,7 +33,7 @@ namespace Former
         private static TradeMarketClient _tradeMarketClient;
 
         private readonly TradeMarketService.TradeMarketServiceClient _client;
-        private readonly GrpcChannel _tradeMarketChannel;
+        private readonly GrpcChannel _channel;
 
         public static TradeMarketClient GetInstance()
         {
@@ -51,8 +51,8 @@ namespace Former
 
         private TradeMarketClient()
         {
-            _tradeMarketChannel = GrpcChannel.ForAddress(_connectionString);
-            _client = new TradeMarketService.TradeMarketServiceClient(_tradeMarketChannel);
+            _channel = GrpcChannel.ForAddress(_connectionString);
+            _client = new TradeMarketService.TradeMarketServiceClient(_channel);
         }
 
         public async void ObserveCurrentPurchaseOrders()
@@ -86,12 +86,11 @@ namespace Former
                     if (attempts >= 10) break;
                     attempts++;
                     Thread.Sleep(10000);
-                    Log.Debug("Исключение в наблюдателе за актуальными ценами: {0}", e.Message);
-                    Log.Debug("Повторная попытка... ");
+                    Log.Debug("Exception in ObserveCurrentPurchaseOrders(): {0}", e.Message);
+                    Log.Debug("\r\nRetrying... ");
                 }
             }
-            _tradeMarketChannel.Dispose();
-            //TODO выход из цикла и дальнейшее закрытие канала
+            _channel.Dispose();
         }
 
         public async void ObserveBalance()
@@ -117,11 +116,11 @@ namespace Former
                     if (attempts >= 10) break;
                     attempts++;
                     Thread.Sleep(10000);
-                    Log.Debug("Исключение в наблюдателе за балансом: {0}", e.Message);
-                    Log.Debug("Повторная попытка... ");
+                    Log.Debug("Exception in ObserveBalance(): {0}", e.Message);
+                    Log.Debug("\r\nRetrying... ");
                 }
             }
-            _tradeMarketChannel.Dispose();
+            _channel.Dispose();
         }
 
         public async void ObserveMyOrders()
@@ -143,15 +142,15 @@ namespace Former
                     if (attempts >= 10) break;
                     attempts++;
                     Thread.Sleep(10000);
-                    Log.Debug("Исключение в наблюдателе за своими ордерами: {0}", e.Message);
-                    Log.Debug("\r\nПовторная попытка... ");
+                    Log.Debug("Exception in ObserveMyOrders(): {0}", e.Message);
+                    Log.Debug("\r\nRetrying... ");
                 }
             }
         }
 
         public async Task CloseOrders(Dictionary<string, SubscribeOrdersResponse> preparedForPurchase)
         {
-            Dictionary<string, SubscribeOrdersResponse> succesfullyPurchasedOrders = new Dictionary<string, SubscribeOrdersResponse>();
+            var succesfullyPurchasedOrders = new Dictionary<string, SubscribeOrdersResponse>();
             foreach (var order in preparedForPurchase)
             {
                 var response = await _client.CloseOrderAsync(new CloseOrderRequest { Id = order.Value.Response.Order.Id });

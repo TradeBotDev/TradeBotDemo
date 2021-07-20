@@ -21,8 +21,6 @@ namespace Former
 
         private readonly ConcurrentDictionary<string, SubscribeOrdersResponse> _currentPurchaseOrders;
 
-        private List<SalesOrder> _ordersForSale;
-
         private readonly ConcurrentDictionary<string, Order> _myOrders;
 
         private double _balanceInRubles;
@@ -56,7 +54,6 @@ namespace Former
             };
 
             _currentPurchaseOrders = new ConcurrentDictionary<string, SubscribeOrdersResponse>();
-            _ordersForSale = new List<SalesOrder>();
             _myOrders = new ConcurrentDictionary<string, Order>();
         }
 
@@ -83,7 +80,7 @@ namespace Former
 
         private void SellPurchasedOrders(Dictionary<string, SubscribeOrdersResponse> successfulOrders)
         {
-            _ordersForSale.Clear();
+            var _ordersForSale = new List<SalesOrder>();
             double sellPrice;
             foreach (var order in successfulOrders)
             {
@@ -104,16 +101,17 @@ namespace Former
 
         private void UpdateCurrentBalance(Balance balance)
         {
-            Log.Debug("Обновление баланса. Новый баланс: {0}", balance);
+            Log.Debug("Balance updated. New balance: {0}", balance.bal1);
             _balanceInRubles = double.Parse(balance.bal1);
             //bal2 = double.Parse(balance.bal2);
         }
 
         private async void UpdateMyOrder(SubscribyMyOrdersResponse orderNeededUpdate)
         {
+            string key;
             var task = Task.Run(() =>
             {
-                var key = orderNeededUpdate.Changed.Id;
+                key = orderNeededUpdate.Changed.Id;
                 if (orderNeededUpdate.Changed.Signature.Status == OrderStatus.Open)
                     _myOrders.TryUpdate(key, orderNeededUpdate.Changed, _myOrders[key]);
                 else _myOrders.TryRemove(key, out _);
@@ -129,7 +127,7 @@ namespace Former
         public async void FormShoppingList(double avgPrice)
         {
             double availableBalance = _balanceInRubles * config.AvaibleBalance;//  config.AvaibleBalance - доступный баланс в процентах
-            Log.Debug("Получено от алгоритма: {price}", avgPrice);
+            Log.Debug("Received from algorithm: {price}", avgPrice);
             var selectedOrders = new Dictionary<string, SubscribeOrdersResponse>();
 
             foreach (var order in _currentPurchaseOrders)
@@ -139,8 +137,7 @@ namespace Former
                     if ((availableBalance - Convert(price)) > 0)
                         selectedOrders.Add(order.Key, order.Value);
             }
-
-            Log.Debug("Сформировал список необходимых ордеров: {elements}", selectedOrders.ToArray());
+            Log.Debug("Formed a list of required orders: {elements}", selectedOrders.ToArray());
             await _tmClient.CloseOrders(selectedOrders);
         }
     }

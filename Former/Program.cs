@@ -20,7 +20,7 @@ namespace Former
 
             observers.ObserveCurrentPurchaseOrders();
             observers.ObserveBalance();
-            observers.ObserveMyOrders();
+            //observers.ObserveMyOrders();
 
             CreateHostBuilder(args).Build().Run();
         }
