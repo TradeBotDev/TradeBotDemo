@@ -4,6 +4,7 @@ using Grpc.Net.Client;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -73,35 +74,31 @@ namespace Former
                 }
             };
             using var call = _client.SubscribeOrders(request);
-            while (true)
+
+            Func<Task> observeCurrentPurchaseOrders = async () =>
             {
-                try
+                while (await call.ResponseStream.MoveNext())
                 {
-                    while (await call.ResponseStream.MoveNext())
-                    {
-                        UpdatePurchaseOrders?.Invoke(call.ResponseStream.Current);
-                    }
+                    UpdatePurchaseOrders?.Invoke(call.ResponseStream.Current);
                 }
-                catch (RpcException e)
-                {
-                    Thread.Sleep(_retryDelay);
-                    Log.Debug("Exception in ObserveCurrentPurchaseOrders(). Retrying...\r\n{0}", e.Status.DebugException.Message);
-                }
-            }
-            _channel.Dispose();
+            };
+
+            await ConnectionTester(observeCurrentPurchaseOrders);
         }
-        private void TryConnect(Task task) 
+
+        private async Task ConnectionTester(Func<Task> func)
         {
             while (true)
             {
                 try
                 {
-                    task.Start();
+                    await func.Invoke();
+                    break;
                 }
                 catch (RpcException e)
                 {
+                    Log.Debug("Exception in {1}. Retrying...\r\n{0}", e.Status.DebugException.Message, e.StackTrace);
                     Thread.Sleep(_retryDelay);
-                    Log.Debug("Exception in ObserveBalance(). Retrying...\r\n{0}", e.Status.DebugException.Message);
                 }
             }
         }
@@ -113,65 +110,48 @@ namespace Former
                 Request = new TradeBot.Common.v1.SubscribeBalanceRequest()
             };
             using var call = _client.SubscribeBalance(request);
-            while (true)
+
+            Func<Task> observeBalance = async () =>
             {
-                try
+                while (await call.ResponseStream.MoveNext())
                 {
-                    while (await call.ResponseStream.MoveNext())
-                    {
-                        UpdateBalance?.Invoke(call.ResponseStream.Current);
-                    }
+                    UpdateBalance?.Invoke(call.ResponseStream.Current);
                 }
-                catch (RpcException e)
-                {
-                    Thread.Sleep(_retryDelay);
-                    Log.Debug("Exception in ObserveBalance(). Retrying...\r\n{0}", e.Status.DebugException.Message);
-                }
-            }
-            _channel.Dispose();
+            };
+
+            await ConnectionTester(observeBalance);
         }
 
         public async void ObserveMyOrders()
         {
             using var call = _client.SubscribyMyOrders(new SubscribyMyOrdersRequest());
-            while (true)
+
+            Func<Task> observeMyOrders = async () =>
             {
-                try
+                while (await call.ResponseStream.MoveNext())
                 {
-                    while (await call.ResponseStream.MoveNext())
-                    {
-                        UpdateMyOrders?.Invoke(call.ResponseStream.Current);
-                    }
+                    UpdateMyOrders?.Invoke(call.ResponseStream.Current);
                 }
-                catch (RpcException e)
-                {
-                    Thread.Sleep(_retryDelay);
-                    Log.Debug("Exception in ObserveMyOrders(). Retrying...\r\n{0}", e.Status.DebugException.Message);
-                }
-            }
-            _channel.Dispose();
+            };
+
+            await ConnectionTester(observeMyOrders);
         }
 
         public async Task CloseOrders(Dictionary<string, SubscribeOrdersResponse> preparedForPurchase, double contractValue)
         {
-            CloseOrderResponse response;
+            CloseOrderResponse response = null;
+            Func<Task> closeOrders;
             var succesfullyPurchasedOrders = new Dictionary<string, SubscribeOrdersResponse>();
-            
+
             foreach (var order in preparedForPurchase)
             {
-                while (true)
+                closeOrders = async () =>
                 {
-                    try
-                    {
-                        response = await _client.CloseOrderAsync(new CloseOrderRequest { Id = order.Value.Response.Order.Id, Value = contractValue });
-                        break;
-                    }
-                    catch (RpcException e)
-                    {
-                        Thread.Sleep(_retryDelay);
-                        Log.Debug("Exception in CloseOrders(). Retrying...\r\n{0}", e.Status.DebugException.Message);
-                    }
-                }
+                    response = await _client.CloseOrderAsync(new CloseOrderRequest { Id = order.Value.Response.Order.Id, Value = contractValue });
+                };
+
+                await ConnectionTester(closeOrders);
+
                 Log.Debug("Requested to buy {0}", order);
                 if (response.Response.Code == ReplyCode.Succeed)
                 {
@@ -185,22 +165,17 @@ namespace Former
 
         public async void PlaceSuccessfulOrders(List<SalesOrder> ordersForSale)
         {
-            PlaceOrderResponse response;
+            PlaceOrderResponse response = null;
+            Func<Task> placeSuccessfulOrders;
             foreach (var order in ordersForSale)
             {
-                while (true)
+                placeSuccessfulOrders = async () =>
                 {
-                    try
-                    {
-                        response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = order.price, Value = order.value });
-                        break;
-                    }
-                    catch (RpcException e)
-                    {
-                        Thread.Sleep(_retryDelay);
-                        Log.Debug("Exception in PlaceSuccessfulOrders(). Retrying...\r\n{0}", e.Status.DebugException.Message);
-                    }
-                }
+                    response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = order.price, Value = order.value });
+                };
+
+                await ConnectionTester(placeSuccessfulOrders);
+                
                 Log.Debug("Place order: price {0}, value {1}", order.price, order.value);
                 Log.Debug(response.Response.Code == ReplyCode.Succeed
                     ? " ...order placed"
