@@ -97,6 +97,7 @@ message PlaceOrderResponse{
 }
 message CloseOrderRequest{
 	string id = 1;
+	double value = 2;
 }
 
 message CloseOrderResponse{

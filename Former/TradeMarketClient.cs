@@ -87,7 +87,7 @@ namespace Former
                     attempts++;
                     Thread.Sleep(10000);
                     Log.Debug("Exception in ObserveCurrentPurchaseOrders(): {0}", e.Message);
-                    Log.Debug("\r\nRetrying... ");
+                    Log.Debug("\r\nRetrying...({0})", attempts);
                 }
             }
             _channel.Dispose();
@@ -117,7 +117,7 @@ namespace Former
                     attempts++;
                     Thread.Sleep(10000);
                     Log.Debug("Exception in ObserveBalance(): {0}", e.Message);
-                    Log.Debug("\r\nRetrying... ");
+                    Log.Debug("\r\nRetrying...({0})", attempts);
                 }
             }
             _channel.Dispose();
@@ -143,7 +143,7 @@ namespace Former
                     attempts++;
                     Thread.Sleep(10000);
                     Log.Debug("Exception in ObserveMyOrders(): {0}", e.Message);
-                    Log.Debug("\r\nRetrying... ");
+                    Log.Debug("\r\nRetrying...({0})", attempts);
                 }
             }
         }
