@@ -6,7 +6,7 @@ using TradeMarket.Model;
 
 namespace TradeMarket.DataTransfering
 {
-    public class FakeBalanceSubscriber : ISubscriber<Balance>, IFakeDataSubscriber
+    public class FakeBalanceSubscriber : IPublisher<Balance>, IFakeDataSubscriber
     {
         private static FakeBalanceSubscriber _fakeBalanceSubscriber = null;
         private FakeBalanceSubscriber()
@@ -32,7 +32,7 @@ namespace TradeMarket.DataTransfering
             new Balance("XBT",1D)
         };
 
-        public event ISubscriber<Balance>.ChangedEventHandler Changed;
+        public event EventHandler<IPublisher<Balance>.ChangedEventArgs> Changed;
 
         public async Task Simulate()
         {

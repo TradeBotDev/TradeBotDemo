@@ -70,7 +70,7 @@ namespace TradeMarket.Services
         public TradeMarketService(ILogger<TradeMarketService> logger)
         {
             //TODO Денис Тут надо тянуть зависимость на subscriber а не хардкодить
-            _orderSubscriptionService = new(BitmexOrderSubscriber.GetInstance(), logger, ConvertOrder);
+            //_orderSubscriptionService = new(BitmexPublisher.GetInstance(), logger, ConvertOrder);
             _balanceSubscriptionService = new(FakeBalanceSubscriber.GetInstance(), logger, ConvertBalance);
             _slotSubscriptionService = new(FakeSlotSubscriber.GetInstance(), logger, ConvertSlot);
             _logger = logger;

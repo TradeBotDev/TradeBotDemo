@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 namespace TradeMarket.DataTransfering
 {
     //TODO Денис пока без логов.
-    public class LoggerSubscriber<T> : ISubscriber<ILogger<T>>
+    public class LoggerSubscriber<T> : IPublisher<ILogger<T>>
     {
-        public event ISubscriber<ILogger<T>>.ChangedEventHandler Changed;
+        public event EventHandler<IPublisher<ILogger<T>>.ChangedEventArgs> Changed;
     }
 }

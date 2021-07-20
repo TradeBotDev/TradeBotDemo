@@ -24,7 +24,7 @@ namespace TradeMarket
                 //запуск подписок
                 Task[] tasks =
                 {
-                    BitmexOrderSubscriber.GetInstance().SubscribeAsync(stoppingToken),
+                    //BitmexPublisher.GetInstance().SubscribeAsync(stoppingToken),
                     FakeOrderSubscriber.GetInstance().Simulate(),
                     FakeBalanceSubscriber.GetInstance().Simulate(),
                     FakeSlotSubscriber.GetInstance().Simulate()

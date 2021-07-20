@@ -35,7 +35,7 @@ namespace TradeMarket
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<GreeterService>();
+                //endpoints.MapGrpcService<GreeterService>();
                 endpoints.MapGrpcService<TradeMarketService>();
 
 

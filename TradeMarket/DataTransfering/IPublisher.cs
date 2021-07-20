@@ -9,11 +9,8 @@ namespace TradeMarket.DataTransfering
     /// Отвечает за оповещение об изменениях в выбранных типах
     /// </summary>
     /// <typeparam name="T">класс за изменением которого идет отслеживание</typeparam>
-    public interface ISubscriber<T>
+    public interface IPublisher<T>
     {
-
-        public delegate void ChangedEventHandler(object sender, ChangedEventArgs args);
-
         public class ChangedEventArgs : EventArgs
         {
             public T Changed { get; internal set; }
@@ -31,6 +28,6 @@ namespace TradeMarket.DataTransfering
         {
             throw new NotImplementedException();
         }*/
-        public event ChangedEventHandler Changed;
+        public event EventHandler<ChangedEventArgs> Changed;
     }
 }
