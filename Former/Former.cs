@@ -99,10 +99,10 @@ namespace Former
             _tmClient.PlaceSuccessfulOrders(_ordersForSale);
         }
 
-        private void UpdateCurrentBalance(Balance balance)
+        private void UpdateCurrentBalance(TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceResponse balance)
         {
-            Log.Debug("Balance updated. New balance: {0}", balance.bal1);
-            _balanceInRubles = double.Parse(balance.bal1);
+            Log.Debug("Balance updated. New balance: {0}", balance.Response.Balance.Value);
+            _balanceInRubles = double.Parse(balance.Response.Balance.Value);
             //bal2 = double.Parse(balance.bal2);
         }
 

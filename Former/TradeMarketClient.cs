@@ -23,7 +23,7 @@ namespace Former
         public delegate void SuccessOrdersEvent(Dictionary<string, SubscribeOrdersResponse> successOrdersToUpdate);
         public SuccessOrdersEvent SellSuccessOrders;
 
-        public delegate void BalanceEvent(Balance balanceToUpdate);
+        public delegate void BalanceEvent(TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceResponse balanceToUpdate);
         public BalanceEvent UpdateBalance;
 
         public delegate void MyOrdersEvent(SubscribyMyOrdersResponse myOrderToUpdate);
@@ -57,7 +57,6 @@ namespace Former
 
         public async void ObserveCurrentPurchaseOrders()
         {
-            int attempts = 0;
             var orderSignature = new OrderSignature
             {
                 Status = OrderStatus.Open,
@@ -75,19 +74,15 @@ namespace Former
             {
                 try
                 {
-                    if (!(call.ResponseStream.Current is null)) attempts = 0;
                     while (await call.ResponseStream.MoveNext())
                     {
                         UpdatePurchaseOrders?.Invoke(call.ResponseStream.Current);
                     }
                 }
-                catch (Exception e)
+                catch (RpcException e)
                 {
-                    if (attempts >= 10) break;
-                    attempts++;
                     Thread.Sleep(10000);
-                    Log.Debug("Exception in ObserveCurrentPurchaseOrders(): {0}", e.Message);
-                    Log.Debug("\r\nRetrying...({0})", attempts);
+                    Log.Debug("Exception in ObserveCurrentPurchaseOrders(). Retrying...\r\n{0}", e.Status.DebugException.Message);
                 }
             }
             _channel.Dispose();
@@ -95,7 +90,6 @@ namespace Former
 
         public async void ObserveBalance()
         {
-            int attempts = 0;
             var request = new TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceRequest
             {
                 Request = new TradeBot.Common.v1.SubscribeBalanceRequest()
@@ -105,19 +99,15 @@ namespace Former
             {
                 try
                 {
-                    if (!(call.ResponseStream.Current is null)) attempts = 0;
                     while (await call.ResponseStream.MoveNext())
                     {
-                        UpdateBalance?.Invoke(new Balance { bal1 = call.ResponseStream.Current.Response.Balance.Value, bal2 = call.ResponseStream.Current.Response.Balance.Value });
+                        UpdateBalance?.Invoke(call.ResponseStream.Current);
                     }
                 }
-                catch (Exception e)
+                catch (RpcException e)
                 {
-                    if (attempts >= 10) break;
-                    attempts++;
                     Thread.Sleep(10000);
-                    Log.Debug("Exception in ObserveBalance(): {0}", e.Message);
-                    Log.Debug("\r\nRetrying...({0})", attempts);
+                    Log.Debug("Exception in ObserveBalance(). Retrying...\r\n{0}", e.Status.DebugException.Message);
                 }
             }
             _channel.Dispose();
@@ -125,35 +115,45 @@ namespace Former
 
         public async void ObserveMyOrders()
         {
-            int attempts = 0;
             using var call = _client.SubscribyMyOrders(new SubscribyMyOrdersRequest());
             while (true)
             {
                 try
                 {
-                    if (!(call.ResponseStream.Current is null)) attempts = 0;
                     while (await call.ResponseStream.MoveNext())
                     {
                         UpdateMyOrders?.Invoke(call.ResponseStream.Current);
                     }
                 }
-                catch (Exception e)
+                catch (RpcException e)
                 {
-                    if (attempts >= 10) break;
-                    attempts++;
                     Thread.Sleep(10000);
-                    Log.Debug("Exception in ObserveMyOrders(): {0}", e.Message);
-                    Log.Debug("\r\nRetrying...({0})", attempts);
+                    Log.Debug("Exception in ObserveMyOrders(). Retrying...\r\n{0}", e.Status.DebugException.Message);
                 }
             }
+            _channel.Dispose();
         }
 
         public async Task CloseOrders(Dictionary<string, SubscribeOrdersResponse> preparedForPurchase, double contractValue)
         {
+            CloseOrderResponse response;
             var succesfullyPurchasedOrders = new Dictionary<string, SubscribeOrdersResponse>();
+            
             foreach (var order in preparedForPurchase)
             {
-                var response = await _client.CloseOrderAsync(new CloseOrderRequest { Id = order.Value.Response.Order.Id, Value = contractValue });
+                while (true)
+                {
+                    try
+                    {
+                        response = await _client.CloseOrderAsync(new CloseOrderRequest { Id = order.Value.Response.Order.Id, Value = contractValue });
+                        break;
+                    }
+                    catch (RpcException e)
+                    {
+                        Thread.Sleep(10000);
+                        Log.Debug("Exception in CloseOrders(). Retrying...\r\n{0}", e.Status.DebugException.Message);
+                    }
+                }
                 Log.Debug("Requested to buy {0}", order);
                 if (response.Response.Code == ReplyCode.Succeed)
                 {
@@ -167,9 +167,22 @@ namespace Former
 
         public async void PlaceSuccessfulOrders(List<SalesOrder> ordersForSale)
         {
+            PlaceOrderResponse response;
             foreach (var order in ordersForSale)
             {
-                var response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = order.price, Value = order.value });
+                while (true)
+                {
+                    try
+                    {
+                        response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = order.price, Value = order.value });
+                        break;
+                    }
+                    catch (RpcException e)
+                    {
+                        Thread.Sleep(10000);
+                        Log.Debug("Exception in PlaceSuccessfulOrders(). Retrying...\r\n{0}", e.Status.DebugException.Message);
+                    }
+                }
                 Log.Debug("Place order: price {0}, value {1}", order.price, order.value);
                 Log.Debug(response.Response.Code == ReplyCode.Succeed
                     ? " ...order placed"
