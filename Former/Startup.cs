@@ -13,7 +13,7 @@ namespace Former
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddGrpc();
-            services.AddSingleton(new Former(9));
+            services.AddSingleton(new Former(25));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

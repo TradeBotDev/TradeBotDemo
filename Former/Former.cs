@@ -1,5 +1,6 @@
 ﻿using Serilog;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,9 +21,7 @@ namespace Former
 
         private readonly TradeMarketClient _tmClient;
 
-        private readonly List<SubscribeOrdersResponse> _currentPurchaseOrders;
-
-        private List<SubscribeOrdersResponse> _successfulOrders;
+        private readonly ConcurrentDictionary<string, SubscribeOrdersResponse> _currentPurchaseOrders;
 
         private List<SalesOrder> _ordersForSale;
 
@@ -34,51 +33,56 @@ namespace Former
 
         private Config config;
 
-        public Former(int ordersCount)
+        public void SetConfig(Config conf)
         {
-            _ordersCount = ordersCount;
+            config = conf;
+        }
+
+        public Former(int ordersToSave)
+        {
+            _ordersCount = ordersToSave;
             _tmClient = TradeMarketClient.GetInstance();
             _tmClient.UpdatePurchaseOrders += UpdateCurrentPurchaseOrders;
-            _tmClient.SellSuccessOrders += UpdateSuccessfullyPurchasedOrders;
+            _tmClient.SellSuccessOrders += SellPurchasedOrders;
             _tmClient.UpdateBalance += UpdateCurrentBalance;
 
-            _currentPurchaseOrders = new List<SubscribeOrdersResponse>();
-            _successfulOrders = new List<SubscribeOrdersResponse>();
+            _currentPurchaseOrders = new ConcurrentDictionary<string, SubscribeOrdersResponse>();
             _ordersForSale = new List<SalesOrder>();
         }
 
         private async void UpdateCurrentPurchaseOrders(SubscribeOrdersResponse orderNeededUpdate)
         {
-            Log.Debug("Принял от маркета заказ {id}: цена {price}, количество {value}", orderNeededUpdate.Response.Order.Id, orderNeededUpdate.Response.Order.Price, orderNeededUpdate.Response.Order.Quantity);
-
+            //Log.Debug("Принял от маркета заказ {id}: цена {price}, количество {value}", orderNeededUpdate.Response.Order.Id, orderNeededUpdate.Response.Order.Price, orderNeededUpdate.Response.Order.Quantity);
             var task = Task.Run(() =>
             {
-                int index = _currentPurchaseOrders.FindIndex(x => x.Response.Order.Id == orderNeededUpdate.Response.Order.Id);
                 if (orderNeededUpdate.Response.Order.Signature.Status == OrderStatus.Open)
-                    if (_currentPurchaseOrders.Exists(x => x.Response.Order.Id == orderNeededUpdate.Response.Order.Id))
-                        _currentPurchaseOrders[index] = orderNeededUpdate;
-                    else _currentPurchaseOrders.Add(orderNeededUpdate);
-                else _currentPurchaseOrders.RemoveAt(index);
-
-                _currentPurchaseOrders.Sort(new ReplyComparator());
+                    _currentPurchaseOrders.AddOrUpdate(orderNeededUpdate.Response.Order.Id, orderNeededUpdate, (k, v) => {
+                        //todo убедиться что цена приходит чистым нулем и не нужно проверять по эпсилону
+                        var price = orderNeededUpdate.Response.Order.Price;
+                        if (price != 0) v.Response.Order.Price = price;
+                        v.Response.Order.Quantity = orderNeededUpdate.Response.Order.Quantity;
+                        v.Response.Order.Signature = orderNeededUpdate.Response.Order.Signature;
+                        v.Response.Order.LastUpdateDate = orderNeededUpdate.Response.Order.LastUpdateDate;
+                        return v;
+                    });
+                else if (_currentPurchaseOrders.ContainsKey(orderNeededUpdate.Response.Order.Id)) _currentPurchaseOrders.TryRemove(orderNeededUpdate.Response.Order.Id, out _);
             });
             await task;
         }
 
-        private void UpdateSuccessfullyPurchasedOrders(List<SubscribeOrdersResponse> successfulOrders)
+        private void SellPurchasedOrders(Dictionary<string, SubscribeOrdersResponse> successfulOrders)
         {
-            _successfulOrders = successfulOrders.ToList();
             _ordersForSale.Clear();
             double sellPrice;
-            foreach (var order in _successfulOrders)
+            foreach (var order in successfulOrders)
             {
-                sellPrice = order.Response.Order.Price + config.RequiredProfit + config.SlotFee;
+                sellPrice = order.Value.Response.Order.Price + config.RequiredProfit + config.SlotFee;
                 _ordersForSale.Add(new SalesOrder { price = sellPrice, value = config.ContractValue });
-                _myOrders.Add(new Order 
-                { 
-                    Id = order.Response.Order.Id, 
-                    Price = sellPrice, 
-                    LastUpdateDate = new Google.Protobuf.WellKnownTypes.Timestamp(), 
+                _myOrders.Add(new Order
+                {
+                    Id = order.Value.Response.Order.Id,
+                    Price = sellPrice,
+                    LastUpdateDate = new Google.Protobuf.WellKnownTypes.Timestamp(),
                     Quantity = config.ContractValue,
                     Signature = new OrderSignature { Status = OrderStatus.Open, Type = OrderType.Sell }
                 });
@@ -92,14 +96,19 @@ namespace Former
             bal2 = double.Parse(balance.bal2);
         }
 
+        private double Convert(double priceFromTM) 
+        {
+            return priceFromTM * 0.00000001;
+        }
+
         public async void FormShoppingList(double avgPrice)
         {
             Log.Debug("Получено от алгоритма: {price}", avgPrice);
 
-            var selectedOrders = _currentPurchaseOrders.Where(order => order.Response.Order.Price <= avgPrice).ToList();
+            var selectedOrders = _currentPurchaseOrders.Where(order => order.Value.Response.Order.Price <= avgPrice).ToDictionary(x => x.Key, x => x.Value);
 
             Log.Debug("Сформировал список необходимых ордеров: {elements}", selectedOrders.ToArray());
-            await _tmClient.SendShoppingList(selectedOrders);
+            await _tmClient.CloseOrders(selectedOrders);
         }
     }
 }

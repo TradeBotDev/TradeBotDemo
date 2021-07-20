@@ -25,8 +25,8 @@ namespace Facade
                 
                 await responseStream.WriteAsync(new TradeBot.Facade.FacadeService.v1.SubscribeBalanceResponse
                 {
-                    BalanceOne=response.ResponseStream.Current.BalanceOne,
-                    BalanceTwo=response.ResponseStream.Current.BalanceTwo
+                    BalanceOne = response.ResponseStream.Current.Response.Balance,
+                    BalanceTwo = response.ResponseStream.Current.Response.Balance
                 });
             }
         }

@@ -8,7 +8,7 @@ namespace Former
     {
         int IComparer<SubscribeOrdersResponse>.Compare(SubscribeOrdersResponse x, SubscribeOrdersResponse y)
         {
-            return x.Response.Order.Price.CompareTo(y.Response.Order.Price);
+            return x.Response.Order.Price.CompareTo(y .Response.Order.Price);
         }
     }
 }
