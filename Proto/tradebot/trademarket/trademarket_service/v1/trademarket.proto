@@ -27,7 +27,7 @@ service TradeMarketService {
 	/*
 		подписка на изменения размещенных ордеров
 	*/
-	rpc SubscribyMyOrders(stream SubscribyMyOrdersRequest) returns (stream SubscribyMyOrdersResponse);
+	rpc SubscribyMyOrders(SubscribyMyOrdersRequest) returns (stream SubscribyMyOrdersResponse);
 
 	/*
 		Подписка на изменение баланса пользователя (ЕДИНСТВЕННОГО)
@@ -52,11 +52,10 @@ service TradeMarketService {
 }
 
 message SubscribyMyOrdersRequest{
-	string order_id = 1;
+	google.protobuf.Empty empty = 1;
 }
 
 message SubscribyMyOrdersResponse {
-	string order_id = 1;
 	tradebot.common.v1.Order changed = 2;
 
 }

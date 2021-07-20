@@ -17,7 +17,7 @@ namespace Former
 {
     public class TradeMarketClient
     {
-        public delegate void CurrentPurchaseOrdersEvent(SubscribeOrdersResponse PurchaseOrdersToUpdate);
+        public delegate void CurrentPurchaseOrdersEvent(SubscribeOrdersResponse purchaseOrdersToUpdate);
         public CurrentPurchaseOrdersEvent UpdatePurchaseOrders;
 
         public delegate void SuccessOrdersEvent(Dictionary<string, SubscribeOrdersResponse> successOrdersToUpdate);
@@ -25,6 +25,9 @@ namespace Former
 
         public delegate void BalanceEvent(Balance balanceToUpdate);
         public BalanceEvent UpdateBalance;
+
+        public delegate void MyOrdersEvent(SubscribyMyOrdersResponse myOrderToUpdate);
+        public MyOrdersEvent UpdateMyOrders;
 
         private static string _connectionString;
         private static TradeMarketClient _tradeMarketClient;
@@ -68,10 +71,11 @@ namespace Former
                 }
             };
             using var call = _client.SubscribeOrders(request);
-            while (true) 
+            while (true)
             {
                 try
                 {
+                    if (!(call.ResponseStream.Current is null)) attempts = 0;
                     while (await call.ResponseStream.MoveNext())
                     {
                         UpdatePurchaseOrders?.Invoke(call.ResponseStream.Current);
@@ -102,6 +106,7 @@ namespace Former
             {
                 try
                 {
+                    if (!(call.ResponseStream.Current is null)) attempts = 0;
                     while (await call.ResponseStream.MoveNext())
                     {
                         UpdateBalance?.Invoke(new Balance { bal1 = call.ResponseStream.Current.Response.Balance.Value, bal2 = call.ResponseStream.Current.Response.Balance.Value });
@@ -119,23 +124,29 @@ namespace Former
             _tradeMarketChannel.Dispose();
         }
 
-        private async void ObserveMyOrders(List<Order> myOrders)
+        public async void ObserveMyOrders()
         {
-            using var call = _client.SubscribyMyOrders();
-            var responseReaderTask = Task.Run(async () =>
+            int attempts = 0;
+            using var call = _client.SubscribyMyOrders(new SubscribyMyOrdersRequest());
+            while (true)
             {
-                while (await call.ResponseStream.MoveNext())
+                try
                 {
-                    var note = call.ResponseStream.Current;
+                    if (!(call.ResponseStream.Current is null)) attempts = 0;
+                    while (await call.ResponseStream.MoveNext())
+                    {
+                        UpdateMyOrders?.Invoke(call.ResponseStream.Current);
+                    }
                 }
-            });
-            //foreach (var order in _successfulOrders)
-            //{
-            //    await call.RequestStream.WriteAsync(new SubscribyMyOrdersRequest{ OrderId = order.Key});
-            //}
-            await call.RequestStream.CompleteAsync();
-            await responseReaderTask;
-
+                catch (Exception e)
+                {
+                    if (attempts >= 10) break;
+                    attempts++;
+                    Thread.Sleep(10000);
+                    Log.Debug("Исключение в наблюдателе за своими ордерами: {0}", e.Message);
+                    Log.Debug("\r\nПовторная попытка... ");
+                }
+            }
         }
 
         public async Task CloseOrders(Dictionary<string, SubscribeOrdersResponse> preparedForPurchase)
