@@ -1,4 +1,4 @@
-﻿namespace Account.Validation
+﻿namespace Account
 {
     // Все сообщения об операциях, используемые при валидации и проверках при входе/регистрации.
     public static class Messages
@@ -12,9 +12,6 @@
         public const string accountNotFound = "Произошла ошибка: пользователь не найден.";
         public const string accountExists = "Произошла ошибка: пользователь уже существует.";
         public const string alreadySignedIn = "Вы уже вошли в аккаунт.";
-        public const string emptyField = "Произошла ошибка: присутствуют пустые поля. Проверьте правильность введенных данных.";
-        public const string passwordMismatch = "Произошла ошибка: введенные пароли не совпадают. Проверьте правильность введенных данных.";
-        public const string isNotEmail = "Произошла ошибка: данные не являются электронной почтой. Проверьте правильность введенных данных.";
         public const string isValid = "Операция валидна.";
         public const string isNotValid = "Операция не валидна.";
     }

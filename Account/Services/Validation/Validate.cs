@@ -5,39 +5,40 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
+using Account.Validation.Messages;
 
 namespace Account.Validation
 {
     public class Validate
     {
         // Метод, который проверяет, являются ли поля для входа пустыми.
-        public static (ActionCode, string) LoginFields(LoginRequest request)
+        public static ValidationMessage LoginFields(LoginRequest request)
         {
             // В случае, если они являются пустыми, возвращает сообщение об ошибке.
             if (IsEmpty(request.Email, request.Password))
-                return (ActionCode.EmptyField, Messages.emptyField);
+                return new EmptyFieldMessage();
             // Иначе возвращает сообщение об успешности операции.
-            return (ActionCode.Successful, Messages.successfulValidation);
+            return new SuccessfulValidationMessage();
         }
 
         // Метод, который проверяет, являются ли ланные для регистрации пустыми и нет ли в них ошибок.
-        public static (ActionCode, string) RegisterFields(RegisterRequest request)
+        public static ValidationMessage RegisterFields(RegisterRequest request)
         {
             // В случае, если хоть одно поле пустое, возвращает сообщение о наличии пустых полей.
             if (IsEmpty(request.Email, request.Firstname, request.Lastname, request.PhoneNumber, request.Password, request.VerifyPassword))
-                return (ActionCode.EmptyField, Messages.emptyField);
-            
+                return new EmptyFieldMessage();
+
             // В случае, если пароли не совпадают, возвращает сообщение о несоответствии паролей.
             else if (request.Password != request.VerifyPassword)
-                return (ActionCode.PasswordMismatch, Messages.passwordMismatch);
-            
+                return new PasswordMismatchMessage();
+
             // В случае, если при записи адреса электронной почты допущены ошибки, возвращает сообщение о том,
             // что данные не являются адресом электронной почтой.
             else if (!IsEmail(request.Email))
-                return (ActionCode.IsNotEmail, Messages.isNotEmail);
+                return new IsNotEmailMessage();
             
             // В случае отсутствия ошибок возвращает сообщение об успешности валидации.
-            return (ActionCode.Successful, Messages.successfulValidation);
+            return new SuccessfulValidationMessage();
         }
 
         //Метод, который пробегается по всем предоставленным строкам и делает вывод, являются ли они пустыми.

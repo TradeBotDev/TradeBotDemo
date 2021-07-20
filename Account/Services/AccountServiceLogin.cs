@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
 using Account.Validation;
+using Account.Validation.Messages;
 
 namespace Account
 {
@@ -15,17 +16,17 @@ namespace Account
         public override Task<LoginReply> Login(LoginRequest request, ServerCallContext context)
         {
             // Валидация полей запроса
-            (ActionCode, string) validationResult = Validate.LoginFields(request);
+            ValidationMessage validationResult = Validate.LoginFields(request);
 
             // В случае, если валидация не прошла успешно (к примеру, присутствуют пустые поля)
             // возвращается сообщение об одной из ошибок в запросе.
-            if (validationResult.Item1 != ActionCode.Successful)
+            if (validationResult.Code != ActionCode.Successful)
             {
                 return Task.FromResult(new LoginReply
                 {
                     SessionId = "Отсутствует",
-                    Result = validationResult.Item1,
-                    Message = validationResult.Item2
+                    Result = validationResult.Code,
+                    Message = validationResult.Message
                 });
             }
 
