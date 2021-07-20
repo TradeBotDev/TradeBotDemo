@@ -148,12 +148,12 @@ namespace Former
             }
         }
 
-        public async Task CloseOrders(Dictionary<string, SubscribeOrdersResponse> preparedForPurchase)
+        public async Task CloseOrders(Dictionary<string, SubscribeOrdersResponse> preparedForPurchase, double contractValue)
         {
             var succesfullyPurchasedOrders = new Dictionary<string, SubscribeOrdersResponse>();
             foreach (var order in preparedForPurchase)
             {
-                var response = await _client.CloseOrderAsync(new CloseOrderRequest { Id = order.Value.Response.Order.Id });
+                var response = await _client.CloseOrderAsync(new CloseOrderRequest { Id = order.Value.Response.Order.Id, Value = contractValue });
                 Log.Debug("Requested to buy {0}", order);
                 if (response.Response.Code == ReplyCode.Succeed)
                 {

@@ -138,7 +138,7 @@ namespace Former
                         selectedOrders.Add(order.Key, order.Value);
             }
             Log.Debug("Formed a list of required orders: {elements}", selectedOrders.ToArray());
-            await _tmClient.CloseOrders(selectedOrders);
+            await _tmClient.CloseOrders(selectedOrders, config.ContractValue);
         }
     }
 }
