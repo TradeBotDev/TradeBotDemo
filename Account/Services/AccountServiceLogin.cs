@@ -68,6 +68,7 @@ namespace Account
                 // пользователями.
                 string sessionId = Guid.NewGuid().ToString();
                 loggedIn.Add(sessionId, accounts.First());
+                FileManagement.WriteState(loggedInFilename, loggedIn);
 
                 // Ответ сервера об успешном входе в аккаунт.
                 return Task.FromResult(new LoginReply

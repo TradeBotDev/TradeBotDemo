@@ -14,9 +14,18 @@ namespace Account
         private readonly ILogger<AccountService> _logger;
 
         // Хранит в себе всех вошедших в аккаунт пользователей, ключем является Id сессии.
-        private static Dictionary<string, Models.Account> loggedIn = new Dictionary<string, Models.Account>();
+        private static Dictionary<string, Models.Account> loggedIn;
 
-        public AccountService(ILogger<AccountService> logger) => _logger = logger;
+        private static string loggedInFilename = "loggedaccounts.state";
+
+        public AccountService(ILogger<AccountService> logger)
+        {
+            // В случае, если чтение файла не прошло успешно, а loggedIn является пустым, для него
+            // выделяется память.
+            if (!FileManagement.ReadState(loggedInFilename, ref loggedIn) && loggedIn == null)
+                loggedIn = new Dictionary<string, Models.Account>();
+            _logger = logger;
+        }
 
         // Метод выхода из аккаунта
         public override Task<LogoutReply> Logout(SessionRequest request, ServerCallContext context)
@@ -24,11 +33,14 @@ namespace Account
             // В случае успешного удаления аккаунта из списка, в которые пользователь зашел,
             // сервер отвечает, что выход был успешно завершен.
             if (loggedIn.Remove(request.SessionId))
+            {
+                FileManagement.WriteState(loggedInFilename, loggedIn);
                 return Task.FromResult(new LogoutReply
                 {
                     Result = ActionCode.Successful,
                     Message = Messages.successfulLogout
                 });
+            }
             // В случае, если аккаунт не был удален (по причине отсутствия) появляется сообщение об ошибке.
             else return Task.FromResult(new LogoutReply
             {
@@ -84,7 +96,5 @@ namespace Account
                 }
             });
         }
-
-        private void WriteLoggedAccountsState() { }
     }
 }
