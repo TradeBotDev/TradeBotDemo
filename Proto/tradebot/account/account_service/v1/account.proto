@@ -11,6 +11,10 @@ service Account {
 	rpc Register (RegisterRequest) returns (RegisterReply); // Метод регистрации аккаунта
 	rpc IsValidSession (SessionRequest) returns (SessionReply); // Проверка текущего пользователя на валидность по Id сессии
 	rpc CurrentAccountData (SessionRequest) returns (CurrentAccountReply); // Получение данных текущего пользователя
+	
+	// Скорее всего, сервис будет потом разбит на два, так что это неокончательная версия
+	rpc AddToken(AddTokenRequest) returns (AddTokenReply);
+	rpc TMsBySession (SessionRequest) returns (TMsBySessionReply);
 }
 
 message LoginRequest {
@@ -66,6 +70,24 @@ message CurrentAccountReply {
 	AccountInfo current_account = 3;
 }
 
+message AddTokenRequest {
+	string session_id = 1;
+	string trade_market_name = 2;
+	string token = 3;
+	int32 secret = 4;
+}
+
+message AddTokenReply {
+	ActionCode result = 1;
+	string message = 2;
+}
+
+message TMsBySessionReply {
+	ActionCode result = 1;
+	string message = 2;
+	repeated TradeMarketInfo trade_markets = 3;
+}
+
 message AccountInfo {
 	//Информация о пользователе, необходимая для отображения в UI
 	int32 id = 1;
@@ -73,6 +95,13 @@ message AccountInfo {
 	string lastname = 3;
 	string email = 4;
 	string phone_number = 5;
+	repeated TradeMarketInfo trade_markets = 6;
+}
+
+message TradeMarketInfo {
+	string name = 1;
+	string token = 2;
+	int32 secret = 3;
 }
 
 enum ActionCode {
