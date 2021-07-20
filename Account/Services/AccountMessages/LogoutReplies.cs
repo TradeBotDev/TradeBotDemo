@@ -11,13 +11,13 @@ namespace Account.AccountMessages
         public static readonly LogoutReply SuccessfulLogout = new LogoutReply
         {
             Result = ActionCode.Successful,
-            Message = "Вы вышли из аккаунта."
+            Message = "Произведен выход из аккаунта."
         };
 
         public static readonly LogoutReply AccountNotFound = new LogoutReply
         {
             Result = ActionCode.AccountNotFound,
-            Message = "Произошла ошибка: вы уже вышли из аккаунта"
+            Message = "Ошибка при выходе из аккаунта: вы уже вышли из аккаунта"
         };
     }
 }

@@ -11,7 +11,7 @@ namespace Account.AccountMessages
         public static readonly CurrentAccountReply AccountNotFound = new CurrentAccountReply
         {
             Result = ActionCode.AccountNotFound,
-            Message = "Произошла ошибка: пользователь не найден.",
+            Message = "Ошибка при получении данных текущего аккаунта: пользователь не найден.",
             CurrentAccount = null
         };
 

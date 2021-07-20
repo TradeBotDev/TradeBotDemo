@@ -11,7 +11,7 @@ namespace Account.AccountMessages
         public static readonly SessionReply IsValid = new SessionReply
         {
             IsValid = true,
-            Message = "Операция валидна."
+            Message = "Операция является валидной."
         };
 
         public static readonly SessionReply IsNotValid = new SessionReply

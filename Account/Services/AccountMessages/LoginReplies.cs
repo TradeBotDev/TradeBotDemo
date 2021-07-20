@@ -14,7 +14,7 @@ namespace Account.AccountMessages
             {
                 SessionId = sessionId,
                 Result = ActionCode.Successful,
-                Message = "Вход в аккаунт завершен успешно."
+                Message = "Произведен вход в аккаунт."
             };
         }
 
@@ -32,7 +32,7 @@ namespace Account.AccountMessages
         {
             SessionId = "Отсутствует",
             Result = ActionCode.AccountNotFound,
-            Message = "Произошла ошибка: пользователь не найден."
+            Message = "Ошибка при входе: пользователь не найден."
         };
     }
 }

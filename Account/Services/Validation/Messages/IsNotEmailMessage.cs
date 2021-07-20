@@ -9,7 +9,7 @@ namespace Account.Validation.Messages
 {
     public class IsNotEmailMessage : FailedValidationMessage
     {
-        public override string Message => "Произошла ошибка: данные не являются электронной почтой. Проверьте правильность введенных данных.";
+        public override string Message => "Произошла ошибка: строка не является электронной почтой. Проверьте правильность введенных данных.";
 
         public override ActionCode Code => ActionCode.IsNotEmail;
     }

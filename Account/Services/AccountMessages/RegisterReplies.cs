@@ -11,13 +11,13 @@ namespace Account.AccountMessages
         public static readonly RegisterReply AccountExists = new RegisterReply
         {
             Result = ActionCode.AccountExists,
-            Message = "Произошла ошибка: пользователь уже существует."
+            Message = "Ошибка при регистрации: пользователь уже существует."
         };
 
         public static readonly RegisterReply SuccessfulRegister = new RegisterReply
         {
             Result = ActionCode.Successful,
-            Message = "Регистрация завершена успешно."
+            Message = "Произведена регистрация аккаунта."
         };
     }
 }
