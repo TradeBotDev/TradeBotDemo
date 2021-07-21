@@ -22,7 +22,7 @@ namespace Former
         }
         public override Task<SendPurchasePriceResponse> SendPurchasePrice(SendPurchasePriceRequest request, ServerCallContext context)
         {
-            _former.FormShoppingList(request.PurchasePrice);
+            _former.FormPurchaseList(request.PurchasePrice);
             return Task.FromResult(new SendPurchasePriceResponse());
         }
     }

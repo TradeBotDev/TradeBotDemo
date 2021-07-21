@@ -19,7 +19,7 @@ namespace Former
             TradeMarketClient observers = TradeMarketClient.GetInstance();
 
             observers.ObserveCurrentPurchaseOrders();
-            observers.ObserveBalance();
+            //observers.ObserveBalance();
             //observers.ObserveMyOrders();
 
             CreateHostBuilder(args).Build().Run();

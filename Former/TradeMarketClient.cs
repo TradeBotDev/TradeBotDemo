@@ -1,6 +1,5 @@
 ﻿using Grpc.Core;
 using Grpc.Net.Client;
-
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -18,16 +17,16 @@ namespace Former
 {
     public class TradeMarketClient
     {
-        public delegate void CurrentPurchaseOrdersEvent(SubscribeOrdersResponse purchaseOrdersToUpdate);
-        public CurrentPurchaseOrdersEvent UpdatePurchaseOrders;
+        public delegate void PurchaseOrdersEvent(Order purchaseOrdersToUpdate);
+        public PurchaseOrdersEvent UpdatePurchaseOrders;
 
-        public delegate void SuccessOrdersEvent(Dictionary<string, SubscribeOrdersResponse> successOrdersToUpdate);
-        public SuccessOrdersEvent SellSuccessOrders;
+        public delegate void SellOrdersEvent(Dictionary<string, Order> successOrdersToUpdate);
+        public SellOrdersEvent SellListUpdated;
 
-        public delegate void BalanceEvent(TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceResponse balanceToUpdate);
+        public delegate void BalanceEvent(Balance balanceToUpdate);
         public BalanceEvent UpdateBalance;
 
-        public delegate void MyOrdersEvent(SubscribyMyOrdersResponse myOrderToUpdate);
+        public delegate void MyOrdersEvent(Order myOrderToUpdate);
         public MyOrdersEvent UpdateMyOrders;
 
         private static int _retryDelay;
@@ -59,6 +58,23 @@ namespace Former
             _client = new TradeMarketService.TradeMarketServiceClient(_channel);
         }
 
+        private async Task ConnectionTester(Func<Task> func)
+        {
+            while (true)
+            {
+                try
+                {
+                    await func.Invoke();
+                    break;
+                }
+                catch (RpcException e)
+                {
+                    Log.Error("Error {1}. Retrying...\r\n{0}", e.Status.DebugException.Message, e.StackTrace);
+                    Thread.Sleep(_retryDelay);
+                }
+            }
+        }
+
         public async void ObserveCurrentPurchaseOrders()
         {
             var orderSignature = new OrderSignature
@@ -79,28 +95,11 @@ namespace Former
             {
                 while (await call.ResponseStream.MoveNext())
                 {
-                    UpdatePurchaseOrders?.Invoke(call.ResponseStream.Current);
+                    UpdatePurchaseOrders?.Invoke(call.ResponseStream.Current.Response.Order);
                 }
             };
 
             await ConnectionTester(observeCurrentPurchaseOrders);
-        }
-
-        private async Task ConnectionTester(Func<Task> func)
-        {
-            while (true)
-            {
-                try
-                {
-                    await func.Invoke();
-                    break;
-                }
-                catch (RpcException e)
-                {
-                    Log.Debug("Exception in {1}. Retrying...\r\n{0}", e.Status.DebugException.Message, e.StackTrace);
-                    Thread.Sleep(_retryDelay);
-                }
-            }
         }
 
         public async void ObserveBalance()
@@ -115,7 +114,7 @@ namespace Former
             {
                 while (await call.ResponseStream.MoveNext())
                 {
-                    UpdateBalance?.Invoke(call.ResponseStream.Current);
+                    UpdateBalance?.Invoke(call.ResponseStream.Current.Response.Balance);
                 }
             };
 
@@ -130,24 +129,24 @@ namespace Former
             {
                 while (await call.ResponseStream.MoveNext())
                 {
-                    UpdateMyOrders?.Invoke(call.ResponseStream.Current);
+                    UpdateMyOrders?.Invoke(call.ResponseStream.Current.Changed);
                 }
             };
 
             await ConnectionTester(observeMyOrders);
         }
 
-        public async Task CloseOrders(Dictionary<string, SubscribeOrdersResponse> preparedForPurchase, double contractValue)
+        public async Task CloseOrders(Dictionary<string, Order> preparedForPurchase, double contractValue)
         {
             CloseOrderResponse response = null;
             Func<Task> closeOrders;
-            var succesfullyPurchasedOrders = new Dictionary<string, SubscribeOrdersResponse>();
+            var succesfullyPurchasedOrders = new Dictionary<string, Order>();
 
             foreach (var order in preparedForPurchase)
             {
                 closeOrders = async () =>
                 {
-                    response = await _client.CloseOrderAsync(new CloseOrderRequest { Id = order.Value.Response.Order.Id, Value = contractValue });
+                    response = await _client.CloseOrderAsync(new CloseOrderRequest { Id = order.Value.Id, Value = contractValue });
                 };
 
                 await ConnectionTester(closeOrders);
@@ -160,10 +159,10 @@ namespace Former
                 }
                 else Log.Debug(" ...not purchased");
             }
-            SellSuccessOrders?.Invoke(succesfullyPurchasedOrders);
+            SellListUpdated?.Invoke(succesfullyPurchasedOrders);
         }
 
-        public async void PlaceSuccessfulOrders(List<SalesOrder> ordersForSale)
+        public async Task PlaceSuccessfulOrders(List<SalesOrder> ordersForSale)
         {
             PlaceOrderResponse response = null;
             Func<Task> placeSuccessfulOrders;
@@ -181,6 +180,12 @@ namespace Former
                     ? " ...order placed"
                     : " ...order not placed");
             }
+        }
+
+        public async Task UpdateMyOrdersOnTM(Dictionary<string, double> orderToUpdate) 
+        {
+            
+        
         }
     }
 }
