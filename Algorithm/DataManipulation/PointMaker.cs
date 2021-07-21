@@ -25,7 +25,7 @@ namespace Algorithm.DataManipulation
             return new KeyValuePair<DateTime, double> (timestamp, price); 
         }
 
-        public void Launch()
+        public void Launch(Publisher publisher)
         {
             List<Order> newOrders = new();
 
@@ -34,9 +34,7 @@ namespace Algorithm.DataManipulation
                 Thread.Sleep(3000);
                 newOrders = DataCollector.orders;
                 KeyValuePair<DateTime, double> newPoint = MakePoint(newOrders, DateTime.Now);
-
-                //PointMadeEvent?.Invoke(this, newPoint);
-
+                publisher.Publish(newPoint);
                 newOrders.Clear();
             }
         }

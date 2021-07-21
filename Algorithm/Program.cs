@@ -1,3 +1,4 @@
+using Algorithm.DataManipulation;
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,36 +22,30 @@ namespace Algorithm
             //DataCollector.SendPurchasePrice();
             //CreateHostBuilder(args).Build().Run();
 
-            using var channel = GrpcChannel.ForAddress("https://localhost:5003");
-            var client = new FormerService.FormerServiceClient(channel);
-            SendPurchasePriceResponse call;
-            AlgorithmEmulator algo = new AlgorithmEmulator();
-            Random rnd = new Random();
+            Publisher publisher = new();
 
-            while (true)
-            {
-                Thread.Sleep(rnd.Next(0, 5000));
-                double newPrice = algo.CalculateSuggestedPrice();
-                call = client.SendPurchasePrice(new SendPurchasePriceRequest() { PurchasePrice = newPrice });
-                Console.WriteLine("Sent " + newPrice);
-            }
+            PointMaker PM = new PointMaker();
+            PM.Launch(publisher);
+
         }
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
+
+
+       /* public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
                 }).ConfigureServices(services => {
                     services.AddHostedService<Worker>();
-                });
+                });*/
     }
 
-    public class Worker : BackgroundService
+    /*public class Worker : BackgroundService
     {
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await DataCollector.SendPurchasePrice();
         }
-    }
+    }*/
 }
