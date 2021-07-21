@@ -22,10 +22,11 @@ namespace Facade
             using var response = clientTM.SubscribeBalance(new TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceRequest {Request=request.Request });
             while (await response.ResponseStream.MoveNext())
             {
-                //TradeBot.Facade.FacadeService.v1.SubscribeBalanceResponse subscribeBalanceResponse = new SubscribeBalanceResponse()
-                //{
-                //    Response=response.ResponseStream.Current.BalanceOne
-                //};
+                TradeBot.Facade.FacadeService.v1.SubscribeBalanceResponse subscribeBalanceResponse = new SubscribeBalanceResponse()
+                {
+                    BalanceOne = response.ResponseStream.Current.BalanceOne,
+                    BalanceTwo = response.ResponseStream.Current.BalanceTwo
+                };
                 //await responseStream.WriteAsync(new TradeBot.Facade.FacadeService.v1.SubscribeBalanceResponse
                 //{
                 //    R
@@ -36,23 +37,19 @@ namespace Facade
         
         public override Task<AuthenticateTokenResponse> AuthenticateToken(AuthenticateTokenRequest request, ServerCallContext context)
         {
-            System.Console.WriteLine("Вызов метода AuthenticateToken спараметром: " + request.Token);
-
             try
             {
                 var response = clientTM.AuthenticateToken(new TradeBot.TradeMarket.TradeMarketService.v1.AuthenticateTokenRequest {Token=request.Token });
 
-                System.Console.WriteLine("Возврат значения из AuthenticateToken:" + response.Response.ToString());
                 return Task.FromResult(new AuthenticateTokenResponse
                 {
                     //Response = new TradeBot.Common.v1.DefaultResponse { Code=TradeBot.Common.v1.ReplyCode.Succeed,Message="otvet"}
                     Response = response.Response
                 });
             }
-            catch (System.Exception e)
+            catch (RpcException e)
             {
-                System.Console.WriteLine("Ошибка работы метода AuthenticateToken");
-                System.Console.WriteLine("Exception: " + e.Message);
+                _logger.LogError("Exception: " + e.Message);
                 var defaultResponse = new TradeBot.Common.v1.DefaultResponse
                 {
                     Code = TradeBot.Common.v1.ReplyCode.Failure,
@@ -68,41 +65,54 @@ namespace Facade
 
         public override async Task Slots(SlotsRequest request, IServerStreamWriter<SlotsResponse> responseStream, ServerCallContext context)
         {
-            using var response = clientTM.Slots(new TradeBot.TradeMarket.TradeMarketService.v1.SlotsRequest { Empty=request.Empty});
-
-            while (await response.ResponseStream.MoveNext())
+            try
             {
-                await responseStream.WriteAsync(new SlotsResponse
+                var response = clientTM.Slots(new TradeBot.TradeMarket.TradeMarketService.v1.SlotsRequest { Empty = request.Empty });
+
+                while (await response.ResponseStream.MoveNext())
                 {
-                    SlotName = response.ResponseStream.Current.SlotName
-                });
+                    await responseStream.WriteAsync(new SlotsResponse
+                    {
+                        SlotName = response.ResponseStream.Current.SlotName
+                    });
+                }
             }
+            catch (RpcException e)
+            {
+                _logger.LogError("Exception: " + e.Message);
+                var defaultResponse = new TradeBot.Common.v1.DefaultResponse
+                {
+                    Code = TradeBot.Common.v1.ReplyCode.Failure,
+                    Message = "The server doens't answer"
+                };
+                await responseStream.WriteAsync(new SlotResponse
+                {
+                    Message=defaultResponse
+                });
+                
+            }
+            
         }
 
         
         public override Task<SwitchBotResponse> SwitchBot(SwitchBotRequest request, ServerCallContext context)
         {
-            System.Console.WriteLine("Вызов метода StartBot с параметром: " + request.Config.ToString());
             try
             {
-
                 var response = clientRelay.StartBot(new TradeBot.Relay.RelayService.v1.StartBotRequest{ Config = request.Config });
-
-                System.Console.WriteLine("Возврат значения из StartBot: " + response.Response.ToString());
 
                 return Task.FromResult(new SwitchBotResponse
                 {
                     Response = response.Response
                 });
             }
-            catch (Exception e)
+            catch (RpcException e)
             {
-                Console.WriteLine("Ошибка работы метода StarBot");
-                Console.WriteLine("Exception: " + e.Message);
+                _logger.LogError("Exception: " + e.Message);
                 var defaultResponse = new TradeBot.Common.v1.DefaultResponse
                 {
                     Code = TradeBot.Common.v1.ReplyCode.Failure,
-                    Message = "Exception"
+                    Message = "The server doens't answer"
                 };
                 return Task.FromResult(new SwitchBotResponse
                 {
@@ -114,18 +124,35 @@ namespace Facade
 
         public override async Task SubscribeLogs(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
         {
-            var response = clientRelay.SubscribeLogs(new TradeBot.Relay.RelayService.v1.SubscribeLogsRequest { Request = request.R }, cancellationToken: context.CancellationToken);
-
-            while (await response.ResponseStream.MoveNext())
+            try
             {
-                //токен на эксепшен
-                context.CancellationToken.ThrowIfCancellationRequested();
-                await responseStream.WriteAsync(new SubscribeLogsResponse
+                var response = clientRelay.SubscribeLogs(new TradeBot.Relay.RelayService.v1.SubscribeLogsRequest { Request = request.R }, cancellationToken: context.CancellationToken);
+
+                while (await response.ResponseStream.MoveNext())
                 {
-                    Response = response.ResponseStream.Current.Response
+                    //токен на эксепшен
+                    context.CancellationToken.ThrowIfCancellationRequested();
+                    await responseStream.WriteAsync(new SubscribeLogsResponse
+                    {
+                        Response = response.ResponseStream.Current.Response
+                    });
+                }
+            }
+            catch (RpcException e)
+            {
+                _logger.LogError("Exception: " + e.Message);
+                var defaultResponse = new TradeBot.Common.v1.DefaultResponse
+                {
+                    Code = TradeBot.Common.v1.ReplyCode.Failure,
+                    Message = "The server doens't answer"
+                };
+                return Task.FromResult(new SwitchBotResponse
+                {
+                    Response = defaultResponse
                 });
             }
         }
+        
         //public override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request, ServerCallContext context)
         //{
         //    var response = clientTM.UpdateServerConfig(request);
