@@ -18,8 +18,15 @@ namespace Algorithm
     {
         public static void Main(string[] args)
         {
-            DataCollector.SendPurchasePrice();
-            CreateHostBuilder(args).Build().Run();
+            //commented out for testing purposes
+            //DataCollector.SendPurchasePrice();
+            //CreateHostBuilder(args).Build().Run();
+
+            Publisher publisher = new();
+
+            PointMaker PM = new PointMaker();
+            PM.Launch(publisher);
+              
         }
 
 
