@@ -5,8 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Relay.Clients;
+using TradeBot.Relay.RelayService.v1;
 
 namespace Relay
 {
@@ -24,9 +23,6 @@ namespace Relay
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                }).ConfigureServices(services =>
-                {
-                    services.AddHostedService<Worker>();
                 });
     }
 }
