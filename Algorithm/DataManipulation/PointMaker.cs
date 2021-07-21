@@ -25,14 +25,14 @@ namespace Algorithm.DataManipulation
             return new KeyValuePair<DateTime, double> (timestamp, price); 
         }
 
-        public void Launch(Publisher publisher)
+        public void Launch(Publisher publisher, DataCollector dataCollector)
         {
             List<Order> newOrders = new();
 
             while (true)
             {
                 Thread.Sleep(3000);
-                newOrders = DataCollector.orders;
+                newOrders = dataCollector.orders;
                 KeyValuePair<DateTime, double> newPoint = MakePoint(newOrders, DateTime.Now);
                 publisher.Publish(newPoint);
                 newOrders.Clear();

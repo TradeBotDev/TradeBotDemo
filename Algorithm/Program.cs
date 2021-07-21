@@ -28,13 +28,12 @@ namespace Algorithm
             PointMaker PM = new PointMaker();
             AlgorithmAlpha algo = new();
             DataCollector DC = new();
-            PM.Launch(publisher);
+            PM.Launch(publisher, DC);
 
 
         }
 
-
-       /* public static IHostBuilder CreateHostBuilder(string[] args) =>
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {

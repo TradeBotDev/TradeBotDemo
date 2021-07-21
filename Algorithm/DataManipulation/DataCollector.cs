@@ -13,7 +13,7 @@ namespace Algorithm
 {
     public class DataCollector
     {
-        public static List<Order> orders;
+        public List<Order> orders;
         Publisher publisher = new Publisher();
 
         public DataCollector()
