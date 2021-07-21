@@ -14,9 +14,10 @@ namespace Algorithm.DataManipulation
         private static FormerServiceClient client = new FormerServiceClient(channel);
         //private static SendPurchasePriceResponse call;
         
+
         public static void SendPrice (double price)
         {
-            client.SendPurchasePrice(new SendPurchasePriceRequest() { PurchasePrice = price });
+            var response = client.SendPurchasePrice(new SendPurchasePriceRequest() { PurchasePrice = price });
         }
 
 

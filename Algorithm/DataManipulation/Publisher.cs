@@ -7,11 +7,12 @@ namespace Algorithm.DataManipulation
 {
     public class Publisher
     {
-        public event EventHandler<KeyValuePair<DateTime, double>> Handler = delegate { };
+        public delegate void PointMade(KeyValuePair<DateTime, double> point);
+        public PointMade pointMadeEvent;
 
         public void Publish(KeyValuePair<DateTime, double> point)
         {
-            Handler?.Invoke(this, point);
+            pointMadeEvent?.Invoke(point);
         }
     }
 

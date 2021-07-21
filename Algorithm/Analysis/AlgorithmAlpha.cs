@@ -1,16 +1,28 @@
-﻿using System;
+﻿using Algorithm.DataManipulation;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Algorithm.Analysis
 {
+    //public delegate void SendPrice (double price);
+    
     //if the trend has been descending for three points and is now on the rise we're buying
     //hardcoded for five points for now, will change with user config
     public class AlgorithmAlpha
     {
         private Dictionary<DateTime, double> storage;
-        
+        private Publisher publisher = new();
+        //SendPrice sendPrice = PriceSender.SendPrice;
+        //public SendPrice sendPriceEvent;
+
+        public AlgorithmAlpha() 
+        {
+            publisher.pointMadeEvent += NewPointAlert;
+            storage = new();
+        }
+
         //hardcoded for five points!! 
         public void NewPointAlert (KeyValuePair<DateTime, double> point)
         {
@@ -39,7 +51,7 @@ namespace Algorithm.Analysis
                 prices.Add(CalculateSMA(subSet));
             }
             // TODO alert the price sender!!
-            if (IsItTimeToBuy(prices, points)) { }
+            if (IsItTimeToBuy(prices, points)) { PriceSender.SendPrice(prices.Last()); }
         }
         //if the trend has been going downwards and now stopped and it going up
         public bool IsItTimeToBuy(List<double> prices, Dictionary<DateTime, double> points)
