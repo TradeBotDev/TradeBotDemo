@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TradeBot.Common;
 
-namespace Facade
+namespace Algorithm
 {
-    public class Repeater
+    interface IAlgorithm
     {
+        public double CalculateSuggestedPrice();
     }
 }

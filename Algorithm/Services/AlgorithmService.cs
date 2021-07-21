@@ -12,19 +12,20 @@ namespace Algorithm.Services
 
     public class AlgorithmService : TradeBot.Algorithm.AlgorithmService.v1.AlgorithmService.AlgorithmServiceBase
     {
-        DataCollector _dataCollector;
-        public AlgorithmService(DataCollector dataCollector)
-        {
+        private DataCollector _collector;
 
-            _dataCollector = dataCollector;
+        public AlgorithmService(DataCollector collector)
+        {
+            _collector = collector;
         }
+
         public override async Task<AddOrderResponse> AddOrder(IAsyncStreamReader<AddOrderRequest> requestStream, ServerCallContext context)
         {
             while (await requestStream.MoveNext())
             {
-                var order = requestStream.Current.Order;
-                _dataCollector.orders.Add(order);
-                Console.WriteLine("Got " + order.Id);
+                var order = requestStream.Current;
+                _collector.orders.Add(order.Order);
+                Console.WriteLine("Got " + order.Order.Id);
             }
             return new AddOrderResponse();
         }

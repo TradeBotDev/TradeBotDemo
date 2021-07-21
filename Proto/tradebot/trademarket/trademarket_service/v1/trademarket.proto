@@ -84,8 +84,7 @@ message SubscribeBalanceRequest{
 }
 
 message SubscribeBalanceResponse{
-	optional tradebot.common.v1.Balance balance_one = 2;
-	optional tradebot.common.v1.Balance balance_two = 3;
+	tradebot.common.v1.SubscribeBalanceResponse response = 1;
 }
 
 message PlaceOrderRequest{
