@@ -151,13 +151,13 @@ namespace Former
 
                 await ConnectionTester(closeOrders);
 
-                Log.Debug("Requested to buy {0}", order);
+                //Log.Debug("Requested to buy {0}", order);
                 if (response.Response.Code == ReplyCode.Succeed)
                 {
                     succesfullyPurchasedOrders.Add(order.Key, order.Value);
-                    Log.Debug(" ...purchased");
+                    //Log.Debug(" ...purchased");
                 }
-                else Log.Debug(" ...not purchased");
+                //else Log.Debug(" ...not purchased");
             }
             SellListUpdated?.Invoke(succesfullyPurchasedOrders);
         }
@@ -175,17 +175,20 @@ namespace Former
 
                 await ConnectionTester(placeSuccessfulOrders);
                 
-                Log.Debug("Place order: price {0}, value {1}", order.price, order.value);
-                Log.Debug(response.Response.Code == ReplyCode.Succeed
-                    ? " ...order placed"
-                    : " ...order not placed");
+                //Log.Debug("Place order: price {0}, value {1}", order.price, order.value);
+                //Log.Debug(response.Response.Code == ReplyCode.Succeed
+                //    ? " ...order placed"
+                //    : " ...order not placed");
             }
         }
 
         public async Task UpdateMyOrdersOnTM(Dictionary<string, double> orderToUpdate) 
         {
-            
-        
+            foreach (var order in orderToUpdate) 
+            {
+                Log.Debug("Update order id: {0}, new price: {1}", order.Key, order.Value);
+            }
+           
         }
     }
 }

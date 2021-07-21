@@ -26,6 +26,8 @@ namespace Former
 
         private double _balanceInRubles = 100;
 
+        private int _ordersCount;
+
         private Config config;
 
         public void SetConfig(Config conf)
@@ -33,12 +35,12 @@ namespace Former
             config = conf;
         }
 
-        public Former()
+        public Former(int ordersCount)
         {
             _tmClient = TradeMarketClient.GetInstance();
             _tmClient.UpdatePurchaseOrders += UpdateCurrentPurchaseOrders;
             _tmClient.UpdateBalance += UpdateCurrentBalance;
-            _tmClient.UpdateMyOrders += UpdateMyOrder;
+            _tmClient.UpdateMyOrders += UpdateMyOrderList;
             _tmClient.SellListUpdated += FormSellList;
             
             //кастомный конфиг
@@ -52,6 +54,7 @@ namespace Former
                 TotalBalance = 0
             };
 
+            _ordersCount = ordersCount;
             _currentPurchaseOrders = new ConcurrentDictionary<string, Order>();
             _myOrders = new ConcurrentDictionary<string, Order>();
         }
@@ -62,7 +65,7 @@ namespace Former
             var task = Task.Run(() =>
             {
                 //TODO убрать проверку на тип ордера
-                if (orderNeededUpdate.Signature.Status == OrderStatus.Open && orderNeededUpdate.Signature.Type == OrderType.Buy)
+                if (orderNeededUpdate.Signature.Status == OrderStatus.Open && orderNeededUpdate.Signature.Type == OrderType.Sell)
                     _currentPurchaseOrders.AddOrUpdate(orderNeededUpdate.Id, orderNeededUpdate, (k, v) =>
                     {
                         var price = orderNeededUpdate.Price;
@@ -73,38 +76,14 @@ namespace Former
                         return v;
                     });
                 else if (_currentPurchaseOrders.ContainsKey(orderNeededUpdate.Id)) _currentPurchaseOrders.TryRemove(orderNeededUpdate.Id, out _);
-                UpdateFairPrice(_currentPurchaseOrders);
+                
             });
             await task;
+            //???????????????????????????????????????????????????????????????????????????????????????????
+            if (_currentPurchaseOrders.Count > _ordersCount) await FitPrices(_currentPurchaseOrders);
         }
 
-        private async void UpdateFairPrice(ConcurrentDictionary<string, Order> currentPurchaseOrders) 
-        {
-            double fairPrice;
-            var task = Task.Run(async () =>
-            {
-                fairPrice = currentPurchaseOrders.Min(x => x.Value.Price);
-                await FitPrice(fairPrice);
-            });
-            await task;
-        }
-
-        private async Task FitPrice(double fairPrice) 
-        {
-            var ordersToFit = new Dictionary<string, double>();
-            foreach (var order in _myOrders)
-            {
-                if (order.Value.Price + config.OrderUpdatePriceRange < fairPrice)
-                {
-                    order.Value.Price = fairPrice;
-                    _myOrders.TryUpdate(order.Key, order.Value, order.Value);
-                    ordersToFit.Add(order.Key, fairPrice);
-                }
-            }
-            await _tmClient.UpdateMyOrdersOnTM(ordersToFit);
-        }
-
-        private async void UpdateMyOrder(Order orderNeededUpdate)
+        private async void UpdateMyOrderList(Order orderNeededUpdate)
         { 
             var task = Task.Run(() =>
             {
@@ -120,6 +99,30 @@ namespace Former
             _balanceInRubles = double.Parse(balance.Value);
         }
 
+        private async Task FitPrices(ConcurrentDictionary<string, Order> currentPurchaseOrdersForFairPrice)
+        {
+            double fairPrice = 0;
+            var ordersNeededToFit = new Dictionary<string, double>();
+            var calcFairPrice = Task.Run(() => fairPrice = currentPurchaseOrdersForFairPrice.Min(x => x.Value.Price));
+            var checkPrices = Task.Run(() =>
+            {
+                foreach (var order in _myOrders)
+                {
+                    if (order.Value.Price + config.OrderUpdatePriceRange < fairPrice)
+                    {
+                        order.Value.Price = fairPrice;
+                        _myOrders.TryUpdate(order.Key, order.Value, order.Value);
+                        ordersNeededToFit.Add(order.Key, fairPrice);
+                    }
+                }
+            });
+            await calcFairPrice;
+            await checkPrices;
+
+            if (ordersNeededToFit.Count != 0)
+                await _tmClient.UpdateMyOrdersOnTM(ordersNeededToFit);
+        }
+
         public async void FormPurchaseList(double avgPrice)
         {
             Log.Debug("Received from algorithm: {price}", avgPrice);
@@ -132,7 +135,7 @@ namespace Former
                     if ((availableBalance - Convert(price)) > 0)
                         selectedOrders.Add(order.Key, order.Value);
             }
-            Log.Debug("Formed a list of required orders: {elements}", selectedOrders.ToArray());
+            Log.Debug("Formed a list of required orders: {elements}", selectedOrders.Count);
             if (selectedOrders.Count != 0) await _tmClient.CloseOrders(selectedOrders, config.ContractValue);
         }
 
