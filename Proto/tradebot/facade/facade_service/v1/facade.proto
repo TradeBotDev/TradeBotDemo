@@ -68,6 +68,7 @@ message UpdateServerConfigResponse{
 
 message SubscribeBalanceRequest{
 	tradebot.common.v1.SubscribeBalanceRequest request = 1;
+	string slot_name = 2;
 }
 
 message SubscribeBalanceResponse{
