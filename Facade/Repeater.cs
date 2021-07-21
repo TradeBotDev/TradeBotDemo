@@ -73,9 +73,9 @@ namespace Facade
             return _repeater ??= new Repeater();
         }
         
-        public void RedirectToTheServer(IEmpty empty)
+        public void RedirectToTheServer()
         {
-            empty
+            
         }
 
         //public static T1 ReturnToTheClient<T,T1>(this T1 response, T response, string methodName)

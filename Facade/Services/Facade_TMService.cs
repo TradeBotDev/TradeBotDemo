@@ -54,9 +54,14 @@ namespace Facade
                     {
                         _logger.LogError("timeout exceeded");
                         _logger.LogError("Exception:\n" + ex);
+                        var defaultResponse = new TradeBot.Common.v1.DefaultResponse
+                        {
+                            Code = TradeBot.Common.v1.ReplyCode.Failure,
+                            Message = "Exception. The server doesnt answer"
+                        };
                         _ = responseStream.WriteAsync(new TradeBot.Facade.FacadeService.v1.SubscribeBalanceResponse()
                         {
-                            Message = "Exception. The server doesnt answer"
+                            Message = defaultResponse
                         });
                     }
                 }
@@ -75,7 +80,7 @@ namespace Facade
             }
             catch (RpcException e)
             {
-                System.Console.WriteLine("Exception: " + e.Status.DebugException.Message);
+                _logger.LogError("Exception: " + e.Status.DebugException.Message);
                 var defaultResponse = new TradeBot.Common.v1.DefaultResponse
                 {
                     Code = TradeBot.Common.v1.ReplyCode.Failure,
@@ -86,42 +91,55 @@ namespace Facade
                     Response = defaultResponse
                 });
             }
-
         }
 
         public override async Task Slots(SlotsRequest request, IServerStreamWriter<SlotsResponse> responseStream, ServerCallContext context)
         {
-            using var response = clientTM.Slots(new TradeBot.TradeMarket.TradeMarketService.v1.SlotsRequest { Empty = request.Empty });
-
-            while (await response.ResponseStream.MoveNext())
+            try
             {
+                var response = clientTM.Slots(new TradeBot.TradeMarket.TradeMarketService.v1.SlotsRequest { Empty = request.Empty });
+
+                while (await response.ResponseStream.MoveNext())
+                {
+                    await responseStream.WriteAsync(new SlotsResponse
+                    {
+                        SlotName = response.ResponseStream.Current.SlotName
+                    });
+                }
+            }
+            catch (RpcException e)
+            {
+                _logger.LogError("Exception: " + e.Status.DebugException.Message);
+                var defaultResponse = new TradeBot.Common.v1.DefaultResponse
+                {
+                    Code = TradeBot.Common.v1.ReplyCode.Failure,
+                    Message = "Exception. The server doesnt answer"
+                };
                 await responseStream.WriteAsync(new SlotsResponse
                 {
-                    SlotName = response.ResponseStream.Current.SlotName
+                    Message=defaultResponse
                 });
             }
+
+
         }
 
 
         public override Task<SwitchBotResponse> SwitchBot(SwitchBotRequest request, ServerCallContext context)
         {
-            System.Console.WriteLine("Вызов метода StartBot с параметром: " + request.Config.ToString());
             try
             {
 
                 var response = clientRelay.StartBot(new TradeBot.Relay.RelayService.v1.StartBotRequest { Config = request.Config });
-
-                System.Console.WriteLine("Возврат значения из StartBot: " + response.Response.ToString());
 
                 return Task.FromResult(new SwitchBotResponse
                 {
                     Response = response.Response
                 });
             }
-            catch (Exception e)
+            catch (RpcException e)
             {
-                Console.WriteLine("Ошибка работы метода StarBot");
-                Console.WriteLine("Exception: " + e.Message);
+                _logger.LogError("Exception: " + e.Message);
                 var defaultResponse = new TradeBot.Common.v1.DefaultResponse
                 {
                     Code = TradeBot.Common.v1.ReplyCode.Failure,
@@ -137,15 +155,58 @@ namespace Facade
 
         public override async Task SubscribeLogs(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
         {
-            var response = clientRelay.SubscribeLogs(new TradeBot.Relay.RelayService.v1.SubscribeLogsRequest { Request = request.R }, cancellationToken: context.CancellationToken);
-
-            while (await response.ResponseStream.MoveNext())
+            try
             {
-                //токен на эксепшен
-                context.CancellationToken.ThrowIfCancellationRequested();
+                var response = clientRelay.SubscribeLogs(new TradeBot.Relay.RelayService.v1.SubscribeLogsRequest { Request = request.R }, cancellationToken: context.CancellationToken);
+
+                while (await response.ResponseStream.MoveNext())
+                {
+                    //токен на эксепшен
+                    context.CancellationToken.ThrowIfCancellationRequested();
+                    await responseStream.WriteAsync(new SubscribeLogsResponse
+                    {
+                        Response = response.ResponseStream.Current.Response
+                    });
+                }
+            }
+            catch (RpcException e)
+            {
+                _logger.LogError("Exception: " + e.Message);
+                var defaultResponse = new TradeBot.Common.v1.DefaultResponse
+                {
+                    Code = TradeBot.Common.v1.ReplyCode.Failure,
+                    Message = "Exception"
+                };
                 await responseStream.WriteAsync(new SubscribeLogsResponse
                 {
-                    Response = response.ResponseStream.Current.Response
+                    Message = defaultResponse
+                });
+            }
+
+        }
+        public override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request, ServerCallContext context)
+        {
+            try
+            {
+                var response = clientRelay.UpdateServerConfig(new TradeBot.Relay.RelayService.v1.UpdateServerConfigRequest() { Request=request.Request});
+
+
+                return Task.FromResult(new UpdateServerConfigResponse
+                {
+                    Response=response.Response
+                });
+            }
+            catch (RpcException e)
+            {
+                _logger.LogError("Exception: " + e.Message);
+                var defaultResponse = new TradeBot.Common.v1.DefaultResponse
+                {
+                    Code = TradeBot.Common.v1.ReplyCode.Failure,
+                    Message = "Exception"
+                };
+                return Task.FromResult(new UpdateServerConfigResponse
+                {
+                    Message = defaultResponse
                 });
             }
         }
