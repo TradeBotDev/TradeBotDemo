@@ -47,25 +47,17 @@ namespace Account
         public override Task<ExchangesBySessionReply> ExchangesBySession(SessionRequest request, ServerCallContext context)
         {
             using (Models.AccountContext database = new Models.AccountContext()) {
-                var fromAccount = loggedIn[request.SessionId];
+                // Получение данных текущей сессии.
+                Models.LoggedAccount fromAccount = loggedIn[request.SessionId];
+                // Поиск всех добавленных бирж по id пользователя текущей сессии.
                 var exchangesFromAccount = database.ExchangeAccesses.Where(exchange => exchange.Account.AccountId == fromAccount.AccountId);
+                
+                // Ошибка в случае, если биржи не найдены.
+                if (exchangesFromAccount.Count() == 0)
+                    return Task.FromResult(ExchangeAccessReplies.ExchangesNotFound);
 
-                ExchangesBySessionReply reply = new ExchangesBySessionReply
-                {
-                    Message = "Успешно",
-                    Result = ActionCode.Successful,
-                };
-
-                foreach (Models.ExchangeAccess exchange in exchangesFromAccount)
-                {
-                    reply.Exchanges.Add(new ExchangeInfo
-                    {
-                        Code = exchange.Code,
-                        Name = exchange.Name,
-                        Token = exchange.Token,
-                        Secret = exchange.Secret
-                    });
-                }
+                // Формирование ответа со всей необходимой информацией о добавленных биржах.
+                var reply = ExchangeAccessReplies.SuccessfulGettingExchangesInfo(exchangesFromAccount);
                 return Task.FromResult(reply);
             }
         }

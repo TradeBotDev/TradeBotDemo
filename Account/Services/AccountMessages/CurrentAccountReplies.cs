@@ -15,12 +15,12 @@ namespace Account.AccountMessages
             CurrentAccount = null
         };
 
-        public static CurrentAccountReply SuccessfulOperation(AccountInfo currentAccount)
+        public static CurrentAccountReply SuccessfulGettingAccountData(AccountInfo currentAccount)
         {
             return new CurrentAccountReply
             {
                 Result = ActionCode.Successful,
-                Message = "Операция завершена успешно.",
+                Message = "Получение данных текущего пользователя .",
                 CurrentAccount = currentAccount
             };
         }

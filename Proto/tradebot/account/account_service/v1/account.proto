@@ -11,8 +11,11 @@ service Account {
 	rpc Register (RegisterRequest) returns (RegisterReply); // Метод регистрации аккаунта
 	rpc IsValidSession (SessionRequest) returns (SessionReply); // Проверка текущего пользователя на валидность по Id сессии
 	rpc CurrentAccountData (SessionRequest) returns (CurrentAccountReply); // Получение данных текущего пользователя
+	
+	// Методы для управления данными биржи.
 	rpc AddExchangeAccess(AddExchangeAccessRequest) returns (AddExchangeAccessReply); // Добавление новой биржи для текущего пользователя
 	rpc ExchangesBySession (SessionRequest) returns (ExchangesBySessionReply); // Получение массива бирж текущего пользователя
+	//rpc DeleteExchangeAccess () returns ();
 }
 
 message LoginRequest {
@@ -88,24 +91,26 @@ message ExchangesBySessionReply {
 	// Получение всех добавленных бирж текущего пользователя.
 	ActionCode result = 1;
 	string message = 2;
-	repeated ExchangeInfo exchanges = 3;
+	repeated ExchangeAccessInfo exchanges = 3;
 }
 
 message AccountInfo {
 	//Информация о пользователе, необходимая для отображения в UI
+	int32 account_id = 1;
 	string firstname = 2;
 	string lastname = 3;
 	string email = 4;
 	string phone_number = 5;
-	repeated ExchangeInfo exchanges = 6;
+	repeated ExchangeAccessInfo exchanges = 6;
 }
 
-message ExchangeInfo {
-	// Информация о бирже.
-	ExchangeCode code = 1;
-	string name = 2;
-	string token = 3;
-	int32 secret = 4;
+message ExchangeAccessInfo {
+	// Информация о данных для доступа к бирже.
+	int32 exchange_access_id = 1;
+	ExchangeCode code = 2;
+	string name = 3;
+	string token = 4;
+	int32 secret = 5;
 }
 
 enum ExchangeCode {
@@ -128,4 +133,5 @@ enum ActionCode {
 	ACTION_CODE_EMPTY_FIELD = 3;
 	ACTION_CODE_PASSWORD_MISMATCH = 4;
 	ACTION_CODE_IS_NOT_EMAIL = 5;
+	ACTION_CODE_EXCHANGE_NOT_FOUND = 6;
 }
