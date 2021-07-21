@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Account.Models
 {
-    public class TradeMarketAccess
+    public class ExchangeAccess
     {
         public string Name { get; set; }
 

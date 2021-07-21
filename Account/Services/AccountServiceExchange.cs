@@ -18,23 +18,23 @@ namespace Account
             return base.AddToken(request, context);
         }
 
-        public override Task<TMsBySessionReply> TMsBySession(SessionRequest request, ServerCallContext context)
+        public override Task<ExchangesBySessionReply> ExchangesBySession(SessionRequest request, ServerCallContext context)
         {
             var fromAccount = loggedIn[request.SessionId];
 
-            TMsBySessionReply reply = new TMsBySessionReply
+            ExchangesBySessionReply reply = new ExchangesBySessionReply
             {
                 Message = "Сообщение",
                 Result = ActionCode.Successful,
             };
 
-            foreach (Models.TradeMarketAccess tradeMarket in fromAccount.TradeMarkets)
+            foreach (Models.ExchangeAccess exchange in fromAccount.Exchanges)
             {
-                reply.TradeMarkets.Add(new TradeMarketInfo
+                reply.Exchanges.Add(new ExchangeInfo
                 {
-                    Name = tradeMarket.Name,
-                    Token = tradeMarket.Token,
-                    Secret = tradeMarket.Secret
+                    Name = exchange.Name,
+                    Token = exchange.Token,
+                    Secret = exchange.Secret
                 });
             }
             return Task.FromResult(reply);

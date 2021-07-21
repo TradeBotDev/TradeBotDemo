@@ -13,7 +13,7 @@ service Account {
 	rpc CurrentAccountData (SessionRequest) returns (CurrentAccountReply); // Получение данных текущего пользователя
 	
 	rpc AddToken(AddTokenRequest) returns (AddTokenReply);
-	rpc TMsBySession (SessionRequest) returns (TMsBySessionReply);
+	rpc ExchangesBySession (SessionRequest) returns (ExchangesBySessionReply);
 }
 
 message LoginRequest {
@@ -81,10 +81,10 @@ message AddTokenReply {
 	string message = 2;
 }
 
-message TMsBySessionReply {
+message ExchangesBySessionReply {
 	ActionCode result = 1;
 	string message = 2;
-	repeated TradeMarketInfo trade_markets = 3;
+	repeated ExchangeInfo exchanges = 3;
 }
 
 message AccountInfo {
@@ -93,10 +93,10 @@ message AccountInfo {
 	string lastname = 3;
 	string email = 4;
 	string phone_number = 5;
-	repeated TradeMarketInfo trade_markets = 6;
+	repeated ExchangeInfo exchanges = 6;
 }
 
-message TradeMarketInfo {
+message ExchangeInfo {
 	string name = 1;
 	string token = 2;
 	int32 secret = 3;

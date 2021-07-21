@@ -9,12 +9,12 @@ namespace Account.Models
     {
         public Account AccountInfo { get; set; }
 
-        public List<TradeMarketAccess> TradeMarkets;
+        public List<ExchangeAccess> Exchanges;
 
         public LoggedAccount(Account account)
         {
             AccountInfo = account;
-            TradeMarkets = new List<TradeMarketAccess>();
+            Exchanges = new List<ExchangeAccess>();
         }
     }
 }
