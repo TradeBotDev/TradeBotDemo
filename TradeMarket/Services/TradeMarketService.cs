@@ -1,16 +1,18 @@
 ﻿using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
+
 using Grpc.Core;
+
 using Microsoft.Extensions.Logging;
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+
 using TradeBot.TradeMarket.TradeMarketService.v1;
-using TradeMarket.DataTransfering;
+
 using TradeMarket.Model;
-using TradeMarket.Services;
 
 namespace TradeMarket.Services
 {
@@ -23,7 +25,7 @@ namespace TradeMarket.Services
          private SubscriptionService<SlotsRequest, SlotsResponse, Slot, TradeMarketService> _slotSubscriptionService;*/
 
 
-        private ILogger<TradeMarketService> _logger;
+        private readonly ILogger<TradeMarketService> _logger;
 
         private static SubscribeOrdersResponse ConvertOrder(FullOrder order)
         {
@@ -48,14 +50,14 @@ namespace TradeMarket.Services
 
         private static SubscribeBalanceResponse ConvertBalance(Balance balance)
         {
-            return new SubscribeBalanceResponse
+            return new()
             {
                 Response = new TradeBot.Common.v1.SubscribeBalanceResponse
                 {
                     Balance = new TradeBot.Common.v1.Balance
                     {
                         Currency = balance.Currency,
-                        Value = balance.Value.ToString()
+                        Value = balance.Value.ToString(CultureInfo.InvariantCulture)
                     }
                 }
             };
@@ -92,12 +94,12 @@ namespace TradeMarket.Services
             });
         }
 
-        public async override Task<CloseOrderResponse> CloseOrder(CloseOrderRequest request, ServerCallContext context)
+        public override async Task<CloseOrderResponse> CloseOrder(CloseOrderRequest request, ServerCallContext context)
         {
             var sessionId = context.RequestHeaders.Get("sessionId").Value;
             try
             {
-                var user = Model.TradeMarket.GetUserContexBySessionId(sessionId);
+                var user = DataTransfering.TradeMarket.GetUserContextBySessionId(sessionId);
                 await user.CloseOrder(request.Id);
             }
             catch (Exception)
@@ -117,13 +119,13 @@ namespace TradeMarket.Services
 
 
 
-        public async override Task<PlaceOrderResponse> PlaceOrder(PlaceOrderRequest request, ServerCallContext context)
+        public override async Task<PlaceOrderResponse> PlaceOrder(PlaceOrderRequest request, ServerCallContext context)
         {
 
             var sessionId = context.RequestHeaders.Get("sessionId").Value;
 
 
-            var user = Model.TradeMarket.GetUserContexBySessionId(sessionId);
+            var user = DataTransfering.TradeMarket.GetUserContextBySessionId(sessionId);
             var response = await user.PlaceOrder(request.Value, request.Price);
 
             return new PlaceOrderResponse
@@ -132,12 +134,12 @@ namespace TradeMarket.Services
             };
         }
 
-        public async override Task Slots(SlotsRequest request, IServerStreamWriter<SlotsResponse> responseStream, ServerCallContext context)
+        public override async Task Slots(SlotsRequest request, IServerStreamWriter<SlotsResponse> responseStream, ServerCallContext context)
         {
             var sessionId = context.RequestHeaders.Get("sessionId").Value;
 
 
-            var user = Model.TradeMarket.GetUserContexBySessionId(sessionId);
+            var user = DataTransfering.TradeMarket.GetUserContextBySessionId(sessionId);
 
             SubscriptionService<SlotsRequest, SlotsResponse, Slot, TradeMarketService> service = null; //= new (FakeSlotSubscriber.GetInstance().Changed,_logger,ConvertSlot);
 
@@ -157,16 +159,21 @@ namespace TradeMarket.Services
             }
         }
 
-        public async override Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<SubscribeBalanceResponse> responseStream, ServerCallContext context)
+        public override async Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<SubscribeBalanceResponse> responseStream, ServerCallContext context)
         {
             var sessionId = context.RequestHeaders.Get("sessionId").Value;
-            var user = Model.TradeMarket.GetUserContexBySessionId(sessionId);
-            user.UserBalance += async (sender, args) => {
-                await WriteStreamAsync<SubscribeBalanceResponse>(responseStream, ConvertBalance(args));
+            var user = DataTransfering.TradeMarket.GetUserContextBySessionId(sessionId);
+            user.UserBalance += async (_, args) =>
+            {
+                await WriteStreamAsync(responseStream, ConvertBalance(args));
             };
+
+            var service = new SubscriptionService<SubscribeBalanceRequest, SubscribeBalanceResponse, Balance, TradeMarketService>(
+                    user.InvokeDelegate, _logger, ConvertBalance);
+
+
             //TODO отписка после отмены
             await AwaitCancellation(context.CancellationToken);
-
         }
 
         public override Task SubscribeLogs(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
@@ -174,11 +181,12 @@ namespace TradeMarket.Services
             return base.SubscribeLogs(request, responseStream, context);
         }
 
-        public async override Task SubscribeOrders(SubscribeOrdersRequest request, IServerStreamWriter<SubscribeOrdersResponse> responseStream, ServerCallContext context)
+        public override async Task SubscribeOrders(SubscribeOrdersRequest request, IServerStreamWriter<SubscribeOrdersResponse> responseStream, ServerCallContext context)
         {
             var sessionId = context.RequestHeaders.Get("sessionId").Value;
-            var user = Model.TradeMarket.GetUserContexBySessionId(sessionId);
-            user.Book25 += async (sender, args) => {
+            var user = DataTransfering.TradeMarket.GetUserContextBySessionId(sessionId);
+            user.Book25 += async (sender, args) =>
+            {
                 await WriteStreamAsync<SubscribeOrdersResponse>(responseStream, ConvertOrder(args));
             };
             //TODO отписка после отмены
