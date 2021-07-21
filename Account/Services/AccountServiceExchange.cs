@@ -62,9 +62,25 @@ namespace Account
             }
         }
 
+        // Метод, удаляющий данные одной из бирж для текущего пользователя по id записи.
         public override Task<DeleteExchangeAccessReply> DeleteExchangeAccess(DeleteExchangeAccessRequest request, ServerCallContext context)
         {
-            return base.DeleteExchangeAccess(request, context);
+            using (var database = new Models.AccountContext())
+            {
+                // Получение данных биржи для текущего пользователя.
+                var exhangeAccess = database.ExchangeAccesses.Where(exchange =>
+                    exchange.Account.AccountId == loggedIn[request.SessionId].AccountId &&
+                    exchange.ExchangeAccessId == request.EchangeAccessId);
+
+                // В случае, если такой записи не обнаружено, сервис отвечает ошибкой.
+                if (exhangeAccess.Count() == 0)
+                    return Task.FromResult(ExchangeAccessReplies.ExchangeAccessNotFound);
+
+                // Если такая запись существует, производится ее удаление.
+                database.ExchangeAccesses.Remove(exhangeAccess.First());
+                database.SaveChanges();
+            }
+            return Task.FromResult(ExchangeAccessReplies.SuccessfulDeletingExchangeAccess);
         }
     }
 }

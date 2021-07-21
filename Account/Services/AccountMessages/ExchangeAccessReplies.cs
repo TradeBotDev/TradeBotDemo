@@ -18,8 +18,8 @@ namespace Account.AccountMessages
         {
             ExchangesBySessionReply reply = new ExchangesBySessionReply
             {
-                Message = "Получение информации о биржах завершено успешно.",
                 Result = ActionCode.Successful,
+                Message = "Получение информации о биржах завершено успешно."
             };
 
             foreach (Models.ExchangeAccess exchange in exchangesFromAccount)
@@ -38,8 +38,20 @@ namespace Account.AccountMessages
 
         public static readonly ExchangesBySessionReply ExchangesNotFound = new ExchangesBySessionReply
         {
-            Message = "Ошибка при получении бирж: данные не найдены.",
-            Result = ActionCode.ExchangeNotFound
+            Result = ActionCode.ExchangeNotFound,
+            Message = "Ошибка при получении бирж: данные не найдены."
+        };
+
+        public static readonly DeleteExchangeAccessReply SuccessfulDeletingExchangeAccess = new DeleteExchangeAccessReply
+        {
+            Result = ActionCode.Successful,
+            Message = "Данные биржи для данного пользователя успешно удалены."
+        };
+
+        public static readonly DeleteExchangeAccessReply ExchangeAccessNotFound = new DeleteExchangeAccessReply
+        {
+            Result = ActionCode.ExchangeNotFound,
+            Message = "Данные биржи не найдены."
         };
     }
 }

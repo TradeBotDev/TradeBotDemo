@@ -95,11 +95,13 @@ message ExchangesBySessionReply {
 }
 
 message DeleteExchangeAccessRequest {
+	// Запрос на удаление записи о бирже для текущего пользователя.
 	string session_id = 1;
 	int32 echange_access_id = 2;
 }
 
 message DeleteExchangeAccessReply {
+	// Ответ на запрос об удалении записи о бирже для текущего пользователя.
 	ActionCode result = 1;
 	string message = 2;
 }

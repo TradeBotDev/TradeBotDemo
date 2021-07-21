@@ -84,6 +84,7 @@ namespace Account
             {
                 using (Models.AccountContext database = new Models.AccountContext())
                 {
+                    // Получение данных вошедшего пользователя.
                     Models.Account account = database.Accounts.Where(id => id.AccountId == loggedIn[request.SessionId].AccountId).First(); 
                     return Task.FromResult(CurrentAccountReplies.SuccessfulGettingAccountData(new AccountInfo
                     {
