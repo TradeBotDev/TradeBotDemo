@@ -32,10 +32,13 @@ namespace Algorithm.DataManipulation
             while (true)
             {
                 Thread.Sleep(3000);
-                newOrders = DataCollector.orders;
-                KeyValuePair<DateTime, double> newPoint = MakePoint(newOrders, DateTime.Now);
-                publisher.Publish(newPoint);
-                newOrders.Clear();
+                if (DataCollector.orders.Count != 0)
+                {
+                    newOrders = DataCollector.orders;
+                    KeyValuePair<DateTime, double> newPoint = MakePoint(newOrders, DateTime.Now);
+                    publisher.Publish(newPoint);
+                    newOrders.Clear();
+                }
             }
         }
 
