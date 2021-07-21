@@ -12,7 +12,7 @@ service Account {
 	rpc IsValidSession (SessionRequest) returns (SessionReply); // Проверка текущего пользователя на валидность по Id сессии
 	rpc CurrentAccountData (SessionRequest) returns (CurrentAccountReply); // Получение данных текущего пользователя
 	
-	rpc AddToken(AddTokenRequest) returns (AddTokenReply);
+	rpc AddExchangeAccess(AddExchangeAccessRequest) returns (AddExchangeAccessReply);
 	rpc ExchangesBySession (SessionRequest) returns (ExchangesBySessionReply);
 }
 
@@ -70,14 +70,14 @@ message CurrentAccountReply {
 	AccountInfo current_account = 3;
 }
 
-message AddTokenRequest {
+message AddExchangeAccessRequest {
 	string session_id = 1;
 	string trade_market_name = 2;
 	string token = 3;
 	int32 secret = 4;
 }
 
-message AddTokenReply {
+message AddExchangeAccessReply {
 	ActionCode result = 1;
 	string message = 2;
 }

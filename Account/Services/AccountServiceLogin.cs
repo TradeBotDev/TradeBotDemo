@@ -47,8 +47,8 @@ namespace Account
                 // в случае, если он вошел, возвращается его Id сессии
                 foreach (KeyValuePair<string, Models.LoggedAccount> account in loggedIn)
                 {
-                    var checkedAccount = database.Accounts.Where(account => account.Email == request.Email);
-                    if (checkedAccount.Count() > 0)
+                    int checkedAccount = database.Accounts.Count(account => account.Email == request.Email);
+                    if (checkedAccount > 0)
                         return Task.FromResult(LoginReplies.AlreadySignedIn(account.Key));
                 }
 
