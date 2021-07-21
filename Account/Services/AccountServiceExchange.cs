@@ -32,6 +32,7 @@ namespace Account
             {
                 reply.Exchanges.Add(new ExchangeInfo
                 {
+                    Code = exchange.Code,
                     Name = exchange.Name,
                     Token = exchange.Token,
                     Secret = exchange.Secret

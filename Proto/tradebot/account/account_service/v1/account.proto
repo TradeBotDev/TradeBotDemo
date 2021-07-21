@@ -97,9 +97,14 @@ message AccountInfo {
 }
 
 message ExchangeInfo {
-	string name = 1;
-	string token = 2;
-	int32 secret = 3;
+	ExchangeCode code = 1;
+	string name = 2;
+	string token = 3;
+	int32 secret = 4;
+}
+
+enum ExchangeCode {
+	EXCHANGE_CODE_BITMEX = 0;
 }
 
 enum ActionCode {
