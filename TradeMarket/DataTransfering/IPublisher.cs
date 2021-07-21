@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Bitmex.Client.Websocket.Responses;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,20 +12,13 @@ namespace TradeMarket.DataTransfering
     /// <typeparam name="T">класс за изменением которого идет отслеживание</typeparam>
     public interface IPublisher<T>
     {
-        public enum Action
-        {
-            Partial,
-            Insert,
-            Update,
-            Delete
-        }
         public class ChangedEventArgs : EventArgs
         {
             
-            public Action Action;
+            public BitmexAction Action;
             public T Changed { get; internal set; }
 
-            public ChangedEventArgs(T changed,Action action)
+            public ChangedEventArgs(T changed,BitmexAction action)
             {
                 this.Action = action;
                 this.Changed = changed;

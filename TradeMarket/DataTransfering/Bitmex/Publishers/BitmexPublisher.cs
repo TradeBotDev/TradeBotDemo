@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Bitmex.Client.Websocket;
 using Bitmex.Client.Websocket.Client;
+using Bitmex.Client.Websocket.Messages;
 using Bitmex.Client.Websocket.Requests;
 using Bitmex.Client.Websocket.Responses;
 using Bitmex.Client.Websocket.Responses.Orders;
@@ -13,7 +14,7 @@ using Bitmex.Client.Websocket.Websockets;
 namespace TradeMarket.DataTransfering.Bitmex.Publishers
 {
     public abstract class BitmexPublisher<TResponse,TRequest,TModel> : IPublisher<TModel>
-        where TResponse : ResponseBase<TModel>
+        where TResponse : MessageBase
         where TRequest : RequestBase
     {
 
@@ -23,13 +24,14 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         public event EventHandler<IPublisher<TModel>.ChangedEventArgs> Changed;
 
-        public BitmexPublisher(Action<TResponse, EventHandler<IPublisher<TModel>.ChangedEventArgs>> action)
+        public BitmexPublisher(BitmexWebsocketClient client,Action<TResponse, EventHandler<IPublisher<TModel>.ChangedEventArgs>> action)
         {
+            _client = client;
             _invokeActionOnNext = action ?? throw new ArgumentNullException(nameof(action));
         }
 
 
-        public async Task SubscribeAsync(TRequest request, IObservable<TResponse> stream, CancellationToken token)
+        internal async Task SubscribeAsync(TRequest request, IObservable<TResponse> stream, CancellationToken token)
         {
 
             _client.Send(request);
@@ -39,7 +41,8 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             //await communicator.Start();
             //exitEvent.WaitOne(TimeSpan.FromSeconds(30));
 
-            await AwaitCancellation(token);
+            //TODO закоментил чтобы поток не блокировался
+            //await AwaitCancellation(token);
         }
        
         private static Task AwaitCancellation(CancellationToken token)
@@ -49,9 +52,5 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             return completion.Task;
         }
 
-        public void subscribeToEvent(object sender,TModel changed)
-        {
-            Changed?.Invoke(sender, new(changed));
-        }
     }
 }

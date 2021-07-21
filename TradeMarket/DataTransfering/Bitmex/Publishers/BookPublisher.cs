@@ -15,9 +15,10 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         internal static readonly Action<BookResponse, EventHandler<IPublisher<BookLevel>.ChangedEventArgs>> _action = (response, e) =>
         {
+            
             foreach (var data in response.Data)
             {
-                e?.Invoke(nameof(BookPublisher), new(data));
+                e?.Invoke(nameof(BookPublisher), new(data,response.Action));
             }
         };
         private IObservable<BookResponse> _stream;
@@ -27,7 +28,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             _stream = stream;
         }
 
-        public async Task SubcribeAsync(SubscribeRequestBase bookSubscribeRequest,CancellationToken token) 
+        public async Task SubscribeAsync(SubscribeRequestBase bookSubscribeRequest,CancellationToken token) 
         {
             await base.SubscribeAsync(bookSubscribeRequest, _stream, token);
         }
