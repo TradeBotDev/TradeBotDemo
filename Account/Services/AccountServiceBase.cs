@@ -22,10 +22,13 @@ namespace Account
 
         public AccountService(ILogger<AccountService> logger)
         {
-            // В случае, если чтение файла не прошло успешно, а loggedIn является пустым, для него
-            // выделяется память.
-            if (!FileManagement.ReadState(loggedInFilename, ref loggedIn) && loggedIn == null)
+            // В случае, если  loggedIn является пустым, для него выделяется память и записываются
+            // все данные из файла.
+            if (loggedIn == null)
+            {
                 loggedIn = new Dictionary<string, Models.LoggedAccount>();
+                FileManagement.ReadState(loggedInFilename, ref loggedIn);
+            }
             _logger = logger;
         }
 
