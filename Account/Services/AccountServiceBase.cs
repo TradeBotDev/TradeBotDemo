@@ -15,7 +15,7 @@ namespace Account
         private readonly ILogger<AccountService> _logger;
 
         // Хранит в себе всех вошедших в аккаунт пользователей, ключем является Id сессии.
-        private static Dictionary<string, Models.Account> loggedIn;
+        private static Dictionary<string, Models.LoggedAccount> loggedIn;
 
         // Название файла сохранения.
         private static string loggedInFilename = "loggedaccounts.state";
@@ -25,7 +25,7 @@ namespace Account
             // В случае, если чтение файла не прошло успешно, а loggedIn является пустым, для него
             // выделяется память.
             if (!FileManagement.ReadState(loggedInFilename, ref loggedIn) && loggedIn == null)
-                loggedIn = new Dictionary<string, Models.Account>();
+                loggedIn = new Dictionary<string, Models.LoggedAccount>();
             _logger = logger;
         }
 
@@ -62,11 +62,11 @@ namespace Account
             // Если текущий пользователь вошедший, то сервер возвращает данные этого пользователя.
             else return Task.FromResult(CurrentAccountReplies.SuccessfulOperation(new AccountInfo
             {
-                Id = loggedIn[request.SessionId].AccountId,
-                Firstname = loggedIn[request.SessionId].Firstname,
-                Lastname = loggedIn[request.SessionId].Lastname,
-                Email = loggedIn[request.SessionId].Email,
-                PhoneNumber = loggedIn[request.SessionId].PhoneNumber
+                //Id = loggedIn[request.SessionId].AccountId,
+                Firstname = loggedIn[request.SessionId].AccountInfo.Firstname,
+                Lastname = loggedIn[request.SessionId].AccountInfo.Lastname,
+                Email = loggedIn[request.SessionId].AccountInfo.Email,
+                PhoneNumber = loggedIn[request.SessionId].AccountInfo.PhoneNumber
             }));
         }
     }

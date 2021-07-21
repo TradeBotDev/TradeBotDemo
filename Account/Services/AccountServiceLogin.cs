@@ -45,9 +45,9 @@ namespace Account
 
                 // Проверка на то, есть ли сессия с пользователем, который пытается войти в аккаунт, и
                 // в случае, если он вошел, возвращается его Id сессии
-                foreach (KeyValuePair<string, Models.Account> account in loggedIn)
+                foreach (KeyValuePair<string, Models.LoggedAccount> account in loggedIn)
                 {
-                    if (request.Email == account.Value.Email)
+                    if (request.Email == account.Value.AccountInfo.Email)
                         return Task.FromResult(LoginReplies.AlreadySignedIn(account.Key));
                 }
 
@@ -55,7 +55,7 @@ namespace Account
                 // Id сессии, а также полученный пользователь добавляется в коллекцию с вошедшими
                 // пользователями.
                 string sessionId = Guid.NewGuid().ToString();
-                loggedIn.Add(sessionId, accounts.First());
+                loggedIn.Add(sessionId, new Models.LoggedAccount(accounts.First()));
 
                 // Сохранение текущего состояния в файл.
                 FileManagement.WriteState(loggedInFilename, loggedIn);

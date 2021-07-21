@@ -15,8 +15,6 @@ namespace Account.Models
 
         public string PhoneNumber { get; set; }
 
-        public List<TradeMarket> TradeMarkets = new List<TradeMarket>();
-
         public string Password { get; set; }
     }
 }

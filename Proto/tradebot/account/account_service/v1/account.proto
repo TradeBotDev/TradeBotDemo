@@ -12,7 +12,6 @@ service Account {
 	rpc IsValidSession (SessionRequest) returns (SessionReply); // Проверка текущего пользователя на валидность по Id сессии
 	rpc CurrentAccountData (SessionRequest) returns (CurrentAccountReply); // Получение данных текущего пользователя
 	
-	// Скорее всего, сервис будет потом разбит на два, так что это неокончательная версия
 	rpc AddToken(AddTokenRequest) returns (AddTokenReply);
 	rpc TMsBySession (SessionRequest) returns (TMsBySessionReply);
 }
@@ -90,7 +89,6 @@ message TMsBySessionReply {
 
 message AccountInfo {
 	//Информация о пользователе, необходимая для отображения в UI
-	int32 id = 1;
 	string firstname = 2;
 	string lastname = 3;
 	string email = 4;

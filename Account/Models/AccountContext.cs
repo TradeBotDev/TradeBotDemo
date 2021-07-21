@@ -12,8 +12,5 @@ namespace Account.Models
         
         // Таблица с данными аккаунтов.
         public DbSet<Account> Accounts { get; set; }
-        
-        // Таблица с токенами пользователей, соответствующими биржам.
-        public DbSet<TradeMarket> TradeMarkets { get; set; }
     }
 }

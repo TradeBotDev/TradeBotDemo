@@ -5,12 +5,8 @@ using System.Threading.Tasks;
 
 namespace Account.Models
 {
-    public class TradeMarket
+    public class TradeMarketAccess
     {
-        public int TradeMarketId { get; set; }
-
-        public int AccountId { get; set; }
-
         public string Name { get; set; }
 
         public string Token { get; set; }

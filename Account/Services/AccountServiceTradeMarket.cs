@@ -15,15 +15,11 @@ namespace Account
     {
         public override Task<AddTokenReply> AddToken(AddTokenRequest request, ServerCallContext context)
         {
-            // Пока пустышка
             return base.AddToken(request, context);
         }
 
         public override Task<TMsBySessionReply> TMsBySession(SessionRequest request, ServerCallContext context)
         {
-            // Я пока даже не запускал этот метод, так что не уверен насчет него.
-            // Потом доделаю... когда-нибудь...
-
             var fromAccount = loggedIn[request.SessionId];
 
             TMsBySessionReply reply = new TMsBySessionReply
@@ -32,7 +28,7 @@ namespace Account
                 Result = ActionCode.Successful,
             };
 
-            foreach (Models.TradeMarket tradeMarket in fromAccount.TradeMarkets)
+            foreach (Models.TradeMarketAccess tradeMarket in fromAccount.TradeMarkets)
             {
                 reply.TradeMarkets.Add(new TradeMarketInfo
                 {
