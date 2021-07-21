@@ -41,11 +41,12 @@ namespace Account.Validation
             return new SuccessfulValidationMessage();
         }
 
+        // Метод, проверяющий поля при добавлении биржи в аккаунт пользователя.
         public static ValidationMessage AddExchangeAccessFields(AddExchangeAccessRequest request)
         {
             if (IsEmpty(request.SessionId, request.ExchangeName, request.Token))
                 return new EmptyFieldMessage();
-
+            // В случае отсутствия ошибок возвращает сообщение об успешности валидации.
             return new SuccessfulValidationMessage();
         }
 

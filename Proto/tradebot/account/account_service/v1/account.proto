@@ -11,9 +11,8 @@ service Account {
 	rpc Register (RegisterRequest) returns (RegisterReply); // Метод регистрации аккаунта
 	rpc IsValidSession (SessionRequest) returns (SessionReply); // Проверка текущего пользователя на валидность по Id сессии
 	rpc CurrentAccountData (SessionRequest) returns (CurrentAccountReply); // Получение данных текущего пользователя
-	
-	rpc AddExchangeAccess(AddExchangeAccessRequest) returns (AddExchangeAccessReply);
-	rpc ExchangesBySession (SessionRequest) returns (ExchangesBySessionReply);
+	rpc AddExchangeAccess(AddExchangeAccessRequest) returns (AddExchangeAccessReply); // Добавление новой биржи для текущего пользователя
+	rpc ExchangesBySession (SessionRequest) returns (ExchangesBySessionReply); // Получение массива бирж текущего пользователя
 }
 
 message LoginRequest {
@@ -47,30 +46,31 @@ message RegisterRequest {
 }
 
 message RegisterReply {
-	//Ответ на запрос о регистрации аккаунта.
+	// Ответ на запрос о регистрации аккаунта.
 	ActionCode result = 1;
 	string message = 2;
 }
 
 message SessionRequest {
-	//Запрос на передачу сессии.
+	// Запрос на передачу сессии.
 	string session_id = 1;
 }
 
 message SessionReply {
-	//Результат проверки сессии на валидность.
+	// Результат проверки сессии на валидность.
 	bool is_valid = 1;
 	string message = 2;
 }
 
 message CurrentAccountReply {
-	//Получение данных текущего пользователя.
+	// Получение данных текущего пользователя.
 	ActionCode result = 1;
 	string message = 2;
 	AccountInfo current_account = 3;
 }
 
 message AddExchangeAccessRequest {
+	// Запрос на добавление биржи для текущего пользователя.
 	string session_id = 1;
 	ExchangeCode code = 2;
 	string exchange_name = 3;
@@ -79,11 +79,13 @@ message AddExchangeAccessRequest {
 }
 
 message AddExchangeAccessReply {
+	// Ответ на добавление биржи для текущего пользователя.
 	ActionCode result = 1;
 	string message = 2;
 }
 
 message ExchangesBySessionReply {
+	// Получение всех добавленных бирж текущего пользователя.
 	ActionCode result = 1;
 	string message = 2;
 	repeated ExchangeInfo exchanges = 3;
@@ -99,6 +101,7 @@ message AccountInfo {
 }
 
 message ExchangeInfo {
+	// Информация о бирже.
 	ExchangeCode code = 1;
 	string name = 2;
 	string token = 3;
@@ -106,6 +109,7 @@ message ExchangeInfo {
 }
 
 enum ExchangeCode {
+	// Коды всех бирж.
 	EXCHANGE_CODE_BITMEX = 0;
 }
 

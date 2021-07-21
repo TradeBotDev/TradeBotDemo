@@ -37,15 +37,25 @@ namespace Account
         {
             // В случае успешного удаления аккаунта из списка, в которые пользователь зашел,
             // сервер отвечает, что выход был успешно завершен.
-            int account = loggedIn[request.SessionId].AccountId;
+            int accountId = loggedIn[request.SessionId].AccountId;
             bool saveExchanges = loggedIn[request.SessionId].SaveExchangesAfterLogout;
 
+            // Если пользователь был успешно удален из коллекции с вошедшими, изменения записываются в файл.
             if (loggedIn.Remove(request.SessionId))
             {
+                // Если отключено сохранение всех данных о биржах пользователя после выхода из аккаунта, происходит
+                // их удаление из базы данных (только связанные с этим пользователем).
                 if (!saveExchanges)
                 {
-                    // Здесь будет логика удаления записей...
+                    using (var database = new Models.AccountContext())
+                    {
+                        var exchanges = database.ExchangeAccesses.Where(exchange => exchange.Account.AccountId == accountId);
+                        foreach (Models.ExchangeAccess exchange in exchanges)
+                            database.ExchangeAccesses.Remove(exchange);
+                        database.SaveChanges();
+                    }
                 }
+                // Запись изменений в файл.
                 FileManagement.WriteState(loggedInFilename, loggedIn);
                 return Task.FromResult(LogoutReplies.SuccessfulLogout);
             }
@@ -59,8 +69,8 @@ namespace Account
             // Проверка на наличие вошедших пользователем с тем же Id сессии, что
             // предоставляется клиентом. Если есть - сессия валидна, нет - невалидна.
             if (loggedIn.ContainsKey(request.SessionId))
-                return Task.FromResult(SessionReplies.IsValid);
-            else return Task.FromResult(SessionReplies.IsNotValid);
+                return Task.FromResult(IsValidSessionReplies.IsValid);
+            else return Task.FromResult(IsValidSessionReplies.IsNotValid);
         }
 
         // Метод получения информации о текущем пользователе по Id сессии.
@@ -77,7 +87,6 @@ namespace Account
                     Models.Account account = database.Accounts.Where(id => id.AccountId == loggedIn[request.SessionId].AccountId).First(); 
                     return Task.FromResult(CurrentAccountReplies.SuccessfulOperation(new AccountInfo
                     {
-                        //Id = loggedIn[request.SessionId].AccountId,
                         Firstname = account.Firstname,
                         Lastname = account.Lastname,
                         Email = account.Email,

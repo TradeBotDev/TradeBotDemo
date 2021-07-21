@@ -6,7 +6,7 @@ using TradeBot.Account.AccountService.v1;
 
 namespace Account.AccountMessages
 {
-    public static class SessionReplies
+    public static class IsValidSessionReplies
     {
         public static readonly SessionReply IsValid = new SessionReply
         {

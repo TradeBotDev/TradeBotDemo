@@ -13,9 +13,10 @@ namespace Account
 {
     public partial class AccountService : TradeBot.Account.AccountService.v1.Account.AccountBase
     {
+        // Метод, добавляющий новую биржу для текущего пользователя.
         public override Task<AddExchangeAccessReply> AddExchangeAccess(AddExchangeAccessRequest request, ServerCallContext context)
         {
-            // Пока ничего особо нет...
+            // Валидация полученных данных. В случае, если валидация не прошла успешно, возвращается сообщение об ошибке.
             ValidationMessage validationResult = Validate.AddExchangeAccessFields(request);
             if (validationResult.Code != ActionCode.Successful)
             {
@@ -26,6 +27,7 @@ namespace Account
                 });
             }
 
+            // Добавление данных из запроса в таблицу базы данных.
             using (var database = new Models.AccountContext())
             {
                 var account = database.Accounts.Where(account => account.AccountId == loggedIn[request.SessionId].AccountId).First();
@@ -39,16 +41,11 @@ namespace Account
                 });
                 database.SaveChanges();
             }
-            return Task.FromResult(new AddExchangeAccessReply
-            {
-                Result = ActionCode.Successful,
-                Message = "Успешно"
-            });
+            return Task.FromResult(ExchangeAccessReplies.SuccessfulAddition);
         }
 
         public override Task<ExchangesBySessionReply> ExchangesBySession(SessionRequest request, ServerCallContext context)
         {
-            // Пока ничего особо не сделано...
             using (Models.AccountContext database = new Models.AccountContext()) {
                 var fromAccount = loggedIn[request.SessionId];
                 var exchangesFromAccount = database.ExchangeAccesses.Where(exchange => exchange.Account.AccountId == fromAccount.AccountId);
@@ -69,7 +66,6 @@ namespace Account
                         Secret = exchange.Secret
                     });
                 }
-
                 return Task.FromResult(reply);
             }
         }
