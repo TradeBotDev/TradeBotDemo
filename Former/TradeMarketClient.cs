@@ -80,7 +80,7 @@ namespace Former
             var orderSignature = new OrderSignature
             {
                 Status = OrderStatus.Open,
-                Type = OrderType.Buy
+                Type = OrderType.Sell
             };
             var request = new SubscribeOrdersRequest
             {
