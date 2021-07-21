@@ -26,7 +26,7 @@ namespace Algorithm
 
             PointMaker PM = new PointMaker();
             PM.Launch(publisher);
-
+              
         }
 
 
