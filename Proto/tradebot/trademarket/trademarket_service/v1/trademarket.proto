@@ -12,13 +12,8 @@ service TradeMarketService {
 	/*
 		Покупает ордер по указанному ид и возвращает результат покупики (получилось / не получилось)
 	*/
-	rpc CloseOrder(CloseOrderRequest) returns (CloseOrderResponse);
-
-	/*
-		Запрос на размещение ордера
-	*/
-	rpc PlaceOrder(PlaceOrderRequest) returns (PlaceOrderResponse);
-
+	rpc PlaceOrder (PlaceOrderRequest) returns (PlaceOrderResponse);
+;
 	/*
 		Подписывается на ордера выбранного типа
 	*/
@@ -27,7 +22,7 @@ service TradeMarketService {
 	/*
 		подписка на изменения размещенных ордеров
 	*/
-	rpc SubscribyMyOrders(SubscribyMyOrdersRequest) returns (stream SubscribyMyOrdersResponse);
+	rpc SubscribeMyOrders(SubscribeMyOrdersRequest) returns (stream SubscribeMyOrdersResponse);
 
 	/*
 		Подписка на изменение баланса пользователя (ЕДИНСТВЕННОГО)
@@ -51,11 +46,11 @@ service TradeMarketService {
 
 }
 
-message SubscribyMyOrdersRequest{
+message SubscribeMyOrdersRequest{
 	google.protobuf.Empty empty = 1;
 }
 
-message SubscribyMyOrdersResponse {
+message SubscribeMyOrdersResponse {
 	tradebot.common.v1.Order changed = 2;
 
 }
@@ -91,18 +86,11 @@ message PlaceOrderRequest{
 	double price = 1;
 	double value = 2;
 }
+
 message PlaceOrderResponse{
 	tradebot.common.v1.DefaultResponse response = 1;
-	string order_id = 2;
-}
-message CloseOrderRequest{
-	string id = 1;
-	double value = 2;
 }
 
-message CloseOrderResponse{
-	tradebot.common.v1.DefaultResponse response = 1;
-}
 message SlotsRequest{
 	//TODO Тут должно быть обращение к конкретной бирже, но она пока одна
 	google.protobuf.Empty empty = 1;

@@ -1,32 +1,23 @@
 ﻿using Serilog;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Common.v1;
-using TradeBot.TradeMarket.TradeMarketService.v1;
-using SubscribeOrdersResponse = TradeBot.TradeMarket.TradeMarketService.v1.SubscribeOrdersResponse;
 
 namespace Former
 {
-    public class SalesOrder
-    {
-        public double price;
-        public double value;
-    }
-
     public class Former
     {
         private readonly TradeMarketClient _tmClient;
 
-        private readonly ConcurrentDictionary<string, Order> _currentPurchaseOrders;
+        private readonly ConcurrentDictionary<string, Order> _orderBook;
 
-        private readonly ConcurrentDictionary<string, Order> _myOrders; 
+        private readonly ConcurrentDictionary<string, Order> _myOrders;
 
-        private double _balanceInRubles = 100;
+        private double _balance = 100;
 
-        private int _ordersCount;
+        private readonly int _ordersCount;
 
         private Config config;
 
@@ -38,11 +29,10 @@ namespace Former
         public Former(int ordersCount)
         {
             _tmClient = TradeMarketClient.GetInstance();
-            _tmClient.UpdatePurchaseOrders += UpdateCurrentPurchaseOrders;
-            _tmClient.UpdateBalance += UpdateCurrentBalance;
+            _tmClient.UpdateOrderBook += UpdateOrderBook;
+            _tmClient.UpdateBalance += UpdateBalance;
             _tmClient.UpdateMyOrders += UpdateMyOrderList;
-            _tmClient.SellListUpdated += FormSellList;
-            
+
             //кастомный конфиг
             config = new Config
             {
@@ -55,18 +45,17 @@ namespace Former
             };
 
             _ordersCount = ordersCount;
-            _currentPurchaseOrders = new ConcurrentDictionary<string, Order>();
+            _orderBook = new ConcurrentDictionary<string, Order>();
             _myOrders = new ConcurrentDictionary<string, Order>();
         }
 
-        private async void UpdateCurrentPurchaseOrders(Order orderNeededUpdate)
+        private async void UpdateOrderBook(Order orderNeededUpdate)
         {
-            //Log.Debug("Принял от маркета заказ {id}: цена {price}, количество {value}", orderNeededUpdate.Response.Order.Id, orderNeededUpdate.Response.Order.Price, orderNeededUpdate.Response.Order.Quantity);
             var task = Task.Run(() =>
             {
                 //TODO убрать проверку на тип ордера
                 if (orderNeededUpdate.Signature.Status == OrderStatus.Open && orderNeededUpdate.Signature.Type == OrderType.Sell)
-                    _currentPurchaseOrders.AddOrUpdate(orderNeededUpdate.Id, orderNeededUpdate, (k, v) =>
+                    _orderBook.AddOrUpdate(orderNeededUpdate.Id, orderNeededUpdate, (k, v) =>
                     {
                         var price = orderNeededUpdate.Price;
                         if (price != 0) v.Price = price;
@@ -75,28 +64,63 @@ namespace Former
                         v.LastUpdateDate = orderNeededUpdate.LastUpdateDate;
                         return v;
                     });
-                else if (_currentPurchaseOrders.ContainsKey(orderNeededUpdate.Id)) _currentPurchaseOrders.TryRemove(orderNeededUpdate.Id, out _);
-                
+                else if (_orderBook.ContainsKey(orderNeededUpdate.Id)) _orderBook.TryRemove(orderNeededUpdate.Id, out _);
+
             });
             await task;
             //???????????????????????????????????????????????????????????????????????????????????????????
-            if (_currentPurchaseOrders.Count > _ordersCount) await FitPrices(_currentPurchaseOrders);
+            if (_orderBook.Count > _ordersCount) await FitPrices(_orderBook);
+        }
+
+        private async void SellPartContracts(string id, Order orderNeededUpdate, double sellPrice) 
+        {
+            Order beforeUpdate;
+            double newQuantity;
+            if (_myOrders.TryGetValue(id, out beforeUpdate))
+                if ((newQuantity = beforeUpdate.Quantity - orderNeededUpdate.Quantity) > 0)
+                    await _tmClient.PlaceSellOrder(sellPrice, newQuantity);
         }
 
         private async void UpdateMyOrderList(Order orderNeededUpdate)
-        { 
-            var task = Task.Run(() =>
+        {
+            var id = orderNeededUpdate.Id;
+            var status = orderNeededUpdate.Signature.Status;
+            var type = orderNeededUpdate.Signature.Type;
+            var sellPrice = orderNeededUpdate.Price + config.RequiredProfit + config.SlotFee;
+            var task = Task.Run(async () =>
             {
-                if (orderNeededUpdate.Signature.Status == OrderStatus.Open) _myOrders.TryAdd(orderNeededUpdate.Id, orderNeededUpdate);
-                else _myOrders.TryRemove(orderNeededUpdate.Id, out _);
+                if (status == OrderStatus.Open && type == OrderType.Buy)
+                {
+                    SellPartContracts(id, orderNeededUpdate, sellPrice);
+                    _myOrders.AddOrUpdate(id, orderNeededUpdate, (k, v) =>
+                    {
+                        v.Price = orderNeededUpdate.Price;
+                        v.Quantity = orderNeededUpdate.Quantity;
+                        return v;
+                    });
+                }
+                if (status == OrderStatus.Open && type == OrderType.Sell)
+                    _myOrders.AddOrUpdate(id, orderNeededUpdate, (k, v) =>
+                    {
+                        v.Price = orderNeededUpdate.Price;
+                        v.Quantity = orderNeededUpdate.Quantity;
+                        return v;
+                    });
+                if (status == OrderStatus.Closed && type == OrderType.Buy)
+                {
+                    await _tmClient.PlaceSellOrder(sellPrice, orderNeededUpdate.Quantity);
+                    _myOrders.TryRemove(id, out _);
+                }
+                if (status == OrderStatus.Closed && type == OrderType.Sell)
+                    _myOrders.TryRemove(id, out _);
             });
             await task;
         }
 
-        private void UpdateCurrentBalance(Balance balance)
+        private void UpdateBalance(Balance balance)
         {
             Log.Debug("Balance updated. New balance: {0}", balance.Value);
-            _balanceInRubles = double.Parse(balance.Value);
+            _balance = double.Parse(balance.Value);
         }
 
         private async Task FitPrices(ConcurrentDictionary<string, Order> currentPurchaseOrdersForFairPrice)
@@ -120,44 +144,30 @@ namespace Former
             await checkPrices;
 
             if (ordersNeededToFit.Count != 0)
-                await _tmClient.UpdateMyOrdersOnTM(ordersNeededToFit);
+                await _tmClient.TellTMUpdateMyOreders(ordersNeededToFit);
         }
 
         public async void FormPurchaseList(double avgPrice)
         {
             Log.Debug("Received from algorithm: {price}", avgPrice);
-            double availableBalance = _balanceInRubles * config.AvaibleBalance; //config.AvaibleBalance это доступный баланс в процентах
-            var selectedOrders = new Dictionary<string, Order>();
-            foreach (var order in _currentPurchaseOrders)
+            //config.AvaibleBalance это доступный баланс в процентах
+            double availableBalance = _balance * config.AvaibleBalance;
+            var selectedOrders = new Dictionary<double, double>();
+            foreach (var order in _orderBook)
             {
-                var price = order.Value.Price;
-                if (price + config.RequiredProfit + config.SlotFee < avgPrice)
-                    if ((availableBalance - Convert(price)) > 0)
-                        selectedOrders.Add(order.Key, order.Value);
+                if (IsPriceCorrect(order.Value.Price, avgPrice, availableBalance))
+                    selectedOrders.Add(order.Value.Price, config.ContractValue);
             }
             Log.Debug("Formed a list of required orders: {elements}", selectedOrders.Count);
-            if (selectedOrders.Count != 0) await _tmClient.CloseOrders(selectedOrders, config.ContractValue);
+            if (selectedOrders.Count != 0)
+                await _tmClient.PlacePurchaseOrders(selectedOrders);
         }
 
-        private async void FormSellList(Dictionary<string, Order> successfulOrders)
+        private bool IsPriceCorrect(double estimatedPrice, double cuttingPrice, double availableBalance)
         {
-            var ordersForSale = new List<SalesOrder>();
-            double sellPrice;
-            foreach (var order in successfulOrders)
-            {
-                sellPrice = order.Value.Price + config.RequiredProfit + config.SlotFee;
-                ordersForSale.Add(new SalesOrder { price = sellPrice, value = config.ContractValue });
-                _myOrders.TryAdd(order.Key,
-                    new Order
-                    {
-                        Id = order.Value.Id,
-                        Price = sellPrice,
-                        LastUpdateDate = new Google.Protobuf.WellKnownTypes.Timestamp(),
-                        Quantity = config.ContractValue,
-                        Signature = new OrderSignature { Status = OrderStatus.Open, Type = OrderType.Sell }
-                    });
-            }
-            await _tmClient.PlaceSuccessfulOrders(ordersForSale);
+            if (estimatedPrice < cuttingPrice && (availableBalance - Convert(estimatedPrice) * config.ContractValue) > 0) return true;
+            else return false;
+
         }
 
         private double Convert(double priceFromTM)

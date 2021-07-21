@@ -3,7 +3,6 @@ using Grpc.Net.Client;
 using Serilog;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,23 +10,19 @@ using TradeBot.Common.v1;
 using TradeBot.TradeMarket.TradeMarketService.v1;
 
 using SubscribeOrdersRequest = TradeBot.TradeMarket.TradeMarketService.v1.SubscribeOrdersRequest;
-using SubscribeOrdersResponse = TradeBot.TradeMarket.TradeMarketService.v1.SubscribeOrdersResponse;
 
 namespace Former
 {
     public class TradeMarketClient
     {
-        public delegate void PurchaseOrdersEvent(Order purchaseOrdersToUpdate);
-        public PurchaseOrdersEvent UpdatePurchaseOrders;
-
-        public delegate void SellOrdersEvent(Dictionary<string, Order> successOrdersToUpdate);
-        public SellOrdersEvent SellListUpdated;
-
-        public delegate void BalanceEvent(Balance balanceToUpdate);
-        public BalanceEvent UpdateBalance;
+        public delegate void OrderBookEvent(Order purchaseOrdersToUpdate);
+        public OrderBookEvent UpdateOrderBook;
 
         public delegate void MyOrdersEvent(Order myOrderToUpdate);
         public MyOrdersEvent UpdateMyOrders;
+
+        public delegate void BalanceEvent(Balance balanceToUpdate);
+        public BalanceEvent UpdateBalance;
 
         private static int _retryDelay;
         private static string _connectionString;
@@ -75,7 +70,7 @@ namespace Former
             }
         }
 
-        public async void ObserveCurrentPurchaseOrders()
+        public async void ObserveOrderBook()
         {
             var orderSignature = new OrderSignature
             {
@@ -95,7 +90,7 @@ namespace Former
             {
                 while (await call.ResponseStream.MoveNext())
                 {
-                    UpdatePurchaseOrders?.Invoke(call.ResponseStream.Current.Response.Order);
+                    UpdateOrderBook?.Invoke(call.ResponseStream.Current.Response.Order);
                 }
             };
 
@@ -123,8 +118,7 @@ namespace Former
 
         public async void ObserveMyOrders()
         {
-            using var call = _client.SubscribyMyOrders(new SubscribyMyOrdersRequest());
-
+            using var call = _client.SubscribeMyOrders(new SubscribeMyOrdersRequest());
             Func<Task> observeMyOrders = async () =>
             {
                 while (await call.ResponseStream.MoveNext())
@@ -132,63 +126,42 @@ namespace Former
                     UpdateMyOrders?.Invoke(call.ResponseStream.Current.Changed);
                 }
             };
-
             await ConnectionTester(observeMyOrders);
         }
 
-        public async Task CloseOrders(Dictionary<string, Order> preparedForPurchase, double contractValue)
+        public async Task PlacePurchaseOrders(Dictionary<double, double> purchaseList)
         {
-            CloseOrderResponse response = null;
+            PlaceOrderResponse response = null;
             Func<Task> closeOrders;
-            var succesfullyPurchasedOrders = new Dictionary<string, Order>();
-
-            foreach (var order in preparedForPurchase)
+            foreach (var order in purchaseList)
             {
                 closeOrders = async () =>
                 {
-                    response = await _client.CloseOrderAsync(new CloseOrderRequest { Id = order.Value.Id, Value = contractValue });
+                    response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = order.Key, Value = order.Value });
                 };
 
                 await ConnectionTester(closeOrders);
-
-                //Log.Debug("Requested to buy {0}", order);
-                if (response.Response.Code == ReplyCode.Succeed)
-                {
-                    succesfullyPurchasedOrders.Add(order.Key, order.Value);
-                    //Log.Debug(" ...purchased");
-                }
-                //else Log.Debug(" ...not purchased");
             }
-            SellListUpdated?.Invoke(succesfullyPurchasedOrders);
         }
 
-        public async Task PlaceSuccessfulOrders(List<SalesOrder> ordersForSale)
+        public async Task PlaceSellOrder(double sellPrice, double contractValue)
         {
             PlaceOrderResponse response = null;
             Func<Task> placeSuccessfulOrders;
-            foreach (var order in ordersForSale)
+            placeSuccessfulOrders = async () =>
             {
-                placeSuccessfulOrders = async () =>
-                {
-                    response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = order.price, Value = order.value });
-                };
-
-                await ConnectionTester(placeSuccessfulOrders);
-                
-                //Log.Debug("Place order: price {0}, value {1}", order.price, order.value);
-                //Log.Debug(response.Response.Code == ReplyCode.Succeed
-                //    ? " ...order placed"
-                //    : " ...order not placed");
-            }
+                response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = sellPrice, Value = contractValue });
+            };
+            await ConnectionTester(placeSuccessfulOrders);
         }
 
-        public async Task UpdateMyOrdersOnTM(Dictionary<string, double> orderToUpdate) 
+        public async Task TellTMUpdateMyOreders(Dictionary<string, double> orderToUpdate)
         {
-            foreach (var order in orderToUpdate) 
+            foreach (var order in orderToUpdate)
             {
                 Log.Debug("Update order id: {0}, new price: {1}", order.Key, order.Value);
             }
-           
+
         }
     }
 }
