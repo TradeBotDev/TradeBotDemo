@@ -72,9 +72,10 @@ message CurrentAccountReply {
 
 message AddExchangeAccessRequest {
 	string session_id = 1;
-	string trade_market_name = 2;
-	string token = 3;
-	int32 secret = 4;
+	ExchangeCode code = 2;
+	string exchange_name = 3;
+	string token = 4;
+	int32 secret = 5;
 }
 
 message AddExchangeAccessReply {

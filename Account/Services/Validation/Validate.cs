@@ -41,6 +41,14 @@ namespace Account.Validation
             return new SuccessfulValidationMessage();
         }
 
+        public static ValidationMessage AddExchangeAccessFields(AddExchangeAccessRequest request)
+        {
+            if (IsEmpty(request.SessionId, request.ExchangeName, request.Token))
+                return new EmptyFieldMessage();
+
+            return new SuccessfulValidationMessage();
+        }
+
         //Метод, который пробегается по всем предоставленным строкам и делает вывод, являются ли они пустыми.
         private static bool IsEmpty(params string[] fields)
         {

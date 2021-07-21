@@ -15,22 +15,50 @@ namespace Account
     {
         public override Task<AddExchangeAccessReply> AddExchangeAccess(AddExchangeAccessRequest request, ServerCallContext context)
         {
-            // Пока пустышка
-            return base.AddExchangeAccess(request, context);
+            // Пока ничего особо нет...
+            ValidationMessage validationResult = Validate.AddExchangeAccessFields(request);
+            if (validationResult.Code != ActionCode.Successful)
+            {
+                return Task.FromResult(new AddExchangeAccessReply
+                {
+                    Result = validationResult.Code,
+                    Message = validationResult.Message
+                });
+            }
+
+            using (var database = new Models.AccountContext())
+            {
+                var account = database.Accounts.Where(account => account.AccountId == loggedIn[request.SessionId].AccountId).First();
+                account.ExchangeAccesses.Add(new Models.ExchangeAccess
+                {
+                    Code = request.Code,
+                    Name = request.ExchangeName,
+                    Token = request.Token,
+                    Secret = request.Secret,
+                    Account = account
+                });
+                database.SaveChanges();
+            }
+            return Task.FromResult(new AddExchangeAccessReply
+            {
+                Result = ActionCode.Successful,
+                Message = "Успешно"
+            });
         }
 
         public override Task<ExchangesBySessionReply> ExchangesBySession(SessionRequest request, ServerCallContext context)
         {
-            ExchangesBySessionReply reply = new ExchangesBySessionReply
-            {
-                Message = "Сообщение",
-                Result = ActionCode.Successful,
-            };
-
+            // Пока ничего особо не сделано...
             using (Models.AccountContext database = new Models.AccountContext()) {
                 var fromAccount = loggedIn[request.SessionId];
                 var exchangesFromAccount = database.ExchangeAccesses.Where(exchange => exchange.Account.AccountId == fromAccount.AccountId);
-                
+
+                ExchangesBySessionReply reply = new ExchangesBySessionReply
+                {
+                    Message = "Успешно",
+                    Result = ActionCode.Successful,
+                };
+
                 foreach (Models.ExchangeAccess exchange in exchangesFromAccount)
                 {
                     reply.Exchanges.Add(new ExchangeInfo
@@ -41,8 +69,9 @@ namespace Account
                         Secret = exchange.Secret
                     });
                 }
+
+                return Task.FromResult(reply);
             }
-            return Task.FromResult(reply);
         }
     }
 }
