@@ -7,14 +7,13 @@ namespace Account.Models
 {
     public class LoggedAccount
     {
-        public Account AccountInfo { get; set; }
+        public int AccountId { get; set; }
 
-        public List<ExchangeAccess> Exchanges { get; set; }
+        public bool SaveExchangesAfterLogout { get; set; }
 
         public LoggedAccount(Account account)
         {
-            AccountInfo = account;
-            Exchanges = new List<ExchangeAccess>();
+            AccountId = account.AccountId;
         }
     }
 }

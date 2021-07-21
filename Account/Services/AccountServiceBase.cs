@@ -34,8 +34,15 @@ namespace Account
         {
             // В случае успешного удаления аккаунта из списка, в которые пользователь зашел,
             // сервер отвечает, что выход был успешно завершен.
+            int account = loggedIn[request.SessionId].AccountId;
+            bool saveExchanges = loggedIn[request.SessionId].SaveExchangesAfterLogout;
+
             if (loggedIn.Remove(request.SessionId))
             {
+                if (!saveExchanges)
+                {
+                    // Здесь будет логика удаления записей...
+                }
                 FileManagement.WriteState(loggedInFilename, loggedIn);
                 return Task.FromResult(LogoutReplies.SuccessfulLogout);
             }
@@ -60,14 +67,21 @@ namespace Account
             if (!loggedIn.ContainsKey(request.SessionId))
                 return Task.FromResult(CurrentAccountReplies.AccountNotFound);
             // Если текущий пользователь вошедший, то сервер возвращает данные этого пользователя.
-            else return Task.FromResult(CurrentAccountReplies.SuccessfulOperation(new AccountInfo
+            else
             {
-                //Id = loggedIn[request.SessionId].AccountId,
-                Firstname = loggedIn[request.SessionId].AccountInfo.Firstname,
-                Lastname = loggedIn[request.SessionId].AccountInfo.Lastname,
-                Email = loggedIn[request.SessionId].AccountInfo.Email,
-                PhoneNumber = loggedIn[request.SessionId].AccountInfo.PhoneNumber
-            }));
+                using (Models.AccountContext database = new Models.AccountContext())
+                {
+                    Models.Account account = database.Accounts.Where(id => id.AccountId == loggedIn[request.SessionId].AccountId).First(); 
+                    return Task.FromResult(CurrentAccountReplies.SuccessfulOperation(new AccountInfo
+                    {
+                        //Id = loggedIn[request.SessionId].AccountId,
+                        Firstname = account.Firstname,
+                        Lastname = account.Lastname,
+                        Email = account.Email,
+                        PhoneNumber = account.PhoneNumber
+                    }));
+                }
+            }
         }
     }
 }

@@ -8,6 +8,8 @@ namespace Account.Models
 {
     public class ExchangeAccess
     {
+        public int ExchangeAccessId { get; set; }
+
         public ExchangeCode Code { get; set; }
 
         public string Name { get; set; }
@@ -15,5 +17,7 @@ namespace Account.Models
         public string Token { get; set; }
 
         public int Secret { get; set; }
+
+        public Account Account { get; set; }
     }
 }

@@ -12,5 +12,8 @@ namespace Account.Models
         
         // Таблица с данными аккаунтов.
         public DbSet<Account> Accounts { get; set; }
+
+        // Таблица с данными для доступа к биржам.
+        public DbSet<ExchangeAccess> ExchangeAccesses { get; set; }
     }
 }

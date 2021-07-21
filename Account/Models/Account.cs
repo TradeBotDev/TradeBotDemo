@@ -13,6 +13,8 @@ namespace Account.Models
 
         public string Email { get; set; }
 
+        public List<ExchangeAccess> ExchangeAccesses { get; set; } = new List<ExchangeAccess>();
+
         public string PhoneNumber { get; set; }
 
         public string Password { get; set; }

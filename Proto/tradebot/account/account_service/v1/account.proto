@@ -19,7 +19,8 @@ service Account {
 message LoginRequest {
 	// Данные для входа в аккаунт.
 	string email = 1;
-	string password = 2;
+	bool save_exchanges_after_logout = 2;
+	string password = 3;
 }
 
 message LoginReply {
