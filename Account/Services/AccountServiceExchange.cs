@@ -61,5 +61,10 @@ namespace Account
                 return Task.FromResult(reply);
             }
         }
+
+        public override Task<DeleteExchangeAccessReply> DeleteExchangeAccess(DeleteExchangeAccessRequest request, ServerCallContext context)
+        {
+            return base.DeleteExchangeAccess(request, context);
+        }
     }
 }
