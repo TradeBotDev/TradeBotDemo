@@ -47,14 +47,8 @@ namespace TradeMarket.Services
         {
             return new SubscribeBalanceResponse
             {
-                Response = new TradeBot.Common.v1.SubscribeBalanceResponse
-                {
-                    Balance = new TradeBot.Common.v1.Balance
-                    {
-                        Currency = balance.Currency,
-                        Value = balance.Value.ToString()
-                    }
-                }
+                BalanceOne = new TradeBot.Common.v1.Balance() { Currency = balance.Currency.ToString(), Value = balance.Value.ToString() }
+
             };
         }
 
