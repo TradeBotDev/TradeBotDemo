@@ -1,3 +1,4 @@
+using Algorithm.Analysis;
 using Algorithm.DataManipulation;
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.Hosting;
@@ -25,7 +26,10 @@ namespace Algorithm
             Publisher publisher = new();
 
             PointMaker PM = new PointMaker();
+            AlgorithmAlpha algo = new();
+            DataCollector DC = new();
             PM.Launch(publisher);
+
 
         }
 
