@@ -9,7 +9,7 @@ namespace Account.Models
     {
         public Account AccountInfo { get; set; }
 
-        public List<ExchangeAccess> Exchanges;
+        public List<ExchangeAccess> Exchanges { get; set; }
 
         public LoggedAccount(Account account)
         {
