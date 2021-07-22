@@ -92,7 +92,7 @@ namespace TradeMarket.DataTransfering.Bitmex
             FullOrder order = new FullOrder();
             OrderSignature signature = new OrderSignature()
             {
-                Status = OrderStatus.Unspecified,
+                Status = GetSignatureStatusFromAction(e.Action),
                 Type = e.Changed.Side == BitmexSide.Buy ? OrderType.Buy : OrderType.Sell
             };
             order.Id = e.Changed.Id.ToString();
