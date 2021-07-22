@@ -1,32 +1,29 @@
 ﻿using Algorithm.DataManipulation;
-using Algorithm.Services;
-using Grpc.Net.Client;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using TradeBot.Common.v1;
-using TradeBot.Former.FormerService.v1;
 
-namespace Algorithm
+namespace Algorithm.DataManipulation
 {
     public class DataCollector
     {
-        public static List<Order> orders;
-        Publisher publisher = new Publisher();
+        public static List<Order> Orders;
+
+        private readonly Publisher _publisher = new();
 
         public DataCollector()
         {
-            orders = new();
-            publisher.pointMadeEvent += ClearUsedData;
+            Orders = new List<Order>();
+            _publisher.PointMadeEvent += ClearUsedData;
         }
 
-        private void ClearUsedData (KeyValuePair<DateTime, double> point)
+        private static void ClearUsedData (KeyValuePair<DateTime, double> point)
         {
-            foreach(Order order in orders)
+            foreach(var order in Orders.Where(order => DateTime.Compare(order.LastUpdateDate.ToDateTime(), point.Key) < 0))
             {
-                if ((DateTime.Compare(order.LastUpdateDate.ToDateTime(), point.Key))<0) { orders.Remove(order); }
+                Orders.Remove(order);
             }
         }
 

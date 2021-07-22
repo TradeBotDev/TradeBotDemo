@@ -1,17 +1,10 @@
 using Algorithm.Analysis;
 using Algorithm.DataManipulation;
-using Grpc.Net.Client;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TradeBot.Common.v1;
-using TradeBot.Former.FormerService.v1;
 
 namespace Algorithm
 {
@@ -19,13 +12,7 @@ namespace Algorithm
     {
         public static void Main(string[] args)
         {
-            //commented out for testing purposes
-            //DataCollector.SendPurchasePrice();
             CreateHostBuilder(args).Build().Run();
-
-            
-
-
         }
 
 
@@ -46,11 +33,10 @@ namespace Algorithm
         {
             //await PriceSender.SendPrice();
             Publisher publisher = new();
-            DataCollector DC = new();
-            PointMaker PM = new PointMaker();
+            DataCollector dc = new();
+            var pm = new PointMaker();
             AlgorithmAlpha algo = new();
-
-            PM.Launch(publisher, DC);
+            pm.Launch(publisher, dc);
         }
     }
 }

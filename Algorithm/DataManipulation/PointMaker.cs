@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using TradeBot.Common.v1;
 using System.Threading;
+
+using TradeBot.Common.v1;
 
 namespace Algorithm.DataManipulation
 {
@@ -12,7 +11,7 @@ namespace Algorithm.DataManipulation
     public class PointMaker
     {
         public event EventHandler<KeyValuePair<DateTime, double>> PointMadeEvent;
-        public KeyValuePair<DateTime, double> MakePoint(List<Order> orders, DateTime timestamp)
+        private static  KeyValuePair<DateTime, double> MakePoint(List<Order> orders, DateTime timestamp)
         {           
             double price = 0;
             int numberOfOrders = 0;
@@ -27,23 +26,22 @@ namespace Algorithm.DataManipulation
             }
             price /= numberOfOrders;
             Console.WriteLine("Made a point: " + timestamp.TimeOfDay + "    " + price);
-            return new KeyValuePair<DateTime, double> (timestamp, price); 
+            return new KeyValuePair<DateTime, double>(timestamp, price);
         }
 
         public void Launch(Publisher publisher, DataCollector dataCollector)
         {
-            List<Order> newOrders = new();
-
             while (true)
             {
                 Thread.Sleep(3000);
-                if (DataCollector.orders.Count != 0)
-                {
-                    newOrders = DataCollector.orders;
-                    KeyValuePair<DateTime, double> newPoint = MakePoint(newOrders, DateTime.Now);
+                if (DataCollector.Orders.Count == 0)
+                    continue;
+
+                    var newOrders = DataCollector.Orders;
+                    var newPoint = MakePoint(newOrders, DateTime.Now);
                     publisher.Publish(newPoint);
                     newOrders.Clear();
-                }
+                
             }
         }
 
