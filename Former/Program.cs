@@ -14,14 +14,14 @@ namespace Former
                 .WriteTo.Console()
                 .CreateLogger();
 
-            TradeMarketClient.Configure("https://localhost:5005", 10000, null);
-            TradeMarketClient observers = TradeMarketClient.GetInstance();
+            //TradeMarketClient.Configure("https://localhost:5005", 10000, null);
+            //TradeMarketClient observers = TradeMarketClient.GetInstance();
 
-            while (TradeMarketClient._entries is null) { }
+            //while (TradeMarketClient._entries is null) { }
 
-            observers.ObserveOrderBook();
-            observers.ObserveBalance();
-            observers.ObserveMyOrders();
+            //observers.ObserveOrderBook();
+            //observers.ObserveBalance();
+            //observers.ObserveMyOrders();
 
             CreateHostBuilder(args).Build().Run();
         }
