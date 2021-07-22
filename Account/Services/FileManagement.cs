@@ -20,7 +20,7 @@ namespace Account
         // по ссылке.
         public static bool ReadState<T>(string filename, ref T state)
         {
-            if (File.Exists(filename))
+            if (File.Exists(filename) && state != null)
             {
                 string file = File.ReadAllText(filename);
                 state = JsonSerializer.Deserialize<T>(file);
