@@ -69,8 +69,7 @@ message SubscribeBalanceRequest{
 
 message SubscribeBalanceResponse{
 	//old version - tradebot.common.v1.SubscribeBalanceResponse response = 1;
-	optional tradebot.common.v1.Balance balance_one = 2;
-	optional tradebot.common.v1.Balance balance_two = 3;
+	optional tradebot.common.v1.Balance Money = 1;
 }
 
 message SlotsRequest{
