@@ -23,9 +23,13 @@ namespace Former
         public override Task<SendPurchasePriceResponse> SendPurchasePrice(SendPurchasePriceRequest request, ServerCallContext context)
         {
             Metadata meta = new Metadata();
-            meta.Add(context.RequestHeaders.Get("sessionId"));
-            meta.Add(context.RequestHeaders.Get("trademarket"));
-            meta.Add(context.RequestHeaders.Get("slot"));
+            /* meta.Add(context.RequestHeaders.Get("sessionId"));
+             meta.Add(context.RequestHeaders.Get("trademarket"));
+             meta.Add(context.RequestHeaders.Get("slot"));*/
+
+            meta.Add("sessionId","123");
+            meta.Add("trademarket","bitmex");
+            meta.Add("slot","XBTUSD");
 
             TradeMarketClient.Configure("https://localhost:5005", 10000, meta);
 

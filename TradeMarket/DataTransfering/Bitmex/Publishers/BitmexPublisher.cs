@@ -31,12 +31,17 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         }
 
 
+        private void responseAction(TResponse response)
+        {
+            _invokeActionOnNext.Invoke(response, Changed);
+        }
+
         internal async Task SubscribeAsync(TRequest request, IObservable<TResponse> stream, CancellationToken token)
         {
 
             _client.Send(request);
             //TODO это просто жесть c действием. чувствую что нужно как-то по другому
-            stream.Subscribe(response => _invokeActionOnNext.Invoke(response, Changed));
+            stream.Subscribe(responseAction);
             //TODO строчки ниже должна жить в классе биржи
             //await communicator.Start();
             //exitEvent.WaitOne(TimeSpan.FromSeconds(30));

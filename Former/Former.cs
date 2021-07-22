@@ -58,6 +58,7 @@ namespace Former
 
         private async void UpdateOrderBook(Order orderNeededUpdate)
         {
+            Log.Debug("Got order!");
             var task = Task.Run(() =>
             {
                 //TODO убрать проверку на тип ордера

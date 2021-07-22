@@ -1,3 +1,4 @@
+using Grpc.Core;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
@@ -13,15 +14,18 @@ namespace Former
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
                 .CreateLogger();
+            Metadata meta = new Metadata();
+            meta.Add("sessionId","123");
+            meta.Add("slot", "XBTUSD");
 
-            TradeMarketClient.Configure("https://localhost:5005", 10000, null);
+            TradeMarketClient.Configure("https://localhost:5005", 10000, meta);
             TradeMarketClient observers = TradeMarketClient.GetInstance();
 
-            while (TradeMarketClient._entries is null) { }
+
 
             observers.ObserveOrderBook();
             observers.ObserveBalance();
-            observers.ObserveMyOrders();
+            //observers.ObserveMyOrders();
 
             CreateHostBuilder(args).Build().Run();
         }

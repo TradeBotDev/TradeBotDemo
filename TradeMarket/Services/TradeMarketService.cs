@@ -84,36 +84,10 @@ namespace TradeMarket.Services
             });
         }
 
-        public async override Task<CloseOrderResponse> CloseOrder(CloseOrderRequest request, ServerCallContext context)
-        {
-            var sessionId = context.RequestHeaders.Get("sessionId").Value;
-            var slot = context.RequestHeaders.Get("slot").Value;
-            try
-            {
-                var user = Model.TradeMarket.GetUserContex(sessionId,slot);
-                await user.CloseOrder(request.Id);
-            }
-            catch (Exception)
-            {
-            }
-
-            return (new CloseOrderResponse
-            {
-                Response = new TradeBot.Common.v1.DefaultResponse
-                {
-                    Code = TradeBot.Common.v1.ReplyCode.Succeed,
-                    Message = $"Order {request.Id} was closed"
-                }
-
-            });
-        }
-
-
-
         public async override Task<PlaceOrderResponse> PlaceOrder(PlaceOrderRequest request, ServerCallContext context)
         {
 
-            var sessionId = context.RequestHeaders.Get("sessionId").Value;
+            var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
             var user = Model.TradeMarket.GetUserContex(sessionId, slot);
 
@@ -127,7 +101,7 @@ namespace TradeMarket.Services
 
         public async override Task Slots(SlotsRequest request, IServerStreamWriter<SlotsResponse> responseStream, ServerCallContext context)
         {
-            var sessionId = context.RequestHeaders.Get("sessionId").Value;
+            var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
 
             var user = Model.TradeMarket.GetUserContex(sessionId, slot);
@@ -156,7 +130,7 @@ namespace TradeMarket.Services
 
         public async override Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<SubscribeBalanceResponse> responseStream, ServerCallContext context)
         {
-            var sessionId = context.RequestHeaders.Get("sessionId").Value;
+            var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
             var user = Model.TradeMarket.GetUserContex(sessionId,slot);
 
@@ -175,11 +149,13 @@ namespace TradeMarket.Services
 
         public async override Task SubscribeOrders(SubscribeOrdersRequest request, IServerStreamWriter<SubscribeOrdersResponse> responseStream, ServerCallContext context)
         {
-            var sessionId = context.RequestHeaders.Get("sessionId").Value;
+            var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
             var user = Model.TradeMarket.GetUserContex(sessionId, slot);
             user.Book25 += async (sender, args) => {
-                await WriteStreamAsync<SubscribeOrdersResponse>(responseStream, ConvertOrder(args));
+                var order = ConvertOrder(args);
+                _logger.LogInformation($"Sent order : {order} to former");
+                await WriteStreamAsync<SubscribeOrdersResponse>(responseStream, order);
             };
             //TODO отписка после отмены
             await AwaitCancellation(context.CancellationToken);

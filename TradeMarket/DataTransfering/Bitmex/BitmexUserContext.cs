@@ -31,7 +31,7 @@ namespace TradeMarket.DataTransfering.Bitmex
         public event EventHandler<FullOrder> UserOrders;
         public event EventHandler<Model.Balance> UserBalance;
 
-        public BitmexUserContext(string sessionId,string slotName)
+        public BitmexUserContext(string sessionId,string slotName,Model.TradeMarket tradeMarket)
         {
             //инициализация websocket клиента
             var communicator = new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketUrl);
@@ -47,7 +47,7 @@ namespace TradeMarket.DataTransfering.Bitmex
             Key = "lVjs4QoJIe9OqNUnDoVKl2jS";
             Secret = "MAX6lma-Y93bfT3w-g5GtAgvsFNhDLrYlyyqkciDUwRTy64s";
 
-            //аутентификация перед использованием
+            TradeMarket = tradeMarket;
             AutheticateUser();
 
             //инициализация подписок

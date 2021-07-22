@@ -25,8 +25,8 @@ namespace TradeMarket
                 Task[] tasks =
                 {
                     //BitmexPublisher.GetInstance().SubscribeAsync(stoppingToken),
-                    FakeOrderPublisher.GetInstance().Simulate(),
-                    FakeBalancePublisher.GetInstance().Simulate(),
+                   /* FakeOrderPublisher.GetInstance().Simulate(),
+                    FakeBalancePublisher.GetInstance().Simulate(),*/
                     FakeSlotPublisher.GetInstance().Simulate()
                 };
                 await Task.WhenAll(tasks);

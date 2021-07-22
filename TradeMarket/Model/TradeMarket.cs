@@ -27,7 +27,7 @@ namespace TradeMarket.Model
 
         public static BitmexUserContext GetUserContex(string sessionId,string slotName)
         {
-            if(RegisteredUsers.First(el => el.SessionId == sessionId && el.SlotName == slotName) is null)
+            if(RegisteredUsers.FirstOrDefault(el => el.SessionId == sessionId && el.SlotName == slotName) is null)
             {
                 RegisterUser(sessionId, slotName, "Bitmex");
             }
@@ -36,8 +36,8 @@ namespace TradeMarket.Model
 
         public static void RegisterUser(string sessionId,string slotName,string tradeMarketName)
         {
-            BitmexUserContext user = new BitmexUserContext(sessionId,slotName);
-            user.TradeMarket = GetTradeMarketByName(tradeMarketName);
+            BitmexUserContext user = new BitmexUserContext(sessionId,slotName, GetTradeMarketByName(tradeMarketName));
+
             RegisteredUsers.Add(user);
         }
 

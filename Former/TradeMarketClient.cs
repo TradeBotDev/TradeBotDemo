@@ -66,7 +66,7 @@ namespace Former
                 }
                 catch (RpcException e)
                 {
-                    Log.Error("Error {1}. Retrying...\r\n{0}", e.Status.DebugException.Message, e.StackTrace);
+                    //Log.Error("Error {1}. Retrying...\r\n{0}", e.Status.DebugException.Message, e.StackTrace);
                     Thread.Sleep(_retryDelay);
                 }
             }
@@ -88,7 +88,7 @@ namespace Former
             };
             
             using var call = _client.SubscribeOrders(request, _entries);
-
+            Log.Debug("Sent subscribe order request!");
             Func<Task> observeCurrentPurchaseOrders = async () =>
             {
                 while (await call.ResponseStream.MoveNext())
