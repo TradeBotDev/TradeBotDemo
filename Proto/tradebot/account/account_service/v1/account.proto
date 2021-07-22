@@ -149,7 +149,10 @@ enum ActionCode {
 	* 1 - пользователь не найден,
 	* 2 - пользователь уже существует,
 	* 3 - имеется пустое поле ввода,
-	* 4 - пароли не совпадают.
+	* 4 - пароли не совпадают,
+	* 5 - поле не является электронной почтой,
+	* 6 - биржа не найдена,
+	* 7 - биржа уже существует.
 	*/
 	ACTION_CODE_SUCCESSFUL = 0;
 	ACTION_CODE_ACCOUNT_NOT_FOUND = 1;
@@ -158,4 +161,5 @@ enum ActionCode {
 	ACTION_CODE_PASSWORD_MISMATCH = 4;
 	ACTION_CODE_IS_NOT_EMAIL = 5;
 	ACTION_CODE_EXCHANGE_NOT_FOUND = 6;
+	ACTION_CODE_EXCHANGE_EXISTS = 7;
 }

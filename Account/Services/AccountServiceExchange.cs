@@ -36,6 +36,22 @@ namespace Account
             using (var database = new Models.AccountContext())
             {
                 var account = database.Accounts.Where(account => account.AccountId == loggedIn[request.SessionId].AccountId);
+                
+                // Пока некрасиво сделан ответ :(
+                // Проверка на то, добавлен ли токен для той же биржи, что добавляется
+                bool isExists = database.ExchangeAccesses.Any(exchange =>
+                    exchange.Account.AccountId == account.First().AccountId &&
+                    exchange.Code == request.Code);
+
+                if (isExists)
+                {
+                    return Task.FromResult(new AddExchangeAccessReply
+                    {
+                        Result = ActionCode.ExchangeExists,
+                        Message = "Биржа уже существует"
+                    });
+                }
+
                 account.First().ExchangeAccesses.Add(new Models.ExchangeAccess
                 {
                     Code = request.Code,
