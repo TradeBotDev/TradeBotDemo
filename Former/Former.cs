@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using Grpc.Core;
+using Serilog;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,8 @@ namespace Former
 
         private readonly ConcurrentDictionary<string, Order> _myOrders;
 
+        private Metadata _meta;
+
         private double _balance = 100;
 
         private readonly int _ordersCount;
@@ -24,6 +27,10 @@ namespace Former
         public void SetConfig(Config conf)
         {
             config = conf;
+        }
+        public void SetMetadata(Metadata.Entry meta) 
+        {
+            _meta.Add(meta);
         }
 
         public Former(int ordersCount)
@@ -74,13 +81,12 @@ namespace Former
 
         private async void SellPartContracts(string id, Order orderNeededUpdate, double sellPrice) 
         {
-            Order beforeUpdate;
             double newQuantity;
-            if (_myOrders.TryGetValue(id, out beforeUpdate))
+            if (_myOrders.TryGetValue(id, out Order beforeUpdate))
                 if ((newQuantity = beforeUpdate.Quantity - orderNeededUpdate.Quantity) > 0)
                     await _tmClient.PlaceSellOrder(sellPrice, newQuantity);
         }
-
+        //необходимо ревью
         private async void UpdateMyOrderList(Order orderNeededUpdate)
         {
             var id = orderNeededUpdate.Id;
@@ -122,7 +128,7 @@ namespace Former
             Log.Debug("Balance updated. New balance: {0}", balance.Value);
             _balance = double.Parse(balance.Value);
         }
-
+        //необходимо ревью 
         private async Task FitPrices(ConcurrentDictionary<string, Order> currentPurchaseOrdersForFairPrice)
         {
             double fairPrice = 0;

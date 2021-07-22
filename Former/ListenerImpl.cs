@@ -22,6 +22,13 @@ namespace Former
         }
         public override Task<SendPurchasePriceResponse> SendPurchasePrice(SendPurchasePriceRequest request, ServerCallContext context)
         {
+            Metadata meta = new Metadata();
+            meta.Add(context.RequestHeaders.Get("sessionId"));
+            meta.Add(context.RequestHeaders.Get("trademarket"));
+            meta.Add(context.RequestHeaders.Get("slot"));
+
+            TradeMarketClient.Configure("https://localhost:5005", 10000, meta);
+
             _former.FormPurchaseList(request.PurchasePrice);
             return Task.FromResult(new SendPurchasePriceResponse());
         }

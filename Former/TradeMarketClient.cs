@@ -26,6 +26,7 @@ namespace Former
 
         private static int _retryDelay;
         private static string _connectionString;
+        public static Metadata _entries;
 
         private static TradeMarketClient _tradeMarketClient;
 
@@ -41,10 +42,11 @@ namespace Former
             return _tradeMarketClient;
         }
 
-        public static void Configure(string connectionString, int retryDelay)
+        public static void Configure(string connectionString, int retryDelay, Metadata entries)
         {
             _connectionString = connectionString;
             _retryDelay = retryDelay;
+            _entries = entries;
         }
 
         private TradeMarketClient()
@@ -84,7 +86,8 @@ namespace Former
                     Signature = orderSignature
                 }
             };
-            using var call = _client.SubscribeOrders(request);
+            
+            using var call = _client.SubscribeOrders(request, _entries);
 
             Func<Task> observeCurrentPurchaseOrders = async () =>
             {
@@ -103,7 +106,7 @@ namespace Former
             {
                 Request = new TradeBot.Common.v1.SubscribeBalanceRequest()
             };
-            using var call = _client.SubscribeBalance(request);
+            using var call = _client.SubscribeBalance(request, _entries);
 
             Func<Task> observeBalance = async () =>
             {
@@ -118,7 +121,7 @@ namespace Former
 
         public async void ObserveMyOrders()
         {
-            using var call = _client.SubscribeMyOrders(new SubscribeMyOrdersRequest());
+            using var call = _client.SubscribeMyOrders(new SubscribeMyOrdersRequest(), _entries);
             Func<Task> observeMyOrders = async () =>
             {
                 while (await call.ResponseStream.MoveNext())
@@ -137,7 +140,7 @@ namespace Former
             {
                 closeOrders = async () =>
                 {
-                    response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = order.Key, Value = order.Value });
+                    response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = order.Key, Value = order.Value }, _entries);
                 };
 
                 await ConnectionTester(closeOrders);
@@ -150,7 +153,7 @@ namespace Former
             Func<Task> placeSuccessfulOrders;
             placeSuccessfulOrders = async () =>
             {
-                response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = sellPrice, Value = contractValue });
+                response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = sellPrice, Value = contractValue }, _entries);
             };
             await ConnectionTester(placeSuccessfulOrders);
         }
