@@ -93,9 +93,48 @@ namespace Account
             return Task.FromResult(DeleteExchangeAccessReplies.SuccessfulDeleting);
         }
 
+        // Пока все сыро и некрасиво, и даже не факт, что работает, ибо я не проверял
         public override Task<ExchangeBySessionReply> ExchangeBySession(ExchangeBySessionRequest request, ServerCallContext context)
         {
-            return base.ExchangeBySession(request, context);
+            if (!loggedIn.ContainsKey(request.SessionId))
+                return Task.FromResult(new ExchangeBySessionReply
+                {
+                    Result = ActionCode.AccountNotFound,
+                    Message = "Произошла ошибка: пользователь не найден",
+                    Exchange = null
+                });
+
+            using (var database = new Models.AccountContext())
+            {
+                var exchangeAccesses = database.ExchangeAccesses.Where(exchange => exchange.Code == request.Code &&
+                    exchange.Account.AccountId == loggedIn[request.SessionId].AccountId);
+
+                if (exchangeAccesses.Count() == 0)
+                {
+                    return Task.FromResult(new ExchangeBySessionReply
+                    {
+                        Result = ActionCode.ExchangeNotFound,
+                        Message = "Произошла ошибка: биржа не найдена",
+                        Exchange = null
+                    });
+                }
+
+                var exchangeAccess = exchangeAccesses.First();
+                ExchangeBySessionReply reply = new ExchangeBySessionReply
+                {
+                    Result = ActionCode.Successful,
+                    Message = "Успешно",
+                    Exchange = new ExchangeAccessInfo
+                    {
+                        ExchangeAccessId = exchangeAccess.ExchangeAccessId,
+                        Code = exchangeAccess.Code,
+                        Name = exchangeAccess.Name,
+                        Token = exchangeAccess.Token,
+                        Secret = exchangeAccess.Secret
+                    }
+                };
+                return Task.FromResult(reply);
+            }
         }
     }
 }
