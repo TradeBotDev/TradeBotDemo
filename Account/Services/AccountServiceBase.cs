@@ -35,32 +35,33 @@ namespace Account
         // Метод выхода из аккаунта
         public override Task<LogoutReply> Logout(SessionRequest request, ServerCallContext context)
         {
-            // В случае успешного удаления аккаунта из списка, в которые пользователь зашел,
-            // сервер отвечает, что выход был успешно завершен.
+            // В случае, если аккаунт не был найден среди вошедших, появляется сообщение об ошибке.
+            if (!loggedIn.ContainsKey(request.SessionId))
+                return Task.FromResult(LogoutReplies.AccountNotFound);
+
+            // Необходимые данные для удаления бирж.
             int accountId = loggedIn[request.SessionId].AccountId;
             bool saveExchanges = loggedIn[request.SessionId].SaveExchangesAfterLogout;
 
-            // Если пользователь был успешно удален из коллекции с вошедшими, изменения записываются в файл.
-            if (loggedIn.Remove(request.SessionId))
+            // Если отключено сохранение всех данных о биржах пользователя после выхода из аккаунта, происходит
+            // их удаление из базы данных (только связанные с этим пользователем).
+            if (!saveExchanges)
             {
-                // Если отключено сохранение всех данных о биржах пользователя после выхода из аккаунта, происходит
-                // их удаление из базы данных (только связанные с этим пользователем).
-                if (!saveExchanges)
+                using (var database = new Models.AccountContext())
                 {
-                    using (var database = new Models.AccountContext())
-                    {
-                        var exchanges = database.ExchangeAccesses.Where(exchange => exchange.Account.AccountId == accountId);
-                        foreach (Models.ExchangeAccess exchange in exchanges)
-                            database.ExchangeAccesses.Remove(exchange);
-                        database.SaveChanges();
-                    }
+                    var exchanges = database.ExchangeAccesses.Where(exchange => exchange.Account.AccountId == accountId);
+                    foreach (Models.ExchangeAccess exchange in exchanges)
+                        database.ExchangeAccesses.Remove(exchange);
+                    database.SaveChanges();
                 }
-                // Запись изменений в файл.
-                FileManagement.WriteState(loggedInFilename, loggedIn);
-                return Task.FromResult(LogoutReplies.SuccessfulLogout);
             }
-            // В случае, если аккаунт не был удален (по причине отсутствия) появляется сообщение об ошибке.
-            else return Task.FromResult(LogoutReplies.AccountNotFound);
+            // Удаление аккаунта из списка вошедших и запись изменений в файл.
+            loggedIn.Remove(request.SessionId);
+            FileManagement.WriteState(loggedInFilename, loggedIn);
+
+            // В случае успешного удаления аккаунта из списка, в который пользователь зашел,
+            // сервер отвечает, что выход был успешно завершен.
+            return Task.FromResult(LogoutReplies.SuccessfulLogout);
         }
 
         // Метод проверки валидности текущей сессии.

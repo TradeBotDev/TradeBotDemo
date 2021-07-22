@@ -14,6 +14,12 @@ namespace Account.AccountMessages
             Message = "Добавление биржи в аккаунт пользователя завершено."
         };
 
+        public static readonly AddExchangeAccessReply FailedAddition = new AddExchangeAccessReply
+        {
+            Result = ActionCode.AccountNotFound,
+            Message = "Произошла ошибка добавления биржи: пользователь не существует."
+        };
+
         public static ExchangesBySessionReply SuccessfulGettingExchangesInfo(IQueryable<Models.ExchangeAccess> exchangesFromAccount)
         {
             ExchangesBySessionReply reply = new ExchangesBySessionReply
@@ -35,6 +41,12 @@ namespace Account.AccountMessages
             }
             return reply;
         }
+
+        public static readonly ExchangesBySessionReply AccountWithExchangesNotFound = new ExchangesBySessionReply
+        {
+            Result = ActionCode.AccountNotFound,
+            Message = "Произошла ошибка получение данных бирж: пользователь не существует."
+        };
 
         public static readonly ExchangesBySessionReply ExchangesNotFound = new ExchangesBySessionReply
         {
