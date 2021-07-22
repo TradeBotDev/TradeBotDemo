@@ -7,9 +7,13 @@ package exchangeaccess;
 
 // Сервис для управления данными биржи.
 service ExchangeAccess {
-	rpc AddExchangeAccess(AddExchangeAccessRequest) returns (AddExchangeAccessReply); // Добавление новой биржи для текущего пользователя
-	rpc AllExchangesBySession (account.SessionRequest) returns (AllExchangesBySessionReply); // Получение массива бирж текущего пользователя
-	rpc DeleteExchangeAccess (DeleteExchangeAccessRequest) returns (DeleteExchangeAccessReply); // Удаление
+	// Добавление новой биржи для текущего пользователя
+	rpc AddExchangeAccess(AddExchangeAccessRequest) returns (AddExchangeAccessReply);
+	// Получение массива бирж текущего пользователя
+	rpc AllExchangesBySession (account.SessionRequest) returns (AllExchangesBySessionReply);
+	// Удаление информации о доступе к бирже по id в базе данных (пока что)
+	rpc DeleteExchangeAccess (DeleteExchangeAccessRequest) returns (DeleteExchangeAccessReply);
+	// Получение информации о доступе текущего пользователя к бирже
 	rpc ExchangeBySession (ExchangeBySessionRequest) returns (ExchangeBySessionReply);
 }
 

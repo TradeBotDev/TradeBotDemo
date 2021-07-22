@@ -23,10 +23,13 @@ namespace Account
             if (File.Exists(filename))
             {
                 string file = File.ReadAllText(filename);
-                var deserializedFile = JsonSerializer.Deserialize<T>(file);
-                return deserializedFile;
+                if (!string.IsNullOrEmpty(file))
+                {
+                    var deserializedFile = JsonSerializer.Deserialize<T>(file);
+                    return deserializedFile;
+                }
             }
-            else return default(T);
+            return default(T);
         }
     }
 }
