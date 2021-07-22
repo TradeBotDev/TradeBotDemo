@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.17.3" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.38.0" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.38.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.38.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Former\Former.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+        <Protobuf Link="Protos/algorithm.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/algorithm/algorithm_service/v1/algorithm.proto" GrpcServices="Both" />
+    <Protobuf Link="Protos/common.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/common/v1/common.proto" GrpcServices="Both" />
+    <Protobuf Link="Protos/former.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/former/former_service/v1/former.proto" GrpcServices="Both" />
+
+  </ItemGroup>
+
+</Project>
