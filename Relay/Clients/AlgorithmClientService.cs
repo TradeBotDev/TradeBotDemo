@@ -24,11 +24,11 @@ namespace Relay.Clients
             {
                 if (value)
                 {
-                    TradeMarketClientService.OrderRecievedEvent += TradeMarketClientService_OrderRecievedEvent;
+                    //TradeMarketClientService.OrderRecievedEvent += TradeMarketClientService_OrderRecievedEvent;
                 }
                 else
                 {
-                    TradeMarketClientService.OrderRecievedEvent -= TradeMarketClientService_OrderRecievedEvent;
+                    //TradeMarketClientService.OrderRecievedEvent -= TradeMarketClientService_OrderRecievedEvent;
 
                 }
                 _isOn = value;

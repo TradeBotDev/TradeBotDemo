@@ -26,6 +26,7 @@ namespace Relay
         {
             _tradeMarket.OrderRecievedEvent += async (sender, args) =>
             {
+                _logger.LogInformation($"Sending order {args}");
                 await _algorithm.WriteOrder(args);
             };
             while (!stoppingToken.IsCancellationRequested)
