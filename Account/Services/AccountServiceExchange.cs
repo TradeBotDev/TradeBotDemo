@@ -49,7 +49,7 @@ namespace Account
             return Task.FromResult(AddExchangeAccessReplies.SuccessfulAddition);
         }
 
-        public override Task<ExchangesBySessionReply> ExchangesBySession(SessionRequest request, ServerCallContext context)
+        public override Task<AllExchangesBySessionReply> AllExchangesBySession(SessionRequest request, ServerCallContext context)
         {
             if (loggedIn.ContainsKey(request.SessionId))
             {
@@ -62,14 +62,14 @@ namespace Account
 
                     // Ошибка в случае, если биржи не найдены.
                     if (exchangesFromAccount.Count() == 0)
-                        return Task.FromResult(ExchangesBySessionReplies.ExchangesNotFound);
+                        return Task.FromResult(AllExchangesBySessionReplies.ExchangesNotFound);
 
                     // Формирование ответа со всей необходимой информацией о добавленных биржах.
-                    var reply = ExchangesBySessionReplies.SuccessfulGetting(exchangesFromAccount);
+                    var reply = AllExchangesBySessionReplies.SuccessfulGetting(exchangesFromAccount);
                     return Task.FromResult(reply);
                 }
             }
-            else return Task.FromResult(ExchangesBySessionReplies.AccountNotFound);
+            else return Task.FromResult(AllExchangesBySessionReplies.AccountNotFound);
         }
 
         // Метод, удаляющий данные одной из бирж для текущего пользователя по id записи.
@@ -80,7 +80,7 @@ namespace Account
                 // Получение данных биржи для текущего пользователя.
                 var exhangeAccess = database.ExchangeAccesses.Where(exchange =>
                     exchange.Account.AccountId == loggedIn[request.SessionId].AccountId &&
-                    exchange.ExchangeAccessId == request.EchangeAccessId);
+                    exchange.ExchangeAccessId == request.ExchangeAccessId);
 
                 // В случае, если такой записи не обнаружено, сервис отвечает ошибкой.
                 if (exhangeAccess.Count() == 0)
@@ -91,6 +91,11 @@ namespace Account
                 database.SaveChanges();
             }
             return Task.FromResult(DeleteExchangeAccessReplies.SuccessfulDeleting);
+        }
+
+        public override Task<ExchangeBySessionReply> ExchangeBySession(ExchangeBySessionRequest request, ServerCallContext context)
+        {
+            return base.ExchangeBySession(request, context);
         }
     }
 }

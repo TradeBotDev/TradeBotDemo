@@ -14,8 +14,9 @@ service Account {
 	
 	// Методы для управления данными биржи.
 	rpc AddExchangeAccess(AddExchangeAccessRequest) returns (AddExchangeAccessReply); // Добавление новой биржи для текущего пользователя
-	rpc ExchangesBySession (SessionRequest) returns (ExchangesBySessionReply); // Получение массива бирж текущего пользователя
+	rpc AllExchangesBySession (SessionRequest) returns (AllExchangesBySessionReply); // Получение массива бирж текущего пользователя
 	rpc DeleteExchangeAccess (DeleteExchangeAccessRequest) returns (DeleteExchangeAccessReply);
+	rpc ExchangeBySession (ExchangeBySessionRequest) returns (ExchangeBySessionReply);
 }
 
 message LoginRequest {
@@ -87,7 +88,7 @@ message AddExchangeAccessReply {
 	string message = 2;
 }
 
-message ExchangesBySessionReply {
+message AllExchangesBySessionReply {
 	// Получение всех добавленных бирж текущего пользователя.
 	ActionCode result = 1;
 	string message = 2;
@@ -97,13 +98,24 @@ message ExchangesBySessionReply {
 message DeleteExchangeAccessRequest {
 	// Запрос на удаление записи о бирже для текущего пользователя.
 	string session_id = 1;
-	int32 echange_access_id = 2;
+	int32 exchange_access_id = 2;
 }
 
 message DeleteExchangeAccessReply {
 	// Ответ на запрос об удалении записи о бирже для текущего пользователя.
 	ActionCode result = 1;
 	string message = 2;
+}
+
+message ExchangeBySessionRequest {
+	string session_id = 1;
+	ExchangeCode code = 2;
+}
+
+message ExchangeBySessionReply {
+	ActionCode result = 1;
+	string message = 2;
+	ExchangeAccessInfo exchange = 3;
 }
 
 message AccountInfo {
