@@ -9,13 +9,13 @@ using Grpc.Core;
 
 namespace Algorithm
 {
-    public class AlgorithmEmulator : IAlgorithm
+    public class AlgorithmEmulator
     {
         public double CalculateSuggestedPrice()
         {
             Random rn = new Random();
             Thread.Sleep(rn.Next(0, 10000));
-            return rn.Next(31400, 31600);
+            return rn.Next(0, 20);
         }
 
     }
