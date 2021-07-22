@@ -11,9 +11,10 @@ namespace Account.Models
 
         public bool SaveExchangesAfterLogout { get; set; }
 
-        public LoggedAccount(Account account)
+        public LoggedAccount(Account account, bool saveExchangesAfterLogout)
         {
-            AccountId = account.AccountId;
+            this.AccountId = account.AccountId;
+            this.SaveExchangesAfterLogout = saveExchangesAfterLogout;
         }
     }
 }

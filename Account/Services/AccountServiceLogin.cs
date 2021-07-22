@@ -56,7 +56,8 @@ namespace Account
                 // Id сессии, а также полученный пользователь добавляется в коллекцию с вошедшими
                 // пользователями.
                 string sessionId = Guid.NewGuid().ToString();
-                loggedIn.Add(sessionId, new Models.LoggedAccount(accounts.First()));
+                var loggedAccount = new Models.LoggedAccount(accounts.First(), request.SaveExchangesAfterLogout);
+                loggedIn.Add(sessionId, loggedAccount);
 
                 // Сохранение текущего состояния в файл.
                 FileManagement.WriteState(loggedInFilename, loggedIn);
