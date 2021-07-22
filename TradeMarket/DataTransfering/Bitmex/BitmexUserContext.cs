@@ -47,6 +47,9 @@ namespace TradeMarket.DataTransfering.Bitmex
             Key = "lVjs4QoJIe9OqNUnDoVKl2jS";
             Secret = "MAX6lma-Y93bfT3w-g5GtAgvsFNhDLrYlyyqkciDUwRTy64s";
 
+            //аутентификация перед использованием
+            AutheticateUser();
+
             //инициализация подписок
             TradeMarket.SubscribeToBalance((sender,el) => { UserBalance?.Invoke(sender,el); }, this);
             TradeMarket.SubscribeToBook((sender, el) => { Book?.Invoke(sender, el); }, this);
