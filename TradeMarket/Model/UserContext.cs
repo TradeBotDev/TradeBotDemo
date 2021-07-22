@@ -1,28 +1,23 @@
 ﻿using Bitmex.Client.Websocket;
 using Bitmex.Client.Websocket.Client;
 using Bitmex.Client.Websocket.Websockets;
-using Google.Protobuf;
-using Grpc.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using TradeBot.Common.v1;
 using TradeMarket.DataTransfering.Bitmex.Rest.Client;
-using TradeMarket.Model;
-namespace TradeMarket.DataTransfering.Bitmex
+
+namespace TradeMarket.Model
 {
-    public class BitmexUserContext : UserContext
+    public class UserContext
     {
+        #region Dynamic Part
         public String SessionId { get; set; }
         public String SlotName { get; set; }
 
         public String Key { get; set; }
         public String Secret { get; set; }
-
-        internal BitmexWebsocketClient WSClient { get; set; }
-        internal BitmexRestfulClient RestClient { get; set; }
 
         public Model.TradeMarket TradeMarket { get; set; }
 
@@ -31,7 +26,12 @@ namespace TradeMarket.DataTransfering.Bitmex
         public event EventHandler<FullOrder> UserOrders;
         public event EventHandler<Model.Balance> UserBalance;
 
-        internal BitmexUserContext(string sessionId,string slotName,Model.TradeMarket tradeMarket)
+        //TODO сделать эти классы абстрактными
+        internal BitmexWebsocketClient WSClient { get; set; }
+        internal BitmexRestfulClient RestClient { get; set; }
+
+
+        internal UserContext(string sessionId, string slotName, Model.TradeMarket tradeMarket)
         {
             //инициализация websocket клиента
             var communicator = new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketUrl);
@@ -51,18 +51,11 @@ namespace TradeMarket.DataTransfering.Bitmex
             AutheticateUser();
 
             //инициализация подписок
-            TradeMarket.SubscribeToBalance((sender,el) => { UserBalance?.Invoke(sender,el); }, this);
+            TradeMarket.SubscribeToBalance((sender, el) => { UserBalance?.Invoke(sender, el); }, this);
             TradeMarket.SubscribeToBook((sender, el) => { Book?.Invoke(sender, el); }, this);
-            TradeMarket.SubscribeToBook25((sender, el) => Book25?.Invoke(sender, el),this);
+            TradeMarket.SubscribeToBook25((sender, el) => Book25?.Invoke(sender, el), this);
             TradeMarket.SubscribeToUserOrders((sender, el) => UserOrders?.Invoke(sender, el), this);
 
-            TradeMarket.Book25Update += TradeMarket_Book25Update;
-
-        }
-
-        private void TradeMarket_Book25Update(object sender, FullOrder e)
-        {
-            Book25?.Invoke(sender, e);
         }
 
         public async Task<DefaultResponse> PlaceOrder(double quontity, double price)
@@ -77,33 +70,34 @@ namespace TradeMarket.DataTransfering.Bitmex
 
         public async Task<DefaultResponse> AutheticateUser()
         {
-            return await TradeMarket.AutheticateUser(Key, Secret,this);
+            return await TradeMarket.AutheticateUser(Key, Secret, this);
         }
 
-        public static bool operator ==(BitmexUserContext b1, BitmexUserContext b2)
-        {
-            return b1.Equals(b2);
-        }
-
-        public static bool operator !=(BitmexUserContext b1, BitmexUserContext b2)
-        {
-            return !b1.Equals(b2);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj.GetType() != typeof(BitmexUserContext)) return false;
-            BitmexUserContext context = obj as BitmexUserContext;
-            return
-                context.SessionId == this.SessionId &&
-                context.SlotName == this.SlotName &&
-                //Тут сравнение ссылок потому что трэйдмаркеты - синглтоны
-                context.TradeMarket == this.TradeMarket;
-        }
-
-        public bool IsEquevalentTo(string sessionId,string slotName,string tradeMarketName)
+        public bool IsEquevalentTo(string sessionId, string slotName, string tradeMarketName)
         {
             return this.SessionId == sessionId && this.SlotName == slotName && this.TradeMarket.Name == tradeMarketName;
         }
+        #endregion
+
+        #region Static Part
+        internal static List<UserContext> RegisteredUsers = new List<UserContext>();
+
+        public static UserContext GetUserContext(string sessionId, string slotName)
+        {
+            if (RegisteredUsers.FirstOrDefault(el => el.IsEquevalentTo(sessionId, slotName, "Bitmex")) is null)
+            {
+                RegisterUser(sessionId, slotName, "Bitmex");
+            }
+            return RegisteredUsers.First(el => el.IsEquevalentTo(sessionId, slotName, "Bitmex"));
+        }
+
+        public static void RegisterUser(string sessionId, string slotName, string tradeMarketName) 
+        {
+            UserContext user = new UserContext(sessionId, slotName, TradeMarketData.GetTradeMarket(tradeMarketName));
+
+            RegisteredUsers.Add(user);
+        }
+        #endregion
     }
 }
+
