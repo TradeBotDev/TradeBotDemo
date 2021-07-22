@@ -9,7 +9,7 @@ using Grpc.Core;
 
 namespace Algorithm
 {
-    public class AlgorithmEmulator : IAlgorithm
+    public class AlgorithmEmulator
     {
         public double CalculateSuggestedPrice()
         {

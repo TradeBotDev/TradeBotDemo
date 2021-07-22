@@ -2,6 +2,7 @@ using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Logging;
 using System;
+using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
 using TradeBot.Facade.FacadeService.v1;
@@ -10,9 +11,7 @@ namespace Facade
 {
     public class FacadeTMService : TradeBot.Facade.FacadeService.v1.FacadeService.FacadeServiceBase
     {
-        /*
-            Ã≈“Œƒ€ œ≈–≈œ»—¿“‹!!!!!!
-         */
+        
         private TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceClient clientTM = new TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceClient(GrpcChannel.ForAddress("https://localhost:5005"));
         private TradeBot.Relay.RelayService.v1.RelayService.RelayServiceClient clientRelay = new TradeBot.Relay.RelayService.v1.RelayService.RelayServiceClient(GrpcChannel.ForAddress("https://localhost:5004"));
         private readonly ILogger<FacadeTMService> _logger;
@@ -23,219 +22,186 @@ namespace Facade
 
         public override async Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<SubscribeBalanceResponse> responseStream, ServerCallContext context)
         {
-            #region ReconnectionVersion
-            //Û‰‡ÎËÚ¸ Ë Ò‰ÂÎ‡¸ ÌÓÏ‡Î¸ÌÓ!!!!
-            //AsyncServerStreamingCall<TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceResponse> response = null;
-            //for (int i = 0; i < 4; i++)
-            //{
-            //    try
-            //    {
-            //        response = clientTM.SubscribeBalance(new TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceRequest { Request = request.Request });
-            //        while (await response.ResponseStream.MoveNext())
-            //        {
-            //            await responseStream.WriteAsync(new TradeBot.Facade.FacadeService.v1.SubscribeBalanceResponse
-            //            {
-            //                BalanceOne = response.ResponseStream.Current.BalanceOne,
-            //                BalanceTwo = response.ResponseStream.Current.BalanceTwo,
-            //            });
-            //        }
-
-            //        break;
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        if (i == 0)
-            //        {
-            //            _logger.LogError("The server is not responding.");
-            //        }
-            //        _logger.LogError("Reconnection attempt... try " + i + "/3");
-            //        Thread.Sleep(1000);
-            //        if (i == 3)
-            //        {
-            //            _logger.LogError("timeout exceeded");
-            //            _logger.LogError("Exception:\n" + ex);
-            //            var defaultResponse = new TradeBot.Common.v1.DefaultResponse
-            //            {
-            //                Code = TradeBot.Common.v1.ReplyCode.Failure,
-            //                Message = "Exception. The server doesnt answer"
-            //            };
-            //            _ = responseStream.WriteAsync(new TradeBot.Facade.FacadeService.v1.SubscribeBalanceResponse()
-            //            {
-            //                Message = defaultResponse
-            //            });
-            //        }
-            //    }
-            //}
-            #endregion
-            try
+            while (true)
             {
-                var response = clientTM.SubscribeBalance(new TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceRequest { Request = request.Request, SlotName=request.SlotName });
-                
-                while(await response.ResponseStream.MoveNext())
+                try
                 {
-                    await responseStream.WriteAsync(new SubscribeBalanceResponse()
+                    var response = clientTM.SubscribeBalance(new TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceRequest { Request = request.Request });
+                    if (!context.CancellationToken.IsCancellationRequested)
                     {
-                        BalanceOne = response.ResponseStream.Current.BalanceOne,
-                        BalanceTwo = response.ResponseStream.Current.BalanceTwo
-                    });
+                        if (response.ResponseStream.Current != null)
+                        {
+                            while (await response.ResponseStream.MoveNext())
+                            {
+                                await responseStream.WriteAsync(new TradeBot.Facade.FacadeService.v1.SubscribeBalanceResponse
+                                {
+                                    Money=response.ResponseStream.Current.Response.Balance
+                                });
+                            }
+                            break;
+                        }
+                        else
+                        {
+                            Log.Information("Trying to reconnect...");
+                        }
+                    }
+                    else
+                    {
+                        Log.Information("Client disconnected");
+                        break;
+                    }           
                 }
-            }
-            catch (RpcException e)
-            {
-                _logger.LogError("Exception: " + e.Status.DebugException.Message);
-                var defaultResponse = new TradeBot.Common.v1.DefaultResponse
+                catch (RpcException e)
                 {
-                    Code = TradeBot.Common.v1.ReplyCode.Failure,
-                    Message = "Exception. The server doesnt answer"
-                };
-                await responseStream.WriteAsync(new SubscribeBalanceResponse()
-                {
-                    Message=defaultResponse
-                });
+                    Log.Information("Exception" + e);
+                }
             }
         }
         public override Task<AuthenticateTokenResponse> AuthenticateToken(AuthenticateTokenRequest request, ServerCallContext context)
         {
-            try
+            while (true)
             {
-                var response = clientTM.AuthenticateToken(new TradeBot.TradeMarket.TradeMarketService.v1.AuthenticateTokenRequest { Token = request.Token });
-                return Task.FromResult(new AuthenticateTokenResponse
+                try
                 {
-                    //Response = new TradeBot.Common.v1.DefaultResponse { Code=TradeBot.Common.v1.ReplyCode.Succeed,Message="otvet"}
-                    Response = response.Response
-                });
+                    if (context.CancellationToken.IsCancellationRequested) break;
+                    var response = clientTM.AuthenticateToken(new TradeBot.TradeMarket.TradeMarketService.v1.AuthenticateTokenRequest { Token = request.Token });
+                    return Task.FromResult(new AuthenticateTokenResponse
+                    {
+                        Response = response.Response
+                    });
+                }
+                catch (RpcException e)
+                {
+                    Log.Information("Exception:" + e);
+                    
+                }
             }
-            catch (RpcException e)
-            {
-                _logger.LogError("Exception: " + e.Status.DebugException.Message);
-                var defaultResponse = new TradeBot.Common.v1.DefaultResponse
-                {
-                    Code = TradeBot.Common.v1.ReplyCode.Failure,
-                    Message = "Exception. The server doesnt answer"
-                };
-                return Task.FromResult(new AuthenticateTokenResponse
-                {
-                    Message = defaultResponse
-                });
-            }
+            return Task.FromResult(new AuthenticateTokenResponse { });
+
         }
 
         public override async Task Slots(SlotsRequest request, IServerStreamWriter<SlotsResponse> responseStream, ServerCallContext context)
         {
-            try
+            while (true)
             {
-                var response = clientTM.Slots(new TradeBot.TradeMarket.TradeMarketService.v1.SlotsRequest { Empty = request.Empty });
-
-                while (await response.ResponseStream.MoveNext())
+                try
                 {
-                    await responseStream.WriteAsync(new SlotsResponse
+                    var response = clientTM.Slots(new TradeBot.TradeMarket.TradeMarketService.v1.SlotsRequest{});
+                    if (!context.CancellationToken.IsCancellationRequested)
                     {
-                        SlotName = response.ResponseStream.Current.SlotName
-                    });
+                        if (response.ResponseStream.Current != null)
+                        {
+                            while (await response.ResponseStream.MoveNext())
+                            {
+                                await responseStream.WriteAsync(new SlotsResponse
+                                {
+                                    SlotName = response.ResponseStream.Current.SlotName
+                                });
+                            }
+                            break;
+                        }
+                        else
+                        {
+                            Log.Information("Trying to reconnect...");
+                        }
+                    }
+                    else
+                    {
+                        Log.Information("Client disconnected");
+                        break;
+                    }
                 }
-            }
-            catch (RpcException e)
-            {
-                _logger.LogError("Exception: " + e.Status.DebugException.Message);
-                var defaultResponse = new TradeBot.Common.v1.DefaultResponse
+                catch (RpcException e)
                 {
-                    Code = TradeBot.Common.v1.ReplyCode.Failure,
-                    Message = "Exception. The server doesnt answer"
-                };
-                await responseStream.WriteAsync(new SlotsResponse
-                {
-                    Message = defaultResponse
-                });
+                    Log.Information("Exception" + e);
+                }
             }
 
 
         }
-
-
         public override Task<SwitchBotResponse> SwitchBot(SwitchBotRequest request, ServerCallContext context)
         {
-            try
+            while (true)
             {
+                try
+                {
+                    if (context.CancellationToken.IsCancellationRequested) break;
 
-                var response = clientRelay.StartBot(new TradeBot.Relay.RelayService.v1.StartBotRequest { Config = request.Config });
-
-                return Task.FromResult(new SwitchBotResponse
+                    var response = clientRelay.StartBot(new TradeBot.Relay.RelayService.v1.StartBotRequest { Config = request.Config });
+                    return Task.FromResult(new SwitchBotResponse
+                    {
+                        Response = response.Response
+                    });
+                }
+                catch (RpcException e)
                 {
-                    Response = response.Response
-                });
+                    Log.Information("Exception:" + e);
+                }
             }
-            catch (RpcException e)
-            {
-                _logger.LogError("Exception: " + e.Message);
-                var defaultResponse = new TradeBot.Common.v1.DefaultResponse
-                {
-                    Code = TradeBot.Common.v1.ReplyCode.Failure,
-                    Message = "Exception"
-                };
-                return Task.FromResult(new SwitchBotResponse
-                {
-                    Response = defaultResponse
-                });
-            }
+            return Task.FromResult(new SwitchBotResponse { });
 
         }
 
         public override async Task SubscribeLogs(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
         {
-            try
+            while (true)
             {
-                var response = clientRelay.SubscribeLogs(new TradeBot.Relay.RelayService.v1.SubscribeLogsRequest { Request = request.R }, cancellationToken: context.CancellationToken);
-
-                while (await response.ResponseStream.MoveNext())
+                try
                 {
-                    //ÚÓÍÂÌ Ì‡ ˝ÍÒÂÔ¯ÂÌ
-                    context.CancellationToken.ThrowIfCancellationRequested();
-                    await responseStream.WriteAsync(new SubscribeLogsResponse
+                    var response = clientRelay.SubscribeLogs(new TradeBot.Relay.RelayService.v1.SubscribeLogsRequest { Request=request.R});
+                    if (!context.CancellationToken.IsCancellationRequested)
                     {
-                        Response = response.ResponseStream.Current.Response
-                    });
+                        if (response.ResponseStream.Current != null)
+                        {
+                            while (await response.ResponseStream.MoveNext())
+                            {
+                                await responseStream.WriteAsync(new SubscribeLogsResponse
+                                {
+                                    Response=response.ResponseStream.Current.Response
+                                });
+                            }
+                            break;
+                        }
+                        else
+                        {
+                            Log.Information("Trying to reconnect...");
+                        }
+                    }
+                    else
+                    {
+                        Log.Information("Client disconnected");
+                        break;
+                    }
                 }
-            }
-            catch (RpcException e)
-            {
-                _logger.LogError("Exception: " + e.Message);
-                var defaultResponse = new TradeBot.Common.v1.DefaultResponse
+                catch (RpcException e)
                 {
-                    Code = TradeBot.Common.v1.ReplyCode.Failure,
-                    Message = "Exception"
-                };
-                await responseStream.WriteAsync(new SubscribeLogsResponse
-                {
-                    Message = defaultResponse
-                });
+                    Log.Information("Exception" + e);
+                }
             }
 
         }
         public override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request, ServerCallContext context)
         {
-            try
+            while (true)
             {
-                var response = clientRelay.UpdateServerConfig(new TradeBot.Relay.RelayService.v1.UpdateServerConfigRequest() { Request = request.Request });
+                try
+                {
+                    if (context.CancellationToken.IsCancellationRequested) break;
+                    var response = clientRelay.UpdateServerConfig(new TradeBot.Relay.RelayService.v1.UpdateServerConfigRequest() { Request = request.Request });
+
+                    return Task.FromResult(new UpdateServerConfigResponse
+                    {
+                        Response = response.Response
+                    });
+                }
+                catch (RpcException e)
+                {
+                    Log.Information("Exception:");
+                }
+            }
+            return Task.FromResult(new UpdateServerConfigResponse { });
 
 
-                return Task.FromResult(new UpdateServerConfigResponse
-                {
-                    Response = response.Response
-                });
-            }
-            catch (RpcException e)
-            {
-                _logger.LogError("Exception: " + e.Message);
-                var defaultResponse = new TradeBot.Common.v1.DefaultResponse
-                {
-                    Code = TradeBot.Common.v1.ReplyCode.Failure,
-                    Message = "Exception"
-                };
-                return Task.FromResult(new UpdateServerConfigResponse
-                {
-                    Message = defaultResponse
-                });
-            }
         }
         //public override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request, ServerCallContext context)
         //{

@@ -33,16 +33,8 @@ namespace Relay
             {
                 options.Address = new Uri("https//localhost:5005");
             });*/
-            services.AddSingleton<AlgorithmClientService>(srp =>
-            {
-                AlgorithmClientService acs = new AlgorithmClientService(new Uri("https://localhost:5001"));
-                return acs;
-            });
-            services.AddSingleton<TradeMarketClientService>(srp =>
-            {
-                TradeMarketClientService acs = new TradeMarketClientService(new Uri("https://localhost:5005"));
-                return acs;
-            });
+            services.AddSingleton<AlgorithmClientService>( new AlgorithmClientService(new Uri("http://localhost:5006")));
+            services.AddSingleton<TradeMarketClientService>(new TradeMarketClientService(new Uri("https://localhost:5005")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

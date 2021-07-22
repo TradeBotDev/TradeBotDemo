@@ -44,7 +44,7 @@ namespace UI
                 TotalBalance = 100.0
             };
 
-            var requestForRelay = new TradeBot.Facade.FacadeService.v1.StartBotRequest()
+            var requestForRelay = new TradeBot.Facade.FacadeService.v1.SwitchBotRequest()
             {
                 Config = config
 
@@ -56,7 +56,7 @@ namespace UI
             var call = await facadeClient.AuthenticateTokenAsync(requestForFacade);
             Console.WriteLine("Выслал facade: {0}", requestForFacade.Token);
 
-            var call2 = facadeClient.StartBotRPC(requestForRelay);
+            var call2 =await facadeClient.SwitchBotAsync(requestForRelay);
             Console.WriteLine("Запустил бота с конфигом {0}", requestForRelay.Config);
         }
 

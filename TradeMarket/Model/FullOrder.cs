@@ -18,6 +18,10 @@ namespace TradeMarket.Model
         public DateTime LastUpdateDate { get; set; }
         public DateTime RemoveDate { get; set; }
         public OrderSignature Signature { get; set; }
-       
+
+        public override string ToString()
+        {
+            return $"id : {Id} Quantity : {Quantity} Price : {Price} Status : {Signature.Status} Type : {Signature.Type}";
+        }
     }
 }

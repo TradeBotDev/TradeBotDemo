@@ -19,13 +19,13 @@ namespace TradeMarket.Services
         where TSubscribeRequest : Google.Protobuf.IMessage<TSubscribeRequest>
         where TSubscribeReply : Google.Protobuf.IMessage<TSubscribeReply>
     {
-        private readonly ISubscriber<TLocalClass> _subscriber;
+        private EventHandler<TLocalClass> _subscriber;
 
         private readonly ILogger<TService> _logger;
 
         private static Converter<TLocalClass, TSubscribeReply> _converter;
 
-        public SubscriptionService(ISubscriber<TLocalClass> subscriber, ILogger<TService> logger, Converter<TLocalClass, TSubscribeReply> converter)
+        public SubscriptionService(EventHandler<TLocalClass> subscriber, ILogger<TService> logger, Converter<TLocalClass, TSubscribeReply> converter)
         {
             _logger = logger;
             _subscriber = subscriber;
@@ -35,9 +35,11 @@ namespace TradeMarket.Services
 
         public async Task Subscribe(TSubscribeRequest request, IServerStreamWriter<TSubscribeReply> responseStream, ServerCallContext context)
         {
-            _subscriber.Changed += async (sender, args) =>
+            _subscriber += async (sender, args) =>
             {
-                await WriteStreamAsync(responseStream, _converter(args.Changed));
+/*                _logger.LogInformation($"Recieved Order {args.Changed} ");
+*/              
+                await WriteStreamAsync(responseStream, _converter(args));
             };
             await AwaitCancellation(context.CancellationToken);
 

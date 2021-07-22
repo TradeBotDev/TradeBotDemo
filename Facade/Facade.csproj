@@ -6,10 +6,10 @@
 
   <ItemGroup>
     <Protobuf Include="Protos\greet.proto" GrpcServices="Server" />
-    <Protobuf Link ="Protos/facade.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/facade/facade_service/v1/facade.proto" GrpcServices="Both" />
-    <Protobuf Link ="Protos/common.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/common/v1/common.proto" GrpcServices="Both" />
+    <Protobuf Link="Protos/facade.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/facade/facade_service/v1/facade.proto" GrpcServices="Both" />
+    <Protobuf Link="Protos/common.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/common/v1/common.proto" GrpcServices="Both" />
 
-    <Protobuf Link ="Protos/trademarket.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/trademarket/trademarket_service/v1/trademarket.proto" GrpcServices="Both" />
+    <Protobuf Link="Protos/trademarket.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/trademarket/trademarket_service/v1/trademarket.proto" GrpcServices="Both" />
     <!--строку нижу удалить и создать протик для фасада и киента-->
     <Protobuf Link ="Protos/relay.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/relay/relay_service/v1/relay.proto" GrpcServices="Both" />
 
@@ -17,6 +17,8 @@
 
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.38.0" />
+    <PackageReference Include="Serilog" Version="2.10.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="4.0.0" />
   </ItemGroup>
 
 </Project>

@@ -22,24 +22,20 @@ namespace Relay.Clients
             }
             set
             {
-                if (value)
+                if (_isOn = value)
                 {
-                    TradeMarketClientService.OrderRecievedEvent += TradeMarketClientService_OrderRecievedEvent;
+                    //TradeMarketClientService.OrderRecievedEvent += TradeMarketClientService_OrderRecievedEvent;
                 }
                 else
                 {
-                    TradeMarketClientService.OrderRecievedEvent -= TradeMarketClientService_OrderRecievedEvent;
+                    //TradeMarketClientService.OrderRecievedEvent -= TradeMarketClientService_OrderRecievedEvent;
 
                 }
+                
             }
         }
 
-        private async void TradeMarketClientService_OrderRecievedEvent(object sender,
-            TradeMarketClientService.OrderRecievedEventArgs args)
-        {
-            await WriteOrder(_stream, args.Recieved);
-        }
-
+        private AsyncClientStreamingCall<AddOrderRequest, AddOrderResponse> _call;
         private readonly IClientStreamWriter<AddOrderRequest> _stream;
         private readonly AlgorithmService.AlgorithmServiceClient _client;
         
@@ -47,15 +43,19 @@ namespace Relay.Clients
         {
            
             _client = new AlgorithmService.AlgorithmServiceClient(GrpcChannel.ForAddress(uri));
-            _stream = _client.AddOrder().RequestStream;
+            Metadata meta = new Metadata();
+            meta.Add("sessionid", "123");
+            meta.Add("slot", "XBTUSD");
+            _call = _client.AddOrder(meta);
+            _stream = _call.RequestStream;
 
         }
 
-        public async Task WriteOrder(IClientStreamWriter<AddOrderRequest> writer, Order order)
+        public void WriteOrder(Order order)
         {
             try
             {
-               await _stream.WriteAsync(new AddOrderRequest()
+               _stream.WriteAsync(new AddOrderRequest()
                {
                    Order = order
                });

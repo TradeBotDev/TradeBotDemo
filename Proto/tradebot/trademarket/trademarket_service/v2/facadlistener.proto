@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+option csharp_namespace = "TradeBot.TradeMarket.TradeMarketService.v2";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+import "tradebot/common/v1/common.proto";
+package tradebot.trademarket.trademarket_service.v2;
+
+service FacadeListener {
+	/*
+		Подписка на изменение баланса пользователя (ЕДИНСТВЕННОГО)
+	*/
+	rpc SubscribeBalance(SubscribeBalanceRequest) returns (stream SubscribeBalanceResponse);
+	/*
+		Список доступных слотов на бирже
+	*/
+	rpc Slots(SlotsRequest) returns (stream SlotsResponse);
+	/*
+		Подписка на логи нужного сервиса
+	*/
+	rpc SubscribeLogs(SubscribeLogsRequest) returns (stream SubscribeLogsResponse);
+}
+
+message SubscribeLogsRequest{
+	tradebot.common.v1.SubscribeLogsRequest request = 1;
+}
+
+message SubscribeLogsResponse{
+	tradebot.common.v1.SubscribeLogsResponse response = 1;
+}
+
+message SubscribeBalanceRequest{
+	tradebot.common.v1.SubscribeBalanceRequest request = 1;
+	string slot_name = 2;
+}
+
+message SubscribeBalanceResponse{
+	tradebot.common.v1.SubscribeBalanceResponse response = 1;
+}
+
+message SlotsRequest{
+	//TODO Тут должно быть обращение к конкретной бирже, но она пока одна
+	google.protobuf.Empty empty = 1;
+}
+message SlotsResponse{
+	string slot_name = 1;
+}
+

@@ -3,10 +3,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Former
 {
@@ -17,6 +13,7 @@ namespace Former
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddGrpc();
+            services.AddSingleton(new Former(25));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -31,7 +28,7 @@ namespace Former
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<Service>();
+                endpoints.MapGrpcService<ListenerImpl>();
 
                 endpoints.MapGet("/", async context =>
                 {

@@ -1,104 +1,170 @@
 ﻿using Grpc.Core;
-using TradeBot.Common.v1;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System;
 using Grpc.Net.Client;
-using TradeBot.Algorithm.AlgorithmService.v1;
+using Serilog;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+
+using TradeBot.Common.v1;
 using TradeBot.TradeMarket.TradeMarketService.v1;
+
 using SubscribeOrdersRequest = TradeBot.TradeMarket.TradeMarketService.v1.SubscribeOrdersRequest;
 
-namespace Former.Services
+namespace Former
 {
     public class TradeMarketClient
     {
-        private static GrpcChannel TradeMarketChannel = GrpcChannel.ForAddress("https://localhost:5005");
-        private static TradeMarketService.TradeMarketServiceClient Client = new TradeMarketService.TradeMarketServiceClient(TradeMarketChannel);
-        private static Dictionary<string, double> SuccessfulOrders = new();
-        
-        public static async void ObserveActualOrders()
-        {  
+        public delegate void OrderBookEvent(Order purchaseOrdersToUpdate);
+        public OrderBookEvent UpdateOrderBook;
+
+        public delegate void MyOrdersEvent(Order myOrderToUpdate);
+        public MyOrdersEvent UpdateMyOrders;
+
+        public delegate void BalanceEvent(Balance balanceToUpdate);
+        public BalanceEvent UpdateBalance;
+
+        private static int _retryDelay;
+        private static string _connectionString;
+        public static Metadata _entries;
+
+        private static TradeMarketClient _tradeMarketClient;
+
+        private readonly TradeMarketService.TradeMarketServiceClient _client;
+        private readonly GrpcChannel _channel;
+
+        public static TradeMarketClient GetInstance()
+        {
+            if (_tradeMarketClient == null)
+            {
+                _tradeMarketClient = new TradeMarketClient();
+            }
+            return _tradeMarketClient;
+        }
+
+        public static void Configure(string connectionString, int retryDelay, Metadata entries)
+        {
+            _connectionString = connectionString;
+            _retryDelay = retryDelay;
+            _entries = entries;
+        }
+
+        private TradeMarketClient()
+        {
+            _channel = GrpcChannel.ForAddress(_connectionString);
+            _client = new TradeMarketService.TradeMarketServiceClient(_channel);
+        }
+
+        private async Task ConnectionTester(Func<Task> func)
+        {
+            while (true)
+            {
+                try
+                {
+                    await func.Invoke();
+                    break;
+                }
+                catch (RpcException e)
+                {
+                    //Log.Error("Error {1}. Retrying...\r\n{0}", e.Status.DebugException.Message, e.StackTrace);
+                    Thread.Sleep(_retryDelay);
+                }
+            }
+        }
+
+        public async void ObserveOrderBook()
+        {
             var orderSignature = new OrderSignature
             {
                 Status = OrderStatus.Open,
-                Type = OrderType.Buy
+                Type = OrderType.Sell
             };
-            var request = new SubscribeOrdersRequest()
+            var request = new SubscribeOrdersRequest
             {
-                Request = new TradeBot.Common.v1.SubscribeOrdersRequest()
+                Request = new TradeBot.Common.v1.SubscribeOrdersRequest
                 {
                     Signature = orderSignature
                 }
             };
-            using var call = Client.SubscribeOrders(request);
-            while (await call.ResponseStream.MoveNext())
+            
+            using var call = _client.SubscribeOrders(request, _entries);
+            Log.Debug("Sent subscribe order request!");
+            Func<Task> observeCurrentPurchaseOrders = async () =>
             {
-                Former.UpdateCurrentOrders(call.ResponseStream.Current);
-            }
-            //TODO выход из цикла и дальнейшее закрытие канала
-        }
-        public static async Task SendShopingList(Dictionary<string, double> shoppingList)
-        {
-            SuccessfulOrders.Clear();
-            CloseOrderResponse response;
-            foreach (var order in shoppingList)
-            {
-                response = await Client.CloseOrderAsync(new CloseOrderRequest() { Id = order.Key });
-                Console.Write("\nRequested to buy {0}", order);
-                if (response.Response.Code == ReplyCode.Succeed)
+                while (await call.ResponseStream.MoveNext())
                 {
-                    SuccessfulOrders.Add(order.Key, order.Value);
-                    Console.Write(" ...purchased");
-                }
-                else Console.Write(" ...not purchased");
-            }
-            PlaceSuccessfulOrders();
-            //BeginObserveMyOrders();
-        }
-        public static async void PlaceSuccessfulOrders()
-        {
-            PlaceOrderResponse response;
-            foreach (var order in SuccessfulOrders)
-            {
-                response = await Client.PlaceOrderAsync(new PlaceOrderRequest() { Price = order.Value, Value = 2 });
-                Console.Write("\nPlace order {0}", order.Key);
-                if (response.Response.Code == ReplyCode.Succeed)
-                {
-                    Console.Write(" ...order placed\n");
-                }
-                else Console.Write(" ...order not placed\n");
-            }
-        }
-
-        public static async void ObserveMyOrders(string id)
-        {
-            var tradeMarketClient = new TradeMarketService.TradeMarketServiceClient(TradeMarketChannel);
-            var orderSignature = new OrderSignature
-            {
-                Status = OrderStatus.Open,
-                Type = OrderType.Buy
-            };
-            var request = new SubscribeOrdersRequest()
-            {
-                Request = new TradeBot.Common.v1.SubscribeOrdersRequest()
-                {
-                    Signature = orderSignature
+                    UpdateOrderBook?.Invoke(call.ResponseStream.Current.Response.Order);
                 }
             };
 
-            using var call = tradeMarketClient.SubscribeOrders(request);
-            while (await call.ResponseStream.MoveNext())
+            await ConnectionTester(observeCurrentPurchaseOrders);
+        }
+
+        public async void ObserveBalance()
+        {
+            var request = new TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceRequest
             {
-                Former.UpdateCurrentOrders(call.ResponseStream.Current);
+                Request = new TradeBot.Common.v1.SubscribeBalanceRequest()
+            };
+            using var call = _client.SubscribeBalance(request, _entries);
+
+            Func<Task> observeBalance = async () =>
+            {
+                while (await call.ResponseStream.MoveNext())
+                {
+                    UpdateBalance?.Invoke(call.ResponseStream.Current.Response.Balance);
+                }
+            };
+
+            await ConnectionTester(observeBalance);
+        }
+
+        public async void ObserveMyOrders()
+        {
+            using var call = _client.SubscribeMyOrders(new SubscribeMyOrdersRequest(), _entries);
+            Func<Task> observeMyOrders = async () =>
+            {
+                while (await call.ResponseStream.MoveNext())
+                {
+                    UpdateMyOrders?.Invoke(call.ResponseStream.Current.Changed);
+                }
+            };
+            await ConnectionTester(observeMyOrders);
+        }
+
+        public async Task PlacePurchaseOrders(Dictionary<double, double> purchaseList)
+        {
+            PlaceOrderResponse response = null;
+            Func<Task> closeOrders;
+            foreach (var order in purchaseList)
+            {
+                closeOrders = async () =>
+                {
+                    response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = order.Key, Value = order.Value }, _entries);
+                };
+
+                await ConnectionTester(closeOrders);
             }
         }
-        //private async static Task BeginObserveMyOrders() 
-        //{
-        //    foreach (var order in OrdersForObserving) 
-        //    {
-        //        await ObserveMyOrders(order);
-        //    }
 
-        //}
+        public async Task PlaceSellOrder(double sellPrice, double contractValue)
+        {
+            PlaceOrderResponse response = null;
+            Func<Task> placeSuccessfulOrders;
+            placeSuccessfulOrders = async () =>
+            {
+                response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = sellPrice, Value = contractValue }, _entries);
+            };
+            await ConnectionTester(placeSuccessfulOrders);
+        }
+
+        public async Task TellTMUpdateMyOreders(Dictionary<string, double> orderToUpdate)
+        {
+            foreach (var order in orderToUpdate)
+            {
+                Log.Debug("Update order id: {0}, new price: {1}", order.Key, order.Value);
+            }
+
+        }
     }
 }
