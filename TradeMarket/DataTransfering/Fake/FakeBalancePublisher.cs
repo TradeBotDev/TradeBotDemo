@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Bitmex.Client.Websocket.Responses;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,19 +7,19 @@ using TradeMarket.Model;
 
 namespace TradeMarket.DataTransfering
 {
-    public class FakeBalanceSubscriber : IPublisher<Balance>, IFakeDataSubscriber
+    public class FakeBalancePublisher : IPublisher<Balance>, IFakeDataPublisher
     {
-        private static FakeBalanceSubscriber _fakeBalanceSubscriber = null;
-        private FakeBalanceSubscriber()
+        private static FakeBalancePublisher _fakeBalanceSubscriber = null;
+        private FakeBalancePublisher()
         {
 
         }
 
-        public static FakeBalanceSubscriber GetInstance()
+        public static FakeBalancePublisher GetInstance()
         {
             if(_fakeBalanceSubscriber == null)
             {
-                _fakeBalanceSubscriber = new FakeBalanceSubscriber();
+                _fakeBalanceSubscriber = new FakeBalancePublisher();
             }
             return _fakeBalanceSubscriber;
         }
@@ -40,7 +41,7 @@ namespace TradeMarket.DataTransfering
             foreach (var order in _balanceChangingInTime)
             {
                 await Task.Delay(random.Next(0, 2000));
-                Changed?.Invoke(this, new(order));
+                Changed?.Invoke(this, new(order,BitmexAction.Undefined));
             }
         }
 

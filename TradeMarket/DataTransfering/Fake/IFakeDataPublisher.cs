@@ -2,7 +2,7 @@
 
 namespace TradeMarket.DataTransfering
 {
-    internal interface IFakeDataSubscriber
+    internal interface IFakeDataPublisher
     {
         public Task Simulate();
     }

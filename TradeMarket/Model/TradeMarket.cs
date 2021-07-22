@@ -25,18 +25,18 @@ namespace TradeMarket.Model
             return ExistingTradeMarkets[name];
         }
 
-        public static BitmexUserContext GetUserContexBySessionId(string sessionId)
+        public static BitmexUserContext GetUserContex(string sessionId,string slotName)
         {
-            if(RegisteredUsers.First(el => el.SessionId == sessionId) is null)
+            if(RegisteredUsers.First(el => el.SessionId == sessionId && el.SlotName == slotName) is null)
             {
-                RegisterUser(sessionId, "Bitmex");
+                RegisterUser(sessionId, slotName, "Bitmex");
             }
-            return RegisteredUsers.First(el => el.SessionId == sessionId);
+            return RegisteredUsers.First(el => el.SessionId == sessionId && el.SlotName == slotName);
         }
 
-        public static void RegisterUser(string sessionId,string tradeMarketName)
+        public static void RegisterUser(string sessionId,string slotName,string tradeMarketName)
         {
-            BitmexUserContext user = new BitmexUserContext(sessionId);
+            BitmexUserContext user = new BitmexUserContext(sessionId,slotName);
             user.TradeMarket = GetTradeMarketByName(tradeMarketName);
             RegisteredUsers.Add(user);
         }
@@ -55,6 +55,12 @@ namespace TradeMarket.Model
         public abstract void SubscribeToUserOrders(EventHandler<FullOrder> handler, BitmexUserContext context);
 
         public abstract void SubscribeToBalance(EventHandler<Balance> handler, BitmexUserContext context);
-     
+
+
+        public abstract event EventHandler<FullOrder> Book25Update;
+        public abstract event EventHandler<FullOrder> BookUpdate;
+        public abstract event EventHandler<FullOrder> UserOrdersUpdate;
+        public abstract event EventHandler<Balance> BalanceUpdate;
+
     }
-}
+    }

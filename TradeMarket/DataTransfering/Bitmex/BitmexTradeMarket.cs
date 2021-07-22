@@ -15,6 +15,7 @@ using TradeMarket.DataTransfering.Bitmex.Rest.Requests;
 using TradeMarket.Model;
 using Bitmex.Client.Websocket.Responses.Orders;
 using Utf8Json;
+using OrderStatus = TradeBot.Common.v1.OrderStatus;
 
 namespace TradeMarket.DataTransfering.Bitmex
 {
@@ -26,6 +27,11 @@ namespace TradeMarket.DataTransfering.Bitmex
         private UserWalletPublisher UserWalletPublisher;
         private AuthenticationPublisher UserAuthenticationPublisher;
 
+        public override event EventHandler<FullOrder> Book25Update;
+        public override event EventHandler<FullOrder> BookUpdate;
+        public override event EventHandler<FullOrder> UserOrdersUpdate;
+        public override event EventHandler<Model.Balance> BalanceUpdate;
+
         public BitmexTradeMarket()
         {
         }
@@ -33,22 +39,22 @@ namespace TradeMarket.DataTransfering.Bitmex
         private void _userWalletPublisher_Changed(object sender, IPublisher<global::Bitmex.Client.Websocket.Responses.Wallets.Wallet>.ChangedEventArgs e)
         {
 
-            BalanceUpdated?.Invoke(sender, new Model.Balance(e.Changed.Currency, e.Changed.BalanceBtc));
+            BalanceUpdate?.Invoke(sender, new Model.Balance(e.Changed.Currency, e.Changed.BalanceBtc));
         }
 
         private void _userOrdersPublisher_Changed(object sender, IPublisher<global::Bitmex.Client.Websocket.Responses.Orders.Order>.ChangedEventArgs e)
         {
-            UserOrdersUpdated?.Invoke(sender, ConverFromOrder(e));
+            UserOrdersUpdate?.Invoke(sender, ConverFromOrder(e));
         }
 
         private void _bookPublisher_Changed(object sender, IPublisher<global::Bitmex.Client.Websocket.Responses.Books.BookLevel>.ChangedEventArgs e)
         {
-            BookUpdated?.Invoke(sender, ConvertFromBookLevel(e));
+            BookUpdate?.Invoke(sender, ConvertFromBookLevel(e));
         }
 
         private void _book25Publisher_Changed(object sender, IPublisher<global::Bitmex.Client.Websocket.Responses.Books.BookLevel>.ChangedEventArgs e)
         {
-            Book25Updated?.Invoke(sender, ConvertFromBookLevel(e));
+            Book25Update?.Invoke(sender, ConvertFromBookLevel(e));
         }
 
         private FullOrder ConverFromOrder(IPublisher<global::Bitmex.Client.Websocket.Responses.Orders.Order>.ChangedEventArgs e)
@@ -151,7 +157,7 @@ namespace TradeMarket.DataTransfering.Bitmex
                 Book25Publisher.Changed += _book25Publisher_Changed;
             }
             await Book25Publisher.SubscribeAsync(new BookSubscribeRequest("XBTUSD"), new System.Threading.CancellationToken());
-            //Book25Updated += handler;
+            Book25Update += handler;
         }
 
         public async override void SubscribeToBook(EventHandler<FullOrder> handler, BitmexUserContext context)
@@ -162,7 +168,7 @@ namespace TradeMarket.DataTransfering.Bitmex
                 BookPublisher.Changed += _bookPublisher_Changed;
             }
             await BookPublisher.SubscribeAsync(new BookSubscribeRequest("XBTUSD"), new System.Threading.CancellationToken());
-            //BookUpdated += handler;
+            BookUpdate += handler;
         }
 
         public async override void SubscribeToUserOrders(EventHandler<FullOrder> handler, BitmexUserContext context)
@@ -173,7 +179,7 @@ namespace TradeMarket.DataTransfering.Bitmex
                 UserOrdersPublisher.Changed += _userOrdersPublisher_Changed;
             }
             await UserOrdersPublisher.SubcribeAsync(new System.Threading.CancellationToken());
-            //UserOrdersUpdated += handler;
+            UserOrdersUpdate += handler;
         }
 
         public async override void SubscribeToBalance(EventHandler<Model.Balance> handler, BitmexUserContext context)
@@ -181,10 +187,10 @@ namespace TradeMarket.DataTransfering.Bitmex
             if (UserWalletPublisher is null)
             {
                 UserWalletPublisher = new UserWalletPublisher(context.WSClient, context.WSClient.Streams.WalletStream);
-                UserWalletPublisher.Changed += _userWalletPublisher_Changed
+                UserWalletPublisher.Changed += _userWalletPublisher_Changed;
             }
             await UserWalletPublisher.SubcribeAsync(new System.Threading.CancellationToken());
-            //BalanceUpdated += handler;
+            BalanceUpdate += handler;
         }
     }
 }

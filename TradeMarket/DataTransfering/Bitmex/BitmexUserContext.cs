@@ -1,9 +1,12 @@
 ﻿using Bitmex.Client.Websocket;
 using Bitmex.Client.Websocket.Client;
 using Bitmex.Client.Websocket.Websockets;
+using Google.Protobuf;
+using Grpc.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using TradeBot.Common.v1;
 using TradeMarket.DataTransfering.Bitmex.Rest.Client;
@@ -13,6 +16,8 @@ namespace TradeMarket.DataTransfering.Bitmex
     public class BitmexUserContext
     {
         public String SessionId { get; set; }
+        public String SlotName { get; set; }
+
         public String Key { get; set; }
         public String Secret { get; set; }
 
@@ -26,7 +31,7 @@ namespace TradeMarket.DataTransfering.Bitmex
         public event EventHandler<FullOrder> UserOrders;
         public event EventHandler<Model.Balance> UserBalance;
 
-        public BitmexUserContext(string sessionId)
+        public BitmexUserContext(string sessionId,string slotName)
         {
             //инициализация websocket клиента
             var communicator = new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketUrl);
@@ -36,10 +41,11 @@ namespace TradeMarket.DataTransfering.Bitmex
             //инициализация http клиента
             RestClient = new BitmexRestfulClient();
 
-            this.SessionId = sessionId;
+            SessionId = sessionId;
+            SlotName = slotName;
             //TODO обращение к сервису авторизации для получения ключа и секретки
-            this.Key = "lVjs4QoJIe9OqNUnDoVKl2jS";
-            this.Secret = "MAX6lma-Y93bfT3w-g5GtAgvsFNhDLrYlyyqkciDUwRTy64s";
+            Key = "lVjs4QoJIe9OqNUnDoVKl2jS";
+            Secret = "MAX6lma-Y93bfT3w-g5GtAgvsFNhDLrYlyyqkciDUwRTy64s";
 
             //инициализация подписок
             TradeMarket.SubscribeToBalance((sender,el) => { UserBalance?.Invoke(sender,el); }, this);

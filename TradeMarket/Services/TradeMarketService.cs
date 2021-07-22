@@ -11,27 +11,23 @@ using TradeBot.TradeMarket.TradeMarketService.v1;
 using TradeMarket.DataTransfering;
 using TradeMarket.Model;
 using TradeMarket.Services;
+using SubscribeBalanceRequest = TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceRequest;
+using SubscribeBalanceResponse = TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceResponse;
+using SubscribeOrdersResponse = TradeBot.TradeMarket.TradeMarketService.v1.SubscribeOrdersResponse;
 
 namespace TradeMarket.Services
 {
     public class TradeMarketService : TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceBase
     {
-        /* private SubscriptionService<SubscribeOrdersRequest, SubscribeOrdersResponse, FullOrder, TradeMarketService> _orderSubscriptionService;
-
-         private SubscriptionService<SubscribeBalanceRequest, SubscribeBalanceResponse, Balance, TradeMarketService> _balanceSubscriptionService;
-
-         private SubscriptionService<SlotsRequest, SlotsResponse, Slot, TradeMarketService> _slotSubscriptionService;*/
-
-
-        private ILogger<TradeMarketService> _logger;
+       private ILogger<TradeMarketService> _logger;
 
         private static SubscribeOrdersResponse ConvertOrder(FullOrder order)
         {
-            return new SubscribeOrdersResponse
+            return new ()
             {
-                Response = new TradeBot.Common.v1.SubscribeOrdersResponse
+                Response = new ()
                 {
-                    Order = new TradeBot.Common.v1.Order
+                    Order = new ()
                     {
                         Id = order.Id,
                         LastUpdateDate = new Timestamp
@@ -46,13 +42,13 @@ namespace TradeMarket.Services
             };
         }
 
-        private static SubscribeBalanceResponse ConvertBalance(Balance balance)
+        private static SubscribeBalanceResponse ConvertBalance(Model.Balance balance)
         {
-            return new SubscribeBalanceResponse
+            return new ()
             {
-                Response = new TradeBot.Common.v1.SubscribeBalanceResponse
+                Response = new ()
                 {
-                    Balance = new TradeBot.Common.v1.Balance
+                    Balance = new ()
                     {
                         Currency = balance.Currency,
                         Value = balance.Value.ToString()
@@ -63,7 +59,7 @@ namespace TradeMarket.Services
 
         private static SlotsResponse ConvertSlot(Slot slot)
         {
-            return new SlotsResponse
+            return new ()
             {
                 SlotName = slot.Name
             };
@@ -72,10 +68,6 @@ namespace TradeMarket.Services
 
         public TradeMarketService(ILogger<TradeMarketService> logger)
         {
-            /*//TODO Денис Тут надо тянуть зависимость на subscriber а не хардкодить
-            //_orderSubscriptionService = new(BitmexPublisher.GetInstance(), logger, ConvertOrder);
-            _balanceSubscriptionService = new(FakeBalanceSubscriber.GetInstance(), logger, ConvertBalance);
-            _slotSubscriptionService = new(FakeSlotSubscriber.GetInstance(), logger, ConvertSlot);*/
             _logger = logger;
         }
 
@@ -95,9 +87,10 @@ namespace TradeMarket.Services
         public async override Task<CloseOrderResponse> CloseOrder(CloseOrderRequest request, ServerCallContext context)
         {
             var sessionId = context.RequestHeaders.Get("sessionId").Value;
+            var slot = context.RequestHeaders.Get("slot").Value;
             try
             {
-                var user = Model.TradeMarket.GetUserContexBySessionId(sessionId);
+                var user = Model.TradeMarket.GetUserContex(sessionId,slot);
                 await user.CloseOrder(request.Id);
             }
             catch (Exception)
@@ -121,9 +114,9 @@ namespace TradeMarket.Services
         {
 
             var sessionId = context.RequestHeaders.Get("sessionId").Value;
+            var slot = context.RequestHeaders.Get("slot").Value;
+            var user = Model.TradeMarket.GetUserContex(sessionId, slot);
 
-
-            var user = Model.TradeMarket.GetUserContexBySessionId(sessionId);
             var response = await user.PlaceOrder(request.Value, request.Price);
 
             return new PlaceOrderResponse
@@ -135,13 +128,17 @@ namespace TradeMarket.Services
         public async override Task Slots(SlotsRequest request, IServerStreamWriter<SlotsResponse> responseStream, ServerCallContext context)
         {
             var sessionId = context.RequestHeaders.Get("sessionId").Value;
+            var slot = context.RequestHeaders.Get("slot").Value;
 
+            var user = Model.TradeMarket.GetUserContex(sessionId, slot);
 
-            var user = Model.TradeMarket.GetUserContexBySessionId(sessionId);
+            FakeSlotPublisher.GetInstance().Changed += async (sender, args) =>
+            {
+                await WriteStreamAsync<SlotsResponse>(responseStream, ConvertSlot(args.Changed));
+            };
+            //TODO отписка после отмены
+            await AwaitCancellation(context.CancellationToken);
 
-            SubscriptionService<SlotsRequest, SlotsResponse, Slot, TradeMarketService> service = null; //= new (FakeSlotSubscriber.GetInstance().Changed,_logger,ConvertSlot);
-
-            await service.Subscribe(request, responseStream, context);
         }
 
         private async Task WriteStreamAsync<TResponse>(IServerStreamWriter<TResponse> stream, TResponse reply) where TResponse : IMessage<TResponse>
@@ -160,7 +157,9 @@ namespace TradeMarket.Services
         public async override Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<SubscribeBalanceResponse> responseStream, ServerCallContext context)
         {
             var sessionId = context.RequestHeaders.Get("sessionId").Value;
-            var user = Model.TradeMarket.GetUserContexBySessionId(sessionId);
+            var slot = context.RequestHeaders.Get("slot").Value;
+            var user = Model.TradeMarket.GetUserContex(sessionId,slot);
+
             user.UserBalance += async (sender, args) => {
                 await WriteStreamAsync<SubscribeBalanceResponse>(responseStream, ConvertBalance(args));
             };
@@ -177,7 +176,8 @@ namespace TradeMarket.Services
         public async override Task SubscribeOrders(SubscribeOrdersRequest request, IServerStreamWriter<SubscribeOrdersResponse> responseStream, ServerCallContext context)
         {
             var sessionId = context.RequestHeaders.Get("sessionId").Value;
-            var user = Model.TradeMarket.GetUserContexBySessionId(sessionId);
+            var slot = context.RequestHeaders.Get("slot").Value;
+            var user = Model.TradeMarket.GetUserContex(sessionId, slot);
             user.Book25 += async (sender, args) => {
                 await WriteStreamAsync<SubscribeOrdersResponse>(responseStream, ConvertOrder(args));
             };

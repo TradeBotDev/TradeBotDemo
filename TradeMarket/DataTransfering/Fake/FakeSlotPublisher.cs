@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Bitmex.Client.Websocket.Responses;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,15 +7,15 @@ using TradeMarket.Model;
 
 namespace TradeMarket.DataTransfering
 {
-    public class FakeSlotSubscriber : IPublisher<Slot> , IFakeDataSubscriber
+    public class FakeSlotPublisher : IPublisher<Slot> , IFakeDataPublisher
     {
-        private static FakeSlotSubscriber _fakeSlotSubscriber = null;
+        private static FakeSlotPublisher _fakeSlotSubscriber = null;
 
-        public static FakeSlotSubscriber GetInstance()
+        public static FakeSlotPublisher GetInstance()
         {
             if(_fakeSlotSubscriber == null)
             {
-                _fakeSlotSubscriber = new FakeSlotSubscriber();
+                _fakeSlotSubscriber = new FakeSlotPublisher();
             }
             return _fakeSlotSubscriber;
         }
@@ -72,7 +73,7 @@ namespace TradeMarket.DataTransfering
             foreach(var slot in slots)
             {
                 await Task.Delay(new Random().Next(2000));
-                Changed?.Invoke(this, new (slot));
+                Changed?.Invoke(this, new (slot,BitmexAction.Undefined));
             }
         }
     }
