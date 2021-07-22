@@ -16,38 +16,37 @@ namespace Account
         // Метод, добавляющий новую биржу для текущего пользователя.
         public override Task<AddExchangeAccessReply> AddExchangeAccess(AddExchangeAccessRequest request, ServerCallContext context)
         {
-            // Проверка на существование входа в аккаунт.
-            if (loggedIn.ContainsKey(request.SessionId))
-            {
-                // Валидация полученных данных. В случае, если валидация не прошла успешно, возвращается сообщение об ошибке.
-                ValidationMessage validationResult = Validate.AddExchangeAccessFields(request);
-                if (validationResult.Code != ActionCode.Successful)
-                {
-                    return Task.FromResult(new AddExchangeAccessReply
-                    {
-                        Result = validationResult.Code,
-                        Message = validationResult.Message
-                    });
-                }
+            // Проверка на существование входа в аккаунт. Если аккаунт среди вошедших не найден, отправляется
+            // сообщение об ошибке.
+            if (!loggedIn.ContainsKey(request.SessionId))
+                return Task.FromResult(AddExchangeAccessReplies.FailedAddition);
 
-                // Добавление данных из запроса в таблицу базы данных.
-                using (var database = new Models.AccountContext())
+            // Валидация полученных данных. В случае, если валидация не прошла успешно, возвращается сообщение об ошибке.
+            ValidationMessage validationResult = Validate.AddExchangeAccessFields(request);
+            if (validationResult.Code != ActionCode.Successful)
+            {
+                return Task.FromResult(new AddExchangeAccessReply
                 {
-                    var account = database.Accounts.Where(account => account.AccountId == loggedIn[request.SessionId].AccountId);
-                    account.First().ExchangeAccesses.Add(new Models.ExchangeAccess
-                    {
-                        Code = request.Code,
-                        Name = request.ExchangeName,
-                        Token = request.Token,
-                        Secret = request.Secret,
-                        Account = account.First()
-                    });
-                    database.SaveChanges();
-                }
-                return Task.FromResult(ExchangeAccessReplies.SuccessfulAddition);
+                    Result = validationResult.Code,
+                    Message = validationResult.Message
+                });
             }
-            // Если аккаунт среди вошедших не найден, отправляется сообщение об ошибке.
-            else return Task.FromResult(ExchangeAccessReplies.FailedAddition);
+
+            // Добавление данных из запроса в таблицу базы данных.
+            using (var database = new Models.AccountContext())
+            {
+                var account = database.Accounts.Where(account => account.AccountId == loggedIn[request.SessionId].AccountId);
+                account.First().ExchangeAccesses.Add(new Models.ExchangeAccess
+                {
+                    Code = request.Code,
+                    Name = request.ExchangeName,
+                    Token = request.Token,
+                    Secret = request.Secret,
+                    Account = account.First()
+                });
+                database.SaveChanges();
+            }
+            return Task.FromResult(AddExchangeAccessReplies.SuccessfulAddition);
         }
 
         public override Task<ExchangesBySessionReply> ExchangesBySession(SessionRequest request, ServerCallContext context)
@@ -63,14 +62,14 @@ namespace Account
 
                     // Ошибка в случае, если биржи не найдены.
                     if (exchangesFromAccount.Count() == 0)
-                        return Task.FromResult(ExchangeAccessReplies.ExchangesNotFound);
+                        return Task.FromResult(ExchangesBySessionReplies.ExchangesNotFound);
 
                     // Формирование ответа со всей необходимой информацией о добавленных биржах.
-                    var reply = ExchangeAccessReplies.SuccessfulGettingExchangesInfo(exchangesFromAccount);
+                    var reply = ExchangesBySessionReplies.SuccessfulGetting(exchangesFromAccount);
                     return Task.FromResult(reply);
                 }
             }
-            else return Task.FromResult(ExchangeAccessReplies.AccountWithExchangesNotFound);
+            else return Task.FromResult(ExchangesBySessionReplies.AccountNotFound);
         }
 
         // Метод, удаляющий данные одной из бирж для текущего пользователя по id записи.
@@ -85,13 +84,13 @@ namespace Account
 
                 // В случае, если такой записи не обнаружено, сервис отвечает ошибкой.
                 if (exhangeAccess.Count() == 0)
-                    return Task.FromResult(ExchangeAccessReplies.ExchangeAccessNotFound);
+                    return Task.FromResult(DeleteExchangeAccessReplies.ExchangeNotFound);
 
                 // Если такая запись существует, производится ее удаление.
                 database.ExchangeAccesses.Remove(exhangeAccess.First());
                 database.SaveChanges();
             }
-            return Task.FromResult(ExchangeAccessReplies.SuccessfulDeletingExchangeAccess);
+            return Task.FromResult(DeleteExchangeAccessReplies.SuccessfulDeleting);
         }
     }
 }
