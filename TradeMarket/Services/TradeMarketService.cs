@@ -147,6 +147,21 @@ namespace TradeMarket.Services
             return base.SubscribeLogs(request, responseStream, context);
         }
 
+        private static bool IsOrderSuitForRequest(FullOrder order, TradeBot.Common.v1.OrderSignature signature)
+        {
+            bool typeCheck = false;
+            bool statusCheck = false;
+            if(signature.Type == TradeBot.Common.v1.OrderType.Unspecified || order.Signature.Type == signature.Type)
+            {
+                typeCheck = true;
+            }
+            if(signature.Status == TradeBot.Common.v1.OrderStatus.Unspecified || order.Signature.Status == signature.Status)
+            {
+                statusCheck = true;
+            }
+            return typeCheck && statusCheck;
+        }
+
         public async override Task SubscribeOrders(SubscribeOrdersRequest request, IServerStreamWriter<SubscribeOrdersResponse> responseStream, ServerCallContext context)
         {
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
@@ -155,7 +170,10 @@ namespace TradeMarket.Services
             user.Book25 += async (sender, args) => {
                 var order = ConvertOrder(args);
                 _logger.LogInformation($"Sent order : {order} to former");
-                await WriteStreamAsync<SubscribeOrdersResponse>(responseStream, order);
+                if (IsOrderSuitForRequest(args, request.Request.Signature))
+                {
+                    await WriteStreamAsync<SubscribeOrdersResponse>(responseStream, order);
+                }
             };
             //TODO отписка после отмены
             await AwaitCancellation(context.CancellationToken);
