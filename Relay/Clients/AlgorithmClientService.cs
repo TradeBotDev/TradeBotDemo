@@ -31,13 +31,8 @@ namespace Relay.Clients
                     TradeMarketClientService.OrderRecievedEvent -= TradeMarketClientService_OrderRecievedEvent;
 
                 }
+                _isOn = value;
             }
-        }
-
-        private async void TradeMarketClientService_OrderRecievedEvent(object sender,
-            TradeMarketClientService.OrderRecievedEventArgs args)
-        {
-            await WriteOrder(_stream, args.Recieved);
         }
 
         private readonly IClientStreamWriter<AddOrderRequest> _stream;
@@ -51,7 +46,7 @@ namespace Relay.Clients
 
         }
 
-        public async Task WriteOrder(IClientStreamWriter<AddOrderRequest> writer, Order order)
+        public async Task WriteOrder(Order order)
         {
             try
             {
