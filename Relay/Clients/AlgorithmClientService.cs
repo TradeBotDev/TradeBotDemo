@@ -22,7 +22,7 @@ namespace Relay.Clients
             }
             set
             {
-                if (value)
+                if (_isOn = value)
                 {
                     //TradeMarketClientService.OrderRecievedEvent += TradeMarketClientService_OrderRecievedEvent;
                 }
@@ -31,7 +31,7 @@ namespace Relay.Clients
                     //TradeMarketClientService.OrderRecievedEvent -= TradeMarketClientService_OrderRecievedEvent;
 
                 }
-                _isOn = value;
+                
             }
         }
 
@@ -42,7 +42,10 @@ namespace Relay.Clients
         {
            
             _client = new AlgorithmService.AlgorithmServiceClient(GrpcChannel.ForAddress(uri));
-            _stream = _client.AddOrder().RequestStream;
+            Metadata meta = new Metadata();
+            meta.Add("sessionid", "123");
+            meta.Add("slot", "XBTUSD");
+            _stream = _client.AddOrder(meta).RequestStream;
 
         }
 

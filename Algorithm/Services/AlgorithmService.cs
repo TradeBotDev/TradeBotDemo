@@ -12,9 +12,10 @@ namespace Algorithm.Services
 
     public class AlgorithmService : TradeBot.Algorithm.AlgorithmService.v1.AlgorithmService.AlgorithmServiceBase
     {
-
+        
         public override async Task<AddOrderResponse> AddOrder(IAsyncStreamReader<AddOrderRequest> requestStream, ServerCallContext context)
         {
+            Console.WriteLine("Listening to the Relay...");
             while (await requestStream.MoveNext())
             {
                 var order = requestStream.Current;

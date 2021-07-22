@@ -18,6 +18,9 @@ namespace Relay.Clients
         public TradeMarketClientService(Uri uri)
         {
             var client = new TradeMarketService.TradeMarketServiceClient(GrpcChannel.ForAddress(uri));
+            Metadata meta = new Metadata();
+            meta.Add("sessionid", "123");
+            meta.Add("slot", "XBTUSD");
             _stream = client.SubscribeOrders(new SubscribeOrdersRequest()
             {
                 Request = new TradeBot.Common.v1.SubscribeOrdersRequest()
@@ -28,7 +31,7 @@ namespace Relay.Clients
                         Status = OrderStatus.Closed
                     }
                 }
-            }).ResponseStream;
+            },meta).ResponseStream;
         }
 
         public event EventHandler<Order> OrderRecievedEvent;
