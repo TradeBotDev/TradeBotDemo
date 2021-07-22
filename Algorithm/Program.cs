@@ -21,35 +21,36 @@ namespace Algorithm
         {
             //commented out for testing purposes
             //DataCollector.SendPurchasePrice();
-            //CreateHostBuilder(args).Build().Run();
+            CreateHostBuilder(args).Build().Run();
 
-            Publisher publisher = new();
-
-            PointMaker PM = new PointMaker();
-            AlgorithmAlpha algo = new();
-            DataCollector DC = new();
-            PM.Launch(publisher);
+            
 
 
         }
 
 
-       /* public static IHostBuilder CreateHostBuilder(string[] args) =>
+       public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
                 }).ConfigureServices(services => {
                     services.AddHostedService<Worker>();
-                });*/
+                });
     }
 
-    /*public class Worker : BackgroundService
+    public class Worker : BackgroundService
     {
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await DataCollector.SendPurchasePrice();
+            //await PriceSender.SendPrice();
+            Publisher publisher = new();
+            DataCollector DC = new();
+            PointMaker PM = new PointMaker();
+            AlgorithmAlpha algo = new();
+
+            PM.Launch(publisher, DC);
         }
-    }*/
+    }
 }

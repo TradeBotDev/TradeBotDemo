@@ -25,10 +25,10 @@ namespace Relay
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await Task.Delay(3000);
-            _tradeMarket.OrderRecievedEvent += async (sender, args) =>
+            _tradeMarket.OrderRecievedEvent += (sender, args) =>
             {
                 _logger.LogInformation($"Sending order {args}");
-                await _algorithm.WriteOrder(args);
+                _algorithm.WriteOrder(args);
             };
             while (!stoppingToken.IsCancellationRequested)
             {

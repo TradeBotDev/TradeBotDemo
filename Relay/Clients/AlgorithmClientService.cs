@@ -35,6 +35,7 @@ namespace Relay.Clients
             }
         }
 
+        private AsyncClientStreamingCall<AddOrderRequest, AddOrderResponse> _call;
         private readonly IClientStreamWriter<AddOrderRequest> _stream;
         private readonly AlgorithmService.AlgorithmServiceClient _client;
         
@@ -45,15 +46,16 @@ namespace Relay.Clients
             Metadata meta = new Metadata();
             meta.Add("sessionid", "123");
             meta.Add("slot", "XBTUSD");
-            _stream = _client.AddOrder(meta).RequestStream;
+            _call = _client.AddOrder(meta);
+            _stream = _call.RequestStream;
 
         }
 
-        public async Task WriteOrder(Order order)
+        public void WriteOrder(Order order)
         {
             try
             {
-               await _stream.WriteAsync(new AddOrderRequest()
+               _stream.WriteAsync(new AddOrderRequest()
                {
                    Order = order
                });

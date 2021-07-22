@@ -25,7 +25,7 @@ namespace Algorithm.DataManipulation
             return new KeyValuePair<DateTime, double> (timestamp, price); 
         }
 
-        public void Launch(Publisher publisher)
+        public void Launch(Publisher publisher, DataCollector dataCollector)
         {
             List<Order> newOrders = new();
 
