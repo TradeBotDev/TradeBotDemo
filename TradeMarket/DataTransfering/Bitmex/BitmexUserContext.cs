@@ -80,9 +80,30 @@ namespace TradeMarket.DataTransfering.Bitmex
             return await TradeMarket.AutheticateUser(Key, Secret,this);
         }
 
+        public static bool operator ==(BitmexUserContext b1, BitmexUserContext b2)
+        {
+            return b1.Equals(b2);
+        }
 
- 
+        public static bool operator !=(BitmexUserContext b1, BitmexUserContext b2)
+        {
+            return !b1.Equals(b2);
+        }
 
+        public override bool Equals(object obj)
+        {
+            if (obj.GetType() != typeof(BitmexUserContext)) return false;
+            BitmexUserContext context = obj as BitmexUserContext;
+            return
+                context.SessionId == this.SessionId &&
+                context.SlotName == this.SlotName &&
+                //Тут сравнение ссылок потому что трэйдмаркеты - синглтоны
+                context.TradeMarket == this.TradeMarket;
+        }
 
+        public bool IsEquevalentTo(string sessionId,string slotName,string tradeMarketName)
+        {
+            return this.SessionId == sessionId && this.SlotName == slotName && this.TradeMarket.Name == tradeMarketName;
+        }
     }
 }

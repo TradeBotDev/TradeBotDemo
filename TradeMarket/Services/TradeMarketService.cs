@@ -89,7 +89,7 @@ namespace TradeMarket.Services
 
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
-            var user = Model.TradeMarket.GetUserContex(sessionId, slot);
+            var user = UserContextData.GetUserContext(sessionId, slot);
 
             var response = await user.PlaceOrder(request.Value, request.Price);
 
@@ -104,7 +104,7 @@ namespace TradeMarket.Services
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
 
-            var user = Model.TradeMarket.GetUserContex(sessionId, slot);
+            var user = UserContextData.GetUserContext(sessionId, slot);
 
             FakeSlotPublisher.GetInstance().Changed += async (sender, args) =>
             {
@@ -132,7 +132,7 @@ namespace TradeMarket.Services
         {
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
-            var user = Model.TradeMarket.GetUserContex(sessionId,slot);
+            var user = UserContextData.GetUserContext(sessionId,slot);
 
             user.UserBalance += async (sender, args) => {
                 await WriteStreamAsync<SubscribeBalanceResponse>(responseStream, ConvertBalance(args));
@@ -147,33 +147,15 @@ namespace TradeMarket.Services
             return base.SubscribeLogs(request, responseStream, context);
         }
 
-        private static bool IsOrderSuitForRequest(FullOrder order, TradeBot.Common.v1.OrderSignature signature)
-        {
-            bool typeCheck = false;
-            bool statusCheck = false;
-            if(signature.Type == TradeBot.Common.v1.OrderType.Unspecified || order.Signature.Type == signature.Type)
-            {
-                typeCheck = true;
-            }
-            if(signature.Status == TradeBot.Common.v1.OrderStatus.Unspecified || order.Signature.Status == signature.Status)
-            {
-                statusCheck = true;
-            }
-            return typeCheck && statusCheck;
-        }
-
         public async override Task SubscribeOrders(SubscribeOrdersRequest request, IServerStreamWriter<SubscribeOrdersResponse> responseStream, ServerCallContext context)
         {
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
-            var user = Model.TradeMarket.GetUserContex(sessionId, slot);
+            var user = UserContextData.GetUserContext(sessionId, slot);
             user.Book25 += async (sender, args) => {
                 var order = ConvertOrder(args);
                 _logger.LogInformation($"Sent order : {order} to former");
-                if (IsOrderSuitForRequest(args, request.Request.Signature))
-                {
-                    await WriteStreamAsync<SubscribeOrdersResponse>(responseStream, order);
-                }
+                await WriteStreamAsync<SubscribeOrdersResponse>(responseStream, order);
             };
             //TODO отписка после отмены
             await AwaitCancellation(context.CancellationToken);

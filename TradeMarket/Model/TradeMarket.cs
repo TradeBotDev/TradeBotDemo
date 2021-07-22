@@ -10,37 +10,7 @@ namespace TradeMarket.Model
 {
     public abstract class TradeMarket
     {
-        internal static IDictionary<string, TradeMarket> ExistingTradeMarkets = new Dictionary<string, TradeMarket>(new List<KeyValuePair<string, TradeMarket>>{
-            new KeyValuePair<string, TradeMarket>("Bitmex",new BitmexTradeMarket())
-        });
-
-        internal static List<BitmexUserContext> RegisteredUsers = new List<BitmexUserContext>();
-        
-        public static TradeMarket GetTradeMarketByName(string name)
-        {
-            if (!ExistingTradeMarkets.ContainsKey(name))
-            {
-                throw new ArgumentException($"{name} hasn't been implemented yet");
-            }
-            return ExistingTradeMarkets[name];
-        }
-
-        public static BitmexUserContext GetUserContex(string sessionId,string slotName)
-        {
-            if(RegisteredUsers.FirstOrDefault(el => el.SessionId == sessionId && el.SlotName == slotName) is null)
-            {
-                RegisterUser(sessionId, slotName, "Bitmex");
-            }
-            return RegisteredUsers.First(el => el.SessionId == sessionId && el.SlotName == slotName);
-        }
-
-        public static void RegisterUser(string sessionId,string slotName,string tradeMarketName)
-        {
-            BitmexUserContext user = new BitmexUserContext(sessionId,slotName, GetTradeMarketByName(tradeMarketName));
-
-            RegisteredUsers.Add(user);
-        }
-
+        public string Name { get; internal set; }
 
         public abstract Task<DefaultResponse> PlaceOrder(double quontity, double price,BitmexUserContext context);
 

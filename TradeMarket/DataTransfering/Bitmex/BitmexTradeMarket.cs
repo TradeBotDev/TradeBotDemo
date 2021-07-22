@@ -32,8 +32,9 @@ namespace TradeMarket.DataTransfering.Bitmex
         public override event EventHandler<FullOrder> UserOrdersUpdate;
         public override event EventHandler<Model.Balance> BalanceUpdate;
 
-        public BitmexTradeMarket()
+        public BitmexTradeMarket(string name)
         {
+            Name = name;
         }
 
         private void _userWalletPublisher_Changed(object sender, IPublisher<global::Bitmex.Client.Websocket.Responses.Wallets.Wallet>.ChangedEventArgs e)
