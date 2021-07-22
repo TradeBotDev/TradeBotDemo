@@ -20,7 +20,7 @@ namespace Algorithm.Services
             {
                 var order = requestStream.Current;
                 DataCollector.orders.Add(order.Order);
-                Console.WriteLine("Got " + order.Order.Id);
+                Console.WriteLine("Got " + order.Order.Id + "   " + order.Order.Price);
             }
             return new AddOrderResponse();
         }
