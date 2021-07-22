@@ -156,7 +156,7 @@ namespace TradeMarket.DataTransfering.Bitmex
                 Book25Publisher = new BookPublisher(context.WSClient, context.WSClient.Streams.Book25Stream);
                 Book25Publisher.Changed += _book25Publisher_Changed;
             }
-            await Book25Publisher.SubscribeAsync(new BookSubscribeRequest("XBTUSD"), new System.Threading.CancellationToken());
+            await Book25Publisher.SubscribeAsync(new Book25SubscribeRequest(context.SlotName), new System.Threading.CancellationToken());
             Book25Update += handler;
         }
 
@@ -167,7 +167,7 @@ namespace TradeMarket.DataTransfering.Bitmex
                 BookPublisher = new BookPublisher(context.WSClient, context.WSClient.Streams.BookStream);
                 BookPublisher.Changed += _bookPublisher_Changed;
             }
-            await BookPublisher.SubscribeAsync(new BookSubscribeRequest("XBTUSD"), new System.Threading.CancellationToken());
+            await BookPublisher.SubscribeAsync(new BookSubscribeRequest(context.SlotName), new System.Threading.CancellationToken());
             BookUpdate += handler;
         }
 

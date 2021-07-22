@@ -56,6 +56,13 @@ namespace TradeMarket.DataTransfering.Bitmex
             TradeMarket.SubscribeToBook25((sender, el) => Book25?.Invoke(sender, el),this);
             TradeMarket.SubscribeToUserOrders((sender, el) => UserOrders?.Invoke(sender, el), this);
 
+            TradeMarket.Book25Update += TradeMarket_Book25Update;
+
+        }
+
+        private void TradeMarket_Book25Update(object sender, FullOrder e)
+        {
+            Book25?.Invoke(sender, e);
         }
 
         public async Task<DefaultResponse> PlaceOrder(double quontity, double price)
