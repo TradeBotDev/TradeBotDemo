@@ -8,6 +8,9 @@ namespace Former
 {
     public class UserContext
     {
-        public Dictionary<string, Config> configures;
+        public string sessionId;
+        public string trademarket;
+        public string slot;
+        public Config configuration;
     }
 }

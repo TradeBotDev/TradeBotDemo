@@ -28,10 +28,6 @@ namespace Former
         {
             config = conf;
         }
-        public void SetMetadata(Metadata.Entry meta) 
-        {
-            _meta.Add(meta);
-        }
 
         public Former(int ordersCount)
         {
