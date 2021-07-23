@@ -11,14 +11,17 @@ using System.Windows.Forms;
 using TradeBot.Facade.FacadeService.v1;
 using TradeBot.Relay.RelayService.v1;
 using TradeBot.Common.v1;
-using StartBotRequest = TradeBot.Relay.RelayService.v1.StartBotRequest;
+using Grpc.Core;
+//using StartBotRequest = TradeBot.Relay.RelayService.v1.StartBotRequest;
 
 namespace UI
 {
     public partial class TradeBotUI : Form
     {
+        private TradeBot.Facade.FacadeService.v1.FacadeService.FacadeServiceClient client;
         public TradeBotUI()
         {
+            client = new TradeBot.Facade.FacadeService.v1.FacadeService.FacadeServiceClient(GrpcChannel.ForAddress("https://localhost:5002"));
             InitializeComponent();
         }
 
@@ -53,5 +56,55 @@ namespace UI
             var call2 =await facadeClient.SwitchBotAsync(requestForRelay);
             Console.WriteLine("Запустил бота с конфигом {0}", requestForRelay.Config);
         }
+
+        private void ShowRegistrationPanel_Click(object sender, EventArgs e)
+        {
+            RegistrationPanel.Visible = true;
+            RegistrationPanel.Enabled = true;
+            LogginPanel.Visible = false;
+            LogginPanel.Enabled = false;
+            MainMenuPanel.Visible = false;
+            MainMenuPanel.Enabled = false;
+        }
+
+        private void ShowLoginPanel_Click(object sender, EventArgs e)
+        {
+            RegistrationPanel.Visible = false;
+            RegistrationPanel.Enabled = false;
+            LogginPanel.Visible = true;
+            LogginPanel.Enabled = true;
+            MainMenuPanel.Visible = false;
+            MainMenuPanel.Enabled = false;
+        }
+
+        private void ShowMainMenu_Click(object sender, EventArgs e)
+        {
+            RegistrationPanel.Visible = false;
+            RegistrationPanel.Enabled = false;
+            LogginPanel.Visible = false;
+            LogginPanel.Enabled = false;
+            MainMenuPanel.Visible = true;
+            MainMenuPanel.Enabled = true;
+        }
+
+        private async void RegistrationButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var response = await client.AuthenticateTokenAsync(new AuthenticateTokenRequest
+                {
+                    Token = ConfigToken.Text
+                });
+                var response1 = await client.RegisterAsync(new RegisterRequest
+                {
+                    Email = RegLog.Text,
+                    Password = RegPass.Text
+                });
+            }
+            catch (RpcException ex)
+            {
+                IsUserLogged.Text = ex.Message;
+            }
+        } 
     }
 }
