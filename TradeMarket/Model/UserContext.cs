@@ -31,7 +31,7 @@ namespace TradeMarket.Model
         internal BitmexWebsocketClient WSClient { get; set; }
         internal BitmexRestfulClient RestClient { get; set; }
 
-        private AccountClient _accountClient = AccountClient.GetInstance();
+        private AccountClient _accountClient;
 
         private async void init()
         {
@@ -66,7 +66,7 @@ namespace TradeMarket.Model
             SlotName = slotName;
 
             TradeMarket = tradeMarket;
-
+            _accountClient = AccountClient.GetInstance();
             init();
 
         }

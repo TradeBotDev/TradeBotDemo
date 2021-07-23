@@ -22,7 +22,6 @@ namespace TradeMarket
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                await Task.Delay(1000, stoppingToken);
                 AccountClient._accountClient = _account;
                 //запуск подписок
                 Task[] tasks =

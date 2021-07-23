@@ -53,9 +53,7 @@ namespace TradeMarket.Clients
                 throw new KeyNotFoundException($"sessionId : {sessionId} has no data in AccountService");
             }
             var key = reply.Exchange.Token;
-
-            //TODO Когда кирилл допишет протик раскоментить 
-            var secret = "";// reply.Exchange.Secret;
+            var secret = reply.Exchange.Secret;
 
             return new UserAccessInfo(key, secret);
         }
