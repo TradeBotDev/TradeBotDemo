@@ -10,10 +10,16 @@ namespace Account.AccountMessages
             Message = "Данные биржи для данного пользователя успешно удалены."
         };
 
+        public static readonly DeleteExchangeAccessReply AccountNotFound = new DeleteExchangeAccessReply
+        {
+            Result = ActionCode.ExchangeNotFound,
+            Message = "Произошла ошибка: пользователь не найдены."
+        };
+
         public static readonly DeleteExchangeAccessReply ExchangeNotFound = new DeleteExchangeAccessReply
         {
             Result = ActionCode.ExchangeNotFound,
-            Message = "Данные биржи не найдены."
+            Message = "Произошла ошибка: данные биржи не найдены."
         };
     }
 }
