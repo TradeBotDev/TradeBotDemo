@@ -1,10 +1,10 @@
-﻿{
+{
   "profiles": {
-    "Facade": {
+    "Account": {
       "commandName": "Project",
       "dotnetRunMessages": "true",
       "launchBrowser": false,
-      "applicationUrl": "http://localhost:5555;https://localhost:5002",
+      "applicationUrl": "http://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

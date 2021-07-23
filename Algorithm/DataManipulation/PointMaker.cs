@@ -15,13 +15,18 @@ namespace Algorithm.DataManipulation
         public KeyValuePair<DateTime, double> MakePoint(List<Order> orders, DateTime timestamp)
         {           
             double price = 0;
+            int numberOfOrders = 0;
 
             foreach (Order order in orders)
             {
-                price += order.Price;
+                if (order.Price != 0)
+                {
+                    price += order.Price;
+                    numberOfOrders++;
+                }
             }
-            price /= orders.Count;
-            Console.WriteLine("Made a point: " + timestamp.TimeOfDay + " " + price);
+            price /= numberOfOrders;
+            Console.WriteLine("Made a point: " + timestamp.TimeOfDay + "    " + price);
             return new KeyValuePair<DateTime, double> (timestamp, price); 
         }
 

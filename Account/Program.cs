@@ -5,20 +5,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Serilog;
 
-namespace Facade
+namespace Account
 {
     public class Program
     {
         public static void Main(string[] args)
         {
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .WriteTo.Console()
-                .CreateLogger();
             CreateHostBuilder(args).Build().Run();
-            
         }
 
         // Additional configuration is required to successfully run gRPC on macOS.

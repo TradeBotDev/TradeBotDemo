@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TradeMarket", "TradeMarket\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Facade", "Facade\Facade.csproj", "{E6EC140F-4AA1-40F4-BC1B-28717433CE4E}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Account", "Account\Account.csproj", "{D1613EDC-18D8-4573-B1E0-51EA8555847C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{E6EC140F-4AA1-40F4-BC1B-28717433CE4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E6EC140F-4AA1-40F4-BC1B-28717433CE4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E6EC140F-4AA1-40F4-BC1B-28717433CE4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1613EDC-18D8-4573-B1E0-51EA8555847C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1613EDC-18D8-4573-B1E0-51EA8555847C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1613EDC-18D8-4573-B1E0-51EA8555847C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1613EDC-18D8-4573-B1E0-51EA8555847C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

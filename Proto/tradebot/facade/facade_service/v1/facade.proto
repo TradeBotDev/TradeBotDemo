@@ -45,6 +45,7 @@ message SwitchBotRequest {
 
 message SwitchBotResponse {
 	tradebot.common.v1.DefaultResponse response = 1;
+	tradebot.common.v1.DefaultResponse message = 2;
 }
 
 message SubscribeLogsRequest{
@@ -53,6 +54,7 @@ message SubscribeLogsRequest{
 
 message SubscribeLogsResponse{
 	tradebot.common.v1.SubscribeLogsResponse response = 1;
+	tradebot.common.v1.DefaultResponse message = 2;
 }
 
 message UpdateServerConfigRequest{
@@ -61,16 +63,17 @@ message UpdateServerConfigRequest{
 
 message UpdateServerConfigResponse{
 	tradebot.common.v1.UpdateServerConfigResponse response = 1;
+	tradebot.common.v1.DefaultResponse message = 2;
 }
 
 message SubscribeBalanceRequest{
 	tradebot.common.v1.SubscribeBalanceRequest request = 1;
+	string slot_name = 2;
 }
 
 message SubscribeBalanceResponse{
 	//old version - tradebot.common.v1.SubscribeBalanceResponse response = 1;
-	optional tradebot.common.v1.Balance balance_one = 2;
-	optional tradebot.common.v1.Balance balance_two = 3;
+	optional tradebot.common.v1.Balance Money = 1;
 }
 
 message SlotsRequest{
@@ -79,6 +82,7 @@ message SlotsRequest{
 }
 message SlotsResponse{
 	string slot_name = 1;
+	tradebot.common.v1.DefaultResponse message = 2;
 }
 
 message AuthenticateTokenRequest{
@@ -87,4 +91,5 @@ message AuthenticateTokenRequest{
 
 message AuthenticateTokenResponse{
 	tradebot.common.v1.DefaultResponse response = 1;
+	tradebot.common.v1.DefaultResponse message = 2;
 }
