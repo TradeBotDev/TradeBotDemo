@@ -11,6 +11,8 @@ namespace Account.Models
 
         public bool SaveExchangesAfterLogout { get; set; }
 
+        public LoggedAccount() { }
+
         public LoggedAccount(Account account, bool saveExchangesAfterLogout)
         {
             this.AccountId = account.AccountId;
