@@ -6,11 +6,11 @@ using TradeBot.Account.AccountService.v1;
 
 namespace Account.AccountMessages
 {
-    public static class ExchangesBySessionReplies
+    public static class AllExchangesBySessionReplies
     {
-        public static ExchangesBySessionReply SuccessfulGetting(IQueryable<Models.ExchangeAccess> exchangesFromAccount)
+        public static AllExchangesBySessionReply SuccessfulGetting(IQueryable<Models.ExchangeAccess> exchangesFromAccount)
         {
-            ExchangesBySessionReply reply = new ExchangesBySessionReply
+            AllExchangesBySessionReply reply = new AllExchangesBySessionReply
             {
                 Result = ActionCode.Successful,
                 Message = "Получение информации о биржах завершено успешно."
@@ -30,13 +30,13 @@ namespace Account.AccountMessages
             return reply;
         }
 
-        public static readonly ExchangesBySessionReply AccountNotFound = new ExchangesBySessionReply
+        public static readonly AllExchangesBySessionReply AccountNotFound = new AllExchangesBySessionReply
         {
             Result = ActionCode.AccountNotFound,
             Message = "Произошла ошибка получение данных бирж: пользователь не существует."
         };
 
-        public static readonly ExchangesBySessionReply ExchangesNotFound = new ExchangesBySessionReply
+        public static readonly AllExchangesBySessionReply ExchangesNotFound = new AllExchangesBySessionReply
         {
             Result = ActionCode.ExchangeNotFound,
             Message = "Ошибка при получении бирж: данные не найдены."

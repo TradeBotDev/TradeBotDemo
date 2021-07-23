@@ -8,6 +8,7 @@ using TradeBot.Account.AccountService.v1;
 using Account.Validation;
 using Account.Validation.Messages;
 using Account.AccountMessages;
+using Account.Models;
 
 namespace Account
 {
@@ -45,7 +46,7 @@ namespace Account
 
                 // Проверка на то, есть ли сессия с пользователем, который пытается войти в аккаунт, и
                 // в случае, если он вошел, возвращается его Id сессии
-                foreach (KeyValuePair<string, Models.LoggedAccount> account in loggedIn)
+                foreach (KeyValuePair<string, Models.LoggedAccount> account in State.loggedIn)
                 {
                     int checkedAccount = database.Accounts.Count(account => account.Email == request.Email);
                     if (checkedAccount > 0)
@@ -57,10 +58,10 @@ namespace Account
                 // пользователями.
                 string sessionId = Guid.NewGuid().ToString();
                 var loggedAccount = new Models.LoggedAccount(accounts.First(), request.SaveExchangesAfterLogout);
-                loggedIn.Add(sessionId, loggedAccount);
+                State.loggedIn.Add(sessionId, loggedAccount);
 
                 // Сохранение текущего состояния в файл.
-                FileManagement.WriteState(loggedInFilename, loggedIn);
+                FileManagement.WriteFile(State.LoggedInFilename, State.loggedIn);
 
                 // Ответ сервера об успешном входе в аккаунт.
                 return Task.FromResult(LoginReplies.SuccessfulLogin(sessionId));
