@@ -17,18 +17,12 @@ namespace Former
 
         public override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request, ServerCallContext context)
         {
-            if (!UserContextFactory.Contains(context.RequestHeaders.Get("sessionId").Value)) UserContextFactory.AddUserContext
-                (
-                    context.RequestHeaders.GetValue("sessionId"),
-                    context.RequestHeaders.GetValue("trademarket"),
-                    context.RequestHeaders.GetValue("slot"),
-                    request.Request
-                );
+            UserContextFactory.GetUserContext(context.RequestHeaders.GetValue("sessionId"), context.RequestHeaders.GetValue("trademarket"), context.RequestHeaders.GetValue("slot"));
             return Task.FromResult(new UpdateServerConfigResponse());
         }
         public override Task<SendPurchasePriceResponse> SendPurchasePrice(SendPurchasePriceRequest request, ServerCallContext context)
         {
-            UserContextFactory.GetUserContextById(context.RequestHeaders.GetValue("sessionId")).former.FormPurchaseList(request.PurchasePrice);
+            UserContextFactory.GetUserContext(context.RequestHeaders.GetValue("sessionId"), context.RequestHeaders.GetValue("trademarket"), context.RequestHeaders.GetValue("slot")).FormPurchaseList();
             return Task.FromResult(new SendPurchasePriceResponse());
         }
     }
