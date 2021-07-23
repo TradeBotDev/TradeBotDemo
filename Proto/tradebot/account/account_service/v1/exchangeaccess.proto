@@ -39,10 +39,10 @@ message AllExchangesBySessionReply {
 	repeated account.ExchangeAccessInfo exchanges = 3;
 }
 
-// Запрос на удаление записи о бирже для текущего пользователя.
+// Запрос на удаление записи о конкретной бирже для текущего пользователя.
 message DeleteExchangeAccessRequest {
 	string session_id = 1;
-	int32 exchange_access_id = 2;
+	account.ExchangeCode code = 2;
 }
 
 // Ответ на запрос об удалении записи о бирже для текущего пользователя.
