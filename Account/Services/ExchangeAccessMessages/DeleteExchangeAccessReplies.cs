@@ -12,7 +12,7 @@ namespace Account.AccountMessages
 
         public static readonly DeleteExchangeAccessReply AccountNotFound = new DeleteExchangeAccessReply
         {
-            Result = ActionCode.ExchangeNotFound,
+            Result = ActionCode.AccountNotFound,
             Message = "Произошла ошибка: пользователь не найдены."
         };
 
