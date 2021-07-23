@@ -48,7 +48,7 @@ namespace Relay.Model
 
         public void SubscribeForOrders()
         {
-            _tradeMarketClient.SubscribeForOrders(Meta);
+            _tradeMarketClient.SubscribeForOrders(_tradeMarketStream);
         }
 
     }
