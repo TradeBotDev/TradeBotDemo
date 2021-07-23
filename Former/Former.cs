@@ -22,16 +22,7 @@ namespace Former
 
         private readonly int _ordersCount;
 
-        private Config config;
-
-        public void SetConfig(Config conf)
-        {
-            config = conf;
-        }
-        public void SetMetadata(Metadata.Entry meta) 
-        {
-            _meta.Add(meta);
-        }
+        public static Config config;
 
         public Former(int ordersCount)
         {
@@ -40,17 +31,6 @@ namespace Former
             _tmClient.UpdateBalance += UpdateBalance;
             _tmClient.UpdateMyOrders += UpdateMyOrderList;
 
-            //кастомный конфиг
-            config = new Config
-            {
-                AvaibleBalance = 1.0,
-                ContractValue = 10.0,
-                RequiredProfit = 0.5,
-                OrderUpdatePriceRange = 1.0,
-                SlotFee = 0.2,
-                TotalBalance = 0
-            };
-
             _ordersCount = ordersCount;
             _orderBook = new ConcurrentDictionary<string, Order>();
             _myOrders = new ConcurrentDictionary<string, Order>();
@@ -58,7 +38,6 @@ namespace Former
 
         private async void UpdateOrderBook(Order orderNeededUpdate)
         {
-            Log.Debug("Got order!");
             var task = Task.Run(() =>
             {
                 //TODO убрать проверку на тип ордера
@@ -85,7 +64,7 @@ namespace Former
             double newQuantity;
             if (_myOrders.TryGetValue(id, out Order beforeUpdate))
                 if ((newQuantity = beforeUpdate.Quantity - orderNeededUpdate.Quantity) > 0)
-                    await _tmClient.PlaceSellOrder(sellPrice, newQuantity);
+                    await _tmClient.PlaceOrder(sellPrice, newQuantity);
         }
         //необходимо ревью
         private async void UpdateMyOrderList(Order orderNeededUpdate)
@@ -101,6 +80,7 @@ namespace Former
                     SellPartContracts(id, orderNeededUpdate, sellPrice);
                     _myOrders.AddOrUpdate(id, orderNeededUpdate, (k, v) =>
                     {
+                        Log.Information("Order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} added or updated", id, orderNeededUpdate.Price, orderNeededUpdate.Quantity, orderNeededUpdate.Signature.Type, orderNeededUpdate.Signature.Status);
                         v.Price = orderNeededUpdate.Price;
                         v.Quantity = orderNeededUpdate.Quantity;
                         return v;
@@ -109,24 +89,30 @@ namespace Former
                 if (status == OrderStatus.Open && type == OrderType.Sell)
                     _myOrders.AddOrUpdate(id, orderNeededUpdate, (k, v) =>
                     {
+                        Log.Information("Order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} added or updated", id, orderNeededUpdate.Price, orderNeededUpdate.Quantity, orderNeededUpdate.Signature.Type, orderNeededUpdate.Signature.Status);
                         v.Price = orderNeededUpdate.Price;
                         v.Quantity = orderNeededUpdate.Quantity;
                         return v;
                     });
                 if (status == OrderStatus.Closed && type == OrderType.Buy)
                 {
-                    await _tmClient.PlaceSellOrder(sellPrice, orderNeededUpdate.Quantity);
+                    Log.Information("Order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} removed", id, orderNeededUpdate.Price, orderNeededUpdate.Quantity, orderNeededUpdate.Signature.Type, orderNeededUpdate.Signature.Status);
+                    await _tmClient.PlaceOrder(sellPrice, orderNeededUpdate.Quantity);
                     _myOrders.TryRemove(id, out _);
                 }
                 if (status == OrderStatus.Closed && type == OrderType.Sell)
+                {
+                    Log.Information("Order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} removed", id, orderNeededUpdate.Price, orderNeededUpdate.Quantity, orderNeededUpdate.Signature.Type, orderNeededUpdate.Signature.Status);
                     _myOrders.TryRemove(id, out _);
+                }
+                
             });
             await task;
         }
 
         private void UpdateBalance(Balance balance)
         {
-            Log.Debug("Balance updated. New balance: {0}", balance.Value);
+            Log.Information("Balance updated. New balance: {0}", balance.Value);
             _balance = double.Parse(balance.Value);
         }
         //необходимо ревью 
@@ -151,7 +137,7 @@ namespace Former
             await checkPrices;
 
             if (ordersNeededToFit.Count != 0)
-                await _tmClient.TellTMUpdateMyOreders(ordersNeededToFit);
+                await _tmClient.TellTMUpdateMyOrders(ordersNeededToFit);
         }
 
         public async void FormPurchaseList(double avgPrice)
@@ -165,16 +151,20 @@ namespace Former
                 if (IsPriceCorrect(order.Value.Price, avgPrice, availableBalance))
                     selectedOrders.Add(order.Value.Price, config.ContractValue);
             }
-            Log.Debug("Formed a list of required orders: {elements}", selectedOrders.Count);
+            Log.Debug("Formed a list of required orders:");
+            foreach (var order in selectedOrders) 
+            {
+                Log.Debug("Price: {1} Quantity: {2}", order.Key, order.Value);
+            }
+
             if (selectedOrders.Count != 0)
-                await _tmClient.PlacePurchaseOrders(selectedOrders);
+                await _tmClient.PlaceOrdersList(selectedOrders);
         }
 
         private bool IsPriceCorrect(double estimatedPrice, double cuttingPrice, double availableBalance)
         {
             if (estimatedPrice < cuttingPrice && (availableBalance - Convert(estimatedPrice) * config.ContractValue) > 0) return true;
             else return false;
-
         }
 
         private double Convert(double priceFromTM)
