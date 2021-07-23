@@ -88,7 +88,7 @@ message ExchangeAccessInfo {
 	ExchangeCode code = 2;
 	string name = 3;
 	string token = 4;
-	int32 secret = 5;
+	string secret = 5;
 }
 
 // Коды всех бирж.
