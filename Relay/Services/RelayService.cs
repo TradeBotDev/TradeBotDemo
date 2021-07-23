@@ -16,24 +16,41 @@ namespace Relay.Services
 {
     public class RelayService : TradeBot.Relay.RelayService.v1.RelayService.RelayServiceBase
     {
-        private AlgorithmClientService _algorithmClient = null;
-        private TradeMarketClientService _tradeMarketClient = null;
+        private static AlgorithmClient _algorithmClient = null;
+        private static TradeMarketClient _tradeMarketClient = null;
+        private static FormerClient _former;
 
-        public RelayService(AlgorithmClientService algorithm,TradeMarketClientService tradeMarket)
+        private static IDictionary<Metadata, UserContext> contexts = new Dictionary<Metadata, UserContext>();
+
+        public UserContext GetUserContext(Metadata meta)
+        {
+            //TODO Возможно он тут проверяет по ссылке. так что надо бы сделать Equals
+            if (contexts.ContainsKey(meta))
+            {
+                return contexts[meta];
+            }
+            UserContext newContext = new(meta, _former, _algorithmClient, _tradeMarketClient);
+            contexts.Add(meta,newContext);
+            return newContext;
+        }
+
+        public RelayService(AlgorithmClient algorithm,TradeMarketClient tradeMarket,FormerClient former)
         {
             _algorithmClient = algorithm;
             _tradeMarketClient = tradeMarket;
+            _former = former;
         }
 
         public override async Task<StartBotResponse> StartBot(StartBotRequest request, ServerCallContext context)
         {
-            _algorithmClient.IsOn = true;
-            var readOrderTask = _tradeMarketClient.ReadOrders();
+            var user = GetUserContext(context.RequestHeaders);
+            user.SubscribeForOrders();
+            //_algorithmClient.IsOn = true;
             return await Task.FromResult(new StartBotResponse()
             {
                 Response = new DefaultResponse()
                 {
-                    Message = "Bot has been started",
+                    Message = "Bot was launched",
                     Code = ReplyCode.Succeed
                 }
             });
@@ -42,7 +59,8 @@ namespace Relay.Services
         public async override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request,
             ServerCallContext context)
         {
-            await _algorithmClient.UpdateConfig(request.Request.Config);
+            var user = GetUserContext(context.RequestHeaders);
+            user.UpdateConfig(request.Request.Config);
             return await Task.FromResult(new UpdateServerConfigResponse());
         }
 

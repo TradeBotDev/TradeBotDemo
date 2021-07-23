@@ -5,9 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Protobuf Link="Protos/trademarket.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/trademarket/trademarket_service/v1/trademarket.proto" GrpcServices="Both" />
+    <Protobuf Link="Protos/trademarket.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/trademarket/trademarket_service/v1/trademarket.proto" GrpcServices="Server" />
     <Protobuf Link="Protos/common.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/common/v1/common.proto" GrpcServices="Both" />
-
+    <Protobuf Link="Protos/exchangeaccess.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/account/account_service/v1/exchangeaccess.proto" GrpcServices="Client" />
+    <Protobuf Link="Protos/account.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/account/account_service/v1/account.proto" GrpcServices="Both" />
 
 
   </ItemGroup>
