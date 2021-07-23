@@ -11,17 +11,18 @@ using SubscribeOrdersResponse = TradeBot.TradeMarket.TradeMarketService.v1.Subsc
 
 namespace Relay.Clients
 {
-    public class TradeMarketClientService 
+    public class TradeMarketClient 
     {
-        private IAsyncStreamReader<SubscribeOrdersResponse> _stream;
+        private TradeMarketService.TradeMarketServiceClient _client;
 
-        public TradeMarketClientService(Uri uri)
+        public TradeMarketClient(Uri uri)
         {
-            var client = new TradeMarketService.TradeMarketServiceClient(GrpcChannel.ForAddress(uri));
-            Metadata meta = new Metadata();
-            meta.Add("sessionid", "123");
-            meta.Add("slot", "XBTUSD");
-            _stream = client.SubscribeOrders(new SubscribeOrdersRequest()
+             _client = new TradeMarketService.TradeMarketServiceClient(GrpcChannel.ForAddress(uri));   
+        }
+
+        public IAsyncStreamReader<SubscribeOrdersResponse> OpenStream(Metadata meta)
+        {
+            return _client.SubscribeOrders(new SubscribeOrdersRequest()
             {
                 Request = new TradeBot.Common.v1.SubscribeOrdersRequest()
                 {
@@ -31,17 +32,18 @@ namespace Relay.Clients
                         Status = OrderStatus.Closed
                     }
                 }
-            },meta).ResponseStream;
+            }, meta).ResponseStream;
+        }
+
+        public async void SubscribeForOrders(IAsyncStreamReader<SubscribeOrdersResponse> stream)
+        {
+
+            while (await stream.MoveNext())
+            {
+                OrderRecievedEvent?.Invoke(this, new(stream.Current.Response.Order));
+            }
         }
 
         public event EventHandler<Order> OrderRecievedEvent;
-
-        public async Task ReadOrders()
-        {
-            while (await _stream.MoveNext())
-            {
-                OrderRecievedEvent?.Invoke(this,new (_stream.Current.Response.Order));
-            }
-        }
     }
 }
