@@ -24,7 +24,7 @@ namespace Account
             // Проверка на существование входа в аккаунт. Если аккаунт среди вошедших не найден, отправляется
             // сообщение об ошибке.
             if (!State.loggedIn.ContainsKey(request.SessionId))
-                return Task.FromResult(AddExchangeAccessReplies.FailedAddition);
+                return Task.FromResult(AddExchangeAccessReplies.AccountNotFound);
 
             // Валидация полученных данных. В случае, если валидация не прошла успешно, возвращается сообщение об ошибке.
             ValidationMessage validationResult = Validate.AddExchangeAccessFields(request);
@@ -42,21 +42,16 @@ namespace Account
             {
                 var account = database.Accounts.Where(account => account.AccountId == State.loggedIn[request.SessionId].AccountId);
 
-                // Пока некрасиво сделан ответ :(
-                // Проверка на то, добавлен ли токен для той же биржи, что добавляется
+                // Проверка на то, добавлен ли токен для той же биржи, что добавляется.
                 bool isExists = database.ExchangeAccesses.Any(exchange =>
                     exchange.Account.AccountId == account.First().AccountId &&
                     exchange.Code == request.Code);
 
+                // В случае, если данные доступа к бирже уже существуют, возвращается сообщение об этом.
                 if (isExists)
-                {
-                    return Task.FromResult(new AddExchangeAccessReply
-                    {
-                        Result = ActionCode.ExchangeExists,
-                        Message = "Биржа уже существует"
-                    });
-                }
+                    return Task.FromResult(AddExchangeAccessReplies.ExchangeAccessExists);
 
+                // Добавление в текущий аккаунт нового доступа к бирже.
                 account.First().ExchangeAccesses.Add(new Models.ExchangeAccess
                 {
                     Code = request.Code,
@@ -98,10 +93,10 @@ namespace Account
         {
             using (var database = new AccountContext())
             {
-                // Получение данных биржи для текущего пользователя.
+                // Получение данных биржи для текущего пользователя и биржи с конкретным кодом.
                 var exhangeAccess = database.ExchangeAccesses.Where(exchange =>
                     exchange.Account.AccountId == State.loggedIn[request.SessionId].AccountId &&
-                    exchange.ExchangeAccessId == request.ExchangeAccessId);
+                    exchange.Code == request.Code);
 
                 // В случае, если такой записи не обнаружено, сервис отвечает ошибкой.
                 if (exhangeAccess.Count() == 0)
@@ -114,47 +109,24 @@ namespace Account
             return Task.FromResult(DeleteExchangeAccessReplies.SuccessfulDeleting);
         }
 
-        // Пока все сыро и некрасиво, и даже не факт, что работает, ибо я не проверял
+        // Получение данных конкретной биржи пользователя.
         public override Task<ExchangeBySessionReply> ExchangeBySession(ExchangeBySessionRequest request, ServerCallContext context)
         {
+            // В случае, если аккаунт не найден среди вошедших, возвращается сообщение об ошибке.
             if (!State.loggedIn.ContainsKey(request.SessionId))
-                return Task.FromResult(new ExchangeBySessionReply
-                {
-                    Result = ActionCode.AccountNotFound,
-                    Message = "Произошла ошибка: пользователь не найден",
-                    Exchange = null
-                });
+                return Task.FromResult(ExchangeBySessionReplies.AccountNotFound);
 
             using (var database = new AccountContext())
             {
+                // Поиск данных конкретной биржи пользователя.
                 var exchangeAccesses = database.ExchangeAccesses.Where(exchange => exchange.Code == request.Code &&
                     exchange.Account.AccountId == State.loggedIn[request.SessionId].AccountId);
-
+                // Если такой биржи не было найдено, возвращается сообшение об ошибке.
                 if (exchangeAccesses.Count() == 0)
-                {
-                    return Task.FromResult(new ExchangeBySessionReply
-                    {
-                        Result = ActionCode.ExchangeNotFound,
-                        Message = "Произошла ошибка: биржа не найдена",
-                        Exchange = null
-                    });
-                }
-
+                    return Task.FromResult(ExchangeBySessionReplies.ExchangeNotFound);
+                // В случае успешного получения доступа к бирже она возвращается в качестве ответа.
                 var exchangeAccess = exchangeAccesses.First();
-                ExchangeBySessionReply reply = new ExchangeBySessionReply
-                {
-                    Result = ActionCode.Successful,
-                    Message = "Успешно",
-                    Exchange = new ExchangeAccessInfo
-                    {
-                        ExchangeAccessId = exchangeAccess.ExchangeAccessId,
-                        Code = exchangeAccess.Code,
-                        Name = exchangeAccess.Name,
-                        Token = exchangeAccess.Token,
-                        Secret = exchangeAccess.Secret
-                    }
-                };
-                return Task.FromResult(reply);
+                return Task.FromResult(ExchangeBySessionReplies.SuccessfulGettingExchangeAccess(exchangeAccess));
             }
         }
     }

@@ -6,6 +6,7 @@ using TradeBot.Account.AccountService.v1;
 
 namespace Account.Models
 {
+    // Описание таблицы с информацией о доступе к бирже пользователя.
     public class ExchangeAccess
     {
         public int ExchangeAccessId { get; set; }
