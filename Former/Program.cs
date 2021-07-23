@@ -21,22 +21,13 @@ namespace Former
                 { "slot", "XBTUSD" }
             };
 
-            TradeMarketClient.Configure("https://localhost:5005", 10000, meta);
-            TradeMarketClient observers = TradeMarketClient.GetInstance();
-            Former.config = new Config
-            {
-                AvaibleBalance = 1.0,
-                ContractValue = 10.0,
-                RequiredProfit = 0.5,
-                OrderUpdatePriceRange = 1.0,
-                SlotFee = 0.2,
-                TotalBalance = 0
-            };
+            //TradeMarketClient.Configure("https://localhost:5005", 10000, null);
+            //TradeMarketClient observers = TradeMarketClient.GetInstance();
 
-            //while (Former.config is null) { }
+            //while (TradeMarketClient._entries is null) { }
 
-            observers.ObserveOrderBook();
-            observers.ObserveBalance();
+            //observers.ObserveOrderBook();
+            //observers.ObserveBalance();
             //observers.ObserveMyOrders();
 
             CreateHostBuilder(args).Build().Run();

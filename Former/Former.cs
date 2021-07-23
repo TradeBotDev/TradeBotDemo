@@ -20,23 +20,35 @@ namespace Former
 
         private double _balance = 100;
 
-        private readonly int _ordersCount;
+        public Config Config
+        {
+            get; set;
+        }
 
-        public static Config config;
-
-        public Former(int ordersCount)
+        //TODO формер не должне принимать конфиг как аргмунет конструктора, но должен принимать конфиг ( или контекст пользователя) как аргумент своих методов
+        public Former(Config config)
         {
             _tmClient = TradeMarketClient.GetInstance();
             _tmClient.UpdateOrderBook += UpdateOrderBook;
             _tmClient.UpdateBalance += UpdateBalance;
             _tmClient.UpdateMyOrders += UpdateMyOrderList;
 
-            _ordersCount = ordersCount;
+            //кастомный конфиг
+            //config = new Config
+            //{
+            //    AvaibleBalance = 1.0,
+            //    ContractValue = 10.0,
+            //    RequiredProfit = 0.5,
+            //    OrderUpdatePriceRange = 1.0,
+            //    SlotFee = 0.2,
+            //    TotalBalance = 0
+            //};
+            _config = config;
             _orderBook = new ConcurrentDictionary<string, Order>();
             _myOrders = new ConcurrentDictionary<string, Order>();
         }
 
-        private async void UpdateOrderBook(Order orderNeededUpdate)
+        private async void UpdateOrderBook(Order orderNeededUpdate,Config config)
         {
             var task = Task.Run(() =>
             {
@@ -56,10 +68,10 @@ namespace Former
             });
             await task;
             //???????????????????????????????????????????????????????????????????????????????????????????
-            if (_orderBook.Count > _ordersCount) await FitPrices(_orderBook);
+            if (_orderBook.Count > 2) await FitPrices(_orderBook);
         }
 
-        private async void SellPartContracts(string id, Order orderNeededUpdate, double sellPrice) 
+        private async void SellPartOfContracts(string id, Order orderNeededUpdate, double sellPrice) 
         {
             double newQuantity;
             if (_myOrders.TryGetValue(id, out Order beforeUpdate))
@@ -77,7 +89,7 @@ namespace Former
             {
                 if (status == OrderStatus.Open && type == OrderType.Buy)
                 {
-                    SellPartContracts(id, orderNeededUpdate, sellPrice);
+                    SellPartOfContracts(id, orderNeededUpdate, sellPrice);
                     _myOrders.AddOrUpdate(id, orderNeededUpdate, (k, v) =>
                     {
                         Log.Information("Order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} added or updated", id, orderNeededUpdate.Price, orderNeededUpdate.Quantity, orderNeededUpdate.Signature.Type, orderNeededUpdate.Signature.Status);
@@ -140,11 +152,11 @@ namespace Former
                 await _tmClient.TellTMUpdateMyOrders(ordersNeededToFit);
         }
 
-        public async void FormPurchaseList(double avgPrice)
+        public async void FormPurchaseList(double avgPrice,UserContext context)
         {
             Log.Debug("Received from algorithm: {price}", avgPrice);
             //config.AvaibleBalance это доступный баланс в процентах
-            double availableBalance = _balance * config.AvaibleBalance;
+            double availableBalance = _balance * context.config.AvaibleBalance;
             var selectedOrders = new Dictionary<double, double>();
             foreach (var order in _orderBook)
             {
