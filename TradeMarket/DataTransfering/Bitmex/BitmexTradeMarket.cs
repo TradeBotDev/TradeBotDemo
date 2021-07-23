@@ -132,6 +132,7 @@ namespace TradeMarket.DataTransfering.Bitmex
         {
             var response = await context.RestClient.SendAsync(new PlaceOrderRequest(context.Key, context.Secret, new global::Bitmex.Client.Websocket.Responses.Orders.Order
             {
+                //TODO тут переделать под лимит ордер
                 OrdType = "Sell",
                 Price = price,
                 OrderQty = (long?)quontity

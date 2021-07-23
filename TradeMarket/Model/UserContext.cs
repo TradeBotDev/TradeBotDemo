@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Common.v1;
+using TradeMarket.Clients;
 using TradeMarket.DataTransfering.Bitmex.Rest.Client;
 
 namespace TradeMarket.Model
@@ -30,6 +31,26 @@ namespace TradeMarket.Model
         internal BitmexWebsocketClient WSClient { get; set; }
         internal BitmexRestfulClient RestClient { get; set; }
 
+        private AccountClient _accountClient = AccountClient.GetInstance();
+
+        private async void init()
+        {
+            //Ключи от общего аккаунта :
+            // Key = "lVjs4QoJIe9OqNUnDoVKl2jS";
+            // Secret = "MAX6lma-Y93bfT3w-g5GtAgvsFNhDLrYlyyqkciDUwRTy64s";
+            var keySecretPair = await _accountClient.GetUserInfo(SessionId).ContinueWith(el => {
+                Key = el.Result.Key;
+                Secret = el.Result.Secret;
+                return AutheticateUser();
+            } );
+
+            //инициализация подписок
+            TradeMarket.SubscribeToBalance((sender, el) => { UserBalance?.Invoke(sender, el); }, this);
+            TradeMarket.SubscribeToBook((sender, el) => { Book?.Invoke(sender, el); }, this);
+            TradeMarket.SubscribeToBook25((sender, el) => Book25?.Invoke(sender, el), this);
+            TradeMarket.SubscribeToUserOrders((sender, el) => UserOrders?.Invoke(sender, el), this);
+        }
+
 
         internal UserContext(string sessionId, string slotName, Model.TradeMarket tradeMarket)
         {
@@ -43,18 +64,10 @@ namespace TradeMarket.Model
 
             SessionId = sessionId;
             SlotName = slotName;
-            //TODO обращение к сервису авторизации для получения ключа и секретки
-            Key = "lVjs4QoJIe9OqNUnDoVKl2jS";
-            Secret = "MAX6lma-Y93bfT3w-g5GtAgvsFNhDLrYlyyqkciDUwRTy64s";
 
             TradeMarket = tradeMarket;
-            AutheticateUser();
 
-            //инициализация подписок
-            TradeMarket.SubscribeToBalance((sender, el) => { UserBalance?.Invoke(sender, el); }, this);
-            TradeMarket.SubscribeToBook((sender, el) => { Book?.Invoke(sender, el); }, this);
-            TradeMarket.SubscribeToBook25((sender, el) => Book25?.Invoke(sender, el), this);
-            TradeMarket.SubscribeToUserOrders((sender, el) => UserOrders?.Invoke(sender, el), this);
+            init();
 
         }
 

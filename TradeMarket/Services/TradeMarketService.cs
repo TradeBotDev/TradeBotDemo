@@ -89,7 +89,7 @@ namespace TradeMarket.Services
 
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
-            var user = UserContextData.GetUserContext(sessionId, slot);
+            var user = UserContext.GetUserContext(sessionId, slot);
 
             var response = await user.PlaceOrder(request.Value, request.Price);
 
@@ -104,7 +104,7 @@ namespace TradeMarket.Services
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
 
-            var user = UserContextData.GetUserContext(sessionId, slot);
+            var user = UserContext.GetUserContext(sessionId, slot);
 
             FakeSlotPublisher.GetInstance().Changed += async (sender, args) =>
             {
@@ -132,7 +132,7 @@ namespace TradeMarket.Services
         {
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
-            var user = UserContextData.GetUserContext(sessionId,slot);
+            var user = UserContext.GetUserContext(sessionId,slot);
 
             user.UserBalance += async (sender, args) => {
                 await WriteStreamAsync<SubscribeBalanceResponse>(responseStream, ConvertBalance(args));
@@ -151,14 +151,25 @@ namespace TradeMarket.Services
         {
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
-            var user = UserContextData.GetUserContext(sessionId, slot);
-            user.Book25 += async (sender, args) => {
-                var order = ConvertOrder(args);
-                _logger.LogInformation($"Sent order : {order} to former");
-                await WriteStreamAsync<SubscribeOrdersResponse>(responseStream, order);
-            };
-            //TODO отписка после отмены
-            await AwaitCancellation(context.CancellationToken);
+            try
+            {
+                var user = UserContext.GetUserContext(sessionId, slot);
+                user.Book25 += async (sender, args) => {
+                    var order = ConvertOrder(args);
+                    _logger.LogInformation($"Sent order : {order} to former");
+                    await WriteStreamAsync<SubscribeOrdersResponse>(responseStream, order);
+                };
+                //TODO отписка после отмены
+                await AwaitCancellation(context.CancellationToken);
+            }
+            catch (Exception e)
+            {
+                context.Status = Status.DefaultCancelled;
+                context.ResponseTrailers.Add("sessionid", sessionId);
+                context.ResponseTrailers.Add("error", e.Message);
+
+            }
+
         }
 
         private static Task AwaitCancellation(CancellationToken token)
