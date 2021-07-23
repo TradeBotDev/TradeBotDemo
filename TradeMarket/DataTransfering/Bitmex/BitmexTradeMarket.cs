@@ -32,8 +32,9 @@ namespace TradeMarket.DataTransfering.Bitmex
         public override event EventHandler<FullOrder> UserOrdersUpdate;
         public override event EventHandler<Model.Balance> BalanceUpdate;
 
-        public BitmexTradeMarket()
+        public BitmexTradeMarket(string name)
         {
+            Name = name;
         }
 
         private void _userWalletPublisher_Changed(object sender, IPublisher<global::Bitmex.Client.Websocket.Responses.Wallets.Wallet>.ChangedEventArgs e)
@@ -105,7 +106,7 @@ namespace TradeMarket.DataTransfering.Bitmex
             return order;
         }
 
-        public async override Task<DefaultResponse> AutheticateUser(string api, string secret, BitmexUserContext context)
+        public async override Task<DefaultResponse> AutheticateUser(string api, string secret, UserContext context)
         {
             if(UserAuthenticationPublisher is null){
                 UserAuthenticationPublisher = new AuthenticationPublisher(context.WSClient, context.WSClient.Streams.AuthenticationStream);
@@ -122,15 +123,16 @@ namespace TradeMarket.DataTransfering.Bitmex
         }
 
         //TODO дописать 
-        public override Task<DefaultResponse> CloseOrder(string id,BitmexUserContext context)
+        public override Task<DefaultResponse> CloseOrder(string id,UserContext context)
         {
             throw new NotImplementedException();
         }
 
-        public async override Task<DefaultResponse> PlaceOrder(double quontity, double price,BitmexUserContext context)
+        public async override Task<DefaultResponse> PlaceOrder(double quontity, double price,UserContext context)
         {
             var response = await context.RestClient.SendAsync(new PlaceOrderRequest(context.Key, context.Secret, new global::Bitmex.Client.Websocket.Responses.Orders.Order
             {
+                //TODO тут переделать под лимит ордер
                 OrdType = "Sell",
                 Price = price,
                 OrderQty = (long?)quontity
@@ -149,7 +151,7 @@ namespace TradeMarket.DataTransfering.Bitmex
             };
         }
 
-        public async override void SubscribeToBook25(EventHandler<FullOrder> handler, BitmexUserContext context)
+        public async override void SubscribeToBook25(EventHandler<FullOrder> handler, UserContext context)
         {
             if(Book25Publisher is null)
             {
@@ -160,7 +162,7 @@ namespace TradeMarket.DataTransfering.Bitmex
             Book25Update += handler;
         }
 
-        public async override void SubscribeToBook(EventHandler<FullOrder> handler, BitmexUserContext context)
+        public async override void SubscribeToBook(EventHandler<FullOrder> handler, UserContext context)
         {
             if (BookPublisher is null)
             {
@@ -171,7 +173,7 @@ namespace TradeMarket.DataTransfering.Bitmex
             BookUpdate += handler;
         }
 
-        public async override void SubscribeToUserOrders(EventHandler<FullOrder> handler, BitmexUserContext context)
+        public async override void SubscribeToUserOrders(EventHandler<FullOrder> handler, UserContext context)
         {
             if (UserOrdersPublisher is null)
             {
@@ -182,7 +184,7 @@ namespace TradeMarket.DataTransfering.Bitmex
             UserOrdersUpdate += handler;
         }
 
-        public async override void SubscribeToBalance(EventHandler<Model.Balance> handler, BitmexUserContext context)
+        public async override void SubscribeToBalance(EventHandler<Model.Balance> handler, UserContext context)
         {
             if (UserWalletPublisher is null)
             {

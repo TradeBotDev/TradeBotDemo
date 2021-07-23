@@ -10,7 +10,7 @@ using UpdateServerConfigRequest = TradeBot.Algorithm.AlgorithmService.v1.UpdateS
 using Grpc.Net.ClientFactory;
 namespace Relay.Clients
 {
-    public class AlgorithmClientService
+    public class AlgorithmClient
     {
         private bool _isOn = false;
 
@@ -35,27 +35,23 @@ namespace Relay.Clients
             }
         }
 
-        private AsyncClientStreamingCall<AddOrderRequest, AddOrderResponse> _call;
-        private readonly IClientStreamWriter<AddOrderRequest> _stream;
         private readonly AlgorithmService.AlgorithmServiceClient _client;
         
-        public AlgorithmClientService(Uri uri)
+        public AlgorithmClient(Uri uri)
         {
-           
-            _client = new AlgorithmService.AlgorithmServiceClient(GrpcChannel.ForAddress(uri));
-            Metadata meta = new Metadata();
-            meta.Add("sessionid", "123");
-            meta.Add("slot", "XBTUSD");
-            _call = _client.AddOrder(meta);
-            _stream = _call.RequestStream;
-
+           _client = new AlgorithmService.AlgorithmServiceClient(GrpcChannel.ForAddress(uri));
         }
 
-        public void WriteOrder(Order order)
+        public IClientStreamWriter<AddOrderRequest> OpenStream(Metadata meta)
+        {
+            return _client.AddOrder(meta).RequestStream;
+        }
+
+        public void WriteOrder(IClientStreamWriter<AddOrderRequest> stream,Order order)
         {
             try
             {
-               _stream.WriteAsync(new AddOrderRequest()
+               stream.WriteAsync(new AddOrderRequest()
                {
                    Order = order
                });
@@ -67,7 +63,7 @@ namespace Relay.Clients
             }
         }
 
-        public async Task UpdateConfig(Config config)
+        public async Task UpdateConfig(Config config,Metadata meta)
         {
             await _client.UpdateServerConfigAsync(new UpdateServerConfigRequest()
             {
@@ -75,7 +71,7 @@ namespace Relay.Clients
                 {
                     Config = config
                 }
-            });
+            },meta);
         }
         
     }

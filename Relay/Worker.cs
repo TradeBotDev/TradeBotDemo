@@ -12,10 +12,10 @@ namespace Relay
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
-        private readonly AlgorithmClientService _algorithm;
-        private readonly TradeMarketClientService _tradeMarket;
+        private readonly AlgorithmClient _algorithm;
+        private readonly TradeMarketClient _tradeMarket;
 
-        public Worker(ILogger<Worker> logger,AlgorithmClientService algorithm,TradeMarketClientService tradeMarket)
+        public Worker(ILogger<Worker> logger,AlgorithmClient algorithm,TradeMarketClient tradeMarket)
         {
             _logger = logger;
             this._algorithm = algorithm;
@@ -24,12 +24,6 @@ namespace Relay
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await Task.Delay(3000);
-            _tradeMarket.OrderRecievedEvent += (sender, args) =>
-            {
-                _logger.LogInformation($"Sending order {args}");
-                _algorithm.WriteOrder(args);
-            };
             while (!stoppingToken.IsCancellationRequested)
             {
 
