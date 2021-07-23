@@ -10,6 +10,7 @@ namespace TradeMarket.Model
 {
     public abstract class TradeMarket
     {
+        #region Dynamic Part
         public string Name { get; internal set; }
 
         public abstract Task<DefaultResponse> PlaceOrder(double quontity, double price,UserContext context);
@@ -31,6 +32,23 @@ namespace TradeMarket.Model
         public abstract event EventHandler<FullOrder> BookUpdate;
         public abstract event EventHandler<FullOrder> UserOrdersUpdate;
         public abstract event EventHandler<Balance> BalanceUpdate;
+        #endregion
 
+        #region Static Part
+
+        private static IDictionary<string, TradeMarket> _tradeMarkets = new Dictionary<string, TradeMarket>(new List<KeyValuePair<string, TradeMarket>>
+        {
+            new KeyValuePair<string, TradeMarket>("Bitmex",new BitmexTradeMarket("Bitmex"))
+        });
+
+        public static TradeMarket GetTradeMarket(string name)
+        {
+            if (_tradeMarkets.ContainsKey(name))
+            {
+                return _tradeMarkets[name];
+            }
+            throw new ArgumentException($"{name} hasn't been implemented yet");
+        }
+        #endregion
     }
-    }
+}

@@ -93,7 +93,7 @@ namespace TradeMarket.Model
 
         public static void RegisterUser(string sessionId, string slotName, string tradeMarketName) 
         {
-            UserContext user = new UserContext(sessionId, slotName, TradeMarketData.GetTradeMarket(tradeMarketName));
+            UserContext user = new UserContext(sessionId, slotName, TradeMarket.GetTradeMarket(tradeMarketName));
 
             RegisteredUsers.Add(user);
         }
