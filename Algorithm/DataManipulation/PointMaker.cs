@@ -10,7 +10,6 @@ namespace Algorithm.DataManipulation
     //later will be decided by user
     public class PointMaker
     {
-        public event EventHandler<KeyValuePair<DateTime, double>> PointMadeEvent;
         private static  KeyValuePair<DateTime, double> MakePoint(List<Order> orders, DateTime timestamp)
         {           
             double price = 0;
@@ -24,7 +23,10 @@ namespace Algorithm.DataManipulation
                     numberOfOrders++;
                 }
             }
-            price /= numberOfOrders;
+            if (numberOfOrders != 0)
+            {
+                price /= numberOfOrders;
+            } else { price = 0; }
             Console.WriteLine("Made a point: " + timestamp.TimeOfDay + "    " + price);
             return new KeyValuePair<DateTime, double>(timestamp, price);
         }
@@ -33,19 +35,17 @@ namespace Algorithm.DataManipulation
         {
             while (true)
             {
-                Thread.Sleep(3000);
+                Thread.Sleep(2000);
                 if (DataCollector.Orders.Count == 0)
                     continue;
 
                     var newOrders = DataCollector.Orders;
-                    var newPoint = MakePoint(newOrders, DateTime.Now);
+                    var newPoint = MakePoint(new List<Order>(newOrders), DateTime.Now);
                     publisher.Publish(newPoint);
-                    newOrders.Clear();
-                
+
+                    Console.WriteLine("Sending the command to clear used orders");
+                    dataCollector.ClearUsedData(newPoint);              
             }
-        }
-
-        
-
+        }       
     }
 }

@@ -33,9 +33,9 @@ namespace Algorithm
         {
             //await PriceSender.SendPrice();
             Publisher publisher = new();
-            DataCollector dc = new();
+            DataCollector dc = new(publisher);
             var pm = new PointMaker();
-            AlgorithmAlpha algo = new();
+            AlgorithmAlpha algo = new(publisher);
             pm.Launch(publisher, dc);
         }
     }

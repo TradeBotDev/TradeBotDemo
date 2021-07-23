@@ -13,12 +13,10 @@ namespace Algorithm.Analysis
     public class AlgorithmAlpha
     {
         private readonly Dictionary<DateTime, double> _storage;
-        //SendPrice sendPrice = PriceSender.SendPrice;
-        //public SendPrice sendPriceEvent;
 
-        public AlgorithmAlpha()
+        public AlgorithmAlpha(Publisher publisher)
         {
-            Publisher publisher = new();
+
             publisher.PointMadeEvent += NewPointAlert;
 
             _storage = new Dictionary<DateTime, double>();
@@ -27,7 +25,11 @@ namespace Algorithm.Analysis
         //hardcoded for five points!! 
         private void NewPointAlert(KeyValuePair<DateTime, double> point)
         {
-            _storage.Add(point.Key, point.Value);
+            // break here?? 
+            if (point.Value != 0)
+            { 
+                _storage.Add(point.Key, point.Value); 
+            }
             if (_storage.Count > 5)
             {
                 var toRemove = _storage.OrderBy(kvp => kvp.Key).First();
@@ -61,12 +63,13 @@ namespace Algorithm.Analysis
             }
         }
         //if the trend has been going downwards and now stopped and it going up
-        private static bool IsItTimeToBuy(IReadOnlyCollection<double> prices, Dictionary<DateTime, double> points)
+        public static bool IsItTimeToBuy(IReadOnlyCollection<double> prices, Dictionary<DateTime, double> points)
         {
             points.OrderBy(kvp => kvp.Key);
+            Console.WriteLine("Analysis...");
             return prices.ElementAt(0) >= prices.ElementAt(1)
                    && prices.ElementAt(1) >= prices.ElementAt(2)
-                   && prices.ElementAt(2) < points.ElementAt(4).Value;
+                   && prices.ElementAt(2) <= points.ElementAt(4).Value;
         }
         public static double CalculateSMA(Dictionary<DateTime, double> points)
         {
