@@ -57,7 +57,7 @@ namespace Facade
                 }
             }
         }
-
+        
         public override async Task Slots(SlotsRequest request, IServerStreamWriter<SlotsResponse> responseStream, ServerCallContext context)
         {
             while (true)
@@ -195,11 +195,11 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e);
+                    Log.Information("Exception:"+e.Message);
                 }
             }
+            Log.Information("Client disconnected");
             return Task.FromResult(new SwitchBotResponse { });
-
         }
         public override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request, ServerCallContext context)
         {
@@ -217,9 +217,10 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e);
+                    Log.Information("Exception:" + e.Message);
                 }
             }
+            Log.Information("Client disconnected");
             return Task.FromResult(new UpdateServerConfigResponse { });
         }
         #endregion
@@ -247,9 +248,10 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e);
+                    Log.Information("Exception:" + e.Message);
                 }
             }
+            Log.Information("Client disconnected");
             return Task.FromResult(new LoginReply { });
         }
 
@@ -271,9 +273,10 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e);
+                    Log.Information("Exception:" + e.Message);
                 }
             }
+            Log.Information("Client disconnected");
             return Task.FromResult(new LogoutReply { });
         }
 
@@ -303,9 +306,10 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e);
+                    Log.Information("Exception:" + e.Message);
                 }
             }
+            Log.Information("Client disconnected");
             return Task.FromResult(new RegisterReply { });
         }
 
@@ -326,9 +330,10 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e);
+                    Log.Information("Exception:" + e.Message);
                 }
             }
+            Log.Information("Client disconnected");
             return Task.FromResult(new SessionReply { });
         }
 
@@ -359,7 +364,7 @@ namespace Facade
                     {
                         accountResponse.CurrentAccount.Exchanges.Add(new ExchangeAccessInfo
                         {
-                            Secret=item.Secret,
+                            Secret = item.Secret,
                             Code= (ExchangeCode)item.Code,
                             ExchangeAccessId=item.ExchangeAccessId,
                             Name=item.Name,
@@ -370,9 +375,10 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e);
+                    Log.Information("Exception:" + e.Message);
                 }
             }
+            Log.Information("Client disconnected");
             return Task.FromResult(new CurrentAccountReply { });
         }
 
@@ -387,7 +393,7 @@ namespace Facade
                     var response = clientExchange.AddExchangeAccess(new TradeBot.Account.AccountService.v1.AddExchangeAccessRequest 
                     { 
                         Code= (TradeBot.Account.AccountService.v1.ExchangeCode)request.Code,
-                        Secret= request.Secret,
+                        Secret =request.Secret,
                         ExchangeName=request.ExchangeName,
                         SessionId=request.SessionId,
                         Token=request.Token
@@ -400,9 +406,10 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e);
+                    Log.Information("Exception:" + e.Message);
                 }
             }
+            Log.Information("Client disconnected");
             return Task.FromResult(new AddExchangeAccessReply { });
         }
 
@@ -435,9 +442,10 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e);
+                    Log.Information("Exception:" + e.Message);
                 }
             }
+            Log.Information("Client disconnected");
             return Task.FromResult(new AllExchangesBySessionReply { });
         }
 
@@ -488,57 +496,15 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e);
+                    Log.Information("Exception:" + e.Message);
                 }
             }
+            Log.Information("Client disconnected");
             return Task.FromResult(new ExchangeBySessionReply { });
         }
         #endregion
 
-        //TODO переписать на акк
-        public override Task<AuthenticateTokenResponse> AuthenticateToken(AuthenticateTokenRequest request, ServerCallContext context)
-        {
-            while (true)
-            {
-                try
-                {
-                    if (context.CancellationToken.IsCancellationRequested) break;
-                    var response = clientTM.AuthenticateToken(new TradeBot.TradeMarket.TradeMarketService.v1.AuthenticateTokenRequest { Token = request.Token });
-                    return Task.FromResult(new AuthenticateTokenResponse
-                    {
-                        Response = response.Response
-                    });
-                }
-                catch (RpcException e)
-                {
-                    Log.Information("Exception:" + e);
-
-                }
-            }
-            return Task.FromResult(new AuthenticateTokenResponse { });
-
-        }
-        //public override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request, ServerCallContext context)
-        //{
-        //    var response = clientTM.UpdateServerConfig(request);
-
-        //    return Task.FromResult(new UpdateServerConfigResponse
-        //    { 
-        //        Response= response.Response
-        //    });
-
-        //}
-        //public override async Task SubscribeLogs(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
-        //{
-        //    using var response = clientTM.SubscribeLogs(request);
-        //    while(await response.ResponseStream.MoveNext())
-        //    {
-        //        await responseStream.WriteAsync(new SubscribeLogsResponse
-        //        { 
-        //            Response = response.ResponseStream.Current.Response
-        //        });
-        //    }
-        //}
+        
     }
 
 }
