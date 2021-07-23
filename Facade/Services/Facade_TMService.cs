@@ -57,7 +57,7 @@ namespace Facade
                 }
             }
         }
-
+        
         public override async Task Slots(SlotsRequest request, IServerStreamWriter<SlotsResponse> responseStream, ServerCallContext context)
         {
             while (true)
@@ -195,11 +195,11 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e);
+                    Log.Information("Exception:"+e.Message);
                 }
             }
+            Log.Information("Client disconnected");
             return Task.FromResult(new SwitchBotResponse { });
-
         }
         public override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request, ServerCallContext context)
         {
@@ -217,9 +217,10 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e);
+                    Log.Information("Exception:" + e.Message);
                 }
             }
+            Log.Information("Client disconnected");
             return Task.FromResult(new UpdateServerConfigResponse { });
         }
         #endregion
@@ -247,9 +248,10 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e);
+                    Log.Information("Exception:" + e.Message);
                 }
             }
+            Log.Information("Client disconnected");
             return Task.FromResult(new LoginReply { });
         }
 
@@ -271,9 +273,10 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e);
+                    Log.Information("Exception:" + e.Message);
                 }
             }
+            Log.Information("Client disconnected");
             return Task.FromResult(new LogoutReply { });
         }
 
@@ -303,9 +306,10 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e);
+                    Log.Information("Exception:" + e.Message);
                 }
             }
+            Log.Information("Client disconnected");
             return Task.FromResult(new RegisterReply { });
         }
 
@@ -326,9 +330,10 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e);
+                    Log.Information("Exception:" + e.Message);
                 }
             }
+            Log.Information("Client disconnected");
             return Task.FromResult(new SessionReply { });
         }
 
@@ -370,9 +375,10 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e);
+                    Log.Information("Exception:" + e.Message);
                 }
             }
+            Log.Information("Client disconnected");
             return Task.FromResult(new CurrentAccountReply { });
         }
 
@@ -400,9 +406,10 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e);
+                    Log.Information("Exception:" + e.Message);
                 }
             }
+            Log.Information("Client disconnected");
             return Task.FromResult(new AddExchangeAccessReply { });
         }
 
@@ -435,9 +442,10 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e);
+                    Log.Information("Exception:" + e.Message);
                 }
             }
+            Log.Information("Client disconnected");
             return Task.FromResult(new AllExchangesBySessionReply { });
         }
 
@@ -488,9 +496,10 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e);
+                    Log.Information("Exception:" + e.Message);
                 }
             }
+            Log.Information("Client disconnected");
             return Task.FromResult(new ExchangeBySessionReply { });
         }
         #endregion
