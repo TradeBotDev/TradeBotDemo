@@ -89,11 +89,16 @@ namespace Account
         // Метод, удаляющий данные одной из бирж для текущего пользователя по id записи.
         public override Task<DeleteExchangeAccessReply> DeleteExchangeAccess(DeleteExchangeAccessRequest request, ServerCallContext context)
         {
+            if (!State.loggedIn.ContainsKey(request.SessionId))
+                return Task.FromResult(DeleteExchangeAccessReplies.AccountNotFound);
+
             using (var database = new AccountContext())
             {
+                LoggedAccount fromAccount = State.loggedIn[request.SessionId];
+
                 // Получение данных биржи для текущего пользователя и биржи с конкретным кодом.
                 var exсhangeAccess = database.ExchangeAccesses.Where(exchange =>
-                    exchange.Account.AccountId == State.loggedIn[request.SessionId].AccountId &&
+                    exchange.Account.AccountId == fromAccount.AccountId &&
                     exchange.Code == request.Code);
 
                 // В случае, если такой записи не обнаружено, сервис отвечает ошибкой.
@@ -119,9 +124,11 @@ namespace Account
                 // Поиск данных конкретной биржи пользователя.
                 var exchangeAccesses = database.ExchangeAccesses.Where(exchange => exchange.Code == request.Code &&
                     exchange.Account.AccountId == State.loggedIn[request.SessionId].AccountId);
+
                 // Если такой биржи не было найдено, возвращается сообшение об ошибке.
                 if (exchangeAccesses.Count() == 0)
                     return Task.FromResult(ExchangeBySessionReplies.ExchangeNotFound);
+
                 // В случае успешного получения доступа к бирже она возвращается в качестве ответа.
                 var exchangeAccess = exchangeAccesses.First();
                 return Task.FromResult(ExchangeBySessionReplies.SuccessfulGettingExchangeAccess(exchangeAccess));
