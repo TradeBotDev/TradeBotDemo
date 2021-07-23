@@ -13,7 +13,7 @@ namespace Account.Models
 
         public string Token { get; set; }
 
-        public int Secret { get; set; }
+        public string Secret { get; set; }
 
         public Account Account { get; set; }
     }
