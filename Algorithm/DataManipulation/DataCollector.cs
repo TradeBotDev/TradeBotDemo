@@ -6,12 +6,14 @@ using System.Linq;
 using TradeBot.Common.v1;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
+using Grpc.Core;
 
 namespace Algorithm.DataManipulation
 {
     public class DataCollector
     {
         public static BlockingCollection<Order> Orders;
+        public static ServerCallContext metaData;
 
         //private readonly Publisher _publisher = new();
 

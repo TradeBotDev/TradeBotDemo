@@ -20,6 +20,7 @@ namespace Algorithm.Services
                 DataCollector.Orders.Add(order.Order);
                 Console.WriteLine("Got " + order.Order.Id + "   " + order.Order.Price);
             }
+            DataCollector.metaData = context;
             return new AddOrderResponse();
         }
 

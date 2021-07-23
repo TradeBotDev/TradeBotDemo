@@ -41,10 +41,7 @@ namespace Algorithm.DataManipulation
 
                     var newOrders = DataCollector.Orders;
                     var newPoint = MakePoint(new List<Order>(newOrders), DateTime.Now);
-                    publisher.Publish(newPoint);
-
-                    Console.WriteLine("Sending the command to clear used orders");
-                    dataCollector.ClearUsedData(newPoint);              
+                    publisher.Publish(newPoint);                                 
             }
         }       
     }

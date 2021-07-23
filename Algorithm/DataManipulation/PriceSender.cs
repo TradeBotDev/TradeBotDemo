@@ -15,7 +15,7 @@ namespace Algorithm.DataManipulation
 
         public static void SendPrice (double price)
         {
-            var response = Client.SendPurchasePrice(new SendPurchasePriceRequest { PurchasePrice = price });
+            var response = Client.SendPurchasePrice(new SendPurchasePriceRequest { PurchasePrice = price }, DataCollector.metaData.RequestHeaders);
             Console.WriteLine("Sent " + price);
         }
 
