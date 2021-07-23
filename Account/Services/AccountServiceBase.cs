@@ -1,11 +1,8 @@
 ﻿using Grpc.Core;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
-using Account.Validation;
 using Account.AccountMessages;
 using Account.Models;
 
@@ -32,7 +29,7 @@ namespace Account
             // их удаление из базы данных (только связанные с этим пользователем).
             if (!saveExchanges)
             {
-                using (var database = new Models.AccountContext())
+                using (var database = new AccountContext())
                 {
                     var exchanges = database.ExchangeAccesses.Where(exchange => exchange.Account.AccountId == accountId);
                     foreach (Models.ExchangeAccess exchange in exchanges)
@@ -68,7 +65,7 @@ namespace Account
             // Если текущий пользователь вошедший, то сервер возвращает данные этого пользователя.
             else
             {
-                using (Models.AccountContext database = new Models.AccountContext())
+                using (var database = new AccountContext())
                 {
                     // Получение данных вошедшего пользователя.
                     Models.Account account = database.Accounts.Where(id => id.AccountId == State.loggedIn[request.SessionId].AccountId).First(); 
