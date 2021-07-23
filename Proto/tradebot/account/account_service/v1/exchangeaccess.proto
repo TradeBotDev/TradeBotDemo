@@ -23,7 +23,7 @@ message AddExchangeAccessRequest {
 	account.ExchangeCode code = 2;
 	string exchange_name = 3;
 	string token = 4;
-	int32 secret = 5;
+	string secret = 5;
 }
 
 // Ответ на добавление биржи для текущего пользователя.

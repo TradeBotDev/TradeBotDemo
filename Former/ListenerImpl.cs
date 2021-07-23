@@ -17,7 +17,7 @@ namespace Former
 
         public override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request, ServerCallContext context)
         {
-            _former.SetConfig(request.Request);
+            Former.config = request.Request;
             return Task.FromResult(new UpdateServerConfigResponse());
         }
         public override Task<SendPurchasePriceResponse> SendPurchasePrice(SendPurchasePriceRequest request, ServerCallContext context)

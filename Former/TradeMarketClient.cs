@@ -66,7 +66,7 @@ namespace Former
                 }
                 catch (RpcException e)
                 {
-                    //Log.Error("Error {1}. Retrying...\r\n{0}", e.Status.DebugException.Message, e.StackTrace);
+                    Log.Error("Error {1}. Retrying...\r\n{0}", e.Status.DebugException.Message, e.StackTrace);
                     Thread.Sleep(_retryDelay);
                 }
             }
@@ -132,12 +132,13 @@ namespace Former
             await ConnectionTester(observeMyOrders);
         }
 
-        public async Task PlacePurchaseOrders(Dictionary<double, double> purchaseList)
+        public async Task PlaceOrdersList(Dictionary<double, double> purchaseList)
         {
             PlaceOrderResponse response = null;
             Func<Task> closeOrders;
             foreach (var order in purchaseList)
             {
+                Log.Information("Order: price: {0}, quantity: {1} placed", order.Key, order.Value);
                 closeOrders = async () =>
                 {
                     response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = order.Key, Value = order.Value }, _entries);
@@ -147,8 +148,9 @@ namespace Former
             }
         }
 
-        public async Task PlaceSellOrder(double sellPrice, double contractValue)
+        public async Task PlaceOrder(double sellPrice, double contractValue)
         {
+            Log.Information("Order: price: {0}, quantity: {1} placed", sellPrice, contractValue);
             PlaceOrderResponse response = null;
             Func<Task> placeSuccessfulOrders;
             placeSuccessfulOrders = async () =>
@@ -158,7 +160,7 @@ namespace Former
             await ConnectionTester(placeSuccessfulOrders);
         }
 
-        public async Task TellTMUpdateMyOreders(Dictionary<string, double> orderToUpdate)
+        public async Task TellTMUpdateMyOrders(Dictionary<string, double> orderToUpdate)
         {
             foreach (var order in orderToUpdate)
             {

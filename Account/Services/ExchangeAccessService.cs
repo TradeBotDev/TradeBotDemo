@@ -92,16 +92,16 @@ namespace Account
             using (var database = new AccountContext())
             {
                 // Получение данных биржи для текущего пользователя и биржи с конкретным кодом.
-                var exhangeAccess = database.ExchangeAccesses.Where(exchange =>
+                var exchangeAccess = database.ExchangeAccesses.Where(exchange =>
                     exchange.Account.AccountId == State.loggedIn[request.SessionId].AccountId &&
                     exchange.Code == request.Code);
 
                 // В случае, если такой записи не обнаружено, сервис отвечает ошибкой.
-                if (exhangeAccess.Count() == 0)
+                if (exchangeAccess.Count() == 0)
                     return Task.FromResult(DeleteExchangeAccessReplies.ExchangeNotFound);
 
                 // Если такая запись существует, производится ее удаление.
-                database.ExchangeAccesses.Remove(exhangeAccess.First());
+                database.ExchangeAccesses.Remove(exchangeAccess.First());
                 database.SaveChanges();
             }
             return Task.FromResult(DeleteExchangeAccessReplies.SuccessfulDeleting);

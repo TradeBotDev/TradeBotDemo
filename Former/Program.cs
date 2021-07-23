@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
 using Serilog;
+using TradeBot.Common.v1;
 
 namespace Former
 {
@@ -14,14 +15,25 @@ namespace Former
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
                 .CreateLogger();
-            Metadata meta = new Metadata();
-            meta.Add("sessionId","123");
-            meta.Add("slot", "XBTUSD");
+            var meta = new Metadata
+            {
+                { "sessionId", "123" },
+                { "slot", "XBTUSD" }
+            };
 
             TradeMarketClient.Configure("https://localhost:5005", 10000, meta);
             TradeMarketClient observers = TradeMarketClient.GetInstance();
+            Former.config = new Config
+            {
+                AvaibleBalance = 1.0,
+                ContractValue = 10.0,
+                RequiredProfit = 0.5,
+                OrderUpdatePriceRange = 1.0,
+                SlotFee = 0.2,
+                TotalBalance = 0
+            };
 
-
+            //while (Former.config is null) { }
 
             observers.ObserveOrderBook();
             observers.ObserveBalance();
