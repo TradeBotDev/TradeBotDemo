@@ -10,50 +10,75 @@ namespace Former
     public class UserContext
     {
         public string sessionId;
-        public string trademarket;
-        public string slot;
+        public string trademarketName;
+        public string slotName;
         public Config configuration;
-        public TradeMarketClient tradeMarketClient;
-        public Former former;
+        private TradeMarketClient _tradeMarketClient;
+        private Former _former;
 
         public Metadata Meta { get; internal set; }
 
         internal UserContext(string sessionId, string trademarket, string slot)
         {
 
-            //Meta.Add("sessionId", sessionId);
-            //Meta.Add("trademarket", trademarket);
-            //Meta.Add("slot", slot);
+            Meta.Add("sessionId", sessionId);
+            Meta.Add("trademarket", trademarket);
+            Meta.Add("slot", slot);
 
             TradeMarketClient.Configure("https://localhost:5005", 10000);
 
-            tradeMarketClient = new TradeMarketClient();
-            tradeMarketClient.SetMetadata(Meta);
-
-            former = new Former();
+            _tradeMarketClient = new TradeMarketClient();
+            _former = new Former();
             //Конфиг передается как параметр для любого метода
 
-            tradeMarketClient.UpdateOrderBook += UpdateOrderBook;
-            tradeMarketClient.UpdateBalance += UpdateBalance;
-            tradeMarketClient.UpdateMyOrders += UpdateMyOrderList;
+            _tradeMarketClient.UpdateOrderBook += UpdateOrderBook;
+            _tradeMarketClient.UpdateBalance += UpdateBalance;
+            _tradeMarketClient.UpdateMyOrders += UpdateMyOrderList;
 
+            ObserveOrderBook();
+            ObserveBalance();
+            ObserveMyOrders();
         }
 
         public async void FormPurchaseList(double AvgPrice)
         {
-            former.FormPurchaseList(AvgPrice, this);
+            await _former.FormPurchaseList(AvgPrice, this);
         }
         private async void UpdateOrderBook(Order orderNeededUpdate) 
         {
-            former.UpdateOrderBook(orderNeededUpdate, this);
+           await _former.UpdateOrderBook(orderNeededUpdate, this);
         }
         private async void UpdateMyOrderList(Order orderNeededUpdate)
         {
-            former.UpdateMyOrderList(orderNeededUpdate, this);
+            await _former.UpdateMyOrderList(orderNeededUpdate, this);
         }
         private async void UpdateBalance(Balance balance)
         {
-            former.UpdateBalance(balance);
+            await _former.UpdateBalance(balance);
+        }
+        public async Task PlaceOrder(double sellPrice, double contractValue)
+        {
+             await _tradeMarketClient.PlaceOrder(sellPrice, contractValue, this);
+        }
+        public async Task PlaceOrdersList(Dictionary<double, double> purchaseList) 
+        {
+             await _tradeMarketClient.PlaceOrdersList(purchaseList, this);
+        }
+        public async Task TellTMUpdateMyOrders(Dictionary<string, double> orderToUpdate)
+        {
+            await _tradeMarketClient.TellTMUpdateMyOrders(orderToUpdate, this);
+        }
+        private async void ObserveOrderBook()
+        {
+            await _tradeMarketClient.ObserveOrderBook(this);
+        }
+        private async void ObserveBalance()
+        {
+            await _tradeMarketClient.ObserveBalance(this);
+        }
+        private async void ObserveMyOrders()
+        {
+            await _tradeMarketClient.ObserveMyOrders(this);
         }
     }
 }

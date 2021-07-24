@@ -15,7 +15,6 @@ namespace Former
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
                 .CreateLogger();
-
             CreateHostBuilder(args).Build().Run();
         }
 

@@ -27,16 +27,13 @@ namespace Former
         private static int _retryDelay;
         private static string _connectionString;
 
-        public static Metadata _metadata;
-
         private readonly TradeMarketService.TradeMarketServiceClient _client;
         private readonly GrpcChannel _channel;
 
-        public void SetMetadata(Metadata metadata) 
+        public static void Configure(string connectionString, int retryDelay) 
         {
             _connectionString = connectionString;
             _retryDelay = retryDelay;
-            _metadata = meta;
         }
 
         public TradeMarketClient()
@@ -62,7 +59,7 @@ namespace Former
             }
         }
 
-        public async void ObserveOrderBook()
+        public async Task ObserveOrderBook(UserContext context)
         {
             var orderSignature = new OrderSignature
             {
@@ -77,7 +74,7 @@ namespace Former
                 }
             };
             
-            using var call = _client.SubscribeOrders(request, _metadata);
+            using var call = _client.SubscribeOrders(request, context.Meta);
 
             Func<Task> observeCurrentPurchaseOrders = async () =>
             {
@@ -90,13 +87,13 @@ namespace Former
             await ConnectionTester(observeCurrentPurchaseOrders);
         }
 
-        public async void ObserveBalance()
+        public async Task ObserveBalance(UserContext context)
         {
             var request = new TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceRequest
             {
                 Request = new TradeBot.Common.v1.SubscribeBalanceRequest()
             };
-            using var call = _client.SubscribeBalance(request, _metadata);
+            using var call = _client.SubscribeBalance(request, context.Meta);
 
             Func<Task> observeBalance = async () =>
             {
@@ -109,9 +106,9 @@ namespace Former
             await ConnectionTester(observeBalance);
         }
 
-        public async void ObserveMyOrders()
+        public async Task ObserveMyOrders(UserContext context)
         {
-            using var call = _client.SubscribeMyOrders(new SubscribeMyOrdersRequest(), _metadata);
+            using var call = _client.SubscribeMyOrders(new SubscribeMyOrdersRequest(), context.Meta);
             Func<Task> observeMyOrders = async () =>
             {
                 while (await call.ResponseStream.MoveNext())
@@ -122,7 +119,7 @@ namespace Former
             await ConnectionTester(observeMyOrders);
         }
 
-        public async Task PlaceOrdersList(Dictionary<double, double> purchaseList)
+        public async Task PlaceOrdersList(Dictionary<double, double> purchaseList, UserContext context)
         {
             PlaceOrderResponse response = null;
             Func<Task> closeOrders;
@@ -131,25 +128,25 @@ namespace Former
                 Log.Information("Order: price: {0}, quantity: {1} placed", order.Key, order.Value);
                 closeOrders = async () =>
                 {
-                    response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = order.Key, Value = order.Value }, _metadata);
+                    response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = order.Key, Value = order.Value }, context.Meta);
                 };
                 await ConnectionTester(closeOrders);
             }
         }
 
-        public async Task PlaceOrder(double sellPrice, double contractValue)
+        public async Task PlaceOrder(double sellPrice, double contractValue, UserContext context)
         {
             Log.Information("Order: price: {0}, quantity: {1} placed", sellPrice, contractValue);
             PlaceOrderResponse response = null;
             Func<Task> placeSuccessfulOrders;
             placeSuccessfulOrders = async () =>
             {
-                response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = sellPrice, Value = contractValue }, _metadata);
+                response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = sellPrice, Value = contractValue }, context.Meta);
             };
             await ConnectionTester(placeSuccessfulOrders);
         }
 
-        public async Task TellTMUpdateMyOrders(Dictionary<string, double> orderToUpdate)
+        public async Task TellTMUpdateMyOrders(Dictionary<string, double> orderToUpdate, UserContext context)
         {
             foreach (var order in orderToUpdate)
             {
