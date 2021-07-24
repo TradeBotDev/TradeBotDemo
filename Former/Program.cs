@@ -15,19 +15,15 @@ namespace Former
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
                 .CreateLogger();
-            var meta = new Metadata
-            {
-                { "sessionId", "123" },
-                { "slot", "XBTUSD" }
-            };
 
-            //TradeMarketClient.Configure("https://localhost:5005", 10000, null);
-            //TradeMarketClient observers = TradeMarketClient.GetInstance();
 
-            //while (TradeMarketClient._entries is null) { }
+            TradeMarketClient.Configure("https://localhost:5005", 10000, null);
+            TradeMarketClient observers = TradeMarketClient.GetInstance();
 
-            //observers.ObserveOrderBook();
-            //observers.ObserveBalance();
+            while (TradeMarketClient._metadata is null || Former.ñonfig is null) { }
+
+            observers.ObserveOrderBook();
+            observers.ObserveBalance();
             //observers.ObserveMyOrders();
 
             CreateHostBuilder(args).Build().Run();
