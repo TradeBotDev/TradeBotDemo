@@ -15,10 +15,10 @@ namespace Former
 {
     public class TradeMarketClient
     {
-        public delegate void OrderBookEvent(Order purchaseOrdersToUpdate);
+        public delegate void OrderBookEvent(Order purchaseOrdersToUpdate, UserContext context);
         public OrderBookEvent UpdateOrderBook;
 
-        public delegate void MyOrdersEvent(Order myOrderToUpdate);
+        public delegate void MyOrdersEvent(Order myOrderToUpdate, UserContext context);
         public MyOrdersEvent UpdateMyOrders;
 
         public delegate void BalanceEvent(Balance balanceToUpdate);
