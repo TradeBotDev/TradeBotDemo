@@ -27,20 +27,16 @@ namespace Former
         private static int _retryDelay;
         private static string _connectionString;
 
-        private Metadata _metadata;
+        public static Metadata _metadata;
 
         private readonly TradeMarketService.TradeMarketServiceClient _client;
         private readonly GrpcChannel _channel;
 
         public void SetMetadata(Metadata metadata) 
         {
-            _metadata = metadata;
-        }
-
-        public static void Configure(string connectionString, int retryDelay)
-        {
             _connectionString = connectionString;
             _retryDelay = retryDelay;
+            _metadata = meta;
         }
 
         public TradeMarketClient()
@@ -126,7 +122,7 @@ namespace Former
             await ConnectionTester(observeMyOrders);
         }
 
-        public async Task PlacePurchaseOrders(Dictionary<double, double> purchaseList)
+        public async Task PlaceOrdersList(Dictionary<double, double> purchaseList)
         {
             PlaceOrderResponse response = null;
             Func<Task> closeOrders;
@@ -141,7 +137,7 @@ namespace Former
             }
         }
 
-        public async Task PlaceSellOrder(double sellPrice, double contractValue)
+        public async Task PlaceOrder(double sellPrice, double contractValue)
         {
             Log.Information("Order: price: {0}, quantity: {1} placed", sellPrice, contractValue);
             PlaceOrderResponse response = null;
@@ -153,7 +149,7 @@ namespace Former
             await ConnectionTester(placeSuccessfulOrders);
         }
 
-        public async Task TellTMUpdateMyOreders(Dictionary<string, double> orderToUpdate)
+        public async Task TellTMUpdateMyOrders(Dictionary<string, double> orderToUpdate)
         {
             foreach (var order in orderToUpdate)
             {

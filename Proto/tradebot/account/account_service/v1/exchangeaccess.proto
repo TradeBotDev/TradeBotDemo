@@ -1,0 +1,65 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "TradeBot.Account.AccountService.v1";
+import "tradebot/account/account_service/v1/account.proto";
+
+package exchangeaccess;
+
+// Сервис для управления данными биржи.
+service ExchangeAccess {
+	// Добавление новой биржи для текущего пользователя
+	rpc AddExchangeAccess(AddExchangeAccessRequest) returns (AddExchangeAccessReply);
+	// Получение массива бирж текущего пользователя
+	rpc AllExchangesBySession (account.SessionRequest) returns (AllExchangesBySessionReply);
+	// Удаление информации о доступе к бирже по id в базе данных (пока что)
+	rpc DeleteExchangeAccess (DeleteExchangeAccessRequest) returns (DeleteExchangeAccessReply);
+	// Получение информации о доступе текущего пользователя к бирже
+	rpc ExchangeBySession (ExchangeBySessionRequest) returns (ExchangeBySessionReply);
+}
+
+// Запрос на добавление биржи для текущего пользователя.
+message AddExchangeAccessRequest {
+	string session_id = 1;
+	account.ExchangeCode code = 2;
+	string exchange_name = 3;
+	string token = 4;
+	string secret = 5;
+}
+
+// Ответ на добавление биржи для текущего пользователя.
+message AddExchangeAccessReply {
+	account.ActionCode result = 1;
+	string message = 2;
+}
+
+// Получение всех добавленных бирж текущего пользователя.
+message AllExchangesBySessionReply {
+	account.ActionCode result = 1;
+	string message = 2;
+	repeated account.ExchangeAccessInfo exchanges = 3;
+}
+
+// Запрос на удаление записи о конкретной бирже для текущего пользователя.
+message DeleteExchangeAccessRequest {
+	string session_id = 1;
+	account.ExchangeCode code = 2;
+}
+
+// Ответ на запрос об удалении записи о бирже для текущего пользователя.
+message DeleteExchangeAccessReply {
+	account.ActionCode result = 1;
+	string message = 2;
+}
+
+// Запрос на получение информации о доступе пользователя к конкретной бирже.
+message ExchangeBySessionRequest {
+	string session_id = 1;
+	account.ExchangeCode code = 2;
+}
+
+// Ответ на запрос с получением информации о доступе пользователя к конкретной бирже.
+message ExchangeBySessionReply {
+	account.ActionCode result = 1;
+	string message = 2;
+	account.ExchangeAccessInfo exchange = 3;
+}

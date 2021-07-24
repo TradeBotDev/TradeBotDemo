@@ -15,6 +15,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TradeMarket", "TradeMarket\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Facade", "Facade\Facade.csproj", "{E6EC140F-4AA1-40F4-BC1B-28717433CE4E}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Account", "Account\Account.csproj", "{D1613EDC-18D8-4573-B1E0-51EA8555847C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Algorithm.Test", "Algorithm.Test\Algorithm.Test.csproj", "{EFC8273A-D238-4603-A104-B1C96CD4103F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{73AA3E5D-FAEB-491B-8FF7-AD3C7B05961F} = {73AA3E5D-FAEB-491B-8FF7-AD3C7B05961F}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +52,14 @@ Global
 		{E6EC140F-4AA1-40F4-BC1B-28717433CE4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E6EC140F-4AA1-40F4-BC1B-28717433CE4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E6EC140F-4AA1-40F4-BC1B-28717433CE4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1613EDC-18D8-4573-B1E0-51EA8555847C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1613EDC-18D8-4573-B1E0-51EA8555847C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1613EDC-18D8-4573-B1E0-51EA8555847C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1613EDC-18D8-4573-B1E0-51EA8555847C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EFC8273A-D238-4603-A104-B1C96CD4103F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFC8273A-D238-4603-A104-B1C96CD4103F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFC8273A-D238-4603-A104-B1C96CD4103F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFC8273A-D238-4603-A104-B1C96CD4103F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

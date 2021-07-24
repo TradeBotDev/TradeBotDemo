@@ -12,6 +12,7 @@
 **/obj/**
 **/bin/**
 **/.vs/**
+**/Algorithm.Test/**
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

@@ -1,7 +1,9 @@
+using Grpc.Core;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
 using Serilog;
+using TradeBot.Common.v1;
 
 namespace Former
 {

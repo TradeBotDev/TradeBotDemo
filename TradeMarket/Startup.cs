@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Grpc.Net.Client;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,6 +8,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TradeBot.Account.AccountService.v1;
+using TradeMarket.Clients;
 using TradeMarket.DataTransfering;
 using TradeMarket.Services;
 
@@ -19,8 +22,8 @@ namespace TradeMarket
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddGrpc();
-            services.AddSingleton(FakeOrderSubscriber.GetInstance());
-            services.AddSingleton(FakeOrderSubscriber.GetInstance());
+            //services.AddGrpcClient<ExchangeAccess.ExchangeAccessClient>(val => val.Address = new Uri("https://localhost:5000"));
+            services.AddSingleton(new AccountClient(new ExchangeAccess.ExchangeAccessClient(GrpcChannel.ForAddress(new Uri("https://localhost:5000")))));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -35,7 +38,7 @@ namespace TradeMarket
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<GreeterService>();
+                //endpoints.MapGrpcService<GreeterService>();
                 endpoints.MapGrpcService<TradeMarketService>();
 
 

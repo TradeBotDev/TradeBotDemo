@@ -1,13 +1,10 @@
-using Grpc.Net.Client;
+using Algorithm.Analysis;
+using Algorithm.DataManipulation;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Algorithm
 {
@@ -15,11 +12,11 @@ namespace Algorithm
     {
         public static void Main(string[] args)
         {
-            //DataCollector.SendPurchasePrice();
             CreateHostBuilder(args).Build().Run();
-            
         }
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
+
+
+       public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
@@ -34,7 +31,12 @@ namespace Algorithm
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await DataCollector.SendPurchasePrice();
+            //await PriceSender.SendPrice();
+            Publisher publisher = new();
+            DataCollector dc = new(publisher);
+            var pm = new PointMaker();
+            AlgorithmAlpha algo = new(publisher);
+            pm.Launch(publisher, dc);
         }
     }
 }

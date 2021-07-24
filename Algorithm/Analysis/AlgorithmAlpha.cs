@@ -1,8 +1,8 @@
 ﻿using Algorithm.DataManipulation;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Algorithm.Analysis
 {
@@ -12,31 +12,37 @@ namespace Algorithm.Analysis
     //hardcoded for five points for now, will change with user config
     public class AlgorithmAlpha
     {
-        private Dictionary<DateTime, double> storage;
-        private Publisher publisher = new();
-        //SendPrice sendPrice = PriceSender.SendPrice;
-        //public SendPrice sendPriceEvent;
+        private readonly Dictionary<DateTime, double> _storage;
 
-        public AlgorithmAlpha() 
+        public AlgorithmAlpha(Publisher publisher)
         {
-            publisher.pointMadeEvent += NewPointAlert;
-            storage = new();
+
+            publisher.PointMadeEvent += NewPointAlert;
+
+            _storage = new Dictionary<DateTime, double>();
         }
 
         //hardcoded for five points!! 
-        public void NewPointAlert (KeyValuePair<DateTime, double> point)
+        private void NewPointAlert(KeyValuePair<DateTime, double> point)
         {
-            storage.Add(point.Key, point.Value);
-            if (storage.Count > 5)
-            {
-                var toRemove = storage.OrderBy(kvp => kvp.Key).First();
-                storage.Remove(toRemove.Key);
+            // break here?? 
+            if (point.Value != 0)
+            { 
+                _storage.Add(point.Key, point.Value); 
             }
-            if (storage.Count == 5) { PerformCalculations(storage); }
+            if (_storage.Count > 5)
+            {
+                var toRemove = _storage.OrderBy(kvp => kvp.Key).First();
+                _storage.Remove(toRemove.Key);
+            }
+            if (_storage.Count == 5) 
+            { 
+                PerformCalculations(_storage); 
+            }
 
         }
         
-        public void PerformCalculations (Dictionary<DateTime, double> points)
+        private static void PerformCalculations (Dictionary<DateTime, double> points)
         {
             points.OrderBy(kvp => kvp.Key);
             List<double> prices = new();
@@ -46,28 +52,28 @@ namespace Algorithm.Analysis
             {
                 subSet.Clear();
                 subSet.Add(points.ElementAt(i).Key, points.ElementAt(i).Value);
-                subSet.Add(points.ElementAt(i+1).Key, points.ElementAt(i+1).Value);
-                subSet.Add(points.ElementAt(i+2).Key, points.ElementAt(i+2).Value);
+                subSet.Add(points.ElementAt(i + 1).Key, points.ElementAt(i + 1).Value);
+                subSet.Add(points.ElementAt(i + 2).Key, points.ElementAt(i + 2).Value);
                 prices.Add(CalculateSMA(subSet));
             }
             // TODO alert the price sender!!
-            if (IsItTimeToBuy(prices, points)) { PriceSender.SendPrice(prices.Last()); }
+            if (IsItTimeToBuy(prices, points)) 
+            { 
+                PriceSender.SendPrice(prices.Last()); 
+            }
         }
         //if the trend has been going downwards and now stopped and it going up
-        public bool IsItTimeToBuy(List<double> prices, Dictionary<DateTime, double> points)
+        public static bool IsItTimeToBuy(IReadOnlyCollection<double> prices, Dictionary<DateTime, double> points)
         {
             points.OrderBy(kvp => kvp.Key);
-            if ((prices.ElementAt(0) >= prices.ElementAt(1))&&(prices.ElementAt(1) >= prices.ElementAt(2))&&(prices.ElementAt(2)<points.ElementAt(4).Value)) { return true; } 
-            return false;
+            Console.WriteLine("Analysis...");
+            return prices.ElementAt(0) >= prices.ElementAt(1)
+                   && prices.ElementAt(1) >= prices.ElementAt(2)
+                   && prices.ElementAt(2) <= points.ElementAt(4).Value;
         }
-        public double CalculateSMA(Dictionary<DateTime, double> points)
+        public static double CalculateSMA(Dictionary<DateTime, double> points)
         {
-            double sum = 0;
-            foreach (KeyValuePair<DateTime, double> point in points)
-            {
-                sum += point.Value;
-            }
-
+            var sum = points.Sum(point => point.Value);
             return sum / points.Count;
 
         }

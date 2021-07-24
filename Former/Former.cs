@@ -97,7 +97,7 @@ namespace Former
 
         public void UpdateBalance(Balance balance)
         {
-            Log.Debug("Balance updated. New balance: {0}", balance.Value);
+            Log.Information("Balance updated. New balance: {0}", balance.Value);
             _balance = double.Parse(balance.Value);
         }
         //необходимо ревью 

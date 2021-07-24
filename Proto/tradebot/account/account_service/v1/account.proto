@@ -1,0 +1,119 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "TradeBot.Account.AccountService.v1";
+
+package account;
+
+// Сервис для входа в аккаунт или его регистрации.
+service Account {
+	// Метод входа в аккаунт
+	rpc Login (LoginRequest) returns (LoginReply);
+	// Метод выхода из аккаунта
+	rpc Logout (SessionRequest) returns (LogoutReply);
+	// Метод регистрации аккаунта
+	rpc Register (RegisterRequest) returns (RegisterReply);
+	// Проверка текущего пользователя на валидность по Id сессии
+	rpc IsValidSession (SessionRequest) returns (SessionReply);
+	// Получение данных текущего пользователя
+	rpc CurrentAccountData (SessionRequest) returns (CurrentAccountReply);
+}
+
+// Данные для входа в аккаунт.
+message LoginRequest {
+	string email = 1;
+	bool save_exchanges_after_logout = 2;
+	string password = 3;
+}
+
+// Ответ на запрос о входе в аккаунт.
+message LoginReply {
+	ActionCode result = 1;
+	string message = 2;
+	string session_id = 3;
+}
+
+// Ответ на запрос о выходе из аккаунта
+message LogoutReply {
+	ActionCode result = 1;
+	string message = 2;
+}
+
+// Данные для регистрации аккаунта.
+message RegisterRequest {
+	string email = 1;
+	string firstname = 2;
+	string lastname = 3;
+	string phone_number = 4;
+	string password = 5;
+	string verify_password = 6;
+}
+
+// Ответ на запрос о регистрации аккаунта.
+message RegisterReply {
+	ActionCode result = 1;
+	string message = 2;
+}
+
+// Запрос на передачу сессии.
+message SessionRequest {
+	string session_id = 1;
+}
+
+// Результат проверки сессии на валидность.
+message SessionReply {
+	bool is_valid = 1;
+	string message = 2;
+}
+
+// Получение данных текущего пользователя.
+message CurrentAccountReply {
+	ActionCode result = 1;
+	string message = 2;
+	AccountInfo current_account = 3;
+}
+
+//Информация о пользователе, необходимая для отображения в UI
+message AccountInfo {
+	int32 account_id = 1;
+	string firstname = 2;
+	string lastname = 3;
+	string email = 4;
+	string phone_number = 5;
+	repeated ExchangeAccessInfo exchanges = 6;
+}
+
+// Информация о данных для доступа к бирже.
+message ExchangeAccessInfo {
+	int32 exchange_access_id = 1;
+	ExchangeCode code = 2;
+	string name = 3;
+	string token = 4;
+	string secret = 5;
+}
+
+// Коды всех бирж.
+enum ExchangeCode {
+	EXCHANGE_CODE_BITMEX = 0;
+}
+
+// Коды результата выполнения входа или регистрации.
+enum ActionCode {
+	/*
+	* 0 - успешное выполнение,
+	* 1 - пользователь не найден,
+	* 2 - пользователь уже существует,
+	* 3 - имеется пустое поле ввода,
+	* 4 - пароли не совпадают,
+	* 5 - поле не является электронной почтой,
+	* 6 - биржа не найдена,
+	* 7 - биржа уже существует.
+	*/
+	ACTION_CODE_SUCCESSFUL = 0;
+	ACTION_CODE_ACCOUNT_NOT_FOUND = 1;
+	ACTION_CODE_ACCOUNT_EXISTS = 2;
+	ACTION_CODE_EMPTY_FIELD = 3;
+	ACTION_CODE_PASSWORD_MISMATCH = 4;
+	ACTION_CODE_IS_NOT_EMAIL = 5;
+	ACTION_CODE_EXCHANGE_NOT_FOUND = 6;
+	ACTION_CODE_EXCHANGE_EXISTS = 7;
+}

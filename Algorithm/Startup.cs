@@ -18,7 +18,6 @@ namespace Algorithm
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddGrpc();
-            services.AddSingleton(new DataCollector());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

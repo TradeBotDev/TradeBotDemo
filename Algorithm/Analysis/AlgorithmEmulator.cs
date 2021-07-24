@@ -1,23 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using TradeBot.Common;
 using System.Threading;
-using Grpc.Core;
 
 
-namespace Algorithm
+namespace Algorithm.Analysis
 {
-    public class AlgorithmEmulator : IAlgorithm
+    public class AlgorithmEmulator
     {
         public double CalculateSuggestedPrice()
         {
-            Random rn = new Random();
+            var rn = new Random();
             Thread.Sleep(rn.Next(0, 10000));
-            return rn.Next(31400, 31600);
+            return rn.Next(0, 20);
         }
-
-    }
-  
+    } 
 }

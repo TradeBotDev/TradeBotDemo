@@ -21,9 +21,9 @@ namespace Former
         internal UserContext(string sessionId, string trademarket, string slot)
         {
 
-            Meta.Add("sessionId", sessionId);
-            Meta.Add("trademarket", trademarket);
-            Meta.Add("slot", slot);
+            //Meta.Add("sessionId", sessionId);
+            //Meta.Add("trademarket", trademarket);
+            //Meta.Add("slot", slot);
 
             TradeMarketClient.Configure("https://localhost:5005", 10000);
 
