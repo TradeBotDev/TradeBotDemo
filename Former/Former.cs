@@ -10,8 +10,6 @@ namespace Former
 {
     public class Former
     {
-        private readonly TradeMarketClient _tmClient;
-
         private readonly ConcurrentDictionary<string, Order> _orderBook;
 
         private readonly ConcurrentDictionary<string, Order> _myOrders;
@@ -21,16 +19,11 @@ namespace Former
         //TODO формер не должне принимать конфиг как аргмунет конструктора, но должен принимать конфиг ( или контекст пользователя) как аргумент своих методов
         public Former()
         {
-            _tmClient = TradeMarketClient.GetInstance();
-            _tmClient.UpdateOrderBook += UpdateOrderBook;
-            _tmClient.UpdateBalance += UpdateBalance;
-            _tmClient.UpdateMyOrders += UpdateMyOrderList;
-
             _orderBook = new ConcurrentDictionary<string, Order>();
             _myOrders = new ConcurrentDictionary<string, Order>();
         }
 
-        private async void UpdateOrderBook(Order orderNeededUpdate, UserContext context)
+        public async void UpdateOrderBook(Order orderNeededUpdate, UserContext context)
         {
             var task = Task.Run(() =>
             {
@@ -46,22 +39,21 @@ namespace Former
                         return v;
                     });
                 else if (_orderBook.ContainsKey(orderNeededUpdate.Id)) _orderBook.TryRemove(orderNeededUpdate.Id, out _);
-
             });
             await task;
             //???????????????????????????????????????????????????????????????????????????????????????????
-            if (_orderBook.Count > 2) await FitPrices(_orderBook, context.configuration.OrderUpdatePriceRange);
+            if (_orderBook.Count > 2) await FitPrices(_orderBook, context.configuration.OrderUpdatePriceRange, context);
         }
 
-        private async void SellPartOfContracts(string id, Order orderNeededUpdate, double sellPrice) 
+        private async void SellPartOfContracts(string id, Order orderNeededUpdate, double sellPrice, UserContext context) 
         {
             double newQuantity;
             if (_myOrders.TryGetValue(id, out Order beforeUpdate))
                 if ((newQuantity = beforeUpdate.Quantity - orderNeededUpdate.Quantity) > 0)
-                    await _tmClient.PlaceSellOrder(sellPrice, newQuantity);
+                    await UserContextFactory.GetUserContext(context.sessionId, context.trademarket, context.slot).tradeMarketClient.PlaceSellOrder(sellPrice, newQuantity);
         }
         //необходимо ревью
-        private async void UpdateMyOrderList(Order orderNeededUpdate, UserContext context)
+        public async void UpdateMyOrderList(Order orderNeededUpdate, UserContext context)
         {
             var id = orderNeededUpdate.Id;
             var status = orderNeededUpdate.Signature.Status;
@@ -71,9 +63,10 @@ namespace Former
             {
                 if (status == OrderStatus.Open && type == OrderType.Buy)
                 {
-                    SellPartOfContracts(id, orderNeededUpdate, sellPrice);
+                    SellPartOfContracts(id, orderNeededUpdate, sellPrice, context);
                     _myOrders.AddOrUpdate(id, orderNeededUpdate, (k, v) =>
                     {
+                        Log.Information("Order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} added or updated", id, orderNeededUpdate.Price, orderNeededUpdate.Quantity, orderNeededUpdate.Signature.Type, orderNeededUpdate.Signature.Status);
                         v.Price = orderNeededUpdate.Price;
                         v.Quantity = orderNeededUpdate.Quantity;
                         return v;
@@ -82,28 +75,33 @@ namespace Former
                 if (status == OrderStatus.Open && type == OrderType.Sell)
                     _myOrders.AddOrUpdate(id, orderNeededUpdate, (k, v) =>
                     {
+                        Log.Information("Order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} added or updated", id, orderNeededUpdate.Price, orderNeededUpdate.Quantity, orderNeededUpdate.Signature.Type, orderNeededUpdate.Signature.Status);
                         v.Price = orderNeededUpdate.Price;
                         v.Quantity = orderNeededUpdate.Quantity;
                         return v;
                     });
                 if (status == OrderStatus.Closed && type == OrderType.Buy)
                 {
-                    await _tmClient.PlaceSellOrder(sellPrice, orderNeededUpdate.Quantity);
+                    Log.Information("Order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} removed", id, orderNeededUpdate.Price, orderNeededUpdate.Quantity, orderNeededUpdate.Signature.Type, orderNeededUpdate.Signature.Status);
+                    await UserContextFactory.GetUserContext(context.sessionId, context.trademarket, context.slot).tradeMarketClient.PlaceSellOrder(sellPrice, orderNeededUpdate.Quantity);
                     _myOrders.TryRemove(id, out _);
                 }
                 if (status == OrderStatus.Closed && type == OrderType.Sell)
+                {
+                    Log.Information("Order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} removed", id, orderNeededUpdate.Price, orderNeededUpdate.Quantity, orderNeededUpdate.Signature.Type, orderNeededUpdate.Signature.Status);
                     _myOrders.TryRemove(id, out _);
+                }
             });
             await task;
         }
 
-        private void UpdateBalance(Balance balance)
+        public void UpdateBalance(Balance balance)
         {
             Log.Debug("Balance updated. New balance: {0}", balance.Value);
             _balance = double.Parse(balance.Value);
         }
         //необходимо ревью 
-        private async Task FitPrices(ConcurrentDictionary<string, Order> currentPurchaseOrdersForFairPrice, double orderUpdateRange)
+        private async Task FitPrices(ConcurrentDictionary<string, Order> currentPurchaseOrdersForFairPrice, double orderUpdateRange, UserContext context)
         {
             double fairPrice = 0;
             var ordersNeededToFit = new Dictionary<string, double>();
@@ -124,10 +122,10 @@ namespace Former
             await checkPrices;
 
             if (ordersNeededToFit.Count != 0)
-                await _tmClient.TellTMUpdateMyOreders(ordersNeededToFit);
+                await UserContextFactory.GetUserContext(context.sessionId, context.trademarket, context.slot).tradeMarketClient.TellTMUpdateMyOreders(ordersNeededToFit);
         }
 
-        public async void FormPurchaseList(double avgPrice,UserContext context)
+        public async void FormPurchaseList(double avgPrice, UserContext context)
         {
             Log.Debug("Received from algorithm: {price}", avgPrice);
             //config.AvaibleBalance это доступный баланс в процентах
@@ -135,17 +133,21 @@ namespace Former
             var selectedOrders = new Dictionary<double, double>();
             foreach (var order in _orderBook)
             {
-                if (IsPriceCorrect(order.Value.Price, avgPrice, availableBalance, context))
+                if (IsPriceCorrect(order.Value.Price, avgPrice, availableBalance, context.configuration.ContractValue))
                     selectedOrders.Add(order.Value.Price, context.configuration.ContractValue);
             }
-            Log.Debug("Formed a list of required orders: {elements}", selectedOrders.Count);
+            Log.Debug("Formed a list of required orders:");
+            foreach (var order in selectedOrders)
+            {
+                Log.Debug("Price: {1} Quantity: {2}", order.Key, order.Value);
+            }
             if (selectedOrders.Count != 0)
-                await _tmClient.PlacePurchaseOrders(selectedOrders);
+                await UserContextFactory.GetUserContext(context.sessionId, context.trademarket, context.slot).tradeMarketClient.PlacePurchaseOrders(selectedOrders);
         }
 
-        private bool IsPriceCorrect(double estimatedPrice, double cuttingPrice, double availableBalance, UserContext context)
+        private bool IsPriceCorrect(double estimatedPrice, double cuttingPrice, double availableBalance, double contractValue)
         {
-            if (estimatedPrice < cuttingPrice && (availableBalance - Convert(estimatedPrice) * context.configuration.ContractValue) > 0) return true;
+            if (estimatedPrice < cuttingPrice && (availableBalance - Convert(estimatedPrice) * contractValue) > 0) return true;
             else return false;
         }
 

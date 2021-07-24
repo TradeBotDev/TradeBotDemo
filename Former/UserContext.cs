@@ -18,9 +18,7 @@ namespace Former
 
         public Metadata Meta { get; internal set; }
 
-        public Double AvgPrice { get; set; }
-
-        internal UserContext(TradeMarketClient tradeMarketClient, Former former, string sessionId, string trademarket, string slot)
+        internal UserContext(string sessionId, string trademarket, string slot)
         {
 
             Meta.Add("sessionId", sessionId);
@@ -28,21 +26,34 @@ namespace Former
             Meta.Add("slot", slot);
 
             TradeMarketClient.Configure("https://localhost:5005", 10000);
-            tradeMarketClient = TradeMarketClient.GetInstance();
-            tradeMarketClient.SetMetadata(meta);
+
+            tradeMarketClient = new TradeMarketClient();
+            tradeMarketClient.SetMetadata(Meta);
+
             former = new Former();
             //Конфиг передается как параметр для любого метода
-            //former.Config = configuration;
 
-            tradeMarketClient.ObserveOrderBook();
-            tradeMarketClient.ObserveBalance();
-            tradeMarketClient.ObserveMyOrders();
+            tradeMarketClient.UpdateOrderBook += UpdateOrderBook;
+            tradeMarketClient.UpdateBalance += UpdateBalance;
+            tradeMarketClient.UpdateMyOrders += UpdateMyOrderList;
 
         }
 
-        public async void FormPurchaseList()
+        public async void FormPurchaseList(double AvgPrice)
         {
             former.FormPurchaseList(AvgPrice, this);
+        }
+        private async void UpdateOrderBook(Order orderNeededUpdate) 
+        {
+            former.UpdateOrderBook(orderNeededUpdate, this);
+        }
+        private async void UpdateMyOrderList(Order orderNeededUpdate)
+        {
+            former.UpdateMyOrderList(orderNeededUpdate, this);
+        }
+        private async void UpdateBalance(Balance balance)
+        {
+            former.UpdateBalance(balance);
         }
     }
 }

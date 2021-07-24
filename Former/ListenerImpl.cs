@@ -17,12 +17,12 @@ namespace Former
 
         public override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request, ServerCallContext context)
         {
-            UserContextFactory.GetUserContext(context.RequestHeaders.GetValue("sessionId"), context.RequestHeaders.GetValue("trademarket"), context.RequestHeaders.GetValue("slot"));
+            UserContextFactory.GetUserContext(context.RequestHeaders.GetValue("sessionId"), context.RequestHeaders.GetValue("trademarket"), context.RequestHeaders.GetValue("slot")).configuration = request.Request;
             return Task.FromResult(new UpdateServerConfigResponse());
         }
         public override Task<SendPurchasePriceResponse> SendPurchasePrice(SendPurchasePriceRequest request, ServerCallContext context)
         {
-            UserContextFactory.GetUserContext(context.RequestHeaders.GetValue("sessionId"), context.RequestHeaders.GetValue("trademarket"), context.RequestHeaders.GetValue("slot")).FormPurchaseList();
+            UserContextFactory.GetUserContext(context.RequestHeaders.GetValue("sessionId"), context.RequestHeaders.GetValue("trademarket"), context.RequestHeaders.GetValue("slot")).FormPurchaseList(request.PurchasePrice);
             return Task.FromResult(new SendPurchasePriceResponse());
         }
     }

@@ -15,10 +15,10 @@ namespace Former
 {
     public class TradeMarketClient
     {
-        public delegate void OrderBookEvent(Order purchaseOrdersToUpdate, UserContext context);
+        public delegate void OrderBookEvent(Order purchaseOrdersToUpdate);
         public OrderBookEvent UpdateOrderBook;
 
-        public delegate void MyOrdersEvent(Order myOrderToUpdate, UserContext context);
+        public delegate void MyOrdersEvent(Order myOrderToUpdate);
         public MyOrdersEvent UpdateMyOrders;
 
         public delegate void BalanceEvent(Balance balanceToUpdate);
@@ -29,19 +29,8 @@ namespace Former
 
         private Metadata _metadata;
 
-        private static TradeMarketClient _tradeMarketClient;
-
         private readonly TradeMarketService.TradeMarketServiceClient _client;
         private readonly GrpcChannel _channel;
-
-        public static TradeMarketClient GetInstance()
-        {
-            if (_tradeMarketClient == null)
-            {
-                _tradeMarketClient = new TradeMarketClient();
-            }
-            return _tradeMarketClient;
-        }
 
         public void SetMetadata(Metadata metadata) 
         {
@@ -54,7 +43,7 @@ namespace Former
             _retryDelay = retryDelay;
         }
 
-        private TradeMarketClient()
+        public TradeMarketClient()
         {
             _channel = GrpcChannel.ForAddress(_connectionString);
             _client = new TradeMarketService.TradeMarketServiceClient(_channel);
@@ -143,17 +132,18 @@ namespace Former
             Func<Task> closeOrders;
             foreach (var order in purchaseList)
             {
+                Log.Information("Order: price: {0}, quantity: {1} placed", order.Key, order.Value);
                 closeOrders = async () =>
                 {
                     response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = order.Key, Value = order.Value }, _metadata);
                 };
-
                 await ConnectionTester(closeOrders);
             }
         }
 
         public async Task PlaceSellOrder(double sellPrice, double contractValue)
         {
+            Log.Information("Order: price: {0}, quantity: {1} placed", sellPrice, contractValue);
             PlaceOrderResponse response = null;
             Func<Task> placeSuccessfulOrders;
             placeSuccessfulOrders = async () =>
