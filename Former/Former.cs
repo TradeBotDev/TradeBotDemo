@@ -108,6 +108,7 @@ namespace Former
             double fairPrice = 0;
             var ordersNeededToFit = new Dictionary<string, double>();
             var calcFairPrice = Task.Run(() => fairPrice = currentPurchaseOrdersForFairPrice.Min(x => x.Value.Price));
+            await calcFairPrice;
             var checkPrices = Task.Run(() =>
             {
                 foreach (var order in _myOrders)
@@ -120,9 +121,7 @@ namespace Former
                     }
                 }
             });
-            await calcFairPrice;
             await checkPrices;
-
             if (ordersNeededToFit.Count != 0)
                 await context.TellTMUpdateMyOrders(ordersNeededToFit);
         }
@@ -148,11 +147,11 @@ namespace Former
 
         private bool IsPriceCorrect(double estimatedPrice, double cuttingPrice, double availableBalance, double contractValue)
         {
-            if (estimatedPrice < cuttingPrice && (availableBalance - Convert(estimatedPrice) * contractValue) > 0) return true;
+            if (estimatedPrice < cuttingPrice && (availableBalance - ConvertToPricePerContract(estimatedPrice) * contractValue) > 0) return true;
             else return false;
         }
 
-        private double Convert(double priceFromTM)
+        private double ConvertToPricePerContract(double priceFromTM)
         {
             return priceFromTM * 0.00000001;
         }

@@ -61,16 +61,15 @@ namespace Former
 
         public async Task ObserveOrderBook(UserContext context)
         {
-            var orderSignature = new OrderSignature
-            {
-                Status = OrderStatus.Open,
-                Type = OrderType.Sell
-            };
             var request = new SubscribeOrdersRequest
             {
                 Request = new TradeBot.Common.v1.SubscribeOrdersRequest
                 {
-                    Signature = orderSignature
+                    Signature = new OrderSignature
+                    {
+                        Status = OrderStatus.Open,
+                        Type = OrderType.Sell
+                    }
                 }
             };
             
@@ -138,11 +137,11 @@ namespace Former
         {
             Log.Information("Order: price: {0}, quantity: {1} placed", sellPrice, contractValue);
             PlaceOrderResponse response = null;
-            Func<Task> placeSuccessfulOrders;
-            placeSuccessfulOrders = async () =>
+            Func<Task> placeSuccessfulOrders = async () =>
             {
                 response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = sellPrice, Value = contractValue }, context.Meta);
             };
+
             await ConnectionTester(placeSuccessfulOrders);
         }
 
@@ -152,7 +151,6 @@ namespace Former
             {
                 Log.Debug("Update order id: {0}, new price: {1}", order.Key, order.Value);
             }
-
         }
     }
 }

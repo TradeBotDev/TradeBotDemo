@@ -13,8 +13,8 @@ namespace Former
         public string trademarketName;
         public string slotName;
         public Config configuration;
-        private TradeMarketClient _tradeMarketClient;
-        private Former _former;
+        private readonly TradeMarketClient _tradeMarketClient;
+        private readonly Former _former;
 
         public Metadata Meta { get; internal set; }
 
