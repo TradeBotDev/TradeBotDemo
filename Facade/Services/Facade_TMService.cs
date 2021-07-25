@@ -15,10 +15,7 @@ namespace Facade
         private TradeBot.Account.AccountService.v1.Account.AccountClient clientAccount = new TradeBot.Account.AccountService.v1.Account.AccountClient(GrpcChannel.ForAddress("https://localhost:5000"));
         private TradeBot.Account.AccountService.v1.ExchangeAccess.ExchangeAccessClient clientExchange = new TradeBot.Account.AccountService.v1.ExchangeAccess.ExchangeAccessClient(GrpcChannel.ForAddress("https://localhost:5000"));
         private readonly ILogger<FacadeTMService> _logger;
-        public FacadeTMService(ILogger<FacadeTMService> logger)
-        {
-            _logger = logger;
-        }
+        
         #region TradeMarket
         public override async Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<SubscribeBalanceResponse> responseStream, ServerCallContext context)
         {
@@ -53,7 +50,7 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception" + e);
+                    Log.Information("Exception" + e.Message);
                 }
             }
         }
@@ -91,7 +88,7 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception" + e);
+                    Log.Information("Exception" + e.Message);
                 }
             }
 
@@ -131,11 +128,58 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception" + e);
+                    Log.Information("Exception" + e.Message);
                 }
             }
 
         }
+
+        public override Task<AuthenticateTokenResponse> AuthenticateToken(AuthenticateTokenRequest request, ServerCallContext context)
+        {
+            while (true)
+            {
+                try
+                {
+                    if (context.CancellationToken.IsCancellationRequested) break;
+
+                    var response = clientTM.AuthenticateToken(new TradeBot.TradeMarket.TradeMarketService.v1.AuthenticateTokenRequest { Token=request.Token});
+                    return Task.FromResult(new AuthenticateTokenResponse { Response=response.Response});
+                }
+                catch (RpcException e)
+                {
+                    Log.Information("Exception:" + e.Message);
+                }
+            }
+            return Task.FromResult(new AuthenticateTokenResponse { });
+
+
+
+
+
+            try
+            {
+                var response = clientTM.AuthenticateToken(new TradeBot.TradeMarket.TradeMarketService.v1.AuthenticateTokenRequest { Token = request.Token });
+                return Task.FromResult(new AuthenticateTokenResponse
+                {
+                    //Response = new TradeBot.Common.v1.DefaultResponse { Code=TradeBot.Common.v1.ReplyCode.Succeed,Message="otvet"}
+                    Response = response.Response
+                });
+            }
+            catch (RpcException e)
+            {
+                _logger.LogError("Exception: " + e.Status.DebugException.Message);
+                var defaultResponse = new TradeBot.Common.v1.DefaultResponse
+                {
+                    Code = TradeBot.Common.v1.ReplyCode.Failure,
+                    Message = "Exception. The server doesnt answer"
+                };
+                return Task.FromResult(new AuthenticateTokenResponse
+                {
+                    Response = defaultResponse
+                });
+            }
+        }
+
         #endregion
         #region Relay
         public override async Task SubscribeLogsRelay(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
