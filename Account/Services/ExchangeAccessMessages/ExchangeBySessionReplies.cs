@@ -23,7 +23,7 @@ namespace Account.AccountMessages
             return new ExchangeBySessionReply
             {
                 Result = ActionCode.Successful,
-                Message = "Успешно",
+                Message = "Успешное получение информации о доступе пользователя бирже.",
                 Exchange = new ExchangeAccessInfo
                 {
                     ExchangeAccessId = exchangeAccess.ExchangeAccessId,

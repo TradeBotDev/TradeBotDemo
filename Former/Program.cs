@@ -15,25 +15,12 @@ namespace Former
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
                 .CreateLogger();
-            var meta = new Metadata
-            {
-                { "sessionId", "123" },
-                { "slot", "XBTUSD" }
-            };
 
-            TradeMarketClient.Configure("https://localhost:5005", 10000, meta);
+
+            TradeMarketClient.Configure("https://localhost:5005", 10000, null);
             TradeMarketClient observers = TradeMarketClient.GetInstance();
-            Former.config = new Config
-            {
-                AvaibleBalance = 1.0,
-                ContractValue = 10.0,
-                RequiredProfit = 0.5,
-                OrderUpdatePriceRange = 1.0,
-                SlotFee = 0.2,
-                TotalBalance = 0
-            };
 
-            //while (Former.config is null) { }
+            while (TradeMarketClient._metadata is null || Former.ñonfig is null) { }
 
             observers.ObserveOrderBook();
             observers.ObserveBalance();
