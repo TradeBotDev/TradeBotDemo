@@ -1,5 +1,6 @@
 ﻿using Grpc.Core;
 using Relay.Clients;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,6 +38,7 @@ namespace Relay.Model
 
         private void _tradeMarketClient_OrderRecievedEvent(object sender, TradeBot.Common.v1.Order e)
         {
+            Log.Information($"Sending order {e.Price} : {e.Quantity} : {e.Id}");
             _algorithmClient.WriteOrder(_algorithmStream,e);
         }
 
