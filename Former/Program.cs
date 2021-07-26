@@ -15,17 +15,6 @@ namespace Former
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
                 .CreateLogger();
-
-
-            TradeMarketClient.Configure("https://localhost:5005", 10000, null);
-            TradeMarketClient observers = TradeMarketClient.GetInstance();
-
-            while (TradeMarketClient._metadata is null || Former.ñonfig is null) { }
-
-            observers.ObserveOrderBook();
-            observers.ObserveBalance();
-            //observers.ObserveMyOrders();
-
             CreateHostBuilder(args).Build().Run();
         }
 
