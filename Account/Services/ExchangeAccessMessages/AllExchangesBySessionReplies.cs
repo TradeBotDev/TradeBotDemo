@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using Serilog;
+using System.Linq;
 using TradeBot.Account.AccountService.v1;
 
 namespace Account.AccountMessages
@@ -7,10 +8,13 @@ namespace Account.AccountMessages
     {
         public static AllExchangesBySessionReply SuccessfulGetting(IQueryable<Models.ExchangeAccess> exchangesFromAccount)
         {
+            const string Message = "Получение информации о биржах завершено успешно.";
+            Log.Information(Message);
+
             AllExchangesBySessionReply reply = new AllExchangesBySessionReply
             {
                 Result = ActionCode.Successful,
-                Message = "Получение информации о биржах завершено успешно."
+                Message = Message
             };
 
             foreach (Models.ExchangeAccess exchange in exchangesFromAccount)
@@ -27,16 +31,28 @@ namespace Account.AccountMessages
             return reply;
         }
 
-        public static readonly AllExchangesBySessionReply AccountNotFound = new AllExchangesBySessionReply
+        public static AllExchangesBySessionReply AccountNotFound()
         {
-            Result = ActionCode.AccountNotFound,
-            Message = "Произошла ошибка получение данных бирж: пользователь не существует."
-        };
+            const string Message = "Произошла ошибка получение данных бирж: пользователь не существует.";
+            Log.Information(Message);
 
-        public static readonly AllExchangesBySessionReply ExchangesNotFound = new AllExchangesBySessionReply
+            return new AllExchangesBySessionReply
+            {
+                Result = ActionCode.AccountNotFound,
+                Message = Message
+            };
+        }
+
+        public static AllExchangesBySessionReply ExchangesNotFound()
         {
-            Result = ActionCode.ExchangeNotFound,
-            Message = "Ошибка при получении бирж: данные не найдены."
-        };
+            const string Message = "Ошибка при получении бирж: данные не найдены.";
+            Log.Information(Message);
+
+            return new AllExchangesBySessionReply
+            {
+                Result = ActionCode.ExchangeNotFound,
+                Message = Message
+            };
+        }
     }
 }

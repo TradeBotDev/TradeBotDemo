@@ -14,6 +14,8 @@ namespace Account
         // Метод регистрации аккаунта по запросу клиента. Вход в аккаунт после регистрации НЕ производится!
         public override Task<RegisterReply> Register(RegisterRequest request, ServerCallContext context)
         {
+            Log.Information($"Login получил запрос: Email - {request.Email}, Password - {request.Password}, VerifyPassword - {request.VerifyPassword}.");
+
             // Валидация полей запроса
             ValidationMessage validationResult = Validate.RegisterFields(request);
 
@@ -21,9 +23,6 @@ namespace Account
             // возвращается сообщение об одной из ошибок в запросе.
             if (validationResult.Code != ActionCode.Successful)
             {
-                Log.Debug($"Login - получено: \"Email: {request.Email}, Password: {request.Password}, VerifyPassword: {request.VerifyPassword}\", " +
-                    $"ответ: \"{validationResult.Message}\".");
-
                 return Task.FromResult(new RegisterReply
                 {
                     Result = validationResult.Code,
@@ -39,12 +38,7 @@ namespace Account
                 // В случае наличия аккаунтов с таким же Email-адресом, как в запросе, возвращается
                 // ответ сервера с ошибкой, сообщающей об этом.
                 if (accountsWithThisEmail.Count() > 0)
-                {
-                    Log.Debug($"Login - получено: \"Email: {request.Email}, Password: {request.Password}, VerifyPassword: {request.VerifyPassword}\", " +
-                        $"ответ: \"{RegisterReplies.AccountExists}\".");
-
-                    return Task.FromResult(RegisterReplies.AccountExists);
-                }
+                    return Task.FromResult(RegisterReplies.AccountExists());
 
                 // В случае отсутствия пользователей с тем же Email-адресом, добавление в базу данных
                 // нового пользователя с данными из базы данных.
@@ -53,13 +47,9 @@ namespace Account
                     Email = request.Email,
                     Password = request.Password
                 });
-                // Сохранение изменений базы данных.
+                // Сохранение изменений базы данных и возвращение ответа.
                 database.SaveChanges();
-
-                Log.Debug($"Login - получено: \"Email: {request.Email}, Password: {request.Password}, VerifyPassword: {request.VerifyPassword}\", " +
-                    $"ответ: \"{RegisterReplies.SuccessfulRegister}\".");
-
-                return Task.FromResult(RegisterReplies.SuccessfulRegister);
+                return Task.FromResult(RegisterReplies.SuccessfulRegister());
             }
         }
     }

@@ -1,29 +1,45 @@
-﻿using TradeBot.Account.AccountService.v1;
+﻿using Serilog;
+using TradeBot.Account.AccountService.v1;
 
 namespace Account.AccountMessages
 {
     public static class ExchangeBySessionReplies
     {
-        public static readonly ExchangeBySessionReply AccountNotFound = new ExchangeBySessionReply
+        public static ExchangeBySessionReply AccountNotFound()
         {
-            Result = ActionCode.AccountNotFound,
-            Message = "Произошла ошибка: пользователь не найден",
-            Exchange = null
-        };
+            const string Message = "Произошла ошибка: пользователь не найден.";
+            Log.Information(Message);
 
-        public static readonly ExchangeBySessionReply ExchangeNotFound = new ExchangeBySessionReply
+            return new ExchangeBySessionReply
+            {
+                Result = ActionCode.AccountNotFound,
+                Message = Message,
+                Exchange = null
+            };
+        }
+
+        public static ExchangeBySessionReply ExchangeNotFound()
         {
-            Result = ActionCode.ExchangeNotFound,
-            Message = "Произошла ошибка: биржа не найдена",
-            Exchange = null
-        };
+            const string Message = "Произошла ошибка: биржа не найдена.";
+            Log.Information(Message);
+
+            return new ExchangeBySessionReply
+            {
+                Result = ActionCode.ExchangeNotFound,
+                Message = Message,
+                Exchange = null
+            };
+        }
 
         public static ExchangeBySessionReply SuccessfulGettingExchangeAccess(Models.ExchangeAccess exchangeAccess)
         {
+            const string Message = "Успешное получение информации о доступе пользователя бирже.";
+            Log.Information(Message);
+
             return new ExchangeBySessionReply
             {
                 Result = ActionCode.Successful,
-                Message = "Успешное получение информации о доступе пользователя бирже.",
+                Message = Message,
                 Exchange = new ExchangeAccessInfo
                 {
                     ExchangeAccessId = exchangeAccess.ExchangeAccessId,

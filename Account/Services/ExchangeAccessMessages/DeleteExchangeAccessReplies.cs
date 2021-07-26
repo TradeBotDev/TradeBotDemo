@@ -1,25 +1,44 @@
-﻿using TradeBot.Account.AccountService.v1;
+﻿using Serilog;
+using TradeBot.Account.AccountService.v1;
 
 namespace Account.AccountMessages
 {
     public static class DeleteExchangeAccessReplies
     {
-        public static readonly DeleteExchangeAccessReply SuccessfulDeleting = new DeleteExchangeAccessReply
+        public static DeleteExchangeAccessReply SuccessfulDeleting()
         {
-            Result = ActionCode.Successful,
-            Message = "Данные биржи для данного пользователя успешно удалены."
-        };
+            const string Message = "Данные биржи для данного пользователя успешно удалены.";
+            Log.Information(Message);
 
-        public static readonly DeleteExchangeAccessReply AccountNotFound = new DeleteExchangeAccessReply
-        {
-            Result = ActionCode.AccountNotFound,
-            Message = "Произошла ошибка: пользователь не найдены."
-        };
+            return new DeleteExchangeAccessReply
+            {
+                Result = ActionCode.Successful,
+                Message = Message
+            };
+        }
 
-        public static readonly DeleteExchangeAccessReply ExchangeNotFound = new DeleteExchangeAccessReply
+        public static DeleteExchangeAccessReply AccountNotFound()
         {
-            Result = ActionCode.ExchangeNotFound,
-            Message = "Произошла ошибка: данные биржи не найдены."
-        };
+            const string Message = "Произошла ошибка: пользователь не найден.";
+            Log.Information(Message);
+
+            return new DeleteExchangeAccessReply
+            {
+                Result = ActionCode.AccountNotFound,
+                Message = Message
+            };
+        }
+
+        public static DeleteExchangeAccessReply ExchangeNotFound()
+        {
+            const string Message = "Произошла ошибка: данные биржи не найдены.";
+            Log.Information(Message);
+
+            return new DeleteExchangeAccessReply
+            {
+                Result = ActionCode.ExchangeNotFound,
+                Message = Message
+            };
+        }
     }
 }

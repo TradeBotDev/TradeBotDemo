@@ -1,23 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Serilog;
 using TradeBot.Account.AccountService.v1;
 
 namespace Account.AccountMessages
 {
     public static class IsValidSessionReplies
     {
-        public static readonly SessionReply IsValid = new SessionReply
+        public static SessionReply IsValid()
         {
-            IsValid = true,
-            Message = "Операция является валидной."
-        };
+            const string Message = "Операция является валидной.";
+            Log.Information(Message);
 
-        public static readonly SessionReply IsNotValid = new SessionReply
+            return new SessionReply
+            {
+                IsValid = true,
+                Message = Message
+            };
+        }
+
+        public static SessionReply IsNotValid()
         {
-            IsValid = false,
-            Message = "Произошла ошибка: операция не является валидной."
-        };
+            const string Message = "Произошла ошибка: операция не является валидной.";
+            Log.Information(Message);
+
+            return new SessionReply
+            {
+                IsValid = false,
+                Message = Message
+            };
+        }
     }
 }

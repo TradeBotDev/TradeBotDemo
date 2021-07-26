@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using System.IO;
 using Account.Models;
 using Serilog;
@@ -33,7 +32,6 @@ namespace Account
             // Добавление нового логгера, который будет выводить всю информацию в консоль.
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
-                .WriteTo.Console()
                 .WriteTo.Seq("http://localhost:5341")
                 .CreateLogger();
         }

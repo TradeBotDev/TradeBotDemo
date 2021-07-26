@@ -6,45 +6,33 @@ using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
 using Account.Models;
-using Microsoft.Extensions.Logging;
 using Serilog;
 
 namespace Account
 {
     public class ExchangeAccessService : TradeBot.Account.AccountService.v1.ExchangeAccess.ExchangeAccessBase
     {
-        private readonly ILogger<ExchangeAccessService> _logger;
-
-        public ExchangeAccessService(ILogger<ExchangeAccessService> logger) => _logger = logger;
+        public ExchangeAccessService() { }
 
         // Метод, добавляющий новую биржу для текущего пользователя.
         public override Task<AddExchangeAccessReply> AddExchangeAccess(AddExchangeAccessRequest request, ServerCallContext context)
         {
+            Log.Information($"AddExchangeAccess получил запрос: " +
+                $"SessionId - {request.SessionId}, " +
+                $"Code - {request.Code}, " +
+                $"ExchangeName - {request.ExchangeName}, " +
+                $"Token - {request.Token}, " +
+                $"Secret - {request.Secret}.");
+
             // Проверка на существование входа в аккаунт. Если аккаунт среди вошедших не найден, отправляется
             // сообщение об ошибке.
             if (!State.loggedIn.ContainsKey(request.SessionId))
-            {
-                Log.Debug($"Login - получено: \"Code: {request.Code}, " +
-                    $"Name: {request.ExchangeName}, " +
-                    $"SessionId: {request.SessionId}, " +
-                    $"Token: {request.Token}, " +
-                    $"Secret: {request.Secret}\", " +
-                    $"ответ: \"{AddExchangeAccessReplies.AccountNotFound.Message}\".");
-
-                return Task.FromResult(AddExchangeAccessReplies.AccountNotFound);
-            }
+                return Task.FromResult(AddExchangeAccessReplies.AccountNotFound());
 
             // Валидация полученных данных. В случае, если валидация не прошла успешно, возвращается сообщение об ошибке.
             ValidationMessage validationResult = Validate.AddExchangeAccessFields(request);
             if (validationResult.Code != ActionCode.Successful)
             {
-                Log.Debug($"Login - получено: \"Code: {request.Code}, " +
-                    $"Name: {request.ExchangeName}, " +
-                    $"SessionId: {request.SessionId}, " +
-                    $"Token: {request.Token}, " +
-                    $"Secret: {request.Secret}\", " +
-                    $"ответ: \"{validationResult.Message}\".");
-
                 return Task.FromResult(new AddExchangeAccessReply
                 {
                     Result = validationResult.Code,
@@ -64,16 +52,7 @@ namespace Account
 
                 // В случае, если данные доступа к бирже уже существуют, возвращается сообщение об этом.
                 if (isExists)
-                {
-                    Log.Debug($"Login - получено: \"Code: {request.Code}, " +
-                        $"Name: {request.ExchangeName}, " +
-                        $"SessionId: {request.SessionId}, " +
-                        $"Token: {request.Token}, " +
-                        $"Secret: {request.Secret}\", " +
-                        $"ответ: \"{AddExchangeAccessReplies.ExchangeAccessExists.Message}\".");
-
-                    return Task.FromResult(AddExchangeAccessReplies.ExchangeAccessExists);
-                }
+                    return Task.FromResult(AddExchangeAccessReplies.ExchangeAccessExists());
 
                 // Добавление в текущий аккаунт нового доступа к бирже.
                 account.First().ExchangeAccesses.Add(new Models.ExchangeAccess
@@ -86,18 +65,13 @@ namespace Account
                 });
                 database.SaveChanges();
             }
-            Log.Debug($"Login - получено: \"Code: {request.Code}, " +
-                $"Name: {request.ExchangeName}, " +
-                $"SessionId: {request.SessionId}, " +
-                $"Token: {request.Token}, " +
-                $"Secret: {request.Secret}\", " +
-                $"ответ: \"{AddExchangeAccessReplies.SuccessfulAddition.Message}\".");
-
-            return Task.FromResult(AddExchangeAccessReplies.SuccessfulAddition);
+            return Task.FromResult(AddExchangeAccessReplies.SuccessfulAddition());
         }
 
         public override Task<AllExchangesBySessionReply> AllExchangesBySession(SessionRequest request, ServerCallContext context)
         {
+            Log.Information($"AllExchangesBySession получил запрос: SessionId - {request.SessionId}.");
+
             if (State.loggedIn.ContainsKey(request.SessionId))
             {
                 using (var database = new AccountContext())
@@ -109,37 +83,23 @@ namespace Account
 
                     // Ошибка в случае, если биржи не найдены.
                     if (exchangesFromAccount.Count() == 0)
-                    {
-                        Log.Debug($"Login - получено: \"SessionId: {request.SessionId}, " +
-                            $"ответ: \"{AllExchangesBySessionReplies.ExchangesNotFound.Message}\".");
-
-                        return Task.FromResult(AllExchangesBySessionReplies.ExchangesNotFound);
-                    }
+                        return Task.FromResult(AllExchangesBySessionReplies.ExchangesNotFound());
 
                     // Формирование ответа со всей необходимой информацией о добавленных биржах.
                     var reply = AllExchangesBySessionReplies.SuccessfulGetting(exchangesFromAccount);
-
-                    Log.Debug($"Login - получено: \"SessionId: {request.SessionId}, " +
-                        $"ответ: \"{reply.Message}\".");
                     return Task.FromResult(reply);
                 }
             }
-            Log.Debug($"Login - получено: \"SessionId: {request.SessionId}, " +
-                $"ответ: \"{AllExchangesBySessionReplies.AccountNotFound.Message}\".");
-
-            return Task.FromResult(AllExchangesBySessionReplies.AccountNotFound);
+            return Task.FromResult(AllExchangesBySessionReplies.AccountNotFound());
         }
 
         // Метод, удаляющий данные одной из бирж для текущего пользователя по id записи.
         public override Task<DeleteExchangeAccessReply> DeleteExchangeAccess(DeleteExchangeAccessRequest request, ServerCallContext context)
         {
-            if (!State.loggedIn.ContainsKey(request.SessionId))
-            {
-                Log.Debug($"Login - получено: \"SessionId: {request.SessionId}, Code: {request.Code}" +
-                    $"ответ: \"{DeleteExchangeAccessReplies.AccountNotFound.Message}\".");
+            Log.Information($"DeleteExchangeAccess получил запрос: SessionId - {request.SessionId}, Code - {request.Code}.");
 
-                return Task.FromResult(DeleteExchangeAccessReplies.AccountNotFound);
-            }
+            if (!State.loggedIn.ContainsKey(request.SessionId))
+                return Task.FromResult(DeleteExchangeAccessReplies.AccountNotFound());
 
             using (var database = new AccountContext())
             {
@@ -152,34 +112,23 @@ namespace Account
 
                 // В случае, если такой записи не обнаружено, сервис отвечает ошибкой.
                 if (exсhangeAccess.Count() == 0)
-                {
-                    Log.Debug($"Login - получено: \"SessionId: {request.SessionId}, Code: {request.Code}" +
-                        $"ответ: \"{DeleteExchangeAccessReplies.ExchangeNotFound.Message}\".");
-
-                    return Task.FromResult(DeleteExchangeAccessReplies.ExchangeNotFound);
-                }
+                    return Task.FromResult(DeleteExchangeAccessReplies.ExchangeNotFound());
 
                 // Если такая запись существует, производится ее удаление.
                 database.ExchangeAccesses.Remove(exсhangeAccess.First());
                 database.SaveChanges();
             }
-            Log.Debug($"Login - получено: \"SessionId: {request.SessionId}, Code: {request.Code}" +
-                $"ответ: \"{DeleteExchangeAccessReplies.SuccessfulDeleting.Message}\".");
-
-            return Task.FromResult(DeleteExchangeAccessReplies.SuccessfulDeleting);
+            return Task.FromResult(DeleteExchangeAccessReplies.SuccessfulDeleting());
         }
 
         // Получение данных конкретной биржи пользователя.
         public override Task<ExchangeBySessionReply> ExchangeBySession(ExchangeBySessionRequest request, ServerCallContext context)
         {
+            Log.Information($"ExchangeBySession получил запрос: SessionId - {request.SessionId}, Code - {request.Code}.");
+
             // В случае, если аккаунт не найден среди вошедших, возвращается сообщение об ошибке.
             if (!State.loggedIn.ContainsKey(request.SessionId))
-            {
-                Log.Debug($"Login - получено: \"SessionId: {request.SessionId}, Code: {request.Code}" +
-                    $"ответ: \"{ExchangeBySessionReplies.AccountNotFound.Message}\".");
-
-                return Task.FromResult(ExchangeBySessionReplies.AccountNotFound);
-            }
+                return Task.FromResult(ExchangeBySessionReplies.AccountNotFound());
 
             using (var database = new AccountContext())
             {
@@ -189,19 +138,10 @@ namespace Account
 
                 // Если такой биржи не было найдено, возвращается сообшение об ошибке.
                 if (exchangeAccesses.Count() == 0)
-                {
-                    Log.Debug($"Login - получено: \"SessionId: {request.SessionId}, Code: {request.Code}" +
-                        $"ответ: \"{ExchangeBySessionReplies.ExchangeNotFound.Message}\".");
-
-                    return Task.FromResult(ExchangeBySessionReplies.ExchangeNotFound);
-                }
+                    return Task.FromResult(ExchangeBySessionReplies.ExchangeNotFound());
 
                 // В случае успешного получения доступа к бирже она возвращается в качестве ответа.
                 var exchangeAccess = exchangeAccesses.First();
-
-                Log.Debug($"Login - получено: \"SessionId: {request.SessionId}, Code: {request.Code}" +
-                    $"ответ: \"{ExchangeBySessionReplies.SuccessfulGettingExchangeAccess(exchangeAccess).Message}\".");
-
                 return Task.FromResult(ExchangeBySessionReplies.SuccessfulGettingExchangeAccess(exchangeAccess));
             }
         }

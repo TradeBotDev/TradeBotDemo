@@ -1,4 +1,5 @@
-﻿using TradeBot.Account.AccountService.v1;
+﻿using Serilog;
+using TradeBot.Account.AccountService.v1;
 
 namespace Account.Validation.Messages
 {
@@ -7,5 +8,10 @@ namespace Account.Validation.Messages
         public override string Message => "Произошла ошибка: введенные пароли не совпадают. Проверьте правильность введенных данных.";
 
         public override ActionCode Code => ActionCode.PasswordMismatch;
+
+        public PasswordMismatchMessage()
+        {
+            Log.Information("Ошибка валидации: введенные пароли не совпадают.");
+        }
     }
 }

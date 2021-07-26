@@ -1,4 +1,5 @@
-﻿using TradeBot.Account.AccountService.v1;
+﻿using Serilog;
+using TradeBot.Account.AccountService.v1;
 
 namespace Account.Validation.Messages
 {
@@ -7,5 +8,10 @@ namespace Account.Validation.Messages
         public override string Message => "Валидация завершена успешно.";
 
         public override ActionCode Code => ActionCode.Successful;
+
+        public SuccessfulValidationMessage()
+        {
+            Log.Information("Успешная валидация.");
+        }
     }
 }
