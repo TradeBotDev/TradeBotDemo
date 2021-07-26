@@ -17,6 +17,9 @@ namespace Account.Validation
             // В случае, если они являются пустыми, возвращает сообщение об ошибке.
             if (IsEmpty(request.Email, request.Password))
                 return new EmptyFieldMessage();
+            // Если в записи электронной почты есть ошибка, возвращается сообщение об ошибке.
+            if (!IsEmail(request.Email))
+                return new IsNotEmailMessage();
             // Иначе возвращает сообщение об успешности операции.
             return new SuccessfulValidationMessage();
         }

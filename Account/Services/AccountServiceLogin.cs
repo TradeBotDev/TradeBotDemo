@@ -8,6 +8,7 @@ using Account.Validation;
 using Account.Validation.Messages;
 using Account.AccountMessages;
 using Account.Models;
+using Serilog;
 
 namespace Account
 {
@@ -23,6 +24,9 @@ namespace Account
             // возвращается сообщение об одной из ошибок в запросе.
             if (validationResult.Code != ActionCode.Successful)
             {
+                Log.Debug($"Login - получено: \"Email: {request.Email}, Password: {request.Password}\", " +
+                    $"ответ: \"{validationResult.Message}\".");
+
                 return Task.FromResult(new LoginReply
                 {
                     SessionId = "none",
@@ -41,7 +45,12 @@ namespace Account
                 // Проверка на наличие зарегистрированных аккаунтов с данными из запроса, и в
                 // случае их отсутствия отправляет ответ с сообщением об ошибке.
                 if (accounts.Count() == 0)
+                {
+                    Log.Debug($"Login - получено: \"Email: {request.Email}, Password: {request.Password}\", " +
+                        $"ответ: \"{LoginReplies.AccountNotFound.Message}\".");
+
                     return Task.FromResult(LoginReplies.AccountNotFound);
+                }
 
                 // Проверка на то, есть ли сессия с пользователем, который пытается войти в аккаунт, и
                 // в случае, если он вошел, возвращается его Id сессии
@@ -49,7 +58,12 @@ namespace Account
                 {
                     int checkedAccount = database.Accounts.Count(account => account.Email == request.Email);
                     if (checkedAccount > 0)
+                    {
+                        Log.Debug($"Login - получено: \"Email: {request.Email}, Password: {request.Password}\", " +
+                            $"ответ: \"{LoginReplies.AlreadySignedIn(account.Key).Message}\".");
+
                         return Task.FromResult(LoginReplies.AlreadySignedIn(account.Key));
+                    }
                 }
 
                 // В случае наличия зарегистрированного аккаунта с данными из запроса генерируется
@@ -61,6 +75,9 @@ namespace Account
 
                 // Сохранение текущего состояния в файл.
                 FileManagement.WriteFile(State.LoggedInFilename, State.loggedIn);
+
+                Log.Debug($"Login - получено: \"Email: {request.Email}, Password: {request.Password}\", " +
+                    $"ответ: \"{LoginReplies.SuccessfulLogin(sessionId).Message}\".");
 
                 // Ответ сервера об успешном входе в аккаунт.
                 return Task.FromResult(LoginReplies.SuccessfulLogin(sessionId));
