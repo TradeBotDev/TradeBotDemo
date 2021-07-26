@@ -27,7 +27,7 @@ namespace Former
         private static int _retryDelay;
         private static string _connectionString;
 
-        private Metadata _metadata;
+        public static Metadata _metadata;
 
         private static TradeMarketClient _tradeMarketClient;
 
@@ -43,15 +43,11 @@ namespace Former
             return _tradeMarketClient;
         }
 
-        public void SetMetadata(Metadata metadata) 
-        {
-            _metadata = metadata;
-        }
-
-        public static void Configure(string connectionString, int retryDelay)
+        public static void Configure(string connectionString, int retryDelay, Metadata meta)
         {
             _connectionString = connectionString;
             _retryDelay = retryDelay;
+            _metadata = meta;
         }
 
         private TradeMarketClient()

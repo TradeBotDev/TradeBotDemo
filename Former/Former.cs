@@ -20,13 +20,13 @@ namespace Former
 
         private double _balance = 100;
 
-        public Config Config
+        public static Config сonfig
         {
             get; set;
         }
 
         //TODO формер не должне принимать конфиг как аргмунет конструктора, но должен принимать конфиг ( или контекст пользователя) как аргумент своих методов
-        public Former(Config config)
+        public Former()
         {
             _tmClient = TradeMarketClient.GetInstance();
             _tmClient.UpdateOrderBook += UpdateOrderBook;
@@ -43,12 +43,11 @@ namespace Former
             //    SlotFee = 0.2,
             //    TotalBalance = 0
             //};
-            _config = config;
             _orderBook = new ConcurrentDictionary<string, Order>();
             _myOrders = new ConcurrentDictionary<string, Order>();
         }
 
-        private async void UpdateOrderBook(Order orderNeededUpdate,Config config)
+        private async void UpdateOrderBook(Order orderNeededUpdate)
         {
             var task = Task.Run(() =>
             {
@@ -84,7 +83,7 @@ namespace Former
             var id = orderNeededUpdate.Id;
             var status = orderNeededUpdate.Signature.Status;
             var type = orderNeededUpdate.Signature.Type;
-            var sellPrice = orderNeededUpdate.Price + config.RequiredProfit + config.SlotFee;
+            var sellPrice = orderNeededUpdate.Price + сonfig.RequiredProfit + сonfig.SlotFee;
             var task = Task.Run(async () =>
             {
                 if (status == OrderStatus.Open && type == OrderType.Buy)
@@ -137,7 +136,7 @@ namespace Former
             {
                 foreach (var order in _myOrders)
                 {
-                    if (order.Value.Price + config.OrderUpdatePriceRange < fairPrice)
+                    if (order.Value.Price + сonfig.OrderUpdatePriceRange < fairPrice)
                     {
                         order.Value.Price = fairPrice;
                         _myOrders.TryUpdate(order.Key, order.Value, order.Value);
@@ -152,16 +151,16 @@ namespace Former
                 await _tmClient.TellTMUpdateMyOrders(ordersNeededToFit);
         }
 
-        public async void FormPurchaseList(double avgPrice,UserContext context)
+        public async void FormPurchaseList(double avgPrice)
         {
             Log.Debug("Received from algorithm: {price}", avgPrice);
             //config.AvaibleBalance это доступный баланс в процентах
-            double availableBalance = _balance * context.config.AvaibleBalance;
+            double availableBalance = _balance * сonfig.AvaibleBalance;
             var selectedOrders = new Dictionary<double, double>();
             foreach (var order in _orderBook)
             {
                 if (IsPriceCorrect(order.Value.Price, avgPrice, availableBalance))
-                    selectedOrders.Add(order.Value.Price, config.ContractValue);
+                    selectedOrders.Add(order.Value.Price, сonfig.ContractValue);
             }
             Log.Debug("Formed a list of required orders:");
             foreach (var order in selectedOrders) 
@@ -175,7 +174,7 @@ namespace Former
 
         private bool IsPriceCorrect(double estimatedPrice, double cuttingPrice, double availableBalance)
         {
-            if (estimatedPrice < cuttingPrice && (availableBalance - Convert(estimatedPrice) * config.ContractValue) > 0) return true;
+            if (estimatedPrice < cuttingPrice && (availableBalance - Convert(estimatedPrice) * сonfig.ContractValue) > 0) return true;
             else return false;
         }
 
