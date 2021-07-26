@@ -152,32 +152,6 @@ namespace Facade
             }
             return Task.FromResult(new AuthenticateTokenResponse { });
 
-
-
-
-
-            try
-            {
-                var response = clientTM.AuthenticateToken(new TradeBot.TradeMarket.TradeMarketService.v1.AuthenticateTokenRequest { Token = request.Token });
-                return Task.FromResult(new AuthenticateTokenResponse
-                {
-                    //Response = new TradeBot.Common.v1.DefaultResponse { Code=TradeBot.Common.v1.ReplyCode.Succeed,Message="otvet"}
-                    Response = response.Response
-                });
-            }
-            catch (RpcException e)
-            {
-                _logger.LogError("Exception: " + e.Status.DebugException.Message);
-                var defaultResponse = new TradeBot.Common.v1.DefaultResponse
-                {
-                    Code = TradeBot.Common.v1.ReplyCode.Failure,
-                    Message = "Exception. The server doesnt answer"
-                };
-                return Task.FromResult(new AuthenticateTokenResponse
-                {
-                    Response = defaultResponse
-                });
-            }
         }
 
         #endregion
