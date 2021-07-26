@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.IO;
 using Account.Models;
+using Serilog;
 
 namespace Account
 {
@@ -28,6 +29,13 @@ namespace Account
                 State.loggedIn = new Dictionary<string, LoggedAccount>();
                 FileManagement.WriteFile(State.LoggedInFilename, State.loggedIn);
             }
+
+            // Добавление нового логгера, который будет выводить всю информацию в консоль.
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.Console()
+                .WriteTo.Seq("http://localhost:5341")
+                .CreateLogger();
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
