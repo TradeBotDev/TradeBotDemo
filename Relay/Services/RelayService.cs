@@ -11,6 +11,7 @@ using SubscribeLogsRequest = TradeBot.Relay.RelayService.v1.SubscribeLogsRequest
 using SubscribeLogsResponse = TradeBot.Relay.RelayService.v1.SubscribeLogsResponse;
 using UpdateServerConfigRequest = TradeBot.Relay.RelayService.v1.UpdateServerConfigRequest;
 using UpdateServerConfigResponse = TradeBot.Relay.RelayService.v1.UpdateServerConfigResponse;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Relay.Services
 {
@@ -20,12 +21,34 @@ namespace Relay.Services
         private static TradeMarketClient _tradeMarketClient = null;
         private static FormerClient _former;
 
-        private static IDictionary<Metadata, UserContext> contexts = new Dictionary<Metadata, UserContext>();
+        private static IDictionary<Metadata, UserContext> contexts = new Dictionary<Metadata, UserContext>(new MetaComparer());
+
+
+        public class MetaComparer : IEqualityComparer<Metadata>
+        {
+            public bool Equals(Metadata x, Metadata y)
+            {
+                if (x.Get("sessionid") is null || x.Get("slot") is null || x.Get("trademarket") is null)
+                {
+                    return false;
+                }
+                if (y.Get("sessionid") is null || y.Get("slot") is null || y.Get("trademarket") is null)
+                {
+                    return false;
+                }
+                return x.Get("sessionid") == y.Get("sessionid") && x.Get("slot") == y.Get("slot") && x.Get("trademarket") == y.Get("trademarket");
+            }
+
+            public int GetHashCode([DisallowNull] Metadata obj)
+            {
+                return obj.GetHashCode();
+            }
+        }
 
         public UserContext GetUserContext(Metadata meta)
         {
             //TODO Возможно он тут проверяет по ссылке. так что надо бы сделать Equals
-            if (contexts.ContainsKey(meta))
+            if (contexts.ContainsKey(meta)) 
             {
                 return contexts[meta];
             }

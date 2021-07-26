@@ -19,6 +19,7 @@ namespace UI
     public partial class TradeBotUI : Form
     {
         private TradeBot.Facade.FacadeService.v1.FacadeService.FacadeServiceClient client;
+        private Metadata meta;
         public TradeBotUI()
         {
             client = new TradeBot.Facade.FacadeService.v1.FacadeService.FacadeServiceClient(GrpcChannel.ForAddress("https://localhost:5002"));
@@ -35,7 +36,7 @@ namespace UI
                 AvaibleBalance = double.Parse(ConfigAvailableBalance.Text),
                 RequiredProfit = double.Parse(ConfigRequiredProfit.Text),
                 ContractValue = double.Parse(ConfigVolumeOfContracts.Text),
-                AlgorithmInfo = new AlgorithmInfo() { Interval = new Google.Protobuf.WellKnownTypes.Timestamp() { Seconds = int.Parse(ConfigIntervalOfAnalysis.Text) } },
+                //AlgorithmInfo = new AlgorithmInfo() { Interval = new Google.Protobuf.WellKnownTypes.Timestamp() { Seconds = int.Parse(ConfigIntervalOfAnalysis.Text) } },
                 OrderUpdatePriceRange = double.Parse(ConfigUpdatePriceRange.Text),
                 SlotFee = 0.1D,
                 TotalBalance = 100.0
@@ -46,14 +47,13 @@ namespace UI
                 Config = config
 
             };
-            var requestForFacade = new AuthenticateTokenRequest()
-            {
-                Token = ConfigTokenl.Text
-            };
-            var call = await facadeClient.AuthenticateTokenAsync(requestForFacade);
-            Console.WriteLine("Выслал facade: {0}", requestForFacade.Token);
+            //var requestForFacade = new AuthenticateTokenRequest()
+            //{
+            //    Token = ConfigTokenl.Text
+            //};
 
-            var call2 =await facadeClient.SwitchBotAsync(requestForRelay);
+
+            var call2 =await facadeClient.SwitchBotAsync(requestForRelay,meta);
             Console.WriteLine("Запустил бота с конфигом {0}", requestForRelay.Config);
         }
 
@@ -91,16 +91,47 @@ namespace UI
         {
             try
             {
-                var response1 = await client.RegisterAsync(new RegisterRequest
+                var regResponse = await client.RegisterAsync(new RegisterRequest
                 {
                     Email = RegLog.Text,
-                    Password = RegPass.Text
+                    Password = RegPass.Text,
+                    Firstname="ABOBA",
+                    Lastname="AMONGUS",
+                    PhoneNumber="123456789",
+                    VerifyPassword=RegPass.Text
                 });
+
+                
+                
+                
             }
             catch (RpcException ex)
             {
                 IsUserLogged.Text = ex.Message;
             }
-        } 
+        }
+
+        private async void LoginButton_Click(object sender, EventArgs e)
+        {
+            var logResponse = await client.LoginAsync(new LoginRequest
+            {
+                Email = RegLog.Text,
+                Password = RegPass.Text,
+                SaveExchangesAfterLogout = true
+            });
+            meta = new Metadata();
+            meta.Add("sessionid", logResponse.SessionId);
+            meta.Add("slot", "XBTUSD");
+            meta.Add("trademarket", "bitmex");
+
+            var exchangeResponse = client.AddExchangeAccess(new AddExchangeAccessRequest
+            {
+                SessionId = logResponse.SessionId,
+                Token = RegKey.Text,
+                Secret = RegToken.Text,
+                Code = ExchangeCode.Bitmex,
+                ExchangeName = "BitMEX"
+            });
+        }
     }
 }
