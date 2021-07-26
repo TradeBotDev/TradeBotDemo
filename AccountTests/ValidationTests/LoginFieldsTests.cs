@@ -1,8 +1,6 @@
-using System;
-using System.Collections.Generic;
+using Account.Validation;
 using TradeBot.Account.AccountService.v1;
 using Xunit;
-using Account.Validation;
 
 namespace AccountTests.ValidationTests
 {
