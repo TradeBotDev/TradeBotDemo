@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using Serilog;
+using System.IO;
 using System.Text.Json;
 
 namespace Account
@@ -8,6 +9,7 @@ namespace Account
         // Метод записи объекта любого типа в файл.
         public static async void WriteFile<T>(string filename, T state)
         {
+            Log.Debug($"WriteFile - файл {filename} записан в state с типом {state.GetType()}.");
             string serialized = JsonSerializer.Serialize(state);
             await File.WriteAllTextAsync(filename, serialized);
         }
@@ -22,9 +24,12 @@ namespace Account
                 if (!string.IsNullOrEmpty(file))
                 {
                     var deserializedFile = JsonSerializer.Deserialize<T>(file);
+                    Log.Debug("ReadFile - файл прочитан.");
                     return deserializedFile;
                 }
+                Log.Debug("ReadFile - файл пуст.");
             }
+            Log.Debug("ReadFile - файл не существует.");
             return default(T);
         }
     }

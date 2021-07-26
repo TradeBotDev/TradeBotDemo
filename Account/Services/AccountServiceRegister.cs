@@ -5,6 +5,7 @@ using TradeBot.Account.AccountService.v1;
 using Account.Validation;
 using Account.Validation.Messages;
 using Account.AccountMessages;
+using Serilog;
 
 namespace Account
 {
@@ -20,6 +21,9 @@ namespace Account
             // возвращается сообщение об одной из ошибок в запросе.
             if (validationResult.Code != ActionCode.Successful)
             {
+                Log.Debug($"Login - получено: \"Email: {request.Email}, Password: {request.Password}, VerifyPassword: {request.VerifyPassword}\", " +
+                    $"ответ: \"{validationResult.Message}\".");
+
                 return Task.FromResult(new RegisterReply
                 {
                     Result = validationResult.Code,
@@ -35,7 +39,12 @@ namespace Account
                 // В случае наличия аккаунтов с таким же Email-адресом, как в запросе, возвращается
                 // ответ сервера с ошибкой, сообщающей об этом.
                 if (accountsWithThisEmail.Count() > 0)
+                {
+                    Log.Debug($"Login - получено: \"Email: {request.Email}, Password: {request.Password}, VerifyPassword: {request.VerifyPassword}\", " +
+                        $"ответ: \"{RegisterReplies.AccountExists}\".");
+
                     return Task.FromResult(RegisterReplies.AccountExists);
+                }
 
                 // В случае отсутствия пользователей с тем же Email-адресом, добавление в базу данных
                 // нового пользователя с данными из базы данных.
@@ -46,6 +55,10 @@ namespace Account
                 });
                 // Сохранение изменений базы данных.
                 database.SaveChanges();
+
+                Log.Debug($"Login - получено: \"Email: {request.Email}, Password: {request.Password}, VerifyPassword: {request.VerifyPassword}\", " +
+                    $"ответ: \"{RegisterReplies.SuccessfulRegister}\".");
+
                 return Task.FromResult(RegisterReplies.SuccessfulRegister);
             }
         }

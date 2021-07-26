@@ -1,25 +1,32 @@
 ﻿using Grpc.Core;
-using Microsoft.Extensions.Logging;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
 using Account.AccountMessages;
 using Account.Models;
+using Serilog;
 
 namespace Account
 {
     public partial class AccountService : TradeBot.Account.AccountService.v1.Account.AccountBase
     {
-        private readonly ILogger<AccountService> _logger;
+        //private readonly ILogger<AccountService> _logger;
+        //public AccountService(ILogger<AccountService> logger) => _logger = logger;
 
-        public AccountService(ILogger<AccountService> logger) => _logger = logger;
+        public AccountService() { }
 
         // Метод выхода из аккаунта
         public override Task<LogoutReply> Logout(SessionRequest request, ServerCallContext context)
         {
             // В случае, если аккаунт не был найден среди вошедших, появляется сообщение об ошибке.
             if (!State.loggedIn.ContainsKey(request.SessionId))
+            {
+                Log.Debug($"Logout - получено: \"{request.SessionId}\", " +
+                    $"ответ: \"{LogoutReplies.AccountNotFound.Message}\", " +
+                    $"код: \"{LogoutReplies.AccountNotFound.Result}\".");
+
                 return Task.FromResult(LogoutReplies.AccountNotFound);
+            }
 
             // Необходимые данные для удаления бирж.
             int accountId = State.loggedIn[request.SessionId].AccountId;
@@ -41,6 +48,10 @@ namespace Account
             State.loggedIn.Remove(request.SessionId);
             FileManagement.WriteFile(State.LoggedInFilename, State.loggedIn);
 
+            Log.Debug($"Logout - получено: \"{request.SessionId}\", " +
+                $"ответ: \"{LogoutReplies.SuccessfulLogout.Message}\", " +
+                $"код: \"{LogoutReplies.SuccessfulLogout.Result}\".");
+
             // В случае успешного удаления аккаунта из списка, в который пользователь зашел,
             // сервер отвечает, что выход был успешно завершен.
             return Task.FromResult(LogoutReplies.SuccessfulLogout);
@@ -52,8 +63,16 @@ namespace Account
             // Проверка на наличие вошедших пользователем с тем же Id сессии, что
             // предоставляется клиентом. Если есть - сессия валидна, нет - невалидна.
             if (State.loggedIn.ContainsKey(request.SessionId))
+            {
+                Log.Debug($"IsValidSession - получено: {request.SessionId}, " +
+                    $"ответ: \"{IsValidSessionReplies.IsValid.Message}\".");
+
                 return Task.FromResult(IsValidSessionReplies.IsValid);
-            else return Task.FromResult(IsValidSessionReplies.IsNotValid);
+            }
+            Log.Debug($"IsValidSession - получено: {request.SessionId}, " +
+                    $"ответ: \"{IsValidSessionReplies.IsNotValid.Message}\".");
+
+            return Task.FromResult(IsValidSessionReplies.IsNotValid);
         }
 
         // Метод получения информации о текущем пользователе по Id сессии.
@@ -61,19 +80,32 @@ namespace Account
         {
             // Производится проверка на то, является ли текущий пользователь вошедшим (по Id сессии).
             if (!State.loggedIn.ContainsKey(request.SessionId))
+            {
+                Log.Debug($"CurrentAccountData - получено: \"{request.SessionId}\", " +
+                    $"ответ: \"{CurrentAccountReplies.AccountNotFound.Message}\", " +
+                    $"код: \"{CurrentAccountReplies.AccountNotFound.Result}\".");
+
                 return Task.FromResult(CurrentAccountReplies.AccountNotFound);
+            }
             // Если текущий пользователь вошедший, то сервер возвращает данные этого пользователя.
             else
             {
                 using (var database = new AccountContext())
                 {
                     // Получение данных вошедшего пользователя.
-                    Models.Account account = database.Accounts.Where(id => id.AccountId == State.loggedIn[request.SessionId].AccountId).First(); 
-                    return Task.FromResult(CurrentAccountReplies.SuccessfulGettingAccountData(new AccountInfo
+                    Models.Account account = database.Accounts.Where(id => id.AccountId == State.loggedIn[request.SessionId].AccountId).First();
+                    // Формирование ответа.
+                    var reply = CurrentAccountReplies.SuccessfulGettingAccountData(new AccountInfo
                     {
                         AccountId = account.AccountId,
                         Email = account.Email,
-                    }));
+                    });
+
+                    Log.Debug($"CurrentAccountInfo: получено - \"{request.SessionId}\", " +
+                        $"ответ: \"{reply.Message}\", " +
+                        $"код: \"{reply.Result}\", ");
+
+                    return Task.FromResult(reply);
                 }
             }
         }
