@@ -52,7 +52,7 @@ namespace TradeMarket.Model
         internal UserContext(string sessionId, string slotName, Model.TradeMarket tradeMarket)
         {
             //инициализация websocket клиента
-            var communicator = new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketUrl);
+            var communicator = new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketTestnetUrl);
             WSClient = new BitmexWebsocketClient(communicator);
             communicator.Start();
 

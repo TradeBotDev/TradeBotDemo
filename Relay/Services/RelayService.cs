@@ -68,6 +68,7 @@ namespace Relay.Services
         {
             var user = GetUserContext(context.RequestHeaders);
             user.SubscribeForOrders();
+            user.UpdateConfig(request.Config);
             //_algorithmClient.IsOn = true;
             return await Task.FromResult(new StartBotResponse()
             {
