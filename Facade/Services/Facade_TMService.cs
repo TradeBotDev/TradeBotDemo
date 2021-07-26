@@ -309,10 +309,7 @@ namespace Facade
                     var response = clientAccount.Register(new TradeBot.Account.AccountService.v1.RegisterRequest 
                     { 
                         Email= request.Email,
-                        Firstname=request.Firstname,
-                        Lastname=request.Lastname,
                         Password=request.Password,
-                        PhoneNumber=request.PhoneNumber,
                         VerifyPassword=request.VerifyPassword
                     });
                     return Task.FromResult(new RegisterReply 
@@ -372,10 +369,7 @@ namespace Facade
                         CurrentAccount = new AccountInfo
                         {
                             AccountId = response.CurrentAccount.AccountId,
-                            Email = response.CurrentAccount.Email,
-                            Firstname = response.CurrentAccount.Firstname,
-                            Lastname = response.CurrentAccount.Lastname,
-                            PhoneNumber = response.CurrentAccount.PhoneNumber,
+                            Email = response.CurrentAccount.Email
                         }
                     };
                     foreach (var item in response.CurrentAccount.Exchanges)

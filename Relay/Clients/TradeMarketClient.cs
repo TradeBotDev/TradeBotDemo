@@ -37,7 +37,6 @@ namespace Relay.Clients
 
         public async void SubscribeForOrders(IAsyncStreamReader<SubscribeOrdersResponse> stream)
         {
-
             while (await stream.MoveNext())
             {
                 OrderRecievedEvent?.Invoke(this, new(stream.Current.Response.Order));
