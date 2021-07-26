@@ -12,7 +12,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Rest.Requests
     public class PlaceOrderRequest : BitmexRestfulRequest
     {
         public PlaceOrderRequest(string key, string secret, Order order) 
-            : base(key, secret, HttpMethod.Post, /*"api/v1" +*/ "/order", JsonSerializer.Serialize(new Dictionary<string, string>
+            : base(key, secret, HttpMethod.Post, "api/v1" + "/order", JsonSerializer.Serialize(new Dictionary<string, string>
             {
                 {"ordType","Limit" },
                 {"symbol",order.Symbol },
