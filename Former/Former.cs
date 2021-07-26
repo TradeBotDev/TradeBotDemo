@@ -25,6 +25,7 @@ namespace Former
 
         public async Task UpdateOrderBook(Order orderNeededUpdate, UserContext context)
         {
+            Log.Information("Got order: {0}", orderNeededUpdate);
             var task = Task.Run(() =>
             {
                 //TODO убрать проверку на тип ордера
