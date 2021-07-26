@@ -60,9 +60,9 @@ namespace UI
             this.LoginButton = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
-            this.textBox7 = new System.Windows.Forms.TextBox();
+            this.LogLogTextBox = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
-            this.textBox6 = new System.Windows.Forms.TextBox();
+            this.LogPassTextBox = new System.Windows.Forms.TextBox();
             this.MainMenuPanel.SuspendLayout();
             this.RegistrationPanel.SuspendLayout();
             this.LogginPanel.SuspendLayout();
@@ -329,9 +329,9 @@ namespace UI
             this.LogginPanel.Controls.Add(this.LoginButton);
             this.LogginPanel.Controls.Add(this.label3);
             this.LogginPanel.Controls.Add(this.label8);
-            this.LogginPanel.Controls.Add(this.textBox7);
+            this.LogginPanel.Controls.Add(this.LogLogTextBox);
             this.LogginPanel.Controls.Add(this.label9);
-            this.LogginPanel.Controls.Add(this.textBox6);
+            this.LogginPanel.Controls.Add(this.LogPassTextBox);
             this.LogginPanel.Location = new System.Drawing.Point(174, 12);
             this.LogginPanel.Name = "LogginPanel";
             this.LogginPanel.Size = new System.Drawing.Size(349, 344);
@@ -366,12 +366,13 @@ namespace UI
             this.label8.TabIndex = 33;
             this.label8.Text = "Password";
             // 
-            // textBox7
+            // LogLogTextBox
             // 
-            this.textBox7.Location = new System.Drawing.Point(79, 67);
-            this.textBox7.Name = "textBox7";
-            this.textBox7.Size = new System.Drawing.Size(229, 27);
-            this.textBox7.TabIndex = 27;
+            this.LogLogTextBox.Location = new System.Drawing.Point(79, 67);
+            this.LogLogTextBox.Name = "LogLogTextBox";
+            this.LogLogTextBox.Size = new System.Drawing.Size(229, 27);
+            this.LogLogTextBox.TabIndex = 27;
+            this.LogLogTextBox.Text = "@mail.ru";
             // 
             // label9
             // 
@@ -382,26 +383,27 @@ namespace UI
             this.label9.TabIndex = 32;
             this.label9.Text = "Login";
             // 
-            // textBox6
+            // LogPassTextBox
             // 
-            this.textBox6.Location = new System.Drawing.Point(79, 100);
-            this.textBox6.Name = "textBox6";
-            this.textBox6.Size = new System.Drawing.Size(229, 27);
-            this.textBox6.TabIndex = 28;
-            this.textBox6.UseSystemPasswordChar = true;
+            this.LogPassTextBox.Location = new System.Drawing.Point(79, 100);
+            this.LogPassTextBox.Name = "LogPassTextBox";
+            this.LogPassTextBox.Size = new System.Drawing.Size(229, 27);
+            this.LogPassTextBox.TabIndex = 28;
+            this.LogPassTextBox.Text = "123";
+            this.LogPassTextBox.UseSystemPasswordChar = true;
             // 
             // TradeBotUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(533, 365);
+            this.Controls.Add(this.LogginPanel);
             this.Controls.Add(this.IsUserLogged);
             this.Controls.Add(this.ShowMainMenu);
             this.Controls.Add(this.ShowLoginPanel);
             this.Controls.Add(this.ShowRegistrationPanel);
-            this.Controls.Add(this.RegistrationPanel);
-            this.Controls.Add(this.LogginPanel);
             this.Controls.Add(this.MainMenuPanel);
+            this.Controls.Add(this.RegistrationPanel);
             this.Name = "TradeBotUI";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "TradeBot";
@@ -449,9 +451,9 @@ namespace UI
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button LoginButton;
         private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.TextBox textBox7;
+        private System.Windows.Forms.TextBox LogLogTextBox;
         private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.TextBox textBox6;
+        private System.Windows.Forms.TextBox LogPassTextBox;
     }
 }
 

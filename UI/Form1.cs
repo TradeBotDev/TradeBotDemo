@@ -95,9 +95,6 @@ namespace UI
                 {
                     Email = RegLog.Text,
                     Password = RegPass.Text,
-                    Firstname="ABOBA",
-                    Lastname="AMONGUS",
-                    PhoneNumber="123456789",
                     VerifyPassword=RegPass.Text
                 });
 
@@ -115,8 +112,8 @@ namespace UI
         {
             var logResponse = await client.LoginAsync(new LoginRequest
             {
-                Email = RegLog.Text,
-                Password = RegPass.Text,
+                Email = LogLogTextBox.Text,
+                Password = LogPassTextBox.Text,
                 SaveExchangesAfterLogout = true
             });
             meta = new Metadata();

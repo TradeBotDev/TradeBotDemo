@@ -149,6 +149,8 @@ namespace TradeMarket.Services
 
         public async override Task SubscribeOrders(SubscribeOrdersRequest request, IServerStreamWriter<SubscribeOrdersResponse> responseStream, ServerCallContext context)
         {
+            _logger.LogInformation($"Connected with {context.Host}");
+
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
             try
@@ -164,6 +166,11 @@ namespace TradeMarket.Services
             }
             catch (Exception e)
             {
+                _logger.LogError("Exception happened");
+                _logger.LogError(e.Message);
+
+                _logger.LogError(e.StackTrace);
+
                 context.Status = Status.DefaultCancelled;
                 context.ResponseTrailers.Add("sessionid", sessionId);
                 context.ResponseTrailers.Add("error", e.Message);
