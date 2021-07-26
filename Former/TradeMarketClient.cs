@@ -137,13 +137,11 @@ namespace Former
         public async Task PlaceOrder(double sellPrice, double contractValue, UserContext context)
         {
             Log.Information("Order: price: {0}, quantity: {1} placed", sellPrice, contractValue);
-            PlaceOrderResponse responseBuy = null;
-            PlaceOrderResponse responseSell = null;
+            PlaceOrderResponse response = null;
             Func<Task> placeSuccessfulOrders = async () =>
             {
-                responseBuy = _client.PlaceOrder(new PlaceOrderRequest { Price = sellPrice, Value = contractValue }, context.Meta);
-                responseSell =  _client.PlaceOrder(new PlaceOrderRequest { Price = sellPrice + (1 + context.configuration.RequiredProfit) + context.configuration.SlotFee, Value = -contractValue }, context.Meta);
-                Log.Information(responseBuy.Response.Code.ToString());
+                response = _client.PlaceOrder(new PlaceOrderRequest { Price = sellPrice, Value = contractValue }, context.Meta);
+                Log.Information(response.Response.Code.ToString());
             };
 
             await ConnectionTester(placeSuccessfulOrders);
