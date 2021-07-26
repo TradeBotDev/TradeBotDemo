@@ -83,7 +83,7 @@ namespace Former
                 {
                     Log.Information("Order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} removed", id, orderNeededUpdate.Price, orderNeededUpdate.Quantity, orderNeededUpdate.Signature.Type, orderNeededUpdate.Signature.Status);
                     _myOrders.TryRemove(id, out _);
-                    await context.PlaceOrder(sellPrice, orderNeededUpdate.Quantity);
+                    await context.PlaceOrder(sellPrice, -orderNeededUpdate.Quantity);
                 }
                 if (status == OrderStatus.Closed && type == OrderType.Sell)
                 {
@@ -99,7 +99,7 @@ namespace Former
             double newQuantity;
             if (_myOrders.TryGetValue(id, out Order beforeUpdate))
                 if ((newQuantity = beforeUpdate.Quantity - orderNeededUpdate.Quantity) > 0)
-                   await context.PlaceOrder(sellPrice, newQuantity);
+                   await context.PlaceOrder(sellPrice, -newQuantity);
         }
 
         private async Task FitPrices(ConcurrentDictionary<string, Order> currentPurchaseOrdersForFairPrice, double orderUpdateRange, UserContext context)
