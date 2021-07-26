@@ -11,14 +11,11 @@ namespace Algorithm.DataManipulation
         private static readonly GrpcChannel Channel = GrpcChannel.ForAddress("https://localhost:5003");
         private static readonly FormerServiceClient Client = new FormerServiceClient(Channel);
         //private static SendPurchasePriceResponse call;
-        
 
         public static void SendPrice (double price)
         {
-            var response = Client.SendPurchasePrice(new SendPurchasePriceRequest { PurchasePrice = price }, DataCollector.metaData.RequestHeaders);
-            Console.WriteLine("Sent " + price);
+            var response = Client.SendPurchasePrice(new SendPurchasePriceRequest { PurchasePrice = price }, DataCollector.metaData);
+            Console.WriteLine("Sent " + price + "  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         }
-
-
-}
+    }
 }

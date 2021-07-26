@@ -11,7 +11,6 @@ namespace Algorithm.DataManipulation
         public void Publish(KeyValuePair<DateTime, double> point)
         {
             PointMadeEvent?.Invoke(point);
-            Console.WriteLine("Point made event happened!");
         }
     }
 }

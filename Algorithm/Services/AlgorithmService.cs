@@ -18,9 +18,8 @@ namespace Algorithm.Services
             {
                 var order = requestStream.Current;
                 DataCollector.Orders.Add(order.Order);
-                Console.WriteLine("Got " + order.Order.Id + "   " + order.Order.Price);
             }
-            DataCollector.metaData = context;
+            DataCollector.metaData = context.RequestHeaders;
             return new AddOrderResponse();
         }
 
