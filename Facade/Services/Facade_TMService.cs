@@ -42,7 +42,7 @@ namespace Facade
                         }
                         else
                         {
-                            Log.Information("Trying to reconnect...");
+                            //Log.Information("Trying to reconnect")
                         }
                     }
                     else
@@ -83,7 +83,7 @@ namespace Facade
                         }
                         else
                         {
-                            Log.Information("Trying to reconnect...");
+                            //Log.Information("Trying to reconnect")
                         }
                     }
                     else
@@ -125,7 +125,7 @@ namespace Facade
                         }
                         else
                         {
-                            Log.Information("Trying to reconnect...");
+                            //Log.Information("Trying to reconnect")
                         }
                     }
                     else
@@ -189,7 +189,7 @@ namespace Facade
                         }
                         else
                         {
-                            Log.Information("Trying to reconnect...");
+                            //Log.Information("Trying to reconnect")
                         }
                     }
                     else
@@ -250,7 +250,7 @@ namespace Facade
                     Log.Error("Exception:" + e.Message);
                 }
             }
-            Log.Error("Client disconnected");
+            Log.Information("Client disconnected");
             return Task.FromResult(new UpdateServerConfigResponse { });
         }
         #endregion

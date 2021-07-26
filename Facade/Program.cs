@@ -16,8 +16,10 @@ namespace Facade
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
+                .WriteTo.Seq("http://localhost:5341")
                 .CreateLogger();
             CreateHostBuilder(args).Build().Run();
+
             
         }
 
