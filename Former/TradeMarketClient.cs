@@ -128,6 +128,7 @@ namespace Former
                 closeOrders = async () =>
                 {
                     response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = order.Key, Value = order.Value }, context.Meta);
+                    Log.Information(response.Response.Message);
                 };
                 await ConnectionTester(closeOrders);
             }
@@ -140,6 +141,7 @@ namespace Former
             Func<Task> placeSuccessfulOrders = async () =>
             {
                 response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = sellPrice, Value = contractValue }, context.Meta);
+                Log.Information(response.Response.Message);
             };
 
             await ConnectionTester(placeSuccessfulOrders);
