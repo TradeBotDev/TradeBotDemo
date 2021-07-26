@@ -137,7 +137,7 @@ namespace TradeMarket.DataTransfering.Bitmex
             {
                 //TODO тут переделать под лимит ордер
                 OrdType = "Limit",
-                Price = price,
+                Price = (int)price,
                 OrderQty = (long?)quontity,
                 Symbol = context.SlotName
             }),new System.Threading.CancellationToken());

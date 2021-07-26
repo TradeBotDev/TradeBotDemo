@@ -53,7 +53,7 @@ namespace Former
                 }
                 catch (RpcException e)
                 {
-                    Log.Error("Error {1}. Retrying...\r\n{0}", e.Status.DebugException.Message, e.StackTrace);
+                    //Log.Error("Error {1}. Retrying...\r\n{0}", e.Status.DebugException.Message, e.StackTrace);
                     Thread.Sleep(_retryDelay);
                 }
             }
@@ -137,11 +137,13 @@ namespace Former
         public async Task PlaceOrder(double sellPrice, double contractValue, UserContext context)
         {
             Log.Information("Order: price: {0}, quantity: {1} placed", sellPrice, contractValue);
-            PlaceOrderResponse response = null;
+            PlaceOrderResponse responseBuy = null;
+            PlaceOrderResponse responseSell = null;
             Func<Task> placeSuccessfulOrders = async () =>
             {
-                response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = sellPrice, Value = contractValue }, context.Meta);
-                Log.Information(response.Response.Message);
+                responseBuy = _client.PlaceOrder(new PlaceOrderRequest { Price = sellPrice, Value = contractValue }, context.Meta);
+                responseSell =  _client.PlaceOrder(new PlaceOrderRequest { Price = sellPrice + (1 + context.configuration.RequiredProfit) + context.configuration.SlotFee, Value = -contractValue }, context.Meta);
+                Log.Information(responseBuy.Response.Code.ToString());
             };
 
             await ConnectionTester(placeSuccessfulOrders);

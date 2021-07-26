@@ -144,16 +144,16 @@ namespace Former
             }
             if (selectedOrders.Count != 0) 
             {
-                await context.PlaceOrder(avgPrice, context.configuration.ContractValue);
+                await context.PlaceOrdersList(selectedOrders);
             }
             else Log.Information(" none");
         }
 
-        //private bool IsPriceCorrect(double estimatedPrice, double cuttingPrice, double availableBalance, double contractValue)
-        //{
-        //    if (estimatedPrice < cuttingPrice && (availableBalance - ConvertToPricePerContract(estimatedPrice) * contractValue) > 0) return true;
-        //    else return false;
-        //}
+        private bool IsPriceCorrect(double estimatedPrice, double cuttingPrice, double availableBalance, double contractValue)
+        {
+            if (estimatedPrice < cuttingPrice && (availableBalance - ConvertToPricePerContract(estimatedPrice) * contractValue) > 0) return true;
+            else return false;
+        }
 
         private double ConvertToPricePerContract(double priceFromTM)
         {
