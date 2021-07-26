@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Relay.Clients;
+using Serilog;
 
 namespace Relay
 {
@@ -14,6 +15,11 @@ namespace Relay
     {
         public static void Main(string[] args)
         {
+            Log.Logger = new LoggerConfiguration()
+               .MinimumLevel.Debug()
+               .WriteTo.Console()
+               .WriteTo.Seq("http://localhost:5341")
+               .CreateLogger();
             CreateHostBuilder(args).Build().Run();
         }
 

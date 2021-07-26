@@ -25,7 +25,7 @@ namespace Former
 
         public async Task UpdateOrderBook(Order orderNeededUpdate, UserContext context)
         {
-            Log.Information("Got order: {0}", orderNeededUpdate);
+            //Log.Information("id: {0} price: {1} quantity: {2}", orderNeededUpdate.Id, orderNeededUpdate.Price, orderNeededUpdate.Quantity);
             var task = Task.Run(() =>
             {
                 //TODO убрать проверку на тип ордера
@@ -134,23 +134,26 @@ namespace Former
             var selectedOrders = new Dictionary<double, double>();
             foreach (var order in _orderBook)
             {
-                if (IsPriceCorrect(order.Value.Price, avgPrice, availableBalance, context.configuration.ContractValue))
+                if (/*IsPriceCorrect(order.Value.Price, avgPrice, availableBalance, context.configuration.ContractValue)*/true)
                     selectedOrders.Add(order.Value.Price, context.configuration.ContractValue);
             }
             Log.Debug("Formed a list of required orders:");
             foreach (var order in selectedOrders)
             {
-                Log.Debug("Price: {1} Quantity: {2}", order.Key, order.Value);
+                Log.Information("Price: {0} Quantity: {1}", order.Key, order.Value);
             }
-            if (selectedOrders.Count != 0)
-                await context.PlaceOrdersList(selectedOrders);
+            if (selectedOrders.Count != 0) 
+            {
+                await context.PlaceOrder(avgPrice, context.configuration.ContractValue);
+            }
+            else Log.Information(" none");
         }
 
-        private bool IsPriceCorrect(double estimatedPrice, double cuttingPrice, double availableBalance, double contractValue)
-        {
-            if (estimatedPrice < cuttingPrice && (availableBalance - ConvertToPricePerContract(estimatedPrice) * contractValue) > 0) return true;
-            else return false;
-        }
+        //private bool IsPriceCorrect(double estimatedPrice, double cuttingPrice, double availableBalance, double contractValue)
+        //{
+        //    if (estimatedPrice < cuttingPrice && (availableBalance - ConvertToPricePerContract(estimatedPrice) * contractValue) > 0) return true;
+        //    else return false;
+        //}
 
         private double ConvertToPricePerContract(double priceFromTM)
         {

@@ -59,7 +59,7 @@ namespace Algorithm.Analysis
             // TODO alert the price sender!!
             if (IsItTimeToBuy(prices, points)) 
             { 
-                PriceSender.SendPrice(prices.Last()); 
+                PriceSender.SendPrice(points.Last().Value); 
             }
         }
         //if the trend has been going downwards and now stopped and it going up
