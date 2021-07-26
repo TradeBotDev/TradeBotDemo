@@ -2,6 +2,7 @@
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,6 @@ namespace TradeMarket.Services
 {
     public class TradeMarketService : TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceBase
     {
-       private ILogger<TradeMarketService> _logger;
 
         private static SubscribeOrdersResponse ConvertOrder(FullOrder order)
         {
@@ -27,18 +27,23 @@ namespace TradeMarket.Services
             {
                 Response = new ()
                 {
-                    Order = new ()
-                    {
-                        Id = order.Id,
-                        LastUpdateDate = new Timestamp
-                        {
-                            Seconds = order.LastUpdateDate.Second
-                        },
-                        Price = order.Price,
-                        Quantity = order.Quantity,
-                        Signature = order.Signature
-                    }
+                    Order = Convert(order)
                 }
+            };
+        }
+
+        private static TradeBot.Common.v1.Order Convert(FullOrder order)
+        {
+            return new()
+            {
+                Id = order.Id,
+                LastUpdateDate = new Timestamp
+                {
+                    Seconds = order.LastUpdateDate.Second
+                },
+                Price = order.Price,
+                Quantity = order.Quantity,
+                Signature = order.Signature
             };
         }
 
@@ -66,9 +71,8 @@ namespace TradeMarket.Services
         }
 
 
-        public TradeMarketService(ILogger<TradeMarketService> logger)
+        public TradeMarketService()
         {
-            _logger = logger;
         }
 
         public override Task<AuthenticateTokenResponse> AuthenticateToken(AuthenticateTokenRequest request, ServerCallContext context)
@@ -124,7 +128,7 @@ namespace TradeMarket.Services
             catch (Exception exception)
             {
                 //TODO что делать когда разорвется соеденение ?
-                _logger.LogWarning("Connection was interrupted by network services.");
+                Log.Logger.Warning("Connection was interrupted by network services.");
             }
         }
 
@@ -147,9 +151,44 @@ namespace TradeMarket.Services
             return base.SubscribeLogs(request, responseStream, context);
         }
 
+        public async override Task SubscribeMyOrders(SubscribeMyOrdersRequest request, IServerStreamWriter<SubscribeMyOrdersResponse> responseStream, ServerCallContext context)
+        {
+            Log.Logger.Information($"Connected with {context.Host}");
+
+            var sessionId = context.RequestHeaders.Get("sessionid").Value;
+            var slot = context.RequestHeaders.Get("slot").Value;
+            try
+            {
+                var user = UserContext.GetUserContext(sessionId, slot);
+                user.UserOrders += async (sender, args) => {
+                    var order = ConvertOrder(args);
+                    Log.Logger.Information($"Sent order : {order} to {context.Host}");
+                    await WriteStreamAsync<SubscribeMyOrdersResponse>(responseStream, new()
+                    {
+                        Changed = Convert(args)
+                    }) ;
+                };
+                //TODO отписка после отмены
+                await AwaitCancellation(context.CancellationToken);
+            }
+            catch (Exception e)
+            {
+                Log.Logger.Error("Exception happened");
+                Log.Logger.Error(e.Message);
+
+                Log.Logger.Error(e.StackTrace);
+
+                context.Status = Status.DefaultCancelled;
+                context.ResponseTrailers.Add("sessionid", sessionId);
+                context.ResponseTrailers.Add("error", e.Message);
+                
+
+            }
+        }
+
         public async override Task SubscribeOrders(SubscribeOrdersRequest request, IServerStreamWriter<SubscribeOrdersResponse> responseStream, ServerCallContext context)
         {
-            _logger.LogInformation($"Connected with {context.Host}");
+            Log.Logger.Information($"Connected with {context.Host}");
 
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
@@ -158,7 +197,7 @@ namespace TradeMarket.Services
                 var user = UserContext.GetUserContext(sessionId, slot);
                 user.Book25 += async (sender, args) => {
                     var order = ConvertOrder(args);
-                    _logger.LogInformation($"Sent order : {order} to former");
+                    Log.Logger.Information($"Sent order : {order} to {context.Host}");
                     await WriteStreamAsync<SubscribeOrdersResponse>(responseStream, order);
                 };
                 //TODO отписка после отмены
@@ -166,10 +205,10 @@ namespace TradeMarket.Services
             }
             catch (Exception e)
             {
-                _logger.LogError("Exception happened");
-                _logger.LogError(e.Message);
+                Log.Logger.Error("Exception happened");
+                Log.Logger.Error(e.Message);
 
-                _logger.LogError(e.StackTrace);
+                Log.Logger.Error(e.StackTrace);
 
                 context.Status = Status.DefaultCancelled;
                 context.ResponseTrailers.Add("sessionid", sessionId);
@@ -177,6 +216,21 @@ namespace TradeMarket.Services
 
             }
 
+        }
+
+        private static bool IsOrderSuitForSignature(FullOrder order, TradeBot.Common.v1.OrderSignature signature)
+        {
+            bool typeCheck = false;
+            bool statusCheck = false;
+            if(signature.Status == TradeBot.Common.v1.OrderStatus.Unspecified || order.Signature.Status == signature.Status)
+            {
+                statusCheck = true;
+            }
+            if(signature.Type == TradeBot.Common.v1.OrderType.Unspecified || order.Signature.Type == signature.Type)
+            {
+                typeCheck = true;
+            }
+            return typeCheck && statusCheck;
         }
 
         private static Task AwaitCancellation(CancellationToken token)

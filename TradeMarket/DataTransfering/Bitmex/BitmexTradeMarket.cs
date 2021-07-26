@@ -17,6 +17,7 @@ using Bitmex.Client.Websocket.Responses.Orders;
 using Utf8Json;
 using OrderStatus = TradeBot.Common.v1.OrderStatus;
 using TradeMarket.DataTransfering.Bitmex.Rest.Responses;
+using Serilog;
 
 namespace TradeMarket.DataTransfering.Bitmex
 {
@@ -131,6 +132,7 @@ namespace TradeMarket.DataTransfering.Bitmex
 
         public async override Task<DefaultResponse> PlaceOrder(double quontity, double price,UserContext context)
         {
+            Log.Logger.Information($"Placing Limit order witch qty: {quontity}  price: {price}  for sessionId: {context.SessionId}");
             var response = await context.RestClient.SendAsync(new PlaceOrderRequest(context.Key, context.Secret, new global::Bitmex.Client.Websocket.Responses.Orders.Order
             {
                 //TODO тут переделать под лимит ордер
@@ -141,6 +143,7 @@ namespace TradeMarket.DataTransfering.Bitmex
             }),new System.Threading.CancellationToken());
             string message = "";
             string responsejson = await response.Content.ReadAsStringAsync();
+            Log.Logger.Information($"Response: { responsejson}");
             ReplyCode code = ReplyCode.Succeed;
             if (!response.IsSuccessStatusCode)
             {
