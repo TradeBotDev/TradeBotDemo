@@ -2,6 +2,7 @@
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,6 @@ namespace TradeMarket.Services
 {
     public class TradeMarketService : TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceBase
     {
-       private ILogger<TradeMarketService> _logger;
 
         private static SubscribeOrdersResponse ConvertOrder(FullOrder order)
         {
@@ -71,9 +71,8 @@ namespace TradeMarket.Services
         }
 
 
-        public TradeMarketService(ILogger<TradeMarketService> logger)
+        public TradeMarketService()
         {
-            _logger = logger;
         }
 
         public override Task<AuthenticateTokenResponse> AuthenticateToken(AuthenticateTokenRequest request, ServerCallContext context)
@@ -129,7 +128,7 @@ namespace TradeMarket.Services
             catch (Exception exception)
             {
                 //TODO что делать когда разорвется соеденение ?
-                _logger.LogWarning("Connection was interrupted by network services.");
+                Log.Logger.Warning("Connection was interrupted by network services.");
             }
         }
 
@@ -154,7 +153,7 @@ namespace TradeMarket.Services
 
         public async override Task SubscribeMyOrders(SubscribeMyOrdersRequest request, IServerStreamWriter<SubscribeMyOrdersResponse> responseStream, ServerCallContext context)
         {
-            _logger.LogInformation($"Connected with {context.Host}");
+            Log.Logger.Information($"Connected with {context.Host}");
 
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
@@ -163,7 +162,7 @@ namespace TradeMarket.Services
                 var user = UserContext.GetUserContext(sessionId, slot);
                 user.UserOrders += async (sender, args) => {
                     var order = ConvertOrder(args);
-                    _logger.LogInformation($"Sent order : {order} to {context.Host}");
+                    Log.Logger.Information($"Sent order : {order} to {context.Host}");
                     await WriteStreamAsync<SubscribeMyOrdersResponse>(responseStream, new()
                     {
                         Changed = Convert(args)
@@ -174,10 +173,10 @@ namespace TradeMarket.Services
             }
             catch (Exception e)
             {
-                _logger.LogError("Exception happened");
-                _logger.LogError(e.Message);
+                Log.Logger.Error("Exception happened");
+                Log.Logger.Error(e.Message);
 
-                _logger.LogError(e.StackTrace);
+                Log.Logger.Error(e.StackTrace);
 
                 context.Status = Status.DefaultCancelled;
                 context.ResponseTrailers.Add("sessionid", sessionId);
@@ -189,7 +188,7 @@ namespace TradeMarket.Services
 
         public async override Task SubscribeOrders(SubscribeOrdersRequest request, IServerStreamWriter<SubscribeOrdersResponse> responseStream, ServerCallContext context)
         {
-            _logger.LogInformation($"Connected with {context.Host}");
+            Log.Logger.Information($"Connected with {context.Host}");
 
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
@@ -198,7 +197,7 @@ namespace TradeMarket.Services
                 var user = UserContext.GetUserContext(sessionId, slot);
                 user.Book25 += async (sender, args) => {
                     var order = ConvertOrder(args);
-                    _logger.LogInformation($"Sent order : {order} to {context.Host}");
+                    Log.Logger.Information($"Sent order : {order} to {context.Host}");
                     await WriteStreamAsync<SubscribeOrdersResponse>(responseStream, order);
                 };
                 //TODO отписка после отмены
@@ -206,10 +205,10 @@ namespace TradeMarket.Services
             }
             catch (Exception e)
             {
-                _logger.LogError("Exception happened");
-                _logger.LogError(e.Message);
+                Log.Logger.Error("Exception happened");
+                Log.Logger.Error(e.Message);
 
-                _logger.LogError(e.StackTrace);
+                Log.Logger.Error(e.StackTrace);
 
                 context.Status = Status.DefaultCancelled;
                 context.ResponseTrailers.Add("sessionid", sessionId);

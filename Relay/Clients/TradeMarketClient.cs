@@ -29,7 +29,7 @@ namespace Relay.Clients
                     Signature = new OrderSignature()
                     {
                         Type = OrderType.Unspecified,
-                        Status = OrderStatus.Closed
+                        Status = OrderStatus.Unspecified
                     }
                 }
             }, meta).ResponseStream;
