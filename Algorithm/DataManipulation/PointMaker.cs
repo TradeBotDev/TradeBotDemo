@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -32,7 +33,7 @@ namespace Algorithm.DataManipulation
             {
                 price /= numberOfOrders;
             } else { price = 0; }
-            Console.WriteLine("Made a point: " + timestamp.TimeOfDay + "    " + price);
+            Log.Information("Made a point: " + timestamp.TimeOfDay + "    " + price);
             return new KeyValuePair<DateTime, double>(timestamp, price);
         }
 
@@ -40,9 +41,7 @@ namespace Algorithm.DataManipulation
         {
             while (true)
             {
-                Console.WriteLine("");
-                Console.WriteLine("");
-                Console.WriteLine("New iteration started");
+                Log.Information("New iteration started");
                 Thread.Sleep(1000);
                 if (DataCollector.Orders.Count == 0)
                     continue;

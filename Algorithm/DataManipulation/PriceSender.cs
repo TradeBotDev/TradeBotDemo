@@ -1,4 +1,5 @@
 ﻿using Grpc.Net.Client;
+using Serilog;
 using System;
 using TradeBot.Former.FormerService.v1;
 
@@ -15,7 +16,7 @@ namespace Algorithm.DataManipulation
         public static void SendPrice (double price)
         {
             var response = Client.SendPurchasePrice(new SendPurchasePriceRequest { PurchasePrice = price }, DataCollector.metaData);
-            Console.WriteLine("Sent " + price + "  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            Log.Information("Sent " + price + "  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         }
     }
 }

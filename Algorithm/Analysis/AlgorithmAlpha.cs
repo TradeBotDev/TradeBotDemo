@@ -1,5 +1,5 @@
 ﻿using Algorithm.DataManipulation;
-
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -70,12 +70,12 @@ namespace Algorithm.Analysis
         //this func needs points and subset averages and decides if it's time to buy
         public static bool IsItTimeToBuy(IReadOnlyCollection<double> prices, Dictionary<DateTime, double> points)
         {
-            Console.WriteLine("Analysis...");
+            Log.Information("Analysis...");
 
             //if our averages are getting lower with each iteration we conclude the marker price is generally falling
             if (prices.ElementAt(0) >= prices.ElementAt(1) && prices.ElementAt(1) >= prices.ElementAt(2))
             {
-                Console.WriteLine("Downward trend detected");
+                Log.Information("Downward trend detected");
                 //if the latest price is higher (but not too much, not over 15%) we think the price might start rising
                 //the 15% is need to avoid accidentally buying on a sudden spike 
                 //this means now is the time to buy
