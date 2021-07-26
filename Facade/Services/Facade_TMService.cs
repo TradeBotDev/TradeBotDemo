@@ -31,7 +31,7 @@ namespace Facade
                             Log.Information($"Function: SubscribeBalance \n args: request={request}");
                             while (await response.ResponseStream.MoveNext())
                             {
-                                Log.Information($"Function: SubscribeBalance \n args: response={response}");
+                                Log.Information($"Function: SubscribeBalance \n args: response={response.ResponseStream.Current.Response.Balance}");
                                 await responseStream.WriteAsync(new TradeBot.Facade.FacadeService.v1.SubscribeBalanceResponse
                                 {
                                     Money = response.ResponseStream.Current.Response.Balance
@@ -72,7 +72,7 @@ namespace Facade
                             Log.Information($"Function: Slots \n args: request={request}");
                             while (await response.ResponseStream.MoveNext())
                             {
-                                Log.Information($"Function: Slots \n args: response={response}");
+                                Log.Information($"Function: Slots \n args: response={response.ResponseStream.Current.SlotName}");
 
                                 await responseStream.WriteAsync(new SlotsResponse
                                 {
@@ -115,7 +115,7 @@ namespace Facade
                             Log.Information($"Function: SubscribeLogsTM \n args: request={request}");
                             while (await response.ResponseStream.MoveNext())
                             {
-                                Log.Information($"Function: SubscribeBalance \n args: response={response}");
+                                Log.Information($"Function: SubscribeBalance \n args: response={response.ResponseStream.Current.Response}");
                                 await responseStream.WriteAsync(new SubscribeLogsResponse
                                 {
                                     Response = response.ResponseStream.Current.Response
@@ -179,7 +179,7 @@ namespace Facade
                             Log.Information($"Function: SubscribeLogsRelay \n args: request={request}");
                             while (await response.ResponseStream.MoveNext())
                             {
-                                Log.Information($"Function: SubscribeLogsRelay \n args: response={response}");
+                                Log.Information($"Function: SubscribeLogsRelay \n args: response={response.ResponseStream.Current.Response}");
                                 await responseStream.WriteAsync(new SubscribeLogsResponse
                                 {
                                     Response = response.ResponseStream.Current.Response
