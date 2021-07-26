@@ -27,18 +27,23 @@ namespace TradeMarket.Services
             {
                 Response = new ()
                 {
-                    Order = new ()
-                    {
-                        Id = order.Id,
-                        LastUpdateDate = new Timestamp
-                        {
-                            Seconds = order.LastUpdateDate.Second
-                        },
-                        Price = order.Price,
-                        Quantity = order.Quantity,
-                        Signature = order.Signature
-                    }
+                    Order = Convert(order)
                 }
+            };
+        }
+
+        private static TradeBot.Common.v1.Order Convert(FullOrder order)
+        {
+            return new()
+            {
+                Id = order.Id,
+                LastUpdateDate = new Timestamp
+                {
+                    Seconds = order.LastUpdateDate.Second
+                },
+                Price = order.Price,
+                Quantity = order.Quantity,
+                Signature = order.Signature
             };
         }
 
@@ -147,6 +152,41 @@ namespace TradeMarket.Services
             return base.SubscribeLogs(request, responseStream, context);
         }
 
+        public async override Task SubscribeMyOrders(SubscribeMyOrdersRequest request, IServerStreamWriter<SubscribeMyOrdersResponse> responseStream, ServerCallContext context)
+        {
+            _logger.LogInformation($"Connected with {context.Host}");
+
+            var sessionId = context.RequestHeaders.Get("sessionid").Value;
+            var slot = context.RequestHeaders.Get("slot").Value;
+            try
+            {
+                var user = UserContext.GetUserContext(sessionId, slot);
+                user.UserOrders += async (sender, args) => {
+                    var order = ConvertOrder(args);
+                    _logger.LogInformation($"Sent order : {order} to {context.Host}");
+                    await WriteStreamAsync<SubscribeMyOrdersResponse>(responseStream, new()
+                    {
+                        Changed = Convert(args)
+                    }) ;
+                };
+                //TODO отписка после отмены
+                await AwaitCancellation(context.CancellationToken);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("Exception happened");
+                _logger.LogError(e.Message);
+
+                _logger.LogError(e.StackTrace);
+
+                context.Status = Status.DefaultCancelled;
+                context.ResponseTrailers.Add("sessionid", sessionId);
+                context.ResponseTrailers.Add("error", e.Message);
+                
+
+            }
+        }
+
         public async override Task SubscribeOrders(SubscribeOrdersRequest request, IServerStreamWriter<SubscribeOrdersResponse> responseStream, ServerCallContext context)
         {
             _logger.LogInformation($"Connected with {context.Host}");
@@ -158,7 +198,7 @@ namespace TradeMarket.Services
                 var user = UserContext.GetUserContext(sessionId, slot);
                 user.Book25 += async (sender, args) => {
                     var order = ConvertOrder(args);
-                    _logger.LogInformation($"Sent order : {order} to former");
+                    _logger.LogInformation($"Sent order : {order} to {context.Host}");
                     await WriteStreamAsync<SubscribeOrdersResponse>(responseStream, order);
                 };
                 //TODO отписка после отмены
