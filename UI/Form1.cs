@@ -11,35 +11,32 @@ using System.Windows.Forms;
 using TradeBot.Facade.FacadeService.v1;
 using TradeBot.Relay.RelayService.v1;
 using TradeBot.Common.v1;
-using StartBotRequest = TradeBot.Relay.RelayService.v1.StartBotRequest;
+using Grpc.Core;
+//using StartBotRequest = TradeBot.Relay.RelayService.v1.StartBotRequest;
 
 namespace UI
 {
     public partial class TradeBotUI : Form
     {
+        private TradeBot.Facade.FacadeService.v1.FacadeService.FacadeServiceClient client;
         public TradeBotUI()
         {
+            client = new TradeBot.Facade.FacadeService.v1.FacadeService.FacadeServiceClient(GrpcChannel.ForAddress("https://localhost:5002"));
             InitializeComponent();
         }
 
         private async void StartButton_Click(object sender, EventArgs e)
         {
             using var channel = GrpcChannel.ForAddress("https://localhost:5002");
-            //var relayClient = new RelayService.RelayServiceClient(channel);
             var facadeClient = new TradeBot.Facade.FacadeService.v1.FacadeService.FacadeServiceClient(channel);
-
-            var per1 = double.Parse(ConfigAvailableBalance.Text);
-            var per2 = double.Parse(ConfigRequiredProfit.Text);
-            var per3 = double.Parse(ConfigVolumeOfContracts.Text);
-            var per4 = double.Parse(ConfigUpdatePriceRange.Text);
 
             Config config = new Config()
             {
-                AvaibleBalance = per1,
-                RequiredProfit = per2,
-                ContractValue = per3,
-                //AlgorithmInfo = new AlgorithmInfo() { Interval = new Google.Protobuf.WellKnownTypes.Timestamp() { Seconds = int.Parse(ConfigIntervalOfAnalysis.Text) } },
-                OrderUpdatePriceRange = per4,
+                AvaibleBalance = double.Parse(ConfigAvailableBalance.Text),
+                RequiredProfit = double.Parse(ConfigRequiredProfit.Text),
+                ContractValue = double.Parse(ConfigVolumeOfContracts.Text),
+                AlgorithmInfo = new AlgorithmInfo() { Interval = new Google.Protobuf.WellKnownTypes.Timestamp() { Seconds = int.Parse(ConfigIntervalOfAnalysis.Text) } },
+                OrderUpdatePriceRange = double.Parse(ConfigUpdatePriceRange.Text),
                 SlotFee = 0.1D,
                 TotalBalance = 100.0
             };
@@ -60,9 +57,54 @@ namespace UI
             Console.WriteLine("Запустил бота с конфигом {0}", requestForRelay.Config);
         }
 
-        private void TradeBotUI_Load(object sender, EventArgs e)
+        private void ShowRegistrationPanel_Click(object sender, EventArgs e)
         {
-
+            RegistrationPanel.Visible = true;
+            RegistrationPanel.Enabled = true;
+            LogginPanel.Visible = false;
+            LogginPanel.Enabled = false;
+            MainMenuPanel.Visible = false;
+            MainMenuPanel.Enabled = false;
         }
+
+        private void ShowLoginPanel_Click(object sender, EventArgs e)
+        {
+            RegistrationPanel.Visible = false;
+            RegistrationPanel.Enabled = false;
+            LogginPanel.Visible = true;
+            LogginPanel.Enabled = true;
+            MainMenuPanel.Visible = false;
+            MainMenuPanel.Enabled = false;
+        }
+
+        private void ShowMainMenu_Click(object sender, EventArgs e)
+        {
+            RegistrationPanel.Visible = false;
+            RegistrationPanel.Enabled = false;
+            LogginPanel.Visible = false;
+            LogginPanel.Enabled = false;
+            MainMenuPanel.Visible = true;
+            MainMenuPanel.Enabled = true;
+        }
+
+        private async void RegistrationButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var response = await client.AuthenticateTokenAsync(new AuthenticateTokenRequest
+                {
+                    Token = ConfigToken.Text
+                });
+                var response1 = await client.RegisterAsync(new RegisterRequest
+                {
+                    Email = RegLog.Text,
+                    Password = RegPass.Text
+                });
+            }
+            catch (RpcException ex)
+            {
+                IsUserLogged.Text = ex.Message;
+            }
+        } 
     }
 }
