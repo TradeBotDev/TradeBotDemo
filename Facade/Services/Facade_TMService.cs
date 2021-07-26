@@ -28,13 +28,16 @@ namespace Facade
                     {
                         if (response.ResponseStream.Current != null)
                         {
+                            Log.Information($"Function: SubscribeBalance \n args: request={request}");
                             while (await response.ResponseStream.MoveNext())
                             {
+                                Log.Information($"Function: SubscribeBalance \n args: response={response.ResponseStream.Current.Response.Balance}");
                                 await responseStream.WriteAsync(new TradeBot.Facade.FacadeService.v1.SubscribeBalanceResponse
                                 {
                                     Money = response.ResponseStream.Current.Response.Balance
                                 });
                             }
+
                             break;
                         }
                         else
@@ -50,7 +53,7 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception" + e.Message);
+                    Log.Error("Exception" + e.Message);
                 }
             }
         }
@@ -66,8 +69,11 @@ namespace Facade
                     {
                         if (response.ResponseStream.Current != null)
                         {
+                            Log.Information($"Function: Slots \n args: request={request}");
                             while (await response.ResponseStream.MoveNext())
                             {
+                                Log.Information($"Function: Slots \n args: response={response.ResponseStream.Current.SlotName}");
+
                                 await responseStream.WriteAsync(new SlotsResponse
                                 {
                                     SlotName = response.ResponseStream.Current.SlotName
@@ -88,7 +94,7 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception" + e.Message);
+                    Log.Error("Exception" + e.Message);
                 }
             }
 
@@ -106,8 +112,10 @@ namespace Facade
                     {
                         if (response.ResponseStream.Current != null)
                         {
+                            Log.Information($"Function: SubscribeLogsTM \n args: request={request}");
                             while (await response.ResponseStream.MoveNext())
                             {
+                                Log.Information($"Function: SubscribeBalance \n args: response={response.ResponseStream.Current.Response}");
                                 await responseStream.WriteAsync(new SubscribeLogsResponse
                                 {
                                     Response = response.ResponseStream.Current.Response
@@ -128,7 +136,7 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception" + e.Message);
+                    Log.Error("Exception" + e.Message);
                 }
             }
 
@@ -141,8 +149,9 @@ namespace Facade
                 try
                 {
                     if (context.CancellationToken.IsCancellationRequested) break;
-
                     var response = clientTM.AuthenticateToken(new TradeBot.TradeMarket.TradeMarketService.v1.AuthenticateTokenRequest { Token=request.Token});
+                    Log.Information($"Function: AuthenticateToken \n args: request={request}");
+                    Log.Information($"Function: AuthenticateToken \n args: response={response}");
                     return Task.FromResult(new AuthenticateTokenResponse { Response=response.Response});
                 }
                 catch (RpcException e)
@@ -167,8 +176,10 @@ namespace Facade
                     {
                         if (response.ResponseStream.Current != null)
                         {
+                            Log.Information($"Function: SubscribeLogsRelay \n args: request={request}");
                             while (await response.ResponseStream.MoveNext())
                             {
+                                Log.Information($"Function: SubscribeLogsRelay \n args: response={response.ResponseStream.Current.Response}");
                                 await responseStream.WriteAsync(new SubscribeLogsResponse
                                 {
                                     Response = response.ResponseStream.Current.Response
@@ -189,7 +200,7 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception" + e);
+                    Log.Error("Exception" + e);
                 }
             }
         }
@@ -200,12 +211,12 @@ namespace Facade
                 try
                 {
                     if (context.CancellationToken.IsCancellationRequested) break;
-
                     var response = clientRelay.StartBot(new TradeBot.Relay.RelayService.v1.StartBotRequest 
                     { 
                         Config = request.Config 
                     }, context.RequestHeaders);
-                    
+                    Log.Information($"Function: SwitchBot \n args: request={request}");
+                    Log.Information($"Function: SwitchBot \n args: response={response}");
                     return Task.FromResult(new SwitchBotResponse
                     {
                         Response = response.Response
@@ -213,7 +224,7 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:"+e.Message);
+                    Log.Error("Exception:"+e.Message);
                 }
             }
             Log.Information("Client disconnected");
@@ -227,7 +238,8 @@ namespace Facade
                 {
                     if (context.CancellationToken.IsCancellationRequested) break;
                     var response = clientRelay.UpdateServerConfig(new TradeBot.Relay.RelayService.v1.UpdateServerConfigRequest() { Request = request.Request });
-
+                    Log.Information($"Function: UpdateServerConfig \n args: request={request}");
+                    Log.Information($"Function: UpdateServerConfig \n args: response={response}");
                     return Task.FromResult(new UpdateServerConfigResponse
                     {
                         Response = response.Response
@@ -235,10 +247,10 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e.Message);
+                    Log.Error("Exception:" + e.Message);
                 }
             }
-            Log.Information("Client disconnected");
+            Log.Error("Client disconnected");
             return Task.FromResult(new UpdateServerConfigResponse { });
         }
         #endregion
@@ -257,6 +269,8 @@ namespace Facade
                         SaveExchangesAfterLogout = request.SaveExchangesAfterLogout,
                         Password = request.Password
                     });
+                    Log.Information($"Function: Login \n args: request={request}");
+                    Log.Information($"Function: Login \n args: response={response}");
                     return Task.FromResult(new LoginReply 
                     { 
                         Message=response.Message,
@@ -266,7 +280,7 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e.Message);
+                    Log.Error("Exception:" + e.Message);
                 }
             }
             Log.Information("Client disconnected");
@@ -282,6 +296,9 @@ namespace Facade
                     if (context.CancellationToken.IsCancellationRequested) break;
 
                     var response = clientAccount.Logout(new TradeBot.Account.AccountService.v1.SessionRequest { SessionId = request.SessionId });
+                    Log.Information($"Function: Logout \n args: request={request}");
+                    Log.Information($"Function: Logout \n args: response={response}");
+
                     return Task.FromResult(new LogoutReply 
                     { 
                         Message=response.Message,
@@ -291,7 +308,7 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e.Message);
+                    Log.Error("Exception:" + e.Message);
                 }
             }
             Log.Information("Client disconnected");
@@ -312,6 +329,8 @@ namespace Facade
                         Password=request.Password,
                         VerifyPassword=request.VerifyPassword
                     });
+                    Log.Information($"Function: Register \n args: request={request}");
+                    Log.Information($"Function: Register \n args: response={response}");
                     return Task.FromResult(new RegisterReply 
                     {
                         Message=response.Message,
@@ -321,7 +340,7 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e.Message);
+                    Log.Error("Exception:" + e.Message);
                 }
             }
             Log.Information("Client disconnected");
@@ -337,6 +356,8 @@ namespace Facade
                     if (context.CancellationToken.IsCancellationRequested) break;
 
                     var response = clientAccount.IsValidSession(new TradeBot.Account.AccountService.v1.SessionRequest { SessionId = request.SessionId });
+                    Log.Information($"Function: IsValidSession \n args: request={request}");
+                    Log.Information($"Function: IsValidSession \n args: response={response}");
                     return Task.FromResult(new SessionReply
                     {
                         IsValid=response.IsValid,
@@ -345,7 +366,7 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e.Message);
+                    Log.Error("Exception:" + e.Message);
                 }
             }
             Log.Information("Client disconnected");
@@ -361,7 +382,7 @@ namespace Facade
                     if (context.CancellationToken.IsCancellationRequested) break;
 
                     var response = clientAccount.CurrentAccountData(new TradeBot.Account.AccountService.v1.SessionRequest { SessionId = request.SessionId });
-     
+                    Log.Information($"Function: CurrentAccountData \n args: request={request}");
                     var accountResponse = new CurrentAccountReply()
                     {
                         Message = response.Message,
@@ -383,11 +404,12 @@ namespace Facade
                             Token=item.Token
                         });
                     }
+                    Log.Information($"Function: CurrentAccountData \n args: response={response}");
                     return Task.FromResult(accountResponse);
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e.Message);
+                    Log.Error("Exception:" + e.Message);
                 }
             }
             Log.Information("Client disconnected");
@@ -410,6 +432,8 @@ namespace Facade
                         SessionId=request.SessionId,
                         Token=request.Token
                     });
+                    Log.Information($"Function: AddExchangeAccess \n args: request={request}");
+                    Log.Information($"Function: AddExchangeAccess \n args: response={response}");
                     return Task.FromResult(new AddExchangeAccessReply
                     {
                         Message=response.Message,
@@ -418,7 +442,7 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e.Message);
+                    Log.Error("Exception:" + e.Message);
                 }
             }
             Log.Information("Client disconnected");
@@ -433,6 +457,7 @@ namespace Facade
                 {
                     if (context.CancellationToken.IsCancellationRequested) break;
                     var response = clientExchange.AllExchangesBySession(new TradeBot.Account.AccountService.v1.SessionRequest{SessionId=request.SessionId});
+                    Log.Information($"Function: AllExchangesBySession \n args: request={request}");
                     var accountResponse = new AllExchangesBySessionReply()
                     {
                         Message = response.Message,
@@ -449,12 +474,12 @@ namespace Facade
                             Token = item.Token
                         });
                     }
-
+                    Log.Information($"Function: AllExchangesBySession \n args: response={response}");
                     return Task.FromResult(accountResponse);
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e.Message);
+                    Log.Error("Exception:" + e.Message);
                 }
             }
             Log.Information("Client disconnected");
@@ -470,6 +495,8 @@ namespace Facade
                     if (context.CancellationToken.IsCancellationRequested) break;
 
                     var response = clientExchange.DeleteExchangeAccess(new TradeBot.Account.AccountService.v1.DeleteExchangeAccessRequest { SessionId=request.SessionId,Code= (TradeBot.Account.AccountService.v1.ExchangeCode)request.Code});
+                    Log.Information($"Function: DeleteExchangeAccess \n args: request={request}");
+                    Log.Information($"Function: DeleteExchangeAccess \n args: response={response}");
                     return Task.FromResult(new DeleteExchangeAccessReply
                     {
                         Message=response.Message,
@@ -478,7 +505,7 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e);
+                    Log.Error("Exception:" + e);
                 }
             }
             return Task.FromResult(new DeleteExchangeAccessReply { });
@@ -492,6 +519,8 @@ namespace Facade
                     if (context.CancellationToken.IsCancellationRequested) break;
 
                     var response = clientExchange.ExchangeBySession(new TradeBot.Account.AccountService.v1.ExchangeBySessionRequest { SessionId=request.SessionId,Code= (TradeBot.Account.AccountService.v1.ExchangeCode)request.Code});
+                    Log.Information($"Function: ExchangeBySession \n args: request={request}");
+                    Log.Information($"Function: ExchangeBySession \n args: response={response}");
                     return Task.FromResult(new ExchangeBySessionReply
                     {
                         Message=response.Message,
@@ -508,7 +537,7 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e.Message);
+                    Log.Error("Exception:" + e.Message);
                 }
             }
             Log.Information("Client disconnected");

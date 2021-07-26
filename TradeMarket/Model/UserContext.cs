@@ -1,6 +1,7 @@
 ﻿using Bitmex.Client.Websocket;
 using Bitmex.Client.Websocket.Client;
 using Bitmex.Client.Websocket.Websockets;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,9 +37,18 @@ namespace TradeMarket.Model
         private async void init()
         {
             var keySecretPair = await _accountClient.GetUserInfo(SessionId).ContinueWith(el => {
-                Key = el.Result.Key;
-                Secret = el.Result.Secret;
-                return AutheticateUser();
+                try
+                {
+                    Key = el.Result.Key;
+                    Secret = el.Result.Secret;   
+                    return AutheticateUser();
+                }
+                catch (Exception e)
+                {
+                    Log.Logger.Error($"Exception: {e.Message}");
+                }
+                return Task.Delay(0);
+               
             } );
 
             //инициализация подписок
@@ -94,8 +104,10 @@ namespace TradeMarket.Model
 
         public static UserContext GetUserContext(string sessionId, string slotName)
         {
+            Log.Logger.Information($"Getting UserContext with sessionId: {sessionId} and slot: {slotName}");
             if (RegisteredUsers.FirstOrDefault(el => el.IsEquevalentTo(sessionId, slotName, "Bitmex")) is null)
             {
+                
                 RegisterUser(sessionId, slotName, "Bitmex");
             }
             return RegisteredUsers.First(el => el.IsEquevalentTo(sessionId, slotName, "Bitmex"));
@@ -103,6 +115,7 @@ namespace TradeMarket.Model
 
         public static void RegisterUser(string sessionId, string slotName, string tradeMarketName) 
         {
+            Log.Logger.Information($"Creating new UserContext with sessionId: {sessionId} and slot: {slotName}");
             UserContext user = new UserContext(sessionId, slotName, TradeMarket.GetTradeMarket(tradeMarketName));
 
             RegisteredUsers.Add(user);

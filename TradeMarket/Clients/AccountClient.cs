@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -41,12 +42,14 @@ namespace TradeMarket.Clients
 
         public async Task<UserAccessInfo> GetUserInfo(string sessionId)
         {
+            Log.Logger.Information($"Fetching key and secret by sessionId {sessionId}");
+
             var reply = await _client.ExchangeBySessionAsync(new()
             {
                 Code = ExchangeCode.Bitmex,
                 SessionId = sessionId
             });
-
+            Log.Logger.Information($"Fetching complete with result : {reply.Result}");
             if(reply.Result != ActionCode.Successful)
             {
                 //Если по переданному sessionId нет данных
@@ -54,7 +57,7 @@ namespace TradeMarket.Clients
             }
             var key = reply.Exchange.Token;
             var secret = reply.Exchange.Secret;
-
+            Log.Logger.Information($"sessionId : {sessionId} \n key : {key}\n secret : {secret}");
             return new UserAccessInfo(key, secret);
         }
         #endregion
