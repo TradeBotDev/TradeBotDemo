@@ -35,7 +35,10 @@ namespace Algorithm.DataManipulation
         {
             while (true)
             {
-                Thread.Sleep(2000);
+                Console.WriteLine("");
+                Console.WriteLine("");
+                Console.WriteLine("New interation started");
+                Thread.Sleep(1000);
                 if (DataCollector.Orders.Count == 0)
                     continue;
 

@@ -13,7 +13,7 @@ namespace Algorithm.DataManipulation
     public class DataCollector
     {
         public static BlockingCollection<Order> Orders;
-        public static ServerCallContext metaData;
+        public static Grpc.Core.Metadata metaData;
 
         //private readonly Publisher _publisher = new();
 
@@ -31,7 +31,6 @@ namespace Algorithm.DataManipulation
                 {
                     Orders.Take();
                 }
-                Console.WriteLine("Cleared used orders");
         }
     }
 }

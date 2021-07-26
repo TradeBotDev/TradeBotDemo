@@ -65,11 +65,19 @@ namespace Algorithm.Analysis
         //if the trend has been going downwards and now stopped and it going up
         public static bool IsItTimeToBuy(IReadOnlyCollection<double> prices, Dictionary<DateTime, double> points)
         {
-            points.OrderBy(kvp => kvp.Key);
+            //points.OrderBy(kvp => kvp.Key);
             Console.WriteLine("Analysis...");
-            return prices.ElementAt(0) >= prices.ElementAt(1)
-                   && prices.ElementAt(1) >= prices.ElementAt(2)
-                   && prices.ElementAt(2) <= points.ElementAt(4).Value;
+            //return prices.ElementAt(0) >= prices.ElementAt(1)
+            //       && prices.ElementAt(1) >= prices.ElementAt(2)
+            //       && prices.ElementAt(2) <= points.ElementAt(4).Value;
+            if (prices.ElementAt(0) >= prices.ElementAt(1) && prices.ElementAt(1) >= prices.ElementAt(2))
+            {
+                Console.WriteLine("Downward trend detected");
+                //Console.WriteLine("Comparing " + prices.ElementAt(2) + " and " + points.ElementAt(4).Value);
+                return prices.ElementAt(2) <= points.ElementAt(4).Value &&
+                    prices.ElementAt(2)*1.15 > points.ElementAt(4).Value;
+            }
+            return false;
         }
         public static double CalculateSMA(Dictionary<DateTime, double> points)
         {
