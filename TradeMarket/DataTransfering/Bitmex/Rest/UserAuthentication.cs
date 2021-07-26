@@ -20,11 +20,11 @@ namespace TradeMarket.DataTransfering.Bitmex.Rest
         [DataMember(Name = "api-signature")]
         public string Signature;
 
-        public UserAuthentication(string key,string secret,HttpMethod method,Uri uri,String postData)
+        public UserAuthentication(string key,string secret,HttpMethod method,string uri,String postData)
         {
             this.Key = key;
             this.Expires = GetExpires().ToString();
-            string message = method + uri.AbsoluteUri + Expires + postData;
+            string message = method + uri + Expires + postData;
             byte[] signatureBytes = hmacsha256(Encoding.UTF8.GetBytes(secret), Encoding.UTF8.GetBytes(message));
             this.Signature = ByteArrayToString(signatureBytes);
 

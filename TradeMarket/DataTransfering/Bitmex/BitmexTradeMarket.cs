@@ -16,6 +16,7 @@ using TradeMarket.Model;
 using Bitmex.Client.Websocket.Responses.Orders;
 using Utf8Json;
 using OrderStatus = TradeBot.Common.v1.OrderStatus;
+using TradeMarket.DataTransfering.Bitmex.Rest.Responses;
 
 namespace TradeMarket.DataTransfering.Bitmex
 {
@@ -133,16 +134,25 @@ namespace TradeMarket.DataTransfering.Bitmex
             var response = await context.RestClient.SendAsync(new PlaceOrderRequest(context.Key, context.Secret, new global::Bitmex.Client.Websocket.Responses.Orders.Order
             {
                 //TODO тут переделать под лимит ордер
-                OrdType = "Sell",
+                OrdType = "Limit",
                 Price = price,
-                OrderQty = (long?)quontity
+                OrderQty = (long?)quontity,
+                Symbol = context.SlotName
             }),new System.Threading.CancellationToken());
             string message = "";
+            string responsejson = await response.Content.ReadAsStringAsync();
             ReplyCode code = ReplyCode.Succeed;
             if (!response.IsSuccessStatusCode)
             {
-                message = JsonSerializer.Deserialize<ErrorResponse>(await response.Content.ReadAsStringAsync()).Error;
+
+                responsejson = responsejson.Replace("{\"error\":", "");
+                responsejson = responsejson.Remove(responsejson.LastIndexOf("}") - 1, 1);
+                message = JsonSerializer.Deserialize<error>(responsejson).message;
                 code = ReplyCode.Failure;
+            }
+            else
+            {
+                message = responsejson;
             }
             return new DefaultResponse
             {

@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace TradeMarket.DataTransfering.Bitmex.Rest.Responses
 {
-    public class ErrorResponse
+    public class error
     {
 
         [DataMember(Name = "message")]
-        public string Message { get; set; }
+        public string message { get; set; }
 
         [DataMember(Name = "name")]
-        public string Name { get; set; }
+        public string name { get; set; }
     }
 }

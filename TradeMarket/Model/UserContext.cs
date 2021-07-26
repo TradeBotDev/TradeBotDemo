@@ -35,9 +35,6 @@ namespace TradeMarket.Model
 
         private async void init()
         {
-            //Ключи от общего аккаунта :
-            // Key = "lVjs4QoJIe9OqNUnDoVKl2jS";
-            // Secret = "MAX6lma-Y93bfT3w-g5GtAgvsFNhDLrYlyyqkciDUwRTy64s";
             var keySecretPair = await _accountClient.GetUserInfo(SessionId).ContinueWith(el => {
                 Key = el.Result.Key;
                 Secret = el.Result.Secret;
