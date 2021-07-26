@@ -91,10 +91,6 @@ namespace UI
         {
             try
             {
-                var response = await client.AuthenticateTokenAsync(new AuthenticateTokenRequest
-                {
-                    Token = ConfigToken.Text
-                });
                 var response1 = await client.RegisterAsync(new RegisterRequest
                 {
                     Email = RegLog.Text,
