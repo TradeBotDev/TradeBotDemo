@@ -12,6 +12,7 @@ using SubscribeLogsResponse = TradeBot.Relay.RelayService.v1.SubscribeLogsRespon
 using UpdateServerConfigRequest = TradeBot.Relay.RelayService.v1.UpdateServerConfigRequest;
 using UpdateServerConfigResponse = TradeBot.Relay.RelayService.v1.UpdateServerConfigResponse;
 using System.Diagnostics.CodeAnalysis;
+using Serilog;
 
 namespace Relay.Services
 {
@@ -66,6 +67,7 @@ namespace Relay.Services
 
         public override async Task<StartBotResponse> StartBot(StartBotRequest request, ServerCallContext context)
         {
+            Log.Information($"StartBot requested form {context.Host} with meta : \n {context.RequestHeaders}");
             var user = GetUserContext(context.RequestHeaders);
             user.SubscribeForOrders();
             user.UpdateConfig(request.Config);
