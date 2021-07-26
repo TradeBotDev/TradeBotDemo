@@ -21,7 +21,8 @@ namespace Former
         internal UserContext(string sessionId, string trademarket, string slot)
         {
 
-            Meta.Add("sessionId", sessionId);
+            Meta = new Metadata();
+            Meta.Add("sessionid", sessionId);
             Meta.Add("trademarket", trademarket);
             Meta.Add("slot", slot);
 
