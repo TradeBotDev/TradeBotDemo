@@ -16,6 +16,6 @@ namespace TradeMarket.DataTransfering.Bitmex.Rest.Requests
     {
         //todo тут лишняя сериализация
         public CloseOrderRequest(string key, string secret, Order order)
-            : base(key, secret, HttpMethod.Post, new Uri("/order", UriKind.Relative), JsonSerializer.ToJsonString(order)) { }
+            : base(key, secret, HttpMethod.Post, "/order", JsonSerializer.ToJsonString(order)) { }
     }
 }
