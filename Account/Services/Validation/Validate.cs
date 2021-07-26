@@ -25,7 +25,7 @@ namespace Account.Validation
         public static ValidationMessage RegisterFields(RegisterRequest request)
         {
             // В случае, если хоть одно поле пустое, возвращает сообщение о наличии пустых полей.
-            if (IsEmpty(request.Email, request.Firstname, request.Lastname, request.PhoneNumber, request.Password, request.VerifyPassword))
+            if (IsEmpty(request.Email, request.Password, request.VerifyPassword))
                 return new EmptyFieldMessage();
 
             // В случае, если пароли не совпадают, возвращает сообщение о несоответствии паролей.
