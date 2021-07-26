@@ -23,6 +23,7 @@ namespace Algorithm.Services
             return new AddOrderResponse();
         }
 
+        //a config update placeholder 
         public override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request, ServerCallContext context)
         {
             Console.WriteLine("Config Updated");

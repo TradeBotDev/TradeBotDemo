@@ -6,7 +6,8 @@ using TradeBot.Common.v1;
 
 namespace Algorithm.DataManipulation
 {
-    //hardcoded for three second time intervals between points for now, 
+    //PM takes incoming orders from DataCollector and makes average points with regular time intervals to simplify the data and make it digestable for the algo to calculate stuff with 
+    //hardcoded for one second time intervals between points for now
     //later will be decided by user
     public class PointMaker
     {
@@ -17,12 +18,16 @@ namespace Algorithm.DataManipulation
 
             foreach (Order order in orders)
             {
+                //sometimes it recieves an order with a price zero (for example, if the order in question was updated)
+                //they shouldn't be used for calculations so we ignore them  
                 if (order.Price != 0)
                 {
                     price += order.Price;
                     numberOfOrders++;
                 }
             }
+            //sometimes we don't recieve anything from Relay within the timeframe (no new orders)
+            //if that happens we set the price to zero to help algo understand that that has happened 
             if (numberOfOrders != 0)
             {
                 price /= numberOfOrders;
@@ -44,7 +49,8 @@ namespace Algorithm.DataManipulation
 
                     var newOrders = DataCollector.Orders;
                     var newPoint = MakePoint(new List<Order>(newOrders), DateTime.Now);
-                    publisher.Publish(newPoint);                                 
+                //if a point was made we notify everyone involved (algo and dataCollector) 
+                    publisher.Publish(newPoint);                     
             }
         }       
     }

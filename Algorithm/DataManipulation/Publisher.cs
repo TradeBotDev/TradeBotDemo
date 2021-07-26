@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace Algorithm.DataManipulation
 {
+    //used to implement Pub-Sub model, used to notify algo and DataCollector that a point was made 
     public class Publisher
     {
         public delegate void PointMade(KeyValuePair<DateTime, double> point);
