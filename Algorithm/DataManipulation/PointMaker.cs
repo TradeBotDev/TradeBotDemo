@@ -42,7 +42,7 @@ namespace Algorithm.DataManipulation
             {
                 Console.WriteLine("");
                 Console.WriteLine("");
-                Console.WriteLine("New interation started");
+                Console.WriteLine("New iteration started");
                 Thread.Sleep(1000);
                 if (DataCollector.Orders.Count == 0)
                     continue;
