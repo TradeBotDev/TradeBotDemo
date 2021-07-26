@@ -72,10 +72,7 @@ namespace Account
                     return Task.FromResult(CurrentAccountReplies.SuccessfulGettingAccountData(new AccountInfo
                     {
                         AccountId = account.AccountId,
-                        Firstname = account.Firstname,
-                        Lastname = account.Lastname,
                         Email = account.Email,
-                        PhoneNumber = account.PhoneNumber
                     }));
                 }
             }

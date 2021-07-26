@@ -42,9 +42,6 @@ namespace Account
                 database.Add(new Models.Account()
                 {
                     Email = request.Email,
-                    Firstname = request.Firstname,
-                    Lastname = request.Lastname,
-                    PhoneNumber = request.PhoneNumber,
                     Password = request.Password
                 });
                 // Сохранение изменений базы данных.

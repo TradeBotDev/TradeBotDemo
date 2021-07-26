@@ -41,11 +41,8 @@ message LogoutReply {
 // Данные для регистрации аккаунта.
 message RegisterRequest {
 	string email = 1;
-	string firstname = 2;
-	string lastname = 3;
-	string phone_number = 4;
-	string password = 5;
-	string verify_password = 6;
+	string password = 2;
+	string verify_password = 3;
 }
 
 // Ответ на запрос о регистрации аккаунта.
@@ -75,11 +72,8 @@ message CurrentAccountReply {
 //Информация о пользователе, необходимая для отображения в UI
 message AccountInfo {
 	int32 account_id = 1;
-	string firstname = 2;
-	string lastname = 3;
-	string email = 4;
-	string phone_number = 5;
-	repeated ExchangeAccessInfo exchanges = 6;
+	string email = 2;
+	repeated ExchangeAccessInfo exchanges = 3;
 }
 
 // Информация о данных для доступа к бирже.
