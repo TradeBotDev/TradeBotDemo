@@ -219,6 +219,21 @@ namespace TradeMarket.Services
 
         }
 
+        private static bool IsOrderSuitForSignature(FullOrder order, TradeBot.Common.v1.OrderSignature signature)
+        {
+            bool typeCheck = false;
+            bool statusCheck = false;
+            if(signature.Status == TradeBot.Common.v1.OrderStatus.Unspecified || order.Signature.Status == signature.Status)
+            {
+                statusCheck = true;
+            }
+            if(signature.Type == TradeBot.Common.v1.OrderType.Unspecified || order.Signature.Type == signature.Type)
+            {
+                typeCheck = true;
+            }
+            return typeCheck && statusCheck;
+        }
+
         private static Task AwaitCancellation(CancellationToken token)
         {
             var completion = new TaskCompletionSource<object>();
