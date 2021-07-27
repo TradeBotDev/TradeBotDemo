@@ -3,7 +3,7 @@ using Xunit;
 
 namespace AccountTests.AccountServiceTests
 {
-    public class RegisterTests : AccountServicesTestsData
+    public class RegisterTests : AccountServiceTestsData
     {
         // Тестирование на работу регистрации нового аккаунта.
         [Fact]

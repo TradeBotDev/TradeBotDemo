@@ -4,7 +4,7 @@ using Xunit;
 
 namespace AccountTests.AccountServiceTests
 {
-    public class IsValidSessionTests : AccountServicesTestsData
+    public class IsValidSessionTests : AccountServiceTestsData
     {
         // Тестирование проверки существующего вошедшего аккаунта на валидность.
         [Fact]
