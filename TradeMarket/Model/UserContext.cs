@@ -84,7 +84,7 @@ namespace TradeMarket.Model
             return await TradeMarket.PlaceOrder(quontity, price, this);
         }
 
-        public async Task<DefaultResponse> CloseOrder(string id)
+        public async Task<DefaultResponse> DeleteOrder(string id)
         {
             return await TradeMarket.DeleteOrder(id, this);
         }
