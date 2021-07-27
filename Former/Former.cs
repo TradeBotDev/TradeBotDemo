@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace Former
             _myOrders = new ConcurrentDictionary<string, Order>();
         }
 
-        private async Task UpdateConcreteBook(ConcurrentDictionary<string, Order> bookNeededUpdate, Order order, UserContext context)
+        private async Task UpdateConcreteBook(ConcurrentDictionary<string, Order> bookNeededUpdate, string whatBook, Order order, UserContext context)
         {
             var task = Task.Run(async () =>
             {
@@ -42,7 +43,7 @@ namespace Former
                     });
                 else if (bookNeededUpdate.ContainsKey(order.Id))
                     bookNeededUpdate.TryRemove(order.Id, out _);
-                await FitPrices(bookNeededUpdate, context);
+                await FitPrices(bookNeededUpdate, whatBook, context);
             });
             await task;
         }
@@ -51,8 +52,8 @@ namespace Former
         {
             var task = Task.Run(async () =>
             {
-                if (orderNeededUpdate.Signature.Type == OrderType.Sell) await UpdateConcreteBook(_purchaseOrderBook, orderNeededUpdate, context);
-                if (orderNeededUpdate.Signature.Type == OrderType.Buy) await UpdateConcreteBook(_sellOrderBook, orderNeededUpdate, context);
+                if (orderNeededUpdate.Signature.Type == OrderType.Buy) await UpdateConcreteBook(_purchaseOrderBook, "purchase", orderNeededUpdate, context);
+                if (orderNeededUpdate.Signature.Type == OrderType.Sell) await UpdateConcreteBook(_sellOrderBook, "sell", orderNeededUpdate, context);
             });
             await task;
         }
@@ -97,15 +98,17 @@ namespace Former
             }
         }
 
-        private async Task FitPrices(ConcurrentDictionary<string, Order> ordersForFairPrice, UserContext context)
+        private async Task FitPrices(ConcurrentDictionary<string, Order> ordersForFairPrice, string whatBook, UserContext context)
         {
-            //????????????????????????????????????????????????//
+            //????????????????????????????????????????????????
             double fairPrice = 0;
             var ordersNeededToFit = new Dictionary<string, double>();
-            var calcFairPrice = Task.Run(() => fairPrice = ordersForFairPrice.Min(x => x.Value.Price));
-            await calcFairPrice;
+
             var checkPrices = Task.Run(async () =>
             {
+                if (whatBook == "sell") fairPrice = ordersForFairPrice.Min(x => x.Value.Price);
+                if (whatBook == "purchase") fairPrice = ordersForFairPrice.Max(x => x.Value.Price);
+
                 foreach (var order in _myOrders)
                 {
                     if (order.Value.Price < fairPrice)
@@ -117,7 +120,7 @@ namespace Former
                     }
                 }
             });
-            await checkPrices;  
+            await checkPrices;
         }
 
         public async Task FormPurchaseOrder(UserContext context)
@@ -126,13 +129,13 @@ namespace Former
             double availableBalance = _balance * context.configuration.AvaibleBalance;
             //Calc pruchase price
 
-            double purchaseFairPrice = _purchaseOrderBook.Min(x => x.Value.Price);
-            double quantity = 0;
+            double purchaseFairPrice = _purchaseOrderBook.Max(x => x.Value.Price);
 
-            while (quantity / purchaseFairPrice < availableBalance)
-                quantity += 100;
-            //buy order at fair price
+            double quantity = context.configuration.ContractValue * Math.Floor(availableBalance * purchaseFairPrice / context.configuration.ContractValue);
+            
+            //купить ордер по рыночной цене, но ордер при этом лимитный 
             await context.PlaceOrder(purchaseFairPrice, quantity);
+            _balance -= context.configuration.ContractValue / purchaseFairPrice;
         }
 
         public async Task FormSellOrder(UserContext context)
@@ -141,12 +144,12 @@ namespace Former
             double availableBalance = _balance * context.configuration.AvaibleBalance;
             //Calc pruchase price
             double sellFairPrice = _sellOrderBook.Min(x => x.Value.Price);
-            double quantity = 0;
 
-            while (quantity / sellFairPrice < availableBalance)
-                quantity += 100;
-            //sell order at fair price
+            double quantity = context.configuration.ContractValue * Math.Floor(availableBalance * sellFairPrice / context.configuration.ContractValue);
+
+            //продать ордер по рыночной цене, но ордер при этом лимитный 
             await context.PlaceOrder(sellFairPrice, -quantity);
+            _balance += context.configuration.ContractValue / sellFairPrice;
         }
     }
 }

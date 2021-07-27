@@ -52,7 +52,7 @@ namespace Former
                 }
                 catch (RpcException e)
                 {
-                    Log.Error("Error {1}. Retrying...\r\n{0}", e.Status.DebugException.Message, e.StackTrace);
+                    Log.Error("Error {1}. Retrying...\r\n{0}", e.StackTrace);
                     Thread.Sleep(_retryDelay);
                 }
             }
@@ -141,6 +141,7 @@ namespace Former
                     Id = orderNeededToUpdate.Id,
                     NewPrice = orderNeededToUpdate.Price,
                     QuantityType = QuantityType.None,
+                    NewQuantity = (int)orderNeededToUpdate.Quantity,
                     PriceType = PriceType.Default
                 }, context.Meta);
                 Log.Information(response.Response.Code.ToString());

@@ -229,7 +229,7 @@ namespace TradeMarket.DataTransfering.Bitmex
         {
             var response = await context.RestClient.SendAsync(new AmmendOrderRequest(context.Key, context.Secret, new() { Id = id, Price = price, Quantity = Quantity, LeavesQuantity = LeavesQuantity }),new System.Threading.CancellationToken());
             var responsejson = await response.Content.ReadAsStringAsync();
-            string errorMessage = "";
+            string errorMessage = "Succeeded";
             if (!response.IsSuccessStatusCode)
             {
                 errorMessage = JsonConvert.DeserializeObject<error>(responsejson).message;
