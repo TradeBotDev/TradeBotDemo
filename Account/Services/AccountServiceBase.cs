@@ -10,8 +10,6 @@ namespace Account
 {
     public partial class AccountService : TradeBot.Account.AccountService.v1.Account.AccountBase
     {
-        public AccountService() { }
-
         // Метод выхода из аккаунта
         public override Task<LogoutReply> Logout(SessionRequest request, ServerCallContext context)
         {

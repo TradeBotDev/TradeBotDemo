@@ -12,8 +12,6 @@ namespace Account
 {
     public class ExchangeAccessService : TradeBot.Account.AccountService.v1.ExchangeAccess.ExchangeAccessBase
     {
-        public ExchangeAccessService() { }
-
         // Метод, добавляющий новую биржу для текущего пользователя.
         public override Task<AddExchangeAccessReply> AddExchangeAccess(AddExchangeAccessRequest request, ServerCallContext context)
         {
