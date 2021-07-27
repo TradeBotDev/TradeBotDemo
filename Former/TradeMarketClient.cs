@@ -119,12 +119,12 @@ namespace Former
 
         public async Task PlaceOrder(double sellPrice, double contractValue, UserContext context)
         {
-            Log.Information("Order: price: {0}, quantity: {1} placed", sellPrice, contractValue);
+            Log.Information("Order price: {0}, quantity: {1} placed", sellPrice, contractValue);
             PlaceOrderResponse response = null;
             Func<Task> placeOrders = async () =>
             {
                 response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = sellPrice, Value = contractValue }, context.Meta);
-                Log.Information(response.Response.Code.ToString());
+                Log.Information(response.OrderId + " placed " + response.Response.Code.ToString());
             };
 
             await ConnectionTester(placeOrders);
@@ -133,6 +133,19 @@ namespace Former
         public async Task SetNewPrice(Order orderNeededToUpdate, UserContext context)
         {
             Log.Debug("Update order id: {0}, new price: {1}", orderNeededToUpdate.Id, orderNeededToUpdate.Price);
+            AmmendOrderResponse response = null;
+            Func<Task> placeOrders = async () =>
+            {
+                response = await _client.AmmendOrderAsync(new AmmendOrderRequest
+                {
+                    Id = orderNeededToUpdate.Id,
+                    NewPrice = orderNeededToUpdate.Price,
+                    QuantityType = QuantityType.None,
+                    PriceType = PriceType.Default
+                }, context.Meta);
+                Log.Information(response.Response.Code.ToString());
+            };
+            await ConnectionTester(placeOrders);
         }
     }
 }
