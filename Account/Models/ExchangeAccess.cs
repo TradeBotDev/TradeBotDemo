@@ -1,6 +1,6 @@
 ﻿using TradeBot.Account.AccountService.v1;
 
-namespace Account.Models
+namespace AccountGRPC.Models
 {
     // Описание таблицы с информацией о доступе к бирже пользователя.
     public class ExchangeAccess

@@ -1,7 +1,7 @@
 ﻿using Serilog;
 using TradeBot.Account.AccountService.v1;
 
-namespace Account.AccountMessages
+namespace AccountGRPC.AccountMessages
 {
     public static class DeleteExchangeAccessReplies
     {

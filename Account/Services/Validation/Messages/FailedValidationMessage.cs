@@ -1,6 +1,6 @@
 ﻿using Serilog;
 
-namespace Account.Validation.Messages
+namespace AccountGRPC.Validation.Messages
 {
     public abstract class FailedValidationMessage : ValidationMessage
     {

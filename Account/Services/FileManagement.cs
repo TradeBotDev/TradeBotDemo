@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text.Json;
 
-namespace Account
+namespace AccountGRPC
 {
     public static class FileManagement
     {
@@ -11,8 +11,7 @@ namespace Account
         {
             string serialized = JsonSerializer.Serialize(state);
             await File.WriteAllTextAsync(filename, serialized);
-
-            Log.Information($"Файл {filename}");
+            Log.Information($"Данные записаны в файл {filename}.");
         }
 
         // Метод чтения любого объекта из файла. Результат записывается в переменную, переданную
@@ -25,9 +24,11 @@ namespace Account
                 if (!string.IsNullOrEmpty(file))
                 {
                     var deserializedFile = JsonSerializer.Deserialize<T>(file);
+                    Log.Information($"Файл {filename} успешно прочитан и записан в оперативную память.");
                     return deserializedFile;
                 }
             }
+            Log.Information($"Ошибка при чтении {filename}: файл не существует или является пустым.");
             return default(T);
         }
     }

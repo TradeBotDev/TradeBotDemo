@@ -2,7 +2,7 @@
 using System.Linq;
 using TradeBot.Account.AccountService.v1;
 
-namespace Account.AccountMessages
+namespace AccountGRPC.AccountMessages
 {
     public static class AllExchangesBySessionReplies
     {

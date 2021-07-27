@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Account.Models
+namespace AccountGRPC.Models
 {
     public static class State
     {

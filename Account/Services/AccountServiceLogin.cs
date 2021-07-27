@@ -4,15 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
-using Account.Validation;
-using Account.Validation.Messages;
-using Account.AccountMessages;
-using Account.Models;
+using AccountGRPC.Validation;
+using AccountGRPC.Validation.Messages;
+using AccountGRPC.AccountMessages;
 using Serilog;
 
-namespace Account
+namespace AccountGRPC
 {
-    public partial class AccountService : TradeBot.Account.AccountService.v1.Account.AccountBase
+    public partial class AccountService : Account.AccountBase
     {
         // Метод входа в аккаунт по запросу клиента.
         public override Task<LoginReply> Login(LoginRequest request, ServerCallContext context)
@@ -35,7 +34,7 @@ namespace Account
             }
 
             // В случае успешной прохождении валидации используется база данных.
-            using (var database = new AccountContext())
+            using (var database = new Models.AccountContext())
             {
                 // Получение всех пользователей с таким же Email-адресом и паролем, как в запросе.
                 var accounts = database.Accounts.Where(accounts => accounts.Email == request.Email &&
@@ -48,7 +47,7 @@ namespace Account
 
                 // Проверка на то, есть ли сессия с пользователем, который пытается войти в аккаунт, и
                 // в случае, если он вошел, возвращается его Id сессии
-                foreach (KeyValuePair<string, LoggedAccount> account in State.loggedIn)
+                foreach (KeyValuePair<string, Models.LoggedAccount> account in Models.State.loggedIn)
                 {
                     int checkedAccount = database.Accounts.Count(account => account.Email == request.Email);
                     if (checkedAccount > 0)
@@ -59,11 +58,11 @@ namespace Account
                 // Id сессии, а также полученный пользователь добавляется в коллекцию с вошедшими
                 // пользователями.
                 string sessionId = Guid.NewGuid().ToString();
-                var loggedAccount = new LoggedAccount(accounts.First(), request.SaveExchangesAfterLogout);
-                State.loggedIn.Add(sessionId, loggedAccount);
+                var loggedAccount = new Models.LoggedAccount(accounts.First(), request.SaveExchangesAfterLogout);
+                Models.State.loggedIn.Add(sessionId, loggedAccount);
 
                 // Сохранение текущего состояния в файл.
-                FileManagement.WriteFile(State.LoggedInFilename, State.loggedIn);
+                FileManagement.WriteFile(Models.State.LoggedInFilename, Models.State.loggedIn);
 
                 // Ответ сервера об успешном входе в аккаунт.
                 return Task.FromResult(LoginReplies.SuccessfulLogin(sessionId));

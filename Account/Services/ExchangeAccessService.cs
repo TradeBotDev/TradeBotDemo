@@ -1,16 +1,15 @@
-﻿using Account.AccountMessages;
-using Account.Validation;
-using Account.Validation.Messages;
+﻿using AccountGRPC.AccountMessages;
+using AccountGRPC.Validation;
+using AccountGRPC.Validation.Messages;
 using Grpc.Core;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
-using Account.Models;
 using Serilog;
 
-namespace Account
+namespace AccountGRPC
 {
-    public class ExchangeAccessService : TradeBot.Account.AccountService.v1.ExchangeAccess.ExchangeAccessBase
+    public class ExchangeAccessService : ExchangeAccess.ExchangeAccessBase
     {
         // Метод, добавляющий новую биржу для текущего пользователя.
         public override Task<AddExchangeAccessReply> AddExchangeAccess(AddExchangeAccessRequest request, ServerCallContext context)
@@ -24,7 +23,7 @@ namespace Account
 
             // Проверка на существование входа в аккаунт. Если аккаунт среди вошедших не найден, отправляется
             // сообщение об ошибке.
-            if (!State.loggedIn.ContainsKey(request.SessionId))
+            if (!Models.State.loggedIn.ContainsKey(request.SessionId))
                 return Task.FromResult(AddExchangeAccessReplies.AccountNotFound());
 
             // Валидация полученных данных. В случае, если валидация не прошла успешно, возвращается сообщение об ошибке.
@@ -39,9 +38,9 @@ namespace Account
             }
 
             // Добавление данных из запроса в таблицу базы данных.
-            using (var database = new AccountContext())
+            using (var database = new Models.AccountContext())
             {
-                var account = database.Accounts.Where(account => account.AccountId == State.loggedIn[request.SessionId].AccountId);
+                var account = database.Accounts.Where(account => account.AccountId == Models.State.loggedIn[request.SessionId].AccountId);
 
                 // Проверка на то, добавлен ли токен для той же биржи, что добавляется.
                 bool isExists = database.ExchangeAccesses.Any(exchange =>
@@ -70,12 +69,12 @@ namespace Account
         {
             Log.Information($"AllExchangesBySession получил запрос: SessionId - {request.SessionId}.");
 
-            if (State.loggedIn.ContainsKey(request.SessionId))
+            if (Models.State.loggedIn.ContainsKey(request.SessionId))
             {
-                using (var database = new AccountContext())
+                using (var database = new Models.AccountContext())
                 {
                     // Получение данных текущей сессии.
-                    LoggedAccount fromAccount = State.loggedIn[request.SessionId];
+                    Models.LoggedAccount fromAccount = Models.State.loggedIn[request.SessionId];
                     // Поиск всех добавленных бирж по id пользователя текущей сессии.
                     var exchangesFromAccount = database.ExchangeAccesses.Where(exchange => exchange.Account.AccountId == fromAccount.AccountId);
 
@@ -96,12 +95,12 @@ namespace Account
         {
             Log.Information($"DeleteExchangeAccess получил запрос: SessionId - {request.SessionId}, Code - {request.Code}.");
 
-            if (!State.loggedIn.ContainsKey(request.SessionId))
+            if (!Models.State.loggedIn.ContainsKey(request.SessionId))
                 return Task.FromResult(DeleteExchangeAccessReplies.AccountNotFound());
 
-            using (var database = new AccountContext())
+            using (var database = new Models.AccountContext())
             {
-                LoggedAccount fromAccount = State.loggedIn[request.SessionId];
+                Models.LoggedAccount fromAccount = Models.State.loggedIn[request.SessionId];
 
                 // Получение данных биржи для текущего пользователя и биржи с конкретным кодом.
                 var exсhangeAccess = database.ExchangeAccesses.Where(exchange =>
@@ -125,14 +124,14 @@ namespace Account
             Log.Information($"ExchangeBySession получил запрос: SessionId - {request.SessionId}, Code - {request.Code}.");
 
             // В случае, если аккаунт не найден среди вошедших, возвращается сообщение об ошибке.
-            if (!State.loggedIn.ContainsKey(request.SessionId))
+            if (!Models.State.loggedIn.ContainsKey(request.SessionId))
                 return Task.FromResult(ExchangeBySessionReplies.AccountNotFound());
 
-            using (var database = new AccountContext())
+            using (var database = new Models.AccountContext())
             {
                 // Поиск данных конкретной биржи пользователя.
                 var exchangeAccesses = database.ExchangeAccesses.Where(exchange => exchange.Code == request.Code &&
-                    exchange.Account.AccountId == State.loggedIn[request.SessionId].AccountId);
+                    exchange.Account.AccountId == Models.State.loggedIn[request.SessionId].AccountId);
 
                 // Если такой биржи не было найдено, возвращается сообшение об ошибке.
                 if (exchangeAccesses.Count() == 0)

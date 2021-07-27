@@ -2,14 +2,14 @@
 using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
-using Account.Validation;
-using Account.Validation.Messages;
-using Account.AccountMessages;
+using AccountGRPC.Validation;
+using AccountGRPC.Validation.Messages;
+using AccountGRPC.AccountMessages;
 using Serilog;
 
-namespace Account
+namespace AccountGRPC
 {
-    public partial class AccountService : TradeBot.Account.AccountService.v1.Account.AccountBase
+    public partial class AccountService : Account.AccountBase
     {
         // Метод регистрации аккаунта по запросу клиента. Вход в аккаунт после регистрации НЕ производится!
         public override Task<RegisterReply> Register(RegisterRequest request, ServerCallContext context)

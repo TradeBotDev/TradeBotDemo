@@ -1,7 +1,7 @@
 ﻿using Serilog;
 using TradeBot.Account.AccountService.v1;
 
-namespace Account.Validation.Messages
+namespace AccountGRPC.Validation.Messages
 {
     public class PasswordMismatchMessage : FailedValidationMessage
     {
