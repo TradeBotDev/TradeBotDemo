@@ -24,13 +24,13 @@ namespace AccountTests.AccountServiceTests
                 SaveExchangesAfterLogout = false
             };
 
+            // Последовательная регистрация, вход в аккаунт и проверка валидности текущего входа.
             var reply = service.Register(registerRequest, null)
             .ContinueWith(login => service.Login(loginRequest, null))
-            .ContinueWith(login => service.IsValidSession(new SessionRequest
-            {
-                SessionId = login.Result.Result.SessionId 
-            }, null));
+            .ContinueWith(login => service.IsValidSession(
+                new SessionRequest { SessionId = login.Result.Result.SessionId }, null));
 
+            // Ожидается, что текущий вход будет являться валидным.
             Assert.True(reply.Result.Result.IsValid);
         }
 
@@ -38,9 +38,12 @@ namespace AccountTests.AccountServiceTests
         [Fact]
         public void NonExistingAccountIsValidTest()
         {
+            // Намеренно отправляется несуществующий id сессии, чтобы аккаунт не был найден.
             var request = new SessionRequest { SessionId = "non_existing_session_id" };
             State.loggedIn = new();
             var reply = service.IsValidSession(request, null);
+
+            // Ожидается, что придет сообщенение о том, что текущий вход не является валидным.
             Assert.False(reply.Result.IsValid);
         }
     }

@@ -22,8 +22,12 @@ namespace AccountTests.AccountServiceTests
                 Password = "password",
                 SaveExchangesAfterLogout = false
             };
+            // Регистрация тестового аккаунта для того, чтобы потом в него можно было войти, а также
+            // вход в аккаунт.
             var reply = service.Register(registerRequest, null);
             reply.ContinueWith(login => service.Login(loginRequest, null));
+
+            // Ожидается, что вход в аккаунт будет успешным.
             Assert.Equal(ActionCode.Successful, reply.Result.Result);
         }
 
@@ -31,14 +35,15 @@ namespace AccountTests.AccountServiceTests
         [Fact]
         public void LoginToNonExistingAccount()
         {
+            // Генерация данных несуществующего аккауниа.
             var request = new LoginRequest()
             {
                 Email = $"non_existing_user{random.Next(0, 10000)}@pochta.ru",
                 Password = "password",
                 SaveExchangesAfterLogout = false
             };
-
             var reply = service.Login(request, null);
+            //Ожидается, что аккаунт не будет найден.
             Assert.Equal(ActionCode.AccountNotFound, reply.Result.Result);
         }
 
@@ -59,10 +64,15 @@ namespace AccountTests.AccountServiceTests
                 Password = "password",
                 SaveExchangesAfterLogout = false
             };
+
+            // Последовательная регистрация, вход в аккаунт и вход в тот же самый аккаунт (т.е. попытка входа
+            // в аккаунт, когда пользователь уже является вошедшим).
             var reply = service.Register(registerRequest, null)
                 .ContinueWith(login => service.Login(loginRequest, null))
                 .ContinueWith(login => service.Login(loginRequest, null));
 
+            // Ожидается, что в результате придет сообщение о том, что пользователь уже вошел, однако вход будет
+            // считаться успешным и выдастся уже существующий id сессии.
             Assert.Equal(ActionCode.Successful, reply.Result.Result.Result);
         }
     }
