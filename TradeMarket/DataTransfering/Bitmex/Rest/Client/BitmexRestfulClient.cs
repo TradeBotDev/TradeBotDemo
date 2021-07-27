@@ -22,7 +22,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Rest.Client
 
         public async Task<BitmexResfulResponse<T>> SendAsync<T>(BitmexRestfulRequest<T> request,CancellationToken cancellationToken)
         {
-            return new(await _client.SendAsync(request, cancellationToken));
+            return BitmexResfulResponse<T>.Create(await _client.SendAsync(request, cancellationToken));
         }
 
     }

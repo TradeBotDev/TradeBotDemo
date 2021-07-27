@@ -16,7 +16,7 @@ namespace Former
 
         private readonly ConcurrentDictionary<string, Order> _myOrders;
 
-        private double _balance = 0.0131;
+        private double _balance;
 
         //TODO формер не должне принимать конфиг как аргмунет конструктора, но должен принимать конфиг ( или контекст пользователя) как аргумент своих методов
         public Former()
@@ -181,11 +181,9 @@ namespace Former
             //вычисляем объём контракта, который может позволить наш баланс с учётом настройки доступности баланса 
             double quantity = context.configuration.ContractValue * Math.Floor(availableBalance * purchaseFairPrice / context.configuration.ContractValue);
             
-            //покупаем ордер по рыночной цене, но ордер при этом лимитный 
-            await context.PlaceOrder(purchaseFairPrice, quantity);
-
-            //временные манипуляции с балансом, вообще он должен обновляеться 
-            _balance -= context.configuration.ContractValue / purchaseFairPrice;
+            //купить ордер по рыночной цене, но ордер при этом лимитный 
+            if (quantity != 0) await context.PlaceOrder(purchaseFairPrice, quantity);
+            else Log.Debug("Insufficient balance");
         }
 
         /// <summary>
@@ -206,11 +204,9 @@ namespace Former
             //вычисляем объём контракта, который может позволить наш баланс с учётом настройки доступности баланса 
             double quantity = context.configuration.ContractValue * Math.Floor(availableBalance * sellFairPrice / context.configuration.ContractValue);
 
-            //отправляем запрос на продажу ордера по рыночной цене, но ордер при этом лимитный 
-            await context.PlaceOrder(sellFairPrice, -quantity);
-
-            //временные манипуляции с балансом, вообще он должен обновляеться 
-            _balance += context.configuration.ContractValue / sellFairPrice;
+            //продать ордер по рыночной цене, но ордер при этом лимитный 
+            if (quantity != 0) await context.PlaceOrder(sellFairPrice, -quantity);
+            else Log.Debug("Insufficient balance");
         }
     }
 }

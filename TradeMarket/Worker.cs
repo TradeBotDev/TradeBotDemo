@@ -1,10 +1,12 @@
 ﻿using Bitmex.Client.Websocket.Responses.Orders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
 using TradeMarket.Clients;
 using TradeMarket.DataTransfering;
+using TradeMarket.DataTransfering.Bitmex.Rest.Client;
 using TradeMarket.DataTransfering.Bitmex.Rest.Requests;
 using TradeMarket.DataTransfering.Bitmex.Rest.Requests.Ammend;
 using TradeMarket.DataTransfering.Bitmex.Rest.Requests.Place;
@@ -27,9 +29,6 @@ namespace TradeMarket
             while (!stoppingToken.IsCancellationRequested)
             {
                 AccountClient._accountClient = _account;
-                var request = new PlaceOrderRequest("key", "secret",new Order() { 
-                    OrdType = "Market", OrderQty = 200, Side = Bitmex.Client.Websocket.Responses.BitmexSide.Sell
-                });
                 //запуск подписок
                 Task[] tasks =
                 {

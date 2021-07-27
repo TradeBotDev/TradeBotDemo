@@ -151,10 +151,10 @@ namespace TradeMarket.DataTransfering.Bitmex
         {
             var response = await context.RestClient.SendAsync(new PlaceOrderRequest(context.Key, context.Secret, new Order
             {
+                Symbol = context.SlotName,
                 OrdType = "Limit",
                 Price = (int)price,
-                OrderQty = (long?)quontity,
-                Symbol = context.SlotName
+                OrderQty = (long?)quontity
             }), new System.Threading.CancellationToken());
             if (response.Error is not null)
             {

@@ -19,18 +19,27 @@ namespace TradeMarket.DataTransfering.Bitmex.Rest.Responses
         [JsonIgnore]
         private string _responseContent { get; set; }
 
-        public BitmexResfulResponse(HttpResponseMessage response) 
+        public BitmexResfulResponse()
         {
-            _ReadContent(response.Content);
-            _TryParse();
+
         }
+
+        public static BitmexResfulResponse<MessageType> Create(HttpResponseMessage response)
+        {
+            var result = new BitmexResfulResponse<MessageType>();
+            result._ReadContent(response.Content);
+            result._TryParse();
+            return result;
+        }
+
 
         private void _TryParse()
         {
             if (IsResponseError())
             {
                 Error = JsonConvert.DeserializeObject<BitmexResfulResponse<MessageType>>(_responseContent,
-                    new JsonSerializerSettings { 
+                    new JsonSerializerSettings
+                    {
                         NullValueHandling = NullValueHandling.Ignore
                     }).Error;
                 return;

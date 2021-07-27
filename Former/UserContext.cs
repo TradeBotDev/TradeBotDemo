@@ -20,6 +20,10 @@ namespace Former
 
         internal UserContext(string sessionId, string trademarket, string slot)
         {
+            this.sessionId = sessionId;
+            this.trademarketName = trademarket;
+            this.slotName = slot;
+
 
             Meta = new Metadata();
             Meta.Add("sessionid", sessionId);
