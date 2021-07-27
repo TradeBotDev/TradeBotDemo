@@ -1,5 +1,4 @@
-﻿using System;
-using TradeBot.Account.AccountService.v1;
+﻿using TradeBot.Account.AccountService.v1;
 using Xunit;
 
 namespace AccountTests.AccountServiceTests

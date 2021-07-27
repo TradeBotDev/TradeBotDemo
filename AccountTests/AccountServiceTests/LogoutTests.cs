@@ -1,5 +1,4 @@
-﻿using AccountGRPC;
-using AccountGRPC.Models;
+﻿using AccountGRPC.Models;
 using TradeBot.Account.AccountService.v1;
 using Xunit;
 

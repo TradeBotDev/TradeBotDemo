@@ -4,11 +4,11 @@ using Xunit;
 
 namespace AccountTests.AccountServiceTests
 {
-    public class IsValidSessionTests : AccountServicesTestsData
+    public class CurrentAccountDataTests : AccountServicesTestsData
     {
-        // Тестирование проверки существующего вошедшего аккаунта на валидность.
+        // Тестирование получения данных из существующего аккаунта.
         [Fact]
-        public void ExistingAccountIsValidTest()
+        public void DataFromExistingAccount()
         {
             var registerRequest = new RegisterRequest
             {
@@ -26,22 +26,22 @@ namespace AccountTests.AccountServiceTests
 
             var reply = service.Register(registerRequest, null)
             .ContinueWith(login => service.Login(loginRequest, null))
-            .ContinueWith(login => service.IsValidSession(new SessionRequest
+            .ContinueWith(login => service.CurrentAccountData(new SessionRequest
             {
-                SessionId = login.Result.Result.SessionId 
+                SessionId = login.Result.Result.SessionId
             }, null));
 
-            Assert.True(reply.Result.Result.IsValid);
+            Assert.Equal(ActionCode.Successful, reply.Result.Result.Result);
         }
 
-        // Тестирование проверки невошедшего аккаунта на валидность.
+        // Тестирование получения данных из несуществующего аккаунта.
         [Fact]
-        public void NonExistingAccountIsValidTest()
+        public void DataFromNonExistingAccount()
         {
             var request = new SessionRequest { SessionId = "non_existing_session_id" };
             State.loggedIn = new();
-            var reply = service.IsValidSession(request, null);
-            Assert.False(reply.Result.IsValid);
+            var reply = service.CurrentAccountData(request, null);
+            Assert.Equal(ActionCode.AccountNotFound, reply.Result.Result);
         }
     }
 }
