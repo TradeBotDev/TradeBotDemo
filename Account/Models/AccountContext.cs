@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace Account.Models
+namespace AccountGRPC.Models
 {
     public class AccountContext : DbContext
     {

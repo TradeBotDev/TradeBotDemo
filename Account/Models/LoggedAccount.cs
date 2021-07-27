@@ -1,4 +1,4 @@
-﻿namespace Account.Models
+﻿namespace AccountGRPC.Models
 {
     // Объект вошедшего аккаунта.
     public class LoggedAccount

@@ -1,23 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Serilog;
 using TradeBot.Account.AccountService.v1;
 
-namespace Account.AccountMessages
+namespace AccountGRPC.AccountMessages
 {
     public static class LogoutReplies
     {
-        public static readonly LogoutReply SuccessfulLogout = new LogoutReply
+        public static LogoutReply SuccessfulLogout()
         {
-            Result = ActionCode.Successful,
-            Message = "Произведен выход из аккаунта."
-        };
+            const string Message = "Произведен выход из аккаунта.";
+            Log.Information(Message);
 
-        public static readonly LogoutReply AccountNotFound = new LogoutReply
+            return new LogoutReply
+            {
+                Result = ActionCode.Successful,
+                Message = Message
+            };
+        }
+
+        public static LogoutReply AccountNotFound()
         {
-            Result = ActionCode.AccountNotFound,
-            Message = "Ошибка при выходе из аккаунта: вы уже вышли из аккаунта"
-        };
+            const string Message = "Ошибка при выходе из аккаунта: вы уже вышли из аккаунта";
+            Log.Information(Message);
+
+            return new LogoutReply
+            {
+                Result = ActionCode.AccountNotFound,
+                Message = Message
+            };
+        }
     }
 }

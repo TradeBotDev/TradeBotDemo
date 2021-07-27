@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Account.Models
+namespace AccountGRPC.Models
 {
     // Описание таблицы аккаунтов пользователей.
     public class Account

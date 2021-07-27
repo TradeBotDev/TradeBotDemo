@@ -1,4 +1,12 @@
-﻿namespace Account.Validation.Messages
+﻿using Serilog;
+
+namespace AccountGRPC.Validation.Messages
 {
-    public abstract class FailedValidationMessage : ValidationMessage { }
+    public abstract class FailedValidationMessage : ValidationMessage
+    {
+        public FailedValidationMessage()
+        {
+            Log.Information("Ошибка валидации.");
+        }
+    }
 }
