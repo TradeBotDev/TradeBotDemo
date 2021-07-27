@@ -62,27 +62,48 @@ namespace Algorithm.Analysis
                 prices.Add(CalculateSMA(subSet));
             }
             //after all the data is prepared the actual analysis takes place
-            if (IsItTimeToBuy(prices, points)) 
+            /*if (TrendAnalyser(prices, points)) 
             { 
                 PriceSender.SendPrice(points.Last().Value); 
+            }*/
+            int trend = TrendAnalyser(prices, points);
+            if (trend != 0)
+            {
+                PriceSender.SendPrice(trend);
             }
         }
         //this func needs points and subset averages and decides if it's time to buy
-        public static bool IsItTimeToBuy(IReadOnlyCollection<double> prices, Dictionary<DateTime, double> points)
+        public static int TrendAnalyser(IReadOnlyCollection<double> averages, Dictionary<DateTime, double> points)
         {
             Log.Information("Analysis...");
 
             //if our averages are getting lower with each iteration we conclude the marker price is generally falling
-            if (prices.ElementAt(0) >= prices.ElementAt(1) && prices.ElementAt(1) >= prices.ElementAt(2))
+            if (averages.ElementAt(0) >= averages.ElementAt(1) && averages.ElementAt(1) >= averages.ElementAt(2))
             {
                 Log.Information("Downward trend detected");
                 //if the latest price is higher (but not too much, not over 15%) we think the price might start rising
-                //the 15% is need to avoid accidentally buying on a sudden spike 
+                //the 15% is needed to avoid accidentally buying on a sudden spike 
                 //this means now is the time to buy
-                return prices.ElementAt(2) <= points.ElementAt(4).Value &&
-                    prices.ElementAt(2)*1.15 > points.ElementAt(4).Value;
+
+                if (averages.ElementAt(2) <= points.ElementAt(4).Value &&
+                    averages.ElementAt(2)*1.15 > points.ElementAt(4).Value)
+                {
+                    return 1;
+                }
             }
-            return false;
+
+            if (averages.ElementAt(0) <= averages.ElementAt(1) && averages.ElementAt(1) <= averages.ElementAt(2))
+            {
+                Log.Information("Upward trend detected");
+
+                if (averages.ElementAt(2) >= points.ElementAt(4).Value &&
+                    averages.ElementAt(2)  < points.ElementAt(4).Value * 1.15)
+                {
+                    return -1;
+                }
+            }
+            return 0;
+
         }
         //func to find average price of a dict (used so that we don't have to iterate the dict in the other funcs)
         public static double CalculateSMA(Dictionary<DateTime, double> points)
