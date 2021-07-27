@@ -1,5 +1,4 @@
-﻿using Grpc.Core;
-using Serilog;
+﻿using Serilog;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -59,48 +58,48 @@ namespace Former
             var status = orderNeededUpdate.Signature.Status;
             var type = orderNeededUpdate.Signature.Type;
             var sellPrice = orderNeededUpdate.Price + context.configuration.RequiredProfit + context.configuration.SlotFee;
-            var task = Task.Run(async () =>
+            //var task = Task.Run(async () =>
+            //{
+            if (status == OrderStatus.Open && type == OrderType.Buy)
             {
-                if (status == OrderStatus.Open && type == OrderType.Buy)
-                {
-                    _myOrders.AddOrUpdate(id, orderNeededUpdate, (k, v) =>
+                await SellPartOfContracts(id, orderNeededUpdate, sellPrice, context);
+                _myOrders.AddOrUpdate(id, orderNeededUpdate, (k, v) =>
                     {
                         Log.Information("Order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} added or updated", id, orderNeededUpdate.Price, orderNeededUpdate.Quantity, orderNeededUpdate.Signature.Type, orderNeededUpdate.Signature.Status);
                         v.Price = orderNeededUpdate.Price;
                         v.Quantity = orderNeededUpdate.Quantity;
                         return v;
                     });
-                    await SellPartOfContracts(id, orderNeededUpdate, sellPrice, context);
-                }
-                if (status == OrderStatus.Open && type == OrderType.Sell)
-                    _myOrders.AddOrUpdate(id, orderNeededUpdate, (k, v) =>
-                    {
-                        Log.Information("Order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} added or updated", id, orderNeededUpdate.Price, orderNeededUpdate.Quantity, orderNeededUpdate.Signature.Type, orderNeededUpdate.Signature.Status);
-                        v.Price = orderNeededUpdate.Price;
-                        v.Quantity = orderNeededUpdate.Quantity;
-                        return v;
-                    });
-                if (status == OrderStatus.Closed && type == OrderType.Buy)
+            }
+            if (status == OrderStatus.Open && type == OrderType.Sell)
+                _myOrders.AddOrUpdate(id, orderNeededUpdate, (k, v) =>
                 {
-                    Log.Information("Order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} removed", id, orderNeededUpdate.Price, orderNeededUpdate.Quantity, orderNeededUpdate.Signature.Type, orderNeededUpdate.Signature.Status);
-                    _myOrders.TryRemove(id, out _);
-                    await context.PlaceOrder(sellPrice, -orderNeededUpdate.Quantity);
-                }
-                if (status == OrderStatus.Closed && type == OrderType.Sell)
-                {
-                    Log.Information("Order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} removed", id, orderNeededUpdate.Price, orderNeededUpdate.Quantity, orderNeededUpdate.Signature.Type, orderNeededUpdate.Signature.Status);
-                    _myOrders.TryRemove(id, out _);
-                }
-            });
-            await task;
+                    Log.Information("Order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} added or updated", id, orderNeededUpdate.Price, orderNeededUpdate.Quantity, orderNeededUpdate.Signature.Type, orderNeededUpdate.Signature.Status);
+                    v.Price = orderNeededUpdate.Price;
+                    v.Quantity = orderNeededUpdate.Quantity;
+                    return v;
+                });
+            if (status == OrderStatus.Closed && type == OrderType.Buy)
+            {
+                Log.Information("Order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} removed", id, orderNeededUpdate.Price, orderNeededUpdate.Quantity, orderNeededUpdate.Signature.Type, orderNeededUpdate.Signature.Status);
+                _myOrders.TryRemove(id, out _);
+                await context.PlaceOrder(sellPrice, -orderNeededUpdate.Quantity);
+            }
+            if (status == OrderStatus.Closed && type == OrderType.Sell)
+            {
+                Log.Information("Order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} removed", id, orderNeededUpdate.Price, orderNeededUpdate.Quantity, orderNeededUpdate.Signature.Type, orderNeededUpdate.Signature.Status);
+                _myOrders.TryRemove(id, out _);
+            }
+            //});
+            //await task;
         }
 
-        private async Task SellPartOfContracts(string id, Order orderNeededUpdate, double sellPrice, UserContext context) 
+        private async Task SellPartOfContracts(string id, Order orderNeededUpdate, double sellPrice, UserContext context)
         {
             double newQuantity;
             if (_myOrders.TryGetValue(id, out Order beforeUpdate))
                 if ((newQuantity = beforeUpdate.Quantity - orderNeededUpdate.Quantity) > 0)
-                   await context.PlaceOrder(sellPrice, -newQuantity);
+                    await context.PlaceOrder(sellPrice, -newQuantity);
         }
 
         private async Task FitPrices(ConcurrentDictionary<string, Order> currentPurchaseOrdersForFairPrice, double orderUpdateRange, UserContext context)
@@ -137,14 +136,15 @@ namespace Former
                 if (/*IsPriceCorrect(order.Value.Price, avgPrice, availableBalance, context.configuration.ContractValue)*/true)
                     selectedOrders.Add(order.Value.Price, context.configuration.ContractValue);
             }
-            Log.Debug("Formed a list of required orders:");
-            foreach (var order in selectedOrders)
+            //Log.Debug("Formed a list of required orders:");
+            //foreach (var order in selectedOrders)
+            //{
+            //    Log.Information("Price: {0} Quantity: {1}", order.Key, order.Value);
+            //}
+            if (selectedOrders.Count != 0)
             {
-                Log.Information("Price: {0} Quantity: {1}", order.Key, order.Value);
-            }
-            if (selectedOrders.Count != 0) 
-            {
-                await context.PlaceOrdersList(selectedOrders);
+                await context.PlaceOrder(avgPrice * (1 + context.configuration.RequiredProfit), context.configuration.ContractValue);
+                //await context.PlaceOrdersList(selectedOrders);
             }
             else Log.Information(" none");
         }
