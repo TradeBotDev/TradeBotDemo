@@ -84,7 +84,7 @@ namespace UI
             this.ConfigAvailableBalance.Name = "ConfigAvailableBalance";
             this.ConfigAvailableBalance.Size = new System.Drawing.Size(77, 27);
             this.ConfigAvailableBalance.TabIndex = 1;
-            this.ConfigAvailableBalance.Text = "0,1";
+            this.ConfigAvailableBalance.Text = "100";
             // 
             // ConfigRequiredProfit
             // 
@@ -92,7 +92,7 @@ namespace UI
             this.ConfigRequiredProfit.Name = "ConfigRequiredProfit";
             this.ConfigRequiredProfit.Size = new System.Drawing.Size(77, 27);
             this.ConfigRequiredProfit.TabIndex = 2;
-            this.ConfigRequiredProfit.Text = "0,1";
+            this.ConfigRequiredProfit.Text = "20";
             // 
             // ConfigVolumeOfContracts
             // 
@@ -100,7 +100,7 @@ namespace UI
             this.ConfigVolumeOfContracts.Name = "ConfigVolumeOfContracts";
             this.ConfigVolumeOfContracts.Size = new System.Drawing.Size(77, 27);
             this.ConfigVolumeOfContracts.TabIndex = 3;
-            this.ConfigVolumeOfContracts.Text = "0,1";
+            this.ConfigVolumeOfContracts.Text = "100";
             // 
             // ConfigUpdatePriceRange
             // 
@@ -372,7 +372,7 @@ namespace UI
             this.LogLogTextBox.Name = "LogLogTextBox";
             this.LogLogTextBox.Size = new System.Drawing.Size(229, 27);
             this.LogLogTextBox.TabIndex = 27;
-            this.LogLogTextBox.Text = "@mail.ru";
+            this.LogLogTextBox.Text = "a@mail.ru";
             // 
             // label9
             // 
@@ -397,13 +397,13 @@ namespace UI
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(533, 365);
-            this.Controls.Add(this.LogginPanel);
             this.Controls.Add(this.IsUserLogged);
             this.Controls.Add(this.ShowMainMenu);
             this.Controls.Add(this.ShowLoginPanel);
             this.Controls.Add(this.ShowRegistrationPanel);
             this.Controls.Add(this.MainMenuPanel);
             this.Controls.Add(this.RegistrationPanel);
+            this.Controls.Add(this.LogginPanel);
             this.Name = "TradeBotUI";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "TradeBot";

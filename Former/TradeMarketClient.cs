@@ -2,7 +2,6 @@
 using Grpc.Net.Client;
 using Serilog;
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -30,7 +29,7 @@ namespace Former
         private readonly TradeMarketService.TradeMarketServiceClient _client;
         private readonly GrpcChannel _channel;
 
-        public static void Configure(string connectionString, int retryDelay) 
+        public static void Configure(string connectionString, int retryDelay)
         {
             _connectionString = connectionString;
             _retryDelay = retryDelay;
@@ -53,7 +52,7 @@ namespace Former
                 }
                 catch (RpcException e)
                 {
-                    //Log.Error("Error {1}. Retrying...\r\n{0}", e.Status.DebugException.Message, e.StackTrace);
+                    Log.Error("Error {1}. Retrying...\r\n{0}", e.Status.DebugException.Message, e.StackTrace);
                     Thread.Sleep(_retryDelay);
                 }
             }
@@ -72,7 +71,7 @@ namespace Former
                     }
                 }
             };
-            
+
             using var call = _client.SubscribeOrders(request, context.Meta);
 
             Func<Task> observeCurrentPurchaseOrders = async () =>
@@ -118,41 +117,22 @@ namespace Former
             await ConnectionTester(observeMyOrders);
         }
 
-        public async Task PlaceOrdersList(Dictionary<double, double> purchaseList, UserContext context)
-        {
-            PlaceOrderResponse response = null;
-            Func<Task> closeOrders;
-            foreach (var order in purchaseList)
-            {
-                Log.Information("Order: price: {0}, quantity: {1} placed", order.Key, order.Value);
-                closeOrders = async () =>
-                {
-                    response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = order.Key, Value = order.Value }, context.Meta);
-                    Log.Information(response.Response.Message);
-                };
-                await ConnectionTester(closeOrders);
-            }
-        }
-
         public async Task PlaceOrder(double sellPrice, double contractValue, UserContext context)
         {
             Log.Information("Order: price: {0}, quantity: {1} placed", sellPrice, contractValue);
             PlaceOrderResponse response = null;
-            Func<Task> placeSuccessfulOrders = async () =>
+            Func<Task> placeOrders = async () =>
             {
-                response = _client.PlaceOrder(new PlaceOrderRequest { Price = sellPrice, Value = contractValue }, context.Meta);
+                response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = sellPrice, Value = contractValue }, context.Meta);
                 Log.Information(response.Response.Code.ToString());
             };
 
-            await ConnectionTester(placeSuccessfulOrders);
+            await ConnectionTester(placeOrders);
         }
 
-        public async Task TellTMUpdateMyOrders(Dictionary<string, double> orderToUpdate, UserContext context)
+        public async Task SetNewPrice(Order orderNeededToUpdate, UserContext context)
         {
-            foreach (var order in orderToUpdate)
-            {
-                Log.Debug("Update order id: {0}, new price: {1}", order.Key, order.Value);
-            }
+            Log.Debug("Update order id: {0}, new price: {1}", orderNeededToUpdate.Id, orderNeededToUpdate.Price);
         }
     }
 }

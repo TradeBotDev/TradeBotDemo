@@ -32,7 +32,7 @@ namespace Former
             _former = new Former();
             //Конфиг передается как параметр для любого метода
 
-            _tradeMarketClient.UpdateOrderBook += UpdateOrderBook;
+            _tradeMarketClient.UpdateOrderBook += UpdateOrderBooks;
             _tradeMarketClient.UpdateBalance += UpdateBalance;
             _tradeMarketClient.UpdateMyOrders += UpdateMyOrderList;
 
@@ -41,13 +41,17 @@ namespace Former
             ObserveMyOrders();
         }
 
-        public async void FormPurchaseList(double AvgPrice)
+        public async void FormPurchaseOrder()
         {
-            await _former.FormPurchaseList(AvgPrice, this);
+            await _former.FormPurchaseOrder(this);
         }
-        private async void UpdateOrderBook(Order orderNeededUpdate) 
+        public async void FormSellOrder()
         {
-           await _former.UpdateOrderBook(orderNeededUpdate, this);
+            await _former.FormSellOrder(this);
+        }
+        private async void UpdateOrderBooks(Order orderNeededUpdate) 
+        {
+           await _former.UpdateOrderBooks(orderNeededUpdate, this);
         }
         private async void UpdateMyOrderList(Order orderNeededUpdate)
         {
@@ -61,13 +65,9 @@ namespace Former
         {
              await _tradeMarketClient.PlaceOrder(sellPrice, contractValue, this);
         }
-        public async Task PlaceOrdersList(Dictionary<double, double> purchaseList) 
+        public async Task SetNewPrice(Order orderNeededToUpdate)
         {
-             await _tradeMarketClient.PlaceOrdersList(purchaseList, this);
-        }
-        public async Task TellTMUpdateMyOrders(Dictionary<string, double> orderToUpdate)
-        {
-            await _tradeMarketClient.TellTMUpdateMyOrders(orderToUpdate, this);
+            await _tradeMarketClient.SetNewPrice(orderNeededToUpdate, this);
         }
         private async void ObserveOrderBook()
         {
