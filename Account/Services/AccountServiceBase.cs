@@ -16,7 +16,7 @@ namespace AccountGRPC
             Log.Information($"Logout получил запрос: SessionId - {request.SessionId}.");
 
             // В случае, если аккаунт не был найден среди вошедших, появляется сообщение об ошибке.
-            if (!Models.State.loggedIn.ContainsKey(request.SessionId))
+            if (Models.State.loggedIn == null || !Models.State.loggedIn.ContainsKey(request.SessionId))
                 return Task.FromResult(LogoutReplies.AccountNotFound());
 
             // Необходимые данные для удаления бирж.
