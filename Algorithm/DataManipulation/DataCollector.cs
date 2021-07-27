@@ -10,18 +10,20 @@ using Grpc.Core;
 
 namespace Algorithm.DataManipulation
 {
+    //DataCollector receives orders from the Relay service
+    //it is basically a data storage to use instead of a DB 
+    //maybe TODO replace it w/ a DB 
     public class DataCollector
     {
+        //all the orders coming from Relay
         public static BlockingCollection<Order> Orders;
+        //metadata coming w/ orders (only needed to be relayed to Former for now)
         public static Grpc.Core.Metadata metaData;
-
-        //private readonly Publisher _publisher = new();
-
 
         public DataCollector(Publisher publisher)
         {
             Orders = new BlockingCollection<Order>();
-            //_publisher.PointMadeEvent += ClearUsedData;
+            //if PointMaker had taken the orders and made a point we can clear the storage
             publisher.PointMadeEvent += ClearUsedData;
         }
 
