@@ -97,11 +97,9 @@ namespace TradeMarket.Services
 
             var response = await user.PlaceOrder(request.Value, request.Price);
 
-            return new PlaceOrderResponse
-            {
-                Response = response
-            };
+            return response;
         }
+
 
         public async override Task Slots(SlotsRequest request, IServerStreamWriter<SlotsResponse> responseStream, ServerCallContext context)
         {
@@ -238,6 +236,40 @@ namespace TradeMarket.Services
             var completion = new TaskCompletionSource<object>();
             token.Register(() => completion.SetResult(null));
             return completion.Task;
+        }
+
+        public async override Task<AmmendOrderResponse> AmmendOrder(AmmendOrderRequest request, ServerCallContext context)
+        {
+            var sessionId = context.RequestHeaders.Get("sessionid").Value;
+            var slot = context.RequestHeaders.Get("slot").Value;
+            var user = UserContext.GetUserContext(sessionId, slot);
+
+            double? price = 0;
+            switch (request.PriceType)
+            {
+                case PriceType.Default: price = request.NewPrice;break;
+                case PriceType.None: price = null;break;
+                case PriceType.Unspecified: throw new RpcException(Status.DefaultCancelled,$"{nameof(request.PriceType)} should be specified");
+            }
+            long? quantity = null, leavesQuantity = null;
+            switch (request.QuantityType)
+            {
+                case QuantityType.Leaves: leavesQuantity = request.NewQuantity;break;
+                case QuantityType.Default: quantity = request.NewQuantity;break;
+                case QuantityType.None:break;
+                case QuantityType.Unspecified: throw new RpcException(Status.DefaultCancelled, $"{nameof(request.QuantityType)} should be specified");
+            }
+            var response = await user.AmmendOrder(request.Id,price,quantity,leavesQuantity);
+
+            return new()
+            {
+                Response = response
+            };
+        }
+
+        public override Task<DeleteOrderResponse> DeleteOrder(DeleteOrderRequest request, ServerCallContext context)
+        {
+            return base.DeleteOrder(request, context);
         }
     }
 }

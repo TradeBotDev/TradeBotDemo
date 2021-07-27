@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Common.v1;
+using TradeBot.TradeMarket.TradeMarketService.v1;
 using TradeMarket.DataTransfering.Bitmex;
 using TradeMarket.Model;
 
@@ -13,9 +14,12 @@ namespace TradeMarket.Model
         #region Dynamic Part
         public string Name { get; internal set; }
 
-        public abstract Task<DefaultResponse> PlaceOrder(double quontity, double price,UserContext context);
+        public abstract Task<PlaceOrderResponse> PlaceOrder(double quontity, double price,UserContext context);
 
-        public abstract Task<DefaultResponse> CloseOrder(string id, UserContext context);
+        public abstract Task<DefaultResponse> DeleteOrder(string id, UserContext context);
+
+        public abstract Task<DefaultResponse> AmmendOrder(string id,double? price,long? Quantity,long? LeavesQuantity, UserContext context);
+
 
         public abstract Task<DefaultResponse> AutheticateUser(string api, string secret,UserContext context);
 
