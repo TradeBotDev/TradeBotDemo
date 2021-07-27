@@ -24,4 +24,16 @@
     <ProjectReference Include="..\Account\Account.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="empty_file.test">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="not_empty_file.test">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="no_data_file.test">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

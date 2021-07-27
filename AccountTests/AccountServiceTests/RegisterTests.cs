@@ -1,14 +1,10 @@
-﻿using System;
-using TradeBot.Account.AccountService.v1;
+﻿using TradeBot.Account.AccountService.v1;
 using Xunit;
 
 namespace AccountTests.AccountServiceTests
 {
-    public class RegisterTests
+    public class RegisterTests : AccountServiceTestsData
     {
-        Random random = new Random();
-        AccountGRPC.AccountService service = new AccountGRPC.AccountService();
-
         // Тестирование на работу регистрации нового аккаунта.
         [Fact]
         public void RegisterNewAccountTest()
@@ -19,8 +15,8 @@ namespace AccountTests.AccountServiceTests
                 Password = "password",
                 VerifyPassword = "password"
             };
-            
             var reply = service.Register(request, null);
+            // Ожидается, что регистрация будет завершена успешно.
             Assert.Equal(ActionCode.Successful, reply.Result.Result);
         }
         
@@ -34,9 +30,11 @@ namespace AccountTests.AccountServiceTests
                 Password = "password",
                 VerifyPassword = "password"
             };
-
+            // Двойная регистрация аккаунта.
             service.Register(request, null);
             var reply = service.Register(request, null);
+
+            // Ожидается, что придет сообщение о том, что такой аккаунт уже зарегистрирован.
             Assert.Equal(ActionCode.AccountExists, reply.Result.Result);
         }
     }
