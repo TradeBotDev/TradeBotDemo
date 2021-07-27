@@ -75,8 +75,8 @@ enum QuantityType{
 
 enum PriceType{
 	PRICE_TYPE_UNSPECIFIED = 0;
-	PRICE_TYPE_DEFAULT = 0;
-	PRICE_TYPE_NONE = 0;
+	PRICE_TYPE_DEFAULT = 1;
+	PRICE_TYPE_NONE = 2;
 }
 
 message AmmendOrderRequest{
