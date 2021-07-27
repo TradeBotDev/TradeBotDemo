@@ -247,17 +247,17 @@ namespace TradeMarket.Services
             double? price = 0;
             switch (request.PriceType)
             {
-                case PriceType.Default: price = request.NewPrice;break;
-                case PriceType.None: price = null;break;
+                case PriceType.Default:     price = request.NewPrice;break;
+                case PriceType.None:        price = null;break;
                 case PriceType.Unspecified: throw new RpcException(Status.DefaultCancelled,$"{nameof(request.PriceType)} should be specified");
             }
             long? quantity = null, leavesQuantity = null;
             switch (request.QuantityType)
             {
-                case QuantityType.Leaves: leavesQuantity = request.NewQuantity;break;
-                case QuantityType.Default: quantity = request.NewQuantity;break;
-                case QuantityType.None:break;
-                case QuantityType.Unspecified: throw new RpcException(Status.DefaultCancelled, $"{nameof(request.QuantityType)} should be specified");
+                case QuantityType.Leaves:       leavesQuantity = request.NewQuantity;break;
+                case QuantityType.Default:      quantity = request.NewQuantity;break;
+                case QuantityType.None:         break;
+                case QuantityType.Unspecified:  throw new RpcException(Status.DefaultCancelled, $"{nameof(request.QuantityType)} should be specified");
             }
             var response = await user.AmmendOrder(request.Id,price,quantity,leavesQuantity);
 
