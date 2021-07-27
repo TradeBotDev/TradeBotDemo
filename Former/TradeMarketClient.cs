@@ -67,7 +67,7 @@ namespace Former
                     Signature = new OrderSignature
                     {
                         Status = OrderStatus.Open,
-                        Type = OrderType.Sell
+                        Type = OrderType.Unspecified
                     }
                 }
             };
@@ -124,7 +124,7 @@ namespace Former
             Func<Task> placeOrders = async () =>
             {
                 response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = sellPrice, Value = contractValue }, context.Meta);
-                Log.Information(response.OrderId + " placed " + response.Response.Code.ToString());
+                Log.Information(response.OrderId + " placed " + response.Response.Code.ToString() + " message " + response.Response.Message);
             };
 
             await ConnectionTester(placeOrders);
