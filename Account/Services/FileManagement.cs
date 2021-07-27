@@ -1,6 +1,6 @@
-﻿using Serilog;
-using System.IO;
+﻿using System.IO;
 using System.Text.Json;
+using Serilog;
 
 namespace AccountGRPC
 {

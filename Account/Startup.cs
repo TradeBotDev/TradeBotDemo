@@ -5,8 +5,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Collections.Generic;
 using System.IO;
-using AccountGRPC.Models;
 using Serilog;
+
+using AccountGRPC.Models;
 
 namespace AccountGRPC
 {

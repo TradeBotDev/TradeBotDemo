@@ -1,11 +1,12 @@
-﻿using AccountGRPC.AccountMessages;
-using AccountGRPC.Validation;
-using AccountGRPC.Validation.Messages;
-using Grpc.Core;
+﻿using Grpc.Core;
 using System.Linq;
 using System.Threading.Tasks;
-using TradeBot.Account.AccountService.v1;
 using Serilog;
+
+using TradeBot.Account.AccountService.v1;
+using AccountGRPC.AccountMessages;
+using AccountGRPC.Validation;
+using AccountGRPC.Validation.Messages;
 
 namespace AccountGRPC
 {
