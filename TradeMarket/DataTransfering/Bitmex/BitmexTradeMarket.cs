@@ -18,6 +18,10 @@ using Utf8Json;
 using OrderStatus = TradeBot.Common.v1.OrderStatus;
 using TradeMarket.DataTransfering.Bitmex.Rest.Responses;
 using Serilog;
+using TradeMarket.DataTransfering.Bitmex.Rest.Requests.Place;
+using Newtonsoft.Json;
+using Order = Bitmex.Client.Websocket.Responses.Orders.Order;
+using TradeMarket.DataTransfering.Bitmex.Rest.Requests.Ammend;
 
 namespace TradeMarket.DataTransfering.Bitmex
 {
@@ -124,18 +128,27 @@ namespace TradeMarket.DataTransfering.Bitmex
             };
         }
 
-        //TODO дописать 
-        public override Task<DefaultResponse> CloseOrder(string id,UserContext context)
+        public async override Task<DefaultResponse> DeleteOrder(string id, UserContext context)
         {
-            throw new NotImplementedException();
+            var response = await context.RestClient.SendAsync(new DeleteOrderRequest(context.Key, context.Secret, id), new System.Threading.CancellationToken());
+            var responsejson = await response.Content.ReadAsStringAsync();
+            string errorMessage = "";
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = JsonConvert.DeserializeObject<error>(responsejson).message;
+            }
+            return new()
+            {
+                Code = response.IsSuccessStatusCode ? ReplyCode.Succeed : ReplyCode.Failure,
+                Message = errorMessage
+            };
         }
 
-        public async override Task<DefaultResponse> PlaceOrder(double quontity, double price,UserContext context)
+        public async override Task<TradeBot.TradeMarket.TradeMarketService.v1.PlaceOrderResponse> PlaceOrder(double quontity, double price,UserContext context)
         {
             Log.Logger.Information($"Placing Limit order witch qty: {quontity}  price: {price}  for sessionId: {context.SessionId}");
             var response = await context.RestClient.SendAsync(new PlaceOrderRequest(context.Key, context.Secret, new global::Bitmex.Client.Websocket.Responses.Orders.Order
             {
-                //TODO тут переделать под лимит ордер
                 OrdType = "Limit",
                 Price = (int)price,
                 OrderQty = (long?)quontity,
@@ -143,24 +156,28 @@ namespace TradeMarket.DataTransfering.Bitmex
             }),new System.Threading.CancellationToken());
             string message = "";
             string responsejson = await response.Content.ReadAsStringAsync();
-            Log.Logger.Information($"Response: { responsejson}");
+            Log.Logger.Information($"Response: {responsejson}");
             ReplyCode code = ReplyCode.Succeed;
             if (!response.IsSuccessStatusCode)
             {
 
                 responsejson = responsejson.Replace("{\"error\":", "");
                 responsejson = responsejson.Remove(responsejson.LastIndexOf("}") - 1, 1);
-                message = JsonSerializer.Deserialize<error>(responsejson).message;
+                message = JsonConvert.DeserializeObject<error>(responsejson).message;
                 code = ReplyCode.Failure;
             }
             else
             {
                 message = responsejson;
             }
-            return new DefaultResponse
+            return new()
             {
-                Message = message,
-                Code = code
+                OrderId = JsonConvert.DeserializeObject<Order>(responsejson).OrderId,
+                Response = new()
+                {
+                    Code = ReplyCode.Succeed,
+                    Message = message
+                }
             };
         }
 
@@ -206,6 +223,22 @@ namespace TradeMarket.DataTransfering.Bitmex
             }
             await UserWalletPublisher.SubcribeAsync(new System.Threading.CancellationToken());
             BalanceUpdate += handler;
+        }
+
+        public async override Task<DefaultResponse> AmmendOrder(string id, double? price, long? Quantity, long? LeavesQuantity, UserContext context)
+        {
+            var response = await context.RestClient.SendAsync(new AmmendOrderRequest(context.Key, context.Secret, new() { Id = id, Price = price, Quantity = Quantity, LeavesQuantity = LeavesQuantity }),new System.Threading.CancellationToken());
+            var responsejson = await response.Content.ReadAsStringAsync();
+            string errorMessage = "";
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = JsonConvert.DeserializeObject<error>(responsejson).message;
+            }
+            return new()
+            {
+                Code = response.IsSuccessStatusCode ? ReplyCode.Succeed : ReplyCode.Failure,
+                Message = errorMessage
+            };
         }
     }
 }

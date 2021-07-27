@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Common.v1;
+using TradeBot.TradeMarket.TradeMarketService.v1;
 using TradeMarket.Clients;
 using TradeMarket.DataTransfering.Bitmex.Rest.Client;
 
@@ -78,14 +79,19 @@ namespace TradeMarket.Model
 
         }
 
-        public async Task<DefaultResponse> PlaceOrder(double quontity, double price)
+        public async Task<PlaceOrderResponse> PlaceOrder(double quontity, double price)
         {
             return await TradeMarket.PlaceOrder(quontity, price, this);
         }
 
         public async Task<DefaultResponse> CloseOrder(string id)
         {
-            return await TradeMarket.CloseOrder(id, this);
+            return await TradeMarket.DeleteOrder(id, this);
+        }
+
+        public async Task<DefaultResponse> AmmendOrder(string id, double? price, long? Quantity, long? LeavesQuantity)
+        {
+            return await TradeMarket.AmmendOrder(id, price, Quantity, LeavesQuantity, this);
         }
 
         public async Task<DefaultResponse> AutheticateUser()

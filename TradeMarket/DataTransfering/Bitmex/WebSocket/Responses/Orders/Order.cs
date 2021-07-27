@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Diagnostics;
 using System.Runtime.Serialization;
 
@@ -7,12 +8,16 @@ namespace Bitmex.Client.Websocket.Responses.Orders
     [DebuggerDisplay("Order: {Symbol}, {OrderQty}. {Price}")]
     public class Order
     {
+        [JsonProperty("orderID")]
         [DataMember(Name = "orderID")]
         public string OrderId { get; set; }
 
+        [JsonProperty("clOrdID")]
         [DataMember(Name = "clOrdID")]
         public string ClOrdId { get; set; }
 
+
+        [JsonProperty("clOrdLinkID")]
         [DataMember(Name = "clOrdLinkID")]
         public string ClOrdLinkId {get; set; }
 

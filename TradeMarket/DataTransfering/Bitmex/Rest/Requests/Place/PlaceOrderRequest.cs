@@ -7,7 +7,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using TradeMarket.DataTransfering.Bitmex.Rest.Responses;
 
-namespace TradeMarket.DataTransfering.Bitmex.Rest.Requests
+namespace TradeMarket.DataTransfering.Bitmex.Rest.Requests.Place
 {
     public class PlaceOrderRequest : BitmexRestfulRequest
     {

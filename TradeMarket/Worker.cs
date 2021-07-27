@@ -4,6 +4,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using TradeMarket.Clients;
 using TradeMarket.DataTransfering;
+using TradeMarket.DataTransfering.Bitmex.Rest.Requests;
+using TradeMarket.DataTransfering.Bitmex.Rest.Requests.Ammend;
 
 namespace TradeMarket
 {
@@ -23,6 +25,12 @@ namespace TradeMarket
             while (!stoppingToken.IsCancellationRequested)
             {
                 AccountClient._accountClient = _account;
+                var request = new AmmendOrderRequest("key", "secret", new DataTransfering.Bitmex.Rest.AmmendOrderDTO
+                {
+                    Id = "111",
+                    Price = 222,
+                    Quantity = 333
+                });
                 //запуск подписок
                 Task[] tasks =
                 {
