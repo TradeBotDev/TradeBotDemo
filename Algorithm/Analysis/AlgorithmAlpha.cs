@@ -65,14 +65,11 @@ namespace Algorithm.Analysis
             /*if (TrendAnalyser(prices, points)) 
             { 
                 PriceSender.SendPrice(points.Last().Value); 
-<<<<<<< HEAD
-=======
             }*/
             int trend = TrendAnalyser(prices, points);
             if (trend != 0)
             {
                 PriceSender.SendPrice(trend);
->>>>>>> feature/algorithm
             }
         }
         //this func needs points and subset averages and decides if it's time to buy
