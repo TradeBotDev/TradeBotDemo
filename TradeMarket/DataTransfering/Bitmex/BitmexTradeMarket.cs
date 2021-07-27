@@ -135,7 +135,6 @@ namespace TradeMarket.DataTransfering.Bitmex
             Log.Logger.Information($"Placing Limit order witch qty: {quontity}  price: {price}  for sessionId: {context.SessionId}");
             var response = await context.RestClient.SendAsync(new PlaceOrderRequest(context.Key, context.Secret, new global::Bitmex.Client.Websocket.Responses.Orders.Order
             {
-                //TODO тут переделать под лимит ордер
                 OrdType = "Limit",
                 Price = (int)price,
                 OrderQty = (long?)quontity,
@@ -143,7 +142,7 @@ namespace TradeMarket.DataTransfering.Bitmex
             }),new System.Threading.CancellationToken());
             string message = "";
             string responsejson = await response.Content.ReadAsStringAsync();
-            Log.Logger.Information($"Response: { responsejson}");
+            Log.Logger.Information($"Response: {responsejson}");
             ReplyCode code = ReplyCode.Succeed;
             if (!response.IsSuccessStatusCode)
             {

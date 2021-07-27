@@ -13,7 +13,7 @@ service TradeMarketService {
 		Покупает ордер по указанному ид и возвращает результат покупики (получилось / не получилось)
 	*/
 	rpc PlaceOrder (PlaceOrderRequest) returns (PlaceOrderResponse);
-;
+
 	/*
 		Подписывается на ордера выбранного типа
 	*/
@@ -44,6 +44,51 @@ service TradeMarketService {
 	*/
 	rpc SubscribeLogs(SubscribeLogsRequest) returns (stream SubscribeLogsResponse);
 
+
+	/*
+		Обновление параметров ордера по ид
+	*/
+	rpc AmmendOrder(AmmendOrderRequest) returns (AmmendOrderResponse);
+
+	/*
+		удаление ордера по ид
+	*/
+	rpc DeleteOrder(DeleteOrderRequest) returns (DeleteOrderResponse);
+
+}
+
+message DeleteOrderRequest{
+	string order_id = 1;
+}
+
+message DeleteOrderResponse{
+	tradebot.common.v1.DefaultResponse response = 1;
+}
+
+
+enum QuantityType{
+	QUANTITY_TYPE_UNSPECIFIED = 0;
+	QUANTITY_TYPE_LEAVES = 1;	
+	QUANTITY_TYPE_DEFAULT = 2;
+	QUANTITY_TYPE_NONE = 3;	
+}
+
+enum PriceType{
+	PRICE_TYPE_UNSPECIFIED = 0;
+	PRICE_TYPE_DEFAULT = 0;
+	PRICE_TYPE_NONE = 0;
+}
+
+message AmmendOrderRequest{
+	string id = 1;
+	double new_price = 2;
+	double new_quantity = 3;
+	QuantityType quantity_type = 4;
+	PriceType price_type = 5;
+}
+
+message AmmendOrderResponse{
+	tradebot.common.v1.DefaultResponse response = 1;
 }
 
 message SubscribeMyOrdersRequest{
@@ -89,6 +134,7 @@ message PlaceOrderRequest{
 
 message PlaceOrderResponse{
 	tradebot.common.v1.DefaultResponse response = 1;
+	string order_id = 2;
 }
 
 message SlotsRequest{

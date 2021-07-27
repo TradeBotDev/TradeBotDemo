@@ -142,7 +142,7 @@ namespace Former
             Func<Task> placeSuccessfulOrders = async () =>
             {
                 responseBuy = _client.PlaceOrder(new PlaceOrderRequest { Price = sellPrice, Value = contractValue }, context.Meta);
-                responseSell =  _client.PlaceOrder(new PlaceOrderRequest { Price = sellPrice + (1 + context.configuration.RequiredProfit) + context.configuration.SlotFee, Value = -contractValue }, context.Meta);
+                responseSell =  _client.PlaceOrder(new PlaceOrderRequest { Price = sellPrice * (1 + context.configuration.RequiredProfit) + context.configuration.SlotFee, Value = -contractValue }, context.Meta);
                 Log.Information(responseBuy.Response.Code.ToString());
             };
 
