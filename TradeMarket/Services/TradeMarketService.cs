@@ -94,10 +94,29 @@ namespace TradeMarket.Services
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
             var user = UserContext.GetUserContext(sessionId, slot);
+            var response = new PlaceOrderResponse()
+            {
+                OrderId = "",
+                Response = new()
+                {
+                    Code = TradeBot.Common.v1.ReplyCode.Failure,
+                    Message = "Exception Happened"
+                }
+            };
+            try
+            {
+                response = await user.PlaceOrder(request.Value, request.Price);
+                return response;
+            }
+            catch(Exception e)
+            {
+                Log.Logger.Error("Exception happened");
+                Log.Logger.Error(e.Message);
 
-            var response = await user.PlaceOrder(request.Value, request.Price);
-
+                Log.Logger.Error(e.StackTrace);
+            }
             return response;
+            
         }
 
 
