@@ -7,11 +7,21 @@ namespace AccountGRPC
     public static class FileManagement
     {
         // Метод записи объекта любого типа в файл.
-        public static async void WriteFile<T>(string filename, T state)
+        public static bool WriteFile<T>(string filename, T state)
         {
+            // В случае, если объект, который требуется записать, является пустым, отправляется
+            // false, что означает, что запись не была выполнена.
+            if (state == null)
+            {
+                Log.Information($"Данные не записаны в файл {filename}, так как объект является пустым.");
+                return false;
+            }
+            
+            // Иначе данные объекта записываются в файл.
             string serialized = JsonSerializer.Serialize(state);
-            await File.WriteAllTextAsync(filename, serialized);
+            File.WriteAllText(filename, serialized);
             Log.Information($"Данные записаны в файл {filename}.");
+            return true;
         }
 
         // Метод чтения любого объекта из файла. Результат записывается в переменную, переданную
