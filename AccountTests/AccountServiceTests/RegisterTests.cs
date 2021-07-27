@@ -4,11 +4,8 @@ using Xunit;
 
 namespace AccountTests.AccountServiceTests
 {
-    public class RegisterTests
+    public class RegisterTests : AccountServicesTestsData
     {
-        Random random = new Random();
-        AccountGRPC.AccountService service = new AccountGRPC.AccountService();
-
         // Тестирование на работу регистрации нового аккаунта.
         [Fact]
         public void RegisterNewAccountTest()

@@ -4,11 +4,8 @@ using Xunit;
 
 namespace AccountTests.AccountServiceTests
 {
-    public class LoginTests
+    public class LoginTests : AccountServicesTestsData
     {
-        Random random = new Random();
-        AccountGRPC.AccountService service = new AccountGRPC.AccountService();
-
         // Тестирование входа в существующий аккаунт.
         [Fact]
         public void LoginToExistingAccount()

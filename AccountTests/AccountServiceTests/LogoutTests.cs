@@ -5,10 +5,8 @@ using Xunit;
 
 namespace AccountTests.AccountServiceTests
 {
-    public class LogoutTests
+    public class LogoutTests : AccountServicesTestsData
     {
-        AccountService service = new AccountService();
-
         // Тестирование выхода из существующего аккаунта.
         [Fact]
         public void LogoutFromLoggedAccount()
