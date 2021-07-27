@@ -111,20 +111,21 @@ namespace TradeMarket.Model
         public static UserContext GetUserContext(string sessionId, string slotName)
         {
             Log.Logger.Information($"Getting UserContext with sessionId: {sessionId} and slot: {slotName}");
-            if (RegisteredUsers.FirstOrDefault(el => el.IsEquevalentTo(sessionId, slotName, "Bitmex")) is null)
+            var userContext = RegisteredUsers.FirstOrDefault(el => el.IsEquevalentTo(sessionId, slotName, "Bitmex"));
+            if (userContext is null)
             {
-                
-                RegisterUser(sessionId, slotName, "Bitmex");
+                userContext = RegisterUser(sessionId, slotName, "Bitmex");
             }
-            return RegisteredUsers.First(el => el.IsEquevalentTo(sessionId, slotName, "Bitmex"));
+            return userContext;
         }
 
-        public static void RegisterUser(string sessionId, string slotName, string tradeMarketName) 
+        public static UserContext RegisterUser(string sessionId, string slotName, string tradeMarketName) 
         {
             Log.Logger.Information($"Creating new UserContext with sessionId: {sessionId} and slot: {slotName}");
             UserContext user = new UserContext(sessionId, slotName, TradeMarket.GetTradeMarket(tradeMarketName));
 
             RegisteredUsers.Add(user);
+            return user;
         }
         #endregion
     }
