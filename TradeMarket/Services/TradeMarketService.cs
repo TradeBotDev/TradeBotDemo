@@ -267,9 +267,17 @@ namespace TradeMarket.Services
             };
         }
 
-        public override Task<DeleteOrderResponse> DeleteOrder(DeleteOrderRequest request, ServerCallContext context)
+        public async override Task<DeleteOrderResponse> DeleteOrder(DeleteOrderRequest request, ServerCallContext context)
         {
-            return base.DeleteOrder(request, context);
+            var sessionId = context.RequestHeaders.Get("sessionid").Value;
+            var slot = context.RequestHeaders.Get("slot").Value;
+            var user = UserContext.GetUserContext(sessionId, slot);
+            var response = await user.DeleteOrder(request.OrderId);
+            return new()
+            {
+                Response = response
+            };
+
         }
     }
 }
