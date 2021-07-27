@@ -195,8 +195,10 @@ namespace TradeMarket.Services
                 var user = UserContext.GetUserContext(sessionId, slot);
                 user.Book25 += async (sender, args) => {
                     var order = ConvertOrder(args);
-                    //Log.Logger.Information($"Sent order : {order} to {context.Host}");
-                    await WriteStreamAsync<SubscribeOrdersResponse>(responseStream, order);
+                    if (IsOrderSuitForSignature(args, request.Request.Signature))
+                    {
+                        await WriteStreamAsync<SubscribeOrdersResponse>(responseStream, order);
+                    }
                 };
                 //TODO отписка после отмены
                 await AwaitCancellation(context.CancellationToken);

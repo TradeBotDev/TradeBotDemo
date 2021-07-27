@@ -20,9 +20,9 @@ namespace TradeMarket.DataTransfering.Bitmex.Rest.Client
             _client = new HttpClient() { BaseAddress = new Uri(BitmexUri) };
         }
 
-        public async Task<HttpResponseMessage> SendAsync(BitmexRestfulRequest request,CancellationToken cancellationToken)
+        public async Task<BitmexResfulResponse<T>> SendAsync<T>(BitmexRestfulRequest<T> request,CancellationToken cancellationToken)
         {
-            return await _client.SendAsync(request, cancellationToken);
+            return new(await _client.SendAsync(request, cancellationToken));
         }
 
     }

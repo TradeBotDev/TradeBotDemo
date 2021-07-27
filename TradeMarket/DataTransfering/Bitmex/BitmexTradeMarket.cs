@@ -131,52 +131,63 @@ namespace TradeMarket.DataTransfering.Bitmex
         public async override Task<DefaultResponse> DeleteOrder(string id, UserContext context)
         {
             var response = await context.RestClient.SendAsync(new DeleteOrderRequest(context.Key, context.Secret, id), new System.Threading.CancellationToken());
-            var responsejson = await response.Content.ReadAsStringAsync();
-            string errorMessage = "";
-            if (!response.IsSuccessStatusCode)
+            if(response.Error is not null)
             {
-                errorMessage = JsonConvert.DeserializeObject<error>(responsejson).message;
+                return new()
+                {
+                    Code = ReplyCode.Failure,
+                    Message = response.Error.Message
+                };
             }
+            var orderMessage = response.Message;
             return new()
             {
-                Code = response.IsSuccessStatusCode ? ReplyCode.Succeed : ReplyCode.Failure,
-                Message = errorMessage
+                Code = ReplyCode.Succeed,
+                Message = $"Order {orderMessage.OrderId} was deleted"
             };
         }
 
         public async override Task<TradeBot.TradeMarket.TradeMarketService.v1.PlaceOrderResponse> PlaceOrder(double quontity, double price,UserContext context)
         {
-            Log.Logger.Information($"Placing Limit order witch qty: {quontity}  price: {price}  for sessionId: {context.SessionId}");
-            var response = await context.RestClient.SendAsync(new PlaceOrderRequest(context.Key, context.Secret, new global::Bitmex.Client.Websocket.Responses.Orders.Order
+            var response = await context.RestClient.SendAsync(new PlaceOrderRequest(context.Key, context.Secret, new Order
             {
                 OrdType = "Limit",
                 Price = (int)price,
                 OrderQty = (long?)quontity,
                 Symbol = context.SlotName
-            }),new System.Threading.CancellationToken());
-            string message = "";
-            string responsejson = await response.Content.ReadAsStringAsync();
-            Log.Logger.Information($"Response: {responsejson}");
-            ReplyCode code = ReplyCode.Succeed;
-            if (!response.IsSuccessStatusCode)
+            }), new System.Threading.CancellationToken());
+            if (response.Error is not null)
             {
-
-                responsejson = responsejson.Replace("{\"error\":", "");
-                responsejson = responsejson.Remove(responsejson.LastIndexOf("}") - 1, 1);
-                message = JsonConvert.DeserializeObject<error>(responsejson).message;
-                code = ReplyCode.Failure;
+                return new()
+                {
+                    OrderId = "empty",
+                    Response = new()
+                    {
+                        Code = ReplyCode.Failure,
+                        Message = response.Error.Message
+                    }
+                };
             }
-            else
+            var orderMessage = response.Message;
+            if(orderMessage.OrdRejReason is not null)
             {
-                message = responsejson;
+                return new()
+                {
+                    OrderId = orderMessage.OrderId,
+                    Response = new()
+                    {
+                        Code = ReplyCode.Failure,
+                        Message = orderMessage.OrdRejReason
+                    }
+                };
             }
             return new()
             {
-                OrderId = JsonConvert.DeserializeObject<Order>(responsejson).OrderId,
+                OrderId = orderMessage.OrderId,
                 Response = new()
                 {
                     Code = ReplyCode.Succeed,
-                    Message = message
+                    Message = $"Order Placed"
                 }
             };
         }
@@ -227,17 +238,28 @@ namespace TradeMarket.DataTransfering.Bitmex
 
         public async override Task<DefaultResponse> AmmendOrder(string id, double? price, long? Quantity, long? LeavesQuantity, UserContext context)
         {
-            var response = await context.RestClient.SendAsync(new AmmendOrderRequest(context.Key, context.Secret, new() { Id = id, Price = price, Quantity = Quantity, LeavesQuantity = LeavesQuantity }),new System.Threading.CancellationToken());
-            var responsejson = await response.Content.ReadAsStringAsync();
-            string errorMessage = "";
-            if (!response.IsSuccessStatusCode)
+            var response = await context.RestClient.SendAsync(new AmmendOrderRequest(context.Key, context.Secret, new() {Id = id, LeavesQuantity = LeavesQuantity, Price = price, Quantity = Quantity }), new System.Threading.CancellationToken());
+            if (response.Error is not null)
             {
-                errorMessage = JsonConvert.DeserializeObject<error>(responsejson).message;
+                return new()
+                {
+                    Code = ReplyCode.Failure,
+                    Message = response.Error.Message
+                };
+            }
+            var orderMessage = response.Message;
+            if (orderMessage.OrdRejReason is not null)
+            {
+                return new()
+                {
+                    Code = ReplyCode.Failure,
+                    Message = orderMessage.OrdRejReason
+                };
             }
             return new()
             {
-                Code = response.IsSuccessStatusCode ? ReplyCode.Succeed : ReplyCode.Failure,
-                Message = errorMessage
+                Code = ReplyCode.Succeed,
+                Message = $"Order {orderMessage.OrderId} Ammended"
             };
         }
     }

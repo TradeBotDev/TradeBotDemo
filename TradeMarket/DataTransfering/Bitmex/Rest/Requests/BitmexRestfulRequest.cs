@@ -8,8 +8,9 @@ using TradeMarket.DataTransfering.Bitmex.Rest.Responses;
 
 namespace TradeMarket.DataTransfering.Bitmex.Rest.Requests
 {
-    public class BitmexRestfulRequest : HttpRequestMessage
+    public class BitmexRestfulRequest<ResultType> : HttpRequestMessage
     {
+
         public UserAuthentication Authentication;
         public BitmexRestfulRequest(string key,string secret,HttpMethod method, string uri,string postdata) : base(method, BitmexRestfulClient.BitmexUri+uri) {
             Authentication = new UserAuthentication(key, secret, method, uri, postdata);
