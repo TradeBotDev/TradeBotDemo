@@ -84,7 +84,7 @@ namespace UI
             this.ConfigAvailableBalance.Name = "ConfigAvailableBalance";
             this.ConfigAvailableBalance.Size = new System.Drawing.Size(77, 27);
             this.ConfigAvailableBalance.TabIndex = 1;
-            this.ConfigAvailableBalance.Text = "100";
+            this.ConfigAvailableBalance.Text = "0,5";
             // 
             // ConfigRequiredProfit
             // 
@@ -92,7 +92,7 @@ namespace UI
             this.ConfigRequiredProfit.Name = "ConfigRequiredProfit";
             this.ConfigRequiredProfit.Size = new System.Drawing.Size(77, 27);
             this.ConfigRequiredProfit.TabIndex = 2;
-            this.ConfigRequiredProfit.Text = "20";
+            this.ConfigRequiredProfit.Text = "0,005";
             // 
             // ConfigVolumeOfContracts
             // 

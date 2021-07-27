@@ -89,7 +89,8 @@ namespace Former
         {
             var request = new TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceRequest
             {
-                Request = new TradeBot.Common.v1.SubscribeBalanceRequest()
+                Request = new TradeBot.Common.v1.SubscribeBalanceRequest(),
+                SlotName = context.slotName
             };
             using var call = _client.SubscribeBalance(request, context.Meta);
 
