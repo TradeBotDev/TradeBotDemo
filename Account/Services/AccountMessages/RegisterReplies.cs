@@ -1,23 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Serilog;
 using TradeBot.Account.AccountService.v1;
 
-namespace Account.AccountMessages
+namespace AccountGRPC.AccountMessages
 {
     public static class RegisterReplies
     {
-        public static readonly RegisterReply AccountExists = new RegisterReply
+        public static RegisterReply AccountExists()
         {
-            Result = ActionCode.AccountExists,
-            Message = "Ошибка при регистрации: пользователь уже существует."
-        };
+            const string Message = "Ошибка при регистрации: пользователь уже существует.";
+            Log.Information(Message);
 
-        public static readonly RegisterReply SuccessfulRegister = new RegisterReply
+            return new RegisterReply
+            {
+                Result = ActionCode.AccountExists,
+                Message = Message
+            };
+        }
+
+        public static RegisterReply SuccessfulRegister()
         {
-            Result = ActionCode.Successful,
-            Message = "Произведена регистрация аккаунта."
-        };
+            const string Message = "Произведена регистрация аккаунта.";
+            Log.Information(Message);
+
+            return new RegisterReply
+            {
+                Result = ActionCode.Successful,
+                Message = Message
+            };
+        }
     }
 }

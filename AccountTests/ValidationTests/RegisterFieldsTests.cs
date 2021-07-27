@@ -1,4 +1,4 @@
-﻿using Account.Validation;
+﻿using AccountGRPC.Validation;
 using TradeBot.Account.AccountService.v1;
 using Xunit;
 
