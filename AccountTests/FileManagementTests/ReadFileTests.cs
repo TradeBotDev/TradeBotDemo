@@ -6,14 +6,14 @@ using Xunit;
 namespace AccountTests.FileManagementTests
 {
     // Класс тестирования чтения данных из файла.
-    public class ReadFileTests
+    public class ReadFileTests : FileManagementTestsData
     {
         // Тестирование всех вариантов, когда при чтении файла должен возвращаться null.
         [Theory]
         [InlineData("not_existing_file.test")] // Тестирования чтения несуществующего файла.
         [InlineData("empty_file.test")] // Тестирование чтения пустого файла.
         [InlineData("not_data_file.test")] // Тестирование чтения файла без данных (но имеющего символы).
-        public void ReadEmptyFile(string filename)
+        public void ReadEmptyFileTest(string filename)
         {
             var file = FileManagement.ReadFile<Dictionary<string, LoggedAccount>>(filename);
             Assert.Null(file);
