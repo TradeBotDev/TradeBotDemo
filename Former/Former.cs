@@ -16,7 +16,7 @@ namespace Former
 
         private readonly ConcurrentDictionary<string, Order> _myOrders;
 
-        private double _balance = 0.0131;
+        private double _balance;
 
         //TODO формер не должне принимать конфиг как аргмунет конструктора, но должен принимать конфиг ( или контекст пользователя) как аргумент своих методов
         public Former()
@@ -134,8 +134,8 @@ namespace Former
             double quantity = context.configuration.ContractValue * Math.Floor(availableBalance * purchaseFairPrice / context.configuration.ContractValue);
             
             //купить ордер по рыночной цене, но ордер при этом лимитный 
-            await context.PlaceOrder(purchaseFairPrice, quantity);
-            _balance -= context.configuration.ContractValue / purchaseFairPrice;
+            if (quantity != 0) await context.PlaceOrder(purchaseFairPrice, quantity);
+            else Log.Debug("Insufficient balance");
         }
 
         public async Task FormSellOrder(UserContext context)
@@ -148,8 +148,8 @@ namespace Former
             double quantity = context.configuration.ContractValue * Math.Floor(availableBalance * sellFairPrice / context.configuration.ContractValue);
 
             //продать ордер по рыночной цене, но ордер при этом лимитный 
-            await context.PlaceOrder(sellFairPrice, -quantity);
-            _balance += context.configuration.ContractValue / sellFairPrice;
+            if (quantity != 0) await context.PlaceOrder(sellFairPrice, -quantity);
+            else Log.Debug("Insufficient balance");
         }
     }
 }

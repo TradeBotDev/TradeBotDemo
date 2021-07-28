@@ -22,7 +22,10 @@ namespace Bitmex.Client.Websocket.Responses.Orders
         [DataMember(Name = "clOrdLinkID")]
         public string ClOrdLinkId {get; set; }
 
+        [JsonProperty("account")]
         public long? Account { get; set; }
+
+        [JsonProperty("symbol")]
         public string Symbol { get; set; }
         [JsonConverter(typeof(StringEnumConverter))]
         [JsonProperty("side")]
