@@ -51,10 +51,15 @@ namespace AccountGRPC
 
             // Проверка на наличие вошедших пользователем с тем же Id сессии, что
             // предоставляется клиентом. Если есть - сессия валидна.
-            if (Models.State.loggedIn.ContainsKey(request.SessionId))
-                return Task.FromResult(IsValidSessionReplies.IsValid());
+            if (Models.State.loggedIn == null || !Models.State.loggedIn.ContainsKey(request.SessionId))
+                return Task.FromResult(IsValidSessionReplies.IsNotValid());
+            else return Task.FromResult(IsValidSessionReplies.IsValid());
+
+
+            //if (Models.State.loggedIn.ContainsKey(request.SessionId))
+            //    return Task.FromResult(IsValidSessionReplies.IsValid());
             // Если нет - сессия невалидна.
-            return Task.FromResult(IsValidSessionReplies.IsNotValid());
+            //return Task.FromResult(IsValidSessionReplies.IsNotValid());
         }
 
         // Метод получения информации о текущем пользователе по Id сессии.

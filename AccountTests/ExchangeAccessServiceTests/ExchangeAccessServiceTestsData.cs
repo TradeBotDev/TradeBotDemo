@@ -17,12 +17,12 @@ namespace AccountTests.ExchangeAccessServiceTests
         public ExchangeAccessService exchangeAccessService = new();
 
         // Метод, создающий временный аккаунт в процессе тестирования.
-        public Task<Task<LoginReply>> GenerateLogin()
+        public Task<Task<LoginReply>> GenerateLogin(string prefix)
         {
             // Запрос для регистрации.
             var registerRequest = new RegisterRequest
             {
-                Email = $"generated_user{random.Next(1, 1000000)}@pochta.ru",
+                Email = $"{prefix}_generated_user{random.Next(1, 1000000)}@pochta.ru",
                 Password = "test_pawsword",
                 VerifyPassword = "test_pawsword"
             };

@@ -27,12 +27,9 @@ namespace AccountTests.ExchangeAccessServiceTests
                 };
             }
 
-            // Очистка текущего состояния.
-            ClearAfterCompletion.Clear();
-
             // Последовательная регистрация и вход (внутри метода GenerateLogin), добавление информации о
             // доступе к бирже, а затем ее чтение.
-            var reply = GenerateLogin()
+            var reply = GenerateLogin("all_exs_from_acc_")
                 .ContinueWith(loginReply => exchangeAccessService.AddExchangeAccess(GenerateReply(loginReply.Result.Result.SessionId), null))
                 .ContinueWith(addExchangeReply => exchangeAccessService.AllExchangesBySession(
                 new SessionRequest { SessionId = sessionId }, null));
@@ -48,9 +45,9 @@ namespace AccountTests.ExchangeAccessServiceTests
         public void WhenExchangesIsNotExistsTest()
         {
             // Очистка текущего состояния.
-            ClearAfterCompletion.Clear();
+            //ClearAfterCompletion.Clear();
 
-            var reply = GenerateLogin()
+            var reply = GenerateLogin("ex_not_exist_")
                 .ContinueWith(loginReply => exchangeAccessService.AllExchangesBySession(
                     new SessionRequest { SessionId = loginReply.Result.Result.SessionId }, null));
 

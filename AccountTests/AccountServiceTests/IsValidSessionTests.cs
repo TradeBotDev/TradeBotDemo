@@ -12,7 +12,7 @@ namespace AccountTests.AccountServiceTests
         {
             var registerRequest = new RegisterRequest
             {
-                Email = $"existing_user{random.Next(0, 10000)}@pochta.test",
+                Email = $"existing_user_isvalid@pochta.test",
                 Password = "password",
                 VerifyPassword = "password"
             };
@@ -20,7 +20,7 @@ namespace AccountTests.AccountServiceTests
             var loginRequest = new LoginRequest()
             {
                 Email = registerRequest.Email,
-                Password = "password",
+                Password = registerRequest.Password,
                 SaveExchangesAfterLogout = false
             };
 
@@ -39,8 +39,7 @@ namespace AccountTests.AccountServiceTests
         public void NonExistingAccountIsValidTest()
         {
             // Намеренно отправляется несуществующий id сессии, чтобы аккаунт не был найден.
-            var request = new SessionRequest { SessionId = "non_existing_session_id" };
-            State.loggedIn = new();
+            var request = new SessionRequest { SessionId = "not_valid_session_id" };
             var reply = service.IsValidSession(request, null);
 
             // Ожидается, что придет сообщенение о том, что текущий вход не является валидным.

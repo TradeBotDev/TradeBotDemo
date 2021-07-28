@@ -12,7 +12,7 @@ namespace AccountTests.AccountServiceTests
         {
             var registerRequest = new RegisterRequest
             {
-                Email = $"existing_user{random.Next(0, 10000)}@pochta.test",
+                Email = $"existing_user@pochta.test",
                 Password = "password",
                 VerifyPassword = "password"
             };
@@ -20,7 +20,7 @@ namespace AccountTests.AccountServiceTests
             var loginRequest = new LoginRequest()
             {
                 Email = registerRequest.Email,
-                Password = "password",
+                Password = registerRequest.Password,
                 SaveExchangesAfterLogout = false
             };
 

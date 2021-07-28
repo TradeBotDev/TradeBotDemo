@@ -8,18 +8,18 @@ using System.Threading.Tasks;
 
 namespace AccountTests
 {
-    public static class ClearAfterCompletion
-    {
-        public static void Clear()
-        {
-            File.WriteAllText("loggedaccounts.state", null);
-            using (var database = new AccountContext())
-            {
-                database.Accounts.RemoveRange(database.Accounts);
-                database.ExchangeAccesses.RemoveRange(database.ExchangeAccesses);
-                database.SaveChanges();
-            }
-            State.loggedIn = new();
-        }
-    }
+    //public static class ClearAfterCompletion
+    //{
+    //    public static void Clear()
+    //    {
+    //        File.WriteAllText("loggedaccounts.state", null);
+    //        using (var database = new AccountContext())
+    //        {
+    //            database.Accounts.RemoveRange(database.Accounts);
+    //            database.ExchangeAccesses.RemoveRange(database.ExchangeAccesses);
+    //            database.SaveChanges();
+    //        }
+    //        State.loggedIn = new();
+    //    }
+    //}
 }

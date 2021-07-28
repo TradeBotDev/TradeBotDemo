@@ -43,7 +43,7 @@ namespace AccountGRPC
 
                 // Проверка на наличие зарегистрированных аккаунтов с данными из запроса, и в
                 // случае их отсутствия отправляет ответ с сообщением об ошибке.
-                if (accounts.Count() == 0)
+                if (Models.State.loggedIn == null || accounts.Count() == 0)
                     return Task.FromResult(LoginReplies.AccountNotFound());
 
                 // Проверка на то, есть ли сессия с пользователем, который пытается войти в аккаунт, и
