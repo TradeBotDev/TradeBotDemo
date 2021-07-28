@@ -17,7 +17,6 @@ namespace Bitmex.Client.Websocket.Responses.Orders
         [DataMember(Name = "clOrdID")]
         public string ClOrdId { get; set; }
 
-
         [JsonProperty("clOrdLinkID")]
         [DataMember(Name = "clOrdLinkID")]
         public string ClOrdLinkId {get; set; }
@@ -106,7 +105,6 @@ namespace Bitmex.Client.Websocket.Responses.Orders
         [JsonProperty("text")]
         public string Text {get; set; }
 
-        
         [JsonProperty("transactTime")]
         public DateTime? TransactTime { get; set; }
         

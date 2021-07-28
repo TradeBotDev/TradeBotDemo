@@ -93,7 +93,9 @@ namespace TradeMarket.Services
 
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
-            var user = UserContext.GetUserContext(sessionId, slot);
+            var trademarket = context.RequestHeaders.Get("trademarket").Value;
+
+            var user = await UserContext.GetUserContextAsync(sessionId, slot,trademarket);
             var response = new PlaceOrderResponse()
             {
                 OrderId = "",
@@ -124,8 +126,10 @@ namespace TradeMarket.Services
         {
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
+            var trademarket = context.RequestHeaders.Get("trademarket").Value;
 
-            var user = UserContext.GetUserContext(sessionId, slot);
+
+            var user = UserContext.GetUserContextAsync(sessionId, slot,trademarket);
 
             FakeSlotPublisher.GetInstance().Changed += async (sender, args) =>
             {
@@ -153,7 +157,9 @@ namespace TradeMarket.Services
         {
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
-            var user = UserContext.GetUserContext(sessionId,slot);
+            var trademarket = context.RequestHeaders.Get("trademarket").Value;
+
+            var user = await UserContext.GetUserContextAsync(sessionId,slot,trademarket);
 
             user.UserBalance += async (sender, args) => {
                 await WriteStreamAsync<SubscribeBalanceResponse>(responseStream, ConvertBalance(args));
@@ -174,9 +180,11 @@ namespace TradeMarket.Services
 
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
+            var trademarket = context.RequestHeaders.Get("trademarket").Value;
+
             try
             {
-                var user = UserContext.GetUserContext(sessionId, slot);
+                var user = await UserContext.GetUserContextAsync(sessionId, slot, trademarket);
                 user.UserOrders += async (sender, args) => {
                     var order = ConvertOrder(args);
                     Log.Logger.Information($"Sent order : {order} to {context.Host}");
@@ -209,9 +217,10 @@ namespace TradeMarket.Services
 
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
+            var trademarket = context.RequestHeaders.Get("trademarket").Value;
             try
             {
-                var user = UserContext.GetUserContext(sessionId, slot);
+                var user = await UserContext .GetUserContextAsync(sessionId, slot, trademarket);
                 user.Book25 += async (sender, args) => {
                     var order = ConvertOrder(args);
                     if (IsOrderSuitForSignature(args, request.Request.Signature))
@@ -263,7 +272,9 @@ namespace TradeMarket.Services
         {
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
-            var user = UserContext.GetUserContext(sessionId, slot);
+            var trademarket = context.RequestHeaders.Get("trademarket").Value;
+
+            var user = await UserContext.GetUserContextAsync(sessionId, slot, trademarket);
 
             double? price = 0;
             switch (request.PriceType)
@@ -292,7 +303,9 @@ namespace TradeMarket.Services
         {
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
-            var user = UserContext.GetUserContext(sessionId, slot);
+            var trademarket = context.RequestHeaders.Get("trademarket").Value;
+
+            var user = await UserContext.GetUserContextAsync(sessionId, slot, trademarket);
             var response = await user.DeleteOrder(request.OrderId);
             return new()
             {

@@ -42,7 +42,7 @@ namespace TradeMarket.Model
 
         private static IDictionary<string, TradeMarket> _tradeMarkets = new Dictionary<string, TradeMarket>(new List<KeyValuePair<string, TradeMarket>>
         {
-            new KeyValuePair<string, TradeMarket>("Bitmex",new BitmexTradeMarket("Bitmex"))
+            new KeyValuePair<string, TradeMarket>("bitmex",new BitmexTradeMarket("bitmex"))
         });
 
         public static TradeMarket GetTradeMarket(string name)
