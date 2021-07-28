@@ -41,6 +41,11 @@ namespace Former
             _client = new TradeMarketService.TradeMarketServiceClient(_channel);
         }
 
+        /// <summary>
+        /// Проверяет соединение с биржей, на вход принимает функцию, осуществляющую общение с биржей
+        /// </summary>
+        /// <param name="func"></param>
+        /// <returns></returns>
         private async Task ConnectionTester(Func<Task> func)
         {
             while (true)
@@ -58,6 +63,11 @@ namespace Former
             }
         }
 
+        /// <summary>
+        /// Наблюдает за обновлением текущих стаканов цен
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public async Task ObserveOrderBook(UserContext context)
         {
             var request = new SubscribeOrdersRequest
@@ -84,13 +94,17 @@ namespace Former
 
             await ConnectionTester(observeCurrentPurchaseOrders);
         }
-
+        /// <summary>
+        /// Наблюдает за обновлением доступного баланса 
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public async Task ObserveBalance(UserContext context)
         {
             var request = new TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceRequest
             {
                 Request = new TradeBot.Common.v1.SubscribeBalanceRequest(),
-                SlotName = context.slotName
+                SlotName = context.slot
             };
             using var call = _client.SubscribeBalance(request, context.Meta);
 
@@ -104,7 +118,11 @@ namespace Former
 
             await ConnectionTester(observeBalance);
         }
-
+        /// <summary>
+        /// Наблюдает за событиями моих ордеров
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public async Task ObserveMyOrders(UserContext context)
         {
             using var call = _client.SubscribeMyOrders(new SubscribeMyOrdersRequest(), context.Meta);
@@ -117,7 +135,13 @@ namespace Former
             };
             await ConnectionTester(observeMyOrders);
         }
-
+        /// <summary>
+        /// Отправляет запрос в биржу на выставление своего ордера
+        /// </summary>
+        /// <param name="sellPrice"></param>
+        /// <param name="contractValue"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public async Task PlaceOrder(double sellPrice, double contractValue, UserContext context)
         {
             Log.Information("Order price: {0}, quantity: {1} placed", sellPrice, contractValue);
@@ -125,12 +149,17 @@ namespace Former
             Func<Task> placeOrders = async () =>
             {
                 response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = sellPrice, Value = contractValue }, context.Meta);
-                Log.Information(response.OrderId + " placed " + response.Response.Code.ToString() + " message " + response.Response.Message);
+                Log.Information(response.OrderId + " placed " + response.Response.Code.ToString() + " message: " + response.Response.Message);
             };
 
             await ConnectionTester(placeOrders);
         }
-
+        /// <summary>
+        /// Отправляет запрос в биржу на изменение цены своего ордера
+        /// </summary>
+        /// <param name="orderNeededToUpdate"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public async Task SetNewPrice(Order orderNeededToUpdate, UserContext context)
         {
             Log.Debug("Update order id: {0}, new price: {1}", orderNeededToUpdate.Id, orderNeededToUpdate.Price);
@@ -145,7 +174,7 @@ namespace Former
                     NewQuantity = (int)orderNeededToUpdate.Quantity,
                     PriceType = PriceType.Default
                 }, context.Meta);
-                Log.Information(response.Response.Code.ToString());
+                Log.Information(orderNeededToUpdate.Id + " ammended " + response.Response.Code.ToString() + " message: " + response.Response.Message);
             };
             await ConnectionTester(placeOrders);
         }
