@@ -101,7 +101,7 @@ namespace Former
             {
                 while (await call.ResponseStream.MoveNext())
                 {
-                    UpdateBalance?.Invoke(call.ResponseStream.Current.Margin.AvailableMargin);
+                    UpdateBalance?.Invoke((int)call.ResponseStream.Current.Margin.AvailableMargin);
                 }
             };
 
