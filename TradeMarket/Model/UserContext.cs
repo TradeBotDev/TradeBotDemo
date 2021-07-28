@@ -37,7 +37,6 @@ namespace TradeMarket.Model
 
         /// <summary>
         /// Метод инициализации контекста. 
-        /// Публичный из-за бага: Когда нет объектов в списке RegisteredUsers и создается новый контекст он создается так долго, что при новом запросе на контекст старый не успевает создасться и добавиться в список и создается еще один контекст.
         /// </summary>
         public async Task initAsync()
         {
@@ -66,9 +65,6 @@ namespace TradeMarket.Model
         /// <summary>
         /// После создание нового объекта необходима инициализация некоторых полей и ивентов через метод init()
         /// </summary>
-        /// <param name="sessionId"></param>
-        /// <param name="slotName"></param>
-        /// <param name="tradeMarket"></param>
         internal UserContext(string sessionId, string slotName, Model.TradeMarket tradeMarket)
         {
             //инициализация websocket клиента
@@ -153,7 +149,7 @@ namespace TradeMarket.Model
                 System.Threading.Monitor.Enter(locker);
                 Log.Logger.Information("Getting UserContext {@sessionId} : {@slotName} : {@tradeMarketName}", sessionId, slotName, tradeMarketName);
                 Log.Logger.Information("Stored Contexts : {@RegisteredUsers}", RegisteredUsers);
-                userContext = RegisteredUsers.FirstOrDefault(el => el.IsEquevalentTo(sessionId, slotName, "bitmex"));
+                userContext = RegisteredUsers.FirstOrDefault(el => el.IsEquevalentTo(sessionId, slotName, tradeMarketName));
                 if (userContext is null)
                 {
                     Log.Logger.Information("Creating new UserContext {@sessionId} : {@slotName} : {@tradeMarketName}", sessionId, slotName, tradeMarketName);
@@ -169,29 +165,6 @@ namespace TradeMarket.Model
 
 
         }
-    
-
-        /// <summary>
-        /// UNUSED
-        /// </summary>
-        /// <param name="sessionId"></param>
-        /// <param name="slotName"></param>
-        /// <param name="tradeMarketName"></param>
-        /// <returns></returns>
-        public static UserContext RegisterUser(string sessionId, string slotName, string tradeMarketName) 
-        {
-            Log.Logger.Information("Creating new UserContext with sessionId: {@sessionId} and slot: {@slotName}",sessionId,slotName);
-            UserContext user = new UserContext(sessionId, slotName, TradeMarket.GetTradeMarket(tradeMarketName));
-            if (RegisteredUsers.Contains(user))
-            {
-                Log.Information("UserContext with {@sessionId} : {@slotName} : {@trademarketname} already exists", sessionId, slotName, tradeMarketName);
-                return RegisteredUsers.Find(el => el == user);
-            }
-            RegisteredUsers.Add(user);
-            return user;
-        }
-
-        
         #endregion
     }
 }
