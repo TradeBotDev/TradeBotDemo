@@ -19,7 +19,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Account", "Account\Account.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{AE34BEE1-15B3-4F82-8767-73A4E4E60A09}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountTests", "AccountTests\AccountTests.csproj", "{25F23785-A4F7-482D-9DCB-D3529CB062C2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AccountTests", "AccountTests\AccountTests.csproj", "{25F23785-A4F7-482D-9DCB-D3529CB062C2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FormerTests", "Tests\FormerTests\FormerTests.csproj", "{EBF4CE7D-8759-4DB7-87A9-9800BE52D0D6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,12 +61,17 @@ Global
 		{25F23785-A4F7-482D-9DCB-D3529CB062C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{25F23785-A4F7-482D-9DCB-D3529CB062C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{25F23785-A4F7-482D-9DCB-D3529CB062C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EBF4CE7D-8759-4DB7-87A9-9800BE52D0D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBF4CE7D-8759-4DB7-87A9-9800BE52D0D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBF4CE7D-8759-4DB7-87A9-9800BE52D0D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EBF4CE7D-8759-4DB7-87A9-9800BE52D0D6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{25F23785-A4F7-482D-9DCB-D3529CB062C2} = {AE34BEE1-15B3-4F82-8767-73A4E4E60A09}
+		{EBF4CE7D-8759-4DB7-87A9-9800BE52D0D6} = {AE34BEE1-15B3-4F82-8767-73A4E4E60A09}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E2027A17-FF96-418D-A05D-A2B4029A9C4E}
