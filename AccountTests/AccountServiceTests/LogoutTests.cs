@@ -4,6 +4,7 @@ using Xunit;
 
 namespace AccountTests.AccountServiceTests
 {
+    [Collection("AccountTests")]
     public class LogoutTests : AccountServiceTestsData
     {
         // Тестирование выхода из существующего аккаунта.

@@ -3,6 +3,7 @@ using Xunit;
 
 namespace AccountTests.ExchangeAccessServiceTests
 {
+    [Collection("AccountTests")]
     public class AllExchangesBySessionTests : ExchangeAccessServiceTestsData
     {
         // Тестирование получения информации о всех добавленных биржах в аккаунт, когда они точно есть.

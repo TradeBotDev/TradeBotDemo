@@ -5,6 +5,7 @@ using Xunit;
 
 namespace AccountTests.FileManagementTests
 {
+    [Collection("AccountTests")]
     public class WriteFileTests : FileManagementTestsData
     {
         // Тестирование записи объекта, содержащего в себе данные.

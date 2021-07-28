@@ -4,6 +4,7 @@ using Xunit;
 
 namespace AccountTests.AccountServiceTests
 {
+    [Collection("AccountTests")]
     public class CurrentAccountDataTests : AccountServiceTestsData
     {
         // Тестирование получения данных из существующего аккаунта.

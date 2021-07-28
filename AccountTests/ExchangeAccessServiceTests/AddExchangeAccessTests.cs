@@ -8,6 +8,7 @@ using Xunit;
 
 namespace AccountTests.ExchangeAccessServiceTests
 {
+    [Collection("AccountTests")]
     public class AddExchangeAccessTests : ExchangeAccessServiceTestsData
     {
         [Fact]

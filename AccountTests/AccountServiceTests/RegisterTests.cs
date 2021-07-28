@@ -3,6 +3,7 @@ using Xunit;
 
 namespace AccountTests.AccountServiceTests
 {
+    [Collection("AccountTests")]
     public class RegisterTests : AccountServiceTestsData
     {
         // Тестирование на работу регистрации нового аккаунта.

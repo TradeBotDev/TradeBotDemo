@@ -3,6 +3,7 @@ using Xunit;
 
 namespace AccountTests.AccountServiceTests
 {
+    [Collection("AccountTests")]
     public class LoginTests : AccountServiceTestsData
     {
         // Тестирование входа в существующий аккаунт.
