@@ -17,7 +17,7 @@ namespace AccountTests.ExchangeAccessServiceTests
         {
             State.loggedIn = new();
 
-            string sessionId;
+            string sessionId = "Отсутствует";
 
             AddExchangeAccessRequest GenerateRequest(string _sessionId)
             {
@@ -32,17 +32,19 @@ namespace AccountTests.ExchangeAccessServiceTests
                 };
             }
 
-            var reply = GenerateLogin("ex_to_acc").ContinueWith(loginReply => exchangeAccessService.AddExchangeAccess(
-                GenerateRequest(loginReply.Result.Result.SessionId), null));
-
             using (var database = new AccountContext())
             {
-                var accounts = database.Accounts.Where(account => account.Email == "ex_to_acc_generated_user@pochta.ru");
-                database.Accounts.Remove(accounts.First());
-                database.SaveChanges();
-            }
+                var reply = GenerateLogin("ex_to_acc")
+                .ContinueWith(loginReply => exchangeAccessService.AddExchangeAccess(GenerateRequest(loginReply.Result.Result.SessionId), null));
 
-            Assert.Equal(ActionCode.Successful, reply.Result.Result.Result);
+                var accounts = database.Accounts.Where(account => account.Email == "ex_to_acc_generated_user@pochta.ru");
+                var exchanges = database.ExchangeAccesses.Where(exchange => exchange.Account.AccountId == accounts.First().AccountId);
+                foreach (AccountGRPC.Models.ExchangeAccess exchange in exchanges)
+                    database.Remove(exchange);
+                database.SaveChanges();
+
+                Assert.Equal(ActionCode.Successful, reply.Result.Result.Result);
+            }
         }
 
         [Fact]

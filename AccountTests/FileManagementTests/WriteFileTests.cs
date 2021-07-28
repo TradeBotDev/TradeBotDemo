@@ -15,15 +15,18 @@ namespace AccountTests.FileManagementTests
             // Добавление случайных записей в список вошедших пользователей.
             for (int i = 0; i < 10; i++)
             {
-                loggedIn.Add($"random_session_{random.Next(1, 1000)}", new LoggedAccount
+                loggedIn.Add($"write_not_null_session", new LoggedAccount
                 {
-                    AccountId = random.Next(1, 100),
+                    AccountId = 1,
                     SaveExchangesAfterLogout = false
                 });
             }
             // Запись в переменные результата записи файла, а зачем его чтения.
             bool isWrited = FileManagement.WriteFile("not_null_writed_file.test", loggedIn);
+            loggedIn = new();
+
             var writed_file = FileManagement.ReadFile<Dictionary<string, LoggedAccount>>("not_null_writed_file.test");
+            loggedIn = new();
 
             // Ожидается, что запись будет произведена корректно, а объект будет содержать в себе данные.
             Assert.True(isWrited);
