@@ -39,14 +39,14 @@ namespace TradeMarket.DataTransfering.Bitmex
         public override event EventHandler<FullOrder> BookUpdate;
         public override event EventHandler<FullOrder> UserOrdersUpdate;
         public override event EventHandler<Model.Balance> BalanceUpdate;
-        public override event EventHandler<Model.Balance> MarginUpdate;
+        public override event EventHandler<IPublisher<Margin>.ChangedEventArgs> MarginUpdate;
 
         public BitmexTradeMarket(string name)
         {
             Name = name;
         }
 
-        public async override void SubscribeToUserMargin(EventHandler<Model.Balance> handler, UserContext context)
+        public async override void SubscribeToUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, UserContext context)
         {
             if (_userMarginPublisher is null)
             {
@@ -60,8 +60,9 @@ namespace TradeMarket.DataTransfering.Bitmex
         private void _userMarginPublisher_Changed(object sender, IPublisher<Margin>.ChangedEventArgs e)
         {
             Log.Information("Recieved Margin {@Margin}", e);
-            MarginUpdate?.Invoke(sender, new Model.Balance(e.Changed.Currency, (double)e.Changed.AvailableMargin));
+            MarginUpdate?.Invoke(sender, e);
         }
+
 
         private void _userWalletPublisher_Changed(object sender, IPublisher<global::Bitmex.Client.Websocket.Responses.Wallets.Wallet>.ChangedEventArgs e)
         {

@@ -9,7 +9,9 @@ using System.Threading.Tasks;
 using TradeBot.Common.v1;
 using TradeBot.TradeMarket.TradeMarketService.v1;
 using TradeMarket.Clients;
+using TradeMarket.DataTransfering;
 using TradeMarket.DataTransfering.Bitmex.Rest.Client;
+using Margin = Bitmex.Client.Websocket.Responses.Margins.Margin;
 
 namespace TradeMarket.Model
 {
@@ -28,9 +30,9 @@ namespace TradeMarket.Model
         public event EventHandler<FullOrder> Book;
         public event EventHandler<FullOrder> UserOrders;
         public event EventHandler<Model.Balance> UserBalance;
-        public event EventHandler<Model.Balance> UserMargin;
+        public event EventHandler<IPublisher<Margin>.ChangedEventArgs> UserMargin;
 
-        public List<Balance> MarginCache = new List<Balance>();
+        public List<IPublisher<Margin>.ChangedEventArgs> MarginCache = new List<IPublisher<Margin>.ChangedEventArgs>();
         public List<Balance> BalanceCache = new List<Balance>();
         public List<FullOrder> UserOrdersCache = new List<FullOrder>();
         //TODO сделать эти классы абстрактными

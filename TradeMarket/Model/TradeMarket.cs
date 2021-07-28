@@ -4,8 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Common.v1;
 using TradeBot.TradeMarket.TradeMarketService.v1;
+using TradeMarket.DataTransfering;
 using TradeMarket.DataTransfering.Bitmex;
 using TradeMarket.Model;
+using Margin = Bitmex.Client.Websocket.Responses.Margins.Margin;
+
 
 namespace TradeMarket.Model
 {
@@ -31,12 +34,16 @@ namespace TradeMarket.Model
 
         public abstract void SubscribeToBalance(EventHandler<Balance> handler, UserContext context);
 
+        public abstract void SubscribeToUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, UserContext context);
+
+
+
 
         public abstract event EventHandler<FullOrder> Book25Update;
         public abstract event EventHandler<FullOrder> BookUpdate;
         public abstract event EventHandler<FullOrder> UserOrdersUpdate;
         public abstract event EventHandler<Balance> BalanceUpdate;
-        public abstract event EventHandler<Balance> MarginUpdate;
+        public abstract event EventHandler<IPublisher<Margin>.ChangedEventArgs> MarginUpdate;
         #endregion
 
         #region Static Part
@@ -55,7 +62,6 @@ namespace TradeMarket.Model
             throw new ArgumentException($"{name} hasn't been implemented yet");
         }
 
-        public abstract void SubscribeToUserMargin(EventHandler<Model.Balance> handler, UserContext context);
         #endregion
     }
 }

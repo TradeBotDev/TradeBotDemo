@@ -120,7 +120,7 @@ message Margin{
 
 message SubscribeMarginResponse{
 	ChangesType changed_type = 1;
-	Margin Margin = 2;
+	Margin margin = 2;
 }
 
 

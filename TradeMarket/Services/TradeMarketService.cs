@@ -15,6 +15,9 @@ using TradeMarket.Services;
 using SubscribeBalanceRequest = TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceRequest;
 using SubscribeBalanceResponse = TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceResponse;
 using SubscribeOrdersResponse = TradeBot.TradeMarket.TradeMarketService.v1.SubscribeOrdersResponse;
+using Margin = Bitmex.Client.Websocket.Responses.Margins.Margin;
+using Newtonsoft.Json;
+using Bitmex.Client.Websocket.Responses;
 
 namespace TradeMarket.Services
 {
@@ -171,6 +174,71 @@ namespace TradeMarket.Services
             //TODO отписка после отмены
             await AwaitCancellation(context.CancellationToken);
 
+        }
+
+        /// <summary>
+        /// Конверт через json пока не нашли способа генерить код конвертации
+        /// </summary>
+        private TradeBot.TradeMarket.TradeMarketService.v1.Margin Convert(Margin margin)
+        {
+            string json = JsonConvert.SerializeObject(margin, Formatting.None, new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                DateParseHandling = DateParseHandling.DateTimeOffset
+            });
+            return JsonConvert.DeserializeObject<TradeBot.TradeMarket.TradeMarketService.v1.Margin>(json);
+        }
+
+        private TradeBot.TradeMarket.TradeMarketService.v1.ChangesType Convert(BitmexAction action)
+        {
+            switch (action)
+            {
+                case BitmexAction.Undefined: return ChangesType.Undefiend;
+                case BitmexAction.Partial: return ChangesType.Partitial;
+                case BitmexAction.Insert: return ChangesType.Insert;
+                case BitmexAction.Update:return ChangesType.Update;
+                case BitmexAction.Delete: return ChangesType.Delete;
+            }
+            return ChangesType.Undefiend;
+        }
+
+        public async override Task SubscribeMargin(SubscribeMarginRequest request, IServerStreamWriter<SubscribeMarginResponse> responseStream, ServerCallContext context)
+        {
+            Log.Logger.Information($"Connected with {context.Host}");
+
+            var sessionId = context.RequestHeaders.Get("sessionid").Value;
+            var slot = context.RequestHeaders.Get("slot").Value;
+            var trademarket = context.RequestHeaders.Get("trademarket").Value;
+
+            try
+            {
+                var user = await UserContext.GetUserContextAsync(sessionId, slot, trademarket);
+                user.UserMargin += async (sender, args) => {
+                    var margin = Convert(args.Changed);
+                    //Log.Logger.Information($"Sent order : {order} to {context.Host}");
+                    await WriteStreamAsync<SubscribeMarginResponse>(responseStream, new()
+                    {
+                        ChangedType = Convert(args.Action),
+                        Margin = margin
+
+                    }) ;
+                };
+                //TODO отписка после отмены
+                await AwaitCancellation(context.CancellationToken);
+            }
+            catch (Exception e)
+            {
+                Log.Logger.Error("Exception happened");
+                Log.Logger.Error(e.Message);
+
+                Log.Logger.Error(e.StackTrace);
+
+                context.Status = Status.DefaultCancelled;
+                context.ResponseTrailers.Add("sessionid", sessionId);
+                context.ResponseTrailers.Add("error", e.Message);
+
+
+            }
         }
 
         public override Task SubscribeLogs(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
