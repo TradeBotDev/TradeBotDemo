@@ -16,7 +16,9 @@ namespace Former
 
         private readonly ConcurrentDictionary<string, Order> _myOrders;
 
-        private double _balance;
+        private int _balanceToBuy;
+
+        private int _balanceToSell;
 
         private int _bookSize;
 
@@ -37,11 +39,6 @@ namespace Former
         /// <summary>
         /// апдейтит конкретную книгу ордеров (на покупку или продажу)
         /// </summary>
-        /// <param name="bookNeededUpdate"></param>
-        /// <param name="whatBook"></param>
-        /// <param name="order"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
         private async Task UpdateConcreteBook(ConcurrentDictionary<string, Order> bookNeededUpdate, Order order, UserContext context)
         {
             if (CheckContext(context)) return;
@@ -66,9 +63,6 @@ namespace Former
         /// <summary>
         /// Обновляет одну из книг ордеров с вновь пришедшим ордером
         /// </summary>
-        /// <param name="orderNeededUpdate"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
         public async Task UpdateOrderBooks(Order newComingOrder, UserContext context)
         {
             if (CheckContext(context)) return;
@@ -94,10 +88,6 @@ namespace Former
         /// <summary>
         /// подгоняет мои ордера под рыночную цену (и на покупку и на продажу)
         /// </summary>
-        /// <param name="ordersForFairPrice"></param>
-        /// <param name="whatBook"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
         private async Task FitPrices(ConcurrentDictionary<string, Order> ordersForFairPrice, OrderBookType bookType, UserContext context)
         {
             if (CheckContext(context)) return;
@@ -142,21 +132,17 @@ namespace Former
         /// <summary>
         /// обновляет балан для формирования верных списков 
         /// </summary>
-        /// <param name="balance"></param>
-        /// <returns></returns>
-        public Task UpdateBalance(Balance balance)
+        public Task UpdateBalance(int balanceToBuy, int balanceToSell)
         {
-            Log.Information("Balance updated. New balance: {0}", balance.Value);
-            _balance = double.Parse(balance.Value);
+            Log.Information("Balance updated. To buy: {0}, To sell: {1}", balanceToBuy, balanceToSell);
+            _balanceToBuy = balanceToBuy;
+            _balanceToSell = balanceToSell;
             return Task.CompletedTask;
         }
 
         /// <summary>
         /// обновляет список моих ордеров по подписке
         /// </summary>
-        /// <param name="orderNeededUpdate"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
         public async Task UpdateMyOrderList(Order newComingOrder, UserContext context)
         {
             if (CheckContext(context)) return;
@@ -166,6 +152,8 @@ namespace Former
             var quantity = newComingOrder.Quantity;
             var type = newComingOrder.Signature.Type;
             var status = newComingOrder.Signature.Status;
+
+
 
             //пытается получить ордер из списка, если его нет, то добавляет его
             if (_myOrders.TryGetValue(id, out oldOrder))
@@ -218,13 +206,11 @@ namespace Former
         /// <summary>
         /// формируется ордер на покупку
         /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
         public async Task FormPurchaseOrder(UserContext context)
         {
             if (CheckContext(context)) return;
             Log.Debug("Playing long...");
-            double availableBalance = _balance * context.configuration.AvaibleBalance;
+            double availableBalance = ConvertSatoshiToXBT(_balanceToBuy) * context.configuration.AvaibleBalance;
 
             //Вычисляем рыночную цену, для выставления лимитного ордера
             double purchaseFairPrice = _purchaseOrderBook.Max(x => x.Value.Price);
@@ -240,15 +226,13 @@ namespace Former
         /// <summary>
         /// формируется ордер на продажу
         /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
         public async Task FormSellOrder(UserContext context)
         {
             if (CheckContext(context)) return;
             Log.Debug("Playing short...");
 
             //вычисляется доступный баланс в зависимости от настроек пользователя
-            double availableBalance = _balance * context.configuration.AvaibleBalance;
+            double availableBalance = ConvertSatoshiToXBT(_balanceToSell) * context.configuration.AvaibleBalance;
 
             //вычисляем рыночную цену 
             double sellFairPrice = _sellOrderBook.Min(x => x.Value.Price);
@@ -259,6 +243,11 @@ namespace Former
             //продать ордер по рыночной цене, но ордер при этом лимитный 
             if (quantity > 0) await context.PlaceOrder(sellFairPrice, -quantity);
             else Log.Debug("Insufficient balance");
+        }
+
+        private double ConvertSatoshiToXBT(int satoshiValue) 
+        {
+            return satoshiValue * 0.00000001;
         }
 
         /// <summary>
