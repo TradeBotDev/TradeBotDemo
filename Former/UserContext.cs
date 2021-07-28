@@ -41,11 +41,18 @@ namespace Former
             _tradeMarketClient.UpdateBalance += UpdateBalance;
             _tradeMarketClient.UpdateMyOrders += UpdateMyOrderList;
 
+
             ObserveOrderBook();
             ObserveBalance();
             ObserveMyOrders();
+            ObservePositions();
         }
 
+
+        private async void ObservePositions()
+        {
+            await _tradeMarketClient.ObservePositions(this);
+        }
         public async void FormPurchaseOrder()
         {
             await _former.FormPurchaseOrder(this);

@@ -28,6 +28,7 @@ using Margin = Bitmex.Client.Websocket.Responses.Margins.Margin;
 using DeleteOrderRequest = TradeMarket.DataTransfering.Bitmex.Rest.Requests.DeleteOrderRequest;
 using PlaceOrderRequest = TradeMarket.DataTransfering.Bitmex.Rest.Requests.Place.PlaceOrderRequest;
 using AmmendOrderRequest = TradeMarket.DataTransfering.Bitmex.Rest.Requests.Ammend.AmmendOrderRequest;
+using Bitmex.Client.Websocket.Responses.Positions;
 
 namespace TradeMarket.DataTransfering.Bitmex
 {
@@ -39,16 +40,36 @@ namespace TradeMarket.DataTransfering.Bitmex
         private UserWalletPublisher _userWalletPublisher;
         private AuthenticationPublisher _userAuthenticationPublisher;
         private UserMarginPublisher _userMarginPublisher;
+        private UserPositionPublisher _userPositionPublisher;
 
         public override event EventHandler<FullOrder> Book25Update;
         public override event EventHandler<FullOrder> BookUpdate;
         public override event EventHandler<Order> UserOrdersUpdate;
         public override event EventHandler<Model.Balance> BalanceUpdate;
         public override event EventHandler<IPublisher<Margin>.ChangedEventArgs> MarginUpdate;
+        public override event EventHandler<IPublisher<Position>.ChangedEventArgs> PositionUpdate;
+
 
         public BitmexTradeMarket(string name)
         {
             Name = name;
+        }
+
+        public async override void SubscribeToUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, UserContext context)
+        {
+            if (_userPositionPublisher is null)
+            {
+                _userPositionPublisher = new UserPositionPublisher(context.WSClient, context.WSClient.Streams.PositionStream);
+                _userPositionPublisher.Changed += _userPositionPublisher_Changed;
+            }
+            await _userMarginPublisher.SubcribeAsync(new System.Threading.CancellationToken());
+            PositionUpdate += handler;
+        }
+
+        private void _userPositionPublisher_Changed(object sender, IPublisher<Position>.ChangedEventArgs e)
+        {
+            Log.Information("Recieved Position {@Position}", e);
+            PositionUpdate?.Invoke(this, e);
         }
 
         public async override void SubscribeToUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, UserContext context)

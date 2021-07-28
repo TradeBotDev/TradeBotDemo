@@ -60,6 +60,25 @@ service TradeMarketService {
 	*/
 	rpc SubscribeMargin(SubscribeMarginRequest) returns (stream SubscribeMarginResponse);
 
+	/*
+		Подписка на обновление позиций
+	*/
+	rpc SubscribePosition(SubscribePositionRequest) returns (stream SubscribePositionResponse);
+
+}
+
+message SubscribePositionRequest{
+
+}
+
+enum PositionState{
+	POSITION_STATE_UNDEFIEND = 0;
+	POSITION_STATE_LONG = 1;
+	POSITION_STATE_SHORT = 2;
+}
+
+message SubscribePositionResponse{
+	PositionState position_state = 1;
 }
 
 message SubscribeMarginRequest{

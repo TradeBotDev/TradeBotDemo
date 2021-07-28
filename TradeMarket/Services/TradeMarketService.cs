@@ -243,6 +243,23 @@ namespace TradeMarket.Services
             }
         }
 
+        public async override Task SubscribePosition(SubscribePositionRequest request, IServerStreamWriter<SubscribePositionResponse> responseStream, ServerCallContext context)
+        {
+            var sessionId = context.RequestHeaders.Get("sessionid").Value;
+            var slot = context.RequestHeaders.Get("slot").Value;
+            var trademarket = context.RequestHeaders.Get("trademarket").Value;
+
+            var user = await UserContext.GetUserContextAsync(sessionId, slot, trademarket);
+           
+
+            user.UserPosition += async (sender, args) => {
+                //Log.Information()
+                //await WriteStreamAsync<SubscribeBalanceResponse>(responseStream, ConvertBalance(args));
+            };
+            //TODO отписка после отмены
+            await AwaitCancellation(context.CancellationToken);
+        }
+
         public override Task SubscribeLogs(TradeBot.TradeMarket.TradeMarketService.v1.SubscribeLogsRequest request, IServerStreamWriter<TradeBot.TradeMarket.TradeMarketService.v1.SubscribeLogsResponse> responseStream, ServerCallContext context)
         {
             return base.SubscribeLogs(request, responseStream, context);

@@ -1,6 +1,7 @@
 ﻿using Bitmex.Client.Websocket;
 using Bitmex.Client.Websocket.Client;
 using Bitmex.Client.Websocket.Responses.Orders;
+using Bitmex.Client.Websocket.Responses.Positions;
 using Bitmex.Client.Websocket.Websockets;
 using Serilog;
 using System;
@@ -33,9 +34,12 @@ namespace TradeMarket.Model
         public event EventHandler<Order> UserOrders;
         public event EventHandler<Model.Balance> UserBalance;
         public event EventHandler<IPublisher<Margin>.ChangedEventArgs> UserMargin;
+        public event EventHandler<IPublisher<Position>.ChangedEventArgs> UserPosition;
+
 
         public List<IPublisher<Margin>.ChangedEventArgs> MarginCache = new List<IPublisher<Margin>.ChangedEventArgs>();
         public List<Balance> BalanceCache = new List<Balance>();
+
         //TODO сделать эти классы абстрактными
         internal BitmexWebsocketClient WSClient { get; set; }
         internal BitmexRestfulClient RestClient { get; set; }
@@ -47,6 +51,7 @@ namespace TradeMarket.Model
         /// </summary>
         public async Task initAsync()
         {
+            
             var keySecretPair = await _accountClient.GetUserInfo(SessionId).ContinueWith(el => {
                 try
                 {
@@ -68,6 +73,7 @@ namespace TradeMarket.Model
             TradeMarket.SubscribeToBook25((sender, el) => Book25?.Invoke(sender, el), this);
             TradeMarket.SubscribeToUserOrders((sender, el) => UserOrders?.Invoke(sender, el), this);
             TradeMarket.SubscribeToUserMargin((sender, el) => UserMargin?.Invoke(sender, el), this);
+            TradeMarket.SubscribeToUserPositions((sender, el) => UserPosition?.Invoke(sender, el), this);
         }
 
         /// <summary>

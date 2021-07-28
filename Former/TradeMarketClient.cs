@@ -127,6 +127,26 @@ namespace Former
             };
             await ConnectionTester(observeMyOrders);
         }
+        public async Task ObservePositions(UserContext context)
+        {
+            using var call = _client.SubscribePosition(new SubscribePositionRequest(), context.Meta);
+            Func<Task> observeMyOrders = async () =>
+            {
+                while (await call.ResponseStream.MoveNext())
+                {
+
+                    //if (call.ResponseStream.Current.Response.Code == ReplyCode.Failure)
+                    //{
+                    //    Log.Information("order was rejected with message: {0}", call.ResponseStream.Current.Response.Message);
+                    //    continue;
+                    //}
+                    //UpdateMyOrders?.Invoke(call.ResponseStream.Current.Changed);
+                }
+            };
+            await ConnectionTester(observeMyOrders);
+        }
+
+
         /// <summary>
         /// Отправляет запрос в биржу на выставление своего ордера
         /// </summary>

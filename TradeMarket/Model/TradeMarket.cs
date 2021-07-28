@@ -1,4 +1,5 @@
 ﻿using Bitmex.Client.Websocket.Responses.Orders;
+using Bitmex.Client.Websocket.Responses.Positions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,6 +38,7 @@ namespace TradeMarket.Model
 
         public abstract void SubscribeToUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, UserContext context);
 
+        public abstract void SubscribeToUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, UserContext context);
 
 
 
@@ -45,6 +47,7 @@ namespace TradeMarket.Model
         public abstract event EventHandler<Order> UserOrdersUpdate;
         public abstract event EventHandler<Balance> BalanceUpdate;
         public abstract event EventHandler<IPublisher<Margin>.ChangedEventArgs> MarginUpdate;
+        public abstract event EventHandler<IPublisher<Position>.ChangedEventArgs> PositionUpdate;
         #endregion
 
         #region Static Part
