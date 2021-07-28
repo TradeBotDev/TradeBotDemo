@@ -185,8 +185,7 @@ namespace TradeMarket.Services
             {
                 AvailableMargin = margin.AvailableMargin ?? default(long),
                 RealisedPnl = margin.RealisedPnl ?? default(long),
-                WalletBalance = margin.WalletBalance ?? default(long),
-                InitMargin = margin.InitMargin ?? default(long)
+                MarginBalance = margin.MarginBalance ?? default(long)
             };
         }
 
