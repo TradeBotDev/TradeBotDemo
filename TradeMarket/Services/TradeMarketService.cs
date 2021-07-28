@@ -181,12 +181,12 @@ namespace TradeMarket.Services
         /// </summary>
         private TradeBot.TradeMarket.TradeMarketService.v1.Margin Convert(Margin margin)
         {
-            string json = JsonConvert.SerializeObject(margin, Formatting.None, new JsonSerializerSettings
+            return new()
             {
-                NullValueHandling = NullValueHandling.Ignore,
-                DateParseHandling = DateParseHandling.DateTimeOffset
-            });
-            return JsonConvert.DeserializeObject<TradeBot.TradeMarket.TradeMarketService.v1.Margin>(json);
+                AvailableMargin = margin.AvailableMargin ?? default(long),
+                RealisedPnl = margin.RealisedPnl ?? default(long),
+                WalletBalance = margin.WalletBalance ?? default(long)
+            };
         }
 
         private TradeBot.TradeMarket.TradeMarketService.v1.ChangesType Convert(BitmexAction action)
