@@ -16,7 +16,9 @@ namespace Former
 
         private readonly ConcurrentDictionary<string, Order> _myOrders;
 
-        private int _balanceInSatoshi;
+        private int _balanceToBuy;
+
+        private int _balanceToSell;
 
         private int _bookSize;
 
@@ -127,10 +129,11 @@ namespace Former
         /// <summary>
         /// обновляет балан для формирования верных списков 
         /// </summary>
-        public Task UpdateBalance(int balance)
+        public Task UpdateBalance(int balanceToBuy, int balanceToSell)
         {
-            Log.Information("Balance updated. New balance: {0}", balance);
-            _balanceInSatoshi = balance;
+            Log.Information("Balance updated. To buy: {0}, To sell: {1}", balanceToBuy, balanceToSell);
+            _balanceToBuy = balanceToBuy;
+            _balanceToSell = balanceToSell;
             return Task.CompletedTask;
         }
 
@@ -200,7 +203,7 @@ namespace Former
         public async Task FormPurchaseOrder(UserContext context)
         {
             Log.Debug("Playing long...");
-            double availableBalance = ConvertSatoshiToXBT(_balanceInSatoshi) * context.configuration.AvaibleBalance;
+            double availableBalance = ConvertSatoshiToXBT(_balanceToBuy) * context.configuration.AvaibleBalance;
 
             //Вычисляем рыночную цену, для выставления лимитного ордера
             double purchaseFairPrice = _purchaseOrderBook.Max(x => x.Value.Price);
@@ -221,7 +224,7 @@ namespace Former
             Log.Debug("Playing short...");
 
             //вычисляется доступный баланс в зависимости от настроек пользователя
-            double availableBalance = ConvertSatoshiToXBT(_balanceInSatoshi) * context.configuration.AvaibleBalance;
+            double availableBalance = ConvertSatoshiToXBT(_balanceToSell) * context.configuration.AvaibleBalance;
 
             //вычисляем рыночную цену 
             double sellFairPrice = _sellOrderBook.Min(x => x.Value.Price);

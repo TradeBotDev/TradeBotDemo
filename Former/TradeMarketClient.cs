@@ -20,7 +20,7 @@ namespace Former
         public delegate void MyOrdersEvent(Order myOrderToUpdate);
         public MyOrdersEvent UpdateMyOrders;
 
-        public delegate void BalanceEvent(int balanceToUpdate);
+        public delegate void BalanceEvent(int balanceToBuy, int balanceToSell);
         public BalanceEvent UpdateBalance;
 
         private static int _retryDelay;
@@ -101,7 +101,7 @@ namespace Former
             {
                 while (await call.ResponseStream.MoveNext())
                 {
-                    UpdateBalance?.Invoke((int)call.ResponseStream.Current.Margin.AvailableMargin);
+                    UpdateBalance?.Invoke((int)call.ResponseStream.Current.Margin.AvailableMargin, (int)call.ResponseStream.Current.Margin.InitMargin);
                 }
             };
 

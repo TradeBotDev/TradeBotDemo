@@ -62,9 +62,9 @@ namespace Former
         {
             await _former.UpdateMyOrderList(orderNeededUpdate, this);
         }
-        private async void UpdateBalance(int balance)
+        private async void UpdateBalance(int balanceToBuy, int balanceToSell)
         {
-            await _former.UpdateBalance(balance);
+            await _former.UpdateBalance(balanceToBuy, balanceToSell);
         }
         public async Task PlaceOrder(double sellPrice, double contractValue)
         {

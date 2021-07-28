@@ -98,14 +98,17 @@ message Margin{
          int64 maint_margin = 21;
          int64 session_margin = 22;
          int64 target_excess_margin = 23;
-         int64 var_margin = 24;*/
+         int64 var_margin = 24;
+		 */
          int64 realised_pnl = 25;
-        /* int64 unrealised_pnl = 26;
+		 /*
+         int64 unrealised_pnl = 26;
          int64 indicative_tax = 27;
          int64 unrealised_profit = 28;
-         int64 synthetic_margin = 29;*/
-         int64 wallet_balance = 30;
-        /* int64 margin_balance = 31;
+         int64 synthetic_margin = 29;
+         int64 wallet_balance = 30;*/
+         int64 margin_balance = 31;
+		 /*
          int64 margin_balance_pcnt = 32;
          int64 margin_leverage = 33;
          int64 margin_used_pcnt = 34;
