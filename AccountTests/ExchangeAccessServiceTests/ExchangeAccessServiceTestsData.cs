@@ -8,8 +8,6 @@ namespace AccountTests.ExchangeAccessServiceTests
     // Класс, содержащий все необходимые поля для тестирования сервиса ExchangeAccessService.
     public abstract class ExchangeAccessServiceTestsData
     {
-        public Random random = new();
-
         // Объект сервиса системы аккаунтов для того, чтобы взаимодействовать с методами.
         public AccountService accountService = new();
 
@@ -22,7 +20,7 @@ namespace AccountTests.ExchangeAccessServiceTests
             // Запрос для регистрации.
             var registerRequest = new RegisterRequest
             {
-                Email = $"{prefix}_generated_user{random.Next(1, 1000000)}@pochta.ru",
+                Email = $"{prefix}_generated_user@pochta.ru",
                 Password = "test_pawsword",
                 VerifyPassword = "test_pawsword"
             };

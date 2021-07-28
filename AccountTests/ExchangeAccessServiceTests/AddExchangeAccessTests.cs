@@ -28,7 +28,7 @@ namespace AccountTests.ExchangeAccessServiceTests
                 };
             }
 
-            var reply = GenerateLogin("ex_to_acc_").ContinueWith(loginReply => exchangeAccessService.AddExchangeAccess(
+            var reply = GenerateLogin("ex_to_acc").ContinueWith(loginReply => exchangeAccessService.AddExchangeAccess(
                 GenerateRequest(loginReply.Result.Result.SessionId), null));
 
             Assert.Equal(ActionCode.Successful, reply.Result.Result.Result);

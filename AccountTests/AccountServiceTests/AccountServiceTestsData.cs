@@ -7,6 +7,5 @@ namespace AccountTests.AccountServiceTests
     {
         // Объект сервиса для того, чтобы взаимодействовать с методами.
         public AccountGRPC.AccountService service = new();
-        public Random random = new();
     }
 }

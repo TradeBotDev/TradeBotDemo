@@ -11,7 +11,7 @@ namespace AccountTests.AccountServiceTests
         {
             var registerRequest = new RegisterRequest
             {
-                Email = $"existing_user{random.Next(0, 10000)}@pochta.test",
+                Email = $"login_to_existing_user@pochta.test",
                 Password = "password",
                 VerifyPassword = "password"
             };
@@ -38,7 +38,7 @@ namespace AccountTests.AccountServiceTests
             // Генерация данных несуществующего аккауниа.
             var request = new LoginRequest()
             {
-                Email = $"non_existing_user{random.Next(0, 10000)}@pochta.ru",
+                Email = $"login_to_non_existing_user@pochta.ru",
                 Password = "password",
                 SaveExchangesAfterLogout = false
             };
@@ -51,6 +51,8 @@ namespace AccountTests.AccountServiceTests
         [Fact]
         public void DoubleLogin()
         {
+            AccountGRPC.AccountService service = new();
+
             var registerRequest = new RegisterRequest
             {
                 Email = $"double_login_user@pochta.test",

@@ -12,7 +12,7 @@ namespace AccountTests.AccountServiceTests
         {
             var registerRequest = new RegisterRequest
             {
-                Email = $"existing_user_isvalid@pochta.test",
+                Email = $"existing_user_is_valid@pochta.test",
                 Password = "password",
                 VerifyPassword = "password"
             };
