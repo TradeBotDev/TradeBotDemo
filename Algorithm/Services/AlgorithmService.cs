@@ -11,7 +11,6 @@ namespace Algorithm.Services
 
     public class AlgorithmService : TradeBot.Algorithm.AlgorithmService.v1.AlgorithmService.AlgorithmServiceBase
     {
-        //TODO: разобраться с импортами и их конфликтами, или нейминг поменять
         public override async Task<AddOrderResponse> AddOrder(IAsyncStreamReader<AddOrderRequest> requestStream, ServerCallContext context)
         {
             Log.Information("Listening to the Relay...");
