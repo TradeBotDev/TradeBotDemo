@@ -40,7 +40,6 @@ namespace AccountTests.AccountServiceTests
         {
             // Намеренное отправление несуществующего id сессии в метод CurrentAccountData.
             var request = new SessionRequest { SessionId = "non_existing_session_id" };
-            State.loggedIn = new();
             var reply = service.CurrentAccountData(request, null);
 
             // Ожидается, что в качествет ответа придет сообщение о том, что аккаунт не был найден.

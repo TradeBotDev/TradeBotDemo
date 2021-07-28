@@ -11,7 +11,7 @@ namespace AccountTests.AccountServiceTests
         {
             var request = new RegisterRequest
             {
-                Email = $"user{random.Next(0, 10000)}@pochta.test",
+                Email = $"register_new_account{random.Next(0, 10000)}@pochta.test",
                 Password = "password",
                 VerifyPassword = "password"
             };
@@ -26,7 +26,7 @@ namespace AccountTests.AccountServiceTests
         {
             var request = new RegisterRequest
             {
-                Email = "user@pochta.test",
+                Email = "register_existing_account@pochta.test",
                 Password = "password",
                 VerifyPassword = "password"
             };

@@ -1,6 +1,6 @@
 ﻿using AccountGRPC;
-using AccountGRPC.Models;
 using System;
+using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
 
 namespace AccountTests.ExchangeAccessServiceTests
@@ -17,7 +17,7 @@ namespace AccountTests.ExchangeAccessServiceTests
         public ExchangeAccessService exchangeAccessService = new();
 
         // Метод, создающий временный аккаунт в процессе тестирования.
-        public string GenerateLogin(bool withExchangeAccesses)
+        public Task<Task<LoginReply>> GenerateLogin()
         {
             // Запрос для регистрации.
             var registerRequest = new RegisterRequest
@@ -36,11 +36,8 @@ namespace AccountTests.ExchangeAccessServiceTests
 
             // Последовательно производится регистрация аккаунта, а затем вход в него, чтобы получить id
             // сессии и работать с ним.
-            string sessionId = accountService.Register(registerRequest, null)
-                .ContinueWith(registerReply => accountService.Login(loginRequest, null))
-                .Result.Result.SessionId;
-
-            return sessionId;
+            return accountService.Register(registerRequest, null)
+                .ContinueWith(registerReply => accountService.Login(loginRequest, null));
         }
     }
 }
