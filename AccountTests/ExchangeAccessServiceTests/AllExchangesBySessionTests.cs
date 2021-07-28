@@ -7,7 +7,7 @@ namespace AccountTests.ExchangeAccessServiceTests
     {
         // Тестирование получения информации о всех добавленных биржах в аккаунт, когда они точно есть.
         [Fact]
-        public void WhenExchangesIsExists()
+        public void WhenExchangesIsExistsTest()
         {
             // Переменная, в которую будет записываться итоговый Id сессии.
             string sessionId = "Отсутствует";
@@ -27,6 +27,9 @@ namespace AccountTests.ExchangeAccessServiceTests
                 };
             }
 
+            // Очистка текущего состояния.
+            ClearAfterCompletion.Clear();
+
             // Последовательная регистрация и вход (внутри метода GenerateLogin), добавление информации о
             // доступе к бирже, а затем ее чтение.
             var reply = GenerateLogin()
@@ -38,24 +41,31 @@ namespace AccountTests.ExchangeAccessServiceTests
             // не будет пустой.
             Assert.Equal(ActionCode.Successful, reply.Result.Result.Result);
             Assert.NotEmpty(reply.Result.Result.Exchanges);
-
-            // Очистка текущего состояния.
-            ClearAfterCompletion.Clear("loggedaccounts.state");
         }
 
         // Тестирование получения информации о биржах, которой в действительности нет.
         [Fact]
-        public void WhenExchangesIsNotExists()
+        public void WhenExchangesIsNotExistsTest()
         {
+            // Очистка текущего состояния.
+            ClearAfterCompletion.Clear();
+
             var reply = GenerateLogin()
                 .ContinueWith(loginReply => exchangeAccessService.AllExchangesBySession(
                     new SessionRequest { SessionId = loginReply.Result.Result.SessionId }, null));
 
             Assert.Equal(ActionCode.ExchangeNotFound, reply.Result.Result.Result);
             Assert.Empty(reply.Result.Result.Exchanges);
+        }
 
-            // Очистка текущего состояния.
-            ClearAfterCompletion.Clear("loggedaccounts.state");
+        [Fact]
+        public void WhenAccountIsNotExistsTest()
+        {
+            var reply = exchangeAccessService.AllExchangesBySession(
+                new SessionRequest { SessionId = "not_existing_session" }, null);
+
+            Assert.Equal(ActionCode.AccountNotFound, reply.Result.Result);
+            Assert.Empty(reply.Result.Exchanges);
         }
     }
 }

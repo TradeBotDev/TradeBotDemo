@@ -63,7 +63,7 @@ namespace AccountGRPC
             Log.Information($"CurrentAccountData получил запрос: SessionId - {request.SessionId}.");
 
             // Производится проверка на то, является ли текущий пользователь вошедшим (по Id сессии).
-            if (!Models.State.loggedIn.ContainsKey(request.SessionId))
+            if (Models.State.loggedIn == null || !Models.State.loggedIn.ContainsKey(request.SessionId))
                 return Task.FromResult(CurrentAccountReplies.AccountNotFound());
 
             // Если текущий пользователь вошедший, то сервер возвращает данные этого пользователя.

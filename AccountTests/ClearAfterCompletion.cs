@@ -10,16 +10,14 @@ namespace AccountTests
 {
     public static class ClearAfterCompletion
     {
-        public static void Clear(params string[] files)
+        public static void Clear()
         {
-            foreach (string file in files)
-                if (File.Exists(file))
-                    File.Delete(file);
-
+            File.WriteAllText("loggedaccounts.state", null);
             using (var database = new AccountContext())
             {
                 database.Accounts.RemoveRange(database.Accounts);
                 database.ExchangeAccesses.RemoveRange(database.ExchangeAccesses);
+                database.SaveChanges();
             }
             State.loggedIn = new();
         }
