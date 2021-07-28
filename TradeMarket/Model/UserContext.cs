@@ -28,7 +28,11 @@ namespace TradeMarket.Model
         public event EventHandler<FullOrder> Book;
         public event EventHandler<FullOrder> UserOrders;
         public event EventHandler<Model.Balance> UserBalance;
+        public event EventHandler<Model.Balance> UserMargin;
 
+        public List<Balance> MarginCache = new List<Balance>();
+        public List<Balance> BalanceCache = new List<Balance>();
+        public List<FullOrder> UserOrdersCache = new List<FullOrder>();
         //TODO сделать эти классы абстрактными
         internal BitmexWebsocketClient WSClient { get; set; }
         internal BitmexRestfulClient RestClient { get; set; }
@@ -56,10 +60,11 @@ namespace TradeMarket.Model
             });
 
             //инициализация подписок
-            TradeMarket.SubscribeToBalance((sender, el) => { UserBalance?.Invoke(sender, el); }, this);
-            TradeMarket.SubscribeToBook((sender, el) => { Book?.Invoke(sender, el); }, this);
+            TradeMarket.SubscribeToBalance((sender, el) => { BalanceCache.Add(el); UserBalance?.Invoke(sender, el); }, this);
+            TradeMarket.SubscribeToBook((sender, el) => {Book?.Invoke(sender, el); }, this);
             TradeMarket.SubscribeToBook25((sender, el) => Book25?.Invoke(sender, el), this);
             TradeMarket.SubscribeToUserOrders((sender, el) => UserOrders?.Invoke(sender, el), this);
+            TradeMarket.SubscribeToUserMargin((sender, el) => UserMargin?.Invoke(sender, el), this);
         }
 
         /// <summary>

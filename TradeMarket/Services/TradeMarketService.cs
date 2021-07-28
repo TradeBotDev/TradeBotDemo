@@ -160,6 +160,10 @@ namespace TradeMarket.Services
             var trademarket = context.RequestHeaders.Get("trademarket").Value;
 
             var user = await UserContext.GetUserContextAsync(sessionId,slot,trademarket);
+            foreach(var balance in user.BalanceCache)
+            {
+                await WriteStreamAsync<SubscribeBalanceResponse>(responseStream, ConvertBalance(balance));
+            }
 
             user.UserBalance += async (sender, args) => {
                 await WriteStreamAsync<SubscribeBalanceResponse>(responseStream, ConvertBalance(args));

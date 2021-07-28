@@ -10,6 +10,8 @@ using TradeMarket.DataTransfering.Bitmex.Rest.Client;
 using TradeMarket.DataTransfering.Bitmex.Rest.Requests;
 using TradeMarket.DataTransfering.Bitmex.Rest.Requests.Ammend;
 using TradeMarket.DataTransfering.Bitmex.Rest.Requests.Place;
+using TradeMarket.DataTransfering.Bitmex.Rest.Requests.Wallets;
+using TradeMarket.Model;
 
 namespace TradeMarket
 {

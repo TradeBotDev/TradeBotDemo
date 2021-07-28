@@ -36,6 +36,7 @@ namespace TradeMarket.Model
         public abstract event EventHandler<FullOrder> BookUpdate;
         public abstract event EventHandler<FullOrder> UserOrdersUpdate;
         public abstract event EventHandler<Balance> BalanceUpdate;
+        public abstract event EventHandler<Balance> MarginUpdate;
         #endregion
 
         #region Static Part
@@ -53,6 +54,8 @@ namespace TradeMarket.Model
             }
             throw new ArgumentException($"{name} hasn't been implemented yet");
         }
+
+        public abstract void SubscribeToUserMargin(EventHandler<Model.Balance> handler, UserContext context);
         #endregion
     }
 }
