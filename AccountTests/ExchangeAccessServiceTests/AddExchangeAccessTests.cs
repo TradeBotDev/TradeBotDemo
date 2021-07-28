@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AccountGRPC.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,8 @@ namespace AccountTests.ExchangeAccessServiceTests
         [Fact]
         public void AddExchangeToExistingAccountTest()
         {
+            State.loggedIn = new();
+
             string sessionId;
 
             AddExchangeAccessRequest GenerateRequest(string _sessionId)
@@ -31,6 +34,13 @@ namespace AccountTests.ExchangeAccessServiceTests
 
             var reply = GenerateLogin("ex_to_acc").ContinueWith(loginReply => exchangeAccessService.AddExchangeAccess(
                 GenerateRequest(loginReply.Result.Result.SessionId), null));
+
+            using (var database = new AccountContext())
+            {
+                var accounts = database.Accounts.Where(account => account.Email == "ex_to_acc_generated_user@pochta.ru");
+                database.Accounts.Remove(accounts.First());
+                database.SaveChanges();
+            }
 
             Assert.Equal(ActionCode.Successful, reply.Result.Result.Result);
         }

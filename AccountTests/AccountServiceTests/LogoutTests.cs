@@ -11,6 +11,8 @@ namespace AccountTests.AccountServiceTests
         [Fact]
         public void LogoutFromLoggedAccount()
         {
+            State.loggedIn = new();
+
             var registerRequest = new RegisterRequest()
             {
                 Email = "logoutAfterLogin@pochta.test",

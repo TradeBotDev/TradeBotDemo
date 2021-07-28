@@ -61,6 +61,8 @@ namespace AccountTests.AccountServiceTests
         [Fact]
         public void DoubleLogin()
         {
+            State.loggedIn = new();
+
             AccountGRPC.AccountService service = new();
 
             var registerRequest = new RegisterRequest

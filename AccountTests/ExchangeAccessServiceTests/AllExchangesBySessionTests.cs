@@ -1,4 +1,5 @@
-﻿using TradeBot.Account.AccountService.v1;
+﻿using AccountGRPC.Models;
+using TradeBot.Account.AccountService.v1;
 using Xunit;
 
 namespace AccountTests.ExchangeAccessServiceTests
@@ -10,6 +11,8 @@ namespace AccountTests.ExchangeAccessServiceTests
         [Fact]
         public void WhenExchangesIsExistsTest()
         {
+            State.loggedIn = new();
+
             // Переменная, в которую будет записываться итоговый Id сессии.
             string sessionId = "Отсутствует";
 
@@ -45,6 +48,8 @@ namespace AccountTests.ExchangeAccessServiceTests
         [Fact]
         public void WhenExchangesIsNotExistsTest()
         {
+            State.loggedIn = new();
+
             var reply = GenerateLogin("ex_not_exist")
                 .ContinueWith(loginReply => exchangeAccessService.AllExchangesBySession(
                     new SessionRequest { SessionId = loginReply.Result.Result.SessionId }, null));

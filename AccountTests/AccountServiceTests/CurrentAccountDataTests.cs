@@ -11,6 +11,8 @@ namespace AccountTests.AccountServiceTests
         [Fact]
         public void DataFromExistingAccount()
         {
+            State.loggedIn = new();
+
             var registerRequest = new RegisterRequest
             {
                 Email = $"existing_user@pochta.test",
