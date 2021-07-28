@@ -1,5 +1,7 @@
-﻿using TradeBot.Account.AccountService.v1;
+﻿using AccountGRPC.Models;
+using TradeBot.Account.AccountService.v1;
 using Xunit;
+using System.Linq;
 
 namespace AccountTests.AccountServiceTests
 {
@@ -27,6 +29,13 @@ namespace AccountTests.AccountServiceTests
             // вход в аккаунт.
             var reply = service.Register(registerRequest, null);
             reply.ContinueWith(login => service.Login(loginRequest, null));
+
+            using (var database = new AccountContext())
+            {
+                var accounts = database.Accounts.Where(account => account.Email == loginRequest.Email);
+                database.Accounts.Remove(accounts.First());
+                database.SaveChanges();
+            }
 
             // Ожидается, что вход в аккаунт будет успешным.
             Assert.Equal(ActionCode.Successful, reply.Result.Result);
@@ -73,6 +82,13 @@ namespace AccountTests.AccountServiceTests
             var reply = service.Register(registerRequest, null)
                 .ContinueWith(login => service.Login(loginRequest, null))
                 .ContinueWith(login => service.Login(loginRequest, null));
+
+            using (var database = new AccountContext())
+            {
+                var accounts = database.Accounts.Where(account => account.Email == loginRequest.Email);
+                database.Accounts.Remove(accounts.First());
+                database.SaveChanges();
+            }
 
             // Ожидается, что в результате придет сообщение о том, что пользователь уже вошел, однако вход будет
             // считаться успешным и выдастся уже существующий id сессии.
