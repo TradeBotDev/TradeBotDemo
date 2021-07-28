@@ -63,8 +63,6 @@ namespace AccountTests.AccountServiceTests
         {
             State.loggedIn = new();
 
-            AccountGRPC.AccountService service = new();
-
             var registerRequest = new RegisterRequest
             {
                 Email = $"double_login_user@pochta.test",
@@ -76,7 +74,7 @@ namespace AccountTests.AccountServiceTests
             {
                 Email = registerRequest.Email,
                 Password = registerRequest.Password,
-                SaveExchangesAfterLogout = false
+                SaveExchangesAfterLogout = true
             };
 
             // Последовательная регистрация, вход в аккаунт и вход в тот же самый аккаунт (т.е. попытка входа
@@ -84,13 +82,6 @@ namespace AccountTests.AccountServiceTests
             var reply = service.Register(registerRequest, null)
                 .ContinueWith(login => service.Login(loginRequest, null))
                 .ContinueWith(login => service.Login(loginRequest, null));
-
-            using (var database = new AccountContext())
-            {
-                var accounts = database.Accounts.Where(account => account.Email == loginRequest.Email);
-                database.Accounts.Remove(accounts.First());
-                database.SaveChanges();
-            }
 
             // Ожидается, что в результате придет сообщение о том, что пользователь уже вошел, однако вход будет
             // считаться успешным и выдастся уже существующий id сессии.
