@@ -55,7 +55,74 @@ service TradeMarketService {
 	*/
 	rpc DeleteOrder(DeleteOrderRequest) returns (DeleteOrderResponse);
 
+	/*
+		Подписка на изменения полного баланса пользователя
+	*/
+	rpc SubscribeMargin(SubscribeMarginRequest) returns (stream SubscribeMarginResponse);
+
 }
+
+message SubscribeMarginRequest{
+	// В мете передается информация о пользователе
+}
+
+enum ChangesType{
+	CHANGES_TYPE_UNDEFIEND = 0; 
+	CHANGES_TYPE_PARTITIAL = 1;
+	CHANGES_TYPE_UPDATE = 2; 
+	CHANGES_TYPE_INSERT = 3;
+	CHANGES_TYPE_DELETE = 4; 
+}
+
+message Margin{
+	 int32 Account = 1;
+         string currency = 2;
+         int32 risk_limit = 3;
+         string PrevState = 4;
+         string State = 5;
+         string Action = 6;
+         int32 Amount = 7;
+         int32 PendingCredit = 8;
+         int32 PendingDebit = 9;
+         int32 ConfirmedDebit = 10;
+         int32 PrevRealisedPnl = 11;
+         int32 PrevUnrealisedPnl = 12;
+         int32 GrossComm = 13;
+         int32 GrossOpenCost = 14;
+         int32 GrossOpenPremium = 15;
+         int32 GrossExecCost = 16;
+         int32 GrossMarkValue = 17;
+         int32 RiskValue = 18;
+         int32 TaxableMargin = 19;
+         int32 InitMargin = 20;
+         int32 MaintMargin = 21;
+         int32 SessionMargin = 22;
+         int32 TargetExcessMargin = 23;
+         int32 VarMargin = 24;
+         int32 RealisedPnl = 25;
+         int32 UnrealisedPnl = 26;
+         int32 IndicativeTax = 27;
+         int32 UnrealisedProfit = 28;
+         int32 SyntheticMargin = 29;
+         int32 WalletBalance = 30;
+         int32 MarginBalance = 31;
+         int32 MarginBalancePcnt = 32;
+         int32 MarginLeverage = 33;
+         int32 MarginUsedPcnt = 34;
+         int32 ExcessMargin = 35;
+         int32 ExcessMarginPcnt = 36;
+         int32 AvailableMargin = 37;
+         int32 WithdrawableMargin = 38;
+         google.protobuf.Timestamp Timestamp = 39;
+         int32 GrossLastValue = 40;
+         double Commission = 41;
+}
+
+message SubscribeMarginResponse{
+	ChangesType changed_type = 1;
+
+}
+
 
 message DeleteOrderRequest{
 	string order_id = 1;
