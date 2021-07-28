@@ -44,6 +44,7 @@ namespace Former
         /// <returns></returns>
         private async Task UpdateConcreteBook(ConcurrentDictionary<string, Order> bookNeededUpdate, Order order, UserContext context)
         {
+            if (CheckContext(context)) return;
             var task = Task.Run(() =>
             {
                 //если ордер имеет статус открытый, то он добавляется, либо апдейтится, если закрытый, то удаляется из книги
@@ -70,6 +71,7 @@ namespace Former
         /// <returns></returns>
         public async Task UpdateOrderBooks(Order newComingOrder, UserContext context)
         {
+            if (CheckContext(context)) return;
             var task = Task.Run(async () =>
             {
                 //выбирает, какую книгу апдейтить
@@ -98,6 +100,7 @@ namespace Former
         /// <returns></returns>
         private async Task FitPrices(ConcurrentDictionary<string, Order> ordersForFairPrice, OrderBookType bookType, UserContext context)
         {
+            if (CheckContext(context)) return;
             var checkPrices = Task.Run(async () =>
             {
                 //в зависимости от того, какая книга обновлялась, вычисляется рыночная цена
@@ -156,6 +159,7 @@ namespace Former
         /// <returns></returns>
         public async Task UpdateMyOrderList(Order newComingOrder, UserContext context)
         {
+            if (CheckContext(context)) return;
             Order oldOrder;
             var id = newComingOrder.Id;
             var price = newComingOrder.Price;
@@ -218,6 +222,7 @@ namespace Former
         /// <returns></returns>
         public async Task FormPurchaseOrder(UserContext context)
         {
+            if (CheckContext(context)) return;
             Log.Debug("Playing long...");
             double availableBalance = _balance * context.configuration.AvaibleBalance;
 
@@ -239,6 +244,7 @@ namespace Former
         /// <returns></returns>
         public async Task FormSellOrder(UserContext context)
         {
+            if (CheckContext(context)) return;
             Log.Debug("Playing short...");
 
             //вычисляется доступный баланс в зависимости от настроек пользователя
@@ -253,6 +259,27 @@ namespace Former
             //продать ордер по рыночной цене, но ордер при этом лимитный 
             if (quantity > 0) await context.PlaceOrder(sellFairPrice, -quantity);
             else Log.Debug("Insufficient balance");
+        }
+
+        /// <summary>
+        /// Возвращает true если контекст нулевой или имеет нулевые поля
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        private bool CheckContext(UserContext context)
+        {
+            if (context is null)
+            {
+                Log.Error("Bad user context (null)");
+                return true;
+            }
+
+            if (context.configuration is null || context.sessionId is null || context.slot is null || context.trademarket is null)
+            {
+                Log.Error("Bad user context (some field is null)");
+                return true;
+            }
+            return false;
         }
     }
 }
