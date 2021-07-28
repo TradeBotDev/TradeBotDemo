@@ -166,6 +166,7 @@ message SubscribeMyOrdersRequest{
 }
 
 message SubscribeMyOrdersResponse {
+	tradebot.common.v1.DefaultResponse response = 1;
 	tradebot.common.v1.Order changed = 2;
 
 }

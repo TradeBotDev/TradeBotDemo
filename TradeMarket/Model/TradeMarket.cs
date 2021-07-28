@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Bitmex.Client.Websocket.Responses.Orders;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,7 +9,7 @@ using TradeMarket.DataTransfering;
 using TradeMarket.DataTransfering.Bitmex;
 using TradeMarket.Model;
 using Margin = Bitmex.Client.Websocket.Responses.Margins.Margin;
-
+using Order = Bitmex.Client.Websocket.Responses.Orders.Order;
 
 namespace TradeMarket.Model
 {
@@ -30,7 +31,7 @@ namespace TradeMarket.Model
         
         public abstract void SubscribeToBook(EventHandler<FullOrder> handler, UserContext context);
 
-        public abstract void SubscribeToUserOrders(EventHandler<FullOrder> handler, UserContext context);
+        public abstract void SubscribeToUserOrders(EventHandler<Order> handler, UserContext context);
 
         public abstract void SubscribeToBalance(EventHandler<Balance> handler, UserContext context);
 
@@ -41,7 +42,7 @@ namespace TradeMarket.Model
 
         public abstract event EventHandler<FullOrder> Book25Update;
         public abstract event EventHandler<FullOrder> BookUpdate;
-        public abstract event EventHandler<FullOrder> UserOrdersUpdate;
+        public abstract event EventHandler<Order> UserOrdersUpdate;
         public abstract event EventHandler<Balance> BalanceUpdate;
         public abstract event EventHandler<IPublisher<Margin>.ChangedEventArgs> MarginUpdate;
         #endregion

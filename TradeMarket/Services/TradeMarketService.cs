@@ -18,6 +18,8 @@ using SubscribeOrdersResponse = TradeBot.TradeMarket.TradeMarketService.v1.Subsc
 using Margin = Bitmex.Client.Websocket.Responses.Margins.Margin;
 using Newtonsoft.Json;
 using Bitmex.Client.Websocket.Responses;
+using TradeBot.Common.v1;
+using TradeMarket.DataTransfering.Bitmex;
 
 namespace TradeMarket.Services
 {
@@ -241,7 +243,7 @@ namespace TradeMarket.Services
             }
         }
 
-        public override Task SubscribeLogs(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
+        public override Task SubscribeLogs(TradeBot.TradeMarket.TradeMarketService.v1.SubscribeLogsRequest request, IServerStreamWriter<TradeBot.TradeMarket.TradeMarketService.v1.SubscribeLogsResponse> responseStream, ServerCallContext context)
         {
             return base.SubscribeLogs(request, responseStream, context);
         }
@@ -258,11 +260,17 @@ namespace TradeMarket.Services
             {
                 var user = await UserContext.GetUserContextAsync(sessionId, slot, trademarket);
                 user.UserOrders += async (sender, args) => {
-                    var order = ConvertOrder(args);
+                    var defaultResponse = new DefaultResponse()
+                    {
+                        Code = string.IsNullOrEmpty(args.OrdRejReason) ? ReplyCode.Succeed : ReplyCode.Failure,
+                        Message = string.IsNullOrEmpty(args.OrdRejReason) ? args.OrdRejReason! : ""
+                    };
+                    Order order = Convert(args);
                     Log.Logger.Information($"Sent order : {order} to {context.Host}");
                     await WriteStreamAsync<SubscribeMyOrdersResponse>(responseStream, new()
                     {
-                        Changed = Convert(args)
+                        Response = defaultResponse,
+                        Changed = order
                     }) ;
                 };
                 //TODO отписка после отмены
@@ -283,7 +291,27 @@ namespace TradeMarket.Services
             }
         }
 
-        public async override Task SubscribeOrders(SubscribeOrdersRequest request, IServerStreamWriter<SubscribeOrdersResponse> responseStream, ServerCallContext context)
+        private Order Convert(Bitmex.Client.Websocket.Responses.Orders.Order args)
+        {
+            return new()
+            {
+                Id = args.OrderId,
+                LastUpdateDate = new Timestamp
+                {
+                    Seconds = args.Timestamp.Value.Second
+                },
+
+                Price = (int)(args.Price ?? default(int)),
+                Quantity = (int)(args.OrderQty ?? default(int)),
+                Signature = new OrderSignature()
+                {
+                    Status = args.OrdStatus == Bitmex.Client.Websocket.Responses.Orders.OrderStatus.Filled ? OrderStatus.Closed : OrderStatus.Open,
+                    Type = args.Side == BitmexSide.Buy ? OrderType.Buy : OrderType.Sell
+                }
+            };
+        }
+
+        public async override Task SubscribeOrders(TradeBot.TradeMarket.TradeMarketService.v1.SubscribeOrdersRequest request, IServerStreamWriter<SubscribeOrdersResponse> responseStream, ServerCallContext context)
         {
             Log.Logger.Information($"Connected with {context.Host}");
 

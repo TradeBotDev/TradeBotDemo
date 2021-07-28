@@ -1,5 +1,6 @@
 ﻿using Bitmex.Client.Websocket;
 using Bitmex.Client.Websocket.Client;
+using Bitmex.Client.Websocket.Responses.Orders;
 using Bitmex.Client.Websocket.Websockets;
 using Serilog;
 using System;
@@ -12,6 +13,7 @@ using TradeMarket.Clients;
 using TradeMarket.DataTransfering;
 using TradeMarket.DataTransfering.Bitmex.Rest.Client;
 using Margin = Bitmex.Client.Websocket.Responses.Margins.Margin;
+using Order = Bitmex.Client.Websocket.Responses.Orders.Order;
 
 namespace TradeMarket.Model
 {
@@ -28,13 +30,12 @@ namespace TradeMarket.Model
 
         public event EventHandler<FullOrder> Book25;
         public event EventHandler<FullOrder> Book;
-        public event EventHandler<FullOrder> UserOrders;
+        public event EventHandler<Order> UserOrders;
         public event EventHandler<Model.Balance> UserBalance;
         public event EventHandler<IPublisher<Margin>.ChangedEventArgs> UserMargin;
 
         public List<IPublisher<Margin>.ChangedEventArgs> MarginCache = new List<IPublisher<Margin>.ChangedEventArgs>();
         public List<Balance> BalanceCache = new List<Balance>();
-        public List<FullOrder> UserOrdersCache = new List<FullOrder>();
         //TODO сделать эти классы абстрактными
         internal BitmexWebsocketClient WSClient { get; set; }
         internal BitmexRestfulClient RestClient { get; set; }

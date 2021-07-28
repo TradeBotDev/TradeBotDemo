@@ -117,6 +117,11 @@ namespace Former
             {
                 while (await call.ResponseStream.MoveNext())
                 {
+                    if (call.ResponseStream.Current.Response.Code == ReplyCode.Failure)
+                    {
+                        Log.Information("order was rejected with message: {0}", call.ResponseStream.Current.Response.Message);
+                        continue;
+                    }
                     UpdateMyOrders?.Invoke(call.ResponseStream.Current.Changed);
                 }
             };

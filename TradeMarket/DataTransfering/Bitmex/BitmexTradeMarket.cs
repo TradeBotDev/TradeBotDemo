@@ -23,6 +23,11 @@ using Newtonsoft.Json;
 using Order = Bitmex.Client.Websocket.Responses.Orders.Order;
 using TradeMarket.DataTransfering.Bitmex.Rest.Requests.Ammend;
 using Bitmex.Client.Websocket.Responses.Margins;
+using TradeBot.TradeMarket.TradeMarketService.v1;
+using Margin = Bitmex.Client.Websocket.Responses.Margins.Margin;
+using DeleteOrderRequest = TradeMarket.DataTransfering.Bitmex.Rest.Requests.DeleteOrderRequest;
+using PlaceOrderRequest = TradeMarket.DataTransfering.Bitmex.Rest.Requests.Place.PlaceOrderRequest;
+using AmmendOrderRequest = TradeMarket.DataTransfering.Bitmex.Rest.Requests.Ammend.AmmendOrderRequest;
 
 namespace TradeMarket.DataTransfering.Bitmex
 {
@@ -37,7 +42,7 @@ namespace TradeMarket.DataTransfering.Bitmex
 
         public override event EventHandler<FullOrder> Book25Update;
         public override event EventHandler<FullOrder> BookUpdate;
-        public override event EventHandler<FullOrder> UserOrdersUpdate;
+        public override event EventHandler<Order> UserOrdersUpdate;
         public override event EventHandler<Model.Balance> BalanceUpdate;
         public override event EventHandler<IPublisher<Margin>.ChangedEventArgs> MarginUpdate;
 
@@ -72,7 +77,7 @@ namespace TradeMarket.DataTransfering.Bitmex
 
         private void _userOrdersPublisher_Changed(object sender, IPublisher<global::Bitmex.Client.Websocket.Responses.Orders.Order>.ChangedEventArgs e)
         {
-            UserOrdersUpdate?.Invoke(sender, ConverFromOrder(e));
+            UserOrdersUpdate?.Invoke(sender, e.Changed );
         }
 
         private void _bookPublisher_Changed(object sender, IPublisher<global::Bitmex.Client.Websocket.Responses.Books.BookLevel>.ChangedEventArgs e)
@@ -85,7 +90,7 @@ namespace TradeMarket.DataTransfering.Bitmex
             Book25Update?.Invoke(sender, ConvertFromBookLevel(e));
         }
 
-        private FullOrder ConverFromOrder(IPublisher<global::Bitmex.Client.Websocket.Responses.Orders.Order>.ChangedEventArgs e)
+        public FullOrder ConverFromOrder(IPublisher<global::Bitmex.Client.Websocket.Responses.Orders.Order>.ChangedEventArgs e)
         {
             FullOrder order = new FullOrder
             {
@@ -235,7 +240,7 @@ namespace TradeMarket.DataTransfering.Bitmex
             BookUpdate += handler;
         }
 
-        public async override void SubscribeToUserOrders(EventHandler<FullOrder> handler, UserContext context)
+        public async override void SubscribeToUserOrders(EventHandler<Order> handler, UserContext context)
         {
             if (_userOrdersPublisher is null)
             {

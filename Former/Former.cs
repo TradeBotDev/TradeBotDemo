@@ -149,6 +149,8 @@ namespace Former
             var type = newComingOrder.Signature.Type;
             var status = newComingOrder.Signature.Status;
 
+
+
             //пытается получить ордер из списка, если его нет, то добавляет его
             if (_myOrders.TryGetValue(id, out oldOrder))
             {
