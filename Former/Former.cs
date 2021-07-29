@@ -174,7 +174,7 @@ namespace Former
             var type = newComingOrder.Signature.Type;
             var status = newComingOrder.Signature.Status;
 
-            //пытается получить ордер из списка, если его нет, то добавляет его
+            //пытается получить ордер из списка, то просто выходим из метода, т.к. нам нельзя его добавлять здесь для предотвращения цикла перевыставления ордеров
             if (_myOrders.TryGetValue(id, out oldOrder))
             {
                 //так как ордер сущетсвует в нашем списке, вероятно он закрыт почти или полностью и мы будем его продвать, поэтому сразу вычисляем цену для продажи
@@ -193,7 +193,7 @@ namespace Former
                 //если вновь пришедший ордер закрыт и он был на продажу, то просто удаляем его из нашего списка и больше не подгоняем его цену
                 if (status == OrderStatus.Closed && oldOrder.Signature.Type == OrderType.Sell)
                 {
-                    PlaceOrderResponse response = await context.PlaceOrder(sellPrice, -oldOrder.Quantity);
+                    PlaceOrderResponse response = await context.PlaceOrder(sellPrice, oldOrder.Quantity);
                     if (response.Response.Code == ReplyCode.Succeed)
                     {
                         _myOrders.TryRemove(id, out _);
@@ -219,7 +219,6 @@ namespace Former
                         }
                         Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} updated {5}", id, price, quantity, type, status, response.Response.Code);
                     }
-                    
                     return;
                 }
                 if (status == OrderStatus.Open && oldOrder.Signature.Type == OrderType.Sell)
@@ -227,7 +226,7 @@ namespace Former
                     PlaceOrderResponse response = null;
                     if (quantity != 0)
                     {
-                        newQuantity = oldOrder.Quantity - quantity;
+                        newQuantity = oldOrder.Quantity + quantity;
                         response = await context.PlaceOrder(sellPrice, newQuantity);
                         if (response.Response.Code == ReplyCode.Succeed)
                         {
@@ -240,14 +239,13 @@ namespace Former
                         }
                         Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} updated {5}", id, price, quantity, type, status, response.Response.Code);
                     }
-                    
                     return;
                 } 
             }
         }
 
         /// <summary>
-        /// формируется ордер на покупку
+        /// Формирует ордер на покупку
         /// </summary>
         public async Task FormPurchaseOrder(UserContext context)
         {
@@ -255,18 +253,20 @@ namespace Former
             double quantity = 0;
             double availableBalance = ConvertSatoshiToXBT(_availableBalance) * context.configuration.AvaibleBalance;
             double totalBalance = ConvertSatoshiToXBT(_totalBalance) * context.configuration.AvaibleBalance;
+            //вычисляем рыночную цену для продажи
             double purchaseFairPrice = _purchaseOrderBook.Max(x => x.Value.Price);
 
+            //если наша позиция длинная, то есть _positionSize имеет положительное значение, то мы можем продавать только по доступному балансу
+            //если наша позиция короткая, то есть _positionSize имеет отрицательное значение, то мы можем продавать по общему балансу, который есть на аккаунте
             if (_positionSize >= 0) quantity = context.configuration.ContractValue * Math.Floor(availableBalance * purchaseFairPrice / context.configuration.ContractValue);
             else quantity = context.configuration.ContractValue * Math.Floor(totalBalance * purchaseFairPrice / context.configuration.ContractValue);
 
+            //если баланса было достаточно для хотя бы одного ордера то выполняем продажу
             if (quantity > 0) 
             {
                 PlaceOrderResponse response = await context.PlaceOrder(purchaseFairPrice, quantity);
                 if(response.Response.Code == ReplyCode.Succeed)
                 {
-                    Log.Information("Order price: {0}, quantity: {1} placed {2}", purchaseFairPrice, quantity, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
-                    
                     _myOrders.TryAdd(response.OrderId, new Order
                     {
                         Id = response.OrderId,
@@ -280,12 +280,13 @@ namespace Former
                         LastUpdateDate = new Google.Protobuf.WellKnownTypes.Timestamp()
                     });
                 }
-            } 
+                Log.Information("Order price: {0}, quantity: {1} placed {2}", purchaseFairPrice, quantity, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
+            }
             else Log.Debug("Cannot place purchase order. Insufficient balance.");
         }
 
         /// <summary>
-        /// формируется ордер на продажу
+        /// Формирует ордер на продажу
         /// </summary>
         public async Task FormSellOrder(UserContext context)
         {
@@ -293,17 +294,20 @@ namespace Former
             double quantity = 0;
             double availableBalance = ConvertSatoshiToXBT(_availableBalance) * context.configuration.AvaibleBalance;
             double totalBalance = ConvertSatoshiToXBT(_totalBalance) * context.configuration.AvaibleBalance;
+            //вычисляем рыночную цену для продажи
             double sellFairPrice = _sellOrderBook.Min(x => x.Value.Price);
 
+            //если наша позиция короткая, то есть _positionSize имеет отрицательное значение, то мы можем продавать только по доступному балансу
+            //если наша позиция длинная, то есть _positionSize имеет положительное значение, то мы можем продавать по общему балансу, который есть на аккаунте
             if (_positionSize <= 0) quantity = context.configuration.ContractValue * Math.Floor(availableBalance * sellFairPrice / context.configuration.ContractValue);
             else quantity = context.configuration.ContractValue * Math.Floor(totalBalance * sellFairPrice / context.configuration.ContractValue);
 
+            //если баланса было достаточно для хотя бы одного ордера то выполняем продажу
             if (quantity > 0)
             {
                 PlaceOrderResponse response = await context.PlaceOrder(sellFairPrice, -quantity);
-                if (response.Response.Code != ReplyCode.Failure)
+                if (response.Response.Code == ReplyCode.Succeed)
                 {
-                    Log.Information("Order price: {0}, quantity: {1} placed {2}", sellFairPrice, quantity, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
                     _myOrders.TryAdd(response.OrderId, new Order
                     {
                         Id = response.OrderId,
@@ -316,11 +320,17 @@ namespace Former
                         },
                         LastUpdateDate = new Google.Protobuf.WellKnownTypes.Timestamp()
                     });
+                    Log.Information("Order price: {0}, quantity: {1} placed {2}", sellFairPrice, -quantity, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
                 }
             }
             else Log.Debug("Cannot place sell order. Insufficient balance.");
         }
 
+        /// <summary>
+        /// Конвертирует сатоши в биткоины
+        /// </summary>
+        /// <param name="satoshiValue"></param>
+        /// <returns></returns>
         private double ConvertSatoshiToXBT(int satoshiValue) 
         {
             return satoshiValue * 0.00000001;
@@ -336,7 +346,6 @@ namespace Former
                 Log.Error("Bad user context (null)");
                 return true;
             }
-
             if (context.configuration is null || context.sessionId is null || context.slot is null || context.trademarket is null)
             {
                 Log.Error("Bad user context (some field is null)");
