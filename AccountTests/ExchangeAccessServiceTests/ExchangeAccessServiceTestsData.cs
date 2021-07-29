@@ -1,5 +1,4 @@
 ﻿using AccountGRPC;
-using System;
 using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
 
