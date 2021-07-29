@@ -128,14 +128,6 @@ namespace TradeMarket.Services
 
         }
 
-        private TradeBot.TradeMarket.TradeMarketService.v1.SubscribePositionResponse ConvertPosition(Position position)
-        {
-            return new()
-            {
-                CurrentQty = position.CurrentQty ?? default(long),
-            };
-        }
-
         public async override Task SubscribePosition(SubscribePositionRequest request, IServerStreamWriter<SubscribePositionResponse> responseStream, ServerCallContext context)
         {
             var sessionId = context.RequestHeaders.Get("sessionid").Value;

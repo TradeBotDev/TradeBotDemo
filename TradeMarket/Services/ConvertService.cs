@@ -59,7 +59,7 @@ namespace TradeMarket.Services
         {
             return new()
             {
-                
+                CurrentQty = position.CurrentQty ?? default(long)
             };
         }
         
