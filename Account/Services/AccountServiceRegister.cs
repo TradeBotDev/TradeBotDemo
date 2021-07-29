@@ -15,7 +15,7 @@ namespace AccountGRPC
         // Метод регистрации аккаунта по запросу клиента. Вход в аккаунт после регистрации НЕ производится!
         public override Task<RegisterReply> Register(RegisterRequest request, ServerCallContext context)
         {
-            Log.Information($"Login получил запрос: Email - {request.Email}, Password - {request.Password}, VerifyPassword - {request.VerifyPassword}.");
+            Log.Information($"Register получил запрос: Email - {request.Email}, Password - {request.Password}, VerifyPassword - {request.VerifyPassword}.");
 
             // Валидация полей запроса
             ValidationMessage validationResult = Validate.RegisterFields(request);

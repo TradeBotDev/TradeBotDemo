@@ -24,7 +24,7 @@ namespace AccountGRPC
 
             // Проверка на существование входа в аккаунт. Если аккаунт среди вошедших не найден, отправляется
             // сообщение об ошибке.
-            if (!Models.State.loggedIn.ContainsKey(request.SessionId))
+            if (Models.State.loggedIn == null || !Models.State.loggedIn.ContainsKey(request.SessionId))
                 return Task.FromResult(AddExchangeAccessReplies.AccountNotFound());
 
             // Валидация полученных данных. В случае, если валидация не прошла успешно, возвращается сообщение об ошибке.
@@ -70,7 +70,9 @@ namespace AccountGRPC
         {
             Log.Information($"AllExchangesBySession получил запрос: SessionId - {request.SessionId}.");
 
-            if (Models.State.loggedIn.ContainsKey(request.SessionId))
+            if (Models.State.loggedIn == null || !Models.State.loggedIn.ContainsKey(request.SessionId))
+                return Task.FromResult(AllExchangesBySessionReplies.AccountNotFound());
+            else
             {
                 using (var database = new Models.AccountContext())
                 {
@@ -88,7 +90,6 @@ namespace AccountGRPC
                     return Task.FromResult(reply);
                 }
             }
-            return Task.FromResult(AllExchangesBySessionReplies.AccountNotFound());
         }
 
         // Метод, удаляющий данные одной из бирж для текущего пользователя по id записи.

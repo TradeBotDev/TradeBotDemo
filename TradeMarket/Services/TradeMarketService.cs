@@ -15,6 +15,11 @@ using TradeMarket.Services;
 using SubscribeBalanceRequest = TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceRequest;
 using SubscribeBalanceResponse = TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceResponse;
 using SubscribeOrdersResponse = TradeBot.TradeMarket.TradeMarketService.v1.SubscribeOrdersResponse;
+using Margin = Bitmex.Client.Websocket.Responses.Margins.Margin;
+using Newtonsoft.Json;
+using Bitmex.Client.Websocket.Responses;
+using TradeBot.Common.v1;
+using TradeMarket.DataTransfering.Bitmex;
 
 namespace TradeMarket.Services
 {
@@ -93,7 +98,9 @@ namespace TradeMarket.Services
 
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
-            var user = UserContext.GetUserContext(sessionId, slot);
+            var trademarket = context.RequestHeaders.Get("trademarket").Value;
+
+            var user = await UserContext.GetUserContextAsync(sessionId, slot,trademarket);
             var response = new PlaceOrderResponse()
             {
                 OrderId = "",
@@ -124,8 +131,10 @@ namespace TradeMarket.Services
         {
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
+            var trademarket = context.RequestHeaders.Get("trademarket").Value;
 
-            var user = UserContext.GetUserContext(sessionId, slot);
+
+            var user = UserContext.GetUserContextAsync(sessionId, slot,trademarket);
 
             FakeSlotPublisher.GetInstance().Changed += async (sender, args) =>
             {
@@ -153,7 +162,13 @@ namespace TradeMarket.Services
         {
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
-            var user = UserContext.GetUserContext(sessionId,slot);
+            var trademarket = context.RequestHeaders.Get("trademarket").Value;
+
+            var user = await UserContext.GetUserContextAsync(sessionId,slot,trademarket);
+            foreach(var balance in user.BalanceCache)
+            {
+                await WriteStreamAsync<SubscribeBalanceResponse>(responseStream, ConvertBalance(balance));
+            }
 
             user.UserBalance += async (sender, args) => {
                 await WriteStreamAsync<SubscribeBalanceResponse>(responseStream, ConvertBalance(args));
@@ -163,7 +178,89 @@ namespace TradeMarket.Services
 
         }
 
-        public override Task SubscribeLogs(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
+        /// <summary>
+        /// Конверт через json пока не нашли способа генерить код конвертации
+        /// </summary>
+        private TradeBot.TradeMarket.TradeMarketService.v1.Margin Convert(Margin margin)
+        {
+            return new()
+            {
+                AvailableMargin = margin.AvailableMargin ?? default(long),
+                RealisedPnl = margin.RealisedPnl ?? default(long),
+                MarginBalance = margin.MarginBalance ?? default(long)
+            };
+        }
+
+        private TradeBot.TradeMarket.TradeMarketService.v1.ChangesType Convert(BitmexAction action)
+        {
+            switch (action)
+            {
+                case BitmexAction.Undefined: return ChangesType.Undefiend;
+                case BitmexAction.Partial: return ChangesType.Partitial;
+                case BitmexAction.Insert: return ChangesType.Insert;
+                case BitmexAction.Update:return ChangesType.Update;
+                case BitmexAction.Delete: return ChangesType.Delete;
+            }
+            return ChangesType.Undefiend;
+        }
+
+        public async override Task SubscribeMargin(SubscribeMarginRequest request, IServerStreamWriter<SubscribeMarginResponse> responseStream, ServerCallContext context)
+        {
+            Log.Logger.Information($"Connected with {context.Host}");
+
+            var sessionId = context.RequestHeaders.Get("sessionid").Value;
+            var slot = context.RequestHeaders.Get("slot").Value;
+            var trademarket = context.RequestHeaders.Get("trademarket").Value;
+
+            try
+            {
+                var user = await UserContext.GetUserContextAsync(sessionId, slot, trademarket);
+                user.UserMargin += async (sender, args) => {
+                    var margin = Convert(args.Changed);
+                    //Log.Logger.Information($"Sent order : {order} to {context.Host}");
+                    await WriteStreamAsync<SubscribeMarginResponse>(responseStream, new()
+                    {
+                        ChangedType = Convert(args.Action),
+                        Margin = margin
+
+                    }) ;
+                };
+                //TODO отписка после отмены
+                await AwaitCancellation(context.CancellationToken);
+            }
+            catch (Exception e)
+            {
+                Log.Logger.Error("Exception happened");
+                Log.Logger.Error(e.Message);
+
+                Log.Logger.Error(e.StackTrace);
+
+                context.Status = Status.DefaultCancelled;
+                context.ResponseTrailers.Add("sessionid", sessionId);
+                context.ResponseTrailers.Add("error", e.Message);
+
+
+            }
+        }
+
+        public async override Task SubscribePosition(SubscribePositionRequest request, IServerStreamWriter<SubscribePositionResponse> responseStream, ServerCallContext context)
+        {
+            var sessionId = context.RequestHeaders.Get("sessionid").Value;
+            var slot = context.RequestHeaders.Get("slot").Value;
+            var trademarket = context.RequestHeaders.Get("trademarket").Value;
+
+            var user = await UserContext.GetUserContextAsync(sessionId, slot, trademarket);
+           
+
+            user.UserPosition += async (sender, args) => {
+                //Log.Information()
+                //await WriteStreamAsync<SubscribeBalanceResponse>(responseStream, ConvertBalance(args));
+            };
+            //TODO отписка после отмены
+            await AwaitCancellation(context.CancellationToken);
+        }
+
+        public override Task SubscribeLogs(TradeBot.TradeMarket.TradeMarketService.v1.SubscribeLogsRequest request, IServerStreamWriter<TradeBot.TradeMarket.TradeMarketService.v1.SubscribeLogsResponse> responseStream, ServerCallContext context)
         {
             return base.SubscribeLogs(request, responseStream, context);
         }
@@ -174,15 +271,23 @@ namespace TradeMarket.Services
 
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
+            var trademarket = context.RequestHeaders.Get("trademarket").Value;
+
             try
             {
-                var user = UserContext.GetUserContext(sessionId, slot);
+                var user = await UserContext.GetUserContextAsync(sessionId, slot, trademarket);
                 user.UserOrders += async (sender, args) => {
-                    var order = ConvertOrder(args);
+                    var defaultResponse = new DefaultResponse()
+                    {
+                        Code = string.IsNullOrEmpty(args.OrdRejReason) ? ReplyCode.Succeed : ReplyCode.Failure,
+                        Message = string.IsNullOrEmpty(args.OrdRejReason) ? args.OrdRejReason! : ""
+                    };
+                    Order order = Convert(args);
                     Log.Logger.Information($"Sent order : {order} to {context.Host}");
                     await WriteStreamAsync<SubscribeMyOrdersResponse>(responseStream, new()
                     {
-                        Changed = Convert(args)
+                        Response = defaultResponse,
+                        Changed = order
                     }) ;
                 };
                 //TODO отписка после отмены
@@ -203,15 +308,36 @@ namespace TradeMarket.Services
             }
         }
 
-        public async override Task SubscribeOrders(SubscribeOrdersRequest request, IServerStreamWriter<SubscribeOrdersResponse> responseStream, ServerCallContext context)
+        private Order Convert(Bitmex.Client.Websocket.Responses.Orders.Order args)
+        {
+            return new()
+            {
+                Id = args.OrderId,
+                LastUpdateDate = new Timestamp
+                {
+                    Seconds = args.Timestamp.Value.Second
+                },
+
+                Price = (int)(args.Price ?? default(int)),
+                Quantity = (int)(args.OrderQty ?? default(int)),
+                Signature = new OrderSignature()
+                {
+                    Status = args.OrdStatus == Bitmex.Client.Websocket.Responses.Orders.OrderStatus.Filled ? OrderStatus.Closed : OrderStatus.Open,
+                    Type = args.Side == BitmexSide.Buy ? OrderType.Buy : OrderType.Sell
+                }
+            };
+        }
+
+        public async override Task SubscribeOrders(TradeBot.TradeMarket.TradeMarketService.v1.SubscribeOrdersRequest request, IServerStreamWriter<SubscribeOrdersResponse> responseStream, ServerCallContext context)
         {
             Log.Logger.Information($"Connected with {context.Host}");
 
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
+            var trademarket = context.RequestHeaders.Get("trademarket").Value;
             try
             {
-                var user = UserContext.GetUserContext(sessionId, slot);
+                var user = await UserContext .GetUserContextAsync(sessionId, slot, trademarket);
                 user.Book25 += async (sender, args) => {
                     var order = ConvertOrder(args);
                     if (IsOrderSuitForSignature(args, request.Request.Signature))
@@ -263,7 +389,9 @@ namespace TradeMarket.Services
         {
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
-            var user = UserContext.GetUserContext(sessionId, slot);
+            var trademarket = context.RequestHeaders.Get("trademarket").Value;
+
+            var user = await UserContext.GetUserContextAsync(sessionId, slot, trademarket);
 
             double? price = 0;
             switch (request.PriceType)
@@ -292,7 +420,9 @@ namespace TradeMarket.Services
         {
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
-            var user = UserContext.GetUserContext(sessionId, slot);
+            var trademarket = context.RequestHeaders.Get("trademarket").Value;
+
+            var user = await UserContext.GetUserContextAsync(sessionId, slot, trademarket);
             var response = await user.DeleteOrder(request.OrderId);
             return new()
             {

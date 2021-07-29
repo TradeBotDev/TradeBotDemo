@@ -9,9 +9,10 @@ namespace Former
 {
     public class UserContext
     {
+        //Класс контекста пользователя
         public string sessionId;
-        public string trademarketName;
-        public string slotName;
+        public string trademarket;
+        public string slot;
         public Config configuration;
         private readonly TradeMarketClient _tradeMarketClient;
         private readonly Former _former;
@@ -21,8 +22,8 @@ namespace Former
         internal UserContext(string sessionId, string trademarket, string slot)
         {
             this.sessionId = sessionId;
-            this.trademarketName = trademarket;
-            this.slotName = slot;
+            this.trademarket = trademarket;
+            this.slot = slot;
 
 
             Meta = new Metadata();
@@ -33,18 +34,25 @@ namespace Former
             TradeMarketClient.Configure("https://localhost:5005", 10000);
 
             _tradeMarketClient = new TradeMarketClient();
-            _former = new Former();
+            _former = new Former(25);
             //Конфиг передается как параметр для любого метода
 
             _tradeMarketClient.UpdateOrderBook += UpdateOrderBooks;
             _tradeMarketClient.UpdateBalance += UpdateBalance;
             _tradeMarketClient.UpdateMyOrders += UpdateMyOrderList;
 
+
             ObserveOrderBook();
             ObserveBalance();
             ObserveMyOrders();
+            ObservePositions();
         }
 
+
+        private async void ObservePositions()
+        {
+            await _tradeMarketClient.ObservePositions(this);
+        }
         public async void FormPurchaseOrder()
         {
             await _former.FormPurchaseOrder(this);
@@ -61,9 +69,9 @@ namespace Former
         {
             await _former.UpdateMyOrderList(orderNeededUpdate, this);
         }
-        private async void UpdateBalance(Balance balance)
+        private async void UpdateBalance(int balanceToBuy, int balanceToSell)
         {
-            await _former.UpdateBalance(balance);
+            await _former.UpdateBalance(balanceToBuy, balanceToSell);
         }
         public async Task PlaceOrder(double sellPrice, double contractValue)
         {

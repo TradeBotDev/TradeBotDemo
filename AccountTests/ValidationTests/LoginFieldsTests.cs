@@ -4,6 +4,7 @@ using Xunit;
 
 namespace AccountTests.ValidationTests
 {
+    [Collection("AccountTests")]
     public class LoginFieldsTests
     {
         // “ест проверки на то, какой результат вернет валидаци€, если есть пустые пол€.
