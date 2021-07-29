@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AccountGRPC.Models;
 using TradeBot.Account.AccountService.v1;
 using Xunit;
 
@@ -11,18 +12,31 @@ namespace AccountTests.ExchangeAccessServiceTests
     [Collection("AccountTests")]
     public class ExchangeBySessionTests : ExchangeAccessServiceTestsData
     {
+        // Тестирование получения несуществующей информации о доступе к бирже из существующего.
         [Fact]
         public void GetNotExistingExchangeAccessTest()
         {
-            // Пока пусто
+            // Очистка списка вошедших аккаунтов для того, чтобы не было конфликтов.
+            State.loggedIn = new();
+
+            // Последовательная регистрация, вход и получение информации о доступе к бирже.
+            var reply = GenerateLogin("not_existing_exchange").ContinueWith(loginReply => 
+                exchangeAccessService.ExchangeBySession(new ExchangeBySessionRequest
+                {
+                    SessionId = loginReply.Result.Result.SessionId,
+                    Code = ExchangeCode.Bitmex
+                }, null));
+
+            // Ожидается что в результате не будет найдена информация о бирже.
+            Assert.Equal(ActionCode.ExchangeNotFound, reply.Result.Result.Result);
         }
         
-        // Тестирование получения информации о бирже из несуществующего аккаунта.
+        // Тестирование получения информации о доступе к бирже из несуществующего аккаунта.
         [Fact]
         public void GetExchangeAccessFromNonExistingAccount()
         {
             // Очистка списка вошедших аккаунтов для того, чтобы не было конфликтов.
-            AccountGRPC.Models.State.loggedIn = new();
+            State.loggedIn = new();
 
             // Запрос с заведомо несуществующим аккаунтом.
             var request = new ExchangeBySessionRequest
