@@ -73,9 +73,9 @@ namespace Former
         {
             await _former.UpdateBalance(balanceToBuy, balanceToSell);
         }
-        public async Task PlaceOrder(double sellPrice, double contractValue)
+        public async Task<TradeBot.TradeMarket.TradeMarketService.v1.PlaceOrderResponse> PlaceOrder(double sellPrice, double contractValue)
         {
-             await _tradeMarketClient.PlaceOrder(sellPrice, contractValue, this);
+            return await _tradeMarketClient.PlaceOrder(sellPrice, contractValue, this);
         }
         public async Task SetNewPrice(Order orderNeededToUpdate)
         {

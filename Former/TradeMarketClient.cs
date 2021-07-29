@@ -150,7 +150,7 @@ namespace Former
         /// <summary>
         /// Отправляет запрос в биржу на выставление своего ордера
         /// </summary>
-        public async Task PlaceOrder(double sellPrice, double contractValue, UserContext context)
+        public async Task<PlaceOrderResponse> PlaceOrder(double sellPrice, double contractValue, UserContext context)
         {
             Log.Information("Order price: {0}, quantity: {1} placed", sellPrice, contractValue);
             PlaceOrderResponse response = null;
@@ -159,8 +159,8 @@ namespace Former
                 response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = sellPrice, Value = contractValue }, context.Meta);
                 Log.Information(response.OrderId + " placed " + response.Response.Code.ToString() + " message: " + response.Response.Message);
             };
-
             await ConnectionTester(placeOrders);
+            return response;
         }
         /// <summary>
         /// Отправляет запрос в биржу на изменение цены своего ордера
