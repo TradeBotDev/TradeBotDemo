@@ -188,6 +188,7 @@ namespace Former
                         _myOrders.TryRemove(id, out _);
                     }
                     Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} removed {5}", id, price, quantity, type, status, response.Response.Code);
+                    Log.Information("Order price: {0}, quantity: {1} placed {2}", sellPrice, -oldOrder.Quantity, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
                     return;
                 }
                 //если вновь пришедший ордер закрыт и он был на продажу, то просто удаляем его из нашего списка и больше не подгоняем его цену
@@ -199,6 +200,7 @@ namespace Former
                         _myOrders.TryRemove(id, out _);
                     }
                     Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} removed {5}", id, price, quantity, type, status, response.Response.Code);
+                    Log.Information("Order price: {0}, quantity: {1} placed {2}", sellPrice, quantity, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
                     return;
                 } 
                 if (status == OrderStatus.Open && oldOrder.Signature.Type == OrderType.Buy)
@@ -218,6 +220,8 @@ namespace Former
                             });
                         }
                         Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} updated {5}", id, price, quantity, type, status, response.Response.Code);
+                        Log.Information("Order price: {0}, quantity: {1} placed {2}", sellPrice, -newQuantity, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
+
                     }
                     return;
                 }
@@ -238,6 +242,7 @@ namespace Former
                             });
                         }
                         Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} updated {5}", id, price, quantity, type, status, response.Response.Code);
+                        Log.Information("Order price: {0}, quantity: {1} placed {2}", sellPrice, newQuantity, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
                     }
                     return;
                 } 
