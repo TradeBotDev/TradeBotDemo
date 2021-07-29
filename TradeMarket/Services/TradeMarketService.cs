@@ -20,6 +20,7 @@ using Newtonsoft.Json;
 using Bitmex.Client.Websocket.Responses;
 using TradeBot.Common.v1;
 using TradeMarket.DataTransfering.Bitmex;
+using Bitmex.Client.Websocket.Responses.Positions;
 
 namespace TradeMarket.Services
 {
@@ -243,6 +244,14 @@ namespace TradeMarket.Services
             }
         }
 
+        private TradeBot.TradeMarket.TradeMarketService.v1.SubscribePositionResponse ConvertPosition(Position position)
+        {
+            return new()
+            {
+                CurrentQty = position.CurrentQty ?? default(long),
+            };
+        }
+
         public async override Task SubscribePosition(SubscribePositionRequest request, IServerStreamWriter<SubscribePositionResponse> responseStream, ServerCallContext context)
         {
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
@@ -251,10 +260,10 @@ namespace TradeMarket.Services
 
             var user = await UserContext.GetUserContextAsync(sessionId, slot, trademarket);
            
-
             user.UserPosition += async (sender, args) => {
-                //Log.Information()
-                //await WriteStreamAsync<SubscribeBalanceResponse>(responseStream, ConvertBalance(args));
+                Log.Error("Recieved from {@Sender} args: {@Args}", sender, args);
+                await WriteStreamAsync<SubscribePositionResponse>(responseStream, ConvertPosition(args.Changed));
+
             };
             //TODO отписка после отмены
             await AwaitCancellation(context.CancellationToken);
@@ -280,7 +289,7 @@ namespace TradeMarket.Services
                     var defaultResponse = new DefaultResponse()
                     {
                         Code = string.IsNullOrEmpty(args.OrdRejReason) ? ReplyCode.Succeed : ReplyCode.Failure,
-                        Message = string.IsNullOrEmpty(args.OrdRejReason) ? args.OrdRejReason! : ""
+                        Message = string.IsNullOrEmpty(args.OrdRejReason) ? "" : args.OrdRejReason!
                     };
                     Order order = Convert(args);
                     Log.Logger.Information($"Sent order : {order} to {context.Host}");

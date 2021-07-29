@@ -68,17 +68,11 @@ service TradeMarketService {
 }
 
 message SubscribePositionRequest{
-
-}
-
-enum PositionState{
-	POSITION_STATE_UNDEFIEND = 0;
-	POSITION_STATE_LONG = 1;
-	POSITION_STATE_SHORT = 2;
+	google.protobuf.Empty empty = 1;
 }
 
 message SubscribePositionResponse{
-	PositionState position_state = 1;
+	double current_qty = 1;
 }
 
 message SubscribeMarginRequest{
@@ -187,7 +181,7 @@ message SubscribeMyOrdersRequest{
 message SubscribeMyOrdersResponse {
 	tradebot.common.v1.DefaultResponse response = 1;
 	tradebot.common.v1.Order changed = 2;
-
+	ChangesType changes_type = 3;
 }
 
 message SubscribeOrdersRequest{
@@ -197,7 +191,6 @@ message SubscribeOrdersRequest{
 
 message SubscribeOrdersResponse{
 	tradebot.common.v1.SubscribeOrdersResponse response = 1;
-
 }
 
 message SubscribeLogsRequest{

@@ -62,13 +62,13 @@ namespace TradeMarket.DataTransfering.Bitmex
                 _userPositionPublisher = new UserPositionPublisher(context.WSClient, context.WSClient.Streams.PositionStream);
                 _userPositionPublisher.Changed += _userPositionPublisher_Changed;
             }
-            await _userMarginPublisher.SubcribeAsync(new System.Threading.CancellationToken());
+            await _userPositionPublisher.SubcribeAsync(new System.Threading.CancellationToken());
             PositionUpdate += handler;
         }
 
         private void _userPositionPublisher_Changed(object sender, IPublisher<Position>.ChangedEventArgs e)
         {
-            Log.Information("Recieved Position {@Position}", e);
+            Log.Information("Recieved Position {@Position}", e.Changed);
             PositionUpdate?.Invoke(this, e);
         }
 
