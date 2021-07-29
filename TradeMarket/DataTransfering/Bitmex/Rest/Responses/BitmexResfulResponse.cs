@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using TradeMarket.DataTransfering.Bitmex.Rest.Requests;
@@ -19,6 +20,8 @@ namespace TradeMarket.DataTransfering.Bitmex.Rest.Responses
         [JsonIgnore]
         private string _responseContent { get; set; }
 
+        public HttpStatusCode Code { get; private set; }
+
         public BitmexResfulResponse()
         {
 
@@ -29,6 +32,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Rest.Responses
             var result = new BitmexResfulResponse<MessageType>();
             result._ReadContent(response.Content);
             result._TryParse();
+            result.Code = response.StatusCode;
             return result;
         }
 

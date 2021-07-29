@@ -49,7 +49,7 @@ namespace TradeMarket.Model
         /// <summary>
         /// Метод инициализации контекста. 
         /// </summary>
-        private void initAsync()
+        public void init()
         {
 
             var keySecretPair = _accountClient.GetUserInfo(SessionId);
@@ -161,7 +161,7 @@ namespace TradeMarket.Model
                     userContext = new UserContext(sessionId, slotName, TradeMarket.GetTradeMarket(tradeMarketName));
                     //контекст сначала добавляется , а затеми инициализируется для того чтобы избежать создание нескольких контекстов
                     RegisteredUsers.Add(userContext);
-                    userContext.initAsync();
+                    userContext.init();
                 }
                 return userContext;
             }
