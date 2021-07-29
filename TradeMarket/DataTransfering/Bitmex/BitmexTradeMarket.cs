@@ -29,6 +29,8 @@ using DeleteOrderRequest = TradeMarket.DataTransfering.Bitmex.Rest.Requests.Dele
 using PlaceOrderRequest = TradeMarket.DataTransfering.Bitmex.Rest.Requests.Place.PlaceOrderRequest;
 using AmmendOrderRequest = TradeMarket.DataTransfering.Bitmex.Rest.Requests.Ammend.AmmendOrderRequest;
 using Bitmex.Client.Websocket.Responses.Positions;
+using Bitmex.Client.Websocket.Responses.Books;
+using Bitmex.Client.Websocket.Responses.Wallets;
 
 namespace TradeMarket.DataTransfering.Bitmex
 {
@@ -42,10 +44,10 @@ namespace TradeMarket.DataTransfering.Bitmex
         private UserMarginPublisher _userMarginPublisher;
         private UserPositionPublisher _userPositionPublisher;
 
-        public override event EventHandler<FullOrder> Book25Update;
-        public override event EventHandler<FullOrder> BookUpdate;
-        public override event EventHandler<Order> UserOrdersUpdate;
-        public override event EventHandler<Model.Balance> BalanceUpdate;
+        public override event EventHandler<IPublisher<BookLevel>.ChangedEventArgs> Book25Update;
+        public override event EventHandler<IPublisher<BookLevel>.ChangedEventArgs> BookUpdate;
+        public override event EventHandler<IPublisher<Order>.ChangedEventArgs> UserOrdersUpdate;
+        public override event EventHandler<Wallet> BalanceUpdate;
         public override event EventHandler<IPublisher<Margin>.ChangedEventArgs> MarginUpdate;
         public override event EventHandler<IPublisher<Position>.ChangedEventArgs> PositionUpdate;
 
@@ -55,33 +57,13 @@ namespace TradeMarket.DataTransfering.Bitmex
             Name = name;
         }
 
-        public async override void SubscribeToUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, UserContext context)
-        {
-            if (_userPositionPublisher is null)
-            {
-                _userPositionPublisher = new UserPositionPublisher(context.WSClient, context.WSClient.Streams.PositionStream);
-                _userPositionPublisher.Changed += _userPositionPublisher_Changed;
-            }
-            await _userMarginPublisher.SubcribeAsync(new System.Threading.CancellationToken());
-            PositionUpdate += handler;
-        }
-
+        #region EventsHandlers
         private void _userPositionPublisher_Changed(object sender, IPublisher<Position>.ChangedEventArgs e)
         {
             Log.Information("Recieved Position {@Position}", e);
             PositionUpdate?.Invoke(this, e);
         }
 
-        public async override void SubscribeToUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, UserContext context)
-        {
-            if (_userMarginPublisher is null)
-            {
-                _userMarginPublisher = new UserMarginPublisher(context.WSClient, context.WSClient.Streams.MarginStream);
-                _userMarginPublisher.Changed += _userMarginPublisher_Changed;
-            }
-            await _userMarginPublisher.SubcribeAsync(new System.Threading.CancellationToken());
-            MarginUpdate += handler;
-        }
 
         private void _userMarginPublisher_Changed(object sender, IPublisher<Margin>.ChangedEventArgs e)
         {
@@ -93,70 +75,46 @@ namespace TradeMarket.DataTransfering.Bitmex
         private void _userWalletPublisher_Changed(object sender, IPublisher<global::Bitmex.Client.Websocket.Responses.Wallets.Wallet>.ChangedEventArgs e)
         {
             Log.Information("Recieved Balance {@Balance}", e);
-            BalanceUpdate?.Invoke(sender, new Model.Balance(e.Changed.Currency, e.Changed.BalanceBtc));
+            BalanceUpdate?.Invoke(sender, e.Changed);
         }
 
         private void _userOrdersPublisher_Changed(object sender, IPublisher<global::Bitmex.Client.Websocket.Responses.Orders.Order>.ChangedEventArgs e)
         {
-            UserOrdersUpdate?.Invoke(sender, e.Changed );
+            UserOrdersUpdate?.Invoke(sender, e );
         }
 
         private void _bookPublisher_Changed(object sender, IPublisher<global::Bitmex.Client.Websocket.Responses.Books.BookLevel>.ChangedEventArgs e)
         {
-            BookUpdate?.Invoke(sender, ConvertFromBookLevel(e));
+            BookUpdate?.Invoke(sender, e);
         }
 
         private void _book25Publisher_Changed(object sender, IPublisher<global::Bitmex.Client.Websocket.Responses.Books.BookLevel>.ChangedEventArgs e)
         {
-            Book25Update?.Invoke(sender, ConvertFromBookLevel(e));
+            Book25Update?.Invoke(sender, e);
         }
+        #endregion
 
-        public FullOrder ConverFromOrder(IPublisher<global::Bitmex.Client.Websocket.Responses.Orders.Order>.ChangedEventArgs e)
+        #region SubscribeRequests
+        public async override void SubscribeToUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, UserContext context)
         {
-            FullOrder order = new FullOrder
+            if (_userPositionPublisher is null)
             {
-                Signature = new OrderSignature
-                {
-                    Status = GetSignatureStatusFromAction(e.Action),
-                    Type = e.Changed.Side == BitmexSide.Buy ? OrderType.Buy : OrderType.Sell
-                },
-                Id = e.Changed.OrderId,
-                LastUpdateDate = DateTime.Now,
-                Price = e.Changed.Price.HasValue ? e.Changed.Price.Value : default(double),
-                Quantity = e.Changed.OrderQty.HasValue ? (int)e.Changed.OrderQty.Value : default(int)
-            };
-            return order;
-
-        }
-
-        private TradeBot.Common.v1.OrderStatus GetSignatureStatusFromAction(BitmexAction action)
-        {
-            switch (action)
-            {
-                case BitmexAction.Partial: return TradeBot.Common.v1.OrderStatus.Open;
-                case BitmexAction.Insert: return TradeBot.Common.v1.OrderStatus.Open; 
-                case BitmexAction.Delete: return TradeBot.Common.v1.OrderStatus.Closed;
-                case BitmexAction.Update: return TradeBot.Common.v1.OrderStatus.Open;
+                _userPositionPublisher = new UserPositionPublisher(context.WSClient, context.WSClient.Streams.PositionStream);
+                _userPositionPublisher.Changed += _userPositionPublisher_Changed;
             }
-            return TradeBot.Common.v1.OrderStatus.Unspecified;
+            await _userMarginPublisher.SubcribeAsync(new System.Threading.CancellationToken());
+            PositionUpdate += handler;
         }
 
-        private FullOrder ConvertFromBookLevel(IPublisher<global::Bitmex.Client.Websocket.Responses.Books.BookLevel>.ChangedEventArgs e)
-        { 
-            FullOrder order = new FullOrder();
-            OrderSignature signature = new OrderSignature()
+        public async override void SubscribeToUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, UserContext context)
+        {
+            if (_userMarginPublisher is null)
             {
-                Status = GetSignatureStatusFromAction(e.Action),
-                Type = e.Changed.Side == BitmexSide.Buy ? OrderType.Buy : OrderType.Sell
-            };
-            order.Id = e.Changed.Id.ToString();
-            //это время последнего обновления. оно пока что берется с текущей даты
-            order.LastUpdateDate = DateTime.Now;
-            order.Price = e.Changed.Price.HasValue ? (double)e.Changed.Price : default(double);
-            order.Quantity = e.Changed.Size.HasValue ? (int)e.Changed.Size : default(int);
-            
-            order.Signature = signature;
-            return order;
+                _userMarginPublisher = new UserMarginPublisher(context.WSClient, context.WSClient.Streams.MarginStream);
+                _userMarginPublisher.Changed += _userMarginPublisher_Changed;
+            }
+            await _userMarginPublisher.SubcribeAsync(new System.Threading.CancellationToken());
+            MarginUpdate += handler;
         }
 
         public async override Task<DefaultResponse> AutheticateUser(string api, string secret, UserContext context)
@@ -175,71 +133,7 @@ namespace TradeMarket.DataTransfering.Bitmex
             };
         }
 
-        public async override Task<DefaultResponse> DeleteOrder(string id, UserContext context)
-        {
-            var response = await context.RestClient.SendAsync(new DeleteOrderRequest(context.Key, context.Secret, id), new System.Threading.CancellationToken());
-            if(response.Error is not null)
-            {
-                return new()
-                {
-                    Code = ReplyCode.Failure,
-                    Message = response.Error.Message
-                };
-            }
-            var orderMessage = response.Message;
-            return new()
-            {
-                Code = ReplyCode.Succeed,
-                Message = $"Order {orderMessage.OrderId} was deleted"
-            };
-        }
-
-        public async override Task<TradeBot.TradeMarket.TradeMarketService.v1.PlaceOrderResponse> PlaceOrder(double quontity, double price,UserContext context)
-        {
-            var response = await context.RestClient.SendAsync(new PlaceOrderRequest(context.Key, context.Secret, new Order
-            {
-                Symbol = context.SlotName,
-                OrdType = "Limit",
-                Price = (int)price,
-                OrderQty = (long?)quontity
-            }), new System.Threading.CancellationToken());
-            if (response.Error is not null)
-            {
-                return new()
-                {
-                    OrderId = "empty",
-                    Response = new()
-                    {
-                        Code = ReplyCode.Failure,
-                        Message = response.Error.Message
-                    }
-                };
-            }
-            var orderMessage = response.Message;
-            if(!string.IsNullOrEmpty(orderMessage.OrdRejReason))
-            {
-                return new()
-                {
-                    OrderId = orderMessage.OrderId,
-                    Response = new()
-                    {
-                        Code = ReplyCode.Failure,
-                        Message = orderMessage.OrdRejReason
-                    }
-                };
-            }
-            return new()
-            {
-                OrderId = orderMessage.OrderId,
-                Response = new()
-                {
-                    Code = ReplyCode.Succeed,
-                    Message = $"Order Placed"
-                }
-            };
-        }
-
-        public async override void SubscribeToBook25(EventHandler<FullOrder> handler, UserContext context)
+        public async override void SubscribeToBook25(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, UserContext context)
         {
             if(_book25Publisher is null)
             {
@@ -250,7 +144,7 @@ namespace TradeMarket.DataTransfering.Bitmex
             Book25Update += handler;
         }
 
-        public async override void SubscribeToBook(EventHandler<FullOrder> handler, UserContext context)
+        public async override void SubscribeToBook(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, UserContext context)
         {
             if (_bookPublisher is null)
             {
@@ -261,7 +155,7 @@ namespace TradeMarket.DataTransfering.Bitmex
             BookUpdate += handler;
         }
 
-        public async override void SubscribeToUserOrders(EventHandler<Order> handler, UserContext context)
+        public async override void SubscribeToUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, UserContext context)
         {
             if (_userOrdersPublisher is null)
             {
@@ -272,7 +166,7 @@ namespace TradeMarket.DataTransfering.Bitmex
             UserOrdersUpdate += handler;
         }
 
-        public async override void SubscribeToBalance(EventHandler<Model.Balance> handler, UserContext context)
+        public async override void SubscribeToBalance(EventHandler<Wallet> handler, UserContext context)
         {
             if (_userWalletPublisher is null)
             {
@@ -282,7 +176,9 @@ namespace TradeMarket.DataTransfering.Bitmex
             await _userWalletPublisher.SubcribeAsync(new System.Threading.CancellationToken());
             BalanceUpdate += handler;
         }
+        #endregion
 
+        #region RestREquests
         public async override Task<DefaultResponse> AmmendOrder(string id, double? price, long? Quantity, long? LeavesQuantity, UserContext context)
         {
             var response = await context.RestClient.SendAsync(new AmmendOrderRequest(context.Key, context.Secret, new() {Id = id, LeavesQuantity = LeavesQuantity, Price = price, Quantity = Quantity }), new System.Threading.CancellationToken());
@@ -309,5 +205,69 @@ namespace TradeMarket.DataTransfering.Bitmex
                 Message = $"Order {orderMessage.OrderId} Ammended"
             };
         }
+        public async override Task<DefaultResponse> DeleteOrder(string id, UserContext context)
+        {
+            var response = await context.RestClient.SendAsync(new DeleteOrderRequest(context.Key, context.Secret, id), new System.Threading.CancellationToken());
+            if (response.Error is not null)
+            {
+                return new()
+                {
+                    Code = ReplyCode.Failure,
+                    Message = response.Error.Message
+                };
+            }
+            var orderMessage = response.Message;
+            return new()
+            {
+                Code = ReplyCode.Succeed,
+                Message = $"Order {orderMessage.OrderId} was deleted"
+            };
+        }
+
+        public async override Task<TradeBot.TradeMarket.TradeMarketService.v1.PlaceOrderResponse> PlaceOrder(double quontity, double price, UserContext context)
+        {
+            var response = await context.RestClient.SendAsync(new PlaceOrderRequest(context.Key, context.Secret, new Order
+            {
+                Symbol = context.SlotName,
+                OrdType = "Limit",
+                Price = (int)price,
+                OrderQty = (long?)quontity
+            }), new System.Threading.CancellationToken());
+            if (response.Error is not null)
+            {
+                return new()
+                {
+                    OrderId = "empty",
+                    Response = new()
+                    {
+                        Code = ReplyCode.Failure,
+                        Message = response.Error.Message
+                    }
+                };
+            }
+            var orderMessage = response.Message;
+            if (!string.IsNullOrEmpty(orderMessage.OrdRejReason))
+            {
+                return new()
+                {
+                    OrderId = orderMessage.OrderId,
+                    Response = new()
+                    {
+                        Code = ReplyCode.Failure,
+                        Message = orderMessage.OrdRejReason
+                    }
+                };
+            }
+            return new()
+            {
+                OrderId = orderMessage.OrderId,
+                Response = new()
+                {
+                    Code = ReplyCode.Succeed,
+                    Message = $"Order Placed"
+                }
+            };
+        }
+        #endregion
     }
 }

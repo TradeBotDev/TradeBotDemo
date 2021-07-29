@@ -197,6 +197,7 @@ message SubscribeOrdersRequest{
 
 message SubscribeOrdersResponse{
 	tradebot.common.v1.SubscribeOrdersResponse response = 1;
+	ChangesType changed_type = 2;
 
 }
 

@@ -14,11 +14,13 @@ namespace TradeMarketTests.IntegrationTests
         [Fact]
         public async void MultipleUserShouldCreatesOneInstanceOfUserContextSync()
         {
-            Moq.Mock<UserContext> UserContextMoq = new Moq.Mock<UserContext>(Moq.MockBehavior.Strict);
+            /*Moq.Mock<UserContext> UserContextMoq = new Moq.Mock<UserContext>(Moq.MockBehavior.Loose);
             UserContextMoq.Setup(uq => uq.init()).Callback(() => { });
             UserContextMoq.Setup(uq => uq.IsEquevalentTo(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).CallBase();
-            UserContextMoq.Setup()
-            var user1 = await UserContextMoq.GetUserContextAsync("123", "123", "123");
+            */
+            var user1 = await UserContext.GetUserContextAsync("123", "123", "bitmex");
+            var user2 = await UserContext.GetUserContextAsync("123", "123", "bitmex");
+            var user3 = await UserContext.GetUserContextAsync("123", "123", "bitmex");
         }
 
         [Fact]
