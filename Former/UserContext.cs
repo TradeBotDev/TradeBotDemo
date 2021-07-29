@@ -40,7 +40,7 @@ namespace Former
             _tradeMarketClient.UpdateOrderBook += UpdateOrderBooks;
             _tradeMarketClient.UpdateBalance += UpdateBalance;
             _tradeMarketClient.UpdateMyOrders += UpdateMyOrderList;
-
+            _tradeMarketClient.UpdatePosition += UpdatePosition;
 
             ObserveOrderBook();
             ObserveBalance();
@@ -48,6 +48,7 @@ namespace Former
             ObservePositions();
         }
 
+        
 
         private async void ObservePositions()
         {
@@ -73,13 +74,17 @@ namespace Former
         {
             await _former.UpdateBalance(balanceToBuy, balanceToSell);
         }
-        public async Task PlaceOrder(double sellPrice, double contractValue)
+        private async void UpdatePosition(double currentQuantity)
         {
-             await _tradeMarketClient.PlaceOrder(sellPrice, contractValue, this);
+            await _former.UpdatePosition(currentQuantity);
         }
-        public async Task SetNewPrice(Order orderNeededToUpdate)
+        public async Task<TradeBot.TradeMarket.TradeMarketService.v1.PlaceOrderResponse> PlaceOrder(double sellPrice, double contractValue)
         {
-            await _tradeMarketClient.SetNewPrice(orderNeededToUpdate, this);
+            return await _tradeMarketClient.PlaceOrder(sellPrice, contractValue, this);
+        }
+        public async Task<TradeBot.TradeMarket.TradeMarketService.v1.AmmendOrderResponse> SetNewPrice(Order orderNeededToUpdate)
+        {
+            return await _tradeMarketClient.SetNewPrice(orderNeededToUpdate, this);
         }
         private async void ObserveOrderBook()
         {

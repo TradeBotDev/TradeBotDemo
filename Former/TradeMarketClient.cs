@@ -23,6 +23,9 @@ namespace Former
         public delegate void BalanceEvent(int balanceToBuy, int balanceToSell);
         public BalanceEvent UpdateBalance;
 
+        public delegate void PositionUpdate(double currentQuantity);
+        public PositionUpdate UpdatePosition;
+
         private static int _retryDelay;
         private static string _connectionString;
 
@@ -117,7 +120,7 @@ namespace Former
             {
                 while (await call.ResponseStream.MoveNext())
                 {
-                    if (call.ResponseStream.Current.Response.Code == ReplyCode.Failure)
+                    if (call.ResponseStream.Current.Response.Code == ReplyCode.Failure || call.ResponseStream.Current.ChangesType == ChangesType.Partitial)
                     {
                         Log.Information("order was rejected with message: {0}", call.ResponseStream.Current.Response.Message);
                         continue;
@@ -130,44 +133,36 @@ namespace Former
         public async Task ObservePositions(UserContext context)
         {
             using var call = _client.SubscribePosition(new SubscribePositionRequest(), context.Meta);
-            Func<Task> observeMyOrders = async () =>
+            Func<Task> observePosition = async () =>
             {
                 while (await call.ResponseStream.MoveNext())
                 {
-
-                    //if (call.ResponseStream.Current.Response.Code == ReplyCode.Failure)
-                    //{
-                    //    Log.Information("order was rejected with message: {0}", call.ResponseStream.Current.Response.Message);
-                    //    continue;
-                    //}
-                    //UpdateMyOrders?.Invoke(call.ResponseStream.Current.Changed);
+                    UpdatePosition?.Invoke(call.ResponseStream.Current.CurrentQty);
                 }
             };
-            await ConnectionTester(observeMyOrders);
+            await ConnectionTester(observePosition);
         }
 
 
         /// <summary>
         /// Отправляет запрос в биржу на выставление своего ордера
         /// </summary>
-        public async Task PlaceOrder(double sellPrice, double contractValue, UserContext context)
+        public async Task<PlaceOrderResponse> PlaceOrder(double sellPrice, double contractValue, UserContext context)
         {
-            Log.Information("Order price: {0}, quantity: {1} placed", sellPrice, contractValue);
+            
             PlaceOrderResponse response = null;
             Func<Task> placeOrders = async () =>
             {
                 response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = sellPrice, Value = contractValue }, context.Meta);
-                Log.Information(response.OrderId + " placed " + response.Response.Code.ToString() + " message: " + response.Response.Message);
             };
-
             await ConnectionTester(placeOrders);
+            return response;
         }
         /// <summary>
         /// Отправляет запрос в биржу на изменение цены своего ордера
         /// </summary>
-        public async Task SetNewPrice(Order orderNeededToUpdate, UserContext context)
+        public async Task<AmmendOrderResponse> SetNewPrice(Order orderNeededToUpdate, UserContext context)
         {
-            Log.Debug("Update order id: {0}, new price: {1}", orderNeededToUpdate.Id, orderNeededToUpdate.Price);
             AmmendOrderResponse response = null;
             Func<Task> placeOrders = async () =>
             {
@@ -179,9 +174,9 @@ namespace Former
                     NewQuantity = (int)orderNeededToUpdate.Quantity,
                     PriceType = PriceType.Default
                 }, context.Meta);
-                Log.Information(orderNeededToUpdate.Id + " ammended " + response.Response.Code.ToString() + " message: " + response.Response.Message);
             };
             await ConnectionTester(placeOrders);
+            return response;
         }
     }
 }
