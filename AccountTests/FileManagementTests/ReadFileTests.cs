@@ -6,6 +6,7 @@ using Xunit;
 namespace AccountTests.FileManagementTests
 {
     // Класс тестирования чтения данных из файла.
+    [Collection("AccountTests")]
     public class ReadFileTests : FileManagementTestsData
     {
         // Тестирование всех вариантов, когда при чтении файла должен возвращаться null.
