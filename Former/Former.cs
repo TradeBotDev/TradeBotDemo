@@ -180,6 +180,7 @@ namespace Former
         /// </summary>
         internal async Task UpdateMyOrderList(Order newComingOrder, ChangesType changesType, UserContext context)
         {
+            Log.Information("Order id: {@OrderId} was {@ChangeType}", newComingOrder.Id, changesType);
             if (CheckContext(context)) return;
             Order oldOrder = null;
             var id = newComingOrder.Id;

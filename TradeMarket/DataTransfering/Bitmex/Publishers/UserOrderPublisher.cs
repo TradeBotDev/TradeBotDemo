@@ -15,6 +15,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         {
             foreach (var data in response.Data)
             {
+                
                 e?.Invoke(nameof(UserOrderPublisher), new(data, response.Action));
             }
         };
