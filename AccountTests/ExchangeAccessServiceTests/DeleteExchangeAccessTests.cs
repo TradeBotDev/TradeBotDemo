@@ -1,9 +1,4 @@
 ﻿using AccountGRPC.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
 using Xunit;
 
@@ -53,7 +48,37 @@ namespace AccountTests.ExchangeAccessServiceTests
         [Fact]
         public void GetExistingExchangeAccessTest()
         {
-            // Пока пусто
+            // Очистка списка вошедших аккаунтов для того, чтобы не было конфликтов.
+            State.loggedIn = new();
+            string sessionId = "none";
+
+            // Локальный метод, генерирующий запрос на добавление информации о доступе к бирже
+            // и записывающий Id сессии в переменную.
+            AddExchangeAccessRequest GenerateRequest(string _sessionId)
+            {
+                sessionId = _sessionId;
+                return new AddExchangeAccessRequest
+                {
+                    Code = ExchangeCode.Bitmex,
+                    ExchangeName = "Bitmex",
+                    SessionId = sessionId,
+                    Token = "test_token",
+                    Secret = "test_secret"
+                };
+            }
+
+            // Последовательная генерация входа в аккаунт, добавление информации о доступе к биржи в аккаунт,
+            // а затем ее удаление.
+            var reply = GenerateLogin("delete_existing_exchange")
+                .ContinueWith(loginReply => exchangeAccessService.AddExchangeAccess(GenerateRequest(loginReply.Result.Result.SessionId), null))
+                .ContinueWith(none => exchangeAccessService.DeleteExchangeAccess(new DeleteExchangeAccessRequest
+                {
+                    SessionId = sessionId,
+                    Code = ExchangeCode.Bitmex
+                }, null));
+
+            // Ожидается, что удаление информации будет завершено успешно.
+            Assert.Equal(ActionCode.Successful, reply.Result.Result.Result);
         }
     }
 }
