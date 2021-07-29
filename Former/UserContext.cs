@@ -82,9 +82,9 @@ namespace Former
         {
             return await _tradeMarketClient.PlaceOrder(sellPrice, contractValue, this);
         }
-        public async Task<TradeBot.TradeMarket.TradeMarketService.v1.AmmendOrderResponse> SetNewPrice(Order orderNeededToUpdate)
+        public async Task<TradeBot.TradeMarket.TradeMarketService.v1.AmmendOrderResponse> SetNewPrice(string id, double newPrice)
         {
-            return await _tradeMarketClient.SetNewPrice(orderNeededToUpdate, this);
+            return await _tradeMarketClient.SetNewPrice(id, newPrice, this);
         }
         private async void ObserveOrderBook()
         {

@@ -103,17 +103,23 @@ namespace Former
                     foreach (var order in _myOrders)
                     {
                         //проверяем все свои ордера, необходимо ли им подогнаться по рыночную цену
-                        if (order.Value.Price + context.configuration.OrderUpdatePriceRange > fairPrice )
+                        if (order.Value.Price - fairPrice > context.configuration.OrderUpdatePriceRange)
                         {
-                            if (!_myOrders.TryGetValue(order.Key, out _)) return;
-                            //отправляется запрос в тм, чтобы он перевыставил ордер (поменял цену ордера) на новую (рыночную)
-                            AmmendOrderResponse response = await context.SetNewPrice(order.Value);
-                            if (response.Response.Code == ReplyCode.Succeed) 
+                            if (!_myOrders.TryGetValue(order.Key, out _))
                             {
-                                var temp = order.Value;
-                                order.Value.Price = fairPrice;
-                                _myOrders.TryUpdate(order.Key, order.Value, temp);
+                                _myOrders.TryRemove(order.Key, out _);
+                                return;
                             }
+                            //отправляется запрос в тм, чтобы он перевыставил ордер (поменял цену ордера) на новую (рыночную)
+                            AmmendOrderResponse response = await context.SetNewPrice(order.Value.Id, fairPrice);
+                            if (response.Response.Code == ReplyCode.Succeed) 
+                                _myOrders.AddOrUpdate(order.Key, order.Value, (k,v) => 
+                                {
+                                    v.Price = fairPrice;
+                                    return v;
+                                });
+
+                            
                             Log.Information("Order {0} amended with {1} {2} {3}", order.Key, fairPrice, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
                         }
                     }
@@ -124,16 +130,22 @@ namespace Former
                     double fairPrice = ordersForFairPrice.Max(x => x.Value.Price);
                     foreach (var order in _myOrders)
                     {
-                        if (order.Value.Price + context.configuration.OrderUpdatePriceRange < fairPrice)
+                        if (fairPrice - order.Value.Price > context.configuration.OrderUpdatePriceRange)
                         {
-                            if (!_myOrders.TryGetValue(order.Key, out _)) return;
-                            AmmendOrderResponse response = await context.SetNewPrice(order.Value);
-                            if (response.Response.Code == ReplyCode.Succeed)
+                            if (!_myOrders.TryGetValue(order.Key, out _)) 
                             {
-                                var temp = order.Value;
-                                order.Value.Price = fairPrice;
-                                _myOrders.TryUpdate(order.Key, order.Value, temp);
+                                _myOrders.TryRemove(order.Key, out _);
+                                return;
                             }
+                                
+                                
+                            AmmendOrderResponse response = await context.SetNewPrice(order.Value.Id, fairPrice);
+                            if (response.Response.Code == ReplyCode.Succeed)
+                                _myOrders.AddOrUpdate(order.Key, order.Value, (k, v) =>
+                                {
+                                    v.Price = fairPrice;
+                                    return v;
+                                });
                             Log.Information("Order {0} amended with {1} {2} {3}", order.Key, fairPrice, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
                         }
                     }

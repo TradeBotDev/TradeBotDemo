@@ -191,7 +191,7 @@ namespace TradeMarket.DataTransfering.Bitmex
                 };
             }
             var orderMessage = response.Message;
-            if (orderMessage.OrdRejReason is not null)
+            if (!string.IsNullOrEmpty(orderMessage.OrdRejReason))
             {
                 return new()
                 {

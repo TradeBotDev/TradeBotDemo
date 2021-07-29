@@ -122,7 +122,8 @@ namespace Former
             {
                 while (await call.ResponseStream.MoveNext())
                 {
-                    if (call.ResponseStream.Current.Response.Code == ReplyCode.Failure || call.ResponseStream.Current.ChangesType == ChangesType.Partitial)
+                    if (call.ResponseStream.Current.ChangesType == ChangesType.Partitial) continue;
+                    if (call.ResponseStream.Current.Response.Code == ReplyCode.Failure)
                     {
                         Log.Information("order was rejected with message: {0}", call.ResponseStream.Current.Response.Message);
                         continue;
@@ -166,17 +167,17 @@ namespace Former
         /// <summary>
         /// Отправляет запрос в биржу на изменение цены своего ордера
         /// </summary>
-        public async Task<AmmendOrderResponse> SetNewPrice(Order orderNeededToUpdate, UserContext context)
+        public async Task<AmmendOrderResponse> SetNewPrice(string id, double newPrice, UserContext context)
         {
             AmmendOrderResponse response = null;
             Func<Task> placeOrders = async () =>
             {
                 response = await _client.AmmendOrderAsync(new AmmendOrderRequest
                 {
-                    Id = orderNeededToUpdate.Id,
-                    NewPrice = orderNeededToUpdate.Price,
+                    Id = id,
+                    NewPrice = newPrice,
                     QuantityType = QuantityType.None,
-                    NewQuantity = (int)orderNeededToUpdate.Quantity,
+                    NewQuantity = default(int),
                     PriceType = PriceType.Default
                 }, context.Meta);
             };
