@@ -93,6 +93,7 @@ namespace Former
 
             await ConnectionTester(observeCurrentPurchaseOrders);
         }
+
         /// <summary>
         /// Наблюдает за обновлением доступного баланса 
         /// </summary>
@@ -110,6 +111,7 @@ namespace Former
 
             await ConnectionTester(observeBalance);
         }
+
         /// <summary>
         /// Наблюдает за событиями моих ордеров
         /// </summary>
@@ -130,6 +132,10 @@ namespace Former
             };
             await ConnectionTester(observeMyOrders);
         }
+
+        /// <summary>
+        /// Наблюдает за событиями моих позиций
+        /// </summary>
         public async Task ObservePositions(UserContext context)
         {
             using var call = _client.SubscribePosition(new SubscribePositionRequest(), context.Meta);
@@ -143,13 +149,11 @@ namespace Former
             await ConnectionTester(observePosition);
         }
 
-
         /// <summary>
         /// Отправляет запрос в биржу на выставление своего ордера
         /// </summary>
         public async Task<PlaceOrderResponse> PlaceOrder(double sellPrice, double contractValue, UserContext context)
         {
-            
             PlaceOrderResponse response = null;
             Func<Task> placeOrders = async () =>
             {
@@ -158,6 +162,7 @@ namespace Former
             await ConnectionTester(placeOrders);
             return response;
         }
+
         /// <summary>
         /// Отправляет запрос в биржу на изменение цены своего ордера
         /// </summary>
