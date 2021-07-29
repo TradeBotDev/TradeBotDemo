@@ -1,8 +1,11 @@
-﻿using TradeBot.Account.AccountService.v1;
+﻿using AccountGRPC.Models;
+using TradeBot.Account.AccountService.v1;
 using Xunit;
+using System.Linq;
 
 namespace AccountTests.AccountServiceTests
 {
+    [Collection("AccountTests")]
     public class LoginTests : AccountServiceTestsData
     {
         // Тестирование входа в существующий аккаунт.
@@ -11,7 +14,7 @@ namespace AccountTests.AccountServiceTests
         {
             var registerRequest = new RegisterRequest
             {
-                Email = $"existing_user{random.Next(0, 10000)}@pochta.test",
+                Email = $"login_to_existing_user@pochta.test",
                 Password = "password",
                 VerifyPassword = "password"
             };
@@ -27,6 +30,13 @@ namespace AccountTests.AccountServiceTests
             var reply = service.Register(registerRequest, null);
             reply.ContinueWith(login => service.Login(loginRequest, null));
 
+            using (var database = new AccountContext())
+            {
+                var accounts = database.Accounts.Where(account => account.Email == loginRequest.Email);
+                database.Accounts.Remove(accounts.First());
+                database.SaveChanges();
+            }
+
             // Ожидается, что вход в аккаунт будет успешным.
             Assert.Equal(ActionCode.Successful, reply.Result.Result);
         }
@@ -38,7 +48,7 @@ namespace AccountTests.AccountServiceTests
             // Генерация данных несуществующего аккауниа.
             var request = new LoginRequest()
             {
-                Email = $"non_existing_user{random.Next(0, 10000)}@pochta.ru",
+                Email = $"login_to_non_existing_user@pochta.ru",
                 Password = "password",
                 SaveExchangesAfterLogout = false
             };
@@ -51,9 +61,11 @@ namespace AccountTests.AccountServiceTests
         [Fact]
         public void DoubleLogin()
         {
+            State.loggedIn = new();
+
             var registerRequest = new RegisterRequest
             {
-                Email = $"existing_user{random.Next(0, 10000)}@pochta.test",
+                Email = $"double_login_user@pochta.test",
                 Password = "password",
                 VerifyPassword = "password"
             };
@@ -61,8 +73,8 @@ namespace AccountTests.AccountServiceTests
             var loginRequest = new LoginRequest()
             {
                 Email = registerRequest.Email,
-                Password = "password",
-                SaveExchangesAfterLogout = false
+                Password = registerRequest.Password,
+                SaveExchangesAfterLogout = true
             };
 
             // Последовательная регистрация, вход в аккаунт и вход в тот же самый аккаунт (т.е. попытка входа

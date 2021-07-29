@@ -5,6 +5,7 @@ using Xunit;
 
 namespace AccountTests.FileManagementTests
 {
+    [Collection("AccountTests")]
     public class WriteFileTests : FileManagementTestsData
     {
         // Тестирование записи объекта, содержащего в себе данные.
@@ -14,9 +15,9 @@ namespace AccountTests.FileManagementTests
             // Добавление случайных записей в список вошедших пользователей.
             for (int i = 0; i < 10; i++)
             {
-                loggedIn.Add($"random_session_{random.Next(1, 1000)}", new LoggedAccount
+                loggedIn.Add($"write_not_null_session_{i}", new LoggedAccount
                 {
-                    AccountId = random.Next(1, 100),
+                    AccountId = i,
                     SaveExchangesAfterLogout = false
                 });
             }
