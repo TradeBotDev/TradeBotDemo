@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AccountGRPC.Models;
+﻿using AccountGRPC.Models;
 using TradeBot.Account.AccountService.v1;
 using Xunit;
 
@@ -12,7 +7,7 @@ namespace AccountTests.ExchangeAccessServiceTests
     [Collection("AccountTests")]
     public class ExchangeBySessionTests : ExchangeAccessServiceTestsData
     {
-        // Тестирование получения несуществующей информации о доступе к бирже из существующего.
+        // Тестирование получения несуществующей информации о доступе к бирже из существующего аккаунта.
         [Fact]
         public void GetNotExistingExchangeAccessTest()
         {
@@ -20,7 +15,7 @@ namespace AccountTests.ExchangeAccessServiceTests
             State.loggedIn = new();
 
             // Последовательная регистрация, вход и получение информации о доступе к бирже.
-            var reply = GenerateLogin("not_existing_exchange").ContinueWith(loginReply => 
+            var reply = GenerateLogin("getting_not_existing_exchange").ContinueWith(loginReply => 
                 exchangeAccessService.ExchangeBySession(new ExchangeBySessionRequest
                 {
                     SessionId = loginReply.Result.Result.SessionId,
@@ -33,7 +28,7 @@ namespace AccountTests.ExchangeAccessServiceTests
         
         // Тестирование получения информации о доступе к бирже из несуществующего аккаунта.
         [Fact]
-        public void GetExchangeAccessFromNonExistingAccount()
+        public void GetExchangeAccessFromNonExistingAccountTest()
         {
             // Очистка списка вошедших аккаунтов для того, чтобы не было конфликтов.
             State.loggedIn = new();
@@ -52,7 +47,7 @@ namespace AccountTests.ExchangeAccessServiceTests
 
         // Тестирование получения существующей информации о доступе к бирже из существующего аккаунта.
         [Fact]
-        public void GetExistingExchangeAccess()
+        public void GetExistingExchangeAccessTest()
         {
             // Очистка списка вошедших аккаунтов для того, чтобы не было конфликтов.
             State.loggedIn = new();
