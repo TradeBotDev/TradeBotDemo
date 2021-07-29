@@ -1,7 +1,6 @@
 ﻿using Serilog;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Common.v1;
@@ -25,7 +24,7 @@ namespace Former
 
         private int _bookSize;
 
-        enum OrderBookType 
+        enum OrderBookType
         {
             Sell,
             Buy
@@ -76,18 +75,18 @@ namespace Former
                 {
                     await UpdateConcreteBook(_purchaseOrderBook, newComingOrder, context);
                     //если книга ордеров полностью заполнилась, вычисление рыночной цены, выполняющейся в методе FitPrices, будет корректным
-                    if (_purchaseOrderBook.Count >= _bookSize) await FitPrices(_purchaseOrderBook, OrderBookType.Buy, context);
+                    //if (_purchaseOrderBook.Count >= _bookSize) await FitPrices(_purchaseOrderBook, OrderBookType.Buy, context);
                 }
                 if (newComingOrder.Signature.Type == OrderType.Sell)
                 {
                     await UpdateConcreteBook(_sellOrderBook, newComingOrder, context);
                     //если книга ордеров полностью заполнилась, вычисление рыночной цены, выполняющейся в методе FitPrices, будет корректным
-                    if (_purchaseOrderBook.Count >= _bookSize) await FitPrices(_sellOrderBook, OrderBookType.Sell, context);
+                    //if (_purchaseOrderBook.Count >= _bookSize) await FitPrices(_sellOrderBook, OrderBookType.Sell, context);
                 }
             });
             await task;
         }
-        
+
         /// <summary>
         /// Подгоняет мои ордера под рыночную цену
         /// </summary>
@@ -112,14 +111,14 @@ namespace Former
                             }
                             //отправляется запрос в тм, чтобы он перевыставил ордер (поменял цену ордера) на новую (рыночную)
                             AmmendOrderResponse response = await context.SetNewPrice(order.Value.Id, fairPrice);
-                            if (response.Response.Code == ReplyCode.Succeed) 
-                                _myOrders.AddOrUpdate(order.Key, order.Value, (k,v) => 
+                            if (response.Response.Code == ReplyCode.Succeed)
+                                _myOrders.AddOrUpdate(order.Key, order.Value, (k, v) =>
                                 {
                                     v.Price = fairPrice;
                                     return v;
                                 });
 
-                            
+
                             Log.Information("Order {0} amended with {1} {2} {3}", order.Key, fairPrice, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
                         }
                     }
@@ -132,13 +131,13 @@ namespace Former
                     {
                         if (fairPrice - order.Value.Price > context.configuration.OrderUpdatePriceRange)
                         {
-                            if (!_myOrders.TryGetValue(order.Key, out _)) 
+                            if (!_myOrders.TryGetValue(order.Key, out _))
                             {
                                 _myOrders.TryRemove(order.Key, out _);
                                 return;
                             }
-                                
-                                
+
+
                             AmmendOrderResponse response = await context.SetNewPrice(order.Value.Id, fairPrice);
                             if (response.Response.Code == ReplyCode.Succeed)
                                 _myOrders.AddOrUpdate(order.Key, order.Value, (k, v) =>
@@ -179,35 +178,34 @@ namespace Former
         /// <summary>
         /// Обновляет список моих ордеров по подписке
         /// </summary>
-        internal async Task UpdateMyOrderList(Order newComingOrder, UserContext context)
+        internal async Task UpdateMyOrderList(Order newComingOrder, ChangesType changesType, UserContext context)
         {
             if (CheckContext(context)) return;
-            Order oldOrder;
+            Order oldOrder = null;
             var id = newComingOrder.Id;
             var price = newComingOrder.Price;
             var quantity = newComingOrder.Quantity;
             var type = newComingOrder.Signature.Type;
             var status = newComingOrder.Signature.Status;
+            double sellPrice; 
+            double newQuantity;
 
-            //пытается получить ордер из списка, то просто выходим из метода, т.к. нам нельзя его добавлять здесь для предотвращения цикла перевыставления ордеров
-            if (_myOrders.TryGetValue(id, out oldOrder))
+            if (changesType != ChangesType.Insert && _myOrders.TryGetValue(id, out oldOrder)) sellPrice = oldOrder.Price + oldOrder.Price * context.configuration.RequiredProfit;
+            else return;
+
+            if (changesType == ChangesType.Delete)
             {
-                //так как ордер сущетсвует в нашем списке, вероятно он закрыт почти или полностью и мы будем его продвать, поэтому сразу вычисляем цену для продажи
-                double sellPrice = oldOrder.Price + oldOrder.Price * context.configuration.RequiredProfit;
-                double newQuantity;
-                if (status == OrderStatus.Closed && oldOrder.Signature.Type == OrderType.Buy)
+                if (oldOrder.Signature.Type == OrderType.Buy)
                 {
                     PlaceOrderResponse response = await context.PlaceOrder(sellPrice, -oldOrder.Quantity);
-                    if (response.Response.Code == ReplyCode.Succeed) 
+                    if (response.Response.Code == ReplyCode.Succeed)
                     {
                         _myOrders.TryRemove(id, out _);
                     }
                     Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} removed {5}", id, price, quantity, type, status, response.Response.Code);
                     Log.Information("Order price: {0}, quantity: {1} placed {2}", sellPrice, -oldOrder.Quantity, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
-                    return;
                 }
-                //если вновь пришедший ордер закрыт и он был на продажу, то просто удаляем его из нашего списка и больше не подгоняем его цену
-                if (status == OrderStatus.Closed && oldOrder.Signature.Type == OrderType.Sell)
+                if (oldOrder.Signature.Type == OrderType.Sell)
                 {
                     PlaceOrderResponse response = await context.PlaceOrder(sellPrice, oldOrder.Quantity);
                     if (response.Response.Code == ReplyCode.Succeed)
@@ -216,11 +214,13 @@ namespace Former
                     }
                     Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} removed {5}", id, price, quantity, type, status, response.Response.Code);
                     Log.Information("Order price: {0}, quantity: {1} placed {2}", sellPrice, quantity, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
-                    return;
-                } 
-                if (status == OrderStatus.Open && oldOrder.Signature.Type == OrderType.Buy)
+                }
+            }
+            if (changesType == ChangesType.Update)
+            {
+                if (oldOrder.Signature.Type == OrderType.Buy)
                 {
-                    if (quantity != 0) 
+                    if (quantity != 0)
                     {
                         newQuantity = oldOrder.Quantity - quantity;
                         PlaceOrderResponse response = await context.PlaceOrder(sellPrice, -newQuantity);
@@ -233,9 +233,8 @@ namespace Former
                         if (quantity != 0) v.Quantity = quantity;
                         return v;
                     });
-                    return;
                 }
-                if (status == OrderStatus.Open && oldOrder.Signature.Type == OrderType.Sell)
+                if (oldOrder.Signature.Type == OrderType.Sell)
                 {
                     if (quantity != 0)
                     {
@@ -250,9 +249,7 @@ namespace Former
                         if (quantity != 0) v.Quantity = quantity;
                         return v;
                     });
-
-                    return;
-                } 
+                }
             }
         }
 
@@ -274,10 +271,10 @@ namespace Former
             else quantity = context.configuration.ContractValue * Math.Floor(totalBalance * purchaseFairPrice / context.configuration.ContractValue);
 
             //если баланса было достаточно для хотя бы одного ордера то выполняем продажу
-            if (quantity > 0) 
+            if (quantity > 0)
             {
                 PlaceOrderResponse response = await context.PlaceOrder(purchaseFairPrice, quantity);
-                if(response.Response.Code == ReplyCode.Succeed)
+                if (response.Response.Code == ReplyCode.Succeed)
                 {
                     _myOrders.TryAdd(response.OrderId, new Order
                     {
@@ -343,7 +340,7 @@ namespace Former
         /// </summary>
         /// <param name="satoshiValue"></param>
         /// <returns></returns>
-        private double ConvertSatoshiToXBT(int satoshiValue) 
+        private double ConvertSatoshiToXBT(int satoshiValue)
         {
             return satoshiValue * 0.00000001;
         }
