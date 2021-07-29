@@ -14,7 +14,7 @@ namespace AccountTests.ExchangeAccessServiceTests
             State.loggedIn = new();
 
             // Переменная, в которую будет записываться итоговый Id сессии.
-            string sessionId = "Отсутствует";
+            string sessionId = "none";
 
             // Локальный метод, который необходим для того, чтобы записать Id сессии при использовании объекта
             // запроса в качестве параметра.
