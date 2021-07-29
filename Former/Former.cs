@@ -40,7 +40,7 @@ namespace Former
         }
 
         /// <summary>
-        /// апдейтит конкретную книгу ордеров (на покупку или продажу)
+        /// Обновляет конкретную книгу ордеров
         /// </summary>
         private async Task UpdateConcreteBook(ConcurrentDictionary<string, Order> bookNeededUpdate, Order order, UserContext context)
         {
@@ -89,7 +89,7 @@ namespace Former
         }
         
         /// <summary>
-        /// подгоняет мои ордера под рыночную цену (и на покупку и на продажу)
+        /// Подгоняет мои ордера под рыночную цену
         /// </summary>
         private async Task FitPrices(ConcurrentDictionary<string, Order> ordersForFairPrice, OrderBookType bookType, UserContext context)
         {
@@ -143,6 +143,9 @@ namespace Former
             await checkPrices;
         }
 
+        /// <summary>
+        /// Обновляет размер позиции, для того чтобы знать, короткая позиция или длинная
+        /// </summary>
         internal Task UpdatePosition(double currentQuantity)
         {
             if (_positionSize != currentQuantity) Log.Information("Current postition: {0}", _positionSize);
@@ -151,7 +154,7 @@ namespace Former
         }
 
         /// <summary>
-        /// обновляет балан для формирования верных списков 
+        /// Обновляет доступный и общий баланс
         /// </summary>
         internal Task UpdateBalance(int availableBalance, int totalBalance)
         {
@@ -162,7 +165,7 @@ namespace Former
         }
 
         /// <summary>
-        /// обновляет список моих ордеров по подписке
+        /// Обновляет список моих ордеров по подписке
         /// </summary>
         internal async Task UpdateMyOrderList(Order newComingOrder, UserContext context)
         {
@@ -205,45 +208,37 @@ namespace Former
                 } 
                 if (status == OrderStatus.Open && oldOrder.Signature.Type == OrderType.Buy)
                 {
-                    PlaceOrderResponse response = null;
                     if (quantity != 0) 
                     {
                         newQuantity = oldOrder.Quantity - quantity;
-                        response = await context.PlaceOrder(sellPrice, -newQuantity);
-                        if (response.Response.Code == ReplyCode.Succeed)
-                        {
-                            _myOrders.AddOrUpdate(id, newComingOrder, (k, v) =>
-                            {
-                                if (price != 0) v.Price = price;
-                                if (quantity != 0) v.Quantity = quantity;
-                                return v;
-                            });
-                        }
+                        PlaceOrderResponse response = await context.PlaceOrder(sellPrice, -newQuantity);
                         Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} updated {5}", id, price, quantity, type, status, response.Response.Code);
                         Log.Information("Order price: {0}, quantity: {1} placed {2}", sellPrice, -newQuantity, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
-
                     }
+                    _myOrders.AddOrUpdate(id, newComingOrder, (k, v) =>
+                    {
+                        if (price != 0) v.Price = price;
+                        if (quantity != 0) v.Quantity = quantity;
+                        return v;
+                    });
                     return;
                 }
                 if (status == OrderStatus.Open && oldOrder.Signature.Type == OrderType.Sell)
                 {
-                    PlaceOrderResponse response = null;
                     if (quantity != 0)
                     {
                         newQuantity = oldOrder.Quantity + quantity;
-                        response = await context.PlaceOrder(sellPrice, newQuantity);
-                        if (response.Response.Code == ReplyCode.Succeed)
-                        {
-                            _myOrders.AddOrUpdate(id, newComingOrder, (k, v) =>
-                            {
-                                if (price != 0) v.Price = price;
-                                if (quantity != 0) v.Quantity = quantity;
-                                return v;
-                            });
-                        }
+                        PlaceOrderResponse response = await context.PlaceOrder(sellPrice, newQuantity);
                         Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} updated {5}", id, price, quantity, type, status, response.Response.Code);
                         Log.Information("Order price: {0}, quantity: {1} placed {2}", sellPrice, newQuantity, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
                     }
+                    _myOrders.AddOrUpdate(id, newComingOrder, (k, v) =>
+                    {
+                        if (price != 0) v.Price = price;
+                        if (quantity != 0) v.Quantity = quantity;
+                        return v;
+                    });
+
                     return;
                 } 
             }
