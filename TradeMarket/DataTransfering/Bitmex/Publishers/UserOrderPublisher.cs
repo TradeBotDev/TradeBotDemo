@@ -1,6 +1,7 @@
 ﻿using Bitmex.Client.Websocket.Client;
 using Bitmex.Client.Websocket.Requests;
 using Bitmex.Client.Websocket.Responses.Orders;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         {
             foreach (var data in response.Data)
             {
-                
+                Log.Information("{@Where} {@OrderId} {@OrderQuantity} @{OrderPrice} @{OrderAction}", "Trademarket", data.OrderId, data.OrderQty, data.Price, response.Action);
                 e?.Invoke(nameof(UserOrderPublisher), new(data, response.Action));
             }
         };

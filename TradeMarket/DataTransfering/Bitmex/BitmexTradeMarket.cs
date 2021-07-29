@@ -60,21 +60,21 @@ namespace TradeMarket.DataTransfering.Bitmex
         #region EventsHandlers
         private void _userPositionPublisher_Changed(object sender, IPublisher<Position>.ChangedEventArgs e)
         {
-            Log.Information("Recieved Position {@Position}", e.Changed);
+            //Log.Information("Recieved Position {@Position}", e.Changed);
             PositionUpdate?.Invoke(this, e);
         }
 
 
         private void _userMarginPublisher_Changed(object sender, IPublisher<Margin>.ChangedEventArgs e)
         {
-            Log.Information("Recieved Margin {@Margin}", e);
+            //Log.Information("Recieved Margin {@Margin}", e);
             MarginUpdate?.Invoke(sender, e);
         }
 
 
         private void _userWalletPublisher_Changed(object sender, IPublisher<global::Bitmex.Client.Websocket.Responses.Wallets.Wallet>.ChangedEventArgs e)
         {
-            Log.Information("Recieved Balance {@Balance}", e);
+            //Log.Information("Recieved Balance {@Balance}", e);
             BalanceUpdate?.Invoke(sender, e.Changed);
         }
 
