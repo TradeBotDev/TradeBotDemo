@@ -45,8 +45,9 @@ namespace AccountTests.ExchangeAccessServiceTests
             Assert.Equal(ActionCode.AccountNotFound, reply.Result.Result);
         }
 
+        // Тестирование на удаление существующей информации из существующего аккаунта.
         [Fact]
-        public void GetExistingExchangeAccessTest()
+        public void DeleteExistingExchangeAccessTest()
         {
             // Очистка списка вошедших аккаунтов для того, чтобы не было конфликтов.
             State.loggedIn = new();
