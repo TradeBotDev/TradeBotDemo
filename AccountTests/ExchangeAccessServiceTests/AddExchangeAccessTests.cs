@@ -35,15 +35,16 @@ namespace AccountTests.ExchangeAccessServiceTests
             using (var database = new AccountContext())
             {
                 var reply = GenerateLogin("ex_to_acc")
-                .ContinueWith(loginReply => exchangeAccessService.AddExchangeAccess(GenerateRequest(loginReply.Result.Result.SessionId), null));
+                .ContinueWith(loginReply => exchangeAccessService.AddExchangeAccess(
+                    GenerateRequest(loginReply.Result.Result.SessionId), null));
 
-                var accounts = database.Accounts.Where(account => account.Email == "ex_to_acc_generated_user@pochta.ru");
-                var exchanges = database.ExchangeAccesses.Where(exchange => exchange.Account.AccountId == accounts.First().AccountId);
+                Assert.Equal(ActionCode.Successful, reply.Result.Result.Result);
+
+                var accounts = database.Accounts.Where(account => account.Email == "ex_to_acc_generated_user@pochta.ru").First();
+                var exchanges = database.ExchangeAccesses.Where(exchange => exchange.Account.AccountId == accounts.AccountId);
                 foreach (AccountGRPC.Models.ExchangeAccess exchange in exchanges)
                     database.Remove(exchange);
                 database.SaveChanges();
-
-                Assert.Equal(ActionCode.Successful, reply.Result.Result.Result);
             }
         }
 
