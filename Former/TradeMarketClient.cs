@@ -23,6 +23,9 @@ namespace Former
         public delegate void BalanceEvent(int balanceToBuy, int balanceToSell);
         public BalanceEvent UpdateBalance;
 
+        public delegate void PositionUpdate(double currentQuantity);
+        public PositionUpdate UpdatePosition;
+
         private static int _retryDelay;
         private static string _connectionString;
 
@@ -130,20 +133,14 @@ namespace Former
         public async Task ObservePositions(UserContext context)
         {
             using var call = _client.SubscribePosition(new SubscribePositionRequest(), context.Meta);
-            Func<Task> observeMyOrders = async () =>
+            Func<Task> observePosition = async () =>
             {
                 while (await call.ResponseStream.MoveNext())
                 {
-
-                    //if (call.ResponseStream.Current.Response.Code == ReplyCode.Failure)
-                    //{
-                    //    Log.Information("order was rejected with message: {0}", call.ResponseStream.Current.Response.Message);
-                    //    continue;
-                    //}
-                    //UpdateMyOrders?.Invoke(call.ResponseStream.Current.Changed);
+                    UpdatePosition?.Invoke(call.ResponseStream.Current.CurrentQty);
                 }
             };
-            await ConnectionTester(observeMyOrders);
+            await ConnectionTester(observePosition);
         }
 
 
