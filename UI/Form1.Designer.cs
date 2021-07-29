@@ -108,7 +108,7 @@ namespace UI
             this.ConfigUpdatePriceRange.Name = "ConfigUpdatePriceRange";
             this.ConfigUpdatePriceRange.Size = new System.Drawing.Size(77, 27);
             this.ConfigUpdatePriceRange.TabIndex = 4;
-            this.ConfigUpdatePriceRange.Text = "0,1";
+            this.ConfigUpdatePriceRange.Text = "50";
             // 
             // ConfigIntervalOfAnalysis
             // 

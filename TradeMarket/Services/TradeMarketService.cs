@@ -260,8 +260,8 @@ namespace TradeMarket.Services
 
             var user = await UserContext.GetUserContextAsync(sessionId, slot, trademarket);
            
-
             user.UserPosition += async (sender, args) => {
+                Log.Error("Recieved from {@Sender} args: {@Args}", sender, args);
                 await WriteStreamAsync<SubscribePositionResponse>(responseStream, ConvertPosition(args.Changed));
 
             };
@@ -289,7 +289,7 @@ namespace TradeMarket.Services
                     var defaultResponse = new DefaultResponse()
                     {
                         Code = string.IsNullOrEmpty(args.OrdRejReason) ? ReplyCode.Succeed : ReplyCode.Failure,
-                        Message = string.IsNullOrEmpty(args.OrdRejReason) ? args.OrdRejReason! : ""
+                        Message = string.IsNullOrEmpty(args.OrdRejReason) ? "" : args.OrdRejReason!
                     };
                     Order order = Convert(args);
                     Log.Logger.Information($"Sent order : {order} to {context.Host}");

@@ -181,7 +181,7 @@ message SubscribeMyOrdersRequest{
 message SubscribeMyOrdersResponse {
 	tradebot.common.v1.DefaultResponse response = 1;
 	tradebot.common.v1.Order changed = 2;
-
+	ChangesType changes_type = 3;
 }
 
 message SubscribeOrdersRequest{
@@ -191,7 +191,6 @@ message SubscribeOrdersRequest{
 
 message SubscribeOrdersResponse{
 	tradebot.common.v1.SubscribeOrdersResponse response = 1;
-
 }
 
 message SubscribeLogsRequest{
