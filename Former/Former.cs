@@ -167,7 +167,6 @@ namespace Former
         internal async Task UpdateMyOrderList(Order newComingOrder, UserContext context)
         {
             if (CheckContext(context)) return;
-            if (newComingOrder.)
             Order oldOrder;
             var id = newComingOrder.Id;
             var price = newComingOrder.Price;
