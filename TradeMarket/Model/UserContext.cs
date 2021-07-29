@@ -49,23 +49,15 @@ namespace TradeMarket.Model
         /// <summary>
         /// Метод инициализации контекста. 
         /// </summary>
-        public async Task initAsync()
+        private void initAsync()
         {
-            
-            var keySecretPair = await _accountClient.GetUserInfo(SessionId).ContinueWith(el => {
-                try
-                {
-                    Key = el.Result.Key;
-                    Secret = el.Result.Secret;
-                    return AutheticateUser();
-                }
-                catch (Exception e)
-                {
-                    Log.Logger.Error($"Exception: {e.Message}");
-                }
-                return Task.Delay(0);
 
-            });
+            var keySecretPair = _accountClient.GetUserInfo(SessionId);
+            Key = keySecretPair.Key;
+            Secret = keySecretPair.Secret;
+
+            //TODO что-то сделать с этим методом
+            AutheticateUser();
 
             //инициализация подписок
             TradeMarket.SubscribeToBalance((sender, el) => { BalanceCache.Add(el); UserBalance?.Invoke(sender, el); }, this);
@@ -158,9 +150,8 @@ namespace TradeMarket.Model
         public static async Task<UserContext> GetUserContextAsync(string sessionId, string slotName, string tradeMarketName)
         {
             UserContext userContext = null;
-            try
+            lock (locker)
             {
-                System.Threading.Monitor.Enter(locker);
                 Log.Logger.Information("Getting UserContext {@sessionId} : {@slotName} : {@tradeMarketName}", sessionId, slotName, tradeMarketName);
                 Log.Logger.Information("Stored Contexts : {@RegisteredUsers}", RegisteredUsers);
                 userContext = RegisteredUsers.FirstOrDefault(el => el.IsEquevalentTo(sessionId, slotName, tradeMarketName));
@@ -170,13 +161,10 @@ namespace TradeMarket.Model
                     userContext = new UserContext(sessionId, slotName, TradeMarket.GetTradeMarket(tradeMarketName));
                     //контекст сначала добавляется , а затеми инициализируется для того чтобы избежать создание нескольких контекстов
                     RegisteredUsers.Add(userContext);
-                    await userContext.initAsync();
+                    userContext.initAsync();
                 }
-            } finally {
-                System.Threading.Monitor.Exit(locker);
+                return userContext;
             }
-            return userContext;
-
 
         }
         #endregion
