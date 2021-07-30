@@ -17,7 +17,7 @@ namespace AccountTests.ValidationTests
             // Валидация сразу же формируемого запроса.
             var reply = Validate.LoginFields(new LoginRequest { Email = email, Password = password } );
             // Ожидается, что Code будет равен EmptyField.
-            Assert.Equal(ActionCode.EmptyField, reply.Code);
+            Assert.False(reply.Successful);
         }
 
         // Тест проверки на то, являются ли введенные данные в поле Email электронной почтой.
@@ -31,9 +31,9 @@ namespace AccountTests.ValidationTests
             var reply = Validate.LoginFields(new LoginRequest { Email = email, Password = "password"} );
             // В случае, если указано, что это именно электронная почта, ожидается, что результатом валидации
             // не будет IsNotEmail (не электронная почта).
-            if (isEmail) Assert.NotEqual(ActionCode.IsNotEmail, reply.Code);
+            if (isEmail) Assert.True(reply.Successful);
             // В ином случае ожидается ответ, что данные не являются электронной почтой.
-            else Assert.Equal(ActionCode.IsNotEmail, reply.Code);
+            else Assert.False(reply.Successful);
         }
     }
 }

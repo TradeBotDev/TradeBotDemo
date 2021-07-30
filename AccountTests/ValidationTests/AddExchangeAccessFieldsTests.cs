@@ -24,9 +24,9 @@ namespace AccountTests.ValidationTests
             });
 
             // Если указано, что присутствуют пустые поля, ожидается, что в результате ответом будет EmptyField.
-            if (isEmpty) Assert.Equal(ActionCode.EmptyField, reply.Code);
+            if (isEmpty) Assert.False(reply.Successful);
             // Иначе ожидается, что будет любой другой ответ, кроме EmptyField.
-            else Assert.NotEqual(ActionCode.EmptyField, reply.Code);
+            else Assert.True(reply.Successful);
         }
     }
 }
