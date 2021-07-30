@@ -5,27 +5,27 @@ namespace AccountGRPC.AccountMessages
 {
     public static class CurrentAccountReplies
     {
-        public static CurrentAccountReply AccountNotFound()
+        public static AccountDataReply AccountNotFound()
         {
             const string Message = "Ошибка при получении данных текущего аккаунта: пользователь не найден.";
             Log.Information(Message);
 
-            return new CurrentAccountReply
+            return new AccountDataReply
             {
-                Result = ActionCode.AccountNotFound,
+                Result = AccountActionCode.IsNotFound,
                 Message = Message,
                 CurrentAccount = null
             };
         }
 
-        public static CurrentAccountReply SuccessfulGettingAccountData(AccountInfo currentAccount)
+        public static AccountDataReply SuccessfulGettingAccountData(AccountInfo currentAccount)
         {
             const string Message = "Получение данных текущего пользователя.";
             Log.Information(Message);
 
-            return new CurrentAccountReply
+            return new AccountDataReply
             {
-                Result = ActionCode.Successful,
+                Result = AccountActionCode.Successful,
                 Message = Message,
                 CurrentAccount = currentAccount
             };

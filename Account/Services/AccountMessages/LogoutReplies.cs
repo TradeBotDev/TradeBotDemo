@@ -12,7 +12,7 @@ namespace AccountGRPC.AccountMessages
 
             return new LogoutReply
             {
-                Result = ActionCode.Successful,
+                Result = AccountActionCode.Successful,
                 Message = Message
             };
         }
@@ -24,7 +24,7 @@ namespace AccountGRPC.AccountMessages
 
             return new LogoutReply
             {
-                Result = ActionCode.AccountNotFound,
+                Result = AccountActionCode.IsNotFound,
                 Message = Message
             };
         }

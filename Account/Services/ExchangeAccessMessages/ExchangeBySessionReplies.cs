@@ -12,7 +12,7 @@ namespace AccountGRPC.AccountMessages
 
             return new ExchangeBySessionReply
             {
-                Result = ActionCode.AccountNotFound,
+                Result = ExchangeAccessActionCode.AccountNotFound,
                 Message = Message,
                 Exchange = null
             };
@@ -25,7 +25,7 @@ namespace AccountGRPC.AccountMessages
 
             return new ExchangeBySessionReply
             {
-                Result = ActionCode.ExchangeNotFound,
+                Result = ExchangeAccessActionCode.IsNotFound,
                 Message = Message,
                 Exchange = null
             };
@@ -38,7 +38,7 @@ namespace AccountGRPC.AccountMessages
 
             return new ExchangeBySessionReply
             {
-                Result = ActionCode.Successful,
+                Result = ExchangeAccessActionCode.Successful,
                 Message = Message,
                 Exchange = new ExchangeAccessInfo
                 {

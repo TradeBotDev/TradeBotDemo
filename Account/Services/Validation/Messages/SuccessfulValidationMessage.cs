@@ -7,7 +7,7 @@ namespace AccountGRPC.Validation.Messages
     {
         public override string Message => "Валидация завершена успешно.";
 
-        public override ActionCode Code => ActionCode.Successful;
+        public override ValidationCode Code => ValidationCode.Successful;
 
         public SuccessfulValidationMessage()
         {

@@ -12,7 +12,7 @@ namespace AccountGRPC.AccountMessages
 
             return new AddExchangeAccessReply
             {
-                Result = ActionCode.Successful,
+                Result = ExchangeAccessActionCode.Successful,
                 Message = Message
             };
         }
@@ -24,7 +24,7 @@ namespace AccountGRPC.AccountMessages
 
             return new AddExchangeAccessReply
             {
-                Result = ActionCode.AccountNotFound,
+                Result = ExchangeAccessActionCode.AccountNotFound,
                 Message = Message
             };
         }
@@ -36,7 +36,7 @@ namespace AccountGRPC.AccountMessages
 
             return new AddExchangeAccessReply
             {
-                Result = ActionCode.ExchangeExists,
+                Result = ExchangeAccessActionCode.IsExists,
                 Message = Message
             };
         }

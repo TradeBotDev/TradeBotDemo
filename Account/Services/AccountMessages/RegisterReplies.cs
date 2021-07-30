@@ -12,7 +12,7 @@ namespace AccountGRPC.AccountMessages
 
             return new RegisterReply
             {
-                Result = ActionCode.AccountExists,
+                Result = AccountActionCode.IsExists,
                 Message = Message
             };
         }
@@ -24,7 +24,7 @@ namespace AccountGRPC.AccountMessages
 
             return new RegisterReply
             {
-                Result = ActionCode.Successful,
+                Result = AccountActionCode.Successful,
                 Message = Message
             };
         }

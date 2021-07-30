@@ -11,7 +11,7 @@ namespace AccountGRPC
 {
     public partial class ExchangeAccessService : ExchangeAccess.ExchangeAccessBase
     {
-        public override Task<AllExchangesBySessionReply> AllExchangesBySession(SessionRequest request, ServerCallContext context)
+        public override Task<AllExchangesBySessionReply> AllExchangesBySession(AllExchangesBySessionRequest request, ServerCallContext context)
         {
             Log.Information($"AllExchangesBySession получил запрос: SessionId - {request.SessionId}.");
             using (var database = new Models.AccountContext())

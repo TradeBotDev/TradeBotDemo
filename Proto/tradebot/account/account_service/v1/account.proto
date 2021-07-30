@@ -9,13 +9,13 @@ service Account {
 	// Метод входа в аккаунт
 	rpc Login (LoginRequest) returns (LoginReply);
 	// Метод выхода из аккаунта
-	rpc Logout (SessionRequest) returns (LogoutReply);
+	rpc Logout (LogoutRequest) returns (LogoutReply);
 	// Метод регистрации аккаунта
 	rpc Register (RegisterRequest) returns (RegisterReply);
 	// Проверка текущего пользователя на валидность по Id сессии
-	rpc IsValidSession (SessionRequest) returns (SessionReply);
+	rpc IsValidSession (IsValidSessionRequest) returns (IsValidSessionReply);
 	// Получение данных текущего пользователя
-	rpc CurrentAccountData (SessionRequest) returns (CurrentAccountReply);
+	rpc AccountData (AccountDataRequest) returns (AccountDataReply);
 }
 
 // Данные для входа в аккаунт.
@@ -27,14 +27,18 @@ message LoginRequest {
 
 // Ответ на запрос о входе в аккаунт.
 message LoginReply {
-	ActionCode result = 1;
+	AccountActionCode result = 1;
 	string message = 2;
 	string session_id = 3;
 }
 
+message LogoutRequest {
+	string session_id = 1;
+}
+
 // Ответ на запрос о выходе из аккаунта
 message LogoutReply {
-	ActionCode result = 1;
+	AccountActionCode result = 1;
 	string message = 2;
 }
 
@@ -47,24 +51,29 @@ message RegisterRequest {
 
 // Ответ на запрос о регистрации аккаунта.
 message RegisterReply {
-	ActionCode result = 1;
+	AccountActionCode result = 1;
 	string message = 2;
 }
 
-// Запрос на передачу сессии.
-message SessionRequest {
+// Запрос на проверку сессии на валидность.
+message IsValidSessionRequest {
 	string session_id = 1;
 }
 
 // Результат проверки сессии на валидность.
-message SessionReply {
+message IsValidSessionReply {
 	bool is_valid = 1;
 	string message = 2;
 }
 
-// Получение данных текущего пользователя.
-message CurrentAccountReply {
-	ActionCode result = 1;
+// Запрос на получение данных пользователя.
+message AccountDataRequest {
+	string session_id = 1;
+}
+
+// Получение данных пользователя.
+message AccountDataReply {
+	AccountActionCode result = 1;
 	string message = 2;
 	AccountInfo current_account = 3;
 }
@@ -79,35 +88,31 @@ message AccountInfo {
 // Информация о данных для доступа к бирже.
 message ExchangeAccessInfo {
 	int32 exchange_access_id = 1;
-	ExchangeCode code = 2;
+	ExchangeAccessCode code = 2;
 	string name = 3;
 	string token = 4;
 	string secret = 5;
 }
 
 // Коды всех бирж.
-enum ExchangeCode {
-	EXCHANGE_CODE_BITMEX = 0;
+enum ExchangeAccessCode {
+	EXCHANGE_CODE_UNSPECIFIED = 0;
+	EXCHANGE_CODE_BITMEX = 1;
 }
 
-// Коды результата выполнения входа или регистрации.
-enum ActionCode {
-	/*
-	* 0 - успешное выполнение,
-	* 1 - пользователь не найден,
-	* 2 - пользователь уже существует,
-	* 3 - имеется пустое поле ввода,
-	* 4 - пароли не совпадают,
-	* 5 - поле не является электронной почтой,
-	* 6 - биржа не найдена,
-	* 7 - биржа уже существует.
-	*/
-	ACTION_CODE_SUCCESSFUL = 0;
-	ACTION_CODE_ACCOUNT_NOT_FOUND = 1;
-	ACTION_CODE_ACCOUNT_EXISTS = 2;
-	ACTION_CODE_EMPTY_FIELD = 3;
-	ACTION_CODE_PASSWORD_MISMATCH = 4;
-	ACTION_CODE_IS_NOT_EMAIL = 5;
-	ACTION_CODE_EXCHANGE_NOT_FOUND = 6;
-	ACTION_CODE_EXCHANGE_EXISTS = 7;
+enum ValidationCode {
+	VALIDATION_CODE_UNSPECIFIED = 0;
+	VALIDATION_CODE_SUCCESSFUL = 1;
+	VALIDATION_CODE_FAILED = 2;
+	VALIDATION_CODE_EMPTY_FIELD = 3;
+	VALIDATION_CODE_PASSWORD_MISMATCH = 4;
+	VALIDATION_CODE_IS_NOT_EMAIL = 5;
+}
+
+enum AccountActionCode {
+	ACCOUNT_ACTION_CODE_UNSPECIFIED = 0;
+	ACCOUNT_ACTION_CODE_SUCCESSFUL = 1;
+	ACCOUNT_ACTION_CODE_FAILED = 2;
+	ACCOUNT_ACTION_CODE_IS_NOT_FOUND = 3;
+	ACCOUNT_ACTION_CODE_IS_EXISTS = 4;
 }

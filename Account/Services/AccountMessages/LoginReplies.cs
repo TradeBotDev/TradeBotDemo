@@ -13,7 +13,7 @@ namespace AccountGRPC.AccountMessages
             return new LoginReply
             {
                 SessionId = sessionId,
-                Result = ActionCode.Successful,
+                Result = AccountActionCode.Successful,
                 Message = Message
             };
         }
@@ -26,7 +26,7 @@ namespace AccountGRPC.AccountMessages
             return new LoginReply
             {
                 SessionId = sessionId,
-                Result = ActionCode.Successful,
+                Result = AccountActionCode.Successful,
                 Message = Message
             };
         }
@@ -39,7 +39,7 @@ namespace AccountGRPC.AccountMessages
             return new LoginReply
             {
                 SessionId = "Отсутствует",
-                Result = ActionCode.AccountNotFound,
+                Result = AccountActionCode.IsNotFound,
                 Message = Message
             };
         }

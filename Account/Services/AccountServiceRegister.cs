@@ -22,11 +22,11 @@ namespace AccountGRPC
 
             // В случае, если валидация не прошла успешно (к примеру, присутствуют пустые поля)
             // возвращается сообщение об одной из ошибок в запросе.
-            if (validationResult.Code != ActionCode.Successful)
+            if (validationResult.Code != ValidationCode.Successful)
             {
                 return Task.FromResult(new RegisterReply
                 {
-                    Result = validationResult.Code,
+                    Result = AccountActionCode.Failed,
                     Message = validationResult.Message
                 });
             }

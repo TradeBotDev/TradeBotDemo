@@ -7,7 +7,7 @@ namespace AccountGRPC.Validation.Messages
     {
         public override string Message => "Произошла ошибка: введенные пароли не совпадают. Проверьте правильность введенных данных.";
 
-        public override ActionCode Code => ActionCode.PasswordMismatch;
+        public override ValidationCode Code => ValidationCode.PasswordMismatch;
 
         public PasswordMismatchMessage()
         {

@@ -7,7 +7,7 @@ namespace AccountGRPC.Validation.Messages
     {
         public override string Message => "Произошла ошибка: присутствуют пустые поля. Проверьте правильность введенных данных.";
 
-        public override ActionCode Code => ActionCode.EmptyField;
+        public override ValidationCode Code => ValidationCode.EmptyField;
 
         public EmptyFieldMessage()
         {

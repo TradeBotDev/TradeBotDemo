@@ -10,7 +10,7 @@ service ExchangeAccess {
 	// Добавление новой биржи для текущего пользователя.
 	rpc AddExchangeAccess(AddExchangeAccessRequest) returns (AddExchangeAccessReply);
 	// Получение массива бирж текущего пользователя.
-	rpc AllExchangesBySession (account.SessionRequest) returns (AllExchangesBySessionReply);
+	rpc AllExchangesBySession (AllExchangesBySessionRequest) returns (AllExchangesBySessionReply);
 	// Удаление информации о доступе к бирже по ее коду и id сессии.
 	rpc DeleteExchangeAccess (DeleteExchangeAccessRequest) returns (DeleteExchangeAccessReply);
 	// Получение информации о доступе текущего пользователя к бирже.
@@ -20,7 +20,7 @@ service ExchangeAccess {
 // Запрос на добавление биржи для текущего пользователя.
 message AddExchangeAccessRequest {
 	string session_id = 1;
-	account.ExchangeCode code = 2;
+	account.ExchangeAccessCode code = 2;
 	string exchange_name = 3;
 	string token = 4;
 	string secret = 5;
@@ -28,13 +28,17 @@ message AddExchangeAccessRequest {
 
 // Ответ на добавление биржи для текущего пользователя.
 message AddExchangeAccessReply {
-	account.ActionCode result = 1;
+	ExchangeAccessActionCode result = 1;
 	string message = 2;
+}
+
+message AllExchangesBySessionRequest {
+	string session_id = 1;
 }
 
 // Получение всех добавленных бирж текущего пользователя.
 message AllExchangesBySessionReply {
-	account.ActionCode result = 1;
+	ExchangeAccessActionCode result = 1;
 	string message = 2;
 	repeated account.ExchangeAccessInfo exchanges = 3;
 }
@@ -42,24 +46,33 @@ message AllExchangesBySessionReply {
 // Запрос на удаление записи о конкретной бирже для текущего пользователя.
 message DeleteExchangeAccessRequest {
 	string session_id = 1;
-	account.ExchangeCode code = 2;
+	account.ExchangeAccessCode code = 2;
 }
 
 // Ответ на запрос об удалении записи о бирже для текущего пользователя.
 message DeleteExchangeAccessReply {
-	account.ActionCode result = 1;
+	ExchangeAccessActionCode result = 1;
 	string message = 2;
 }
 
 // Запрос на получение информации о доступе пользователя к конкретной бирже.
 message ExchangeBySessionRequest {
 	string session_id = 1;
-	account.ExchangeCode code = 2;
+	account.ExchangeAccessCode code = 2;
 }
 
 // Ответ на запрос с получением информации о доступе пользователя к конкретной бирже.
 message ExchangeBySessionReply {
-	account.ActionCode result = 1;
+	ExchangeAccessActionCode result = 1;
 	string message = 2;
 	account.ExchangeAccessInfo exchange = 3;
+}
+
+enum ExchangeAccessActionCode {
+	EXCHANGE_ACCESS_ACTION_CODE_UNSPECIFIED = 0;
+	EXCHANGE_ACCESS_ACTION_CODE_SUCCESSFUL = 1;
+	EXCHANGE_ACCESS_ACTION_CODE_FAILED = 2;
+	EXCHANGE_ACCESS_ACTION_CODE_IS_NOT_FOUND = 3;
+	EXCHANGE_ACCESS_ACTION_CODE_ACCOUNT_NOT_FOUND = 4;
+	EXCHANGE_ACCESS_ACTION_CODE_IS_EXISTS = 5;
 }

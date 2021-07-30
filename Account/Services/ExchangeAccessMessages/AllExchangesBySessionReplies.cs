@@ -13,7 +13,7 @@ namespace AccountGRPC.AccountMessages
 
             AllExchangesBySessionReply reply = new AllExchangesBySessionReply
             {
-                Result = ActionCode.Successful,
+                Result = ExchangeAccessActionCode.Successful,
                 Message = Message
             };
 
@@ -38,7 +38,7 @@ namespace AccountGRPC.AccountMessages
 
             return new AllExchangesBySessionReply
             {
-                Result = ActionCode.AccountNotFound,
+                Result = ExchangeAccessActionCode.AccountNotFound,
                 Message = Message
             };
         }
@@ -50,7 +50,7 @@ namespace AccountGRPC.AccountMessages
 
             return new AllExchangesBySessionReply
             {
-                Result = ActionCode.ExchangeNotFound,
+                Result = ExchangeAccessActionCode.IsNotFound,
                 Message = Message
             };
         }

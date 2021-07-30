@@ -7,7 +7,7 @@ namespace AccountGRPC.Models
     {
         public int ExchangeAccessId { get; set; }
 
-        public ExchangeCode Code { get; set; }
+        public ExchangeAccessCode Code { get; set; }
         
         public string Name { get; set; }
         

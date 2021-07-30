@@ -12,7 +12,7 @@ namespace AccountGRPC
     public partial class AccountService : Account.AccountBase
     {
         // Метод выхода из аккаунта
-        public override Task<LogoutReply> Logout(SessionRequest request, ServerCallContext context)
+        public override Task<LogoutReply> Logout(LogoutRequest request, ServerCallContext context)
         {
             Log.Information($"Logout получил запрос: SessionId - {request.SessionId}.");
             using (var database = new Models.AccountContext())
@@ -45,7 +45,7 @@ namespace AccountGRPC
         }
 
         // Метод проверки валидности текущей сессии.
-        public override Task<SessionReply> IsValidSession(SessionRequest request, ServerCallContext context)
+        public override Task<IsValidSessionReply> IsValidSession(IsValidSessionRequest request, ServerCallContext context)
         {
             Log.Information($"IsValidSession получил запрос: SessionId - {request.SessionId}.");
             using (var database = new Models.AccountContext())
@@ -60,7 +60,7 @@ namespace AccountGRPC
         }
 
         // Метод получения информации о текущем пользователе по Id сессии.
-        public override Task<CurrentAccountReply> CurrentAccountData(SessionRequest request, ServerCallContext context)
+        public override Task<AccountDataReply> AccountData(AccountDataRequest request, ServerCallContext context)
         {
             Log.Information($"CurrentAccountData получил запрос: SessionId - {request.SessionId}.");
             using (var database = new Models.AccountContext())
