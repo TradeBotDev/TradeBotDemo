@@ -38,8 +38,8 @@ namespace TradeMarket.Services
                     Code = string.IsNullOrEmpty(order.OrdRejReason) ? TradeBot.Common.v1.ReplyCode.Succeed : TradeBot.Common.v1.ReplyCode.Failure,
                     Message = order.OrdRejReason ?? ""
                 },
-                Changed = Convert(order, action),
-                ChangesType = ConvertChangeType(action) 
+                Changed = Convert(order, action)
+
             };
         }
         
