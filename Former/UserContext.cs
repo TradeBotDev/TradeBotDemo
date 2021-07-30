@@ -49,8 +49,6 @@ namespace Former
             ObservePositions();
         }
 
-        
-
         private async void ObservePositions()
         {
             await _tradeMarketClient.ObservePositions(this);
