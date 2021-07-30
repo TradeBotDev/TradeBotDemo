@@ -96,8 +96,8 @@ message ExchangeAccessInfo {
 
 // Коды всех бирж.
 enum ExchangeAccessCode {
-	EXCHANGE_CODE_UNSPECIFIED = 0;
-	EXCHANGE_CODE_BITMEX = 1;
+	EXCHANGE_ACCESS_CODE_UNSPECIFIED = 0;
+	EXCHANGE_ACCESS_CODE_BITMEX = 1;
 }
 
 enum AccountActionCode {
