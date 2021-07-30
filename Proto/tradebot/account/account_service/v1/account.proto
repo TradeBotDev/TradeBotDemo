@@ -21,8 +21,7 @@ service Account {
 // Данные для входа в аккаунт.
 message LoginRequest {
 	string email = 1;
-	bool save_exchanges_after_logout = 2;
-	string password = 3;
+	string password = 2;
 }
 
 // Ответ на запрос о входе в аккаунт.
@@ -34,6 +33,7 @@ message LoginReply {
 
 message LogoutRequest {
 	string session_id = 1;
+	bool save_exchange_accesses = 2;
 }
 
 // Ответ на запрос о выходе из аккаунта

@@ -1,6 +1,5 @@
 ﻿using Grpc.Core;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Serilog;
@@ -17,7 +16,7 @@ namespace AccountGRPC
         // Метод входа в аккаунт по запросу клиента.
         public override Task<LoginReply> Login(LoginRequest request, ServerCallContext context)
         {
-            Log.Information($"Login получил запрос: Email - {request.Email}, Password - {request.Password}, SaveExchangesAfterLogout - {request.SaveExchangesAfterLogout}.");
+            Log.Information($"Login получил запрос: Email - {request.Email}, Password - {request.Password}.");
             
             // Валидация полей запроса
             ValidationMessage validationResult = Validate.LoginFields(request);
@@ -59,7 +58,6 @@ namespace AccountGRPC
                 var loggedAccount = new Models.LoggedAccount
                 {
                     SessionId = sessionId,
-                    SaveExchangesAfterLogout = request.SaveExchangesAfterLogout,
                     Account = accounts.First()
                 };
                 // Добавление в таблицу информации о новом входе в аккаунт.

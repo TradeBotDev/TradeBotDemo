@@ -1,5 +1,4 @@
 ﻿using Serilog;
-using TradeBot.Account.AccountService.v1;
 
 namespace AccountGRPC.Validation.Messages
 {

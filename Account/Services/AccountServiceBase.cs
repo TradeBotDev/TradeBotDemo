@@ -14,7 +14,7 @@ namespace AccountGRPC
         // Метод выхода из аккаунта
         public override Task<LogoutReply> Logout(LogoutRequest request, ServerCallContext context)
         {
-            Log.Information($"Logout получил запрос: SessionId - {request.SessionId}.");
+            Log.Information($"Logout получил запрос: SessionId - {request.SessionId},  SaveExchangeAccesses - {request.SaveExchangeAccesses}.");
             using (var database = new Models.AccountContext())
             {
                 // В случае, если аккаунт не был найден среди вошедших, появляется сообщение об ошибке.
@@ -28,7 +28,7 @@ namespace AccountGRPC
 
                 // Если отключено сохранение всех данных о биржах пользователя после выхода из аккаунта, происходит
                 // их удаление из базы данных (только связанные с этим пользователем).
-                if (!loginInfo.SaveExchangesAfterLogout)
+                if (!request.SaveExchangeAccesses)
                 {
                     var exchanges = database.ExchangeAccesses.Where(exchange => exchange.Account.AccountId == loginInfo.Account.AccountId);
                     foreach (Models.ExchangeAccess exchange in exchanges)

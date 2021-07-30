@@ -6,8 +6,6 @@
         public int LoggedAccountId { get; set; }
         
         public string SessionId { get; set; }
-        
-        public bool SaveExchangesAfterLogout { get; set; }
 
         public int AccountId { get; set; }
         
