@@ -23,8 +23,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FormerTests", "FormerTests\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TradeMarketTests", "TradeMarketTests\TradeMarketTests.csproj", "{FB5ED5FC-0EC5-447B-98EC-6DB7E265D27F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TradeMarket", "C:\Users\Unh0ly\Desktop\TradeMarket\TradeMarket.csproj", "{6611E594-9D03-4658-BD26-142BA0ED9FD6}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -67,10 +65,6 @@ Global
 		{FB5ED5FC-0EC5-447B-98EC-6DB7E265D27F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FB5ED5FC-0EC5-447B-98EC-6DB7E265D27F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FB5ED5FC-0EC5-447B-98EC-6DB7E265D27F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6611E594-9D03-4658-BD26-142BA0ED9FD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6611E594-9D03-4658-BD26-142BA0ED9FD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6611E594-9D03-4658-BD26-142BA0ED9FD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6611E594-9D03-4658-BD26-142BA0ED9FD6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
