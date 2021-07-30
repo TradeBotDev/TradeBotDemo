@@ -24,4 +24,8 @@
     <Folder Include="WebsocketTests\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\TradeMarket\TradeMarket.csproj" />
+  </ItemGroup>
+
 </Project>
