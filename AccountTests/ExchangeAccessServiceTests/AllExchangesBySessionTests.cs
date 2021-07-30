@@ -11,8 +11,6 @@ namespace AccountTests.ExchangeAccessServiceTests
         [Fact]
         public void WhenExchangesIsExistsTest()
         {
-            State.loggedIn = new();
-
             // Переменная, в которую будет записываться итоговый Id сессии.
             string sessionId = "none";
 
@@ -23,7 +21,7 @@ namespace AccountTests.ExchangeAccessServiceTests
                 sessionId = _sessionId;
                 return new AddExchangeAccessRequest
                 {
-                    Code = ExchangeCode.Bitmex,
+                    Code = ExchangeAccessCode.Bitmex,
                     ExchangeName = "Bitmex",
                     SessionId = _sessionId,
                     Token = "test_token_12345",
@@ -36,11 +34,11 @@ namespace AccountTests.ExchangeAccessServiceTests
             var reply = GenerateLogin("all_exs_from_acc")
                 .ContinueWith(loginReply => exchangeAccessService.AddExchangeAccess(GenerateRequest(loginReply.Result.Result.SessionId), null))
                 .ContinueWith(addExchangeReply => exchangeAccessService.AllExchangesBySession(
-                new SessionRequest { SessionId = sessionId }, null));
+                new AllExchangesBySessionRequest { SessionId = sessionId }, null));
 
             // Ожидается, что придет сообщение об успешности получения данных, и коллекция с биржами
             // не будет пустой.
-            Assert.Equal(ActionCode.Successful, reply.Result.Result.Result);
+            Assert.Equal(ExchangeAccessActionCode.Successful, reply.Result.Result.Result);
             Assert.NotEmpty(reply.Result.Result.Exchanges);
         }
 
@@ -48,13 +46,11 @@ namespace AccountTests.ExchangeAccessServiceTests
         [Fact]
         public void WhenExchangesIsNotExistsTest()
         {
-            State.loggedIn = new();
-
             var reply = GenerateLogin("ex_not_exist")
                 .ContinueWith(loginReply => exchangeAccessService.AllExchangesBySession(
-                    new SessionRequest { SessionId = loginReply.Result.Result.SessionId }, null));
+                    new AllExchangesBySessionRequest { SessionId = loginReply.Result.Result.SessionId }, null));
 
-            Assert.Equal(ActionCode.ExchangeNotFound, reply.Result.Result.Result);
+            Assert.Equal(ExchangeAccessActionCode.IsNotFound, reply.Result.Result.Result);
             Assert.Empty(reply.Result.Result.Exchanges);
         }
 
@@ -62,9 +58,9 @@ namespace AccountTests.ExchangeAccessServiceTests
         public void WhenAccountIsNotExistsTest()
         {
             var reply = exchangeAccessService.AllExchangesBySession(
-                new SessionRequest { SessionId = "not_existing_session" }, null);
+                new AllExchangesBySessionRequest { SessionId = "not_existing_session" }, null);
 
-            Assert.Equal(ActionCode.AccountNotFound, reply.Result.Result);
+            Assert.Equal(ExchangeAccessActionCode.AccountNotFound, reply.Result.Result);
             Assert.Empty(reply.Result.Exchanges);
         }
     }
