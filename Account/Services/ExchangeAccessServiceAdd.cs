@@ -7,6 +7,7 @@ using TradeBot.Account.AccountService.v1;
 using AccountGRPC.AccountMessages;
 using AccountGRPC.Validation;
 using AccountGRPC.Validation.Messages;
+using Microsoft.EntityFrameworkCore;
 
 namespace AccountGRPC
 {
@@ -22,30 +23,32 @@ namespace AccountGRPC
                 $"Token - {request.Token}, " +
                 $"Secret - {request.Secret}.");
 
-            // Проверка на существование входа в аккаунт. Если аккаунт среди вошедших не найден, отправляется
-            // сообщение об ошибке.
-            if (Models.State.loggedIn == null || !Models.State.loggedIn.ContainsKey(request.SessionId))
-                return Task.FromResult(AddExchangeAccessReplies.AccountNotFound());
-
-            // Валидация полученных данных. В случае, если валидация не прошла успешно, возвращается сообщение об ошибке.
-            ValidationMessage validationResult = Validate.AddExchangeAccessFields(request);
-            if (validationResult.Code != ActionCode.Successful)
-            {
-                return Task.FromResult(new AddExchangeAccessReply
-                {
-                    Result = validationResult.Code,
-                    Message = validationResult.Message
-                });
-            }
-
-            // Добавление данных из запроса в таблицу базы данных.
             using (var database = new Models.AccountContext())
             {
-                var account = database.Accounts.Where(account => account.AccountId == Models.State.loggedIn[request.SessionId].AccountId);
+                // Проверка на существование входа в аккаунт. Если аккаунт среди вошедших не найден, отправляется
+                // сообщение об ошибке.
+                if (!database.LoggedAccounts.Any(login => login.SessionId == request.SessionId))
+                    return Task.FromResult(AddExchangeAccessReplies.AccountNotFound());
 
-                // Проверка на то, добавлен ли токен для той же биржи, что добавляется.
+                // Валидация полученных данных. В случае, если валидация не прошла успешно, возвращается сообщение об ошибке.
+                ValidationMessage validationResult = Validate.AddExchangeAccessFields(request);
+                if (validationResult.Code != ActionCode.Successful)
+                {
+                    return Task.FromResult(new AddExchangeAccessReply
+                    {
+                        Result = validationResult.Code,
+                        Message = validationResult.Message
+                    });
+                }
+
+                // Получение данных о текущем входе (которому соответствует Id сессии) и информации об аккаунте.
+                var loginInfo = database.LoggedAccounts
+                    .Where(login => login.SessionId == request.SessionId)
+                    .Include(account => account.Account).First();
+
+                // Проверка на то, была ли уже добавлена информация о добавляемой бирже.
                 bool isExists = database.ExchangeAccesses.Any(exchange =>
-                    exchange.Account.AccountId == account.First().AccountId &&
+                    exchange.Account.AccountId == loginInfo.Account.AccountId &&
                     exchange.Code == request.Code);
 
                 // В случае, если данные доступа к бирже уже существуют, возвращается сообщение об этом.
@@ -53,13 +56,13 @@ namespace AccountGRPC
                     return Task.FromResult(AddExchangeAccessReplies.ExchangeAccessExists());
 
                 // Добавление в текущий аккаунт нового доступа к бирже.
-                account.First().ExchangeAccesses.Add(new Models.ExchangeAccess
+                loginInfo.Account.ExchangeAccesses.Add(new Models.ExchangeAccess
                 {
                     Code = request.Code,
                     Name = request.ExchangeName,
                     Token = request.Token,
                     Secret = request.Secret,
-                    Account = account.First()
+                    Account = loginInfo.Account
                 });
                 database.SaveChanges();
             }

@@ -15,16 +15,16 @@ namespace AccountGRPC
         {
             Log.Information($"DeleteExchangeAccess получил запрос: SessionId - {request.SessionId}, Code - {request.Code}.");
 
-            if (!Models.State.loggedIn.ContainsKey(request.SessionId))
-                return Task.FromResult(DeleteExchangeAccessReplies.AccountNotFound());
-
             using (var database = new Models.AccountContext())
             {
-                Models.LoggedAccount fromAccount = Models.State.loggedIn[request.SessionId];
+                if (!database.LoggedAccounts.Any(login => login.SessionId == request.SessionId))
+                    return Task.FromResult(DeleteExchangeAccessReplies.AccountNotFound());
+
+                Models.LoggedAccount fromAccount = database.LoggedAccounts.Where(login => login.SessionId == request.SessionId).First();
 
                 // Получение данных биржи для текущего пользователя и биржи с конкретным кодом.
                 var exсhangeAccess = database.ExchangeAccesses.Where(exchange =>
-                    exchange.Account.AccountId == fromAccount.AccountId &&
+                    exchange.Account.AccountId == fromAccount.Account.AccountId &&
                     exchange.Code == request.Code);
 
                 // В случае, если такой записи не обнаружено, сервис отвечает ошибкой.

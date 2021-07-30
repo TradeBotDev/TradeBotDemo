@@ -18,7 +18,7 @@ namespace AccountGRPC
         public override Task<LoginReply> Login(LoginRequest request, ServerCallContext context)
         {
             Log.Information($"Login получил запрос: Email - {request.Email}, Password - {request.Password}, SaveExchangesAfterLogout - {request.SaveExchangesAfterLogout}.");
-
+            
             // Валидация полей запроса
             ValidationMessage validationResult = Validate.LoginFields(request);
 
@@ -43,27 +43,28 @@ namespace AccountGRPC
 
                 // Проверка на наличие зарегистрированных аккаунтов с данными из запроса, и в
                 // случае их отсутствия отправляет ответ с сообщением об ошибке.
-                if (Models.State.loggedIn == null || accounts.Count() == 0)
+                if (accounts.Count() == 0)
                     return Task.FromResult(LoginReplies.AccountNotFound());
 
                 // Проверка на то, есть ли сессия с пользователем, который пытается войти в аккаунт, и
                 // в случае, если он вошел, возвращается его Id сессии
-                foreach (KeyValuePair<string, Models.LoggedAccount> account in Models.State.loggedIn)
-                {
-                    int checkedAccount = database.Accounts.Count(account => account.Email == request.Email);
-                    if (checkedAccount > 0)
-                        return Task.FromResult(LoginReplies.AlreadySignedIn(account.Key));
-                }
+                var existingLogin = database.LoggedAccounts.Where(account => account.AccountId == accounts.First().AccountId);
+                if (existingLogin.Count() > 0)
+                    return Task.FromResult(LoginReplies.AlreadySignedIn(existingLogin.First().SessionId));
 
                 // В случае наличия зарегистрированного аккаунта с данными из запроса генерируется
-                // Id сессии, а также полученный пользователь добавляется в коллекцию с вошедшими
+                // Id сессии, а также полученный пользователь добавляется в таблицу с вошедшими
                 // пользователями.
                 string sessionId = Guid.NewGuid().ToString();
-                var loggedAccount = new Models.LoggedAccount(accounts.First(), request.SaveExchangesAfterLogout);
-                Models.State.loggedIn.Add(sessionId, loggedAccount);
-
-                // Сохранение текущего состояния в файл.
-                FileManagement.WriteFile(Models.State.LoggedInFilename, Models.State.loggedIn);
+                var loggedAccount = new Models.LoggedAccount
+                {
+                    SessionId = sessionId,
+                    SaveExchangesAfterLogout = request.SaveExchangesAfterLogout,
+                    Account = accounts.First()
+                };
+                // Добавление в таблицу информации о новом входе в аккаунт.
+                database.LoggedAccounts.Add(loggedAccount);
+                database.SaveChanges();
 
                 // Ответ сервера об успешном входе в аккаунт.
                 return Task.FromResult(LoginReplies.SuccessfulLogin(sessionId));

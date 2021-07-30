@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-using System.Collections.Generic;
 using System.IO;
 using Serilog;
 
@@ -23,22 +22,6 @@ namespace AccountGRPC
                 .WriteTo.Console()
                 .WriteTo.Seq("http://localhost:5341")
                 .CreateLogger();
-
-            // Проверяется существование файла, в котором хранятся данные. В случае, если он существует,
-            // производится его чтение и запись состояния в коллекцию вошедших пользователей.
-            if (File.Exists(State.LoggedInFilename))
-            {
-                var state = FileManagement.ReadFile<Dictionary<string, LoggedAccount>>(State.LoggedInFilename);
-                State.loggedIn = state;
-                Log.Information("Запуск сервиса Account: файл с данными обнаружен. Произведено чтение данных.");
-            }
-            // Иначе выделяется память под коллекцию вошедших пользователей и она сразу же записывается в файл.
-            else
-            {
-                State.loggedIn = new Dictionary<string, LoggedAccount>();
-                FileManagement.WriteFile(State.LoggedInFilename, State.loggedIn);
-                Log.Information("Запуск сервиса Account: файл с данными не найден. Произведено создание нового файла.");
-            }
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.

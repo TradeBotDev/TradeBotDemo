@@ -15,5 +15,8 @@ namespace AccountGRPC.Models
 
         // Таблица с данными для доступа к биржам.
         public DbSet<ExchangeAccess> ExchangeAccesses { get; set; }
+
+        // Таблица с данными о вошедших аккаунтах.
+        public DbSet<LoggedAccount> LoggedAccounts { get; set; }
     }
 }

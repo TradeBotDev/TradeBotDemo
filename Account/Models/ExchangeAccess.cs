@@ -8,11 +8,11 @@ namespace AccountGRPC.Models
         public int ExchangeAccessId { get; set; }
 
         public ExchangeCode Code { get; set; }
-
+        
         public string Name { get; set; }
-
+        
         public string Token { get; set; }
-
+        
         public string Secret { get; set; }
 
         public Account Account { get; set; }

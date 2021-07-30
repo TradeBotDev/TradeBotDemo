@@ -3,18 +3,14 @@
     // Объект вошедшего аккаунта.
     public class LoggedAccount
     {
-        public int AccountId { get; set; }
-
-        // Отвечает за сохранение данных о биржах в базе данных после выхода. True - сохранять, False - уничтожать данные.
+        public int LoggedAccountId { get; set; }
+        
+        public string SessionId { get; set; }
+        
         public bool SaveExchangesAfterLogout { get; set; }
 
-        // Этот конструктор необходим для десериализации.
-        public LoggedAccount() { }
-
-        public LoggedAccount(Account account, bool saveExchangesAfterLogout)
-        {
-            this.AccountId = account.AccountId;
-            this.SaveExchangesAfterLogout = saveExchangesAfterLogout;
-        }
+        public int AccountId { get; set; }
+        
+        public Account Account { get; set; }
     }
 }
