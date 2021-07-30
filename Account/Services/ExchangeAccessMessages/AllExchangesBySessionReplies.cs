@@ -1,5 +1,5 @@
-﻿using Serilog;
-using System.Linq;
+﻿using System.Linq;
+using Serilog;
 using TradeBot.Account.AccountService.v1;
 
 namespace AccountGRPC.AccountMessages

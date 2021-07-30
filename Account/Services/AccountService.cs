@@ -1,7 +1,8 @@
-﻿using Grpc.Core;
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+
+using Grpc.Core;
 using Serilog;
 using Microsoft.EntityFrameworkCore;
 
