@@ -7,8 +7,6 @@ namespace AccountGRPC.Validation.Messages
     {
         public override string Message => "Произошла ошибка: строка не является электронной почтой. Проверьте правильность введенных данных.";
 
-        public override ValidationCode Code => ValidationCode.IsNotEmail;
-
         public IsNotEmailMessage()
         {
             Log.Information("Ошибка валидации: строка не является электронной почтой.");

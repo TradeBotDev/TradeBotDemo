@@ -24,7 +24,7 @@ namespace AccountGRPC
 
             // В случае, если валидация не прошла успешно (к примеру, присутствуют пустые поля)
             // возвращается сообщение об одной из ошибок в запросе.
-            if (validationResult.Code != ValidationCode.Successful)
+            if (!validationResult.Successful)
             {
                 return Task.FromResult(new LoginReply
                 {

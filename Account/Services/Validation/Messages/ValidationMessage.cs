@@ -6,6 +6,6 @@ namespace AccountGRPC.Validation.Messages
     {
         public abstract string Message { get; }
 
-        public abstract ValidationCode Code { get; }
+        public abstract bool Successful { get; }
     }
 }

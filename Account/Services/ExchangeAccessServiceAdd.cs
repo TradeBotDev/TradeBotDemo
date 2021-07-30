@@ -32,7 +32,7 @@ namespace AccountGRPC
 
                 // Валидация полученных данных. В случае, если валидация не прошла успешно, возвращается сообщение об ошибке.
                 ValidationMessage validationResult = Validate.AddExchangeAccessFields(request);
-                if (validationResult.Code != ValidationCode.Successful)
+                if (!validationResult.Successful)
                 {
                     return Task.FromResult(new AddExchangeAccessReply
                     {
