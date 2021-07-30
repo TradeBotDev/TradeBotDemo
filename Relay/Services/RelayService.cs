@@ -49,9 +49,9 @@ namespace Relay.Services
         public UserContext GetUserContext(Metadata meta)
         {
             //TODO Возможно он тут проверяет по ссылке. так что надо бы сделать Equals
-            if (contexts.ContainsKey(meta)) 
+            if (contexts.FirstOrDefault(x=>x.Key.FirstOrDefault(y=>y.Value==meta[2].Value)!=null).Value!=null) 
             {
-                return contexts[meta];
+                return contexts.First(x => x.Key.First(y => y.Value == meta[2].Value).Value != null).Value;
             }
             UserContext newContext = new(meta, _former, _algorithmClient, _tradeMarketClient);
             contexts.Add(meta,newContext);
@@ -69,18 +69,14 @@ namespace Relay.Services
         {
             Log.Information($"StartBot requested form {context.Host} with meta : \n {context.RequestHeaders}");
             var user = GetUserContext(context.RequestHeaders);
+            user.StatusOfSubscribe();
             user.SubscribeForOrders();
             user.UpdateConfig(request.Config);
             //_algorithmClient.IsOn = true;
-            return await Task.FromResult(new StartBotResponse()
-            {
-                Response = new DefaultResponse()
-                {
-                    Message = "Bot was launched",
-                    Code = ReplyCode.Succeed
-                }
-            });
+            return await UserContext.ReturnBotStatus(user);
         }
+
+        
 
         public async override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request,
             ServerCallContext context)
