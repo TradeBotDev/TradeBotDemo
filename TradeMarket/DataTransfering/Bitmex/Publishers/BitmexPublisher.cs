@@ -27,7 +27,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         public BitmexPublisher(BitmexWebsocketClient client,Action<TResponse, EventHandler<IPublisher<TModel>.ChangedEventArgs>> action)
         {
             _client = client;
-            _invokeActionOnNext = action ?? throw new ArgumentNullException(nameof(action));
+            _invokeActionOnNext = action;// ?? throw new ArgumentNullException(nameof(action));
         }
 
 

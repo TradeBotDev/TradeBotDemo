@@ -21,7 +21,7 @@ namespace TradeMarketTests.EventsTests
             IBitmexCommunicator commutator = new BitmexWebsocketCommunicator(new Uri("http://localhost/2134"));
             Moq.Mock<BitmexWebsocketClient> clientmoq = new Mock<BitmexWebsocketClient>(MockBehavior.Strict);
             Moq.Mock<BitmexWebsocketCommunicator> commmoq = new Mock<BitmexWebsocketCommunicator>(MockBehavior.Strict);
-            //clientmoq.Setup(mq => mq.Send(It.IsAny<RequestBase>())).Callback(() => )
+            clientmoq.Setup(mq => mq.Send(It.IsAny<RequestBase>()));
             BitmexWebsocketClient client = new BitmexWebsocketClient(commmoq.Object);
 
             //commmoq.Setup(cmq => cmq.Send(It.IsAny<string>())).Callback(() => client.Streams)

@@ -18,11 +18,11 @@ namespace TradeMarketTests.IntegrationTests
             UserContextMoq.Setup(uq => uq.init()).Callback(() => { });
             UserContextMoq.Setup(uq => uq.IsEquevalentTo(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).CallBase();
             */
-            var user1 = await UserContext.GetUserContextAsync("123", "123", "bitmex");
+            /*var user1 = await UserContext.GetUserContextAsync("123", "123", "bitmex");
             var user2 = await UserContext.GetUserContextAsync("123", "123", "bitmex");
-            var user3 = await UserContext.GetUserContextAsync("123", "123", "bitmex");
+            var user3 = await UserContext.GetUserContextAsync("123", "123", "bitmex");*/
         }
-
+        
         [Fact]
         public async void MultipleUserShouldCreatesOneInstanceOfUserContextAsync()
         {
