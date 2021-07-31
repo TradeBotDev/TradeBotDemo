@@ -10,7 +10,7 @@ namespace Former
 {
     public class Former
     {
-        private readonly ConcurrentDictionary<string, Order> _purchaseOrderBook;
+        private readonly ConcurrentDictionary<string, Order> _buyOrderBook;
 
         private readonly ConcurrentDictionary<string, Order> _sellOrderBook;
 
@@ -24,80 +24,260 @@ namespace Former
 
         private int _positionSize;
 
-        private int _bookSize;
+        private readonly int _bookSize;
 
         private bool _placeLocker;
 
-        private bool _fitLocker;
+        private bool _fitPricesLocker;
+
+        private double _sellFairPrice;
+
+        private double _buyFairPrice;
 
         public Former(int bookSize)
         {
             _sellOrderBook = new ConcurrentDictionary<string, Order>();
-            _purchaseOrderBook = new ConcurrentDictionary<string, Order>();
+            _buyOrderBook = new ConcurrentDictionary<string, Order>();
             _myOrders = new ConcurrentDictionary<string, Order>();
             _bookSize = bookSize;
         }
 
-        #region UpdateRegion
+        #region Update order book and fit prices
+        /// <summary>
+        /// Проверяет, стоит ли перевыставлять ордера, и вызывает FitPrices, в том случае, если это необходимо
+        /// </summary>
+        private async Task CheckAndFitPrices(double buyFairPrice, double sellFairPrice, UserContext context)
+        {
+            //если рыночная цена изменилась, то необходимо проверить, не устарели ли цени в наших ордерах
+            if ((int)Math.Floor(_sellFairPrice) != (int)Math.Floor(sellFairPrice) || (int)Math.Floor(_buyFairPrice) != (int)Math.Floor(buyFairPrice))
+            {
+                _sellFairPrice = sellFairPrice;
+                _buyFairPrice = buyFairPrice;
+                if (_buyOrderBook.Count >= _bookSize && _sellOrderBook.Count >= _bookSize && !_fitPricesLocker && _myOrders.Count > 0) await FitPrices(context);
+            }
+        }
+
+        /// <summary>
+        /// Обновляет рыночные цены на продажу и на покупку
+        /// </summary>
+        private async Task UpdateFairPrices(UserContext context)
+        {
+            //вычиляем рыночные цены на покупку и на продажу и выполняем проверку на актуальность наших ордеров
+            var sellFairPrice = _sellOrderBook.Min(x => x.Value.Price);
+            var buyFairPrice = _buyOrderBook.Max(x => x.Value.Price);
+            await CheckAndFitPrices(buyFairPrice, sellFairPrice, context);
+        }
 
         /// <summary>
         /// Обновляет конкретную книгу ордеров
         /// </summary>
-        private async Task UpdateConcreteBook(ConcurrentDictionary<string, Order> bookNeededUpdate, Order order, UserContext context)
+        private async Task UpdateConcreteBook(ConcurrentDictionary<string, Order> bookNeededUpdate, Order newComingOrder)
         {
-            if (CheckContext(context)) return;
-            var task = Task.Run(() =>
+            var updateConcreteBookTask = new Task(() =>
             {
                 //если ордер имеет статус открытый, то он добавляется, либо апдейтится, если закрытый, то удаляется из книги
-                if (order.Signature.Status == OrderStatus.Open)
-                    bookNeededUpdate.AddOrUpdate(order.Id, order, (k, v) =>
+                if (newComingOrder.Signature.Status == OrderStatus.Open)
+                    bookNeededUpdate.AddOrUpdate(newComingOrder.Id, newComingOrder, (_, v) =>
                     {
-                        if (order.Price != 0) v.Price = order.Price;
-                        if (order.Quantity != 0) v.Quantity = order.Quantity;
-                        if (order.Signature.Type != OrderType.Unspecified) v.Signature = order.Signature;
-                        v.LastUpdateDate = order.LastUpdateDate;
+                        //у ордера на обновление не нулевой будет величина, которая изменилась
+                        if (newComingOrder.Price != 0) v.Price = newComingOrder.Price;
+                        if (newComingOrder.Quantity != 0) v.Quantity = newComingOrder.Quantity;
+                        v.Signature = newComingOrder.Signature;
+                        v.LastUpdateDate = newComingOrder.LastUpdateDate;
+                        v.Signature = newComingOrder.Signature;
                         return v;
                     });
-                else if (bookNeededUpdate.ContainsKey(order.Id))
-                    bookNeededUpdate.TryRemove(order.Id, out _);
+                else if (bookNeededUpdate.ContainsKey(newComingOrder.Id))
+                    bookNeededUpdate.TryRemove(newComingOrder.Id, out _);
+            });
+            await updateConcreteBookTask;
+        }
+
+        /// <summary>
+        /// Обновляет одну из книг ордеров с вновь пришедшим ордером, в зависимости от того, какого типа ордер необходимо внести в книгу
+        /// </summary>
+        public async Task UpdateOrderBooks(Order newComingOrder, UserContext context)
+        {
+            if (CheckContext(context)) return;
+            var task = new Task(async () =>
+            {
+                //выбирает, какую книгу апдейтить
+                await UpdateConcreteBook(newComingOrder.Signature.Type == OrderType.Buy ? _buyOrderBook : _sellOrderBook, newComingOrder);
+                await UpdateFairPrices(context);
             });
             await task;
         }
 
         /// <summary>
-        /// Обновляет одну из книг ордеров с вновь пришедшим ордером
+        /// Подгоняет мои ордера под рыночную цену
         /// </summary>
-        public async Task UpdateOrderBooks(Order newComingOrder, UserContext context)
+        private async Task FitPrices(UserContext context)
         {
             if (CheckContext(context)) return;
-            var task = Task.Run(async () =>
+            _fitPricesLocker = true;
+
+            foreach (var (key, order) in _myOrders)
             {
-                //выбирает, какую книгу апдейтить
-                if (newComingOrder.Signature.Type == OrderType.Buy)
+                if (order.Signature.Type == OrderType.Sell)
+                    if (order.Price - _sellFairPrice > context.Configuration.OrderUpdatePriceRange)
+                    {
+                        if (_sellFairPrice - 1 > _buyFairPrice) _sellFairPrice -= 2;
+                        var response = await context.AmendOrder(order.Id, _sellFairPrice + 1);
+                        if (response.Response.Code == ReplyCode.Succeed)
+                            _myOrders.AddOrUpdate(key, order, (_, v) =>
+                            {
+                                v.Price = _sellFairPrice + 1;
+                                v.Quantity = v.Quantity;
+                                v.LastUpdateDate = v.LastUpdateDate;
+                                v.Signature = v.Signature;
+                                return v;
+                            });
+                        Log.Information("Order {0} amended with {1} {2} {3}", key, _sellFairPrice, response.Response.Code.ToString(), response.Response.Message);
+                    }
+                if (order.Signature.Type == OrderType.Buy)
+                    if (_buyFairPrice - order.Price > context.Configuration.OrderUpdatePriceRange)
+                    {
+                        if (_buyFairPrice + 1 > _sellFairPrice) _buyFairPrice += 2;
+                        var response = await context.AmendOrder(order.Id, _buyFairPrice - 1);
+                        if (response.Response.Code == ReplyCode.Succeed)
+                            _myOrders.AddOrUpdate(key, order, (_, v) =>
+                            {
+                                v.Price = _buyFairPrice - 1;
+                                v.Quantity = v.Quantity;
+                                v.LastUpdateDate = v.LastUpdateDate;
+                                v.Signature = v.Signature;
+                                return v;
+                            });
+                        Log.Information("Order {0} amended with {1} {2} {3}", key, _buyFairPrice, response.Response.Code.ToString(), response.Response.Message);
+                    }
+            }
+            _fitPricesLocker = false;
+        }
+        #endregion
+
+        #region Update my order and place counter orders
+        /// <summary>
+        /// Возвращает true, если получилось удалить ордер по идентификатору из списка моих ордеров, иначе false
+        /// </summary>
+        private bool RemoveFromMyOrders(string id)
+        {
+            return _myOrders.TryRemove(id, out _);
+        } 
+
+        /// <summary>
+        /// Обновляет запись в списке моих ордеров, если запись с таким же идентификатором существует там
+        /// </summary>
+        private void UpdateMyOrder(Order newComingOrder)
+        {
+            if (_myOrders.ContainsKey(newComingOrder.Id))
+                _myOrders.AddOrUpdate(newComingOrder.Id, newComingOrder, (_, v) =>
                 {
-                    await UpdateConcreteBook(_purchaseOrderBook, newComingOrder, context);
-                    //если книга ордеров полностью заполнилась, вычисление рыночной цены, выполняющейся в методе FitPrices, будет корректным
-                }
-                if (newComingOrder.Signature.Type == OrderType.Sell)
-                {
-                    await UpdateConcreteBook(_sellOrderBook, newComingOrder, context);
-                    //если книга ордеров полностью заполнилась, вычисление рыночной цены, выполняющейся в методе FitPrices, будет корректным
-                }
-                if (_purchaseOrderBook.Count >= _bookSize && _sellOrderBook.Count >= _bookSize && !_fitLocker)
-                    await FitPrices(context);
-            });
-            await task;
+                    if (newComingOrder.Price != 0) v.Price = newComingOrder.Price;
+                    if (newComingOrder.Quantity != 0) v.Quantity = -newComingOrder.Quantity;
+                    v.LastUpdateDate = newComingOrder.LastUpdateDate;
+                    v.Signature = newComingOrder.Signature;
+                    return v;
+                });
         }
 
+        /// <summary>
+        /// Выставляет контр-ордер в полном объёме от изначального ордера
+        /// </summary>
+        private async Task<PlaceOrderResponse> PlaceFullCounterOrder(double price, double quantity, UserContext context)
+        {
+            var response = await context.PlaceOrder(price, -quantity);
+            return response;
+        }
+
+        /// <summary>
+        /// Выставляет контр-ордер с частью объёма от изначального ордера
+        /// </summary>
+        private async Task<PlaceOrderResponse> PlacePartialCounterOrder(double price, double newQuantity, double oldQuantity, UserContext context)
+        {
+            var quantity = oldQuantity - newQuantity;
+            var response = await context.PlaceOrder(price, -quantity);
+            return response;
+        }
+
+        /// <summary>
+        /// Обновляет список моих ордеров по подписке, и выставляет контр-ордер в случае частичного или полного исполнения моего ордера
+        /// </summary>
+        internal async Task UpdateMyOrderList(Order newComingOrder, ChangesType changesType, UserContext context)
+        {
+            //вновь пришедший ордер не помещается в список моих ордеров здесь, потому что это делается только по событию из алгоритма, во избежание
+            //зацикливания выставления ордеров и контр-ордеров
+            if (changesType == ChangesType.Insert) return;
+            //по той же причине, что и выше, ордера, которые уже были на бирже не инициализируются снова, а лишь идут в расчёт текущей позиции на бирже
+            if (changesType == ChangesType.Partitial)
+            {
+                _positionSizeInActiveOrders += (int)newComingOrder.Quantity;
+                Log.Information("Position size in active orders has been updated: {0}", _positionSizeInActiveOrders);
+                return;
+            }
+            if (CheckContext(context)) return;
+
+            //данная переменная действует, как семафор. Она предотвращает одновременное выставление контр ордера и выставление ордера по просьбе алгоритма, так как из за высвобождения 
+            //средств оба эти действия имеют место.
+            _placeLocker = true;
+            _fitPricesLocker = true;
+
+            var id = newComingOrder.Id;
+
+            //выходим из метода, если не получилось получить ордер по входящему идентификатору
+            if (!_myOrders.TryGetValue(id, out var oldOrder)) return;
+
+            //рассчитываем цены продажи/покупку для контр ордеров
+            var sellPrice = oldOrder.Price + oldOrder.Price * context.Configuration.RequiredProfit;
+            var buyPrice = oldOrder.Price - oldOrder.Price * context.Configuration.RequiredProfit;
+
+            //если входящий ордер имеет пометку "удалить" необходимо выставить контр-ордер в полном объёме, и в случае, если это удастся, удалить его из списка моих ордеров
+            if (changesType == ChangesType.Delete)
+            {
+                var placeResponse = await PlaceFullCounterOrder(oldOrder.Signature.Type == OrderType.Buy ? sellPrice : buyPrice, oldOrder.Quantity, context);
+                var removeResponse = false;
+                if (placeResponse.Response.Code == ReplyCode.Succeed)
+                {
+                    removeResponse = RemoveFromMyOrders(id);
+                    _positionSizeInActiveOrders -= (int)oldOrder.Quantity;
+                }
+                Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3} removed {5}", oldOrder.Id, oldOrder.Price, oldOrder.Quantity, removeResponse ? ReplyCode.Succeed : ReplyCode.Failure);
+                Log.Information("Counter order price: {0}, quantity: {1} placed {2} {3}", oldOrder.Signature.Type == OrderType.Buy ? sellPrice : buyPrice, -oldOrder.Quantity, placeResponse.Response.Code, placeResponse.Response.Code == ReplyCode.Succeed ? "" : placeResponse.Response.Message);
+            }
+            //если входящий ордер имеет пометку "обновить" необходимо обновить цену или объём в совпадающем по ид ордере, и в случае обновления объёма выставить контр-ордер с частичным объёмом
+            {
+                if (newComingOrder.Quantity != 0)
+                {
+                    var placeResponse = await PlacePartialCounterOrder(oldOrder.Signature.Type == OrderType.Buy ? buyPrice : sellPrice, newComingOrder.Quantity, oldOrder.Quantity, context);
+                    if (placeResponse.Response.Code == ReplyCode.Succeed)
+                    {
+                        UpdateMyOrder(newComingOrder);
+                        _positionSizeInActiveOrders -= (int)(newComingOrder.Quantity - oldOrder.Quantity);
+                    }
+                    Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3} updated", oldOrder.Id, oldOrder.Price, oldOrder.Quantity, oldOrder.Signature.Type);
+                    Log.Information("Counter order price: {0}, quantity: {1} placed {2} {3}", oldOrder.Signature.Type == OrderType.Buy ? buyPrice : sellPrice, -oldOrder.Quantity, placeResponse.Response.Code, placeResponse.Response.Code == ReplyCode.Succeed ? "" : placeResponse.Response.Message);
+                }
+                if (newComingOrder.Price != 0)
+                {
+                    UpdateMyOrder(newComingOrder);
+                    Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3} updated", id, newComingOrder.Price, -oldOrder.Quantity, oldOrder.Signature.Type);
+                }
+            }
+            _placeLocker = false;
+            _fitPricesLocker = false;
+        }
+        #endregion
+
+        #region Form orders and update balance and position
         /// <summary>
         /// Обновляет размер позиции, для того чтобы знать, короткая позиция или длинная
         /// </summary>
         internal Task UpdatePosition(double currentQuantity)
         {
-            if (_positionSize != currentQuantity) Log.Information("Current postition: {0}, position in active orders: {1}", currentQuantity, _positionSizeInActiveOrders);
-
-            _positionSize = (int)currentQuantity;
-
+            if (_positionSize != (int)currentQuantity)
+            {
+                Log.Information("Current position: {0}, position in active orders: {1}", currentQuantity, _positionSizeInActiveOrders);
+                _positionSize = (int)currentQuantity;
+            }
             return Task.CompletedTask;
         }
 
@@ -106,107 +286,15 @@ namespace Former
         /// </summary>
         internal Task UpdateBalance(int availableBalance, int totalBalance)
         {
-            if (_availableBalance != availableBalance) Log.Information("Balance updated. Available balance: {0}, Total balance: {1}", availableBalance, totalBalance);
-            _availableBalance = availableBalance;
+            if (_availableBalance != availableBalance)
+            {
+                Log.Information("Balance updated. Available balance: {0}, Total balance: {1}", availableBalance, totalBalance);
+                _availableBalance = availableBalance;
+            }
             _totalBalance = totalBalance;
             return Task.CompletedTask;
         }
 
-        /// <summary>
-        /// Обновляет список моих ордеров по подписке
-        /// </summary>
-        internal async Task UpdateMyOrderList(Order newComingOrder, ChangesType changesType, UserContext context)
-        {
-            if (CheckContext(context)) return;
-            Order oldOrder = null;
-            var id = newComingOrder.Id;
-            var price = newComingOrder.Price;
-            var quantity = newComingOrder.Quantity;
-            var type = newComingOrder.Signature.Type;
-            var status = newComingOrder.Signature.Status;
-            
-            double newQuantity = 0;
-            if (changesType == ChangesType.Partitial)
-            {
-                _positionSizeInActiveOrders += (int)newComingOrder.Quantity;
-                Log.Information("Position size in active orders has been updated: {0}", _positionSizeInActiveOrders);
-                return;
-            }
-
-            if (changesType == ChangesType.Insert || !_myOrders.TryGetValue(id, out oldOrder)) return;
-
-            double sellPrice = oldOrder.Price + oldOrder.Price * context.configuration.RequiredProfit;
-            double purchasePrice = oldOrder.Price - oldOrder.Price * context.configuration.RequiredProfit;
-
-            _placeLocker = true;
-            if (changesType == ChangesType.Delete)
-            {
-                if (oldOrder.Signature.Type == OrderType.Buy)
-                {
-                    PlaceOrderResponse response = await context.PlaceOrder(sellPrice, -oldOrder.Quantity);
-                    if (response.Response.Code == ReplyCode.Succeed)
-                    {
-                        _positionSizeInActiveOrders -= (int)oldOrder.Quantity;
-                        _myOrders.TryRemove(id, out _);
-                    }
-                    Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} removed {5}", id, price, -oldOrder.Quantity, type, status, response.Response.Code);
-                    Log.Information("Counter order price: {0}, quantity: {1} placed for sell {2} {3}", sellPrice, -oldOrder.Quantity, response.Response.Code.ToString(), response.Response.Message);
-                }
-                if (oldOrder.Signature.Type == OrderType.Sell)
-                {
-                    PlaceOrderResponse response = await context.PlaceOrder(purchasePrice, -oldOrder.Quantity);
-                    if (response.Response.Code == ReplyCode.Succeed)
-                    {
-                        _positionSizeInActiveOrders -= (int)oldOrder.Quantity;
-                        _myOrders.TryRemove(id, out _);
-                    }
-                    Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} removed {5}", id, price, -oldOrder.Quantity, type, status, response.Response.Code);
-                    Log.Information("Counter order price: {0}, quantity: {1} placed for purchase {2} {3}", purchasePrice, -oldOrder.Quantity, response.Response.Code.ToString(), response.Response.Message);
-                }
-            }
-            if (changesType == ChangesType.Update)
-            {
-                if (oldOrder.Signature.Type == OrderType.Buy)
-                {
-                    if (quantity != 0)
-                    {
-                        newQuantity = oldOrder.Quantity - quantity;
-                        PlaceOrderResponse response = await context.PlaceOrder(sellPrice, -newQuantity);
-                        _positionSizeInActiveOrders -= (int)newQuantity;
-                        Log.Information("Counter order price: {0}, quantity: {1} placed for sell {2} {3}", sellPrice, -newQuantity, response.Response.Code.ToString(), response.Response.Message);
-                    }
-                    _myOrders.AddOrUpdate(id, newComingOrder, (k, v) =>
-                    {
-                        if (price != 0) v.Price = price;
-                        if (quantity != 0) v.Quantity = -quantity;
-                        return v;
-                    });
-                    Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} updated {5}", id, price, quantity, type, status);
-                }
-                if (oldOrder.Signature.Type == OrderType.Sell)
-                {
-                    if (quantity != 0)
-                    {
-                        newQuantity = oldOrder.Quantity - quantity;
-                        PlaceOrderResponse response = await context.PlaceOrder(purchasePrice, -newQuantity);
-                        _positionSizeInActiveOrders += (int)newQuantity;
-                        Log.Information("Counter order price: {0}, quantity: {1} placed for purchase {2} {3}", purchasePrice, -newQuantity, response.Response.Code.ToString(), response.Response.Message);
-                    }
-                    _myOrders.AddOrUpdate(id, newComingOrder, (k, v) =>
-                    {
-                        if (price != 0) v.Price = price;
-                        if (quantity != 0) v.Quantity = quantity;
-                        return v;
-                    });
-                    Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} updated {5}", id, price, quantity, type, status);
-                }
-            }
-            _placeLocker = false;
-        }
-
-        #endregion
-
-        #region FormRegion
         /// <summary>
         /// Формирует ордер на покупку
         /// </summary>
@@ -214,21 +302,21 @@ namespace Former
         {
             if (_placeLocker) return;
             if (CheckContext(context)) return;
-            double quantity = 0;
-            double availableBalance = ConvertSatoshiToXBT(_availableBalance) * context.configuration.AvaibleBalance;
-            double totalBalance = ConvertSatoshiToXBT(_totalBalance) * context.configuration.AvaibleBalance;
+            double quantity;
+            var availableBalance = ConvertSatoshiToXbt(_availableBalance) * context.Configuration.AvaibleBalance;
+            var totalBalance = ConvertSatoshiToXbt(_totalBalance) * context.Configuration.AvaibleBalance;
             //вычисляем рыночную цену для продажи
-            double purchaseFairPrice = _purchaseOrderBook.Max(x => x.Value.Price);
+            var purchaseFairPrice = _buyOrderBook.Max(x => x.Value.Price);
 
             //если наша позиция длинная, то есть _positionSize имеет положительное значение, то мы можем продавать только по доступному балансу
             //если наша позиция короткая, то есть _positionSize имеет отрицательное значение, то мы можем продавать по общему балансу, который есть на аккаунте
-            if (_positionSize >= 0) quantity = context.configuration.ContractValue * Math.Floor(availableBalance * purchaseFairPrice / context.configuration.ContractValue);
-            else quantity = context.configuration.ContractValue * Math.Floor(totalBalance * purchaseFairPrice / context.configuration.ContractValue) - _positionSizeInActiveOrders;
+            if (_positionSize >= 0) quantity = context.Configuration.ContractValue * Math.Floor(availableBalance * purchaseFairPrice / context.Configuration.ContractValue);
+            else quantity = context.Configuration.ContractValue * Math.Floor(totalBalance * purchaseFairPrice / context.Configuration.ContractValue) - _positionSizeInActiveOrders;
 
             //если баланса было достаточно для хотя бы одного ордера то выполняем продажу
             if (quantity > 0)
             {
-                PlaceOrderResponse response = await context.PlaceOrder(purchaseFairPrice - 1, quantity);
+                var response = await context.PlaceOrder(purchaseFairPrice - 1, quantity);
                 if (response.Response.Code == ReplyCode.Succeed)
                 {
                     _myOrders.TryAdd(response.OrderId, new Order
@@ -257,21 +345,21 @@ namespace Former
         {
             if (_placeLocker) return;
             if (CheckContext(context)) return;
-            double quantity = 0;
-            double availableBalance = ConvertSatoshiToXBT(_availableBalance) * context.configuration.AvaibleBalance;
-            double totalBalance = ConvertSatoshiToXBT(_totalBalance) * context.configuration.AvaibleBalance;
+            double quantity;
+            var availableBalance = ConvertSatoshiToXbt(_availableBalance) * context.Configuration.AvaibleBalance;
+            var totalBalance = ConvertSatoshiToXbt(_totalBalance) * context.Configuration.AvaibleBalance;
             //вычисляем рыночную цену для продажи
-            double sellFairPrice = _sellOrderBook.Min(x => x.Value.Price);
+            var sellFairPrice = _sellOrderBook.Min(x => x.Value.Price);
 
             //если наша позиция короткая, то есть _positionSize имеет отрицательное значение, то мы можем продавать только по доступному балансу
             //если наша позиция длинная, то есть _positionSize имеет положительное значение, то мы можем продавать по общему балансу, который есть на аккаунте
-            if (_positionSize <= 0) quantity = context.configuration.ContractValue * Math.Floor(availableBalance * sellFairPrice / context.configuration.ContractValue);
-            else quantity = context.configuration.ContractValue * Math.Floor(totalBalance * sellFairPrice / context.configuration.ContractValue) + _positionSizeInActiveOrders;
+            if (_positionSize <= 0) quantity = context.Configuration.ContractValue * Math.Floor(availableBalance * sellFairPrice / context.Configuration.ContractValue);
+            else quantity = context.Configuration.ContractValue * Math.Floor(totalBalance * sellFairPrice / context.Configuration.ContractValue) + _positionSizeInActiveOrders;
 
             //если баланса было достаточно для хотя бы одного ордера то выполняем продажу
             if (quantity > 0)
             {
-                PlaceOrderResponse response = await context.PlaceOrder(sellFairPrice + 1, -quantity);
+                var response = await context.PlaceOrder(sellFairPrice + 1, -quantity);
                 if (response.Response.Code == ReplyCode.Succeed)
                 {
                     _myOrders.TryAdd(response.OrderId, new Order
@@ -292,66 +380,18 @@ namespace Former
             }
             else Log.Debug("Cannot place sell order. Insufficient balance.");
         }
-        #endregion
-
-        #region UtilityRegion
-
-        /// <summary>
-        /// Подгоняет мои ордера под рыночную цену
-        /// </summary>
-        private async Task FitPrices(UserContext context)
-        {
-            _fitLocker = true;
-            if (CheckContext(context)) return;
-            var checkPrices = Task.Run(async () =>
-            {
-                double sellFairPrice = _sellOrderBook.Min(x => x.Value.Price);
-                double purchaseFairPrice = _purchaseOrderBook.Max(x => x.Value.Price);
-
-                foreach (var order in _myOrders)
-                {
-                    if (order.Value.Signature.Type == OrderType.Sell)
-                        if (order.Value.Price - sellFairPrice > context.configuration.OrderUpdatePriceRange)
-                        {
-                            if (sellFairPrice - 1 > purchaseFairPrice) sellFairPrice -= 1;
-                            AmmendOrderResponse response = await context.SetNewPrice(order.Value.Id, sellFairPrice + 1);
-                            if (response.Response.Code == ReplyCode.Succeed)
-                                _myOrders.AddOrUpdate(order.Key, order.Value, (k, v) =>
-                                {
-                                    v.Price = sellFairPrice + 1;
-                                    return v;
-                                });
-                            Log.Information("Order {0} amended with {1} {2} {3}", order.Key, sellFairPrice, response.Response.Code.ToString(), response.Response.Message);
-                        }
-                    if (order.Value.Signature.Type == OrderType.Buy)
-                        if (purchaseFairPrice - order.Value.Price > context.configuration.OrderUpdatePriceRange)
-                        {
-                            if (purchaseFairPrice + 1 > sellFairPrice) purchaseFairPrice += 1;
-                            AmmendOrderResponse response = await context.SetNewPrice(order.Value.Id, sellFairPrice - 1);
-                            if (response.Response.Code == ReplyCode.Succeed)
-                                _myOrders.AddOrUpdate(order.Key, order.Value, (k, v) =>
-                                {
-                                    v.Price = sellFairPrice - 1;
-                                    return v;
-                                });
-                            Log.Information("Order {0} amended with {1} {2} {3}", order.Key, sellFairPrice, response.Response.Code.ToString(), response.Response.Message);
-                        }
-                }
-            });
-            await checkPrices;
-            _fitLocker = false;
-        }
 
         /// <summary>
         /// Конвертирует сатоши в биткоины
         /// </summary>
-        private double ConvertSatoshiToXBT(int satoshiValue)
+        private double ConvertSatoshiToXbt(int satoshiValue)
         {
             return satoshiValue * 0.00000001;
         }
+        #endregion
 
         /// <summary>
-        /// Возвращает true если контекст нулевой или имеет нулевые поля
+        /// Возвращает true если контекст нулевой или имеет нулевые поля, false иначе
         /// </summary>
         private bool CheckContext(UserContext context)
         {
@@ -360,13 +400,12 @@ namespace Former
                 Log.Error("Bad user context (null)");
                 return true;
             }
-            if (context.configuration is null || context.sessionId is null || context.slot is null || context.trademarket is null)
+            if (context.Configuration is null || context.SessionId is null || context.Slot is null || context.TradeMarket is null)
             {
                 Log.Error("Bad user context (some field is null)");
                 return true;
             }
             return false;
         }
-        #endregion
     }
 }

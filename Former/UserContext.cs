@@ -1,7 +1,4 @@
 ﻿using Grpc.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Common.v1;
 using TradeBot.TradeMarket.TradeMarketService.v1;
@@ -11,26 +8,27 @@ namespace Former
     public class UserContext
     {
         //Класс контекста пользователя
-        public string sessionId;
-        public string trademarket;
-        public string slot;
-        public Config configuration;
+        public readonly string SessionId;
+        public readonly string TradeMarket;
+        public readonly string Slot;
+        public Config Configuration;
         private readonly TradeMarketClient _tradeMarketClient;
         private readonly Former _former;
 
-        public Metadata Meta { get; internal set; }
+        public Metadata Meta { get; private set; }
 
-        internal UserContext(string sessionId, string trademarket, string slot)
+        internal UserContext(string sessionId, string tradeMarket, string slot)
         {
-            this.sessionId = sessionId;
-            this.trademarket = trademarket;
-            this.slot = slot;
+            SessionId = sessionId;
+            TradeMarket = tradeMarket;
+            Slot = slot;
 
-
-            Meta = new Metadata();
-            Meta.Add("sessionid", sessionId);
-            Meta.Add("trademarket", trademarket);
-            Meta.Add("slot", slot);
+            Meta = new Metadata
+            {
+                { "sessionid", sessionId },
+                { "trademarket", tradeMarket },
+                { "slot", slot }
+            };
 
             TradeMarketClient.Configure("https://localhost:5005", 10000);
 
@@ -77,13 +75,13 @@ namespace Former
         {
             await _former.UpdatePosition(currentQuantity);
         }
-        public async Task<TradeBot.TradeMarket.TradeMarketService.v1.PlaceOrderResponse> PlaceOrder(double sellPrice, double contractValue)
+        public async Task<PlaceOrderResponse> PlaceOrder(double sellPrice, double contractValue)
         {
             return await _tradeMarketClient.PlaceOrder(sellPrice, contractValue, this);
         }
-        public async Task<TradeBot.TradeMarket.TradeMarketService.v1.AmmendOrderResponse> SetNewPrice(string id, double newPrice)
+        public async Task<AmmendOrderResponse> AmendOrder(string id, double newPrice)
         {
-            return await _tradeMarketClient.SetNewPrice(id, newPrice, this);
+            return await _tradeMarketClient.AmendOrder(id, newPrice, this);
         }
         private async void ObserveOrderBook()
         {
