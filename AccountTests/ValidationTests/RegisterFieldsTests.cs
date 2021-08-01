@@ -7,12 +7,25 @@ namespace AccountTests.ValidationTests
     [Collection("AccountTests")]
     public class RegisterFieldsTests
     {
+        // Тест проверки на успешный исход валидации при правильно введенных полях.
+        [Fact]
+        public void CorrectRegisterFieldsTest()
+        {
+            var reply = Validate.RegisterFields(new RegisterRequest
+            {
+                Email = "pochta@mail.test",
+                Password = "password",
+                VerifyPassword = "password"
+            });
+
+            Assert.True(reply.Successful);
+        }
+
         // Тест проверки на то, какой результат вернет валидация, если есть пустые поля.
         [Theory]
-        [InlineData("text", "password", "password", false)]
-        [InlineData("text", "", "password", true)]
-        [InlineData("", "", "", true)]
-        public void EmptyRegisterFieldsTest(string email, string password, string verifyPassword, bool isEmpty)
+        [InlineData("pochta@mail.test", "", "password")]
+        [InlineData("", "", "")]
+        public void EmptyRegisterFieldsTest(string email, string password, string verifyPassword)
         {
             // Валидация сразу же формируемого запроса.
             var reply = Validate.RegisterFields(new RegisterRequest {
@@ -20,15 +33,14 @@ namespace AccountTests.ValidationTests
                 Password = password,
                 VerifyPassword = verifyPassword
             });
-            // Если указано, что входные параметры являются пустыми, ожидается, что результатом валидации будет EmptyField.
-            if (isEmpty) Assert.False(reply.Successful);
-            // Иначе ожидается, что результатом валидации будет любой другой ответ кроме EmptyField.
-            else Assert.True(reply.Successful);
+
+            // Ожидается, что результатом валидации будет false.
+            Assert.False(reply.Successful);
         }
 
         // Тест проверки на то, являются ли введенные данные в поле Email электронной почтой.
         [Theory]
-        [InlineData("pochta@mail.ru", true)]
+        [InlineData("pochta@mail.test", true)]
         [InlineData("a@a.a", true)]
         [InlineData("text", false)]
         public void NotEmailInRegisterTest(string email, bool isEmail)

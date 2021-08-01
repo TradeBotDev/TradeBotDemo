@@ -7,12 +7,25 @@ namespace AccountTests.ValidationTests
     [Collection("AccountTests")]
     public class AddExchangeAccessFieldsTests
     {
+        [Fact]
+        public void CorrectExchangeFieldsTest()
+        {
+            var reply = Validate.AddExchangeAccessFields(new AddExchangeAccessRequest
+            {
+                SessionId = "not_existing_session_id",
+                ExchangeName = "Bitmex",
+                Token = "not_existing_token",
+                Secret = "not_existing_secret"
+            });
+            // Ожидается, что в результате ответом будет true.
+            Assert.True(reply.Successful);
+        }
+
         // Тест проверки на то, какой результат вернет валидация, если есть пустые поля.
         [Theory]
-        [InlineData("text", "text", "text", "text", false)]
-        [InlineData("text", "text", "", "text", true)]
-        [InlineData("", "", "", "", true)]
-        public void EmptyExchangeFieldsTest(string sessionId, string exchangeName, string token, string secret, bool isEmpty)
+        [InlineData("text", "text", "", "text")]
+        [InlineData("", "", "", "")]
+        public void EmptyExchangeFieldsTest(string sessionId, string exchangeName, string token, string secret)
         {
             // Валидация сразу же формируемого запроса.
             var reply = Validate.AddExchangeAccessFields(new AddExchangeAccessRequest
@@ -22,11 +35,8 @@ namespace AccountTests.ValidationTests
                 Token = token,
                 Secret = secret
             });
-
-            // Если указано, что присутствуют пустые поля, ожидается, что в результате ответом будет EmptyField.
-            if (isEmpty) Assert.False(reply.Successful);
-            // Иначе ожидается, что будет любой другой ответ, кроме EmptyField.
-            else Assert.True(reply.Successful);
+            // Ожидается, что в результате ответом будет false.
+            Assert.False(reply.Successful);
         }
     }
 }
