@@ -110,19 +110,16 @@ namespace AccountGRPC
                 if (!database.LoggedAccounts.Any(login => login.SessionId == request.SessionId))
                     return Task.FromResult(DeleteExchangeAccessReplies.AccountNotFound());
 
-                Models.LoggedAccount fromAccount = database.LoggedAccounts.Where(login => login.SessionId == request.SessionId).First();
-
-                // Получение данных биржи для текущего пользователя и биржи с конкретным кодом.
-                var exсhangeAccess = database.ExchangeAccesses.Where(exchange =>
-                    exchange.Account.AccountId == fromAccount.Account.AccountId &&
-                    exchange.Code == request.Code);
+                Models.LoggedAccount fromAccount = database.LoggedAccounts
+                    .Where(login => login.SessionId == request.SessionId)
+                    .Include(exchange => exchange.Account.ExchangeAccesses).First();
 
                 // В случае, если такой записи не обнаружено, сервис отвечает ошибкой.
-                if (exсhangeAccess.Count() == 0)
+                if (fromAccount.Account.ExchangeAccesses.Count() == 0)
                     return Task.FromResult(DeleteExchangeAccessReplies.ExchangeNotFound());
 
                 // Если такая запись существует, производится ее удаление.
-                database.ExchangeAccesses.Remove(exсhangeAccess.First());
+                database.ExchangeAccesses.Remove(fromAccount.Account.ExchangeAccesses.First());
                 database.SaveChanges();
             }
             return Task.FromResult(DeleteExchangeAccessReplies.SuccessfulDeleting());
