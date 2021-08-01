@@ -67,11 +67,11 @@ namespace AccountTests.ExchangeAccessServiceTests
                 .ContinueWith(none => exchangeAccessService.DeleteExchangeAccess(new DeleteExchangeAccessRequest
                 {
                     SessionId = sessionId,
-                    Code = ExchangeCode.Bitmex
+                    Code = ExchangeAccessCode.Bitmex
                 }, null));
 
             // Ожидается, что удаление информации будет завершено успешно.
-            Assert.Equal(ActionCode.Successful, reply.Result.Result.Result);
+            Assert.Equal(ExchangeAccessActionCode.Successful, reply.Result.Result.Result);
         }
     }
 }
