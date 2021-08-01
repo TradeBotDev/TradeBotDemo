@@ -7,6 +7,7 @@ namespace AccountTests.ValidationTests
     [Collection("AccountTests")]
     public class AddExchangeAccessFieldsTests
     {
+        // Тест проверки на успешный исход валидации при правильно введенных полях.
         [Fact]
         public void CorrectExchangeFieldsTest()
         {

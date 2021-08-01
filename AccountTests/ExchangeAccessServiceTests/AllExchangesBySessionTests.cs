@@ -34,7 +34,7 @@ namespace AccountTests.ExchangeAccessServiceTests
             var reply = GenerateLogin("all_exs_from_acc")
                 .ContinueWith(loginReply => exchangeAccessService.AddExchangeAccess(GenerateRequest(loginReply.Result.Result.SessionId), null))
                 .ContinueWith(addExchangeReply => exchangeAccessService.AllExchangesBySession(
-                new AllExchangesBySessionRequest { SessionId = sessionId }, null));
+                    new AllExchangesBySessionRequest { SessionId = sessionId }, null));
 
             // Ожидается, что придет сообщение об успешности получения данных, и коллекция с биржами
             // не будет пустой.
@@ -54,6 +54,7 @@ namespace AccountTests.ExchangeAccessServiceTests
             Assert.Empty(reply.Result.Result.Exchanges);
         }
 
+        // Тестирование получения информации о бирже из несуществующего аккаунта.
         [Fact]
         public void WhenAccountIsNotExistsTest()
         {
