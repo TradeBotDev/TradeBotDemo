@@ -7,15 +7,15 @@ package account;
 // Сервис для входа в аккаунт или его регистрации.
 service Account {
 	// Метод входа в аккаунт
-	rpc Login (LoginRequest) returns (LoginReply);
+	rpc Login (LoginRequest) returns (LoginResponse);
 	// Метод выхода из аккаунта
-	rpc Logout (LogoutRequest) returns (LogoutReply);
+	rpc Logout (LogoutRequest) returns (LogoutResponse);
 	// Метод регистрации аккаунта
-	rpc Register (RegisterRequest) returns (RegisterReply);
+	rpc Register (RegisterRequest) returns (RegisterResponse);
 	// Проверка текущего пользователя на валидность по Id сессии
-	rpc IsValidSession (IsValidSessionRequest) returns (IsValidSessionReply);
+	rpc IsValidSession (IsValidSessionRequest) returns (IsValidSessionResponse);
 	// Получение данных текущего пользователя
-	rpc AccountData (AccountDataRequest) returns (AccountDataReply);
+	rpc AccountData (AccountDataRequest) returns (AccountDataResponse);
 }
 
 // Данные для входа в аккаунт.
@@ -25,7 +25,7 @@ message LoginRequest {
 }
 
 // Ответ на запрос о входе в аккаунт.
-message LoginReply {
+message LoginResponse {
 	AccountActionCode result = 1;
 	string message = 2;
 	string session_id = 3;
@@ -37,7 +37,7 @@ message LogoutRequest {
 }
 
 // Ответ на запрос о выходе из аккаунта
-message LogoutReply {
+message LogoutResponse {
 	AccountActionCode result = 1;
 	string message = 2;
 }
@@ -50,7 +50,7 @@ message RegisterRequest {
 }
 
 // Ответ на запрос о регистрации аккаунта.
-message RegisterReply {
+message RegisterResponse {
 	AccountActionCode result = 1;
 	string message = 2;
 }
@@ -61,7 +61,7 @@ message IsValidSessionRequest {
 }
 
 // Результат проверки сессии на валидность.
-message IsValidSessionReply {
+message IsValidSessionResponse {
 	bool is_valid = 1;
 	string message = 2;
 }
@@ -72,7 +72,7 @@ message AccountDataRequest {
 }
 
 // Получение данных пользователя.
-message AccountDataReply {
+message AccountDataResponse {
 	AccountActionCode result = 1;
 	string message = 2;
 	AccountInfo current_account = 3;

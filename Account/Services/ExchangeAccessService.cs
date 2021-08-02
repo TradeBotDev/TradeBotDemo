@@ -15,7 +15,7 @@ namespace AccountGRPC
     public class ExchangeAccessService : ExchangeAccess.ExchangeAccessBase
     {
         // Добавить биржу для конкретного пользователя.
-        public override Task<AddExchangeAccessReply> AddExchangeAccess(AddExchangeAccessRequest request, ServerCallContext context)
+        public override Task<AddExchangeAccessResponse> AddExchangeAccess(AddExchangeAccessRequest request, ServerCallContext context)
         {
             Log.Information($"AddExchangeAccess получил запрос: " +
                 $"SessionId - {request.SessionId}, " +
@@ -35,7 +35,7 @@ namespace AccountGRPC
                 ValidationMessage validationResult = Validate.AddExchangeAccessFields(request);
                 if (!validationResult.Successful)
                 {
-                    return Task.FromResult(new AddExchangeAccessReply
+                    return Task.FromResult(new AddExchangeAccessResponse
                     {
                         Result = ExchangeAccessActionCode.Failed,
                         Message = validationResult.Message
@@ -71,7 +71,7 @@ namespace AccountGRPC
         }
 
         // Получение данных всех бирж пользователя.
-        public override Task<AllExchangesBySessionReply> AllExchangesBySession(AllExchangesBySessionRequest request, ServerCallContext context)
+        public override Task<AllExchangesBySessionResponse> AllExchangesBySession(AllExchangesBySessionRequest request, ServerCallContext context)
         {
             Log.Information($"AllExchangesBySession получил запрос: SessionId - {request.SessionId}.");
             using (var database = new Models.AccountContext())
@@ -101,7 +101,7 @@ namespace AccountGRPC
         }
 
         // Удалить биржу из аккаунта пользователя.
-        public override Task<DeleteExchangeAccessReply> DeleteExchangeAccess(DeleteExchangeAccessRequest request, ServerCallContext context)
+        public override Task<DeleteExchangeAccessResponse> DeleteExchangeAccess(DeleteExchangeAccessRequest request, ServerCallContext context)
         {
             Log.Information($"DeleteExchangeAccess получил запрос: SessionId - {request.SessionId}, Code - {request.Code}.");
 
@@ -126,7 +126,7 @@ namespace AccountGRPC
         }
 
         // Получение данных конкретной биржи пользователя.
-        public override Task<ExchangeBySessionReply> ExchangeBySession(ExchangeBySessionRequest request, ServerCallContext context)
+        public override Task<ExchangeBySessionResponse> ExchangeBySession(ExchangeBySessionRequest request, ServerCallContext context)
         {
             Log.Information($"ExchangeBySession получил запрос: SessionId - {request.SessionId}, Code - {request.Code}.");
             using (var database = new Models.AccountContext())

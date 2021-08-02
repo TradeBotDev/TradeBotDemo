@@ -16,7 +16,7 @@ namespace AccountGRPC
     public class AccountService : Account.AccountBase
     {
         // Метод входа в аккаунт по запросу клиента.
-        public override Task<LoginReply> Login(LoginRequest request, ServerCallContext context)
+        public override Task<LoginResponse> Login(LoginRequest request, ServerCallContext context)
         {
             Log.Information($"Login получил запрос: Email - {request.Email}, Password - {request.Password}.");
 
@@ -27,7 +27,7 @@ namespace AccountGRPC
             // возвращается сообщение об одной из ошибок в запросе.
             if (!validationResult.Successful)
             {
-                return Task.FromResult(new LoginReply
+                return Task.FromResult(new LoginResponse
                 {
                     SessionId = "none",
                     Result = AccountActionCode.Failed,
@@ -72,7 +72,7 @@ namespace AccountGRPC
         }
 
         // Метод выхода из аккаунта
-        public override Task<LogoutReply> Logout(LogoutRequest request, ServerCallContext context)
+        public override Task<LogoutResponse> Logout(LogoutRequest request, ServerCallContext context)
         {
             Log.Information($"Logout получил запрос: SessionId - {request.SessionId},  SaveExchangeAccesses - {request.SaveExchangeAccesses}.");
             using (var database = new Models.AccountContext())
@@ -105,7 +105,7 @@ namespace AccountGRPC
         }
 
         // Метод регистрации аккаунта по запросу клиента.
-        public override Task<RegisterReply> Register(RegisterRequest request, ServerCallContext context)
+        public override Task<RegisterResponse> Register(RegisterRequest request, ServerCallContext context)
         {
             Log.Information($"Register получил запрос: Email - {request.Email}, Password - {request.Password}, VerifyPassword - {request.VerifyPassword}.");
 
@@ -116,7 +116,7 @@ namespace AccountGRPC
             // возвращается сообщение об одной из ошибок в запросе.
             if (!validationResult.Successful)
             {
-                return Task.FromResult(new RegisterReply
+                return Task.FromResult(new RegisterResponse
                 {
                     Result = AccountActionCode.Failed,
                     Message = validationResult.Message
@@ -148,7 +148,7 @@ namespace AccountGRPC
         }
 
         // Метод проверки валидности текущей сессии.
-        public override Task<IsValidSessionReply> IsValidSession(IsValidSessionRequest request, ServerCallContext context)
+        public override Task<IsValidSessionResponse> IsValidSession(IsValidSessionRequest request, ServerCallContext context)
         {
             Log.Information($"IsValidSession получил запрос: SessionId - {request.SessionId}.");
             using (var database = new Models.AccountContext())
@@ -163,7 +163,7 @@ namespace AccountGRPC
         }
 
         // Метод получения информации о текущем пользователе по Id сессии.
-        public override Task<AccountDataReply> AccountData(AccountDataRequest request, ServerCallContext context)
+        public override Task<AccountDataResponse> AccountData(AccountDataRequest request, ServerCallContext context)
         {
             Log.Information($"CurrentAccountData получил запрос: SessionId - {request.SessionId}.");
             using (var database = new Models.AccountContext())

@@ -8,13 +8,13 @@ package exchangeaccess;
 // Сервис для управления данными биржи.
 service ExchangeAccess {
 	// Добавление новой биржи для текущего пользователя.
-	rpc AddExchangeAccess(AddExchangeAccessRequest) returns (AddExchangeAccessReply);
+	rpc AddExchangeAccess(AddExchangeAccessRequest) returns (AddExchangeAccessResponse);
 	// Получение массива бирж текущего пользователя.
-	rpc AllExchangesBySession (AllExchangesBySessionRequest) returns (AllExchangesBySessionReply);
+	rpc AllExchangesBySession (AllExchangesBySessionRequest) returns (AllExchangesBySessionResponse);
 	// Удаление информации о доступе к бирже по ее коду и id сессии.
-	rpc DeleteExchangeAccess (DeleteExchangeAccessRequest) returns (DeleteExchangeAccessReply);
+	rpc DeleteExchangeAccess (DeleteExchangeAccessRequest) returns (DeleteExchangeAccessResponse);
 	// Получение информации о доступе текущего пользователя к бирже.
-	rpc ExchangeBySession (ExchangeBySessionRequest) returns (ExchangeBySessionReply);
+	rpc ExchangeBySession (ExchangeBySessionRequest) returns (ExchangeBySessionResponse);
 }
 
 // Запрос на добавление биржи для текущего пользователя.
@@ -27,7 +27,7 @@ message AddExchangeAccessRequest {
 }
 
 // Ответ на добавление биржи для текущего пользователя.
-message AddExchangeAccessReply {
+message AddExchangeAccessResponse {
 	ExchangeAccessActionCode result = 1;
 	string message = 2;
 }
@@ -37,7 +37,7 @@ message AllExchangesBySessionRequest {
 }
 
 // Получение всех добавленных бирж текущего пользователя.
-message AllExchangesBySessionReply {
+message AllExchangesBySessionResponse {
 	ExchangeAccessActionCode result = 1;
 	string message = 2;
 	repeated account.ExchangeAccessInfo exchanges = 3;
@@ -50,7 +50,7 @@ message DeleteExchangeAccessRequest {
 }
 
 // Ответ на запрос об удалении записи о бирже для текущего пользователя.
-message DeleteExchangeAccessReply {
+message DeleteExchangeAccessResponse {
 	ExchangeAccessActionCode result = 1;
 	string message = 2;
 }
@@ -62,7 +62,7 @@ message ExchangeBySessionRequest {
 }
 
 // Ответ на запрос с получением информации о доступе пользователя к конкретной бирже.
-message ExchangeBySessionReply {
+message ExchangeBySessionResponse {
 	ExchangeAccessActionCode result = 1;
 	string message = 2;
 	account.ExchangeAccessInfo exchange = 3;

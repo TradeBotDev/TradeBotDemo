@@ -5,36 +5,36 @@ namespace AccountGRPC.AccountMessages
 {
     public static class AddExchangeAccessReplies
     {
-        public static AddExchangeAccessReply SuccessfulAddition()
+        public static AddExchangeAccessResponse SuccessfulAddition()
         {
             const string Message = "Добавление биржи в аккаунт пользователя завершено.";
             Log.Information(Message);
 
-            return new AddExchangeAccessReply
+            return new AddExchangeAccessResponse
             {
                 Result = ExchangeAccessActionCode.Successful,
                 Message = Message
             };
         }
 
-        public static AddExchangeAccessReply AccountNotFound()
+        public static AddExchangeAccessResponse AccountNotFound()
         {
             const string Message = "Произошла ошибка добавления биржи: пользователь не существует.";
             Log.Information(Message);
 
-            return new AddExchangeAccessReply
+            return new AddExchangeAccessResponse
             {
                 Result = ExchangeAccessActionCode.AccountNotFound,
                 Message = Message
             };
         }
 
-        public static AddExchangeAccessReply ExchangeAccessExists()
+        public static AddExchangeAccessResponse ExchangeAccessExists()
         {
             const string Message = "Произошла ошибка добавления биржи: биржа уже существует.";
             Log.Information(Message);
 
-            return new AddExchangeAccessReply
+            return new AddExchangeAccessResponse
             {
                 Result = ExchangeAccessActionCode.IsExists,
                 Message = Message

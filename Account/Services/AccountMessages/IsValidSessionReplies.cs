@@ -5,24 +5,24 @@ namespace AccountGRPC.AccountMessages
 {
     public static class IsValidSessionReplies
     {
-        public static IsValidSessionReply IsValid()
+        public static IsValidSessionResponse IsValid()
         {
             const string Message = "Операция является валидной.";
             Log.Information(Message);
 
-            return new IsValidSessionReply
+            return new IsValidSessionResponse
             {
                 IsValid = true,
                 Message = Message
             };
         }
 
-        public static IsValidSessionReply IsNotValid()
+        public static IsValidSessionResponse IsNotValid()
         {
             const string Message = "Произошла ошибка: операция не является валидной.";
             Log.Information(Message);
 
-            return new IsValidSessionReply
+            return new IsValidSessionResponse
             {
                 IsValid = false,
                 Message = Message
