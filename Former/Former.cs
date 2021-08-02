@@ -324,7 +324,14 @@ namespace Former
             //вычисляем рыночную цену для продажи
             var purchaseFairPrice = _buyOrderBook.Max(x => x.Value.Price);
 
-            if (_availableBalance - _totalBalance * (1 - context.Configuration.AvaibleBalance) < context.Configuration.ContractValue / purchaseFairPrice || ((_myOrders.Count + 1) * context.Configuration.ContractValue / purchaseFairPrice) > _totalBalance)
+            var balanceLeft = _availableBalance - _totalBalance * (1 - context.Configuration.AvaibleBalance);
+            var priceForOneOrder = context.Configuration.ContractValue / purchaseFairPrice;
+            // +1 я не знаю зачем (
+            var moneySpent = ((_myOrders.Count + 1) * context.Configuration.ContractValue / purchaseFairPrice);
+            bool couldBuyWithAccountBalance = (balanceLeft < priceForOneOrder || moneySpent > _totalBalance);
+            bool couldBuyWithPositionDifference = _positionSize < 0;
+
+            if (couldBuyWithAccountBalance == false  && couldBuyWithPositionDifference == false)
             {
                 Log.Debug("Cannot place purchase order. Insufficient balance.");
                 return;
