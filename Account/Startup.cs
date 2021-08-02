@@ -6,7 +6,6 @@ using Microsoft.Extensions.Hosting;
 
 using System.IO;
 using Serilog;
-
 using AccountGRPC.Models;
 
 namespace AccountGRPC

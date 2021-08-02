@@ -1,6 +1,6 @@
 ﻿namespace AccountGRPC.Models
 {
-    // Объект вошедшего аккаунта.
+    // Описание таблицы с вошедшими аккаунтами.
     public class LoggedAccount
     {
         public int LoggedAccountId { get; set; }

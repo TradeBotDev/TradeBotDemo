@@ -2,7 +2,7 @@
 
 namespace AccountGRPC.Models
 {
-    // Описание таблицы с информацией о доступе к бирже пользователя.
+    // Описание таблицы с информацией о доступе к бирже пользователем.
     public class ExchangeAccess
     {
         public int ExchangeAccessId { get; set; }

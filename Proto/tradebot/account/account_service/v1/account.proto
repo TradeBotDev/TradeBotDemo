@@ -31,12 +31,13 @@ message LoginResponse {
 	string session_id = 3;
 }
 
+// Запрос на выход из аккаунта.
 message LogoutRequest {
 	string session_id = 1;
 	bool save_exchange_accesses = 2;
 }
 
-// Ответ на запрос о выходе из аккаунта
+// Ответ на запрос о выходе из аккаунта.
 message LogoutResponse {
 	AccountActionCode result = 1;
 	string message = 2;
@@ -78,7 +79,7 @@ message AccountDataResponse {
 	AccountInfo current_account = 3;
 }
 
-//Информация о пользователе, необходимая для отображения в UI
+//Информация о пользователе, необходимая для отображения в UI.
 message AccountInfo {
 	int32 account_id = 1;
 	string email = 2;
@@ -102,6 +103,7 @@ enum ExchangeAccessCode {
 	EXCHANGE_ACCESS_CODE_BITMEX = 1;
 }
 
+// Коды с результатом действия с аккаунтами.
 enum AccountActionCode {
 	ACCOUNT_ACTION_CODE_UNSPECIFIED = 0;
 	ACCOUNT_ACTION_CODE_SUCCESSFUL = 1;
