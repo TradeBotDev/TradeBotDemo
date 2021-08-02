@@ -21,11 +21,13 @@ namespace AccountTests.ExchangeAccessServiceTests
                 sessionId = _sessionId;
                 return new AddExchangeAccessRequest
                 {
+                    SessionId = _sessionId,
                     Code = ExchangeAccessCode.Bitmex,
                     ExchangeName = "Bitmex",
-                    Secret = "test_secret",
                     Token = "test_token",
-                    SessionId = _sessionId
+                    RefreshToken = "test_refresh_token",
+                    LogoutToken = "test_logout_token",
+                    Secret = "test_secret"
                 };
             }
 
