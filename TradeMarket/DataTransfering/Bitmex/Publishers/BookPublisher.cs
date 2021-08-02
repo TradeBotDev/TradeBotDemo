@@ -21,7 +21,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             foreach (var data in response.Data)
             {
                 e?.Invoke(nameof(BookPublisher), new(data, response.Action));
-                await _client.Send($"Bitmex_{data.Symbol}_{data.Id}", data, "Bitmex_Book25");
+               // await _client.Send($"Bitmex_{data.Symbol}_{data.Id}", data, "Bitmex_Book25");
             }
         }
 

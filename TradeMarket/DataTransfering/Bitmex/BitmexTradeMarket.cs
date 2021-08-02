@@ -198,6 +198,7 @@ namespace TradeMarket.DataTransfering.Bitmex
             var orderMessage = response.Message;
             if (!string.IsNullOrEmpty(orderMessage.OrdRejReason))
             {
+                Log.Error("Id {0}, quantity {1}, price {2}, leavesQty {3}", id, Quantity, price, LeavesQuantity);
                 return new()
                 {
                     Code = ReplyCode.Failure,

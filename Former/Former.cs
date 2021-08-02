@@ -49,12 +49,12 @@ namespace Former
         private async Task CheckAndFitPrices(double buyFairPrice, double sellFairPrice, UserContext context)
         {
             //если рыночная цена изменилась, то необходимо проверить, не устарели ли цени в наших ордерах
-            //if (Math.Abs(sellFairPrice - _sellFairPrice) > 0.4  || Math.Abs(_buyFairPrice - buyFairPrice) > 0.4  )
-            //{
+            if (Math.Abs(sellFairPrice - _sellFairPrice) > 0.4 || Math.Abs(_buyFairPrice - buyFairPrice) > 0.4)
+            {
                 _sellFairPrice = sellFairPrice;
                 _buyFairPrice = buyFairPrice;
                 if (!_fitPricesLocker && _myOrders.Count > 0) await FitPrices(context);
-            //}
+            }
         }
 
         /// <summary>
@@ -301,12 +301,16 @@ namespace Former
         /// </summary>
         internal Task UpdateBalance(int availableBalance, int totalBalance)
         {
-            if (_availableBalance != ConvertSatoshiToXbt(availableBalance))
+            if (_availableBalance != ConvertSatoshiToXbt(availableBalance) && availableBalance != 0)
             {
-                Log.Information("Balance updated. Available balance: {0}, Total balance: {1}", availableBalance, totalBalance);
+                Log.Information("Balance updated. Available balance: {0}", availableBalance);
                 _availableBalance = ConvertSatoshiToXbt(availableBalance);
             }
-            _totalBalance = ConvertSatoshiToXbt(totalBalance);
+            if (totalBalance != 0)
+            {
+                _totalBalance = ConvertSatoshiToXbt(totalBalance);
+                Log.Information("Balance updated. Total balance: {0}", totalBalance);
+            }
             return Task.CompletedTask;
         }
 
@@ -320,20 +324,20 @@ namespace Former
             //вычисляем рыночную цену для продажи
             var purchaseFairPrice = _buyOrderBook.Max(x => x.Value.Price);
 
-            if (_availableBalance - _totalBalance * context.Configuration.AvaibleBalance < context.Configuration.ContractValue / purchaseFairPrice)
+            if (_availableBalance - _totalBalance * (1 - context.Configuration.AvaibleBalance) < context.Configuration.ContractValue / purchaseFairPrice || ((_myOrders.Count + 1) * context.Configuration.ContractValue / purchaseFairPrice) > _totalBalance)
             {
-                Log.Debug("Cannot place sell order. Insufficient balance.");
+                Log.Debug("Cannot place purchase order. Insufficient balance.");
                 return;
             }
 
             //это хардкод ( - 1 ) . В ТМе не допускаются числа R для выставления ордеров
-            var response = await context.PlaceOrder(purchaseFairPrice - 2, context.Configuration.ContractValue);
+            var response = await context.PlaceOrder(purchaseFairPrice, context.Configuration.ContractValue);
             if (response.Response.Code == ReplyCode.Succeed)
             {
                 _myOrders.TryAdd(response.OrderId, new Order
                 {
                     Id = response.OrderId,
-                    Price = purchaseFairPrice - 1,
+                    Price = purchaseFairPrice,
                     Quantity = context.Configuration.ContractValue,
                     Signature = new OrderSignature
                     {
@@ -344,7 +348,7 @@ namespace Former
                 });
                 _positionSizeInActiveOrders += (int)context.Configuration.ContractValue;
             }
-            Log.Information("Order price: {0}, quantity: {1} placed for purchase {2} {3}", purchaseFairPrice - 2, context.Configuration.ContractValue, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
+            Log.Information("Order price: {0}, quantity: {1} placed for purchase {2} {3}", purchaseFairPrice, context.Configuration.ContractValue, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
 
         }
 
@@ -359,19 +363,18 @@ namespace Former
             //вычисляем рыночную цену для продажи
             var sellFairPrice = _sellOrderBook.Min(x => x.Value.Price);
 
-
-            if (_availableBalance - _totalBalance * context.Configuration.AvaibleBalance < context.Configuration.ContractValue / sellFairPrice)
+            if (_availableBalance - _totalBalance * (1 - context.Configuration.AvaibleBalance) < context.Configuration.ContractValue / sellFairPrice || ((_myOrders.Count + 1) * context.Configuration.ContractValue / sellFairPrice) > _totalBalance)
             {
                 Log.Debug("Cannot place sell order. Insufficient balance.");
                 return;
             }
-            var response = await context.PlaceOrder(sellFairPrice + 2, -context.Configuration.ContractValue);
+            var response = await context.PlaceOrder(sellFairPrice, -context.Configuration.ContractValue);
             if (response.Response.Code == ReplyCode.Succeed)
             {
                 _myOrders.TryAdd(response.OrderId, new Order
                 {
                     Id = response.OrderId,
-                    Price = sellFairPrice + 1,
+                    Price = sellFairPrice,
                     Quantity = -context.Configuration.ContractValue,
                     Signature = new OrderSignature
                     {
@@ -381,7 +384,7 @@ namespace Former
                     LastUpdateDate = new Google.Protobuf.WellKnownTypes.Timestamp()
                 });
             }
-            Log.Information("Order price: {0}, quantity: {1} placed for sell {2} {3}", sellFairPrice + 2, -context.Configuration.ContractValue, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
+            Log.Information("Order price: {0}, quantity: {1} placed for sell {2} {3}", sellFairPrice, -context.Configuration.ContractValue, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
             _positionSizeInActiveOrders -= (int)context.Configuration.ContractValue;
         }
 
