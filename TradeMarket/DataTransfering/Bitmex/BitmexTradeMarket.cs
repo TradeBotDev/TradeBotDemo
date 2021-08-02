@@ -229,13 +229,29 @@ namespace TradeMarket.DataTransfering.Bitmex
             };
         }
 
+        //TODO перенести в конвертер
+        public static double RoundToHalfOrZero(double value)
+        {
+            double truncatedDifference = value - Math.Truncate(value);
+            //если что-то случилось и пришло не ровно 0.5
+            //разница с 0.5 больше чем 0.01 считается нарошной 
+            if (Math.Abs(truncatedDifference - 0.5) < 0.01)
+            {
+                return Math.Truncate(value) + 0.5;
+            }
+            else
+            {
+                return Math.Truncate(value);
+            }
+        }
+
         public async override Task<TradeBot.TradeMarket.TradeMarketService.v1.PlaceOrderResponse> PlaceOrder(double quontity, double price, UserContext context)
         {
             var response = await context.RestClient.SendAsync(new PlaceOrderRequest(context.Key, context.Secret, new Order
             {
                 Symbol = context.SlotName,
                 OrdType = "Limit",
-                Price = (int)price,
+                Price = RoundToHalfOrZero(price),
                 OrderQty = (long?)quontity
             }), new System.Threading.CancellationToken());
             if (response.Error is not null)
