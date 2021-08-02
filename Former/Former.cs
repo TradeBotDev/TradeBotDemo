@@ -16,9 +16,9 @@ namespace Former
 
         private readonly ConcurrentDictionary<string, Order> _myOrders;
 
-        private int _totalBalance;
+        private double _totalBalance;
 
-        private int _availableBalance;
+        private double _availableBalance;
 
         private int _positionSizeInActiveOrders;
 
@@ -166,7 +166,7 @@ namespace Former
         private bool RemoveFromMyOrders(string id)
         {
             return _myOrders.TryRemove(id, out _);
-        } 
+        }
 
         /// <summary>
         /// Обновляет запись в списке моих ордеров, если запись с таким же идентификатором существует там
@@ -250,7 +250,7 @@ namespace Former
                 Log.Information("Counter order price: {0}, quantity: {1} placed {2} {3}", oldOrder.Signature.Type == OrderType.Buy ? sellPrice : buyPrice, -oldOrder.Quantity, placeResponse.Response.Code, placeResponse.Response.Code == ReplyCode.Succeed ? "" : placeResponse.Response.Message);
             }
             //если входящий ордер имеет пометку "обновить" необходимо обновить цену или объём в совпадающем по ид ордере, и в случае обновления объёма выставить контр-ордер с частичным объёмом
-            if(changesType == ChangesType.Update)
+            if (changesType == ChangesType.Update)
             {
                 if (newComingOrder.Quantity != 0)
                 {
@@ -293,12 +293,12 @@ namespace Former
         /// </summary>
         internal Task UpdateBalance(int availableBalance, int totalBalance)
         {
-            if (_availableBalance != availableBalance)
+            if (_availableBalance != ConvertSatoshiToXbt(availableBalance))
             {
                 Log.Information("Balance updated. Available balance: {0}, Total balance: {1}", availableBalance, totalBalance);
-                _availableBalance = availableBalance;
+                _availableBalance = ConvertSatoshiToXbt(availableBalance);
             }
-            _totalBalance = totalBalance;
+            _totalBalance = ConvertSatoshiToXbt(totalBalance);
             return Task.CompletedTask;
         }
 
@@ -309,41 +309,35 @@ namespace Former
         {
             if (_placeLocker) return;
             if (CheckContext(context)) return;
-            double quantity;
-            var availableBalance = ConvertSatoshiToXbt(_availableBalance) * context.Configuration.AvaibleBalance;
-            var totalBalance = ConvertSatoshiToXbt(_totalBalance) * context.Configuration.AvaibleBalance;
             //вычисляем рыночную цену для продажи
             var purchaseFairPrice = _buyOrderBook.Max(x => x.Value.Price);
-
-            //если наша позиция длинная, то есть _positionSize имеет положительное значение, то мы можем продавать только по доступному балансу
-            //если наша позиция короткая, то есть _positionSize имеет отрицательное значение, то мы можем продавать по общему балансу, который есть на аккаунте
-            if (_positionSize >= 0) quantity = context.Configuration.ContractValue * Math.Floor(availableBalance * purchaseFairPrice / context.Configuration.ContractValue);
-            else quantity = context.Configuration.ContractValue * Math.Floor(totalBalance * purchaseFairPrice / context.Configuration.ContractValue) - _positionSizeInActiveOrders;
-
-            //если баланса было достаточно для хотя бы одного ордера то выполняем продажу
-            if (quantity > 0)
+            
+            if (_availableBalance - _totalBalance * context.Configuration.AvaibleBalance < context.Configuration.ContractValue / purchaseFairPrice)
             {
-                //это хардкод ( - 1 ) . В ТМе не допускаются числа R для выставления ордеров
-                var response = await context.PlaceOrder(purchaseFairPrice - 1, quantity);
-                if (response.Response.Code == ReplyCode.Succeed)
-                {
-                    _myOrders.TryAdd(response.OrderId, new Order
-                    {
-                        Id = response.OrderId,
-                        Price = purchaseFairPrice - 1,
-                        Quantity = quantity,
-                        Signature = new OrderSignature
-                        {
-                            Status = OrderStatus.Open,
-                            Type = OrderType.Buy
-                        },
-                        LastUpdateDate = new Google.Protobuf.WellKnownTypes.Timestamp()
-                    });
-                    _positionSizeInActiveOrders += (int)quantity;
-                }
-                Log.Information("Order price: {0}, quantity: {1} placed for purchase {2} {3}", purchaseFairPrice - 1, quantity, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
+                Log.Debug("Cannot place sell order. Insufficient balance.");
+                return;
             }
-            else Log.Debug("Cannot place purchase order. Insufficient balance.");
+
+            //это хардкод ( - 1 ) . В ТМе не допускаются числа R для выставления ордеров
+            var response = await context.PlaceOrder(purchaseFairPrice - 1, context.Configuration.ContractValue);
+            if (response.Response.Code == ReplyCode.Succeed)
+            {
+                _myOrders.TryAdd(response.OrderId, new Order
+                {
+                    Id = response.OrderId,
+                    Price = purchaseFairPrice - 1,
+                    Quantity = context.Configuration.ContractValue,
+                    Signature = new OrderSignature
+                    {
+                        Status = OrderStatus.Open,
+                        Type = OrderType.Buy
+                    },
+                    LastUpdateDate = new Google.Protobuf.WellKnownTypes.Timestamp()
+                });
+                _positionSizeInActiveOrders += (int)context.Configuration.ContractValue;
+            }
+            Log.Information("Order price: {0}, quantity: {1} placed for purchase {2} {3}", purchaseFairPrice - 1, context.Configuration.ContractValue, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
+
         }
 
         /// <summary>
@@ -353,40 +347,34 @@ namespace Former
         {
             if (_placeLocker) return;
             if (CheckContext(context)) return;
-            double quantity;
-            var availableBalance = ConvertSatoshiToXbt(_availableBalance) * context.Configuration.AvaibleBalance;
-            var totalBalance = ConvertSatoshiToXbt(_totalBalance) * context.Configuration.AvaibleBalance;
+
             //вычисляем рыночную цену для продажи
             var sellFairPrice = _sellOrderBook.Min(x => x.Value.Price);
 
-            //если наша позиция короткая, то есть _positionSize имеет отрицательное значение, то мы можем продавать только по доступному балансу
-            //если наша позиция длинная, то есть _positionSize имеет положительное значение, то мы можем продавать по общему балансу, который есть на аккаунте
-            if (_positionSize <= 0) quantity = context.Configuration.ContractValue * Math.Floor(availableBalance * sellFairPrice / context.Configuration.ContractValue);
-            else quantity = context.Configuration.ContractValue * Math.Floor(totalBalance * sellFairPrice / context.Configuration.ContractValue) + _positionSizeInActiveOrders;
-
-            //если баланса было достаточно для хотя бы одного ордера то выполняем продажу
-            if (quantity > 0)
+           
+            if (_availableBalance - _totalBalance * context.Configuration.AvaibleBalance < context.Configuration.ContractValue / sellFairPrice)
             {
-                var response = await context.PlaceOrder(sellFairPrice + 1, -quantity);
-                if (response.Response.Code == ReplyCode.Succeed)
-                {
-                    _myOrders.TryAdd(response.OrderId, new Order
-                    {
-                        Id = response.OrderId,
-                        Price = sellFairPrice + 1,
-                        Quantity = -quantity,
-                        Signature = new OrderSignature
-                        {
-                            Status = OrderStatus.Open,
-                            Type = OrderType.Sell
-                        },
-                        LastUpdateDate = new Google.Protobuf.WellKnownTypes.Timestamp()
-                    });
-                }
-                Log.Information("Order price: {0}, quantity: {1} placed for sell {2} {3}", sellFairPrice + 1, -quantity, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
-                _positionSizeInActiveOrders -= (int)quantity;
+                Log.Debug("Cannot place sell order. Insufficient balance.");
+                return;
             }
-            else Log.Debug("Cannot place sell order. Insufficient balance.");
+            var response = await context.PlaceOrder(sellFairPrice + 1, -context.Configuration.ContractValue);
+            if (response.Response.Code == ReplyCode.Succeed)
+            {
+                _myOrders.TryAdd(response.OrderId, new Order
+                {
+                    Id = response.OrderId,
+                    Price = sellFairPrice + 1,
+                    Quantity = -context.Configuration.ContractValue,
+                    Signature = new OrderSignature
+                    {
+                        Status = OrderStatus.Open,
+                        Type = OrderType.Sell
+                    },
+                    LastUpdateDate = new Google.Protobuf.WellKnownTypes.Timestamp()
+                });
+            }
+            Log.Information("Order price: {0}, quantity: {1} placed for sell {2} {3}", sellFairPrice + 1, -context.Configuration.ContractValue, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
+            _positionSizeInActiveOrders -= (int)context.Configuration.ContractValue;
         }
 
         /// <summary>
