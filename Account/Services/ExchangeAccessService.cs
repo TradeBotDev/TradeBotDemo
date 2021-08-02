@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 
 using TradeBot.Account.AccountService.v1;
 using AccountGRPC.AccountMessages;
-using AccountGRPC.Validation.Messages;
 using AccountGRPC.Validation;
 
 namespace AccountGRPC
@@ -32,7 +31,7 @@ namespace AccountGRPC
                     return Task.FromResult(AddExchangeAccessReplies.AccountNotFound());
 
                 // Валидация полученных данных. В случае, если валидация не прошла успешно, возвращается сообщение об ошибке.
-                ValidationMessage validationResult = Validate.AddExchangeAccessFields(request);
+                var validationResult = Validate.AddExchangeAccessFields(request);
                 if (!validationResult.Successful)
                 {
                     return Task.FromResult(new AddExchangeAccessResponse
@@ -107,19 +106,27 @@ namespace AccountGRPC
 
             using (var database = new Models.AccountContext())
             {
+                // Если среди вошедших аккаунтов не был найден нужный, отправляется сообщение о том, что аккаунт
+                // не был найден.
                 if (!database.LoggedAccounts.Any(login => login.SessionId == request.SessionId))
                     return Task.FromResult(DeleteExchangeAccessReplies.AccountNotFound());
 
-                Models.LoggedAccount fromAccount = database.LoggedAccounts
-                    .Where(login => login.SessionId == request.SessionId)
-                    .Include(exchange => exchange.Account.ExchangeAccesses).First();
+                // Если аккаунт был найден, производится получение его данных по Id сессии.
+                var fromAccount = database.LoggedAccounts
+                    .Where(login => login.SessionId == request.SessionId).First();
+
+                // Получение нужной информации о доступе к бирже, соответствующей полученному аккаунту
+                // и выбранной бирже.
+                var exchangeAccess = database.ExchangeAccesses
+                    .Where(exchange => exchange.Account.AccountId == fromAccount.AccountId &&
+                    exchange.Code == request.Code);
 
                 // В случае, если такой записи не обнаружено, сервис отвечает ошибкой.
-                if (fromAccount.Account.ExchangeAccesses.Count() == 0)
+                if (exchangeAccess.Count() == 0)
                     return Task.FromResult(DeleteExchangeAccessReplies.ExchangeNotFound());
 
                 // Если такая запись существует, производится ее удаление.
-                database.ExchangeAccesses.Remove(fromAccount.Account.ExchangeAccesses.First());
+                database.ExchangeAccesses.Remove(exchangeAccess.First());
                 database.SaveChanges();
             }
             return Task.FromResult(DeleteExchangeAccessReplies.SuccessfulDeleting());

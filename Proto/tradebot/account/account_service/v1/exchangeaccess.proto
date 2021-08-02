@@ -23,6 +23,8 @@ message AddExchangeAccessRequest {
 	account.ExchangeAccessCode code = 2;
 	string exchange_name = 3;
 	string token = 4;
+	//string ? = 5;
+	//string ? = 6;
 	string secret = 5;
 }
 

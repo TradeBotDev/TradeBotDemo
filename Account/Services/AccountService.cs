@@ -8,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 
 using TradeBot.Account.AccountService.v1;
 using AccountGRPC.AccountMessages;
-using AccountGRPC.Validation.Messages;
 using AccountGRPC.Validation;
 
 namespace AccountGRPC
@@ -21,7 +20,7 @@ namespace AccountGRPC
             Log.Information($"Login получил запрос: Email - {request.Email}, Password - {request.Password}.");
 
             // Валидация полей запроса
-            ValidationMessage validationResult = Validate.LoginFields(request);
+            var validationResult = Validate.LoginFields(request);
 
             // В случае, если валидация не прошла успешно (к примеру, присутствуют пустые поля)
             // возвращается сообщение об одной из ошибок в запросе.
@@ -110,7 +109,7 @@ namespace AccountGRPC
             Log.Information($"Register получил запрос: Email - {request.Email}, Password - {request.Password}, VerifyPassword - {request.VerifyPassword}.");
 
             // Валидация полей запроса
-            ValidationMessage validationResult = Validate.RegisterFields(request);
+            var validationResult = Validate.RegisterFields(request);
 
             // В случае, если валидация не прошла успешно (к примеру, присутствуют пустые поля)
             // возвращается сообщение об одной из ошибок в запросе.
