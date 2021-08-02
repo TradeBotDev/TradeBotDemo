@@ -91,7 +91,9 @@ message ExchangeAccessInfo {
 	ExchangeAccessCode code = 2;
 	string name = 3;
 	string token = 4;
-	string secret = 5;
+	string refresh_token = 5;
+	string logout_token = 6;
+	string secret = 7;
 }
 
 // Коды всех бирж.
