@@ -109,6 +109,36 @@ namespace Former
             await task;
         }
 
+        //TODO test!!!
+        public static double RoundPriceRange(double sellPrice,double buyPrice)
+        {
+            return Math.Round(Math.Abs(sellPrice - buyPrice), 1);
+        }
+
+        //TODO test!!!
+        public static double MakePrice(double range,double fairprice,OrderType type)
+        {
+            //TODO убедиться что рэнж точно идет с шагом 0.5
+            return range > 0.5 ? fairprice + (type == OrderType.Buy ? 0.5 : -0.5) : fairprice;
+            
+        }
+
+        /// <summary>
+        /// обновляет ордер в мапе _myOrders 
+        /// </summary>
+        /// <param name="order"></param>
+        /// <param name="price"></param>
+        public void UpdateOrderPrice(Order order,double price)
+        {
+            _myOrders.AddOrUpdate(order.Id, order, (_, v) =>
+            {
+                v.Price = price;
+                v.Quantity = v.Quantity;
+                v.LastUpdateDate = v.LastUpdateDate;
+                v.Signature = v.Signature;
+                return v;
+            });
+        }
         /// <summary>
         /// Подгоняет мои ордера под рыночную цену
         /// </summary>
@@ -116,44 +146,20 @@ namespace Former
         {
             if (CheckContext(context)) return;
             _fitPricesLocker = true;
+            double range = RoundPriceRange(_sellFairPrice, _buyFairPrice);
 
             foreach (var (key, order) in _myOrders)
             {
-                if (order.Signature.Type == OrderType.Sell)
-                    if (order.Price - _sellFairPrice > context.Configuration.OrderUpdatePriceRange)
-                    {
-                        //TODO не менять фаир прайсы а использовать рэнж между ними 
-                        if (_sellFairPrice - 1 > _buyFairPrice) _sellFairPrice -= 2;
-                        var response = await context.AmendOrder(order.Id, _sellFairPrice + 1);
-                        if (response.Response.Code == ReplyCode.Succeed)
-                            //TODO выкинуть в отдельный метод 
-                            _myOrders.AddOrUpdate(key, order, (_, v) =>
-                            {
-                                v.Price = _sellFairPrice + 1;
-                                v.Quantity = v.Quantity;
-                                v.LastUpdateDate = v.LastUpdateDate;
-                                v.Signature = v.Signature;
-                                return v;
-                            });
-                        Log.Information("Order {0} amended with {1} {2} {3}", key, _sellFairPrice, response.Response.Code.ToString(), response.Response.Message);
-                    }
-                if (order.Signature.Type == OrderType.Buy)
-                    if (_buyFairPrice - order.Price > context.Configuration.OrderUpdatePriceRange)
-                    {
-                        //TODO использовать рэнж между фэир прайсами 
-                        if (_buyFairPrice + 1 > _sellFairPrice) _buyFairPrice += 2;
-                        var response = await context.AmendOrder(order.Id, _buyFairPrice - 1);
-                        if (response.Response.Code == ReplyCode.Succeed)
-                            _myOrders.AddOrUpdate(key, order, (_, v) =>
-                            {
-                                v.Price = _buyFairPrice - 1;
-                                v.Quantity = v.Quantity;
-                                v.LastUpdateDate = v.LastUpdateDate;
-                                v.Signature = v.Signature;
-                                return v;
-                            });
-                        Log.Information("Order {0} amended with {1} {2} {3}", key, _buyFairPrice, response.Response.Code.ToString(), response.Response.Message);
-                    }
+                var price = MakePrice(
+                    range, 
+                    order.Signature.Type == OrderType.Sell ? _sellFairPrice : _buyFairPrice, 
+                    order.Signature.Type);
+
+                var response = await context.AmendOrder(order.Id, price);
+
+                if (response.Response.Code == ReplyCode.Succeed)
+                    UpdateOrderPrice(order, price);
+                Log.Information("Order {0} amended with {1} {2} {3}", key, price, response.Response.Code.ToString(), response.Response.Message);
             }
             _fitPricesLocker = false;
         }
