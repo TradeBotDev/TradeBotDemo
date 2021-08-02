@@ -53,7 +53,7 @@ namespace Former
             {
                 _sellFairPrice = sellFairPrice;
                 _buyFairPrice = buyFairPrice;
-                if (_buyOrderBook.Count >= _bookSize && _sellOrderBook.Count >= _bookSize && !_fitPricesLocker && _myOrders.Count > 0) await FitPrices(context);
+                if (!_fitPricesLocker && _myOrders.Count > 0) await FitPrices(context);
             }
         }
 
@@ -62,6 +62,7 @@ namespace Former
         /// </summary>
         private async Task UpdateFairPrices(UserContext context)
         {
+            if (_buyOrderBook.Count < _bookSize || _sellOrderBook.Count < _bookSize) return;
             //вычиляем рыночные цены на покупку и на продажу и выполняем проверку на актуальность наших ордеров
             var sellFairPrice = _sellOrderBook.Min(x => x.Value.Price);
             var buyFairPrice = _buyOrderBook.Max(x => x.Value.Price);
@@ -73,7 +74,7 @@ namespace Former
         /// </summary>
         private async Task UpdateConcreteBook(ConcurrentDictionary<string, Order> bookNeededUpdate, Order newComingOrder)
         {
-            var updateConcreteBookTask = new Task(() =>
+            var updateConcreteBookTask = Task.Run(() =>
             {
                 //если ордер имеет статус открытый, то он добавляется, либо апдейтится, если закрытый, то удаляется из книги
                 if (newComingOrder.Signature.Status == OrderStatus.Open)
@@ -99,7 +100,7 @@ namespace Former
         public async Task UpdateOrderBooks(Order newComingOrder, UserContext context)
         {
             if (CheckContext(context)) return;
-            var task = new Task(async () =>
+            var task = Task.Run(async () =>
             {
                 //выбирает, какую книгу апдейтить
                 await UpdateConcreteBook(newComingOrder.Signature.Type == OrderType.Buy ? _buyOrderBook : _sellOrderBook, newComingOrder);
@@ -121,9 +122,11 @@ namespace Former
                 if (order.Signature.Type == OrderType.Sell)
                     if (order.Price - _sellFairPrice > context.Configuration.OrderUpdatePriceRange)
                     {
+                        //TODO не менять фаир прайсы а использовать рэнж между ними 
                         if (_sellFairPrice - 1 > _buyFairPrice) _sellFairPrice -= 2;
                         var response = await context.AmendOrder(order.Id, _sellFairPrice + 1);
                         if (response.Response.Code == ReplyCode.Succeed)
+                            //TODO выкинуть в отдельный метод 
                             _myOrders.AddOrUpdate(key, order, (_, v) =>
                             {
                                 v.Price = _sellFairPrice + 1;
@@ -137,6 +140,7 @@ namespace Former
                 if (order.Signature.Type == OrderType.Buy)
                     if (_buyFairPrice - order.Price > context.Configuration.OrderUpdatePriceRange)
                     {
+                        //TODO использовать рэнж между фэир прайсами 
                         if (_buyFairPrice + 1 > _sellFairPrice) _buyFairPrice += 2;
                         var response = await context.AmendOrder(order.Id, _buyFairPrice - 1);
                         if (response.Response.Code == ReplyCode.Succeed)
@@ -173,7 +177,8 @@ namespace Former
                 _myOrders.AddOrUpdate(newComingOrder.Id, newComingOrder, (_, v) =>
                 {
                     if (newComingOrder.Price != 0) v.Price = newComingOrder.Price;
-                    if (newComingOrder.Quantity != 0) v.Quantity = -newComingOrder.Quantity;
+                    //TODO тут удалили минус на количестве
+                    if (newComingOrder.Quantity != 0) v.Quantity = newComingOrder.Quantity;
                     v.LastUpdateDate = newComingOrder.LastUpdateDate;
                     v.Signature = newComingOrder.Signature;
                     return v;
@@ -238,12 +243,14 @@ namespace Former
                 if (placeResponse.Response.Code == ReplyCode.Succeed)
                 {
                     removeResponse = RemoveFromMyOrders(id);
+                    //если позиция была положительная то количество позиции отнимется от общего количества в ордерах.
                     _positionSizeInActiveOrders -= (int)oldOrder.Quantity;
                 }
                 Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3} removed {5}", oldOrder.Id, oldOrder.Price, oldOrder.Quantity, removeResponse ? ReplyCode.Succeed : ReplyCode.Failure);
                 Log.Information("Counter order price: {0}, quantity: {1} placed {2} {3}", oldOrder.Signature.Type == OrderType.Buy ? sellPrice : buyPrice, -oldOrder.Quantity, placeResponse.Response.Code, placeResponse.Response.Code == ReplyCode.Succeed ? "" : placeResponse.Response.Message);
             }
             //если входящий ордер имеет пометку "обновить" необходимо обновить цену или объём в совпадающем по ид ордере, и в случае обновления объёма выставить контр-ордер с частичным объёмом
+            if(changesType == ChangesType.Update)
             {
                 if (newComingOrder.Quantity != 0)
                 {
@@ -316,6 +323,7 @@ namespace Former
             //если баланса было достаточно для хотя бы одного ордера то выполняем продажу
             if (quantity > 0)
             {
+                //это хардкод ( - 1 ) . В ТМе не допускаются числа R для выставления ордеров
                 var response = await context.PlaceOrder(purchaseFairPrice - 1, quantity);
                 if (response.Response.Code == ReplyCode.Succeed)
                 {
@@ -333,7 +341,7 @@ namespace Former
                     });
                     _positionSizeInActiveOrders += (int)quantity;
                 }
-                Log.Information("Order price: {0}, quantity: {1} placed for purchase {2} {3}", purchaseFairPrice - 1, quantity, response.Response.Code.ToString(), response.Response.Message);
+                Log.Information("Order price: {0}, quantity: {1} placed for purchase {2} {3}", purchaseFairPrice - 1, quantity, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
             }
             else Log.Debug("Cannot place purchase order. Insufficient balance.");
         }
@@ -375,7 +383,7 @@ namespace Former
                         LastUpdateDate = new Google.Protobuf.WellKnownTypes.Timestamp()
                     });
                 }
-                Log.Information("Order price: {0}, quantity: {1} placed for sell {2} {3}", sellFairPrice + 1, -quantity, response.Response.Code.ToString(), response.Response.Message);
+                Log.Information("Order price: {0}, quantity: {1} placed for sell {2} {3}", sellFairPrice + 1, -quantity, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
                 _positionSizeInActiveOrders -= (int)quantity;
             }
             else Log.Debug("Cannot place sell order. Insufficient balance.");
