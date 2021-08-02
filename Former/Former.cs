@@ -110,17 +110,17 @@ namespace Former
         }
 
         //TODO test!!!
-        public static double RoundPriceRange(double sellPrice,double buyPrice)
+        public static double RoundPriceRange(double sellPrice, double buyPrice)
         {
             return Math.Round(Math.Abs(sellPrice - buyPrice), 1);
         }
 
         //TODO test!!!
-        public static double MakePrice(double range,double fairprice,OrderType type)
+        public static double MakePrice(double range, double fairprice, OrderType type)
         {
             //TODO убедиться что рэнж точно идет с шагом 0.5
             return range > 0.5 ? fairprice + (type == OrderType.Buy ? 0.5 : -0.5) : fairprice;
-            
+
         }
 
         /// <summary>
@@ -128,7 +128,7 @@ namespace Former
         /// </summary>
         /// <param name="order"></param>
         /// <param name="price"></param>
-        public void UpdateOrderPrice(Order order,double price)
+        public void UpdateOrderPrice(Order order, double price)
         {
             _myOrders.AddOrUpdate(order.Id, order, (_, v) =>
             {
@@ -151,8 +151,8 @@ namespace Former
             foreach (var (key, order) in _myOrders)
             {
                 var price = MakePrice(
-                    range, 
-                    order.Signature.Type == OrderType.Sell ? _sellFairPrice : _buyFairPrice, 
+                    range,
+                    order.Signature.Type == OrderType.Sell ? _sellFairPrice : _buyFairPrice,
                     order.Signature.Type);
 
                 var response = await context.AmendOrder(order.Id, price);
@@ -172,7 +172,7 @@ namespace Former
         private bool RemoveFromMyOrders(string id)
         {
             return _myOrders.TryRemove(id, out _);
-        } 
+        }
 
         /// <summary>
         /// Обновляет запись в списке моих ордеров, если запись с таким же идентификатором существует там
@@ -180,34 +180,61 @@ namespace Former
         private void UpdateMyOrder(Order newComingOrder)
         {
             if (_myOrders.ContainsKey(newComingOrder.Id))
-                _myOrders.AddOrUpdate(newComingOrder.Id, newComingOrder, (_, v) =>
+            {
+                AddMyOrder(newComingOrder);
+            }
+        }
+
+        public void AddMyOrder(Order newComingOrder)
+        {
+            _myOrders.AddOrUpdate(newComingOrder.Id, newComingOrder, (_, v) =>
+            {
+                if (newComingOrder.Price != 0) v.Price = newComingOrder.Price;
+                if (newComingOrder.Quantity != 0) v.Quantity = newComingOrder.Quantity;
+                v.LastUpdateDate = newComingOrder.LastUpdateDate;
+                v.Signature = newComingOrder.Signature;
+                return v;
+            });
+        }
+
+       
+
+
+        public bool isOrderStored(string id)
+        {
+            return _myOrders.ContainsKey(id);
+        }
+
+        public double buildPrice(double oldPrice,double requeredProfit,OrderType type)
+        {
+            double additionalPrice = oldPrice * requeredProfit;
+            var newPrice = oldPrice + (type == OrderType.Sell ? additionalPrice : -additionalPrice);
+            //пока просто отбрасываем цену после запятой 
+            return Math.Truncate(newPrice);
+        }
+
+        public async void UpdateOrderAndPlaceConterOrder(Order newComingOrder,UserContext context)
+        {
+            var orderType = newComingOrder.Signature.Type;
+            var OldOrder = _myOrders[newComingOrder.Id];
+            var quantityDifference = OldOrder.Quantity - newComingOrder.Quantity;
+
+            //если разница по количеству больше нуля(волшебного числа)
+            if (quantityDifference > 1e-5)
+            {
+                var newPrice = buildPrice(OldOrder.Price, context.Configuration.RequiredProfit, orderType);
+                //выставляем контр ордер
+                var response = await context.PlaceOrder(newPrice, quantityDifference);
+
+                if (response.Response.Code == ReplyCode.Succeed)
                 {
-                    if (newComingOrder.Price != 0) v.Price = newComingOrder.Price;
-                    //TODO тут удалили минус на количестве
-                    if (newComingOrder.Quantity != 0) v.Quantity = newComingOrder.Quantity;
-                    v.LastUpdateDate = newComingOrder.LastUpdateDate;
-                    v.Signature = newComingOrder.Signature;
-                    return v;
-                });
-        }
+                    Log.Information("Order {@Id} {@Type} updated with {@Price} {@Quantity} ", newComingOrder.Id, orderType, newPrice, quantityDifference);
+                    _positionSizeInActiveOrders -= (int)quantityDifference;
+                }
+            }
 
-        /// <summary>
-        /// Выставляет контр-ордер в полном объёме от изначального ордера
-        /// </summary>
-        private async Task<PlaceOrderResponse> PlaceFullCounterOrder(double price, double quantity, UserContext context)
-        {
-            var response = await context.PlaceOrder(price, -quantity);
-            return response;
-        }
+            UpdateMyOrder(newComingOrder);
 
-        /// <summary>
-        /// Выставляет контр-ордер с частью объёма от изначального ордера
-        /// </summary>
-        private async Task<PlaceOrderResponse> PlacePartialCounterOrder(double price, double newQuantity, double oldQuantity, UserContext context)
-        {
-            var quantity = oldQuantity - newQuantity;
-            var response = await context.PlaceOrder(price, -quantity);
-            return response;
         }
 
         /// <summary>
@@ -215,68 +242,40 @@ namespace Former
         /// </summary>
         internal async Task UpdateMyOrderList(Order newComingOrder, ChangesType changesType, UserContext context)
         {
-            //вновь пришедший ордер не помещается в список моих ордеров здесь, потому что это делается только по событию из алгоритма, во избежание
-            //зацикливания выставления ордеров и контр-ордеров
-            if (changesType == ChangesType.Insert) return;
-            //по той же причине, что и выше, ордера, которые уже были на бирже не инициализируются снова, а лишь идут в расчёт текущей позиции на бирже
-            if (changesType == ChangesType.Partitial)
-            {
-                _positionSizeInActiveOrders += (int)newComingOrder.Quantity;
-                Log.Information("Position size in active orders has been updated: {0}", _positionSizeInActiveOrders);
-                return;
-            }
             if (CheckContext(context)) return;
-
-            //данная переменная действует, как семафор. Она предотвращает одновременное выставление контр ордера и выставление ордера по просьбе алгоритма, так как из за высвобождения 
-            //средств оба эти действия имеют место.
-            _placeLocker = true;
-            _fitPricesLocker = true;
-
-            var id = newComingOrder.Id;
-
-            //выходим из метода, если не получилось получить ордер по входящему идентификатору
-            if (!_myOrders.TryGetValue(id, out var oldOrder)) return;
-
-            //рассчитываем цены продажи/покупку для контр ордеров
-            var sellPrice = oldOrder.Price + oldOrder.Price * context.Configuration.RequiredProfit;
-            var buyPrice = oldOrder.Price - oldOrder.Price * context.Configuration.RequiredProfit;
-
-            //если входящий ордер имеет пометку "удалить" необходимо выставить контр-ордер в полном объёме, и в случае, если это удастся, удалить его из списка моих ордеров
-            if (changesType == ChangesType.Delete)
+            await Task.Run(() =>
             {
-                var placeResponse = await PlaceFullCounterOrder(oldOrder.Signature.Type == OrderType.Buy ? sellPrice : buyPrice, oldOrder.Quantity, context);
-                var removeResponse = false;
-                if (placeResponse.Response.Code == ReplyCode.Succeed)
+                //данная переменная действует, как семафор. Она предотвращает одновременное выставление контр ордера и выставление ордера по просьбе алгоритма, так как из за высвобождения 
+                //средств оба эти действия имеют место.
+                _placeLocker = true;
+                _fitPricesLocker = true;
+
+                var id = newComingOrder.Id;
+
+                switch (changesType)
                 {
-                    removeResponse = RemoveFromMyOrders(id);
-                    //если позиция была положительная то количество позиции отнимется от общего количества в ордерах.
-                    _positionSizeInActiveOrders -= (int)oldOrder.Quantity;
+                    case ChangesType.Insert:
+                        {
+                            //вновь пришедший ордер не помещается в список моих ордеров здесь, потому что это делается только по событию из алгоритма, во избежание
+                            //зацикливания выставления ордеров и контр-ордеров
+                            break;
+                        }
+                    case ChangesType.Partitial:
+                        {
+                            //TEST FEATURE
+                            //Все ордера пользователя которые были уже выставлены добавляются в список _MyOrders
+                            AddMyOrder(newComingOrder);
+                            break;
+                        }
+                    default:
+                        {
+                            UpdateOrderAndPlaceConterOrder(newComingOrder, context);
+                            break;
+                        }
                 }
-                Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3} removed {5}", oldOrder.Id, oldOrder.Price, oldOrder.Quantity, removeResponse ? ReplyCode.Succeed : ReplyCode.Failure);
-                Log.Information("Counter order price: {0}, quantity: {1} placed {2} {3}", oldOrder.Signature.Type == OrderType.Buy ? sellPrice : buyPrice, -oldOrder.Quantity, placeResponse.Response.Code, placeResponse.Response.Code == ReplyCode.Succeed ? "" : placeResponse.Response.Message);
-            }
-            //если входящий ордер имеет пометку "обновить" необходимо обновить цену или объём в совпадающем по ид ордере, и в случае обновления объёма выставить контр-ордер с частичным объёмом
-            if(changesType == ChangesType.Update)
-            {
-                if (newComingOrder.Quantity != 0)
-                {
-                    var placeResponse = await PlacePartialCounterOrder(oldOrder.Signature.Type == OrderType.Buy ? buyPrice : sellPrice, newComingOrder.Quantity, oldOrder.Quantity, context);
-                    if (placeResponse.Response.Code == ReplyCode.Succeed)
-                    {
-                        UpdateMyOrder(newComingOrder);
-                        _positionSizeInActiveOrders -= (int)(newComingOrder.Quantity - oldOrder.Quantity);
-                    }
-                    Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3} updated", oldOrder.Id, oldOrder.Price, oldOrder.Quantity, oldOrder.Signature.Type);
-                    Log.Information("Counter order price: {0}, quantity: {1} placed {2} {3}", oldOrder.Signature.Type == OrderType.Buy ? buyPrice : sellPrice, -oldOrder.Quantity, placeResponse.Response.Code, placeResponse.Response.Code == ReplyCode.Succeed ? "" : placeResponse.Response.Message);
-                }
-                if (newComingOrder.Price != 0)
-                {
-                    UpdateMyOrder(newComingOrder);
-                    Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3} updated", id, newComingOrder.Price, -oldOrder.Quantity, oldOrder.Signature.Type);
-                }
-            }
-            _placeLocker = false;
-            _fitPricesLocker = false;
+                _placeLocker = false;
+                _fitPricesLocker = false;
+            });
         }
         #endregion
 
