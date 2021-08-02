@@ -49,12 +49,12 @@ namespace Former
         private async Task CheckAndFitPrices(double buyFairPrice, double sellFairPrice, UserContext context)
         {
             //если рыночная цена изменилась, то необходимо проверить, не устарели ли цени в наших ордерах
-            if ((int)Math.Floor(_sellFairPrice) != (int)Math.Floor(sellFairPrice) || (int)Math.Floor(_buyFairPrice) != (int)Math.Floor(buyFairPrice))
-            {
+            //if (Math.Abs(sellFairPrice - _sellFairPrice) > 0.4  || Math.Abs(_buyFairPrice - buyFairPrice) > 0.4  )
+            //{
                 _sellFairPrice = sellFairPrice;
                 _buyFairPrice = buyFairPrice;
                 if (!_fitPricesLocker && _myOrders.Count > 0) await FitPrices(context);
-            }
+            //}
         }
 
         /// <summary>
@@ -110,25 +110,22 @@ namespace Former
         }
 
         //TODO test!!!
-        public static double RoundPriceRange(double sellPrice,double buyPrice)
+        public static double RoundPriceRange(double sellPrice, double buyPrice)
         {
             return Math.Round(Math.Abs(sellPrice - buyPrice), 1);
         }
 
         //TODO test!!!
-        public static double MakePrice(double range,double fairprice,OrderType type)
+        public static double MakePrice(double range, double fairprice, OrderType type)
         {
             //TODO убедиться что рэнж точно идет с шагом 0.5
             return range > 0.5 ? fairprice + (type == OrderType.Buy ? 0.5 : -0.5) : fairprice;
-            
         }
 
         /// <summary>
         /// обновляет ордер в мапе _myOrders 
         /// </summary>
-        /// <param name="order"></param>
-        /// <param name="price"></param>
-        public void UpdateOrderPrice(Order order,double price)
+        public void UpdateOrderPrice(Order order, double price)
         {
             _myOrders.AddOrUpdate(order.Id, order, (_, v) =>
             {
@@ -139,6 +136,11 @@ namespace Former
                 return v;
             });
         }
+
+        public double GetFairPrice(OrderType type)
+        {
+            return type == OrderType.Sell ? _sellFairPrice : _buyFairPrice;
+        }
         /// <summary>
         /// Подгоняет мои ордера под рыночную цену
         /// </summary>
@@ -147,13 +149,13 @@ namespace Former
             if (CheckContext(context)) return;
             _fitPricesLocker = true;
             double range = RoundPriceRange(_sellFairPrice, _buyFairPrice);
-
-            foreach (var (key, order) in _myOrders)
+            var ordersSuitableForUpdate = _myOrders.Where(pair => Math.Abs(pair.Value.Price - GetFairPrice(pair.Value.Signature.Type)) >= context.Configuration.OrderUpdatePriceRange);
+            foreach (var (key, order) in ordersSuitableForUpdate)
             {
                 var price = MakePrice(
-                    range, 
-                    order.Signature.Type == OrderType.Sell ? _sellFairPrice : _buyFairPrice, 
-                    order.Signature.Type);
+                range,
+                GetFairPrice(order.Signature.Type),
+                order.Signature.Type);
 
                 var response = await context.AmendOrder(order.Id, price);
 
@@ -317,7 +319,7 @@ namespace Former
             if (CheckContext(context)) return;
             //вычисляем рыночную цену для продажи
             var purchaseFairPrice = _buyOrderBook.Max(x => x.Value.Price);
-            
+
             if (_availableBalance - _totalBalance * context.Configuration.AvaibleBalance < context.Configuration.ContractValue / purchaseFairPrice)
             {
                 Log.Debug("Cannot place sell order. Insufficient balance.");
@@ -325,7 +327,7 @@ namespace Former
             }
 
             //это хардкод ( - 1 ) . В ТМе не допускаются числа R для выставления ордеров
-            var response = await context.PlaceOrder(purchaseFairPrice - 1, context.Configuration.ContractValue);
+            var response = await context.PlaceOrder(purchaseFairPrice - 2, context.Configuration.ContractValue);
             if (response.Response.Code == ReplyCode.Succeed)
             {
                 _myOrders.TryAdd(response.OrderId, new Order
@@ -342,7 +344,7 @@ namespace Former
                 });
                 _positionSizeInActiveOrders += (int)context.Configuration.ContractValue;
             }
-            Log.Information("Order price: {0}, quantity: {1} placed for purchase {2} {3}", purchaseFairPrice - 1, context.Configuration.ContractValue, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
+            Log.Information("Order price: {0}, quantity: {1} placed for purchase {2} {3}", purchaseFairPrice - 2, context.Configuration.ContractValue, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
 
         }
 
@@ -357,13 +359,13 @@ namespace Former
             //вычисляем рыночную цену для продажи
             var sellFairPrice = _sellOrderBook.Min(x => x.Value.Price);
 
-           
+
             if (_availableBalance - _totalBalance * context.Configuration.AvaibleBalance < context.Configuration.ContractValue / sellFairPrice)
             {
                 Log.Debug("Cannot place sell order. Insufficient balance.");
                 return;
             }
-            var response = await context.PlaceOrder(sellFairPrice + 1, -context.Configuration.ContractValue);
+            var response = await context.PlaceOrder(sellFairPrice + 2, -context.Configuration.ContractValue);
             if (response.Response.Code == ReplyCode.Succeed)
             {
                 _myOrders.TryAdd(response.OrderId, new Order
@@ -379,7 +381,7 @@ namespace Former
                     LastUpdateDate = new Google.Protobuf.WellKnownTypes.Timestamp()
                 });
             }
-            Log.Information("Order price: {0}, quantity: {1} placed for sell {2} {3}", sellFairPrice + 1, -context.Configuration.ContractValue, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
+            Log.Information("Order price: {0}, quantity: {1} placed for sell {2} {3}", sellFairPrice + 2, -context.Configuration.ContractValue, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
             _positionSizeInActiveOrders -= (int)context.Configuration.ContractValue;
         }
 

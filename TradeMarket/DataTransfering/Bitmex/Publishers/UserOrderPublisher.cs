@@ -19,7 +19,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             {
                 //при исполнении ордера с биржи прилетает не делит а апдейт
                 BitmexAction action = response.Action;
-                if(data.Price is null || data.OrderQty is null)
+                if(data.Price is null && data.OrderQty is null)
                 {
                     action = BitmexAction.Delete;
                 }
