@@ -17,26 +17,38 @@ namespace LicenseGRPC
             {
                 bool licenseIsExists = database.Licenses.Any(license => license.AccountId == request.AccountId &&
                     license.Product == request.Product);
-                
+
                 if (licenseIsExists)
                     return Task.FromResult(SetLicenseReplies.LicenseIsExists());
-
-                var license = new Models.License
+                else
                 {
-                    AccountId = request.AccountId,
-                    Key = Guid.NewGuid().ToString(),
-                    Product = request.Product
-                };
+                    var license = new Models.License
+                    {
+                        AccountId = request.AccountId,
+                        Key = Guid.NewGuid().ToString(),
+                        Product = request.Product
+                    };
 
-                database.Licenses.Add(license);
-                database.SaveChanges();
-                return Task.FromResult(SetLicenseReplies.SuccessfulSettingLicense());
+                    database.Licenses.Add(license);
+                    database.SaveChanges();
+                    return Task.FromResult(SetLicenseReplies.SuccessfulSettingLicense());
+                }
             }
         }
 
         public override Task<LicenseCheckResponse> LicenseCheck(LicenseCheckRequest request, ServerCallContext context)
         {
-            return base.LicenseCheck(request, context);
+            using (var database = new Models.LicenseContext())
+            {
+                bool isExists = database.Licenses.Any(license =>
+                    license.AccountId == request.AccountId &&
+                    license.Key == request.Key &&
+                    license.Product == request.Product);
+
+                if (isExists)
+                    return Task.FromResult(LicenseCheckReplies.LicenseIsExists());
+                else return Task.FromResult(LicenseCheckReplies.LicenseIsNotExists());
+            }
         }
 
         public override Task<GetKeyResponse> GetKey(GetKeyRequest request, ServerCallContext context)
