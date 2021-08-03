@@ -29,6 +29,18 @@ namespace AccountGRPC.AccountMessages
             };
         }
 
+        public static DeleteExchangeAccessResponse TimePassed()
+        {
+            const string Message = "Произошла ошибка: время сессии вышло.";
+            Log.Information(Message);
+
+            return new DeleteExchangeAccessResponse
+            {
+                Result = ExchangeAccessActionCode.AccountNotFound,
+                Message = Message
+            };
+        }
+
         public static DeleteExchangeAccessResponse ExchangeNotFound()
         {
             const string Message = "Произошла ошибка: данные биржи не найдены.";

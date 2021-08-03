@@ -43,6 +43,18 @@ namespace AccountGRPC.AccountMessages
             };
         }
 
+        public static AllExchangesBySessionResponse TimePassed()
+        {
+            const string Message = "Произошла ошибка получение данных бирж: время сессии вышло.";
+            Log.Information(Message);
+
+            return new AllExchangesBySessionResponse
+            {
+                Result = ExchangeAccessActionCode.AccountNotFound,
+                Message = Message
+            };
+        }
+
         public static AllExchangesBySessionResponse ExchangesNotFound()
         {
             const string Message = "Ошибка при получении бирж: данные не найдены.";

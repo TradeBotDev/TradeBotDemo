@@ -29,6 +29,18 @@ namespace AccountGRPC.AccountMessages
             };
         }
 
+        public static AddExchangeAccessResponse TimePassed()
+        {
+            const string Message = "Произошла ошибка добавления биржи: время сессии вышло.";
+            Log.Information(Message);
+
+            return new AddExchangeAccessResponse
+            {
+                Result = ExchangeAccessActionCode.AccountNotFound,
+                Message = Message
+            };
+        }
+
         public static AddExchangeAccessResponse ExchangeAccessExists()
         {
             const string Message = "Произошла ошибка добавления биржи: биржа уже существует.";

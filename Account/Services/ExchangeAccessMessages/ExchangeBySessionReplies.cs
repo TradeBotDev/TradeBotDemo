@@ -18,6 +18,19 @@ namespace AccountGRPC.AccountMessages
             };
         }
 
+        public static ExchangeBySessionResponse TimePassed()
+        {
+            const string Message = "Произошла ошибка: время сессии вышло.";
+            Log.Information(Message);
+
+            return new ExchangeBySessionResponse
+            {
+                Result = ExchangeAccessActionCode.AccountNotFound,
+                Message = Message,
+                Exchange = null
+            };
+        }
+
         public static ExchangeBySessionResponse ExchangeNotFound()
         {
             const string Message = "Произошла ошибка: биржа не найдена.";

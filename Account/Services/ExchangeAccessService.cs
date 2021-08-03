@@ -29,6 +29,8 @@ namespace AccountGRPC
                 // сообщение об ошибке.
                 if (!database.LoggedAccounts.Any(login => login.SessionId == request.SessionId))
                     return Task.FromResult(AddExchangeAccessReplies.AccountNotFound());
+                else if (LoggedAccountsManagement.TimePassed(request.SessionId))
+                    return Task.FromResult(AddExchangeAccessReplies.TimePassed());
 
                 // Валидация полученных данных. В случае, если валидация не прошла успешно, возвращается сообщение об ошибке.
                 var validationResult = Validate.AddExchangeAccessFields(request);
@@ -83,6 +85,8 @@ namespace AccountGRPC
                 // В случае, если аккаунт не найден среди вошедших, возвращается сообщение об ошибке.
                 if (login.Count() == 0)
                     return Task.FromResult(AllExchangesBySessionReplies.AccountNotFound());
+                else if (LoggedAccountsManagement.TimePassed(request.SessionId))
+                    return Task.FromResult(AllExchangesBySessionReplies.TimePassed());
 
                 // Поиск информации о доступе пользователя к бирже.
                 var exchangeAccesses = database.ExchangeAccesses
@@ -110,6 +114,9 @@ namespace AccountGRPC
                 // не был найден.
                 if (!database.LoggedAccounts.Any(login => login.SessionId == request.SessionId))
                     return Task.FromResult(DeleteExchangeAccessReplies.AccountNotFound());
+                else if (LoggedAccountsManagement.TimePassed(request.SessionId))
+                    return Task.FromResult(DeleteExchangeAccessReplies.TimePassed());
+
 
                 // Если аккаунт был найден, производится получение его данных по Id сессии.
                 var fromAccount = database.LoggedAccounts
@@ -146,6 +153,8 @@ namespace AccountGRPC
                 // В случае, если аккаунт не найден среди вошедших, возвращается сообщение об ошибке.
                 if (login.Count() == 0)
                     return Task.FromResult(ExchangeBySessionReplies.AccountNotFound());
+                else if (LoggedAccountsManagement.TimePassed(request.SessionId))
+                    return Task.FromResult(ExchangeBySessionReplies.TimePassed());
 
                 // Поиск информации о доступе пользователя к бирже.
                 var exchangeAccesses = database.ExchangeAccesses
