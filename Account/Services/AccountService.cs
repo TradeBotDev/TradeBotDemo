@@ -50,7 +50,13 @@ namespace AccountGRPC
                 // в случае, если он вошел, возвращается его Id сессии
                 var existingLogin = database.LoggedAccounts.Where(account => account.AccountId == accounts.First().AccountId);
                 if (existingLogin.Count() > 0)
-                    return Task.FromResult(LoginReplies.AlreadySignedIn(existingLogin.First().SessionId));
+                {
+                    string newSessionId = Guid.NewGuid().ToString();
+                    existingLogin.First().SessionId = newSessionId;
+                    database.SaveChanges();
+
+                    return Task.FromResult(LoginReplies.AlreadySignedIn(newSessionId));
+                }
 
                 // В случае наличия зарегистрированного аккаунта с данными из запроса генерируется
                 // Id сессии, а также полученный пользователь добавляется в таблицу с вошедшими
