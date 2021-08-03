@@ -175,11 +175,8 @@ namespace AccountGRPC
                 // Производится проверка на то, является ли текущий пользователь вошедшим (по Id сессии).
                 if (checkAccount.Count() == 0)
                     return Task.FromResult(CurrentAccountReplies.AccountNotFound());
-                else if (TimePassed(checkAccount.First().LoginDate) == true)
-                {
-                    Logout(new LogoutRequest { SessionId = request.SessionId }, context);
+                else if (LoggedAccountsManagement.TimePassed(request.SessionId))
                     return Task.FromResult(CurrentAccountReplies.TimePassed());
-                }
 
                 // Если текущий пользователь вошедший, то сервер возвращает данные этого пользователя.
                 else
@@ -198,13 +195,6 @@ namespace AccountGRPC
                     return Task.FromResult(reply);
                 }
             }
-        }
-
-        private bool TimePassed(DateTime date)
-        {
-            if (date.AddSeconds(15) < DateTime.Now)
-                return true;
-            return false;
         }
     }
 }
