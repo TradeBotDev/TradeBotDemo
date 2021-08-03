@@ -33,7 +33,7 @@ namespace Former
             TradeMarketClient.Configure("https://localhost:5005", 10000);
 
             _tradeMarketClient = new TradeMarketClient();
-            _former = new Former(25);
+            _former = new Former();
 
             _tradeMarketClient.UpdateBalance += UpdateBalance;
             _tradeMarketClient.UpdateMyOrders += UpdateMyOrderList;
