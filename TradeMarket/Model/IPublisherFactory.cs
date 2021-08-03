@@ -1,4 +1,5 @@
 ﻿using Bitmex.Client.Websocket.Responses.Books;
+using Bitmex.Client.Websocket.Responses.Instruments;
 using Bitmex.Client.Websocket.Responses.Margins;
 using Bitmex.Client.Websocket.Responses.Orders;
 using Bitmex.Client.Websocket.Responses.Positions;
@@ -19,6 +20,8 @@ namespace TradeMarket.Model
         public IPublisher<Margin> CreateUserMarginPublisher(UserContext context);
 
         public IPublisher<Position> CreateUserPositionPublisher(UserContext context);
+
+        public IPublisher<Instrument> CreateInstrumentPublisher(UserContext context);
 
         public IPublisher<bool> CreateAuthenticationPublisher(UserContext context);
     }

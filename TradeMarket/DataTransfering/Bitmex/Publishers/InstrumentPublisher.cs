@@ -31,9 +31,9 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             throw new NotImplementedException();
         }
 
-        public async Task SubcribeAsync(CancellationToken token)
+        public async Task SubcribeAsync(string slot,CancellationToken token)
         {
-            await base.SubscribeAsync(new InstrumentSubscribeRequest(), _stream, token);
+            await base.SubscribeAsync(new InstrumentSubscribeRequest(slot),_stream, token);
 
         }
     }
