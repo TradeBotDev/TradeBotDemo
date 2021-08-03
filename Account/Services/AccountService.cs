@@ -204,26 +204,33 @@ namespace AccountGRPC
                 }
             }
         }
-
+        
+        // Метод, проверяющий лицензию для текущего пользователя по Id сессии.
         public override Task<CheckLicenseResponse> CheckLicense(CheckLicenseRequest request, ServerCallContext context)
         {
             Log.Information($"CheckLicense получил запрос: SessionId - {request.SessionId}.");
             using (var database = new Models.AccountContext())
             {
+                // Поиск входов с этим Id сессии, и если такие аккаунты не найдены, возвращается
+                // Сообщение об этом.
                 var accounts = database.LoggedAccounts.Where(login => login.SessionId == request.SessionId);
                 if (accounts.Count() == 0)
                     return Task.FromResult(CheckLicenseReplies.AccountNotFound());
 
+                // Подключение к сервису LicenseService.
                 var channel = GrpcChannel.ForAddress("http://localhost:5007");
                 var client = new License.LicenseClient(channel);
+                // Отправка запроса и сразу же запись ответа.
                 var reply = client.CheckLicense(new LicenseCheckRequest
                 {
                     AccountId = accounts.First().AccountId,
                     Product = ProductCode.Tradebot
                 });
 
+                // В случае, если лицензия есть, возвращается сообщение об этом.
                 if (reply.HaveAccess)
                     return Task.FromResult(CheckLicenseReplies.HaveAccess());
+                // Иначе возвращается сообщение о том, что пользователь не имеет лицензию.
                 else return Task.FromResult(CheckLicenseReplies.NotHaveAccess());
             }
         }
