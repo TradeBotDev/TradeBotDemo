@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using TradeMarket.Model.Publishers;
 
 namespace TradeMarket.DataTransfering.Bitmex.Publishers
 {
@@ -20,15 +21,17 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         };
 
         private IObservable<MarginResponse> _stream;
+        private readonly CancellationToken _token;
 
-        public UserMarginPublisher(BitmexWebsocketClient client, IObservable<MarginResponse> stream) : base(client, _action)
+        public UserMarginPublisher(BitmexWebsocketClient client, IObservable<MarginResponse> stream, CancellationToken token) : base(client, _action)
         {
             _stream = stream;
+            this._token = token;
         }
 
-        public override void Start()
+        public async override Task Start()
         {
-            throw new NotImplementedException();
+            await SubcribeAsync(_token);
         }
 
         public async Task SubcribeAsync(CancellationToken token)

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using TradeMarket.Model.Publishers;
 
 namespace TradeMarket.DataTransfering.Bitmex.Publishers
 {
@@ -17,15 +18,21 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         };
 
         private IObservable<AuthenticationResponse> _stream;
+        private readonly string _apiKey;
+        private readonly string _apiSecret;
+        private readonly CancellationToken _token;
 
-        public AuthenticationPublisher(BitmexWebsocketClient client, IObservable<AuthenticationResponse> orderStream) : base(client, _action)
+        public AuthenticationPublisher(BitmexWebsocketClient client, IObservable<AuthenticationResponse> orderStream, string apiKey, string apiSecret, CancellationToken token) : base(client, _action)
         {
             _stream = orderStream;
+            this._apiKey = apiKey;
+            this._apiSecret = apiSecret;
+            this._token = token;
         }
 
-        public override void Start()
+        public async override Task Start()
         {
-            throw new NotImplementedException();
+            await SubcribeAsync(_apiKey, _apiSecret, _token);
         }
 
         public async Task SubcribeAsync(string apiKey, string apiSecret,  CancellationToken token)

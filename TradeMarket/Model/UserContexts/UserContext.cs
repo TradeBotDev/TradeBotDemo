@@ -16,21 +16,22 @@ using TradeBot.TradeMarket.TradeMarketService.v1;
 using TradeMarket.Clients;
 using TradeMarket.DataTransfering;
 using TradeMarket.DataTransfering.Bitmex.Rest.Client;
+using TradeMarket.Model.Publishers;
 using Margin = Bitmex.Client.Websocket.Responses.Margins.Margin;
 using Order = Bitmex.Client.Websocket.Responses.Orders.Order;
 
-namespace TradeMarket.Model
+namespace TradeMarket.Model.UserContexts
 {
     public class UserContext : IEquatable<UserContext>
     {
         #region Dynamic Part
-        public String SessionId { get; set; }
-        public String SlotName { get; set; }
+        public String SessionId { get; internal set; }
+        public String SlotName { get; internal set; }
 
-        public String Key { get; set; }
-        public String Secret { get; set; }
+        public String Key { get; internal set; }
+        public String Secret { get; internal set; }
 
-        public Model.TradeMarket TradeMarket { get; set; }
+        public Model.TradeMarkets.TradeMarket TradeMarket { get; set; }
 
         public event EventHandler<IPublisher<BookLevel>.ChangedEventArgs> Book25;
         public event EventHandler<IPublisher<BookLevel>.ChangedEventArgs> Book;
@@ -44,11 +45,17 @@ namespace TradeMarket.Model
 
         //TODO тут должен быть кэш из редиса
 
-        //TODO сделать эти классы абстрактными
+        //Клиенты для доступа к личной информации пользователя на бирже
         internal BitmexWebsocketClient WSClient { get; set; }
         internal BitmexRestfulClient RestClient { get; set; }
 
         private AccountClient _accountClient;
+
+        public void AssignKeySecret(string key,string secret)
+        {
+            Key = key;
+            Secret = secret;
+        }
 
         /// <summary>
         /// Метод инициализации контекста. 
@@ -63,20 +70,25 @@ namespace TradeMarket.Model
             //TODO что-то сделать с этим методом
             AutheticateUser();
 
-            //инициализация подписок
+            /*//инициализация подписок
             TradeMarket.SubscribeToBalance((sender, el) => {UserBalance?.Invoke(sender, el); }, this);
             //TradeMarket.SubscribeToBook((sender, el) => {Book?.Invoke(sender, el); }, this);
             TradeMarket.SubscribeToBook25((sender, el) => Book25?.Invoke(sender, el), this);
             TradeMarket.SubscribeToUserOrders((sender, el) => UserOrders?.Invoke(sender, el), this);
             TradeMarket.SubscribeToUserMargin((sender, el) => UserMargin?.Invoke(sender, el), this);
             TradeMarket.SubscribeToUserPositions((sender, el) => UserPosition?.Invoke(sender, el), this);
-            TradeMarket.SubscribeToInstruments((sender, el) => InstrumentUpdate?.Invoke(sender, el), this);
+            TradeMarket.SubscribeToInstruments((sender, el) => InstrumentUpdate?.Invoke(sender, el), this);*/
+        }
+
+        public UserContext()
+        {
+
         }
 
         /// <summary>
         /// После создание нового объекта необходима инициализация некоторых полей и ивентов через метод init()
         /// </summary>
-        internal UserContext(string sessionId, string slotName, Model.TradeMarket tradeMarket)
+        internal UserContext(string sessionId, string slotName, Model.TradeMarkets.TradeMarket tradeMarket)
         {
             //инициализация websocket клиента
             var communicator = new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketTestnetUrl);
@@ -110,7 +122,7 @@ namespace TradeMarket.Model
 
         public async Task<DefaultResponse> AutheticateUser()
         {
-            return await TradeMarket.AutheticateUser(Key, Secret, this);
+            return await TradeMarket.AutheticateUser(this);
         }
 
         public bool IsEquevalentTo(string sessionId, string slotName, string tradeMarketName)

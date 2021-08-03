@@ -10,6 +10,7 @@ using Bitmex.Client.Websocket.Requests;
 using Bitmex.Client.Websocket.Responses;
 using Bitmex.Client.Websocket.Responses.Orders;
 using Bitmex.Client.Websocket.Websockets;
+using TradeMarket.Model.Publishers;
 
 namespace TradeMarket.DataTransfering.Bitmex.Publishers
 {
@@ -42,6 +43,6 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             stream.Subscribe(responseAction);
         }
 
-        public abstract void Start();
+        public abstract Task Start();
     }
 }

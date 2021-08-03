@@ -14,6 +14,8 @@ using TradeBot.Account.AccountService.v1;
 using TradeMarket.Clients;
 using TradeMarket.DataTransfering;
 using TradeMarket.Model;
+using TradeMarket.Model.TradeMarkets;
+using TradeMarket.Model.UserContexts;
 using TradeMarket.Services;
 
 namespace TradeMarket
@@ -33,7 +35,9 @@ namespace TradeMarket
             services.AddGrpc();
             services.AddSingleton(new AccountClient(new ExchangeAccess.ExchangeAccessClient(GrpcChannel.ForAddress(Configuration.GetConnectionString("AccountService")))));
             services.AddSingleton<IConnectionMultiplexer>(options => ConnectionMultiplexer.Connect(Configuration.GetConnectionString("Redis")));
-            services.AddSingleton<FactoryCache>();
+            services.AddSingleton<TradeMarketFactory>();
+            services.AddSingleton<UserContextDirector>();
+            services.AddSingleton<UserContextBuilder>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

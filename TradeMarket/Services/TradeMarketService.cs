@@ -21,16 +21,18 @@ using Bitmex.Client.Websocket.Responses;
 using TradeBot.Common.v1;
 using TradeMarket.DataTransfering.Bitmex;
 using Bitmex.Client.Websocket.Responses.Positions;
+using TradeMarket.Model.TradeMarkets;
+using TradeMarket.Model.UserContexts;
 
 namespace TradeMarket.Services
 {
     public partial class TradeMarketService : TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceBase
     {
-        private FactoryCache _factory;
+        private UserContextDirector director;
 
-        public TradeMarketService(FactoryCache factory)
+        public TradeMarketService(UserContextDirector director)
         {
-            _factory = factory;
+            this.director = director;
         }
 
         public override Task<AuthenticateTokenResponse> AuthenticateToken(AuthenticateTokenRequest request, ServerCallContext context)
@@ -53,7 +55,7 @@ namespace TradeMarket.Services
             var slot = context.RequestHeaders.Get("slot").Value;
             var trademarket = context.RequestHeaders.Get("trademarket").Value;
 
-            var user = await _factory.GetUserContextAsync(sessionId, slot, trademarket);
+            var user = director.GetUserContext(sessionId, slot, trademarket);
             var response = await user.PlaceOrder(request.Value, request.Price);
 
             return response;
@@ -67,7 +69,7 @@ namespace TradeMarket.Services
             var trademarket = context.RequestHeaders.Get("trademarket").Value;
 
 
-            var user = _factory.GetUserContextAsync(sessionId, slot, trademarket);
+            var user = director.GetUserContext(sessionId, slot, trademarket);
 
             //нет функционала получения всех слотов по вебсокету
             /*FakeSlotPublisher.GetInstance().Changed += async (sender, args) =>
@@ -98,7 +100,7 @@ namespace TradeMarket.Services
             var slot = context.RequestHeaders.Get("slot").Value;
             var trademarket = context.RequestHeaders.Get("trademarket").Value;
 
-            var user = await _factory.GetUserContextAsync(sessionId, slot, trademarket);
+            var user = director.GetUserContext(sessionId, slot, trademarket);
 
             user.UserBalance += async (sender, args) => {
                 await WriteStreamAsync<SubscribeBalanceResponse>(responseStream, new SubscribeBalanceResponse { Response = new() { Balance = ConvertService.ConvertBalance(args.Changed) } });
@@ -114,7 +116,7 @@ namespace TradeMarket.Services
             var slot = context.RequestHeaders.Get("slot").Value;
             var trademarket = context.RequestHeaders.Get("trademarket").Value;
 
-            var user = await _factory.GetUserContextAsync(sessionId, slot, trademarket);
+            var user = director.GetUserContext(sessionId, slot, trademarket);
 
             user.InstrumentUpdate += async (sender, args) => {
                 await WriteStreamAsync<SubscribePriceResponse>(responseStream, ConvertService.ConvertInstrument(args.Changed,args.Action));
@@ -132,7 +134,7 @@ namespace TradeMarket.Services
             var trademarket = context.RequestHeaders.Get("trademarket").Value;
 
 
-            var user = await _factory.GetUserContextAsync(sessionId, slot, trademarket);
+            var user = director.GetUserContext(sessionId, slot, trademarket);
             user.UserMargin += async (sender, args) =>
             {
                 var marginResponse = ConvertService.ConvertMargin(args.Changed, args.Action);
@@ -150,7 +152,7 @@ namespace TradeMarket.Services
             var slot = context.RequestHeaders.Get("slot").Value;
             var trademarket = context.RequestHeaders.Get("trademarket").Value;
 
-            var user = await _factory.GetUserContextAsync(sessionId, slot, trademarket);
+            var user = director.GetUserContext(sessionId, slot, trademarket);
 
 
             user.UserPosition += async (sender, args) => {
@@ -172,7 +174,7 @@ namespace TradeMarket.Services
             var sessionId = context.RequestHeaders.Get("sessionid").Value;
             var slot = context.RequestHeaders.Get("slot").Value;
             var trademarket = context.RequestHeaders.Get("trademarket").Value;
-            var user = await _factory.GetUserContextAsync(sessionId, slot, trademarket);
+            var user = director.GetUserContext(sessionId, slot, trademarket);
             user.UserOrders += async (sender, args) => {
 
                 var response = ConvertService.ConvertMyOrder(args.Changed, args.Action);
@@ -192,7 +194,7 @@ namespace TradeMarket.Services
             var trademarket = context.RequestHeaders.Get("trademarket").Value;
             try
             {
-                var user = await _factory.GetUserContextAsync(sessionId, slot, trademarket);
+                var user = director.GetUserContext(sessionId, slot, trademarket);
                 user.Book25 += async (sender, args) => {
                     var response = ConvertService.ConvertBookOrders(args.Changed,args.Action);
                     if (IsOrderSuitForSignature(response.Response.Order.Signature, request.Request.Signature))
@@ -246,7 +248,7 @@ namespace TradeMarket.Services
             var slot = context.RequestHeaders.Get("slot").Value;
             var trademarket = context.RequestHeaders.Get("trademarket").Value;
 
-            var user = await _factory.GetUserContextAsync(sessionId, slot, trademarket);
+            var user = director.GetUserContext(sessionId, slot, trademarket);
 
             double? price = 0;
             switch (request.PriceType)
@@ -277,7 +279,7 @@ namespace TradeMarket.Services
             var slot = context.RequestHeaders.Get("slot").Value;
             var trademarket = context.RequestHeaders.Get("trademarket").Value;
 
-            var user = await _factory.GetUserContextAsync(sessionId, slot, trademarket);
+            var user = director.GetUserContext(sessionId, slot, trademarket);
             var response = await user.DeleteOrder(request.OrderId);
             return new()
             {

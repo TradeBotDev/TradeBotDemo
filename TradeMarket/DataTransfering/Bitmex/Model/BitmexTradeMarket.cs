@@ -1,29 +1,10 @@
-﻿using Bitmex.Client.Websocket;
-using Bitmex.Client.Websocket.Client;
-using Bitmex.Client.Websocket.Communicator;
-using Bitmex.Client.Websocket.Requests;
-using Bitmex.Client.Websocket.Responses;
-using Bitmex.Client.Websocket.Responses.Orders;
-using Bitmex.Client.Websocket.Websockets;
+﻿using Bitmex.Client.Websocket.Requests;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Common.v1;
 using TradeMarket.DataTransfering.Bitmex.Publishers;
-using TradeMarket.DataTransfering.Bitmex.Rest.Requests;
-using TradeMarket.Model;
-using Bitmex.Client.Websocket.Responses.Orders;
-using Utf8Json;
-using OrderStatus = TradeBot.Common.v1.OrderStatus;
-using TradeMarket.DataTransfering.Bitmex.Rest.Responses;
 using Serilog;
-using TradeMarket.DataTransfering.Bitmex.Rest.Requests.Place;
-using Newtonsoft.Json;
 using Order = Bitmex.Client.Websocket.Responses.Orders.Order;
-using TradeMarket.DataTransfering.Bitmex.Rest.Requests.Ammend;
-using Bitmex.Client.Websocket.Responses.Margins;
-using TradeBot.TradeMarket.TradeMarketService.v1;
 using Margin = Bitmex.Client.Websocket.Responses.Margins.Margin;
 using DeleteOrderRequest = TradeMarket.DataTransfering.Bitmex.Rest.Requests.DeleteOrderRequest;
 using PlaceOrderRequest = TradeMarket.DataTransfering.Bitmex.Rest.Requests.Place.PlaceOrderRequest;
@@ -33,109 +14,88 @@ using Bitmex.Client.Websocket.Responses.Books;
 using Bitmex.Client.Websocket.Responses.Wallets;
 using StackExchange.Redis;
 using Bitmex.Client.Websocket.Responses.Instruments;
+using TradeMarket.Model.TradeMarkets;
+using TradeMarket.Model.Publishers;
+using TradeMarket.Model.UserContexts;
 
-namespace TradeMarket.DataTransfering.Bitmex
+namespace TradeMarket.DataTransfering.Bitmex.Model
 {
-    public class BitmexTradeMarket : Model.TradeMarket
+    public class BitmexTradeMarket : TradeMarket.Model.TradeMarkets.TradeMarket
     {
-        private BookPublisher _book25Publisher;
-        private BookPublisher _bookPublisher;
-        private UserOrderPublisher _userOrdersPublisher;
-        private UserWalletPublisher _userWalletPublisher;
-        private AuthenticationPublisher _userAuthenticationPublisher;
-        private UserMarginPublisher _userMarginPublisher;
-        private UserPositionPublisher _userPositionPublisher;
-        private InstrumentPublisher _instrumentPublisher;
+        public BitmexTradeMarket() : base() { }
 
-
-        private IConnectionMultiplexer _multiplexer;
-
-
-        public BitmexTradeMarket(string name,IConnectionMultiplexer multiplexer)
-        {
-            _multiplexer = multiplexer;
-            Name = name;
-        }
+        public BitmexTradeMarket(string name, IPublisherFactory factory) : base(name, factory) { }
 
       
         #region SubscribeRequests
 
+
         public async override void SubscribeToInstruments(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler, UserContext context)
         {
-            if (_instrumentPublisher is null)
+            if (InstrumentPublisher is null)
             {
-                _instrumentPublisher = new InstrumentPublisher(context.WSClient, context.WSClient.Streams.InstrumentStream);
-                _instrumentPublisher.Changed += handler;
+                InstrumentPublisher = PublisherFactory.CreateInstrumentPublisher(CommonWSClient, context.SlotName);
+                InstrumentPublisher.Changed += handler;
             }
-            await _instrumentPublisher.SubcribeAsync(context.SlotName,new System.Threading.CancellationToken());
+            await InstrumentPublisher.Start();
         }
 
 
         public async override void SubscribeToUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, UserContext context)
         {
-            if (_userPositionPublisher is null)
+            if (PositionPublisher[context] is null)
             {
-                _userPositionPublisher = new UserPositionPublisher(context.WSClient, context.WSClient.Streams.PositionStream);
-                _userPositionPublisher.Changed += handler;
+                PositionPublisher[context] = PublisherFactory.CreateUserPositionPublisher(context);
+                PositionPublisher[context].Changed += handler;
             }
-            await _userPositionPublisher.SubcribeAsync(new System.Threading.CancellationToken());
+            await PositionPublisher[context].Start();
         }
 
         public async override void SubscribeToUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, UserContext context)
         {
-            if (_userMarginPublisher is null)
+            if (MarginPublisher[context] is null)
             {
-                _userMarginPublisher = new UserMarginPublisher(context.WSClient, context.WSClient.Streams.MarginStream);
-                _userMarginPublisher.Changed += handler;
+                MarginPublisher[context] = PublisherFactory.CreateUserMarginPublisher(context);
+                MarginPublisher[context].Changed += handler;
             }
-            await _userMarginPublisher.SubcribeAsync(new System.Threading.CancellationToken());
+            await MarginPublisher[context].Start();
         }
 
         public async override void SubscribeToBook25(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, UserContext context)
         {
-            if(_book25Publisher is null)
+            if(Book25Publisher is null)
             {
-                _book25Publisher = new BookPublisher(context.WSClient, context.WSClient.Streams.Book25Stream,_multiplexer);
-                _book25Publisher.Changed += handler;
+                Book25Publisher = PublisherFactory.CreateBook25Publisher(CommonWSClient, context.SlotName);
+                Book25Publisher.Changed += handler;
             }
-            await _book25Publisher.SubscribeAsync(new Book25SubscribeRequest(context.SlotName), new System.Threading.CancellationToken());
-        }
-
-        public async override void SubscribeToBook(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, UserContext context)
-        {
-            if (_bookPublisher is null)
-            {
-                _bookPublisher = new BookPublisher(context.WSClient, context.WSClient.Streams.BookStream,_multiplexer);
-                _bookPublisher.Changed += handler;
-            }
-            await _bookPublisher.SubscribeAsync(new BookSubscribeRequest(context.SlotName), new System.Threading.CancellationToken());
+            await Book25Publisher.Start();
         }
 
         public async override void SubscribeToUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, UserContext context)
         {
-            if (_userOrdersPublisher is null)
+            if (OrderPublisher[context] is null)
             {
-                _userOrdersPublisher = new UserOrderPublisher(context.WSClient, context.WSClient.Streams.OrderStream);
-                _userOrdersPublisher.Changed += handler;
+                OrderPublisher[context] = PublisherFactory.CreateUserOrderPublisher(context);
+                OrderPublisher[context].Changed += handler;
             }
-            await _userOrdersPublisher.SubcribeAsync(new System.Threading.CancellationToken());
+            await OrderPublisher[context].Start();
         }
 
         public async override void SubscribeToBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, UserContext context)
         {
-            if (_userWalletPublisher is null)
+            if (WalletPublishers[context] is null)
             {
-                _userWalletPublisher = new UserWalletPublisher(context.WSClient, context.WSClient.Streams.WalletStream);
-                _userWalletPublisher.Changed += handler;
+                WalletPublishers[context] = PublisherFactory.CreateWalletPublisher(context);
+                WalletPublishers[context].Changed += handler;
             }
-            await _userWalletPublisher.SubcribeAsync(new System.Threading.CancellationToken());
+            await WalletPublishers[context].Start();
         }
         #endregion
 
         #region RestREquests
         public async override Task<DefaultResponse> AmmendOrder(string id, double? price, long? Quantity, long? LeavesQuantity, UserContext context)
         {
-            var response = await context.RestClient.SendAsync(new AmmendOrderRequest(context.Key, context.Secret, new() {Id = id, LeavesQuantity = LeavesQuantity, Price = price, Quantity = Quantity }), new System.Threading.CancellationToken());
+            var response = await CommonRestClient.SendAsync(new AmmendOrderRequest(context.Key, context.Secret, new() {Id = id, LeavesQuantity = LeavesQuantity, Price = price, Quantity = Quantity }), new System.Threading.CancellationToken());
             if (response.Error is not null)
             {
                 return new()
@@ -162,7 +122,7 @@ namespace TradeMarket.DataTransfering.Bitmex
         }
         public async override Task<DefaultResponse> DeleteOrder(string id, UserContext context)
         {
-            var response = await context.RestClient.SendAsync(new DeleteOrderRequest(context.Key, context.Secret, id), new System.Threading.CancellationToken());
+            var response = await CommonRestClient.SendAsync(new DeleteOrderRequest(context.Key, context.Secret, id), new System.Threading.CancellationToken());
             if (response.Error is not null)
             {
                 return new()
@@ -197,7 +157,7 @@ namespace TradeMarket.DataTransfering.Bitmex
 
         public async override Task<TradeBot.TradeMarket.TradeMarketService.v1.PlaceOrderResponse> PlaceOrder(double quontity, double price, UserContext context)
         {
-            var response = await context.RestClient.SendAsync(new PlaceOrderRequest(context.Key, context.Secret, new Order
+            var response = await CommonRestClient.SendAsync(new PlaceOrderRequest(context.Key, context.Secret, new Order
             {
                 Symbol = context.SlotName,
                 OrdType = "Limit",
@@ -241,16 +201,17 @@ namespace TradeMarket.DataTransfering.Bitmex
         }
         #endregion
 
-        public async override Task<DefaultResponse> AutheticateUser(string api, string secret, UserContext context)
+        public async override Task<DefaultResponse> AutheticateUser(UserContext context)
         {
-            if (_userAuthenticationPublisher is null)
+            if (AuthenticationPublisher[context] is null)
             {
-                _userAuthenticationPublisher = new AuthenticationPublisher(context.WSClient, context.WSClient.Streams.AuthenticationStream);
+                AuthenticationPublisher[context] = PublisherFactory.CreateAuthenticationPublisher(context);
             }
+            //TODO нужно ожидать пока придет ответ от биржи
             bool answer = false;
-            _userAuthenticationPublisher.Changed += (sender, args) => { answer = args.Changed; };
+            AuthenticationPublisher[context].Changed += (sender, args) => { answer = args.Changed; };
 
-            await _userAuthenticationPublisher.SubcribeAsync(context.Key, context.Secret, new System.Threading.CancellationToken());
+            await AuthenticationPublisher[context].Start();
             return new DefaultResponse
             {
                 Code = answer ? ReplyCode.Succeed : ReplyCode.Failure,

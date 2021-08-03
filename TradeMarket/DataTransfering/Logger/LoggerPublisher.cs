@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TradeMarket.Model.Publishers;
 
 namespace TradeMarket.DataTransfering
 {
@@ -12,6 +13,11 @@ namespace TradeMarket.DataTransfering
         public event EventHandler<IPublisher<ILogger<T>>.ChangedEventArgs> Changed;
 
         public void Start()
+        {
+            throw new NotImplementedException();
+        }
+
+        Task IPublisher<ILogger<T>>.Start()
         {
             throw new NotImplementedException();
         }

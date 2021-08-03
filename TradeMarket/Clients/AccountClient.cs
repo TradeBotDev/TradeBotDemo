@@ -49,7 +49,7 @@ namespace TradeMarket.Clients
                 Code = ExchangeCode.Bitmex,
                 SessionId = sessionId
             });
-            Log.Logger.Information($"Fetching complete with result : {reply.Result}");
+            Log.Logger.Information($"Fetching completed with result : {reply.Result}");
             if(reply.Result != ActionCode.Successful)
             {
                 //Если по переданному sessionId нет данных
@@ -57,7 +57,6 @@ namespace TradeMarket.Clients
             }
             var key = reply.Exchange.Token;
             var secret = reply.Exchange.Secret;
-            Log.Logger.Information($"sessionId : {sessionId} \n key : {key}\n secret : {secret}");
             return new UserAccessInfo(key, secret);
         }
         #endregion

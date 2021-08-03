@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TradeMarket.Clients;
+using TradeMarket.Model.Publishers;
 
 namespace TradeMarket.DataTransfering.Bitmex.Publishers
 {
@@ -15,7 +16,9 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
     {
 
         private IObservable<BookResponse> _stream;
-        
+        private readonly SubscribeRequestBase _bookSubscribeRequest;
+        private readonly CancellationToken _token;
+
         private async static void _OnBookUpdated(BookResponse response, EventHandler<IPublisher<BookLevel>.ChangedEventArgs> e)
         {
             foreach (var data in response.Data)
@@ -27,11 +30,13 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         private static RedisClient _client;
 
-        public BookPublisher(BitmexWebsocketClient client,IObservable<BookResponse> stream,IConnectionMultiplexer multiplexer) 
+        public BookPublisher(BitmexWebsocketClient client,IObservable<BookResponse> stream,IConnectionMultiplexer multiplexer, SubscribeRequestBase bookSubscribeRequest, CancellationToken token) 
             : base(client, _OnBookUpdated)
         {
             _client = new RedisClient(multiplexer);
             _stream = stream;
+            this._bookSubscribeRequest = bookSubscribeRequest;
+            this._token = token;
         }
 
         public async Task SubscribeAsync(SubscribeRequestBase bookSubscribeRequest,CancellationToken token) 
@@ -39,9 +44,9 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             await base.SubscribeAsync(bookSubscribeRequest, _stream, token);
         }
 
-        public override void Start()
+        public async override Task Start()
         {
-            throw new NotImplementedException();
+            await SubscribeAsync(_bookSubscribeRequest, _token);
         }
     }
 }
