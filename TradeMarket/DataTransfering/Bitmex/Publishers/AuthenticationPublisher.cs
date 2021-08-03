@@ -23,6 +23,11 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             _stream = orderStream;
         }
 
+        public override void Start()
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task SubcribeAsync(string apiKey, string apiSecret,  CancellationToken token)
         {
             await base.SubscribeAsync(new AuthenticationRequest(apiKey,apiSecret), _stream, token);

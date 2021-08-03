@@ -35,6 +35,11 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             _stream = orderStream;
         }
 
+        public override void Start()
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task SubcribeAsync(CancellationToken token)
         {
             await base.SubscribeAsync(new OrderSubscribeRequest(), _stream, token);
