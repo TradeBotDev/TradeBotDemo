@@ -27,7 +27,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         public BitmexPublisher(BitmexWebsocketClient client,Action<TResponse, EventHandler<IPublisher<TModel>.ChangedEventArgs>> action)
         {
             _client = client;
-            _invokeActionOnNext = action;// ?? throw new ArgumentNullException(nameof(action));
+            _invokeActionOnNext = action;
         }
 
 
@@ -41,13 +41,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             _client.Send(request);
             stream.Subscribe(responseAction);
         }
-       
-        private static Task AwaitCancellation(CancellationToken token)
-        {
-            var completion = new TaskCompletionSource<object>();
-            token.Register(() => completion.SetResult(null));
-            return completion.Task;
-        }
 
+        public abstract void Start();
     }
 }

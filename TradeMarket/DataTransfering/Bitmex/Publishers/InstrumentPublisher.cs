@@ -1,6 +1,6 @@
 ﻿using Bitmex.Client.Websocket.Client;
 using Bitmex.Client.Websocket.Requests;
-using Bitmex.Client.Websocket.Responses.Wallets;
+using Bitmex.Client.Websocket.Responses.Instruments;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace TradeMarket.DataTransfering.Bitmex.Publishers
 {
-    public class UserWalletPublisher : BitmexPublisher<WalletResponse,WalletSubscribeRequest,Wallet>
+    public class InstrumentPublisher : BitmexPublisher<InstrumentResponse, InstrumentSubscribeRequest, Instrument>
     {
-        internal static readonly Action<WalletResponse, EventHandler<IPublisher<Wallet>.ChangedEventArgs>> _action = (response, e) =>
+        internal static readonly Action<InstrumentResponse, EventHandler<IPublisher<Instrument>.ChangedEventArgs>> _action = (response, e) =>
         {
             foreach (var data in response.Data)
             {
@@ -19,9 +19,9 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             }
         };
 
-        private IObservable<WalletResponse> _stream;
+        private IObservable<InstrumentResponse> _stream;
 
-        public UserWalletPublisher(BitmexWebsocketClient client,IObservable<WalletResponse> stream) : base(client,_action)
+        public InstrumentPublisher(BitmexWebsocketClient client, IObservable<InstrumentResponse> stream) : base(client, _action)
         {
             _stream = stream;
         }
@@ -33,7 +33,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         public async Task SubcribeAsync(CancellationToken token)
         {
-            await base.SubscribeAsync(new WalletSubscribeRequest(), _stream, token);
+            await base.SubscribeAsync(new InstrumentSubscribeRequest(), _stream, token);
 
         }
     }
