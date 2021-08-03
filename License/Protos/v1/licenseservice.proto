@@ -6,7 +6,8 @@ package license;
 
 service License {
 	rpc SetLicense (SetLicenseRequest) returns (SetLicenseResponse);
-	rpc LicenseCheck (LicenseCheckRequest) returns (LicenseCheckResponse);
+	rpc LicenseCheck (LicenseCheckRequest) returns (LicenseCheckResponse); // Метод для сервиса Account
+	rpc GetKey(GetKeyRequest) returns (GetKeyResponse); // Метод для сайта
 }
 
 message SetLicenseRequest {
@@ -29,6 +30,18 @@ message LicenseCheckResponse {
 	LicenseCode code = 1;
 	string message = 2;
 	bool have_access = 3;
+}
+
+message GetKeyRequest {
+	int32 account_id = 1;
+	string password = 2;
+	string verify_password = 3;
+}
+
+message GetKeyResponse {
+	LicenseCode code = 1;
+	string message = 2;
+	string key = 3;
 }
 
 enum LicenseCode {

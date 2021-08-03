@@ -45,5 +45,10 @@ namespace LicenseGRPC
         {
             return base.LicenseCheck(request, context);
         }
+
+        public override Task<GetKeyResponse> GetKey(GetKeyRequest request, ServerCallContext context)
+        {
+            return base.GetKey(request, context);
+        }
     }
 }
