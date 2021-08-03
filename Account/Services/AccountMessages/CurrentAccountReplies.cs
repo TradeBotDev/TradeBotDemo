@@ -18,6 +18,19 @@ namespace AccountGRPC.AccountMessages
             };
         }
 
+        public static AccountDataResponse TimePassed()
+        {
+            const string Message = "Ошибка при получении данных текущего аккаунта: время сессии вышло.";
+            Log.Information(Message);
+
+            return new AccountDataResponse
+            {
+                Result = AccountActionCode.TimePassed,
+                Message = Message,
+                CurrentAccount = null
+            };
+        }
+
         public static AccountDataResponse SuccessfulGettingAccountData(AccountInfo currentAccount)
         {
             const string Message = "Получение данных текущего пользователя.";

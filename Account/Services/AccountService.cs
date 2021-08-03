@@ -59,6 +59,7 @@ namespace AccountGRPC
                 var loggedAccount = new Models.LoggedAccount
                 {
                     SessionId = sessionId,
+                    LoginDate = DateTime.Now,
                     Account = accounts.First()
                 };
                 // Добавление в таблицу информации о новом входе в аккаунт.
@@ -154,7 +155,9 @@ namespace AccountGRPC
             {
                 // Проверка на наличие вошедших пользователем с тем же Id сессии, что
                 // предоставляется клиентом. Если есть - сессия валидна.
-                if (database.LoggedAccounts.Any(account => account.SessionId == request.SessionId))
+                var account = database.LoggedAccounts.Where(account => account.SessionId == request.SessionId);
+
+                if (account.Count() >= 0)
                     return Task.FromResult(IsValidSessionReplies.IsValid());
                 // Если нет - сессия невалидна.
                 else return Task.FromResult(IsValidSessionReplies.IsNotValid());
@@ -167,9 +170,16 @@ namespace AccountGRPC
             Log.Information($"CurrentAccountData получил запрос: SessionId - {request.SessionId}.");
             using (var database = new Models.AccountContext())
             {
+                var checkAccount = database.LoggedAccounts.Where(account => account.SessionId == request.SessionId);
+
                 // Производится проверка на то, является ли текущий пользователь вошедшим (по Id сессии).
-                if (!database.LoggedAccounts.Any(account => account.SessionId == request.SessionId))
+                if (checkAccount.Count() == 0)
                     return Task.FromResult(CurrentAccountReplies.AccountNotFound());
+                else if (TimePassed(checkAccount.First().LoginDate) == true)
+                {
+                    Logout(new LogoutRequest { SessionId = request.SessionId }, context);
+                    return Task.FromResult(CurrentAccountReplies.TimePassed());
+                }
 
                 // Если текущий пользователь вошедший, то сервер возвращает данные этого пользователя.
                 else
@@ -188,6 +198,13 @@ namespace AccountGRPC
                     return Task.FromResult(reply);
                 }
             }
+        }
+
+        private bool TimePassed(DateTime date)
+        {
+            if (date.AddSeconds(15) < DateTime.Now)
+                return true;
+            return false;
         }
     }
 }
