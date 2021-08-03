@@ -62,7 +62,7 @@ namespace TradeMarket.Model
 
             //инициализация подписок
             TradeMarket.SubscribeToBalance((sender, el) => {UserBalance?.Invoke(sender, el); }, this);
-            TradeMarket.SubscribeToBook((sender, el) => {Book?.Invoke(sender, el); }, this);
+            //TradeMarket.SubscribeToBook((sender, el) => {Book?.Invoke(sender, el); }, this);
             TradeMarket.SubscribeToBook25((sender, el) => Book25?.Invoke(sender, el), this);
             TradeMarket.SubscribeToUserOrders((sender, el) => UserOrders?.Invoke(sender, el), this);
             TradeMarket.SubscribeToUserMargin((sender, el) => UserMargin?.Invoke(sender, el), this);
@@ -144,31 +144,7 @@ namespace TradeMarket.Model
 
         #endregion
 
-        #region Static Part
-        internal static List<UserContext> RegisteredUsers = new List<UserContext>();
-        private static object locker = new();
-
-        public static async Task<UserContext> GetUserContextAsync(string sessionId, string slotName, string tradeMarketName)
-        {
-            UserContext userContext = null;
-            lock (locker)
-            {
-                Log.Logger.Information("Getting UserContext {@sessionId} : {@slotName} : {@tradeMarketName}", sessionId, slotName, tradeMarketName);
-                Log.Logger.Information("Stored Contexts : {@RegisteredUsers}", RegisteredUsers);
-                userContext = RegisteredUsers.FirstOrDefault(el => el.IsEquevalentTo(sessionId, slotName, tradeMarketName));
-                if (userContext is null)
-                {
-                    Log.Logger.Information("Creating new UserContext {@sessionId} : {@slotName} : {@tradeMarketName}", sessionId, slotName, tradeMarketName);
-                    userContext = new UserContext(sessionId, slotName, TradeMarket.GetTradeMarket(tradeMarketName));
-                    //контекст сначала добавляется , а затеми инициализируется для того чтобы избежать создание нескольких контекстов
-                    RegisteredUsers.Add(userContext);
-                    userContext.init();
-                }
-                return userContext;
-            }
-
-        }
-        #endregion
+        
     }
 }
 

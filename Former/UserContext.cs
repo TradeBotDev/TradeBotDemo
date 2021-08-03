@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Common.v1;
+using TradeBot.TradeMarket.TradeMarketService.v1;
 
 namespace Former
 {
@@ -48,8 +49,6 @@ namespace Former
             ObservePositions();
         }
 
-        
-
         private async void ObservePositions()
         {
             await _tradeMarketClient.ObservePositions(this);
@@ -66,9 +65,9 @@ namespace Former
         {
            await _former.UpdateOrderBooks(orderNeededUpdate, this);
         }
-        private async void UpdateMyOrderList(Order orderNeededUpdate)
+        private async void UpdateMyOrderList(Order orderNeededUpdate, ChangesType changesType)
         {
-            await _former.UpdateMyOrderList(orderNeededUpdate, this);
+            await _former.UpdateMyOrderList(orderNeededUpdate, changesType, this);
         }
         private async void UpdateBalance(int balanceToBuy, int balanceToSell)
         {

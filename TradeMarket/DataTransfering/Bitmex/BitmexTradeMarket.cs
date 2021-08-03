@@ -31,6 +31,7 @@ using AmmendOrderRequest = TradeMarket.DataTransfering.Bitmex.Rest.Requests.Amme
 using Bitmex.Client.Websocket.Responses.Positions;
 using Bitmex.Client.Websocket.Responses.Books;
 using Bitmex.Client.Websocket.Responses.Wallets;
+using StackExchange.Redis;
 
 namespace TradeMarket.DataTransfering.Bitmex
 {
@@ -44,6 +45,9 @@ namespace TradeMarket.DataTransfering.Bitmex
         private UserMarginPublisher _userMarginPublisher;
         private UserPositionPublisher _userPositionPublisher;
 
+
+        private IConnectionMultiplexer _multiplexer;
+
         public override event EventHandler<IPublisher<BookLevel>.ChangedEventArgs> Book25Update;
         public override event EventHandler<IPublisher<BookLevel>.ChangedEventArgs> BookUpdate;
         public override event EventHandler<IPublisher<Order>.ChangedEventArgs> UserOrdersUpdate;
@@ -52,29 +56,30 @@ namespace TradeMarket.DataTransfering.Bitmex
         public override event EventHandler<IPublisher<Position>.ChangedEventArgs> PositionUpdate;
 
 
-        public BitmexTradeMarket(string name)
+        public BitmexTradeMarket(string name/*,IConnectionMultiplexer multiplexer*/)
         {
+            //_multiplexer = multiplexer;
             Name = name;
         }
 
         #region EventsHandlers
         private void _userPositionPublisher_Changed(object sender, IPublisher<Position>.ChangedEventArgs e)
         {
-            Log.Information("Recieved Position {@Position}", e.Changed);
+            //Log.Information("Recieved Position {@Position}", e.Changed);
             PositionUpdate?.Invoke(this, e);
         }
 
 
         private void _userMarginPublisher_Changed(object sender, IPublisher<Margin>.ChangedEventArgs e)
         {
-            Log.Information("Recieved Margin {@Margin}", e);
+            //Log.Information("Recieved Margin {@Margin}", e);
             MarginUpdate?.Invoke(sender, e);
         }
 
 
         private void _userWalletPublisher_Changed(object sender, IPublisher<global::Bitmex.Client.Websocket.Responses.Wallets.Wallet>.ChangedEventArgs e)
         {
-            Log.Information("Recieved Balance {@Balance}", e);
+            //Log.Information("Recieved Balance {@Balance}", e);
             BalanceUpdate?.Invoke(sender, e.Changed);
         }
 
@@ -137,7 +142,7 @@ namespace TradeMarket.DataTransfering.Bitmex
         {
             if(_book25Publisher is null)
             {
-                _book25Publisher = new BookPublisher(context.WSClient, context.WSClient.Streams.Book25Stream);
+                _book25Publisher = new BookPublisher(context.WSClient, context.WSClient.Streams.Book25Stream/*,_multiplexer*/);
                 _book25Publisher.Changed += _book25Publisher_Changed;
             }
             await _book25Publisher.SubscribeAsync(new Book25SubscribeRequest(context.SlotName), new System.Threading.CancellationToken());
@@ -148,7 +153,7 @@ namespace TradeMarket.DataTransfering.Bitmex
         {
             if (_bookPublisher is null)
             {
-                _bookPublisher = new BookPublisher(context.WSClient, context.WSClient.Streams.BookStream);
+                _bookPublisher = new BookPublisher(context.WSClient, context.WSClient.Streams.BookStream/*,_multiplexer*/);
                 _bookPublisher.Changed += _bookPublisher_Changed;
             }
             await _bookPublisher.SubscribeAsync(new BookSubscribeRequest(context.SlotName), new System.Threading.CancellationToken());

@@ -17,7 +17,7 @@ namespace Former
         public delegate void OrderBookEvent(Order purchaseOrdersToUpdate);
         public OrderBookEvent UpdateOrderBook;
 
-        public delegate void MyOrdersEvent(Order myOrderToUpdate);
+        public delegate void MyOrdersEvent(Order myOrderToUpdate, ChangesType changesType);
         public MyOrdersEvent UpdateMyOrders;
 
         public delegate void BalanceEvent(int balanceToBuy, int balanceToSell);
@@ -122,13 +122,12 @@ namespace Former
             {
                 while (await call.ResponseStream.MoveNext())
                 {
-                    if (call.ResponseStream.Current.ChangesType == ChangesType.Partitial) continue;
                     if (call.ResponseStream.Current.Response.Code == ReplyCode.Failure)
                     {
                         Log.Information("order was rejected with message: {0}", call.ResponseStream.Current.Response.Message);
                         continue;
                     }
-                    UpdateMyOrders?.Invoke(call.ResponseStream.Current.Changed);
+                    UpdateMyOrders?.Invoke(call.ResponseStream.Current.Changed, call.ResponseStream.Current.ChangesType);
                 }
             };
             await ConnectionTester(observeMyOrders);

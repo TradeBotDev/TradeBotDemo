@@ -71,7 +71,7 @@ namespace Bitmex.Client.Websocket.Client
             try
             {
                 BmxValidations.ValidateInput(request, nameof(request));
-                Serilog.Log.Information("Sent request {@Request}",request);
+                //Serilog.Log.Information("Sent request {@Request}",request);
                 var serialized = request.IsRaw ? 
                     request.OperationString :
                     BitmexJsonSerializer.Serialize(request);
