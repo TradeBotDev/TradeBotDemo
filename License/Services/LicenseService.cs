@@ -1,4 +1,5 @@
 using Grpc.Core;
+using LicenseGRPC.LicenseMessages;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -14,14 +15,11 @@ namespace LicenseGRPC
         {
             using (var database = new Models.LicenseContext())
             {
-                bool licenseIsExists = database.Licenses.Any(license => license.AccountId == request.AccountId);
+                bool licenseIsExists = database.Licenses.Any(license => license.AccountId == request.AccountId &&
+                    license.Product == request.Product);
                 
                 if (licenseIsExists)
-                    return Task.FromResult(new SetLicenseResponse
-                    {
-                        Code = LicenseCode.IsExists,
-                        Message = "Произошла ошибка добавления лицензии: лицензия уже существует на данный продукт."
-                    });
+                    return Task.FromResult(SetLicenseReplies.LicenseIsExists());
 
                 var license = new Models.License
                 {
@@ -32,12 +30,7 @@ namespace LicenseGRPC
 
                 database.Licenses.Add(license);
                 database.SaveChanges();
-
-                return Task.FromResult(new SetLicenseResponse
-                {
-                    Code = LicenseCode.Successful,
-                    Message = "Успешное добавление лицензии."
-                });
+                return Task.FromResult(SetLicenseReplies.SuccessfulSettingLicense());
             }
         }
 
