@@ -3,12 +3,14 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using Grpc.Core;
+using Grpc.Net.Client;
 using Serilog;
 using Microsoft.EntityFrameworkCore;
 
 using TradeBot.Account.AccountService.v1;
 using AccountGRPC.AccountMessages;
 using AccountGRPC.Validation;
+using TradeBot.License.LicenseService.v1;
 
 namespace AccountGRPC
 {
@@ -200,6 +202,29 @@ namespace AccountGRPC
                     });
                     return Task.FromResult(reply);
                 }
+            }
+        }
+
+        public override Task<CheckLicenseResponse> CheckLicense(CheckLicenseRequest request, ServerCallContext context)
+        {
+            Log.Information($"CheckLicense получил запрос: SessionId - {request.SessionId}.");
+            using (var database = new Models.AccountContext())
+            {
+                var accounts = database.LoggedAccounts.Where(login => login.SessionId == request.SessionId);
+                if (accounts.Count() == 0)
+                    return Task.FromResult(CheckLicenseReplies.AccountNotFound());
+
+                var channel = GrpcChannel.ForAddress("http://localhost:5007");
+                var client = new License.LicenseClient(channel);
+                var reply = client.CheckLicense(new LicenseCheckRequest
+                {
+                    AccountId = accounts.First().AccountId,
+                    Product = ProductCode.Tradebot
+                });
+
+                if (reply.HaveAccess)
+                    return Task.FromResult(CheckLicenseReplies.HaveAccess());
+                else return Task.FromResult(CheckLicenseReplies.NotHaveAccess());
             }
         }
     }

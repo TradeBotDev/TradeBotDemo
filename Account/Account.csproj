@@ -6,11 +6,13 @@
 
   <ItemGroup>
     <None Remove="accounts.db-wal" />
+    <None Remove="Protos\licenseservice.proto" />
   </ItemGroup>
 
   <ItemGroup>
     <Protobuf Link="Protos/account.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/account/account_service/v1/account.proto" GrpcServices="Both" ProtoCompile="true" />
     <Protobuf Link="Protos/exchangeaccess.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/account/account_service/v1/exchangeaccess.proto" GrpcServices="Both" ProtoCompile="true" />
+    <Protobuf Include="Protos\licenseservice.proto" GrpcServices="Client" />
   </ItemGroup>
 
   <ItemGroup>
@@ -20,10 +22,6 @@
     <PackageReference Include="Serilog.Sinks.Console" Version="4.0.0" />
     <PackageReference Include="Serilog.Sinks.Seq" Version="5.0.1" />
     <PackageReference Include="System.Text.Json" Version="5.0.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Protos\" />
   </ItemGroup>
 
 </Project>

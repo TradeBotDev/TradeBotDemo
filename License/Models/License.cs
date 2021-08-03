@@ -9,8 +9,6 @@ namespace LicenseGRPC.Models
 
         public int AccountId { get; set; }
 
-        public string Key { get; set; }
-
         public ProductCode Product { get; set; }
     }
 }
