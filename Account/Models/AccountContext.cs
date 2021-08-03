@@ -22,7 +22,7 @@ namespace AccountGRPC.Models
             Database.EnsureCreated();
         }
 
-        // Указание, что будет использовать SQLite и файл accounts.db для него.
+        // Указание, что будет использовать SQLite и файл из строки подключения для него (accounts.db).
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseSqlite(connectionString);
         
         // Таблица с данными аккаунтов.

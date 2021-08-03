@@ -4,45 +4,56 @@ option csharp_namespace = "TradeBot.License.LicenseService.v1";
 
 package license;
 
+// Сервис управления лицензиями.
 service License {
-	rpc SetLicense (SetLicenseRequest) returns (SetLicenseResponse); // Метод для сайта
-	rpc LicenseCheck (LicenseCheckRequest) returns (LicenseCheckResponse); // Метод для сервиса Account
-	rpc GetKey(GetKeyRequest) returns (GetKeyResponse); // Метод для сайта
+	// Метод для сайта. Позволяет добавить лицензию в аккаунт при покупке продукта.
+	rpc SetLicense (SetLicenseRequest) returns (SetLicenseResponse);
+	// Метод для сервиса Account. Позволяет проверить, есть ли лицензия на продукт для данного аккаунта.
+	rpc LicenseCheck (LicenseCheckRequest) returns (LicenseCheckResponse);
+	// Метод для сайта. Позволяет получить ключ при работе контроллеров.
+	rpc GetKey(GetKeyRequest) returns (GetKeyResponse);
 }
 
+// Запрос на установку лицензии.
 message SetLicenseRequest {
 	int32 account_id = 1;
 	ProductCode product = 2;
 }
 
+// Ответ на запрос об установке лицензии.
 message SetLicenseResponse {
 	LicenseCode code = 1;
 	string message = 2;
 }
 
+// Запрос на проверку лицензии.
 message LicenseCheckRequest {
 	int32 account_id = 1;
 	string key = 2;
 	ProductCode product = 3;
 }
 
+// Ответ на запрос о проверке лицензии.
 message LicenseCheckResponse {
 	LicenseCode code = 1;
 	string message = 2;
 	bool have_access = 3;
 }
 
+// Запрос на получение ключа лицензии.
 message GetKeyRequest {
 	int32 account_id = 1;
 	ProductCode product = 2;
 }
 
+// Ответ на запрос о получении ключа лицензии.
 message GetKeyResponse {
 	LicenseCode code = 1;
 	string message = 2;
 	string key = 3;
 }
 
+// Коды действий с ключами.
 enum LicenseCode {
 	LICENSE_CODE_UNSPECIFIED = 0;
 	LICENSE_CODE_SUCCESSFUL = 1;
@@ -51,6 +62,7 @@ enum LicenseCode {
 	LICENSE_CODE_NO_ACCESS = 4;
 }
 
+// Коды продуктов для лицензий.
 enum ProductCode {
 	PRODUCT_CODE_UNSPECIFIED = 0;
 	PRODUCT_CODE_TRADEBOT = 1;

@@ -2,6 +2,7 @@
 
 namespace LicenseGRPC.Models
 {
+    // Описание таблицы с лицензиями пользователей.
     public class License
     {
         public int LicenseId { get; set; }

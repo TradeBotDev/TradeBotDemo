@@ -10,8 +10,10 @@ namespace LicenseGRPC
 {
     public class Startup
     {
+        // Конструктор перед запуском получает всю информацию о состоянии входов в аккаунт из файла.
         public Startup()
         {
+            // Добавление нового логгера, который будет выводить всю информацию в консоль.
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
