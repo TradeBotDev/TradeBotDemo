@@ -17,7 +17,7 @@ namespace Former
         public override Task<SendPurchasePriceResponse> SendPurchasePrice(SendPurchasePriceRequest request, ServerCallContext context)
         {
             //в зависимости от числа, присланного алгоритмом производится формирование цены на покупку или на продажу с учётом контекста пользователя
-            if ((int)request.PurchasePrice == 1) Clients.GetUserContext(context.RequestHeaders.GetValue("sessionid"), context.RequestHeaders.GetValue("trademarket"), context.RequestHeaders.GetValue("slot")).FormPurchaseOrder();
+            if ((int)request.PurchasePrice == 1) Clients.GetUserContext(context.RequestHeaders.GetValue("sessionid"), context.RequestHeaders.GetValue("trademarket"), context.RequestHeaders.GetValue("slot")).FormBuyOrder();
             else Clients.GetUserContext(context.RequestHeaders.GetValue("sessionid"), context.RequestHeaders.GetValue("trademarket"), context.RequestHeaders.GetValue("slot")).FormSellOrder();
             return Task.FromResult(new SendPurchasePriceResponse());
         }

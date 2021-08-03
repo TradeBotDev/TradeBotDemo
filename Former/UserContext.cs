@@ -36,32 +36,43 @@ namespace Former
             _former = new Former(25);
             //Конфиг передается как параметр для любого метода
 
-            _tradeMarketClient.UpdateOrderBook += UpdateOrderBooks;
+            //_tradeMarketClient.UpdateOrderBook += UpdateOrderBooks;
             _tradeMarketClient.UpdateBalance += UpdateBalance;
             _tradeMarketClient.UpdateMyOrders += UpdateMyOrderList;
             _tradeMarketClient.UpdatePosition += UpdatePosition;
+            _tradeMarketClient.UpdateFairPrices += UpdateFairPrices;
 
-            ObserveOrderBook();
+            ObserveFairPrices();
+            //ObserveOrderBook();
             ObserveBalance();
             ObserveMyOrders();
             ObservePositions();
         }
 
+        private async void UpdateFairPrices(double bid, double ask, double fairPrice, ChangesType changesType)
+        {
+            await _former.UpdateFairPrices(bid, ask, fairPrice, changesType, this);
+            
+        }
         private async void ObservePositions()
         {
             await _tradeMarketClient.ObservePositions(this);
         }
-        public async void FormPurchaseOrder()
+        public async Task ObserveFairPrices()
         {
-            await _former.FormPurchaseOrder(this);
+            await _tradeMarketClient.ObserveFairPrices(this);
+        }
+        public async void FormBuyOrder()
+        {
+            await _former.FormBuyOrder(this);
         }
         public async void FormSellOrder()
         {
             await _former.FormSellOrder(this);
         }
-        private async void UpdateOrderBooks(Order orderNeededUpdate) 
+        private async void UpdateOrderBooks(Order orderNeededUpdate, ChangesType changesType) 
         {
-           await _former.UpdateOrderBooks(orderNeededUpdate, this);
+           await _former.UpdateOrderBooks(orderNeededUpdate, changesType, this);
         }
         private async void UpdateMyOrderList(Order orderNeededUpdate, ChangesType changesType)
         {

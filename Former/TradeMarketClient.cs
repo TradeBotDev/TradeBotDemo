@@ -14,10 +14,10 @@ namespace Former
 {
     public class TradeMarketClient
     {
-        public delegate void OrderBookEvent(Order purchaseOrdersToUpdate);
+        public delegate void OrderBookEvent(Order newComingOrder , ChangesType changesType);
         public OrderBookEvent UpdateOrderBook;
 
-        public delegate void MyOrdersEvent(Order myOrderToUpdate, ChangesType changesType);
+        public delegate void MyOrdersEvent(Order newComingOrder, ChangesType changesType);
         public MyOrdersEvent UpdateMyOrders;
 
         public delegate void BalanceEvent(int balanceToBuy, int balanceToSell);
@@ -25,6 +25,9 @@ namespace Former
 
         public delegate void PositionUpdate(double currentQuantity);
         public PositionUpdate UpdatePosition;
+
+        public delegate void FairPricesUpdate(double bid, double ask, double fairPrice, ChangesType changesType);
+        public FairPricesUpdate UpdateFairPrices;
 
         private static int _retryDelay;
         private static string _connectionString;
@@ -85,11 +88,25 @@ namespace Former
             {
                 while (await call.ResponseStream.MoveNext())
                 {
-                    UpdateOrderBook?.Invoke(call.ResponseStream.Current.Response.Order);
+                    UpdateOrderBook?.Invoke(call.ResponseStream.Current.Response.Order, call.ResponseStream.Current.ChangedType);
                 }
             }
 
             await ConnectionTester(ObserveOrdersFunc);
+        }
+        public async Task ObserveFairPrices(UserContext context)
+        {
+            using var call = _client.SubscribeOrders(new , context.Meta);
+
+            async Task ObserveFairPricesFunc()
+            {
+                while (await call.ResponseStream.MoveNext())
+                {
+                    UpdateFairPrices?.Invoke(call.ResponseStream.Current.Response.Order, call.ResponseStream.Current.ChangedType);
+                }
+            }
+
+            await ConnectionTester(ObserveFairPricesFunc);
         }
 
         /// <summary>
