@@ -67,7 +67,7 @@ namespace TradeMarket.DataTransfering.Bitmex
                 _instrumentPublisher = new InstrumentPublisher(context.WSClient, context.WSClient.Streams.InstrumentStream);
                 _instrumentPublisher.Changed += handler;
             }
-            await _instrumentPublisher.SubcribeAsync(new System.Threading.CancellationToken());
+            await _instrumentPublisher.SubcribeAsync(context.SlotName,new System.Threading.CancellationToken());
         }
 
 
