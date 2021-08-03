@@ -53,7 +53,19 @@ namespace LicenseGRPC
 
         public override Task<GetKeyResponse> GetKey(GetKeyRequest request, ServerCallContext context)
         {
-            return base.GetKey(request, context);
+            using (var database = new Models.LicenseContext())
+            {
+                var license = database.Licenses.Where(license =>
+                    license.AccountId == request.AccountId &&
+                    license.Product == request.Product);
+
+                if (license.Count() > 0)
+                {
+                    string key = license.First().Key;
+                    return Task.FromResult(GetKeyReplies.LicenseIsExists(key));
+                }
+                else return Task.FromResult(GetKeyReplies.LicenseIsNotExists());
+            }
         }
     }
 }
