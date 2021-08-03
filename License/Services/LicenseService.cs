@@ -1,11 +1,11 @@
-using Grpc.Core;
-using LicenseGRPC.LicenseMessages;
-using Microsoft.Extensions.Logging;
-using Serilog;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
+using Grpc.Core;
+using Serilog;
+
+using LicenseGRPC.LicenseMessages;
 using TradeBot.License.LicenseService.v1;
 
 namespace LicenseGRPC
