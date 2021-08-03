@@ -154,10 +154,10 @@ namespace AccountGRPC
             using (var database = new Models.AccountContext())
             {
                 // Проверка на наличие вошедших пользователем с тем же Id сессии, что
-                // предоставляется клиентом. Если есть - сессия валидна.
+                // предоставляется клиентом. Если есть и время сессии не вышло - сессия валидна.
                 var account = database.LoggedAccounts.Where(account => account.SessionId == request.SessionId);
 
-                if (account.Count() >= 0)
+                if (account.Count() >= 0 && !LoggedAccountsManagement.TimePassed(request.SessionId))
                     return Task.FromResult(IsValidSessionReplies.IsValid());
                 // Если нет - сессия невалидна.
                 else return Task.FromResult(IsValidSessionReplies.IsNotValid());
