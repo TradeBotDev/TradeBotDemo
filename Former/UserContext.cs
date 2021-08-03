@@ -49,23 +49,6 @@ namespace Former
         private async void UpdateMarketPrices(double bid, double ask)
         {
             await _former.UpdateMarketPrices(bid, ask, this);
-            
-        }
-        private async void ObservePositions()
-        {
-            await _tradeMarketClient.ObservePositions(this);
-        }
-        public async void ObserveMarketPrices()
-        {
-            await _tradeMarketClient.ObserveMarketPrices(this);
-        }
-        public async void FormBuyOrder()
-        {
-            await _former.FormBuyOrder(this);
-        }
-        public async void FormSellOrder()
-        {
-            await _former.FormSellOrder(this);
         }
         private async void UpdateMyOrderList(Order orderNeededUpdate, ChangesType changesType)
         {
@@ -78,6 +61,10 @@ namespace Former
         private async void UpdatePosition(double currentQuantity)
         {
             await _former.UpdatePosition(currentQuantity);
+        }
+        public async void FormOrder(int decision )
+        {
+            await _former.FormOrder(decision ,this);
         }
         public async Task<PlaceOrderResponse> PlaceOrder(double sellPrice, double contractValue)
         {
@@ -94,6 +81,14 @@ namespace Former
         private async void ObserveMyOrders()
         {
             await _tradeMarketClient.ObserveMyOrders(this);
+        }
+        private async void ObservePositions()
+        {
+            await _tradeMarketClient.ObservePositions(this);
+        }
+        private async void ObserveMarketPrices()
+        {
+            await _tradeMarketClient.ObserveMarketPrices(this);
         }
     }
 }
