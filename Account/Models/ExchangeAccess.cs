@@ -12,10 +12,6 @@ namespace AccountGRPC.Models
         public string Name { get; set; }
         
         public string Token { get; set; }
-
-        public string RefreshToken { get; set; }
-
-        public string LogoutToken { get; set; }
         
         public string Secret { get; set; }
 

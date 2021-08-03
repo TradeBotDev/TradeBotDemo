@@ -25,8 +25,6 @@ namespace AccountTests.ExchangeAccessServiceTests
                     Code = ExchangeAccessCode.Bitmex,
                     ExchangeName = "Bitmex",
                     Token = "test_token",
-                    RefreshToken = "test_refresh_token",
-                    LogoutToken = "test_logout_token",
                     Secret = "test_secret"
                 };
             }

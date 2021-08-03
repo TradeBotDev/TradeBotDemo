@@ -21,8 +21,6 @@ namespace AccountGRPC
                 $"Code - {request.Code}, " +
                 $"ExchangeName - {request.ExchangeName}, " +
                 $"Token - {request.Token}, " +
-                $"RefreshToken - {request.RefreshToken} " +
-                $"LogoutToken - {request.LogoutToken} " +
                 $"Secret - {request.Secret}.");
 
             using (var database = new Models.AccountContext())
@@ -63,8 +61,6 @@ namespace AccountGRPC
                     Code = request.Code,
                     Name = request.ExchangeName,
                     Token = request.Token,
-                    RefreshToken = request.RefreshToken,
-                    LogoutToken = request.LogoutToken,
                     Secret = request.Secret,
                     Account = loginInfo.Account
                 });

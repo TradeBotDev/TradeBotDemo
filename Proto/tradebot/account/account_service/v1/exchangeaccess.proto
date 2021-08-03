@@ -23,9 +23,7 @@ message AddExchangeAccessRequest {
 	account.ExchangeAccessCode code = 2;
 	string exchange_name = 3;
 	string token = 4;
-	string refresh_token = 5;
-	string logout_token = 6;
-	string secret = 7;
+	string secret = 5;
 }
 
 // Ответ на добавление биржи для текущего пользователя.
