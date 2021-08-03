@@ -58,7 +58,7 @@ namespace Former
         {
             await _tradeMarketClient.ObservePositions(this);
         }
-        public async Task ObserveFairPrices()
+        public async void ObserveFairPrices()
         {
             await _tradeMarketClient.ObserveFairPrices(this);
         }

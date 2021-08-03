@@ -96,13 +96,13 @@ namespace Former
         }
         public async Task ObserveFairPrices(UserContext context)
         {
-            using var call = _client.SubscribeOrders(new , context.Meta);
+            using var call = _client.SubscribePrice(new SubscribePriceRequest(), context.Meta);
 
             async Task ObserveFairPricesFunc()
             {
                 while (await call.ResponseStream.MoveNext())
                 {
-                    UpdateFairPrices?.Invoke(call.ResponseStream.Current.Response.Order, call.ResponseStream.Current.ChangedType);
+                    UpdateFairPrices?.Invoke(call.ResponseStream.Current.BidPrice,call.ResponseStream.Current.AskPrice, call.ResponseStream.Current.FairPrice, call.ResponseStream.Current.ChangedType);
                 }
             }
 
