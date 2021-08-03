@@ -14,10 +14,7 @@ namespace Former
 {
     public class TradeMarketClient
     {
-        public delegate void OrderBookEvent(Order purchaseOrdersToUpdate);
-        public OrderBookEvent UpdateOrderBook;
-
-        public delegate void MyOrdersEvent(Order myOrderToUpdate, ChangesType changesType);
+        public delegate void MyOrdersEvent(Order newComingOrder, ChangesType changesType);
         public MyOrdersEvent UpdateMyOrders;
 
         public delegate void BalanceEvent(int balanceToBuy, int balanceToSell);
@@ -25,6 +22,9 @@ namespace Former
 
         public delegate void PositionUpdate(double currentQuantity);
         public PositionUpdate UpdatePosition;
+
+        public delegate void MarketPricesUpdate(double bid, double ask);
+        public MarketPricesUpdate UpdateMarketPrices;
 
         private static int _retryDelay;
         private static string _connectionString;
@@ -62,34 +62,19 @@ namespace Former
             }
         }
 
-        /// <summary>
-        /// Наблюдает за обновлением текущих стаканов цен
-        /// </summary>
-        public async Task ObserveOrderBook(UserContext context)
+        public async Task ObserveMarketPrices(UserContext context)
         {
-            var request = new SubscribeOrdersRequest
-            {
-                Request = new TradeBot.Common.v1.SubscribeOrdersRequest
-                {
-                    Signature = new OrderSignature
-                    {
-                        Status = OrderStatus.Open,
-                        Type = OrderType.Unspecified
-                    }
-                }
-            };
+            using var call = _client.SubscribePrice(new SubscribePriceRequest(), context.Meta);
 
-            using var call = _client.SubscribeOrders(request, context.Meta);
-
-            async Task ObserveOrdersFunc()
+            async Task ObserveMarketPricesFunc()
             {
                 while (await call.ResponseStream.MoveNext())
                 {
-                    UpdateOrderBook?.Invoke(call.ResponseStream.Current.Response.Order);
+                    UpdateMarketPrices?.Invoke(call.ResponseStream.Current.BidPrice,call.ResponseStream.Current.AskPrice);
                 }
             }
 
-            await ConnectionTester(ObserveOrdersFunc);
+            await ConnectionTester(ObserveMarketPricesFunc);
         }
 
         /// <summary>

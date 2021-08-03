@@ -33,35 +33,22 @@ namespace Former
             TradeMarketClient.Configure("https://localhost:5005", 10000);
 
             _tradeMarketClient = new TradeMarketClient();
-            _former = new Former(25);
-            //Конфиг передается как параметр для любого метода
+            _former = new Former();
 
-            _tradeMarketClient.UpdateOrderBook += UpdateOrderBooks;
             _tradeMarketClient.UpdateBalance += UpdateBalance;
             _tradeMarketClient.UpdateMyOrders += UpdateMyOrderList;
             _tradeMarketClient.UpdatePosition += UpdatePosition;
+            _tradeMarketClient.UpdateMarketPrices += UpdateMarketPrices;
 
-            ObserveOrderBook();
+            ObserveMarketPrices();
             ObserveBalance();
             ObserveMyOrders();
             ObservePositions();
         }
 
-        private async void ObservePositions()
+        private async void UpdateMarketPrices(double bid, double ask)
         {
-            await _tradeMarketClient.ObservePositions(this);
-        }
-        public async void FormPurchaseOrder()
-        {
-            await _former.FormPurchaseOrder(this);
-        }
-        public async void FormSellOrder()
-        {
-            await _former.FormSellOrder(this);
-        }
-        private async void UpdateOrderBooks(Order orderNeededUpdate) 
-        {
-           await _former.UpdateOrderBooks(orderNeededUpdate, this);
+            await _former.UpdateMarketPrices(bid, ask, this);
         }
         private async void UpdateMyOrderList(Order orderNeededUpdate, ChangesType changesType)
         {
@@ -75,6 +62,10 @@ namespace Former
         {
             await _former.UpdatePosition(currentQuantity);
         }
+        public async void FormOrder(int decision )
+        {
+            await _former.FormOrder(decision ,this);
+        }
         public async Task<PlaceOrderResponse> PlaceOrder(double sellPrice, double contractValue)
         {
             return await _tradeMarketClient.PlaceOrder(sellPrice, contractValue, this);
@@ -83,10 +74,6 @@ namespace Former
         {
             return await _tradeMarketClient.AmendOrder(id, newPrice, this);
         }
-        private async void ObserveOrderBook()
-        {
-            await _tradeMarketClient.ObserveOrderBook(this);
-        }
         private async void ObserveBalance()
         {
             await _tradeMarketClient.ObserveBalance(this);
@@ -94,6 +81,14 @@ namespace Former
         private async void ObserveMyOrders()
         {
             await _tradeMarketClient.ObserveMyOrders(this);
+        }
+        private async void ObservePositions()
+        {
+            await _tradeMarketClient.ObservePositions(this);
+        }
+        private async void ObserveMarketPrices()
+        {
+            await _tradeMarketClient.ObserveMarketPrices(this);
         }
     }
 }
