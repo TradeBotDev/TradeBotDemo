@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+option csharp_namespace = "TradeBot.License.LicenseService.v1";
+
+package license;
+
+service License {
+	rpc SetLicense (SetLicenseRequest) returns (SetLicenseResponse);
+	rpc LicenseCheck (LicenseCheckRequest) returns (LicenseCheckResponse);
+}
+
+message SetLicenseRequest {
+	int32 account_id = 1;
+	ProductCode product = 2;
+}
+
+message SetLicenseResponse {
+	LicenseCode code = 1;
+	string message = 2;
+}
+
+message LicenseCheckRequest {
+	int32 account_id = 1;
+	string key = 2;
+	ProductCode product = 3;
+}
+
+message LicenseCheckResponse {
+	LicenseCode code = 1;
+	string message = 2;
+	bool have_access = 3;
+}
+
+enum LicenseCode {
+	LICENSE_CODE_UNSPECIFIED = 0;
+	LICENSE_CODE_SUCCESSFUL = 1;
+	LICENSE_CODE_IS_EXISTS = 2;
+	LICENSE_CODE_HAVE_ACCESS = 3;
+	LICENSE_CODE_NO_ACCESS = 4;
+}
+
+enum ProductCode {
+	PRODUCT_CODE_UNSPECIFIED = 0;
+	PRODUCT_CODE_TRADEBOT = 1;
+}
