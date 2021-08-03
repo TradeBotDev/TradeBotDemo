@@ -14,9 +14,6 @@ namespace Former
 {
     public class TradeMarketClient
     {
-        public delegate void OrderBookEvent(Order newComingOrder , ChangesType changesType);
-        public OrderBookEvent UpdateOrderBook;
-
         public delegate void MyOrdersEvent(Order newComingOrder, ChangesType changesType);
         public MyOrdersEvent UpdateMyOrders;
 
@@ -26,8 +23,8 @@ namespace Former
         public delegate void PositionUpdate(double currentQuantity);
         public PositionUpdate UpdatePosition;
 
-        public delegate void FairPricesUpdate(double bid, double ask, double fairPrice, ChangesType changesType);
-        public FairPricesUpdate UpdateFairPrices;
+        public delegate void MarketPricesUpdate(double bid, double ask);
+        public MarketPricesUpdate UpdateMarketPrices;
 
         private static int _retryDelay;
         private static string _connectionString;
@@ -65,48 +62,19 @@ namespace Former
             }
         }
 
-        /// <summary>
-        /// Наблюдает за обновлением текущих стаканов цен
-        /// </summary>
-        public async Task ObserveOrderBook(UserContext context)
-        {
-            var request = new SubscribeOrdersRequest
-            {
-                Request = new TradeBot.Common.v1.SubscribeOrdersRequest
-                {
-                    Signature = new OrderSignature
-                    {
-                        Status = OrderStatus.Open,
-                        Type = OrderType.Unspecified
-                    }
-                }
-            };
-
-            using var call = _client.SubscribeOrders(request, context.Meta);
-
-            async Task ObserveOrdersFunc()
-            {
-                while (await call.ResponseStream.MoveNext())
-                {
-                    UpdateOrderBook?.Invoke(call.ResponseStream.Current.Response.Order, call.ResponseStream.Current.ChangedType);
-                }
-            }
-
-            await ConnectionTester(ObserveOrdersFunc);
-        }
-        public async Task ObserveFairPrices(UserContext context)
+        public async Task ObserveMarketPrices(UserContext context)
         {
             using var call = _client.SubscribePrice(new SubscribePriceRequest(), context.Meta);
 
-            async Task ObserveFairPricesFunc()
+            async Task ObserveMarketPricesFunc()
             {
                 while (await call.ResponseStream.MoveNext())
                 {
-                    UpdateFairPrices?.Invoke(call.ResponseStream.Current.BidPrice,call.ResponseStream.Current.AskPrice, call.ResponseStream.Current.FairPrice, call.ResponseStream.Current.ChangedType);
+                    UpdateMarketPrices?.Invoke(call.ResponseStream.Current.BidPrice,call.ResponseStream.Current.AskPrice);
                 }
             }
 
-            await ConnectionTester(ObserveFairPricesFunc);
+            await ConnectionTester(ObserveMarketPricesFunc);
         }
 
         /// <summary>

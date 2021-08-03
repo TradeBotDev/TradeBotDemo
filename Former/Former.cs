@@ -11,23 +11,15 @@ namespace Former
 {
     public class Former
     {
-        private readonly ConcurrentDictionary<string, Order> _buyOrderBook;
-
-        private readonly ConcurrentDictionary<string, Order> _sellOrderBook;
-
         private readonly ConcurrentDictionary<string, Order> _myOrders;
 
         private readonly ConcurrentDictionary<string, Order> _counterOrders;
 
-        private double _totalBalance;
+        private int _totalBalance;
 
-        private double _availableBalance;
-
-        private int _positionSizeInActiveOrders;
+        private int _availableBalance;
 
         private int _positionSize;
-
-        private readonly int _bookSize;
 
         private bool _placeLocker;
 
@@ -37,13 +29,14 @@ namespace Former
 
         private double _buyFairPrice;
 
-        public Former(int bookSize)
+        private double _savedSellFairPrice;
+
+        private double _savedBuyFairPrice;
+
+        public Former()
         {
-            _sellOrderBook = new ConcurrentDictionary<string, Order>();
-            _buyOrderBook = new ConcurrentDictionary<string, Order>();
             _myOrders = new ConcurrentDictionary<string, Order>();
             _counterOrders = new ConcurrentDictionary<string, Order>();
-            _bookSize = bookSize;
         }
 
         #region Update order book and fit prices
@@ -53,77 +46,38 @@ namespace Former
         private async Task CheckAndFitPrices(UserContext context)
         {
             //если рыночная цена изменилась, то необходимо проверить, не устарели ли цени в наших ордерах
-            //if (Math.Abs(_sellFairPrice - _savedSellFairPrice) > 0.4 || Math.Abs(_savedBuyFairPrice - _buyFairPrice) > 0.4)
-            //{
-            //    _savedSellFairPrice = _sellFairPrice;
-            //    _savedBuyFairPrice = _buyFairPrice;
+            if (Math.Abs(_sellFairPrice - _savedSellFairPrice) > 0.4 || Math.Abs(_savedBuyFairPrice - _buyFairPrice) > 0.4)
+            {
+                _savedSellFairPrice = _sellFairPrice;
+                _savedBuyFairPrice = _buyFairPrice;
                 if (!_fitPricesLocker && _myOrders.Count > 0) await FitPrices(context);
-            //}
+            }
         }
+
 
         /// <summary>
         /// Обновляет рыночные цены на продажу и на покупку
         /// </summary>
-        //private async Task UpdateFairPrices(UserContext context)
-        //{
-        //    if (_buyOrderBook.Count < _bookSize || _sellOrderBook.Count < _bookSize) return;
-        //    //вычиляем рыночные цены на покупку и на продажу и выполняем проверку на актуальность наших ордеров
-        //    _sellFairPrice = _sellOrderBook.Min(x => x.Value.Price);
-        //    _buyFairPrice = _buyOrderBook.Max(x => x.Value.Price);
-        //    Log.Information("sell fair price: {0}, buy fair price: {1}", _sellFairPrice, _buyFairPrice);
-        //    await CheckAndFitPrices(context);
-        //}
-        internal async Task UpdateFairPrices(double bid, double ask, double fairPrice, ChangesType changesType, UserContext context)
+        internal async Task UpdateMarketPrices(double bid, double ask, UserContext context)
         {
-            _buyFairPrice = bid;
-            _sellFairPrice = ask;
-            Log.Information("sell fair price: {0}, buy fair price: {1}, fair price: {2}", _sellFairPrice, _buyFairPrice, fairPrice);
-            await CheckAndFitPrices(context);
-        }
-
-        /// <summary>
-        /// Обновляет конкретную книгу ордеров
-        /// </summary>
-        private async Task UpdateConcreteBook(ConcurrentDictionary<string, Order> bookNeededUpdate, Order newComingOrder, ChangesType changesType)
-        {
-            var updateConcreteBookTask = Task.Run(() =>
+            if (bid > 0)
             {
-                //если ордер имеет статус открытый, то он добавляется, либо апдейтится, если закрытый, то удаляется из книги
-                if (changesType == ChangesType.Partitial || changesType == ChangesType.Insert || changesType == ChangesType.Update)
-                {
-                    newComingOrder.LastUpdateDate = DateTimeOffset.Now.ToTimestamp();
-                    bookNeededUpdate.AddOrUpdate(newComingOrder.Id, newComingOrder, (_, v) =>
-                    {
-                        //у ордера на обновление не нулевой будет величина, которая изменилась
-                        if (newComingOrder.Price != 0) v.Price = newComingOrder.Price;
-                        if (newComingOrder.Quantity != 0) v.Quantity = newComingOrder.Quantity;
-                        v.Signature = newComingOrder.Signature;
-                        v.LastUpdateDate = DateTimeOffset.Now.ToTimestamp();
-                        v.Signature = newComingOrder.Signature;
-                        return v;
-                    });
-                }
-                if (changesType == ChangesType.Delete) bookNeededUpdate.TryRemove(newComingOrder.Id, out _);
-                   
-            });
-            await updateConcreteBookTask;
-        }
+                _buyFairPrice = bid;
+                Log.Information("Buy market price: {0}, Sell market price: {1}", _buyFairPrice, _sellFairPrice);
+            }
+            if (ask > 0)
+            {
+                _sellFairPrice = ask;
+               Log.Information("Buy market price: {0}, Sell market price: {1}", _buyFairPrice, _sellFairPrice);
+            }
 
-        /// <summary>
-        /// Обновляет одну из книг ордеров с вновь пришедшим ордером, в зависимости от того, какого типа ордер необходимо внести в книгу
-        /// </summary>
-        /// 
-        public async Task UpdateOrderBooks(Order newComingOrder, ChangesType changesType, UserContext context)
-        {
-            if (CheckContext(context)) return;
-            await UpdateConcreteBook(newComingOrder.Signature.Type == OrderType.Buy ? _buyOrderBook : _sellOrderBook, newComingOrder, changesType);
-            //await UpdateFairPrices(context);
+            await CheckAndFitPrices(context);
         }
 
         /// <summary>
         /// обновляет ордер в мапе _myOrders 
         /// </summary>
-        public void UpdateOrderPrice(Order order, double price)
+        private void UpdateOrderPrice(Order order, double price)
         {
             _myOrders.AddOrUpdate(order.Id, order, (_, v) =>
             {
@@ -135,10 +89,11 @@ namespace Former
             });
         }
 
-        public double GetFairPrice(OrderType type)
+        private double GetFairPrice(OrderType type)
         {
             return type == OrderType.Sell ? _sellFairPrice : _buyFairPrice;
         }
+
         /// <summary>
         /// Подгоняет мои ордера под рыночную цену
         /// </summary>
@@ -183,6 +138,7 @@ namespace Former
                     if (newComingOrder.Quantity != 0) v.Quantity = newComingOrder.Quantity;
                     v.LastUpdateDate = newComingOrder.LastUpdateDate;
                     v.Signature = newComingOrder.Signature;
+                    v.LastUpdateDate = newComingOrder.LastUpdateDate;
                     return v;
                 });
         }
@@ -217,64 +173,42 @@ namespace Former
             //по той же причине, что и выше, ордера, которые уже были на бирже не инициализируются снова, а лишь идут в расчёт текущей позиции на бирже
             if (changesType == ChangesType.Partitial)
             {
-                _counterOrders.TryAdd(newComingOrder.Id,newComingOrder);
+                _counterOrders.TryAdd(newComingOrder.Id, newComingOrder);
                 return;
             }
             if (CheckContext(context)) return;
 
-            //данная переменная действует, как семафор. Она предотвращает одновременное выставление контр ордера и выставление ордера по просьбе алгоритма, так как из за высвобождения 
-            //средств оба эти действия имеют место.
-            _placeLocker = true;
-            _fitPricesLocker = true;
+            
 
             var id = newComingOrder.Id;
 
             //выходим из метода, если не получилось получить ордер по входящему идентификатору
             if (_myOrders.TryGetValue(id, out var myOldOrder))
             {
+                //данная переменная действует, как семафор. Она предотвращает одновременное выставление контр ордера и выставление ордера по просьбе алгоритма, так как из за высвобождения 
+                //средств оба эти действия имеют место.
+                _placeLocker = true;
+                _fitPricesLocker = true;
                 //рассчитываем цены продажи/покупку для контр ордеров
                 var sellPrice = myOldOrder.Price + myOldOrder.Price * context.Configuration.RequiredProfit;
                 var buyPrice = myOldOrder.Price - myOldOrder.Price * context.Configuration.RequiredProfit;
 
-                //если входящий ордер имеет пометку "удалить" необходимо выставить контр-ордер в полном объёме, и в случае, если это удастся, удалить его из списка моих ордеров
-                if (changesType == ChangesType.Delete)
+                switch (changesType)
                 {
-                    var placeResponse = await PlaceFullCounterOrder(myOldOrder.Signature.Type == OrderType.Buy ? sellPrice : buyPrice, myOldOrder.Quantity, context);
-                    var removeResponse = false;
-                    if (placeResponse.Response.Code == ReplyCode.Succeed)
+                    //если входящий ордер имеет пометку "удалить" необходимо выставить контр-ордер в полном объёме, и в случае, если это удастся, удалить его из списка моих ордеров
+                    case ChangesType.Delete:
                     {
-                        removeResponse = RemoveFromMyOrders(id);
-
-                        _counterOrders.TryAdd(placeResponse.OrderId, new Order
-                        {
-                            Id = placeResponse.OrderId,
-                            Price = myOldOrder.Signature.Type == OrderType.Buy ? sellPrice : buyPrice,
-                            Quantity = -myOldOrder.Quantity,
-                            Signature = new OrderSignature
-                            {
-                                Status = OrderStatus.Open,
-                                Type = myOldOrder.Signature.Type == OrderType.Buy ? OrderType.Sell : OrderType.Buy,
-                            },
-                            LastUpdateDate = new Google.Protobuf.WellKnownTypes.Timestamp()
-                        });
-                    }
-                    Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3} removed {4}", myOldOrder.Id, myOldOrder.Price, myOldOrder.Quantity, myOldOrder.Signature.Type, removeResponse ? ReplyCode.Succeed : ReplyCode.Failure);
-                    Log.Information("Counter order {0} price: {1}, quantity: {2} placed {3} {4}", myOldOrder.Id, myOldOrder.Signature.Type == OrderType.Buy ? sellPrice : buyPrice, -myOldOrder.Quantity, placeResponse.Response.Code, placeResponse.Response.Code == ReplyCode.Succeed ? "" : placeResponse.Response.Message);
-                }
-                //если входящий ордер имеет пометку "обновить" необходимо обновить цену или объём в совпадающем по ид ордере, и в случае обновления объёма выставить контр-ордер с частичным объёмом
-                if (changesType == ChangesType.Update)
-                {
-                    if (newComingOrder.Quantity != 0)
-                    {
-                        var placeResponse = await PlacePartialCounterOrder(myOldOrder.Signature.Type == OrderType.Buy ? buyPrice : sellPrice, newComingOrder.Quantity, myOldOrder.Quantity, context);
+                        var placeResponse = await PlaceFullCounterOrder(myOldOrder.Signature.Type == OrderType.Buy ? sellPrice : buyPrice, myOldOrder.Quantity, context);
+                        var removeResponse = false;
                         if (placeResponse.Response.Code == ReplyCode.Succeed)
                         {
-                            UpdateMyOrder(newComingOrder);
+                            removeResponse = RemoveFromMyOrders(id);
+
                             _counterOrders.TryAdd(placeResponse.OrderId, new Order
                             {
                                 Id = placeResponse.OrderId,
                                 Price = myOldOrder.Signature.Type == OrderType.Buy ? sellPrice : buyPrice,
-                                Quantity = -(myOldOrder.Quantity - newComingOrder.Quantity),
+                                Quantity = -myOldOrder.Quantity,
                                 Signature = new OrderSignature
                                 {
                                     Status = OrderStatus.Open,
@@ -283,32 +217,60 @@ namespace Former
                                 LastUpdateDate = new Timestamp()
                             });
                         }
-                        Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3} updated", myOldOrder.Id, myOldOrder.Price, myOldOrder.Quantity, myOldOrder.Signature.Type);
-                        Log.Information("Counter order {0} price: {1}, quantity: {2} placed {3} {4}", myOldOrder.Id, myOldOrder.Signature.Type == OrderType.Buy ? sellPrice : buyPrice, -(myOldOrder.Quantity - newComingOrder.Quantity), placeResponse.Response.Code, placeResponse.Response.Code == ReplyCode.Succeed ? "" : placeResponse.Response.Message);
+                        Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3} removed {4}", myOldOrder.Id, myOldOrder.Price, myOldOrder.Quantity, myOldOrder.Signature.Type, removeResponse ? ReplyCode.Succeed : ReplyCode.Failure);
+                        Log.Information("Counter order {0} price: {1}, quantity: {2} placed {3} {4}", myOldOrder.Id, myOldOrder.Signature.Type == OrderType.Buy ? sellPrice : buyPrice, -myOldOrder.Quantity, placeResponse.Response.Code, placeResponse.Response.Code == ReplyCode.Succeed ? "" : placeResponse.Response.Message);
+                        break;
                     }
-                    if (newComingOrder.Price != 0)
+                    //если входящий ордер имеет пометку "обновить" необходимо обновить цену или объём в совпадающем по ид ордере, и в случае обновления объёма выставить контр-ордер с частичным объёмом
+                    case ChangesType.Update:
                     {
-                        UpdateMyOrder(newComingOrder);
-                        Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3} updated", id, newComingOrder.Price, -myOldOrder.Quantity, myOldOrder.Signature.Type);
+                        if (newComingOrder.Quantity != 0)
+                        {
+                            var placeResponse = await PlacePartialCounterOrder(myOldOrder.Signature.Type == OrderType.Buy ? buyPrice : sellPrice, newComingOrder.Quantity, myOldOrder.Quantity, context);
+                            if (placeResponse.Response.Code == ReplyCode.Succeed)
+                            {
+                                UpdateMyOrder(newComingOrder);
+                                _counterOrders.TryAdd(placeResponse.OrderId, new Order
+                                {
+                                    Id = placeResponse.OrderId,
+                                    Price = myOldOrder.Signature.Type == OrderType.Buy ? sellPrice : buyPrice,
+                                    Quantity = -(myOldOrder.Quantity - newComingOrder.Quantity),
+                                    Signature = new OrderSignature
+                                    {
+                                        Status = OrderStatus.Open,
+                                        Type = myOldOrder.Signature.Type == OrderType.Buy ? OrderType.Sell : OrderType.Buy,
+                                    },
+                                    LastUpdateDate = new Timestamp()
+                                });
+                            }
+                            Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3} updated", myOldOrder.Id, myOldOrder.Price, myOldOrder.Quantity, myOldOrder.Signature.Type);
+                            Log.Information("Counter order {0} price: {1}, quantity: {2} placed {3} {4}", myOldOrder.Id, myOldOrder.Signature.Type == OrderType.Buy ? sellPrice : buyPrice, -(myOldOrder.Quantity - newComingOrder.Quantity), placeResponse.Response.Code, placeResponse.Response.Code == ReplyCode.Succeed ? "" : placeResponse.Response.Message);
+                        }
+                        if (newComingOrder.Price != 0)
+                        {
+                            UpdateMyOrder(newComingOrder);
+                            Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3} updated", id, newComingOrder.Price, -myOldOrder.Quantity, myOldOrder.Signature.Type);
+                        }
+
+                        break;
                     }
                 }
 
-            };
-
-            if (_counterOrders.TryGetValue(id, out var counterOldOrder))
+                _placeLocker = false;
+                _fitPricesLocker = false;
+            }
+            if (_counterOrders.TryGetValue(id, out _))
             {
-                if (changesType == ChangesType.Delete)
+                switch (changesType)
                 {
-                    RemoveFromMyOrders(id);
-                }
-                if (changesType == ChangesType.Update)
-                {
-                    UpdateMyOrder(newComingOrder);
+                    case ChangesType.Delete:
+                        RemoveFromMyOrders(id);
+                        break;
+                    case ChangesType.Update:
+                        UpdateMyOrder(newComingOrder);
+                        break;
                 }
             }
-
-            _placeLocker = false;
-            _fitPricesLocker = false;
         }
         #endregion
 
@@ -331,14 +293,14 @@ namespace Former
         /// </summary>
         internal Task UpdateBalance(int availableBalance, int totalBalance)
         {
-            if (_availableBalance != ConvertSatoshiToXbt(availableBalance) && availableBalance != 0)
+            if (availableBalance != 0)
             {
+                _availableBalance = availableBalance;
                 Log.Information("Balance updated. Available balance: {0}", availableBalance);
-                _availableBalance = ConvertSatoshiToXbt(availableBalance);
             }
             if (totalBalance != 0)
             {
-                _totalBalance = ConvertSatoshiToXbt(totalBalance);
+                _totalBalance = totalBalance;
                 Log.Information("Balance updated. Total balance: {0}", totalBalance);
             }
             return Task.CompletedTask;
@@ -351,43 +313,7 @@ namespace Former
         {
             if (_placeLocker) return;
             if (CheckContext(context)) return;
-
-            var orderCost = context.Configuration.ContractValue / _buyFairPrice;
-            var availableBalanceWithConfigurationReduction = _availableBalance * context.Configuration.AvaibleBalance;
-            var totalBalanceWithConfigurationReduction = _totalBalance * context.Configuration.AvaibleBalance;
-
-            var marginOfMySellOrders =_myOrders.Where(x => x.Value.Signature.Type == OrderType.Sell).Sum(x => x.Value.Quantity / x.Value.Price);
-            var marginOfCounterSellOrders = _counterOrders.Where(x => x.Value.Signature.Type == OrderType.Sell).Sum(x => x.Value.Quantity / x.Value.Price);
-            var marginOfAlreadyPlacedSellOrders = marginOfMySellOrders + marginOfCounterSellOrders;
-                
-            var marginOfMyBuyOrders =_myOrders.Where(x => x.Value.Signature.Type == OrderType.Buy).Sum(x => x.Value.Quantity / x.Value.Price);
-            var marginOfCounterBuyOrders = _counterOrders.Where(x => x.Value.Signature.Type == OrderType.Buy).Sum(x => x.Value.Quantity / x.Value.Price);
-            var marginOfAlreadyPlacedBuyOrders = marginOfMySellOrders + marginOfCounterSellOrders;
-
-            if (_positionSize > 0)
-            {
-                if (availableBalanceWithConfigurationReduction < orderCost)
-                {
-                    Log.Debug("Cannot place buy order. Insufficient available balance.");
-                    return;
-                }
-            }
-            if (_positionSize < 0)
-            {
-                if (totalBalanceWithConfigurationReduction + marginOfAlreadyPlacedSellOrders - marginOfAlreadyPlacedBuyOrders < orderCost)
-                {
-                    Log.Debug("Cannot place buy order. Insufficient total balance.");
-                    return;
-                }
-            }
-            if (_positionSize == 0)
-            {
-                if (totalBalanceWithConfigurationReduction + marginOfAlreadyPlacedSellOrders - marginOfAlreadyPlacedBuyOrders < orderCost)
-                {
-                    Log.Debug("Cannot place buy order. Insufficient total balance.");
-                    return;
-                }
-            }
+            if (!CheckPossibilityPlacingOrder(OrderType.Sell, context)) return;
 
             var response = await context.PlaceOrder(_buyFairPrice, context.Configuration.ContractValue);
             if (response.Response.Code == ReplyCode.Succeed)
@@ -402,13 +328,56 @@ namespace Former
                         Status = OrderStatus.Open,
                         Type = OrderType.Buy
                     },
-                    LastUpdateDate = new Google.Protobuf.WellKnownTypes.Timestamp()
+                    LastUpdateDate = new Timestamp()
                 });
             }
             Log.Information("Order {0} price: {1}, quantity: {2} placed for purchase {3} {4}", response.OrderId, _buyFairPrice, context.Configuration.ContractValue, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
         }
 
-        
+        /// <summary>
+        /// Возвращает false, если текущий баланс и маржа не позволяют выставить ордер на покупку/продажу, иначе true
+        /// </summary>
+        private bool CheckPossibilityPlacingOrder(OrderType type, UserContext context)
+        { 
+            var orderCost = context.Configuration.ContractValue / (type == OrderType.Sell ? _sellFairPrice : _buyFairPrice);
+            var availableBalanceWithConfigurationReduction = ConvertSatoshiToXbt(_availableBalance) * context.Configuration.AvaibleBalance;
+            var totalBalanceWithConfigurationReduction = ConvertSatoshiToXbt(_totalBalance) * context.Configuration.AvaibleBalance;
+
+            var marginOfMySellOrders = _myOrders.Where(x => x.Value.Signature.Type == OrderType.Sell).Sum(x => x.Value.Quantity / x.Value.Price);
+            var marginOfCounterSellOrders = _counterOrders.Where(x => x.Value.Signature.Type == OrderType.Sell).Sum(x => x.Value.Quantity / x.Value.Price);
+            var marginOfAlreadyPlacedSellOrders = marginOfMySellOrders + marginOfCounterSellOrders;
+
+            var marginOfMyBuyOrders = _myOrders.Where(x => x.Value.Signature.Type == OrderType.Buy).Sum(x => x.Value.Quantity / x.Value.Price);
+            var marginOfCounterBuyOrders = _counterOrders.Where(x => x.Value.Signature.Type == OrderType.Buy).Sum(x => x.Value.Quantity / x.Value.Price);
+            var marginOfAlreadyPlacedBuyOrders = marginOfMyBuyOrders + marginOfCounterBuyOrders;
+
+
+            if (_positionSize < 0)
+            {
+                if (availableBalanceWithConfigurationReduction < orderCost)
+                {
+                    Log.Debug("Cannot place sell order. Insufficient available balance.");
+                    return false;
+                }
+            }
+            if (_positionSize > 0)
+            {
+                if (totalBalanceWithConfigurationReduction - marginOfAlreadyPlacedSellOrders - marginOfAlreadyPlacedBuyOrders < orderCost)
+                {
+                    Log.Debug("Cannot place sell order. Insufficient total balance.");
+                    return false;
+                }
+            }
+            if (_positionSize == 0)
+            {
+                if (totalBalanceWithConfigurationReduction - marginOfAlreadyPlacedSellOrders - marginOfAlreadyPlacedBuyOrders < orderCost)
+                {
+                    Log.Debug("Cannot place sell order. Insufficient total balance.");
+                    return false;
+                }
+            }
+            return true;
+        }
 
         /// <summary>
         /// Формирует ордер на продажу
@@ -417,44 +386,7 @@ namespace Former
         {
             if (_placeLocker) return;
             if (CheckContext(context)) return;
-
-            var orderCost = context.Configuration.ContractValue / _sellFairPrice;
-            var availableBalanceWithConfigurationReduction = _availableBalance * context.Configuration.AvaibleBalance;
-            var totalBalanceWithConfigurationReduction = _totalBalance * context.Configuration.AvaibleBalance;
-
-            var marginOfMySellOrders =_myOrders.Where(x => x.Value.Signature.Type == OrderType.Sell).Sum(x => x.Value.Quantity / x.Value.Price);
-            var marginOfCounterSellOrders = _counterOrders.Where(x => x.Value.Signature.Type == OrderType.Sell).Sum(x => x.Value.Quantity / x.Value.Price);
-            var marginOfAlreadyPlacedSellOrders = marginOfMySellOrders + marginOfCounterSellOrders;
-                
-            var marginOfMyBuyOrders =_myOrders.Where(x => x.Value.Signature.Type == OrderType.Buy).Sum(x => x.Value.Quantity / x.Value.Price);
-            var marginOfCounterBuyOrders = _counterOrders.Where(x => x.Value.Signature.Type == OrderType.Buy).Sum(x => x.Value.Quantity / x.Value.Price);
-            var marginOfAlreadyPlacedBuyOrders = marginOfMySellOrders + marginOfCounterSellOrders;
-
-
-            if (_positionSize < 0)
-            {
-                if (availableBalanceWithConfigurationReduction < orderCost)
-                {
-                    Log.Debug("Cannot place sell order. Insufficient available balance.");
-                    return;
-                }
-            }
-            if (_positionSize > 0)
-            {
-                if (totalBalanceWithConfigurationReduction + marginOfAlreadyPlacedSellOrders - marginOfAlreadyPlacedBuyOrders < orderCost)
-                {
-                    Log.Debug("Cannot place sell order. Insufficient total balance.");
-                    return;
-                }
-            }
-            if (_positionSize == 0)
-            {
-                if (totalBalanceWithConfigurationReduction + marginOfAlreadyPlacedSellOrders - marginOfAlreadyPlacedBuyOrders < orderCost)
-                {
-                    Log.Debug("Cannot place sell order. Insufficient total balance.");
-                    return;
-                }
-            }
+            if (!CheckPossibilityPlacingOrder(OrderType.Sell, context)) return;
 
             var response = await context.PlaceOrder(_sellFairPrice, -context.Configuration.ContractValue);
             if (response.Response.Code == ReplyCode.Succeed)
@@ -469,7 +401,7 @@ namespace Former
                         Status = OrderStatus.Open,
                         Type = OrderType.Sell
                     },
-                    LastUpdateDate = new Google.Protobuf.WellKnownTypes.Timestamp()
+                    LastUpdateDate = new Timestamp()
                 });
             }
             Log.Information("Order {0} price: {1}, quantity: {2} placed for sell {3} {4}", response.OrderId, _sellFairPrice, -context.Configuration.ContractValue, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");

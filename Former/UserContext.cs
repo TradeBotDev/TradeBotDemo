@@ -34,33 +34,30 @@ namespace Former
 
             _tradeMarketClient = new TradeMarketClient();
             _former = new Former(25);
-            //Конфиг передается как параметр для любого метода
 
-            //_tradeMarketClient.UpdateOrderBook += UpdateOrderBooks;
             _tradeMarketClient.UpdateBalance += UpdateBalance;
             _tradeMarketClient.UpdateMyOrders += UpdateMyOrderList;
             _tradeMarketClient.UpdatePosition += UpdatePosition;
-            _tradeMarketClient.UpdateFairPrices += UpdateFairPrices;
+            _tradeMarketClient.UpdateMarketPrices += UpdateMarketPrices;
 
-            ObserveFairPrices();
-            //ObserveOrderBook();
+            ObserveMarketPrices();
             ObserveBalance();
             ObserveMyOrders();
             ObservePositions();
         }
 
-        private async void UpdateFairPrices(double bid, double ask, double fairPrice, ChangesType changesType)
+        private async void UpdateMarketPrices(double bid, double ask)
         {
-            await _former.UpdateFairPrices(bid, ask, fairPrice, changesType, this);
+            await _former.UpdateMarketPrices(bid, ask, this);
             
         }
         private async void ObservePositions()
         {
             await _tradeMarketClient.ObservePositions(this);
         }
-        public async void ObserveFairPrices()
+        public async void ObserveMarketPrices()
         {
-            await _tradeMarketClient.ObserveFairPrices(this);
+            await _tradeMarketClient.ObserveMarketPrices(this);
         }
         public async void FormBuyOrder()
         {
@@ -69,10 +66,6 @@ namespace Former
         public async void FormSellOrder()
         {
             await _former.FormSellOrder(this);
-        }
-        private async void UpdateOrderBooks(Order orderNeededUpdate, ChangesType changesType) 
-        {
-           await _former.UpdateOrderBooks(orderNeededUpdate, changesType, this);
         }
         private async void UpdateMyOrderList(Order orderNeededUpdate, ChangesType changesType)
         {
@@ -93,10 +86,6 @@ namespace Former
         public async Task<AmmendOrderResponse> AmendOrder(string id, double newPrice)
         {
             return await _tradeMarketClient.AmendOrder(id, newPrice, this);
-        }
-        private async void ObserveOrderBook()
-        {
-            await _tradeMarketClient.ObserveOrderBook(this);
         }
         private async void ObserveBalance()
         {
