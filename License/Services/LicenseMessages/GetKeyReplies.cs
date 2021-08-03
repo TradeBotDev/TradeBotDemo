@@ -1,4 +1,5 @@
-﻿using TradeBot.License.LicenseService.v1;
+﻿using Serilog;
+using TradeBot.License.LicenseService.v1;
 
 namespace LicenseGRPC.LicenseMessages
 {
@@ -7,6 +8,7 @@ namespace LicenseGRPC.LicenseMessages
         public static GetKeyResponse LicenseIsExists(string key)
         {
             const string Message = "Ключ лицензии получен успешно.";
+            Log.Information(Message);
 
             return new GetKeyResponse
             {
@@ -19,6 +21,7 @@ namespace LicenseGRPC.LicenseMessages
         public static GetKeyResponse LicenseIsNotExists()
         {
             const string Message = "Произошла ошибка: данный ключ не существует.";
+            Log.Information(Message);
 
             return new GetKeyResponse
             {

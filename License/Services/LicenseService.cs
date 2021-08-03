@@ -1,6 +1,7 @@
 using Grpc.Core;
 using LicenseGRPC.LicenseMessages;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace LicenseGRPC
     {
         public override Task<SetLicenseResponse> SetLicense(SetLicenseRequest request, ServerCallContext context)
         {
+            Log.Information($"SetLicense получил запрос: AccountId - {request.AccountId}, Product - {request.Product}.");
             using (var database = new Models.LicenseContext())
             {
                 bool licenseIsExists = database.Licenses.Any(license => license.AccountId == request.AccountId &&
@@ -38,6 +40,7 @@ namespace LicenseGRPC
 
         public override Task<LicenseCheckResponse> LicenseCheck(LicenseCheckRequest request, ServerCallContext context)
         {
+            Log.Information($"LicenseCheck получил запрос: AccountId - {request.AccountId}, Key - {request.Key}, Product - {request.Product}.");
             using (var database = new Models.LicenseContext())
             {
                 bool isExists = database.Licenses.Any(license =>
@@ -53,6 +56,7 @@ namespace LicenseGRPC
 
         public override Task<GetKeyResponse> GetKey(GetKeyRequest request, ServerCallContext context)
         {
+            Log.Information($"GetKey получил запрос: AccountId - {request.AccountId}, Product - {request.Product}.");
             using (var database = new Models.LicenseContext())
             {
                 var license = database.Licenses.Where(license =>

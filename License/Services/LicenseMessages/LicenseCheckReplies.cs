@@ -1,4 +1,5 @@
-﻿using TradeBot.License.LicenseService.v1;
+﻿using Serilog;
+using TradeBot.License.LicenseService.v1;
 
 namespace LicenseGRPC.LicenseMessages
 {
@@ -7,6 +8,7 @@ namespace LicenseGRPC.LicenseMessages
         public static LicenseCheckResponse LicenseIsExists()
         {
             const string Message = "Данная лицензия существует..";
+            Log.Information(Message);
 
             return new LicenseCheckResponse
             {
@@ -19,6 +21,7 @@ namespace LicenseGRPC.LicenseMessages
         public static LicenseCheckResponse LicenseIsNotExists()
         {
             const string Message = "Произошла ошибка: данная лицензия не существует.";
+            Log.Information(Message);
 
             return new LicenseCheckResponse
             {
