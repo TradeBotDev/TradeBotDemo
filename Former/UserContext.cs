@@ -14,8 +14,10 @@ namespace Former
         public Config Configuration;
         private readonly TradeMarketClient _tradeMarketClient;
         private readonly Former _former;
+        private readonly Storage _storage;
+        private readonly UpdateHandlers _updateHandlers;
 
-        public Metadata Meta { get; private set; }
+        public Metadata Meta { get; }
 
         internal UserContext(string sessionId, string tradeMarket, string slot)
         {
@@ -33,12 +35,14 @@ namespace Former
             TradeMarketClient.Configure("https://localhost:5005", 10000);
 
             _tradeMarketClient = new TradeMarketClient();
-            _former = new Former();
+            _storage = new Storage();
+            _former = new Former(_storage);
+            _updateHandlers = new UpdateHandlers(_storage);
 
+            _tradeMarketClient.UpdateMarketPrices += UpdateMarketPrices;
             _tradeMarketClient.UpdateBalance += UpdateBalance;
             _tradeMarketClient.UpdateMyOrders += UpdateMyOrderList;
             _tradeMarketClient.UpdatePosition += UpdatePosition;
-            _tradeMarketClient.UpdateMarketPrices += UpdateMarketPrices;
 
             _ = ObserveMarketPrices();
             _ = ObserveBalance();
@@ -48,19 +52,19 @@ namespace Former
 
         private async Task UpdateMarketPrices(double bid, double ask)
         {
-            await _former.UpdateMarketPrices(bid, ask, this);
+            await _storage.UpdateMarketPrices(bid, ask, this);
         }
         private async Task UpdateMyOrderList(Order orderNeededUpdate, ChangesType changesType)
         {
-            await _former.UpdateMyOrderList(orderNeededUpdate, changesType, this);
+            await _storage.UpdateMyOrderList(orderNeededUpdate, changesType, this);
         }
         private async Task UpdateBalance(int balanceToBuy, int balanceToSell)
         {
-            await _former.UpdateBalance(balanceToBuy, balanceToSell);
+            await _storage.UpdateBalance(balanceToBuy, balanceToSell);
         }
         private async Task UpdatePosition(double currentQuantity)
         {
-            await _former.UpdatePosition(currentQuantity);
+            await _storage.UpdatePosition(currentQuantity);
         }
         public async Task FormOrder(int decision )
         {

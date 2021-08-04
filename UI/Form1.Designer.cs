@@ -44,7 +44,6 @@ namespace UI
             this.ShowRegistrationPanel = new System.Windows.Forms.Button();
             this.ShowLoginPanel = new System.Windows.Forms.Button();
             this.ShowMainMenu = new System.Windows.Forms.Button();
-            this.IsUserLogged = new System.Windows.Forms.Label();
             this.RegistrationPanel = new System.Windows.Forms.Panel();
             this.RegistrationButton = new System.Windows.Forms.Button();
             this.label6 = new System.Windows.Forms.Label();
@@ -185,7 +184,7 @@ namespace UI
             // 
             this.ShowRegistrationPanel.Location = new System.Drawing.Point(11, 12);
             this.ShowRegistrationPanel.Name = "ShowRegistrationPanel";
-            this.ShowRegistrationPanel.Size = new System.Drawing.Size(136, 61);
+            this.ShowRegistrationPanel.Size = new System.Drawing.Size(106, 61);
             this.ShowRegistrationPanel.TabIndex = 14;
             this.ShowRegistrationPanel.Text = "Registration";
             this.ShowRegistrationPanel.UseVisualStyleBackColor = true;
@@ -195,7 +194,7 @@ namespace UI
             // 
             this.ShowLoginPanel.Location = new System.Drawing.Point(11, 79);
             this.ShowLoginPanel.Name = "ShowLoginPanel";
-            this.ShowLoginPanel.Size = new System.Drawing.Size(136, 61);
+            this.ShowLoginPanel.Size = new System.Drawing.Size(106, 61);
             this.ShowLoginPanel.TabIndex = 15;
             this.ShowLoginPanel.Text = "Login";
             this.ShowLoginPanel.UseVisualStyleBackColor = true;
@@ -205,20 +204,11 @@ namespace UI
             // 
             this.ShowMainMenu.Location = new System.Drawing.Point(11, 147);
             this.ShowMainMenu.Name = "ShowMainMenu";
-            this.ShowMainMenu.Size = new System.Drawing.Size(136, 61);
+            this.ShowMainMenu.Size = new System.Drawing.Size(106, 61);
             this.ShowMainMenu.TabIndex = 16;
             this.ShowMainMenu.Text = "Main Menu";
             this.ShowMainMenu.UseVisualStyleBackColor = true;
             this.ShowMainMenu.Click += new System.EventHandler(this.ShowMainMenu_Click);
-            // 
-            // IsUserLogged
-            // 
-            this.IsUserLogged.AutoSize = true;
-            this.IsUserLogged.Location = new System.Drawing.Point(11, 336);
-            this.IsUserLogged.Name = "IsUserLogged";
-            this.IsUserLogged.Size = new System.Drawing.Size(38, 20);
-            this.IsUserLogged.TabIndex = 17;
-            this.IsUserLogged.Text = "cyka";
             // 
             // RegistrationPanel
             // 
@@ -397,7 +387,6 @@ namespace UI
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(533, 365);
-            this.Controls.Add(this.IsUserLogged);
             this.Controls.Add(this.ShowMainMenu);
             this.Controls.Add(this.ShowLoginPanel);
             this.Controls.Add(this.ShowRegistrationPanel);
@@ -414,7 +403,6 @@ namespace UI
             this.LogginPanel.ResumeLayout(false);
             this.LogginPanel.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -435,7 +423,6 @@ namespace UI
         private System.Windows.Forms.Button ShowRegistrationPanel;
         private System.Windows.Forms.Button ShowLoginPanel;
         private System.Windows.Forms.Button ShowMainMenu;
-        private System.Windows.Forms.Label IsUserLogged;
         private System.Windows.Forms.Panel RegistrationPanel;
         private System.Windows.Forms.Panel LogginPanel;
         private System.Windows.Forms.Label ConfigTokenl;
