@@ -13,17 +13,13 @@ namespace Facade
 {
     public class AutorisationClass
     {
-        private GrpcChannel _channel => GrpcChannel.ForAddress("https://localhost:5001");
-        public GrpcChannel Channel { get => _channel; }
+        private GrpcChannel _channel => GrpcChannel.ForAddress("https://localhost:5000");
+        private Auth _client => new TradeBot.Account.AccountService.v1.Account.AccountClient(_channel);
 
-        private Auth _client => new Auth(Channel);
-        public Auth Client
-        {
-            get => _client;
-        }
+        private TradeBot.Account.AccountService.v1.Account.AccountClient clientAccount = new TradeBot.Account.AccountService.v1.Account.AccountClient(GrpcChannel.ForAddress("https://localhost:5000"));
 
 
-        public Task<Ref.LoginReply> LoginAuth(Ref.LoginRequest request, ServerCallContext context)
+        public Task<Ref.LoginReply> LoginAuth(Ref.LoginRequest request, ServerCallContext context, Auth auth)
         {
             while (true)
             {
@@ -31,7 +27,7 @@ namespace Facade
                 {
                     if (context.CancellationToken.IsCancellationRequested) break;
 
-                    var response = Client.Login(new TradeBot.Account.AccountService.v1.LoginRequest
+                    var response = _client.Login(new TradeBot.Account.AccountService.v1.LoginRequest
                     {
                         Email = request.Email,
                         SaveExchangesAfterLogout = request.SaveExchangesAfterLogout,
@@ -63,7 +59,7 @@ namespace Facade
                 {
                     if (context.CancellationToken.IsCancellationRequested) break;
 
-                    var response = Client.Logout(new TradeBot.Account.AccountService.v1.SessionRequest { SessionId = request.SessionId });
+                    var response = _client.Logout(new TradeBot.Account.AccountService.v1.SessionRequest { SessionId = request.SessionId });
                     Log.Information($"Function: Logout \n args: request={request}");
                     Log.Information($"Function: Logout \n args: response={response}");
 
@@ -91,7 +87,7 @@ namespace Facade
                 {
                     if (context.CancellationToken.IsCancellationRequested) break;
 
-                    var response = Client.Register(new TradeBot.Account.AccountService.v1.RegisterRequest
+                    var response = _client.Register(new TradeBot.Account.AccountService.v1.RegisterRequest
                     {
                         Email = request.Email,
                         Password = request.Password,
@@ -123,7 +119,7 @@ namespace Facade
                 {
                     if (context.CancellationToken.IsCancellationRequested) break;
 
-                    var response = Client.IsValidSession(new TradeBot.Account.AccountService.v1.SessionRequest { SessionId = request.SessionId });
+                    var response = _client.IsValidSession(new TradeBot.Account.AccountService.v1.SessionRequest { SessionId = request.SessionId });
                     Log.Information($"Function: IsValidSession \n args: request={request}");
                     Log.Information($"Function: IsValidSession \n args: response={response}");
                     return Task.FromResult(new Ref.SessionReply
@@ -149,7 +145,7 @@ namespace Facade
                 {
                     if (context.CancellationToken.IsCancellationRequested) break;
 
-                    var response = Client.CurrentAccountData(new TradeBot.Account.AccountService.v1.SessionRequest { SessionId = request.SessionId });
+                    var response = _client.CurrentAccountData(new TradeBot.Account.AccountService.v1.SessionRequest { SessionId = request.SessionId });
                     Log.Information($"Function: CurrentAccountData \n args: request={request}");
                     var accountResponse = new Ref.CurrentAccountReply()
                     {

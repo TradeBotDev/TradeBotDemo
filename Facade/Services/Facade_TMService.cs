@@ -1,4 +1,6 @@
 using Grpc.Core;
+using Grpc.Net.Client;
+using Serilog;
 using System.Threading.Tasks;
 using TradeBot.Facade.FacadeService.v1;
 
@@ -7,10 +9,10 @@ namespace Facade
     public class FacadeTMService : TradeBot.Facade.FacadeService.v1.FacadeService.FacadeServiceBase
     {
         //TODO вынести
-        //private TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceClient clientTM = new TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceClient(GrpcChannel.ForAddress("https://localhost:5005"));
-        //private TradeBot.Relay.RelayService.v1.RelayService.RelayServiceClient Client = new TradeBot.Relay.RelayService.v1.RelayService.RelayServiceClient(GrpcChannel.ForAddress("https://localhost:5004"));
-        //private TradeBot.Account.AccountService.v1.Account.AccountClient clientAccount = new TradeBot.Account.AccountService.v1.Account.AccountClient(GrpcChannel.ForAddress("https://localhost:5000"));
-        //private TradeBot.Account.AccountService.v1.ExchangeAccess.ExchangeAccessClient clientExchange = new TradeBot.Account.AccountService.v1.ExchangeAccess.ExchangeAccessClient(GrpcChannel.ForAddress("https://localhost:5000"));
+        private TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceClient clientTM = new TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceClient(GrpcChannel.ForAddress("https://localhost:5005"));
+        private TradeBot.Relay.RelayService.v1.RelayService.RelayServiceClient Client = new TradeBot.Relay.RelayService.v1.RelayService.RelayServiceClient(GrpcChannel.ForAddress("https://localhost:5004"));
+        private TradeBot.Account.AccountService.v1.Account.AccountClient clientAccount = new TradeBot.Account.AccountService.v1.Account.AccountClient(GrpcChannel.ForAddress("https://localhost:5000"));
+        private TradeBot.Account.AccountService.v1.ExchangeAccess.ExchangeAccessClient clientExchange = new TradeBot.Account.AccountService.v1.ExchangeAccess.ExchangeAccessClient(GrpcChannel.ForAddress("https://localhost:5000"));
         private TradeMarketClass tradeMarketClient;
         private RelayClass relayClient;
         private AutorisationClass autorisationClient;
@@ -76,7 +78,15 @@ namespace Facade
         #region Account
         public override Task<LoginReply> Login(LoginRequest request, ServerCallContext context)
         {
-            return autorisationClient.LoginAuth(request, context);
+            var response = clientAccount.Login(new TradeBot.Account.AccountService.v1.LoginRequest
+            {
+                Email = request.Email,
+                SaveExchangesAfterLogout = request.SaveExchangesAfterLogout,
+                Password = request.Password
+            });
+            Log.Information($"Function: Login \n args: request={request}");
+
+            return autorisationClient.LoginAuth(request, context,clientAccount);
         }
 
         public override Task<LogoutReply> Logout(SessionRequest request, ServerCallContext context)

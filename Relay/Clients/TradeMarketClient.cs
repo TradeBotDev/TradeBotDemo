@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Grpc.Net.Client;
+using Relay.Model;
 using Serilog;
 using TradeBot.Common.v1;
 using TradeBot.TradeMarket.TradeMarketService.v1;
@@ -22,7 +23,7 @@ namespace Relay.Clients
         }
         public IAsyncStreamReader<SubscribeOrdersResponse> OpenStream(Metadata meta)
         {
-            return _client.SubscribeOrders(new SubscribeOrdersRequest()
+            var response = _client.SubscribeOrders(new SubscribeOrdersRequest()
             {
                 Request = new TradeBot.Common.v1.SubscribeOrdersRequest()
                 {
@@ -32,24 +33,30 @@ namespace Relay.Clients
                         Status = OrderStatus.Unspecified
                     }
                 }
-            }, meta).ResponseStream;
+            }, meta);
+            return response.ResponseStream;
         }
-        public async void SubscribeForOrders(IAsyncStreamReader<SubscribeOrdersResponse> stream)
+        public async void SubscribeForOrders(IAsyncStreamReader<SubscribeOrdersResponse> stream, UserContext user)
         {
-            try
+            while (true)
             {
-                while (await stream.MoveNext())
+                try
                 {
-                    OrderRecievedEvent?.Invoke(this, new(stream.Current.Response.Order));
+                    while (await stream.MoveNext())
+                    {
+                        OrderRecievedEvent?.Invoke(this, new(stream.Current.Response.Order));
+                    }
+                    break;
                 }
-            }
-            catch (Exception)
-            {
-                if (stream.Current != null)
+                catch (Exception)
                 {
-                    OrderRecievedEvent?.Invoke(this, new(stream.Current.Response.Order));
+                    if (stream.Current != null)
+                    {
+                        OrderRecievedEvent?.Invoke(this, new(stream.Current.Response.Order));
+                    }
+                    stream = user.ReConnect();
+                    _ = stream.MoveNext();
                 }
-                _ = stream.MoveNext();
             }
         }
         public event EventHandler<Order> OrderRecievedEvent;

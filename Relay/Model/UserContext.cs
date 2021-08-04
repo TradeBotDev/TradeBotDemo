@@ -38,6 +38,11 @@ namespace Relay.Model
             //_tradeMarketClient.OrderRecievedEvent += _tradeMarketClient_OrderRecievedEvent;
             IsSubscribe = false;
         }
+        public IAsyncStreamReader<SubscribeOrdersResponse> ReConnect()
+        {
+            _tradeMarketStream = _tradeMarketClient.OpenStream(Meta);
+            return _tradeMarketStream;
+        }
 
         public void StatusOfSubscribe()
         {
@@ -93,7 +98,7 @@ namespace Relay.Model
 
         public void SubscribeForOrders()
         {
-            if(IsSubscribe) _tradeMarketClient.SubscribeForOrders(_tradeMarketStream);
+            if(IsSubscribe) _tradeMarketClient.SubscribeForOrders(_tradeMarketStream,this);
         }
 
     }
