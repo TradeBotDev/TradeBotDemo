@@ -6,8 +6,8 @@ namespace AccountGRPC
     public static class LoggedAccountsManagement
     {
         // Метод, который проверяет, истекло ли время сессии, и в случае, если оно истекло,
-        // удаляет текущий вход и возвращает true. Иначе возвращает false.
-        public static bool TimePassed(string sessionId)
+        // производит действие и возвращает true. Иначе возвращает false.
+        public static bool TimeOutAction(string sessionId)
         {
             using (var database = new Models.AccountContext())
             {

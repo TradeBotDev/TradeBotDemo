@@ -176,7 +176,7 @@ namespace AccountGRPC
                 // предоставляется клиентом. Если есть и время сессии не вышло - сессия валидна.
                 var account = database.LoggedAccounts.Where(account => account.SessionId == request.SessionId);
 
-                if (account.Count() >= 0 && !LoggedAccountsManagement.TimePassed(request.SessionId))
+                if (account.Count() >= 0 && !LoggedAccountsManagement.TimeOutAction(request.SessionId))
                     return Task.FromResult(IsValidSessionReplies.IsValid());
                 // Если нет - сессия невалидна.
                 else return Task.FromResult(IsValidSessionReplies.IsNotValid());
@@ -194,7 +194,7 @@ namespace AccountGRPC
                 // Производится проверка на то, является ли текущий пользователь вошедшим (по Id сессии).
                 if (checkAccount.Count() == 0)
                     return Task.FromResult(CurrentAccountReplies.AccountNotFound());
-                else if (LoggedAccountsManagement.TimePassed(request.SessionId))
+                else if (LoggedAccountsManagement.TimeOutAction(request.SessionId))
                     return Task.FromResult(CurrentAccountReplies.TimePassed());
 
                 // Если текущий пользователь вошедший, то сервер возвращает данные этого пользователя.
