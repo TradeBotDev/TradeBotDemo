@@ -15,6 +15,7 @@ namespace Former
         private readonly TradeMarketClient _tradeMarketClient;
         private readonly Former _former;
         private readonly Storage _storage;
+        private readonly UpdateHandlers _updateHandlers;
 
         public Metadata Meta { get; }
 
@@ -34,37 +35,38 @@ namespace Former
             TradeMarketClient.Configure("https://localhost:5005", 10000);
 
             _tradeMarketClient = new TradeMarketClient();
-            _former = new Former();
             _storage = new Storage();
+            _former = new Former(_storage);
+            _updateHandlers = new UpdateHandlers(_storage);
 
             _tradeMarketClient.UpdateMarketPrices += UpdateMarketPrices;
             _tradeMarketClient.UpdateBalance += UpdateBalance;
             _tradeMarketClient.UpdateMyOrders += UpdateMyOrderList;
             _tradeMarketClient.UpdatePosition += UpdatePosition;
 
-            ObserveMarketPrices();
-            ObserveBalance();
-            ObserveMyOrders();
-            ObservePositions();
+            _ = ObserveMarketPrices();
+            _ = ObserveBalance();
+            _ = ObserveMyOrders();
+            _ = ObservePositions();
         }
 
-        private async void UpdateMarketPrices(double bid, double ask)
+        private async Task UpdateMarketPrices(double bid, double ask)
         {
-            await _former.UpdateMarketPrices(bid, ask, this);
+            await _storage.UpdateMarketPrices(bid, ask, this);
         }
-        private async void UpdateMyOrderList(Order orderNeededUpdate, ChangesType changesType)
+        private async Task UpdateMyOrderList(Order orderNeededUpdate, ChangesType changesType)
         {
-            await _former.UpdateMyOrderList(orderNeededUpdate, changesType, this);
+            await _storage.UpdateMyOrderList(orderNeededUpdate, changesType, this);
         }
-        private async void UpdateBalance(int balanceToBuy, int balanceToSell)
+        private async Task UpdateBalance(int balanceToBuy, int balanceToSell)
         {
-            await _former.UpdateBalance(balanceToBuy, balanceToSell);
+            await _storage.UpdateBalance(balanceToBuy, balanceToSell);
         }
-        private async void UpdatePosition(double currentQuantity)
+        private async Task UpdatePosition(double currentQuantity)
         {
-            await _former.UpdatePosition(currentQuantity);
+            await _storage.UpdatePosition(currentQuantity);
         }
-        public async void FormOrder(int decision )
+        public async Task FormOrder(int decision )
         {
             await _former.FormOrder(decision ,this);
         }
@@ -76,19 +78,19 @@ namespace Former
         {
             return await _tradeMarketClient.AmendOrder(id, newPrice, this);
         }
-        private async void ObserveBalance()
+        private async Task ObserveBalance()
         {
             await _tradeMarketClient.ObserveBalance(this);
         }
-        private async void ObserveMyOrders()
+        private async Task ObserveMyOrders()
         {
             await _tradeMarketClient.ObserveMyOrders(this);
         }
-        private async void ObservePositions()
+        private async Task ObservePositions()
         {
             await _tradeMarketClient.ObservePositions(this);
         }
-        private async void ObserveMarketPrices()
+        private async Task ObserveMarketPrices()
         {
             await _tradeMarketClient.ObserveMarketPrices(this);
         }

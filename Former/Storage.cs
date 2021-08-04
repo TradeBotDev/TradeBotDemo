@@ -8,37 +8,45 @@ namespace Former
 {
     public class Storage
     {
-        public readonly ConcurrentDictionary<string, Order> _myOrders;
-        public readonly ConcurrentDictionary<string, Order> _counterOrders;
+        public delegate Task NeedPlaceOrderEvent(Order oldOrder, Order newComingOrder, UserContext context);
+        public NeedPlaceOrderEvent PlaceOrderEvent;
 
-        public int _totalBalance;
-        public int _availableBalance;
+        public delegate Task NeedHandleUpdate(UserContext context);
+        public NeedHandleUpdate HandleUpdateEvent;
 
-        public int _positionSize;
+        public readonly ConcurrentDictionary<string, Order> MyOrders;
+        public readonly ConcurrentDictionary<string, Order> CounterOrders;
+
+        public int TotalBalance;
+        public int AvailableBalance;
+
+        public int PositionSize;
         
-        public double _sellMarketPrice;
-        public double _buyMarketPrice;
+        public double SellMarketPrice;
+        public double BuyMarketPrice;
 
-        public bool _placeLocker;
-        public bool _fitPricesLocker;
+        public bool PlaceLocker;
+        public bool FitPricesLocker;
 
-        public double _savedMarketBuyPrice;
-        public double _savedMarketSellPrice;
+        public double SavedMarketBuyPrice;
+        public double SavedMarketSellPrice;
 
-        private UpdateHandlers _updateHandlers;
-
-        public Storage(UpdateHandlers updateHandlers)
+        public Storage()
         {
-            _myOrders = new ConcurrentDictionary<string, Order>();
-            _counterOrders = new ConcurrentDictionary<string, Order>();
-            _updateHandlers = updateHandlers;
+            MyOrders = new ConcurrentDictionary<string, Order>();
+            CounterOrders = new ConcurrentDictionary<string, Order>();
         }
 
+        /// <summary>
+        /// Обновляет рыночные цены на продажу и на покупку
+        /// </summary>
         internal async Task UpdateMarketPrices(double bid, double ask, UserContext context)
         {
-            if (bid > 0) _buyMarketPrice = bid;
-            if (ask > 0) _sellMarketPrice = ask;
-            await _updateHandlers.CheckAndFitPrices(context);
+            if (CheckContext(context)) return;
+
+            if (bid > 0) BuyMarketPrice = bid;
+            if (ask > 0) SellMarketPrice = ask;
+            await HandleUpdateEvent.Invoke(context);
         }
 
         /// <summary>
@@ -49,34 +57,34 @@ namespace Former
             if (CheckContext(context)) return;
 
             var id = newComingOrder.Id;
-            var itsMyOrder = _myOrders.TryGetValue(id, out var myOldOrder);
-            var itsCounterOrder = _counterOrders.TryGetValue(id, out var counterOldOrder);
+            var itsMyOrder = MyOrders.TryGetValue(id, out var myOldOrder);
+            var itsCounterOrder = CounterOrders.TryGetValue(id, out var counterOldOrder);
 
             switch (changesType)
             {
                 case ChangesType.Partitial:
-                    AddOrder(id, newComingOrder, _counterOrders);
+                    AddOrder(id, newComingOrder, CounterOrders);
                     return;
                 case ChangesType.Update when itsMyOrder:
-                    var updateMyOrderResponse = UpdateOrder(newComingOrder, _myOrders);
+                    var updateMyOrderResponse = UpdateOrder(newComingOrder, MyOrders);
                     Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3} updated {4}", myOldOrder.Id, myOldOrder.Price, myOldOrder.Quantity, myOldOrder.Signature.Type, updateMyOrderResponse ? ReplyCode.Succeed : ReplyCode.Failure);
                     LockPlacingOrders(true);
-                    if (newComingOrder.Quantity != 0) await PlaceCounterOrder(myOldOrder, newComingOrder, context);
+                    if (newComingOrder.Quantity != 0) await PlaceOrderEvent.Invoke(myOldOrder, newComingOrder, context);
                     LockPlacingOrders(false);
                     break;
                 case ChangesType.Update when itsCounterOrder:
-                    var updateCounterOrderResponse = UpdateOrder(newComingOrder, _counterOrders);
+                    var updateCounterOrderResponse = UpdateOrder(newComingOrder, CounterOrders);
                     Log.Information("Counter order {0}, price: {1}, quantity: {2}, type: {3} updated {4}", counterOldOrder.Id, counterOldOrder.Price, counterOldOrder.Quantity, counterOldOrder.Signature.Type, updateCounterOrderResponse ? ReplyCode.Succeed : ReplyCode.Failure);
                     break;
                 case ChangesType.Delete when itsMyOrder:
-                    var removeResponse = RemoveOrder(id, _myOrders);
+                    var removeResponse = RemoveOrder(id, MyOrders);
                     Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3} removed {4}", myOldOrder.Id, myOldOrder.Price, myOldOrder.Quantity, myOldOrder.Signature.Type, removeResponse ? ReplyCode.Succeed : ReplyCode.Failure);
                     LockPlacingOrders(true);
-                    await PlaceCounterOrder(myOldOrder, newComingOrder, context);
+                    await PlaceOrderEvent.Invoke(myOldOrder, newComingOrder, context);
                     LockPlacingOrders(false);
                     break;
                 case ChangesType.Delete when itsCounterOrder:
-                    RemoveOrder(id, _counterOrders);
+                    RemoveOrder(id, CounterOrders);
                     break;
                 //вновь пришедший ордер не помещается в список моих ордеров здесь, потому что это делается только по событию из алгоритма, во избежание
                 //зацикливания выставления ордеров и контр-ордеров
@@ -94,10 +102,10 @@ namespace Former
         /// </summary>
         internal Task UpdatePosition(double currentQuantity)
         {
-            if (_positionSize != (int)currentQuantity)
+            if (PositionSize != (int)currentQuantity)
             {
                 Log.Information("Current position: {0}", currentQuantity);
-                _positionSize = (int)currentQuantity;
+                PositionSize = (int)currentQuantity;
             }
             return Task.CompletedTask;
         }
@@ -109,12 +117,12 @@ namespace Former
         {
             if (availableBalance != 0)
             {
-                _availableBalance = availableBalance;
+                AvailableBalance = availableBalance;
                 Log.Information("Balance updated. Available balance: {0}", availableBalance);
             }
             if (totalBalance != 0)
             {
-                _totalBalance = totalBalance;
+                TotalBalance = totalBalance;
                 Log.Information("Balance updated. Total balance: {0}", totalBalance);
             }
             return Task.CompletedTask;
@@ -123,7 +131,7 @@ namespace Former
         /// <summary>
         /// Возвращает true, если получилось удалить ордер по идентификатору из выбранного списка, иначе false
         /// </summary>
-        private bool RemoveOrder(string id, ConcurrentDictionary<string, Order> list)
+        public bool RemoveOrder(string id, ConcurrentDictionary<string, Order> list)
         {
             return list.TryRemove(id, out _);
         }
@@ -131,7 +139,7 @@ namespace Former
         /// <summary>
         /// Обновляет запись в выбранном списке, если она там существует
         /// </summary>
-        private bool UpdateOrder(Order newComingOrder, ConcurrentDictionary<string, Order> list)
+        public bool UpdateOrder(Order newComingOrder, ConcurrentDictionary<string, Order> list)
         {
             if (!list.ContainsKey(newComingOrder.Id)) return false;
             list.AddOrUpdate(newComingOrder.Id, newComingOrder, (_, v) =>
@@ -149,7 +157,7 @@ namespace Former
         /// <summary>
         /// Добавляет запись в выбранный список 
         /// </summary>
-        private bool AddOrder(string id, Order order, ConcurrentDictionary<string, Order> list)
+        public bool AddOrder(string id, Order order, ConcurrentDictionary<string, Order> list)
         {
             return list.TryAdd(id, order);
         }
@@ -177,8 +185,8 @@ namespace Former
         /// </summary>
         private void LockPlacingOrders(bool needLock)
         {
-            _placeLocker = needLock;
-            _fitPricesLocker = needLock;
+            PlaceLocker = needLock;
+            FitPricesLocker = needLock;
         }
     }
 }
