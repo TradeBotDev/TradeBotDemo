@@ -1,8 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
+using System.Security.Principal;
 using System.Threading.Tasks;
+using Website.Models;
 
 namespace Website.Controllers
 {
@@ -17,7 +22,17 @@ namespace Website.Controllers
         [HttpPost]
         public IActionResult Login(string email, string password)
         {
-            return View("Failed", "Какой-то текст");
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Email, email)
+            };
+            ClaimsIdentity id = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
+
+            return RedirectToAction("Account", "Account");
+
+            //return View("Failed", "Какой-то текст " + User.Identity.Name + User.Identity.IsAuthenticated.ToString());
         }
 
         [HttpGet]
