@@ -1,8 +1,6 @@
-﻿using Bitmex.Client.Websocket.Requests;
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using TradeBot.Common.v1;
-using TradeMarket.DataTransfering.Bitmex.Publishers;
 using Serilog;
 using Order = Bitmex.Client.Websocket.Responses.Orders.Order;
 using Margin = Bitmex.Client.Websocket.Responses.Margins.Margin;
@@ -12,9 +10,7 @@ using AmmendOrderRequest = TradeMarket.DataTransfering.Bitmex.Rest.Requests.Amme
 using Bitmex.Client.Websocket.Responses.Positions;
 using Bitmex.Client.Websocket.Responses.Books;
 using Bitmex.Client.Websocket.Responses.Wallets;
-using StackExchange.Redis;
 using Bitmex.Client.Websocket.Responses.Instruments;
-using TradeMarket.Model.TradeMarkets;
 using TradeMarket.Model.Publishers;
 using TradeMarket.Model.UserContexts;
 

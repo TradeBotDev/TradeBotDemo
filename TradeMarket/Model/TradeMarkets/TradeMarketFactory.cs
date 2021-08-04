@@ -30,11 +30,11 @@ namespace TradeMarket.Model.TradeMarkets
         public TradeMarket BuildBitmexTradeMarket()
         {
             var publisherVactory = new BitmexPublisherFactory();
-            var builder = new BitmexTradeMarketBuilder();
-            builder.AddCommonClient(new BitmexWebsocketClient(new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketTestnetUrl)));
-            builder.AddCommonClient(new BitmexRestfulClient());
-            builder.AddPublisherFactory(publisherVactory);
-            return builder.Result;
+            return new BitmexTradeMarketBuilder()
+                .AddCommonClient(new BitmexWebsocketClient(new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketTestnetUrl)))
+                .AddCommonClient(new BitmexRestfulClient())
+                .AddPublisherFactory(publisherVactory)
+                .Result;
         }
 
         #endregion

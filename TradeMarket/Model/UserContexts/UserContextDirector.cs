@@ -31,16 +31,13 @@ namespace TradeMarket.Model.UserContexts
             _builder.AddUniqueInformation(sessionId, slotName);
 
             var keySecretPair =  _accountClient.GetUserInfo(sessionId);
-            _builder.AddKeySecret(keySecretPair.Key, keySecretPair.Secret);
-
-            //TODO Сделать получение клиентов по конкретной бирже.Больше директоров !!!!!
-            _builder.AddRestfulClient(new BitmexRestfulClient());
-            _builder.AddWebSocketClient(new BitmexWebsocketClient(new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketTestnetUrl)));
-            
-            //TODO получение биржи из директора 
-            
-            _builder.AddTradeMarket(_tradeMarketFactory.GetTradeMarket(tradeMarketName));
-            return _builder.GetResult();
+            return _builder
+                .AddKeySecret(keySecretPair.Key, keySecretPair.Secret)
+                //TODO Сделать получение клиентов по конкретной бирже.Больше директоров !!!!!
+                .AddRestfulClient(new BitmexRestfulClient())
+                .AddWebSocketClient(new BitmexWebsocketClient(new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketTestnetUrl)))
+                .AddTradeMarket(_tradeMarketFactory.GetTradeMarket(tradeMarketName))
+                .GetResult();
         }
 
 

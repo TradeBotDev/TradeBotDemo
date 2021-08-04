@@ -1,4 +1,5 @@
 ﻿using Bitmex.Client.Websocket.Client;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,6 +38,12 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
         public ITradeMarketBuilder AddCommonClient(BitmexRestfulClient client)
         {
             _tradeMarket.CommonRestClient = client;
+            return this;
+        }
+
+        public ITradeMarketBuilder AddConnectionMultiplexer(IConnectionMultiplexer multiplexer)
+        {
+            _tradeMarket.Multiplexer = multiplexer;
             return this;
         }
 

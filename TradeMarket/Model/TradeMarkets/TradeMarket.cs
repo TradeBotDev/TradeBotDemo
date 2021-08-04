@@ -4,6 +4,7 @@ using Bitmex.Client.Websocket.Responses.Instruments;
 using Bitmex.Client.Websocket.Responses.Orders;
 using Bitmex.Client.Websocket.Responses.Positions;
 using Bitmex.Client.Websocket.Responses.Wallets;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +24,8 @@ namespace TradeMarket.Model.TradeMarkets
 {
     public abstract class TradeMarket
     {
+        public IConnectionMultiplexer Multiplexer { get; internal set; }
+
         public string Name { get; internal set; }
 
         public IPublisherFactory PublisherFactory { get; internal set; }
