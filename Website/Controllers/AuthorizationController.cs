@@ -61,8 +61,19 @@ namespace Website.Controllers
         [HttpGet]
         public IActionResult Logout()
         {
-            HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return Content("Вы вышли");
+            var channel = GrpcChannel.ForAddress("http://localhost:5000");
+            var accountClient = new Account.AccountClient(channel);
+            var logoutReply = accountClient.Logout(new LogoutRequest
+            {
+                SessionId = User.Identity.Name,
+                SaveExchangeAccesses = false
+            });
+            if (logoutReply.Result == AccountActionCode.Successful)
+            {
+                HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return Content("Вы вышли");
+            }
+            else return View("Failed", logoutReply.Message);
         }
     }
 }
