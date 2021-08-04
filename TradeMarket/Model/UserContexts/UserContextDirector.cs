@@ -34,7 +34,7 @@ namespace TradeMarket.Model.UserContexts
             return _builder
                 .AddKeySecret(keySecretPair.Key, keySecretPair.Secret)
                 //TODO Сделать получение клиентов по конкретной бирже.Больше директоров !!!!!
-                .AddRestfulClient(new BitmexRestfulClient())
+                .AddRestfulClient(new BitmexRestfulClient(BitmexRestufllLink.Testnet))
                 .AddWebSocketClient(new BitmexWebsocketClient(new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketTestnetUrl)))
                 .AddTradeMarket(_tradeMarketFactory.GetTradeMarket(tradeMarketName))
                 .GetResult();

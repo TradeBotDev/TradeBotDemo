@@ -32,7 +32,7 @@ namespace TradeMarket.Model.TradeMarkets
             var publisherVactory = new BitmexPublisherFactory();
             return new BitmexTradeMarketBuilder()
                 .AddCommonClient(new BitmexWebsocketClient(new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketTestnetUrl)))
-                .AddCommonClient(new BitmexRestfulClient())
+                .AddCommonClient(new BitmexRestfulClient(BitmexRestufllLink.Testnet))
                 .AddPublisherFactory(publisherVactory)
                 .Result;
         }
