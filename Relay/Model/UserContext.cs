@@ -35,6 +35,11 @@ namespace Relay.Model
 
             _tradeMarketClient.OrderRecievedEvent += _tradeMarketClient_OrderRecievedEvent;
         }
+        public IAsyncStreamReader<SubscribeOrdersResponse> ReConnect()
+        {
+            return _tradeMarketClient.OpenStream(Meta);
+        }
+
 
         private void _tradeMarketClient_OrderRecievedEvent(object sender, TradeBot.Common.v1.Order e)
         {
@@ -48,9 +53,9 @@ namespace Relay.Model
             _ = _formerClient.UpdateConfig(config, Meta);
         }
 
-        public void SubscribeForOrders()
+        public void SubscribeForOrders(UserContext user)
         {
-            _tradeMarketClient.SubscribeForOrders(_tradeMarketStream);
+            _tradeMarketClient.SubscribeForOrders(_tradeMarketStream,user);
         }
 
     }

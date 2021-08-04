@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Grpc.Net.Client;
+using Relay.Model;
 using TradeBot.Common.v1;
 using TradeBot.TradeMarket.TradeMarketService.v1;
 using SubscribeOrdersRequest = TradeBot.TradeMarket.TradeMarketService.v1.SubscribeOrdersRequest;
@@ -35,11 +36,23 @@ namespace Relay.Clients
             }, meta).ResponseStream;
         }
 
-        public async void SubscribeForOrders(IAsyncStreamReader<SubscribeOrdersResponse> stream)
+        public async void SubscribeForOrders(IAsyncStreamReader<SubscribeOrdersResponse> stream, UserContext user)
         {
-            while (await stream.MoveNext())
+
+            while (true)
             {
-                OrderRecievedEvent?.Invoke(this, new(stream.Current.Response.Order));
+                try
+                {
+                    while (await stream.MoveNext())
+                    {
+                        OrderRecievedEvent?.Invoke(this, new(stream.Current.Response.Order));
+                    }
+                    break;
+                }
+                catch (RpcException e)
+                {
+                    stream = user.ReConnect();
+                }
             }
         }
 

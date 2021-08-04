@@ -69,7 +69,7 @@ namespace Relay.Services
         {
             Log.Information($"StartBot requested form {context.Host} with meta : \n {context.RequestHeaders}");
             var user = GetUserContext(context.RequestHeaders);
-            user.SubscribeForOrders();
+            user.SubscribeForOrders(user);
             user.UpdateConfig(request.Config);
             //_algorithmClient.IsOn = true;
             return await Task.FromResult(new StartBotResponse()
