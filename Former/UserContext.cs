@@ -40,29 +40,29 @@ namespace Former
             _tradeMarketClient.UpdatePosition += UpdatePosition;
             _tradeMarketClient.UpdateMarketPrices += UpdateMarketPrices;
 
-            ObserveMarketPrices();
-            ObserveBalance();
-            ObserveMyOrders();
-            ObservePositions();
+            _ = ObserveMarketPrices();
+            _ = ObserveBalance();
+            _ = ObserveMyOrders();
+            _ = ObservePositions();
         }
 
-        private async void UpdateMarketPrices(double bid, double ask)
+        private async Task UpdateMarketPrices(double bid, double ask)
         {
             await _former.UpdateMarketPrices(bid, ask, this);
         }
-        private async void UpdateMyOrderList(Order orderNeededUpdate, ChangesType changesType)
+        private async Task UpdateMyOrderList(Order orderNeededUpdate, ChangesType changesType)
         {
             await _former.UpdateMyOrderList(orderNeededUpdate, changesType, this);
         }
-        private async void UpdateBalance(int balanceToBuy, int balanceToSell)
+        private async Task UpdateBalance(int balanceToBuy, int balanceToSell)
         {
             await _former.UpdateBalance(balanceToBuy, balanceToSell);
         }
-        private async void UpdatePosition(double currentQuantity)
+        private async Task UpdatePosition(double currentQuantity)
         {
             await _former.UpdatePosition(currentQuantity);
         }
-        public async void FormOrder(int decision )
+        public async Task FormOrder(int decision )
         {
             await _former.FormOrder(decision ,this);
         }
@@ -74,19 +74,19 @@ namespace Former
         {
             return await _tradeMarketClient.AmendOrder(id, newPrice, this);
         }
-        private async void ObserveBalance()
+        private async Task ObserveBalance()
         {
             await _tradeMarketClient.ObserveBalance(this);
         }
-        private async void ObserveMyOrders()
+        private async Task ObserveMyOrders()
         {
             await _tradeMarketClient.ObserveMyOrders(this);
         }
-        private async void ObservePositions()
+        private async Task ObservePositions()
         {
             await _tradeMarketClient.ObservePositions(this);
         }
-        private async void ObserveMarketPrices()
+        private async Task ObserveMarketPrices()
         {
             await _tradeMarketClient.ObserveMarketPrices(this);
         }

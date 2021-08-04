@@ -14,16 +14,16 @@ namespace Former
 {
     public class TradeMarketClient
     {
-        public delegate void MyOrdersEvent(Order newComingOrder, ChangesType changesType);
+        public delegate Task MyOrdersEvent(Order newComingOrder, ChangesType changesType);
         public MyOrdersEvent UpdateMyOrders;
 
-        public delegate void BalanceEvent(int balanceToBuy, int balanceToSell);
+        public delegate Task BalanceEvent(int balanceToBuy, int balanceToSell);
         public BalanceEvent UpdateBalance;
 
-        public delegate void PositionUpdate(double currentQuantity);
+        public delegate Task PositionUpdate(double currentQuantity);
         public PositionUpdate UpdatePosition;
 
-        public delegate void MarketPricesUpdate(double bid, double ask);
+        public delegate Task MarketPricesUpdate(double bid, double ask);
         public MarketPricesUpdate UpdateMarketPrices;
 
         private static int _retryDelay;
