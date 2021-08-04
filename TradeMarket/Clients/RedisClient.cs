@@ -14,7 +14,7 @@ namespace TradeMarket.Clients
 
         public RedisClient(IConnectionMultiplexer multiplexer)
         {
-            _db = multiplexer.GetDatabase();
+            _db = multiplexer == null ? null : multiplexer.GetDatabase();        
         }
 
         public async Task Send<T>(string id, T data, string PublishingTopic)

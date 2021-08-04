@@ -49,7 +49,6 @@ namespace TradeMarket.Model.UserContexts
         internal BitmexWebsocketClient WSClient { get; set; }
         internal BitmexRestfulClient RestClient { get; set; }
 
-        private AccountClient _accountClient;
 
         public void AssignKeySecret(string key,string secret)
         {
@@ -63,21 +62,16 @@ namespace TradeMarket.Model.UserContexts
         public void init()
         {
 
-            var keySecretPair = _accountClient.GetUserInfo(SessionId);
-            Key = keySecretPair.Key;
-            Secret = keySecretPair.Secret;
-
-            //TODO что-то сделать с этим методом
             AutheticateUser();
 
-            /*//инициализация подписок
+            //инициализация подписок
             TradeMarket.SubscribeToBalance((sender, el) => {UserBalance?.Invoke(sender, el); }, this);
             //TradeMarket.SubscribeToBook((sender, el) => {Book?.Invoke(sender, el); }, this);
             TradeMarket.SubscribeToBook25((sender, el) => Book25?.Invoke(sender, el), this);
             TradeMarket.SubscribeToUserOrders((sender, el) => UserOrders?.Invoke(sender, el), this);
             TradeMarket.SubscribeToUserMargin((sender, el) => UserMargin?.Invoke(sender, el), this);
             TradeMarket.SubscribeToUserPositions((sender, el) => UserPosition?.Invoke(sender, el), this);
-            TradeMarket.SubscribeToInstruments((sender, el) => InstrumentUpdate?.Invoke(sender, el), this);*/
+            TradeMarket.SubscribeToInstruments((sender, el) => InstrumentUpdate?.Invoke(sender, el), this);
         }
 
         public UserContext()
@@ -90,19 +84,11 @@ namespace TradeMarket.Model.UserContexts
         /// </summary>
         internal UserContext(string sessionId, string slotName, Model.TradeMarkets.TradeMarket tradeMarket)
         {
-            //инициализация websocket клиента
-            var communicator = new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketTestnetUrl);
-            WSClient = new BitmexWebsocketClient(communicator);
-            communicator.Start();
-
-            //инициализация http клиента
-            RestClient = new BitmexRestfulClient();
 
             SessionId = sessionId;
             SlotName = slotName;
 
             TradeMarket = tradeMarket;
-            _accountClient = AccountClient.GetInstance();
         }
 
         public async Task<PlaceOrderResponse> PlaceOrder(double quontity, double price)

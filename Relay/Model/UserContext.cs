@@ -50,7 +50,17 @@ namespace Relay.Model
 
         public void SubscribeForOrders()
         {
-            _tradeMarketClient.SubscribeForOrders(_tradeMarketStream);
+            try
+            {
+               _tradeMarketClient.SubscribeForOrders(_tradeMarketStream);
+
+            }
+            catch(Exception e)
+            {
+                Log.Error("Connecting with TM was interrupt with message {@Error}", e.Message);
+                _tradeMarketStream = _tradeMarketClient.OpenStream(Meta);
+                SubscribeForOrders();
+            }
         }
 
     }

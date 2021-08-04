@@ -18,7 +18,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Rest.Requests
         };
 
         public UserAuthentication Authentication;
-        public BitmexRestfulRequest(string key,string secret,HttpMethod method, string uri,string postdata) : base(method, BitmexRestfulClient.BitmexUri+uri) {
+        public BitmexRestfulRequest(string key,string secret,HttpMethod method, string uri,string postdata) : base(method, uri) {
             Authentication = new UserAuthentication(key, secret, method, uri, postdata);
             if(postdata is not null)
             {

@@ -47,6 +47,13 @@ namespace TradeMarket.Model.UserContexts
             return this;
         }
 
+        public UserContextBuilder InitUser()
+        {
+            context.init();
+            return this;
+        }
+
+
         public void Reset()
         {
             context = new UserContext();

@@ -16,22 +16,24 @@ namespace TradeMarket.Model.Publishers
 {
     public interface IPublisherFactory
     {
+        public delegate IPublisher<T> Create<T>(BitmexWebsocketClient client, UserContext context);
+
         #region Common Publishers
-        public IPublisher<BookLevel> CreateBook25Publisher(BitmexWebsocketClient client,string slot);
+        public IPublisher<BookLevel> CreateBook25Publisher(BitmexWebsocketClient client, UserContext context);
         
-        public IPublisher<Instrument> CreateInstrumentPublisher(BitmexWebsocketClient client, string slot);
+        public IPublisher<Instrument> CreateInstrumentPublisher(BitmexWebsocketClient client, UserContext context);
 
         #endregion
         #region Users Publishres
-        public IPublisher<Order> CreateUserOrderPublisher(UserContext context);
+        public IPublisher<Order> CreateUserOrderPublisher(BitmexWebsocketClient client,UserContext context);
 
-        public IPublisher<Margin> CreateUserMarginPublisher(UserContext context);
+        public IPublisher<Margin> CreateUserMarginPublisher(BitmexWebsocketClient client,UserContext context);
 
-        public IPublisher<Position> CreateUserPositionPublisher(UserContext context);
+        public IPublisher<Position> CreateUserPositionPublisher(BitmexWebsocketClient client,UserContext context);
 
-        public IPublisher<bool> CreateAuthenticationPublisher(UserContext context);
+        public IPublisher<bool> CreateAuthenticationPublisher(BitmexWebsocketClient client,UserContext context);
 
-        public IPublisher<Wallet> CreateWalletPublisher(UserContext context);
+        public IPublisher<Wallet> CreateWalletPublisher(BitmexWebsocketClient client,UserContext context);
         #endregion
     }
 }

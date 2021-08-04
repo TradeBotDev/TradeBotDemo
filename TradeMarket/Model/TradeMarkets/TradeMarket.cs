@@ -51,7 +51,15 @@ namespace TradeMarket.Model.TradeMarkets
         #endregion
 
         #region Users Publishers
-        //TODO мб перенести эти штуки внутрь юзерконтекста
+        public async Task<IPublisher<T>> CreatePublisher<T>(EventHandler<IPublisher<T>.ChangedEventArgs> handler, UserContext context, IPublisherFactory.Create<T> create)
+        {
+            return await Task.Run(() =>
+            {
+                var publisher = create(CommonWSClient, context);
+                publisher.Changed += handler;
+                return publisher;
+            });
+        }
         public Dictionary<UserContext, IPublisher<Wallet>> WalletPublishers { get; internal set; } = new Dictionary<UserContext, IPublisher<Wallet>>();
         public Dictionary<UserContext, IPublisher<Position>> PositionPublisher { get; internal set; } = new Dictionary<UserContext, IPublisher<Position>>();
         public Dictionary<UserContext, IPublisher<Order>> OrderPublisher { get; internal set; } = new Dictionary<UserContext, IPublisher<Order>>();
@@ -61,12 +69,12 @@ namespace TradeMarket.Model.TradeMarkets
 
         #region Subscribe Methods
         
-        public abstract void SubscribeToInstruments(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler, UserContext context);
-        public abstract void SubscribeToUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, UserContext context);
-        public abstract void SubscribeToUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, UserContext context);
-        public abstract void SubscribeToBook25(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, UserContext context);
-        public abstract void SubscribeToUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, UserContext context);
-        public abstract void SubscribeToBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, UserContext context);
+        public abstract Task SubscribeToInstruments(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler, UserContext context);
+        public abstract Task SubscribeToUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, UserContext context);
+        public abstract Task SubscribeToUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, UserContext context);
+        public abstract Task SubscribeToBook25(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, UserContext context);
+        public abstract Task SubscribeToUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, UserContext context);
+        public abstract Task SubscribeToBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, UserContext context);
 
         #endregion
 

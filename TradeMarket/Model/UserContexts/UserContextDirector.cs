@@ -26,17 +26,17 @@ namespace TradeMarket.Model.UserContexts
             _tradeMarketFactory = tradeMarketFactory;
         }
 
-        internal UserContext BuildUserContext(string sessionId,string slotName,string tradeMarketName)
+        internal async Task<UserContext> BuildUserContext(string sessionId,string slotName,string tradeMarketName)
         {
-            _builder.AddUniqueInformation(sessionId, slotName);
-
-            var keySecretPair =  _accountClient.GetUserInfo(sessionId);
+            var keySecretPair =  await _accountClient.GetUserInfoAsync(sessionId);
             return _builder
+                .AddUniqueInformation(sessionId, slotName)
                 .AddKeySecret(keySecretPair.Key, keySecretPair.Secret)
                 //TODO Сделать получение клиентов по конкретной бирже.Больше директоров !!!!!
                 .AddRestfulClient(new BitmexRestfulClient(BitmexRestufllLink.Testnet))
                 .AddWebSocketClient(new BitmexWebsocketClient(new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketTestnetUrl)))
                 .AddTradeMarket(_tradeMarketFactory.GetTradeMarket(tradeMarketName))
+                .InitUser()
                 .GetResult();
         }
 
@@ -44,23 +44,32 @@ namespace TradeMarket.Model.UserContexts
         internal List<UserContext> RegisteredUsers = new List<UserContext>();
         private object locker = new();
 
-        public UserContext GetUserContext(string sessionId, string slotName, string tradeMarketName)
+        public async Task<UserContext> GetUserContextAsync(string sessionId, string slotName, string tradeMarketName)
         {
+            bool CreatingUserContextIsRequired = false;
             UserContext userContext = null;
             lock (locker)
             {
                 Log.Logger.Information("Getting UserContext {@sessionId} : {@slotName} : {@tradeMarketName}", sessionId, slotName, tradeMarketName);
-                Log.Logger.Information("Stored Contexts : {@RegisteredUsers}", RegisteredUsers);
                 userContext = RegisteredUsers.FirstOrDefault(el => el.IsEquevalentTo(sessionId, slotName, tradeMarketName));
                 if (userContext is null)
                 {
                     Log.Logger.Information("Creating new UserContext {@sessionId} : {@slotName} : {@tradeMarketName}", sessionId, slotName, tradeMarketName);
                     //TODO если uc нет в списке - создать новый через директора
-                    userContext = BuildUserContext(sessionId, slotName, tradeMarketName);
+                    CreatingUserContextIsRequired = true;
+                }
+            }
+            if (CreatingUserContextIsRequired)
+            {
+                //дополнительная проверка после локера
+                userContext = RegisteredUsers.FirstOrDefault(el => el.IsEquevalentTo(sessionId, slotName, tradeMarketName));
+                if (userContext is null)
+                {
+                    userContext = await BuildUserContext(sessionId, slotName, tradeMarketName);
                     RegisteredUsers.Add(userContext);
                 }
-                return userContext;
             }
+            return userContext;
 
         }
     }

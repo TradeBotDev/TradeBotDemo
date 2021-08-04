@@ -23,7 +23,7 @@ namespace TradeMarket.Model.TradeMarkets
         {
             _multiplexer = multiplexer;
             _tradeMarkets = new Dictionary<string, TradeMarket>(new List<KeyValuePair<string, TradeMarket>>());
-            _tradeMarkets.Add("Bitmex", BuildBitmexTradeMarket());
+            _tradeMarkets.Add("bitmex", BuildBitmexTradeMarket());
         }
         #region Concrete TMs Build
         

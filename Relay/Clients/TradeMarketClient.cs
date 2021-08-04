@@ -35,7 +35,7 @@ namespace Relay.Clients
             }, meta).ResponseStream;
         }
 
-        public async void SubscribeForOrders(IAsyncStreamReader<SubscribeOrdersResponse> stream)
+        public async Task SubscribeForOrders(IAsyncStreamReader<SubscribeOrdersResponse> stream)
         {
             while (await stream.MoveNext())
             {

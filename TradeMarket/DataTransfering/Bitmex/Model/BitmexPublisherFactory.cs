@@ -19,38 +19,38 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
 {
     public class BitmexPublisherFactory : IPublisherFactory
     {
-        public IPublisher<bool> CreateAuthenticationPublisher(UserContext context)
+        public IPublisher<bool> CreateAuthenticationPublisher(BitmexWebsocketClient client, UserContext context)
         {
             return new AuthenticationPublisher(context.WSClient, context.WSClient.Streams.AuthenticationStream, context.Key,context.Secret,new System.Threading.CancellationToken());
         }
 
-        public IPublisher<BookLevel> CreateBook25Publisher(BitmexWebsocketClient client, string slot)
+        public IPublisher<BookLevel> CreateBook25Publisher(BitmexWebsocketClient client, UserContext context)
         {
             //TODO добавить мультиплексер
-            return new BookPublisher(client, client.Streams.Book25Stream,null,new Book25SubscribeRequest(slot), new System.Threading.CancellationToken());
+            return new BookPublisher(client, client.Streams.Book25Stream,null,new Book25SubscribeRequest(context.SlotName), new System.Threading.CancellationToken());
         }
 
-        public IPublisher<Instrument> CreateInstrumentPublisher(BitmexWebsocketClient client, string slot)
+        public IPublisher<Instrument> CreateInstrumentPublisher(BitmexWebsocketClient client, UserContext context)
         {
-            return new InstrumentPublisher(client, client.Streams.InstrumentStream,slot ,new System.Threading.CancellationToken());
+            return new InstrumentPublisher(client, client.Streams.InstrumentStream,context.SlotName ,new System.Threading.CancellationToken());
         }
 
-        public IPublisher<Margin> CreateUserMarginPublisher(UserContext context)
+        public IPublisher<Margin> CreateUserMarginPublisher(BitmexWebsocketClient client,UserContext context)
         {
             return new UserMarginPublisher(context.WSClient, context.WSClient.Streams.MarginStream, new System.Threading.CancellationToken());
         }
 
-        public IPublisher<Order> CreateUserOrderPublisher(UserContext context)
+        public IPublisher<Order> CreateUserOrderPublisher(BitmexWebsocketClient client,UserContext context)
         {
             return new UserOrderPublisher(context.WSClient, context.WSClient.Streams.OrderStream, new System.Threading.CancellationToken());
         }
 
-        public IPublisher<Position> CreateUserPositionPublisher(UserContext context)
+        public IPublisher<Position> CreateUserPositionPublisher(BitmexWebsocketClient client,UserContext context)
         {
             return new UserPositionPublisher(context.WSClient, context.WSClient.Streams.PositionStream, new System.Threading.CancellationToken());
         }
 
-        public IPublisher<Wallet> CreateWalletPublisher(UserContext context)
+        public IPublisher<Wallet> CreateWalletPublisher(BitmexWebsocketClient client, UserContext context)
         {
             return new UserWalletPublisher(context.WSClient, context.WSClient.Streams.WalletStream, new System.Threading.CancellationToken());
         }
