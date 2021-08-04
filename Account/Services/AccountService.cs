@@ -65,6 +65,7 @@ namespace AccountGRPC
                 {
                     string newSessionId = Guid.NewGuid().ToString();
                     existingLogin.First().SessionId = newSessionId;
+                    existingLogin.First().LoginDate = DateTime.Now;
                     database.SaveChanges();
 
                     return Task.FromResult(LoginReplies.AlreadySignedIn(newSessionId));
