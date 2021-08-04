@@ -11,11 +11,21 @@ using TradeBot.Account.AccountService.v1;
 using AccountGRPC.AccountMessages;
 using AccountGRPC.Validation;
 using TradeBot.License.LicenseService.v1;
+using Microsoft.Extensions.Configuration;
 
 namespace AccountGRPC
 {
     public class AccountService : Account.AccountBase
     {
+        private IConfigurationRoot config;
+
+        public AccountService()
+        {
+            config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: false)
+                .Build();
+        }
+
         // Метод входа в аккаунт по запросу клиента.
         public override Task<LoginResponse> Login(LoginRequest request, ServerCallContext context)
         {
@@ -217,9 +227,12 @@ namespace AccountGRPC
                 if (accounts.Count() == 0)
                     return Task.FromResult(CheckLicenseReplies.AccountNotFound());
 
+                // Получение строки подключения сервиса LicenseService.
+                string stroke = config.GetSection("GrpcClients").GetSection("LicenseService").Value;
                 // Подключение к сервису LicenseService.
-                var channel = GrpcChannel.ForAddress("http://localhost:5007");
+                var channel = GrpcChannel.ForAddress(stroke);
                 var client = new License.LicenseClient(channel);
+
                 // Отправка запроса и сразу же запись ответа.
                 var reply = client.CheckLicense(new LicenseCheckRequest
                 {
