@@ -14,12 +14,12 @@ namespace TradeMarket.Model
 
         private IDictionary<string, TradeMarket> _tradeMarkets;
 
-        public FactoryCache(IConnectionMultiplexer multiplexer)
+        public TradeMarketFactory(/*IConnectionMultiplexer multiplexer*/)
         {
-            _multiplexer = multiplexer;
+            //_multiplexer = multiplexer;
             _tradeMarkets = new Dictionary<string, TradeMarket>(new List<KeyValuePair<string, TradeMarket>>
             {
-                new KeyValuePair<string, TradeMarket>("bitmex",new BitmexTradeMarket("bitmex",_multiplexer))
+                new KeyValuePair<string, TradeMarket>("bitmex",new BitmexTradeMarket("bitmex"/*,_multiplexer*/))
             });
         }
 
