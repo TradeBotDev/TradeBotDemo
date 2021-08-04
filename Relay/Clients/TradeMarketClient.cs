@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Grpc.Net.Client;
+using Relay.Model;
 using Serilog;
 using TradeBot.Common.v1;
 using TradeBot.TradeMarket.TradeMarketService.v1;
@@ -12,14 +13,15 @@ using SubscribeOrdersResponse = TradeBot.TradeMarket.TradeMarketService.v1.Subsc
 
 namespace Relay.Clients
 {
-    public class TradeMarketClient 
+    public class TradeMarketClient
     {
         private TradeMarketService.TradeMarketServiceClient _client;
 
         public TradeMarketClient(Uri uri)
         {
-             _client = new TradeMarketService.TradeMarketServiceClient(GrpcChannel.ForAddress(uri));   
+            _client = new TradeMarketService.TradeMarketServiceClient(GrpcChannel.ForAddress(uri));
         }
+
         public IAsyncStreamReader<SubscribeOrdersResponse> OpenStream(Metadata meta)
         {
             return _client.SubscribeOrders(new SubscribeOrdersRequest()
@@ -34,24 +36,36 @@ namespace Relay.Clients
                 }
             }, meta).ResponseStream;
         }
-        public async void SubscribeForOrders(IAsyncStreamReader<SubscribeOrdersResponse> stream)
+
+        public async void SubscribeForOrders(IAsyncStreamReader<SubscribeOrdersResponse> stream, UserContext user)
         {
-            try
+            while (true)
             {
-                while (await stream.MoveNext())
+                try
                 {
-                    OrderRecievedEvent?.Invoke(this, new(stream.Current.Response.Order));
+                    while (await stream.MoveNext())
+                    {
+                        OrderRecievedEvent?.Invoke(this, new(stream.Current.Response.Order));
+                    }
+                    _ = stream.MoveNext();
+                    break;
                 }
-            }
-            catch (Exception)
-            {
-                if (stream.Current != null)
+                catch (RpcException e)
                 {
-                    OrderRecievedEvent?.Invoke(this, new(stream.Current.Response.Order));
+                    if (stream.Current != null)
+                    {
+                        OrderRecievedEvent?.Invoke(this, new(stream.Current.Response.Order));
+                    }
+                    stream = user.ReConnect();
                 }
-                _ = stream.MoveNext();
+                catch (System.InvalidOperationException e)
+                {
+                    Log.Information(e.Message);
+                    _ = stream.MoveNext();
+                }
             }
         }
+
         public event EventHandler<Order> OrderRecievedEvent;
     }
 }

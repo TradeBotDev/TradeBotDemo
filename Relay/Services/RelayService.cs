@@ -49,16 +49,16 @@ namespace Relay.Services
         public UserContext GetUserContext(Metadata meta)
         {
             //TODO Возможно он тут проверяет по ссылке. так что надо бы сделать Equals
-            if (contexts.FirstOrDefault(x=>x.Key.FirstOrDefault(y=>y.Value==meta[2].Value)!=null).Value!=null) 
+            if (contexts.Keys.FirstOrDefault(x => x[2].Value == meta[2].Value) != null)
             {
-                return contexts.First(x => x.Key.First(y => y.Value == meta[2].Value).Value != null).Value;
+                return contexts.First(x => x.Value.Meta[2].Value == meta[2].Value).Value;
             }
             UserContext newContext = new(meta, _former, _algorithmClient, _tradeMarketClient);
-            contexts.Add(meta,newContext);
+            contexts.Add(meta, newContext);
             return newContext;
         }
 
-        public RelayService(AlgorithmClient algorithm,TradeMarketClient tradeMarket,FormerClient former)
+        public RelayService(AlgorithmClient algorithm, TradeMarketClient tradeMarket, FormerClient former)
         {
             _algorithmClient = algorithm;
             _tradeMarketClient = tradeMarket;
@@ -67,16 +67,20 @@ namespace Relay.Services
 
         public override async Task<StartBotResponse> StartBot(StartBotRequest request, ServerCallContext context)
         {
-            Log.Information($"StartBot requested form {context.Host} with meta : \n {context.RequestHeaders}");
             var user = GetUserContext(context.RequestHeaders);
-            user.StatusOfSubscribe();
+            user.StatusOfWork();
             user.SubscribeForOrders();
             user.UpdateConfig(request.Config);
             //_algorithmClient.IsOn = true;
-            return await UserContext.ReturnBotStatus(user);
+            return await Task.FromResult(new StartBotResponse()
+            {
+                Response = new DefaultResponse()
+                {
+                    Message = "Bot was launched",
+                    Code = ReplyCode.Succeed
+                }
+            });
         }
-
-        
 
         public async override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request,
             ServerCallContext context)
@@ -92,7 +96,7 @@ namespace Relay.Services
         }
         //public async override Task SubscribeOrders(TradeBot.Relay.RelayService.v1.SubscribeOrdersRequest request, IServerStreamWriter<TradeBot.Relay.RelayService.v1.SubscribeOrdersResponse> responseStream, ServerCallContext context)
         //{
-           
+
         //}
     }
 }
