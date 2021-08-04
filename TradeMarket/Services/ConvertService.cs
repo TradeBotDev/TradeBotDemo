@@ -1,5 +1,6 @@
 ﻿using Bitmex.Client.Websocket.Responses;
 using Bitmex.Client.Websocket.Responses.Books;
+using Bitmex.Client.Websocket.Responses.Instruments;
 using Bitmex.Client.Websocket.Responses.Margins;
 using Bitmex.Client.Websocket.Responses.Orders;
 using Bitmex.Client.Websocket.Responses.Positions;
@@ -62,6 +63,18 @@ namespace TradeMarket.Services
                 CurrentQty = position.CurrentQty ?? default(long)
             };
         }
+
+        public static TradeBot.TradeMarket.TradeMarketService.v1.SubscribePriceResponse ConvertInstrument(Instrument instrument,BitmexAction action)
+        {
+            return new()
+            {
+                AskPrice = instrument.AskPrice ?? default(double),
+                BidPrice = instrument.BidPrice ?? default(double),
+                FairPrice = instrument.FairPrice ?? default(double),
+                ChangedType = ConvertChangeType(action)
+            };
+        }
+        
         
         #endregion
 

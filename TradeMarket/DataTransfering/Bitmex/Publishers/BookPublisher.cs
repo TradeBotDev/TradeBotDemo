@@ -38,5 +38,10 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         {
             await base.SubscribeAsync(bookSubscribeRequest, _stream, token);
         }
+
+        public override void Start()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

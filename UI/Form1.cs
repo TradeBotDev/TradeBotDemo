@@ -1,17 +1,9 @@
-﻿using Grpc.Net.Client;
+﻿using Grpc.Core;
+using Grpc.Net.Client;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using TradeBot.Facade.FacadeService.v1;
-using TradeBot.Relay.RelayService.v1;
 using TradeBot.Common.v1;
-using Grpc.Core;
+using TradeBot.Facade.FacadeService.v1;
 //using StartBotRequest = TradeBot.Relay.RelayService.v1.StartBotRequest;
 
 namespace UI
@@ -53,7 +45,7 @@ namespace UI
             //};
 
 
-            var call2 =await facadeClient.SwitchBotAsync(requestForRelay,meta);
+            var call2 = await facadeClient.SwitchBotAsync(requestForRelay, meta);
             Console.WriteLine("Запустил бота с конфигом {0}", requestForRelay.Config);
         }
 
@@ -89,23 +81,14 @@ namespace UI
 
         private async void RegistrationButton_Click(object sender, EventArgs e)
         {
-            try
+            var regResponse = await client.RegisterAsync(new RegisterRequest
             {
-                var regResponse = await client.RegisterAsync(new RegisterRequest
-                {
-                    Email = RegLog.Text,
-                    Password = RegPass.Text,
-                    VerifyPassword=RegPass.Text
-                });
+                Email = RegLog.Text,
+                Password = RegPass.Text,
+                VerifyPassword = RegPass.Text
+            });
 
-                
-                
-                
-            }
-            catch (RpcException ex)
-            {
-                IsUserLogged.Text = ex.Message;
-            }
+
         }
 
         private async void LoginButton_Click(object sender, EventArgs e)

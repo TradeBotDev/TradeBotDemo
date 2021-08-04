@@ -1,4 +1,5 @@
 ﻿using Bitmex.Client.Websocket.Responses.Books;
+using Bitmex.Client.Websocket.Responses.Instruments;
 using Bitmex.Client.Websocket.Responses.Orders;
 using Bitmex.Client.Websocket.Responses.Positions;
 using Bitmex.Client.Websocket.Responses.Wallets;
@@ -36,20 +37,13 @@ namespace TradeMarket.Model
 
         public abstract void SubscribeToUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, UserContext context);
 
-        public abstract void SubscribeToBalance(EventHandler<Wallet> handler, UserContext context);
+        public abstract void SubscribeToBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, UserContext context);
 
         public abstract void SubscribeToUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, UserContext context);
 
         public abstract void SubscribeToUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, UserContext context);
 
-
-
-        public abstract event EventHandler<IPublisher<BookLevel>.ChangedEventArgs> Book25Update;
-        public abstract event EventHandler<IPublisher<BookLevel>.ChangedEventArgs> BookUpdate;
-        public abstract event EventHandler<IPublisher<Order>.ChangedEventArgs> UserOrdersUpdate;
-        public abstract event EventHandler<Wallet> BalanceUpdate;
-        public abstract event EventHandler<IPublisher<Margin>.ChangedEventArgs> MarginUpdate;
-        public abstract event EventHandler<IPublisher<Position>.ChangedEventArgs> PositionUpdate;
+        public abstract void SubscribeToInstruments(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler, UserContext context);
         #endregion
 
         
