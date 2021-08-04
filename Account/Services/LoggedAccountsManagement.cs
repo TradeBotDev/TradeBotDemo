@@ -23,7 +23,7 @@ namespace AccountGRPC
                         database.SaveChanges();
                         return true;
                     }
-                    // Если время не вышло, но при этом пользователь вошел в аккаунт, оно обновляется.
+                    // Если время не вышло, но при этом пользователь произвел действия с аккаунтом, оно обновляется.
                     checkAccount.First().LoginDate = DateTime.Now;
                     database.SaveChanges();
                     return false;
