@@ -17,6 +17,8 @@ namespace Website.Controllers
         [HttpGet]
         public IActionResult Login()
         {
+            ViewBag.Title = "Вход";
+            ViewBag.SectionTitle = "Вход";
             return View();
         }
 
@@ -43,18 +45,27 @@ namespace Website.Controllers
                 HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
                 return RedirectToAction("Account", "Account");
             }
-            else return View("Failed", loginReply.Message);
+            else
+            {
+                ViewBag.Title = "Произошла ошибка";
+                ViewBag.SectionTitle = "Ошибка при входе";
+                return View("Failed", loginReply.Message);
+            }
         }
 
         [HttpGet]
         public IActionResult Register()
         {
+            ViewBag.Title = "Регистрация";
+            ViewBag.SectionTitle = "Регистрация";
             return View();
         }
 
         [HttpPost]
         public IActionResult Register(string email, string password, string verify_password)
         {
+            ViewBag.Title = "Произошла ошибка";
+            ViewBag.SectionTitle = "Ошибка при регистрации";
             return View("Failed", "Какой-то текст");
         }
 
@@ -73,7 +84,12 @@ namespace Website.Controllers
                 HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 return Content("Вы вышли");
             }
-            else return View("Failed", logoutReply.Message);
+            else
+            {
+                ViewBag.Title = "Произошла ошибка";
+                ViewBag.SectionTitle = "Ошибка при выходе";
+                return View("Failed", logoutReply.Message);
+            }
         }
     }
 }

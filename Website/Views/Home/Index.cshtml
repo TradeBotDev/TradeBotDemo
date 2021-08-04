@@ -1,15 +1,6 @@
-﻿<p>Главная страница</p>
-<a href="/about">О нас</a>
-<a href="/tradebot">Tradebot</a>
-<a href="/account">Аккаунт</a>
-
-@{ 
+﻿@{ 
     string message = "Здесь будет всякий контент. Пока что сайт вообще пустой...";
     <p>@message</p>
 }
-
-<a href="/authorization/login">Войти</a>
-<a href="/authorization/register">Зарегистрироваться</a>
-<a href="authorization/logout">Выйти</a>
 
 @User.Identity.IsAuthenticated

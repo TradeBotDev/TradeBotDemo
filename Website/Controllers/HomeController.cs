@@ -14,12 +14,16 @@ namespace Website.Controllers
 
         public IActionResult Index()
         {
+            ViewBag.Title = "Главная страница";
+            ViewBag.SectionTitle = "Главная страница";
             return View();
         }
 
         [Route("About")]
         public IActionResult About()
         {
+            ViewBag.Title = "О нас";
+            ViewBag.SectionTitle = "О нас";
             return View();
         }
     }

@@ -13,6 +13,8 @@ namespace Website.Controllers
         [Route("Account")]
         public IActionResult Account()
         {
+            ViewBag.Title = "Аккаунт";
+            ViewBag.SectionTitle = "Аккаунт";
             return View();
         }
     }
