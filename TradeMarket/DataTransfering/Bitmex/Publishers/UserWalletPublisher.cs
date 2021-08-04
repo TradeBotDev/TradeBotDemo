@@ -26,6 +26,11 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             _stream = stream;
         }
 
+        public override void Start()
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task SubcribeAsync(CancellationToken token)
         {
             await base.SubscribeAsync(new WalletSubscribeRequest(), _stream, token);

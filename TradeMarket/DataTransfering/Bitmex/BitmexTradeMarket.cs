@@ -32,6 +32,7 @@ using Bitmex.Client.Websocket.Responses.Positions;
 using Bitmex.Client.Websocket.Responses.Books;
 using Bitmex.Client.Websocket.Responses.Wallets;
 using StackExchange.Redis;
+using Bitmex.Client.Websocket.Responses.Instruments;
 
 namespace TradeMarket.DataTransfering.Bitmex
 {
@@ -44,16 +45,10 @@ namespace TradeMarket.DataTransfering.Bitmex
         private AuthenticationPublisher _userAuthenticationPublisher;
         private UserMarginPublisher _userMarginPublisher;
         private UserPositionPublisher _userPositionPublisher;
+        private InstrumentPublisher _instrumentPublisher;
 
 
         private IConnectionMultiplexer _multiplexer;
-
-        public override event EventHandler<IPublisher<BookLevel>.ChangedEventArgs> Book25Update;
-        public override event EventHandler<IPublisher<BookLevel>.ChangedEventArgs> BookUpdate;
-        public override event EventHandler<IPublisher<Order>.ChangedEventArgs> UserOrdersUpdate;
-        public override event EventHandler<Wallet> BalanceUpdate;
-        public override event EventHandler<IPublisher<Margin>.ChangedEventArgs> MarginUpdate;
-        public override event EventHandler<IPublisher<Position>.ChangedEventArgs> PositionUpdate;
 
 
         public BitmexTradeMarket(string name,IConnectionMultiplexer multiplexer)
@@ -62,53 +57,28 @@ namespace TradeMarket.DataTransfering.Bitmex
             Name = name;
         }
 
-        #region EventsHandlers
-        private void _userPositionPublisher_Changed(object sender, IPublisher<Position>.ChangedEventArgs e)
-        {
-            //Log.Information("Recieved Position {@Position}", e.Changed);
-            PositionUpdate?.Invoke(this, e);
-        }
-
-
-        private void _userMarginPublisher_Changed(object sender, IPublisher<Margin>.ChangedEventArgs e)
-        {
-            //Log.Information("Recieved Margin {@Margin}", e);
-            MarginUpdate?.Invoke(sender, e);
-        }
-
-
-        private void _userWalletPublisher_Changed(object sender, IPublisher<global::Bitmex.Client.Websocket.Responses.Wallets.Wallet>.ChangedEventArgs e)
-        {
-            //Log.Information("Recieved Balance {@Balance}", e);
-            BalanceUpdate?.Invoke(sender, e.Changed);
-        }
-
-        private void _userOrdersPublisher_Changed(object sender, IPublisher<global::Bitmex.Client.Websocket.Responses.Orders.Order>.ChangedEventArgs e)
-        {
-            UserOrdersUpdate?.Invoke(sender, e );
-        }
-
-        private void _bookPublisher_Changed(object sender, IPublisher<global::Bitmex.Client.Websocket.Responses.Books.BookLevel>.ChangedEventArgs e)
-        {
-            BookUpdate?.Invoke(sender, e);
-        }
-
-        private void _book25Publisher_Changed(object sender, IPublisher<global::Bitmex.Client.Websocket.Responses.Books.BookLevel>.ChangedEventArgs e)
-        {
-            Book25Update?.Invoke(sender, e);
-        }
-        #endregion
-
+      
         #region SubscribeRequests
+
+        public async override void SubscribeToInstruments(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler, UserContext context)
+        {
+            if (_instrumentPublisher is null)
+            {
+                _instrumentPublisher = new InstrumentPublisher(context.WSClient, context.WSClient.Streams.InstrumentStream);
+                _instrumentPublisher.Changed += handler;
+            }
+            await _instrumentPublisher.SubcribeAsync(context.SlotName,new System.Threading.CancellationToken());
+        }
+
+
         public async override void SubscribeToUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, UserContext context)
         {
             if (_userPositionPublisher is null)
             {
                 _userPositionPublisher = new UserPositionPublisher(context.WSClient, context.WSClient.Streams.PositionStream);
-                _userPositionPublisher.Changed += _userPositionPublisher_Changed;
+                _userPositionPublisher.Changed += handler;
             }
             await _userPositionPublisher.SubcribeAsync(new System.Threading.CancellationToken());
-            PositionUpdate += handler;
         }
 
         public async override void SubscribeToUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, UserContext context)
@@ -116,26 +86,9 @@ namespace TradeMarket.DataTransfering.Bitmex
             if (_userMarginPublisher is null)
             {
                 _userMarginPublisher = new UserMarginPublisher(context.WSClient, context.WSClient.Streams.MarginStream);
-                _userMarginPublisher.Changed += _userMarginPublisher_Changed;
+                _userMarginPublisher.Changed += handler;
             }
             await _userMarginPublisher.SubcribeAsync(new System.Threading.CancellationToken());
-            MarginUpdate += handler;
-        }
-
-        public async override Task<DefaultResponse> AutheticateUser(string api, string secret, UserContext context)
-        {
-            if(_userAuthenticationPublisher is null){
-                _userAuthenticationPublisher = new AuthenticationPublisher(context.WSClient, context.WSClient.Streams.AuthenticationStream);
-            }
-            bool answer = false;
-            _userAuthenticationPublisher.Changed += (sender, args) => { answer = args.Changed; };
-
-            await _userAuthenticationPublisher.SubcribeAsync(context.Key, context.Secret, new System.Threading.CancellationToken());
-            return new DefaultResponse
-            { 
-                Code = answer ? ReplyCode.Succeed : ReplyCode.Failure,
-                Message = ""
-            };
         }
 
         public async override void SubscribeToBook25(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, UserContext context)
@@ -143,10 +96,9 @@ namespace TradeMarket.DataTransfering.Bitmex
             if(_book25Publisher is null)
             {
                 _book25Publisher = new BookPublisher(context.WSClient, context.WSClient.Streams.Book25Stream,_multiplexer);
-                _book25Publisher.Changed += _book25Publisher_Changed;
+                _book25Publisher.Changed += handler;
             }
             await _book25Publisher.SubscribeAsync(new Book25SubscribeRequest(context.SlotName), new System.Threading.CancellationToken());
-            Book25Update += handler;
         }
 
         public async override void SubscribeToBook(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, UserContext context)
@@ -154,10 +106,9 @@ namespace TradeMarket.DataTransfering.Bitmex
             if (_bookPublisher is null)
             {
                 _bookPublisher = new BookPublisher(context.WSClient, context.WSClient.Streams.BookStream,_multiplexer);
-                _bookPublisher.Changed += _bookPublisher_Changed;
+                _bookPublisher.Changed += handler;
             }
             await _bookPublisher.SubscribeAsync(new BookSubscribeRequest(context.SlotName), new System.Threading.CancellationToken());
-            BookUpdate += handler;
         }
 
         public async override void SubscribeToUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, UserContext context)
@@ -165,21 +116,19 @@ namespace TradeMarket.DataTransfering.Bitmex
             if (_userOrdersPublisher is null)
             {
                 _userOrdersPublisher = new UserOrderPublisher(context.WSClient, context.WSClient.Streams.OrderStream);
-                _userOrdersPublisher.Changed += _userOrdersPublisher_Changed;
+                _userOrdersPublisher.Changed += handler;
             }
             await _userOrdersPublisher.SubcribeAsync(new System.Threading.CancellationToken());
-            UserOrdersUpdate += handler;
         }
 
-        public async override void SubscribeToBalance(EventHandler<Wallet> handler, UserContext context)
+        public async override void SubscribeToBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, UserContext context)
         {
             if (_userWalletPublisher is null)
             {
                 _userWalletPublisher = new UserWalletPublisher(context.WSClient, context.WSClient.Streams.WalletStream);
-                _userWalletPublisher.Changed += _userWalletPublisher_Changed;
+                _userWalletPublisher.Changed += handler;
             }
             await _userWalletPublisher.SubcribeAsync(new System.Threading.CancellationToken());
-            BalanceUpdate += handler;
         }
         #endregion
 
@@ -198,6 +147,7 @@ namespace TradeMarket.DataTransfering.Bitmex
             var orderMessage = response.Message;
             if (!string.IsNullOrEmpty(orderMessage.OrdRejReason))
             {
+                Log.Error("Id {0}, quantity {1}, price {2}, leavesQty {3}", id, Quantity, price, LeavesQuantity);
                 return new()
                 {
                     Code = ReplyCode.Failure,
@@ -229,13 +179,29 @@ namespace TradeMarket.DataTransfering.Bitmex
             };
         }
 
+        //TODO перенести в конвертер
+        public static double RoundToHalfOrZero(double value)
+        {
+            double truncatedDifference = value - Math.Truncate(value);
+            //если что-то случилось и пришло не ровно 0.5
+            //разница с 0.5 больше чем 0.01 считается нарошной 
+            if (Math.Abs(truncatedDifference - 0.5) < 0.01)
+            {
+                return Math.Truncate(value) + 0.5;
+            }
+            else
+            {
+                return Math.Truncate(value);
+            }
+        }
+
         public async override Task<TradeBot.TradeMarket.TradeMarketService.v1.PlaceOrderResponse> PlaceOrder(double quontity, double price, UserContext context)
         {
             var response = await context.RestClient.SendAsync(new PlaceOrderRequest(context.Key, context.Secret, new Order
             {
                 Symbol = context.SlotName,
                 OrdType = "Limit",
-                Price = (int)price,
+                Price = RoundToHalfOrZero(price),
                 OrderQty = (long?)quontity
             }), new System.Threading.CancellationToken());
             if (response.Error is not null)
@@ -274,5 +240,22 @@ namespace TradeMarket.DataTransfering.Bitmex
             };
         }
         #endregion
+
+        public async override Task<DefaultResponse> AutheticateUser(string api, string secret, UserContext context)
+        {
+            if (_userAuthenticationPublisher is null)
+            {
+                _userAuthenticationPublisher = new AuthenticationPublisher(context.WSClient, context.WSClient.Streams.AuthenticationStream);
+            }
+            bool answer = false;
+            _userAuthenticationPublisher.Changed += (sender, args) => { answer = args.Changed; };
+
+            await _userAuthenticationPublisher.SubcribeAsync(context.Key, context.Secret, new System.Threading.CancellationToken());
+            return new DefaultResponse
+            {
+                Code = answer ? ReplyCode.Succeed : ReplyCode.Failure,
+                Message = ""
+            };
+        }
     }
 }

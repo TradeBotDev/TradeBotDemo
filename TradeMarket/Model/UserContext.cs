@@ -1,6 +1,7 @@
 ﻿using Bitmex.Client.Websocket;
 using Bitmex.Client.Websocket.Client;
 using Bitmex.Client.Websocket.Responses.Books;
+using Bitmex.Client.Websocket.Responses.Instruments;
 using Bitmex.Client.Websocket.Responses.Orders;
 using Bitmex.Client.Websocket.Responses.Positions;
 using Bitmex.Client.Websocket.Responses.Wallets;
@@ -34,9 +35,11 @@ namespace TradeMarket.Model
         public event EventHandler<IPublisher<BookLevel>.ChangedEventArgs> Book25;
         public event EventHandler<IPublisher<BookLevel>.ChangedEventArgs> Book;
         public event EventHandler<IPublisher<Order>.ChangedEventArgs> UserOrders;
-        public event EventHandler<Wallet> UserBalance;
+        public event EventHandler<IPublisher<Wallet>.ChangedEventArgs> UserBalance;
         public event EventHandler<IPublisher<Margin>.ChangedEventArgs> UserMargin;
         public event EventHandler<IPublisher<Position>.ChangedEventArgs> UserPosition;
+        public event EventHandler<IPublisher<Instrument>.ChangedEventArgs> InstrumentUpdate;
+
 
 
         //TODO тут должен быть кэш из редиса
@@ -67,6 +70,7 @@ namespace TradeMarket.Model
             TradeMarket.SubscribeToUserOrders((sender, el) => UserOrders?.Invoke(sender, el), this);
             TradeMarket.SubscribeToUserMargin((sender, el) => UserMargin?.Invoke(sender, el), this);
             TradeMarket.SubscribeToUserPositions((sender, el) => UserPosition?.Invoke(sender, el), this);
+            TradeMarket.SubscribeToInstruments((sender, el) => InstrumentUpdate?.Invoke(sender, el), this);
         }
 
         /// <summary>

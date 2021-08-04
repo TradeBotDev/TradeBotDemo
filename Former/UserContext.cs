@@ -34,39 +34,22 @@ namespace Former
             TradeMarketClient.Configure("https://localhost:5005", 10000);
 
             _tradeMarketClient = new TradeMarketClient();
-            _storage = new Storage(25);
             _former = new Former();
-            
 
-            _tradeMarketClient.UpdateOrderBook += UpdateOrderBooks;
             _tradeMarketClient.UpdateBalance += UpdateBalance;
             _tradeMarketClient.UpdateMyOrders += UpdateMyOrderList;
             _tradeMarketClient.UpdatePosition += UpdatePosition;
+            _tradeMarketClient.UpdateMarketPrices += UpdateMarketPrices;
 
-            ObserveOrderBook();
+            ObserveMarketPrices();
             ObserveBalance();
             ObserveMyOrders();
             ObservePositions();
         }
-        public async Task<PlaceOrderResponse> PlaceFullCounterOrder(double price, double quantity)
+
+        private async void UpdateMarketPrices(double bid, double ask)
         {
-           return await _former.PlaceFullCounterOrder(price, quantity, this);
-        }
-        public async Task<PlaceOrderResponse> PlacePartialCounterOrder(double price, double newQuantity, double oldQuantity)
-        {
-           return await _former.PlacePartialCounterOrder(price, newQuantity, oldQuantity, this);
-        }
-        public async void FormPurchaseOrder()
-        {
-            await _former.FormPurchaseOrder(this);
-        }
-        public async void FormSellOrder()
-        {
-            await _former.FormSellOrder(this);
-        }
-        private async void UpdateOrderBooks(Order orderNeededUpdate) 
-        {
-           await _storage.UpdateOrderBooks(orderNeededUpdate, this);
+            await _former.UpdateMarketPrices(bid, ask, this);
         }
         private async void UpdateMyOrderList(Order orderNeededUpdate, ChangesType changesType)
         {
@@ -80,6 +63,10 @@ namespace Former
         {
             await _storage.UpdatePosition(currentQuantity);
         }
+        public async void FormOrder(int decision )
+        {
+            await _former.FormOrder(decision ,this);
+        }
         public async Task<PlaceOrderResponse> PlaceOrder(double sellPrice, double contractValue)
         {
             return await _tradeMarketClient.PlaceOrder(sellPrice, contractValue, this);
@@ -87,10 +74,6 @@ namespace Former
         public async Task<AmmendOrderResponse> AmendOrder(string id, double newPrice)
         {
             return await _tradeMarketClient.AmendOrder(id, newPrice, this);
-        }
-        private async void ObserveOrderBook()
-        {
-            await _tradeMarketClient.ObserveOrderBook(this);
         }
         private async void ObserveBalance()
         {
@@ -103,6 +86,10 @@ namespace Former
         private async void ObservePositions()
         {
             await _tradeMarketClient.ObservePositions(this);
+        }
+        private async void ObserveMarketPrices()
+        {
+            await _tradeMarketClient.ObserveMarketPrices(this);
         }
     }
 }

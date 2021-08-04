@@ -26,9 +26,9 @@ namespace TradeMarket.Services
 {
     public partial class TradeMarketService : TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceBase
     {
-        private TradeMarketFactory _factory;
+        private FactoryCache _factory;
 
-        public TradeMarketService(TradeMarketFactory factory)
+        public TradeMarketService(FactoryCache factory)
         {
             _factory = factory;
         }
@@ -101,13 +101,27 @@ namespace TradeMarket.Services
             var user = await _factory.GetUserContextAsync(sessionId, slot, trademarket);
 
             user.UserBalance += async (sender, args) => {
-                await WriteStreamAsync<SubscribeBalanceResponse>(responseStream, new SubscribeBalanceResponse { Response = new() { Balance = ConvertService.ConvertBalance(args) } });
+                await WriteStreamAsync<SubscribeBalanceResponse>(responseStream, new SubscribeBalanceResponse { Response = new() { Balance = ConvertService.ConvertBalance(args.Changed) } });
             };
             //TODO отписка после отмены
             await AwaitCancellation(context.CancellationToken);
 
         }
 
+        public async override Task SubscribePrice(SubscribePriceRequest request, IServerStreamWriter<SubscribePriceResponse> responseStream, ServerCallContext context)
+        {
+            var sessionId = context.RequestHeaders.Get("sessionid").Value;
+            var slot = context.RequestHeaders.Get("slot").Value;
+            var trademarket = context.RequestHeaders.Get("trademarket").Value;
+
+            var user = await _factory.GetUserContextAsync(sessionId, slot, trademarket);
+
+            user.InstrumentUpdate += async (sender, args) => {
+                await WriteStreamAsync<SubscribePriceResponse>(responseStream, ConvertService.ConvertInstrument(args.Changed,args.Action));
+            };
+            //TODO отписка после отмены
+            await AwaitCancellation(context.CancellationToken);
+        }
 
         public async override Task SubscribeMargin(SubscribeMarginRequest request, IServerStreamWriter<SubscribeMarginResponse> responseStream, ServerCallContext context)
         {
