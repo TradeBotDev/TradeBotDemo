@@ -47,6 +47,12 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
             return this;
         }
 
+        public ITradeMarketBuilder AddName(string name)
+        {
+            _tradeMarket.Name = name;
+            return this;
+        }
+
         public ITradeMarketBuilder AddPublisherFactory(IPublisherFactory factory)
         {
             _tradeMarket.PublisherFactory = factory;

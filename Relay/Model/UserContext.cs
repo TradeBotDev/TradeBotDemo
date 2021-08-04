@@ -48,18 +48,18 @@ namespace Relay.Model
             _ = _formerClient.UpdateConfig(config, Meta);
         }
 
-        public void SubscribeForOrders()
+        public async Task SubscribeForOrders()
         {
             try
             {
-               _tradeMarketClient.SubscribeForOrders(_tradeMarketStream);
+               await _tradeMarketClient.SubscribeForOrders(_tradeMarketStream);
 
             }
             catch(Exception e)
             {
                 Log.Error("Connecting with TM was interrupt with message {@Error}", e.Message);
                 _tradeMarketStream = _tradeMarketClient.OpenStream(Meta);
-                SubscribeForOrders();
+                await SubscribeForOrders();
             }
         }
 

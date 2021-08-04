@@ -11,6 +11,8 @@ namespace TradeMarket.Model.TradeMarkets
 {
     public interface ITradeMarketBuilder
     {
+        public ITradeMarketBuilder AddName(string name);
+
         public ITradeMarketBuilder AddPublisherFactory(IPublisherFactory factory);
 
         public ITradeMarketBuilder AddCommonClient(BitmexWebsocketClient client);

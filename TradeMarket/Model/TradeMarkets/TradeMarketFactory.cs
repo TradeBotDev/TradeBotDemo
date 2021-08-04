@@ -34,6 +34,7 @@ namespace TradeMarket.Model.TradeMarkets
                 .AddCommonClient(new BitmexWebsocketClient(new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketTestnetUrl)))
                 .AddCommonClient(new BitmexRestfulClient(BitmexRestufllLink.Testnet))
                 .AddPublisherFactory(publisherVactory)
+                .AddName("bitmex")
                 .Result;
         }
 

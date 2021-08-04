@@ -5,6 +5,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using TradeMarket.Clients;
 using TradeMarket.DataTransfering.Bitmex.Rest.Client;
@@ -19,16 +20,16 @@ namespace TradeMarket.Model.UserContexts
         private readonly AccountClient _accountClient;
         private readonly TradeMarketFactory _tradeMarketFactory;
 
-        public UserContextDirector(UserContextBuilder builder, AccountClient accountClient,TradeMarketFactory tradeMarketFactory)
+        public UserContextDirector(UserContextBuilder builder, AccountClient accountClient, TradeMarketFactory tradeMarketFactory)
         {
             _builder = builder;
             _accountClient = accountClient;
             _tradeMarketFactory = tradeMarketFactory;
         }
 
-        internal async Task<UserContext> BuildUserContext(string sessionId,string slotName,string tradeMarketName)
+        internal async Task<UserContext> BuildUserContext(string sessionId, string slotName, string tradeMarketName)
         {
-            var keySecretPair =  await _accountClient.GetUserInfoAsync(sessionId);
+            var keySecretPair = await _accountClient.GetUserInfoAsync(sessionId);
             return _builder
                 .AddUniqueInformation(sessionId, slotName)
                 .AddKeySecret(keySecretPair.Key, keySecretPair.Secret)
@@ -40,35 +41,32 @@ namespace TradeMarket.Model.UserContexts
                 .GetResult();
         }
 
+        public int RegisteredUsersCount { get => RegisteredUsers.Count; }
 
-        internal List<UserContext> RegisteredUsers = new List<UserContext>();
-        private object locker = new();
+        private List<UserContext> RegisteredUsers = new List<UserContext>();
+        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
 
         public async Task<UserContext> GetUserContextAsync(string sessionId, string slotName, string tradeMarketName)
         {
-            bool CreatingUserContextIsRequired = false;
             UserContext userContext = null;
-            lock (locker)
+            await _semaphore.WaitAsync();
+            try
             {
                 Log.Logger.Information("Getting UserContext {@sessionId} : {@slotName} : {@tradeMarketName}", sessionId, slotName, tradeMarketName);
                 userContext = RegisteredUsers.FirstOrDefault(el => el.IsEquevalentTo(sessionId, slotName, tradeMarketName));
-                if (userContext is null)
+                Log.Logger.Information("Contained UserContext's count {@Count}", RegisteredUsers.Count);
+                if (userContext is  null)
                 {
                     Log.Logger.Information("Creating new UserContext {@sessionId} : {@slotName} : {@tradeMarketName}", sessionId, slotName, tradeMarketName);
-                    //TODO если uc нет в списке - создать новый через директора
-                    CreatingUserContextIsRequired = true;
-                }
-            }
-            if (CreatingUserContextIsRequired)
-            {
-                //дополнительная проверка после локера
-                userContext = RegisteredUsers.FirstOrDefault(el => el.IsEquevalentTo(sessionId, slotName, tradeMarketName));
-                if (userContext is null)
-                {
                     userContext = await BuildUserContext(sessionId, slotName, tradeMarketName);
                     RegisteredUsers.Add(userContext);
                 }
             }
+            finally
+            {
+                _semaphore.Release();
+            }
+
             return userContext;
 
         }
