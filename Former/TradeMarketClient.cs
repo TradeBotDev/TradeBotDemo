@@ -4,11 +4,8 @@ using Serilog;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-
 using TradeBot.Common.v1;
 using TradeBot.TradeMarket.TradeMarketService.v1;
-
-using SubscribeOrdersRequest = TradeBot.TradeMarket.TradeMarketService.v1.SubscribeOrdersRequest;
 
 namespace Former
 {
@@ -17,10 +14,10 @@ namespace Former
         public delegate Task MyOrdersEvent(Order newComingOrder, ChangesType changesType);
         public MyOrdersEvent UpdateMyOrders;
 
-        public delegate Task BalanceEvent(int balanceToBuy, int balanceToSell);
+        public delegate Task BalanceEvent(int availableBalance, int totalBalance);
         public BalanceEvent UpdateBalance;
 
-        public delegate Task PositionUpdate(double currentQuantity);
+        public delegate Task PositionUpdate(double positionQuantity);
         public PositionUpdate UpdatePosition;
 
         public delegate Task MarketPricesUpdate(double bid, double ask);
@@ -56,7 +53,7 @@ namespace Former
                 }
                 catch (RpcException e)
                 {
-                    Log.Error("Error {1}. Retrying...\r\n{0}", e.StackTrace);
+                    Log.Error("{@Where}: Error {@ExceptionMessage}. Retrying...\r\n{@ExceptionStackTrace}", "Former", e.Message, e.StackTrace);
                     Thread.Sleep(_retryDelay);
                 }
             }
@@ -108,7 +105,7 @@ namespace Former
                 {
                     if (call.ResponseStream.Current.Response.Code == ReplyCode.Failure)
                     {
-                        Log.Information("order was rejected with message: {0}", call.ResponseStream.Current.Response.Message);
+                        Log.Error("{@Where}: Order was rejected by trade market with message: {@ResponseMessage}", "Former", call.ResponseStream.Current.Response.Message);
                         continue;
                     }
 

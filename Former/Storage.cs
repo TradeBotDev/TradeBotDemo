@@ -49,19 +49,6 @@ namespace Former
             await HandleUpdateEvent.Invoke(context);
         }
 
-        private Order InitPartialOrder(Order newComingOrder)
-        {
-            return new Order
-            {
-                Id = newComingOrder.Id, 
-                Price = newComingOrder.Price, 
-                LastUpdateDate = newComingOrder.LastUpdateDate, 
-                Signature = newComingOrder.Signature,
-                Quantity = newComingOrder.Signature.Type == OrderType.Sell ? -newComingOrder.Quantity : newComingOrder.Quantity
-            };
-
-        }
-
         /// <summary>
         /// Обновляет список моих ордеров по подписке, и выставляет контр-ордер в случае частичного или полного исполнения моего ордера
         /// </summary>
@@ -80,24 +67,26 @@ namespace Former
                     return;
                 case ChangesType.Update when itsMyOrder:
                     var updateMyOrderResponse = UpdateOrder(newComingOrder, MyOrders);
-                    Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3} updated {4}", myOldOrder.Id, myOldOrder.Price, myOldOrder.Quantity, myOldOrder.Signature.Type, updateMyOrderResponse ? ReplyCode.Succeed : ReplyCode.Failure);
+                    Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} updated {@ResponseCode}", "Former", myOldOrder.Id, myOldOrder.Price, myOldOrder.Quantity, myOldOrder.Signature.Type, updateMyOrderResponse ? ReplyCode.Succeed : ReplyCode.Failure);
                     LockPlacingOrders(true);
                     if (newComingOrder.Quantity != 0) await PlaceOrderEvent.Invoke(myOldOrder, newComingOrder, context);
                     LockPlacingOrders(false);
                     break;
                 case ChangesType.Update when itsCounterOrder:
                     var updateCounterOrderResponse = UpdateOrder(newComingOrder, CounterOrders);
-                    Log.Information("Counter order {0}, price: {1}, quantity: {2}, type: {3} updated {4}", counterOldOrder.Id, counterOldOrder.Price, counterOldOrder.Quantity, counterOldOrder.Signature.Type, updateCounterOrderResponse ? ReplyCode.Succeed : ReplyCode.Failure);
+                    Log.Information("{@Where}: Counter order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} updated {@ResponseCode}", "Former", counterOldOrder.Id, counterOldOrder.Price, counterOldOrder.Quantity, counterOldOrder.Signature.Type, updateCounterOrderResponse ? ReplyCode.Succeed : ReplyCode.Failure);
                     break;
                 case ChangesType.Delete when itsMyOrder:
-                    var removeResponse = RemoveOrder(id, MyOrders);
-                    Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3} removed {4}", myOldOrder.Id, myOldOrder.Price, myOldOrder.Quantity, myOldOrder.Signature.Type, removeResponse ? ReplyCode.Succeed : ReplyCode.Failure);
+                    var removeMyOrderResponse = RemoveOrder(id, MyOrders);
+                    Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed {@ResponseCode}", "Former", myOldOrder.Id, myOldOrder.Price, myOldOrder.Quantity, myOldOrder.Signature.Type, removeMyOrderResponse ? ReplyCode.Succeed : ReplyCode.Failure);
                     LockPlacingOrders(true);
                     await PlaceOrderEvent.Invoke(myOldOrder, newComingOrder, context);
                     LockPlacingOrders(false);
                     break;
                 case ChangesType.Delete when itsCounterOrder:
-                    RemoveOrder(id, CounterOrders);
+                    var removeCounterOrderResponse = RemoveOrder(id, CounterOrders);
+                    Log.Information("{@Where}: Counter order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed {@ResponseCode}", "Former", counterOldOrder.Id, counterOldOrder.Price, counterOldOrder.Quantity, counterOldOrder.Signature.Type, removeCounterOrderResponse ? ReplyCode.Succeed : ReplyCode.Failure);
+
                     break;
                 //вновь пришедший ордер не помещается в список моих ордеров здесь, потому что это делается только по событию из алгоритма, во избежание
                 //зацикливания выставления ордеров и контр-ордеров
@@ -113,12 +102,12 @@ namespace Former
         /// <summary>
         /// Обновляет размер позиции, для того чтобы знать, короткая позиция или длинная
         /// </summary>
-        internal Task UpdatePosition(double currentQuantity)
+        internal Task UpdatePosition(double positionQuantity)
         {
-            if (PositionSize != (int)currentQuantity)
+            if (PositionSize != (int)positionQuantity)
             {
-                Log.Information("Current position: {0}", currentQuantity);
-                PositionSize = (int)currentQuantity;
+                Log.Information("{@Where}: Current position: {@Position}", "Former", positionQuantity);
+                PositionSize = (int)positionQuantity;
             }
             return Task.CompletedTask;
         }
@@ -131,12 +120,11 @@ namespace Former
             if (availableBalance != 0)
             {
                 AvailableBalance = availableBalance;
-                Log.Information("Balance updated. Available balance: {0}", availableBalance);
+                Log.Information("{@Where}: Balance updated. Available balance: {@AvailableBalance}, Total balance: {@TotalBalance}", "Former", availableBalance, totalBalance);
             }
             if (totalBalance != 0)
             {
                 TotalBalance = totalBalance;
-                Log.Information("Balance updated. Total balance: {0}", totalBalance);
             }
             return Task.CompletedTask;
         }
@@ -168,6 +156,22 @@ namespace Former
         }
 
         /// <summary>
+        /// Из-за того, что инициализонные ордера приходят с биржи с положительным числом контрактов независимо от типа ордера, необходимо самому проинициализировать число контрактов
+        /// </summary>
+        private Order InitPartialOrder(Order newComingOrder)
+        {
+            return new Order
+            {
+                Id = newComingOrder.Id, 
+                Price = newComingOrder.Price, 
+                LastUpdateDate = newComingOrder.LastUpdateDate, 
+                Signature = newComingOrder.Signature,
+                Quantity = newComingOrder.Signature.Type == OrderType.Sell ? -newComingOrder.Quantity : newComingOrder.Quantity
+            };
+
+        }
+
+        /// <summary>
         /// Добавляет запись в выбранный список 
         /// </summary>
         public bool AddOrder(string id, Order order, ConcurrentDictionary<string, Order> list)
@@ -182,12 +186,12 @@ namespace Former
         {
             if (context is null)
             {
-                Log.Error("Bad user context (null)");
+                Log.Error("{@Where}: Bad user context (null)", "Former");
                 return true;
             }
             if (context.Configuration is null || context.SessionId is null || context.Slot is null || context.TradeMarket is null)
             {
-                Log.Error("Bad user context (some field is null)");
+                Log.Error("{@Where}: Bad user context (some field is null)", "Former");
                 return true;
             }
             return false;

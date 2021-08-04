@@ -1,6 +1,7 @@
 ﻿using Google.Protobuf.WellKnownTypes;
 using Serilog;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using TradeBot.Common.v1;
 
@@ -39,8 +40,8 @@ namespace Former
                         LastUpdateDate = new Timestamp()
                     }, _storage.CounterOrders);
             }
-            Log.Information("Counter order {0} price: {1}, quantity: {2} placed {3} {4}", oldOrder.Id, price, -quantity, placeResponse.Response.Code, placeResponse.Response.Code == ReplyCode.Succeed ? "" : placeResponse.Response.Message);
-            Log.Information("Order {0}, price: {1}, quantity: {2}, type: {3} added to counter orders list {4}", placeResponse.OrderId, price, -quantity, type, addResponse ? ReplyCode.Succeed : ReplyCode.Failure);
+            Log.Information("{@Where}: Counter order {@Id} price: {@Price}, quantity: {@Quantity} placed {@ResponseCode} {@ResponseMessage}", "Former", oldOrder.Id, price, -quantity, placeResponse.Response.Code, placeResponse.Response.Code == ReplyCode.Succeed ? "" : placeResponse.Response.Message);
+            Log.Information("{@Where}: Order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@ResponseCode} added to counter orders list {@ResponseMessage}", "Former", placeResponse.OrderId, price, -quantity, type, addResponse ? ReplyCode.Succeed : ReplyCode.Failure);
         }
 
         /// <summary>
@@ -69,10 +70,10 @@ namespace Former
             switch (type == OrderType.Sell ? -_storage.PositionSize : _storage.PositionSize)
             {
                 case > 0 when availableBalanceWithConfigurationReduction < orderCost:
-                    Log.Debug("Cannot place {0} order. Insufficient available balance.", type);
+                    Log.Debug("{@Where}: Cannot place {@Type} order. Insufficient available balance.", "Former", type);
                     return false;
                 case <= 0 when totalBalanceWithConfigurationReduction + marginOfAlreadyPlacedSellOrders - marginOfAlreadyPlacedBuyOrders < orderCost:
-                    Log.Debug("Cannot place {0} order. Insufficient total balance.", type);
+                    Log.Debug("{@Where}: Cannot place {@Type} order. Insufficient total balance.", "Former", type);
                     return false;
                 default:
                     return true;
@@ -103,9 +104,9 @@ namespace Former
                         Signature = new OrderSignature { Status = OrderStatus.Open, Type = orderType },
                         LastUpdateDate = new Timestamp()
                     }, _storage.MyOrders);
-                Log.Information("Order {0}, price: {1}, quantity: {2}, type: {3} added to my orders list {4}", response.OrderId, price, quantity, orderType, addResponse ? ReplyCode.Succeed : ReplyCode.Failure);
+                Log.Information("{@Where}: Order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} added to my orders list {@ResponseCode}", "Former", response.OrderId, price, quantity, orderType, addResponse ? ReplyCode.Succeed : ReplyCode.Failure);
             }
-            Log.Information("Order {0} price: {1}, quantity: {2} placed for {3} {4} {5}", response.OrderId, price, quantity, orderType, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
+            Log.Information("{@Where}: Order {@Id} price: {@Price}, quantity: {@Quantity} placed for {@Type} {@ResponseCode} {@ResponseMessage}", "Former", response.OrderId, price, quantity, orderType, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
         }
 
         /// <summary>

@@ -44,6 +44,7 @@ namespace Former
             _tradeMarketClient.UpdateMyOrders += UpdateMyOrderList;
             _tradeMarketClient.UpdatePosition += UpdatePosition;
 
+
             _ = ObserveMarketPrices();
             _ = ObserveBalance();
             _ = ObserveMyOrders();
@@ -66,9 +67,9 @@ namespace Former
         {
             await _storage.UpdatePosition(currentQuantity);
         }
-        public async Task FormOrder(int decision )
+        public async Task FormOrder(int decision)
         {
-            await _former.FormOrder(decision ,this);
+            await _former.FormOrder(decision, this);
         }
         public async Task<PlaceOrderResponse> PlaceOrder(double sellPrice, double contractValue)
         {

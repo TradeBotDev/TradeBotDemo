@@ -26,7 +26,7 @@ namespace Former
             {
                 _storage.SavedMarketSellPrice = _storage.SellMarketPrice;
                 _storage.SavedMarketBuyPrice = _storage.BuyMarketPrice;
-                Log.Information("Buy market price: {0}, Sell market price: {1}", _storage.BuyMarketPrice, _storage.SellMarketPrice);
+                Log.Information("{@Where}: Buy market price: {@BuyMarketPrice}, Sell market price: {@SellMarketPrice}", "Former",_storage.BuyMarketPrice, _storage.SellMarketPrice);
                 if (!_storage.FitPricesLocker && ! _storage.MyOrders.IsEmpty) await FitPrices(context);
             }
         }
@@ -46,6 +46,9 @@ namespace Former
             });
         }
 
+        /// <summary>
+        /// Получить рыночную цену по типу ордера
+        /// </summary>
         public double GetFairPrice(OrderType type)
         {
             return type == OrderType.Sell ? _storage.SellMarketPrice : _storage.BuyMarketPrice;
@@ -68,9 +71,9 @@ namespace Former
                 else if (response.Response.Message.Contains("Invalid ordStatus"))
                 {
                     var removeResponse = _storage.RemoveOrder(key, _storage.MyOrders);
-                    Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3} removed cause cannot be amended {4} ", order.Id, order.Price, order.Quantity, order.Signature.Type, removeResponse ? ReplyCode.Succeed : ReplyCode.Failure);
+                    Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed cause cannot be amended {@ResponseCode} ", "Former", order.Id, order.Price, order.Quantity, order.Signature.Type, removeResponse ? ReplyCode.Succeed : ReplyCode.Failure);
                 }
-                Log.Information("Order {0} amended with {1} {2} {3}", key, fairPrice, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Succeed ? "" : response.Response.Message);
+                Log.Information("{@Where}: Order {@Id} amended with {@Price} {@ResponseCode} {@ResponseMessage}", "Former", key, fairPrice, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Succeed ? "" : response.Response.Message);
             }
             _storage.FitPricesLocker = false;
         }
