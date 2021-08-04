@@ -49,6 +49,19 @@ namespace Former
             await HandleUpdateEvent.Invoke(context);
         }
 
+        private Order InitPartialOrder(Order newComingOrder)
+        {
+            return new Order
+            {
+                Id = newComingOrder.Id, 
+                Price = newComingOrder.Price, 
+                LastUpdateDate = newComingOrder.LastUpdateDate, 
+                Signature = newComingOrder.Signature,
+                Quantity = newComingOrder.Signature.Type == OrderType.Sell ? -newComingOrder.Quantity : newComingOrder.Quantity
+            };
+
+        }
+
         /// <summary>
         /// Обновляет список моих ордеров по подписке, и выставляет контр-ордер в случае частичного или полного исполнения моего ордера
         /// </summary>
@@ -63,7 +76,7 @@ namespace Former
             switch (changesType)
             {
                 case ChangesType.Partitial:
-                    AddOrder(id, newComingOrder, CounterOrders);
+                    AddOrder(id, InitPartialOrder(newComingOrder), CounterOrders);
                     return;
                 case ChangesType.Update when itsMyOrder:
                     var updateMyOrderResponse = UpdateOrder(newComingOrder, MyOrders);

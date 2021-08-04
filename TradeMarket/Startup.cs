@@ -33,7 +33,7 @@ namespace TradeMarket
             services.AddGrpc();
             services.AddSingleton(new AccountClient(new ExchangeAccess.ExchangeAccessClient(GrpcChannel.ForAddress(Configuration.GetConnectionString("AccountService")))));
             //services.AddSingleton<IConnectionMultiplexer>(options => ConnectionMultiplexer.Connect(Configuration.GetConnectionString("Redis")));
-            services.AddSingleton<TradeMarketFactory>();
+            services.AddSingleton<FactoryCache>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

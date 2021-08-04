@@ -22,9 +22,9 @@ namespace TradeMarket
         private readonly IConnectionMultiplexer _multiplexer;
         private readonly AccountClient _account;
 
-        public Worker(ILogger<Worker> logger, AccountClient account,IConnectionMultiplexer multiplexer)
+        public Worker(ILogger<Worker> logger, AccountClient account/*,IConnectionMultiplexer multiplexer*/)
         {
-            _multiplexer = multiplexer;
+            //_multiplexer = multiplexer;
             _account = account;
             _logger = logger;
         }
@@ -32,7 +32,7 @@ namespace TradeMarket
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             AccountClient._accountClient = _account;
-            await _multiplexer.GetSubscriber().SubscribeAsync("Bitmex_Book25", (channel, value) => { Log.Information("{@value}", value.ToString()); });
+            //await _multiplexer.GetSubscriber().SubscribeAsync("Bitmex_Book25", (channel, value) => { Log.Information("{@value}", value.ToString()); });
 
             while (!stoppingToken.IsCancellationRequested)
             {
