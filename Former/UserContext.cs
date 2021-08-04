@@ -16,7 +16,7 @@ namespace Former
         private readonly Former _former;
         private readonly Storage _storage;
 
-        public Metadata Meta { get; private set; }
+        public Metadata Meta { get; }
 
         internal UserContext(string sessionId, string tradeMarket, string slot)
         {
@@ -35,11 +35,12 @@ namespace Former
 
             _tradeMarketClient = new TradeMarketClient();
             _former = new Former();
+            _storage = new Storage();
 
+            _tradeMarketClient.UpdateMarketPrices += UpdateMarketPrices;
             _tradeMarketClient.UpdateBalance += UpdateBalance;
             _tradeMarketClient.UpdateMyOrders += UpdateMyOrderList;
             _tradeMarketClient.UpdatePosition += UpdatePosition;
-            _tradeMarketClient.UpdateMarketPrices += UpdateMarketPrices;
 
             ObserveMarketPrices();
             ObserveBalance();
@@ -53,15 +54,15 @@ namespace Former
         }
         private async void UpdateMyOrderList(Order orderNeededUpdate, ChangesType changesType)
         {
-            await _storage.UpdateMyOrderList(orderNeededUpdate, changesType, this);
+            await _former.UpdateMyOrderList(orderNeededUpdate, changesType, this);
         }
         private async void UpdateBalance(int balanceToBuy, int balanceToSell)
         {
-            await _storage.UpdateBalance(balanceToBuy, balanceToSell);
+            await _former.UpdateBalance(balanceToBuy, balanceToSell);
         }
         private async void UpdatePosition(double currentQuantity)
         {
-            await _storage.UpdatePosition(currentQuantity);
+            await _former.UpdatePosition(currentQuantity);
         }
         public async void FormOrder(int decision )
         {
