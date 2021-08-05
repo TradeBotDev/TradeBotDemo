@@ -7,22 +7,22 @@ namespace Former
 {
     public class ListenerImpl : FormerService.FormerServiceBase
     {
-        public override async Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request,
+        public override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request,
             ServerCallContext context)
         {
             var meta = context.RequestHeaders.ToDictionary(x => x.Key, x => x.Value);
             Clients.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"], request.Request);
-            return new UpdateServerConfigResponse();
+            return Task.FromResult(new UpdateServerConfigResponse());
         }
 
-        public override async Task<SendPurchasePriceResponse> SendPurchasePrice(SendPurchasePriceRequest request,
+        public override Task<SendPurchasePriceResponse> SendPurchasePrice(SendPurchasePriceRequest request,
             ServerCallContext context)
         {
             //в зависимости от числа, присланного алгоритмом производится формирование цены на покупку или на продажу с учётом контекста пользователя
             var meta = context.RequestHeaders.ToDictionary(x => x.Key, x => x.Value);
             _ = Clients.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"])
                 .FormOrder((int)request.PurchasePrice);
-            return new SendPurchasePriceResponse();
+            return Task.FromResult(new SendPurchasePriceResponse());
         }
     }
 }
