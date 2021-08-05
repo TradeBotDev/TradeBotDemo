@@ -39,9 +39,9 @@ namespace Website.Controllers
 
                 var claims = new List<Claim>
                 {
-                    new Claim(ClaimTypes.Email, "session_id")
+                    new Claim(ClaimTypes.NameIdentifier, loginReply.SessionId)
                 };
-                ClaimsIdentity id = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                ClaimsIdentity id = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme, ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
                 HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
                 return RedirectToAction("Account", "Account");
             }
@@ -64,9 +64,25 @@ namespace Website.Controllers
         [HttpPost]
         public IActionResult Register(string email, string password, string verify_password)
         {
-            ViewBag.Title = "Произошла ошибка";
-            ViewBag.SectionTitle = "Ошибка при регистрации";
-            return View("Failed", "Какой-то текст");
+            var channel = GrpcChannel.ForAddress("http://localhost:5000");
+            var accountClient = new Account.AccountClient(channel);
+
+            var registerReply = accountClient.Register(new RegisterRequest
+            {
+                Email = email,
+                Password = password,
+                VerifyPassword = verify_password
+            });
+            if (registerReply.Result == AccountActionCode.Successful)
+            {
+                return Content("Успешная регистрация");
+            }
+            else
+            {
+                ViewBag.Title = "Произошла ошибка";
+                ViewBag.SectionTitle = "Ошибка при регистрации";
+                return View("Failed", registerReply.Message);
+            }
         }
 
         [HttpGet]

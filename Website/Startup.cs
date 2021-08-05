@@ -28,6 +28,8 @@ namespace Website
             {
                 options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/authorization/login");
             });
+
+
             services.AddControllersWithViews();
         }
 
