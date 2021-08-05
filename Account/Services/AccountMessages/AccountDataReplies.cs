@@ -33,7 +33,7 @@ namespace AccountGRPC.AccountMessages
 
         public static AccountDataResponse SuccessfulGettingAccountData(AccountInfo currentAccount)
         {
-            const string Message = "Получение данных текущего пользователя.";
+            const string Message = "Получение данных текущего пользователя завершено успешно.";
             Log.Information(Message);
 
             return new AccountDataResponse

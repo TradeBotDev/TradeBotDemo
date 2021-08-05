@@ -15,14 +15,6 @@ namespace Website.Controllers
 {
     public class AuthorizationController : Controller
     {
-        private Account.AccountClient accountClient;
-
-        public AuthorizationController()
-        {
-            var channel = GrpcChannel.ForAddress("http://localhost:5000");
-            accountClient = new(channel);
-        }
-
         [HttpGet]
         public IActionResult Login()
         {
@@ -58,7 +50,13 @@ namespace Website.Controllers
         {
             var reply = Clients.AccountServiceClient.Register(model);
             if (reply.Result == AccountActionCode.Successful)
-                return Content("Успешная регистрация");
+            {
+                return Login(new LoginModel
+                {
+                    Email = model.Email,
+                    Password = model.Password
+                });
+            }
             else return View("~/Views/Shared/Error.cshtml", reply.Message);
         }
 
