@@ -40,11 +40,9 @@ namespace UI
             this.ConfigVolumeOfContractsl = new System.Windows.Forms.Label();
             this.ConfigUpdatePriceRangel = new System.Windows.Forms.Label();
             this.ConfigIntervalOfAnalysisl = new System.Windows.Forms.Label();
-            this.MainMenuPanel = new System.Windows.Forms.Panel();
             this.ShowRegistrationPanel = new System.Windows.Forms.Button();
             this.ShowLoginPanel = new System.Windows.Forms.Button();
             this.ShowMainMenu = new System.Windows.Forms.Button();
-            this.RegistrationPanel = new System.Windows.Forms.Panel();
             this.RegistrationButton = new System.Windows.Forms.Button();
             this.label6 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
@@ -52,24 +50,24 @@ namespace UI
             this.ConfigTokenl = new System.Windows.Forms.Label();
             this.RegKey = new System.Windows.Forms.TextBox();
             this.RegToken = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
             this.RegPass = new System.Windows.Forms.TextBox();
             this.RegLog = new System.Windows.Forms.TextBox();
-            this.LogginPanel = new System.Windows.Forms.Panel();
             this.LoginButton = new System.Windows.Forms.Button();
-            this.label3 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.LogLogTextBox = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.LogPassTextBox = new System.Windows.Forms.TextBox();
-            this.MainMenuPanel.SuspendLayout();
-            this.RegistrationPanel.SuspendLayout();
-            this.LogginPanel.SuspendLayout();
+            this.MainMenuGroupBox = new System.Windows.Forms.GroupBox();
+            this.SignUpGroupBox = new System.Windows.Forms.GroupBox();
+            this.SignInGroupBox = new System.Windows.Forms.GroupBox();
+            this.MainMenuGroupBox.SuspendLayout();
+            this.SignUpGroupBox.SuspendLayout();
+            this.SignInGroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // StartButton
             // 
-            this.StartButton.Location = new System.Drawing.Point(0, 284);
+            this.StartButton.Location = new System.Drawing.Point(244, 56);
             this.StartButton.Name = "StartButton";
             this.StartButton.Size = new System.Drawing.Size(349, 60);
             this.StartButton.TabIndex = 0;
@@ -79,7 +77,7 @@ namespace UI
             // 
             // ConfigAvailableBalance
             // 
-            this.ConfigAvailableBalance.Location = new System.Drawing.Point(155, 19);
+            this.ConfigAvailableBalance.Location = new System.Drawing.Point(161, 22);
             this.ConfigAvailableBalance.Name = "ConfigAvailableBalance";
             this.ConfigAvailableBalance.Size = new System.Drawing.Size(77, 27);
             this.ConfigAvailableBalance.TabIndex = 1;
@@ -87,7 +85,7 @@ namespace UI
             // 
             // ConfigRequiredProfit
             // 
-            this.ConfigRequiredProfit.Location = new System.Drawing.Point(155, 52);
+            this.ConfigRequiredProfit.Location = new System.Drawing.Point(161, 55);
             this.ConfigRequiredProfit.Name = "ConfigRequiredProfit";
             this.ConfigRequiredProfit.Size = new System.Drawing.Size(77, 27);
             this.ConfigRequiredProfit.TabIndex = 2;
@@ -95,7 +93,7 @@ namespace UI
             // 
             // ConfigVolumeOfContracts
             // 
-            this.ConfigVolumeOfContracts.Location = new System.Drawing.Point(155, 84);
+            this.ConfigVolumeOfContracts.Location = new System.Drawing.Point(161, 87);
             this.ConfigVolumeOfContracts.Name = "ConfigVolumeOfContracts";
             this.ConfigVolumeOfContracts.Size = new System.Drawing.Size(77, 27);
             this.ConfigVolumeOfContracts.TabIndex = 3;
@@ -103,7 +101,7 @@ namespace UI
             // 
             // ConfigUpdatePriceRange
             // 
-            this.ConfigUpdatePriceRange.Location = new System.Drawing.Point(155, 117);
+            this.ConfigUpdatePriceRange.Location = new System.Drawing.Point(161, 120);
             this.ConfigUpdatePriceRange.Name = "ConfigUpdatePriceRange";
             this.ConfigUpdatePriceRange.Size = new System.Drawing.Size(77, 27);
             this.ConfigUpdatePriceRange.TabIndex = 4;
@@ -111,7 +109,7 @@ namespace UI
             // 
             // ConfigIntervalOfAnalysis
             // 
-            this.ConfigIntervalOfAnalysis.Location = new System.Drawing.Point(155, 149);
+            this.ConfigIntervalOfAnalysis.Location = new System.Drawing.Point(161, 152);
             this.ConfigIntervalOfAnalysis.Name = "ConfigIntervalOfAnalysis";
             this.ConfigIntervalOfAnalysis.Size = new System.Drawing.Size(77, 27);
             this.ConfigIntervalOfAnalysis.TabIndex = 5;
@@ -120,7 +118,7 @@ namespace UI
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(3, 21);
+            this.label1.Location = new System.Drawing.Point(9, 24);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(127, 20);
             this.label1.TabIndex = 7;
@@ -129,7 +127,7 @@ namespace UI
             // ConfigRequiredProfitl
             // 
             this.ConfigRequiredProfitl.AutoSize = true;
-            this.ConfigRequiredProfitl.Location = new System.Drawing.Point(3, 53);
+            this.ConfigRequiredProfitl.Location = new System.Drawing.Point(9, 56);
             this.ConfigRequiredProfitl.Name = "ConfigRequiredProfitl";
             this.ConfigRequiredProfitl.Size = new System.Drawing.Size(110, 20);
             this.ConfigRequiredProfitl.TabIndex = 8;
@@ -138,7 +136,7 @@ namespace UI
             // ConfigVolumeOfContractsl
             // 
             this.ConfigVolumeOfContractsl.AutoSize = true;
-            this.ConfigVolumeOfContractsl.Location = new System.Drawing.Point(3, 85);
+            this.ConfigVolumeOfContractsl.Location = new System.Drawing.Point(9, 88);
             this.ConfigVolumeOfContractsl.Name = "ConfigVolumeOfContractsl";
             this.ConfigVolumeOfContractsl.Size = new System.Drawing.Size(141, 20);
             this.ConfigVolumeOfContractsl.TabIndex = 9;
@@ -147,7 +145,7 @@ namespace UI
             // ConfigUpdatePriceRangel
             // 
             this.ConfigUpdatePriceRangel.AutoSize = true;
-            this.ConfigUpdatePriceRangel.Location = new System.Drawing.Point(3, 120);
+            this.ConfigUpdatePriceRangel.Location = new System.Drawing.Point(9, 123);
             this.ConfigUpdatePriceRangel.Name = "ConfigUpdatePriceRangel";
             this.ConfigUpdatePriceRangel.Size = new System.Drawing.Size(137, 20);
             this.ConfigUpdatePriceRangel.TabIndex = 10;
@@ -156,29 +154,11 @@ namespace UI
             // ConfigIntervalOfAnalysisl
             // 
             this.ConfigIntervalOfAnalysisl.AutoSize = true;
-            this.ConfigIntervalOfAnalysisl.Location = new System.Drawing.Point(3, 153);
+            this.ConfigIntervalOfAnalysisl.Location = new System.Drawing.Point(9, 156);
             this.ConfigIntervalOfAnalysisl.Name = "ConfigIntervalOfAnalysisl";
             this.ConfigIntervalOfAnalysisl.Size = new System.Drawing.Size(131, 20);
             this.ConfigIntervalOfAnalysisl.TabIndex = 11;
             this.ConfigIntervalOfAnalysisl.Text = "Interval of analysis";
-            // 
-            // MainMenuPanel
-            // 
-            this.MainMenuPanel.Controls.Add(this.ConfigIntervalOfAnalysis);
-            this.MainMenuPanel.Controls.Add(this.StartButton);
-            this.MainMenuPanel.Controls.Add(this.ConfigIntervalOfAnalysisl);
-            this.MainMenuPanel.Controls.Add(this.ConfigAvailableBalance);
-            this.MainMenuPanel.Controls.Add(this.ConfigUpdatePriceRangel);
-            this.MainMenuPanel.Controls.Add(this.ConfigRequiredProfit);
-            this.MainMenuPanel.Controls.Add(this.ConfigVolumeOfContractsl);
-            this.MainMenuPanel.Controls.Add(this.ConfigVolumeOfContracts);
-            this.MainMenuPanel.Controls.Add(this.ConfigRequiredProfitl);
-            this.MainMenuPanel.Controls.Add(this.ConfigUpdatePriceRange);
-            this.MainMenuPanel.Controls.Add(this.label1);
-            this.MainMenuPanel.Location = new System.Drawing.Point(174, 12);
-            this.MainMenuPanel.Name = "MainMenuPanel";
-            this.MainMenuPanel.Size = new System.Drawing.Size(349, 344);
-            this.MainMenuPanel.TabIndex = 13;
             // 
             // ShowRegistrationPanel
             // 
@@ -210,27 +190,9 @@ namespace UI
             this.ShowMainMenu.UseVisualStyleBackColor = true;
             this.ShowMainMenu.Click += new System.EventHandler(this.ShowMainMenu_Click);
             // 
-            // RegistrationPanel
-            // 
-            this.RegistrationPanel.Controls.Add(this.RegistrationButton);
-            this.RegistrationPanel.Controls.Add(this.label6);
-            this.RegistrationPanel.Controls.Add(this.label5);
-            this.RegistrationPanel.Controls.Add(this.label4);
-            this.RegistrationPanel.Controls.Add(this.ConfigTokenl);
-            this.RegistrationPanel.Controls.Add(this.RegKey);
-            this.RegistrationPanel.Controls.Add(this.RegToken);
-            this.RegistrationPanel.Controls.Add(this.label2);
-            this.RegistrationPanel.Controls.Add(this.RegPass);
-            this.RegistrationPanel.Controls.Add(this.RegLog);
-            this.RegistrationPanel.Location = new System.Drawing.Point(174, 12);
-            this.RegistrationPanel.Name = "RegistrationPanel";
-            this.RegistrationPanel.Size = new System.Drawing.Size(349, 344);
-            this.RegistrationPanel.TabIndex = 18;
-            this.RegistrationPanel.Visible = false;
-            // 
             // RegistrationButton
             // 
-            this.RegistrationButton.Location = new System.Drawing.Point(0, 284);
+            this.RegistrationButton.Location = new System.Drawing.Point(340, 67);
             this.RegistrationButton.Name = "RegistrationButton";
             this.RegistrationButton.Size = new System.Drawing.Size(349, 60);
             this.RegistrationButton.TabIndex = 26;
@@ -241,7 +203,7 @@ namespace UI
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(3, 104);
+            this.label6.Location = new System.Drawing.Point(17, 103);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(33, 20);
             this.label6.TabIndex = 25;
@@ -250,7 +212,7 @@ namespace UI
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(3, 69);
+            this.label5.Location = new System.Drawing.Point(17, 68);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(70, 20);
             this.label5.TabIndex = 24;
@@ -259,7 +221,7 @@ namespace UI
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(3, 37);
+            this.label4.Location = new System.Drawing.Point(17, 36);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(46, 20);
             this.label4.TabIndex = 23;
@@ -268,7 +230,7 @@ namespace UI
             // ConfigTokenl
             // 
             this.ConfigTokenl.AutoSize = true;
-            this.ConfigTokenl.Location = new System.Drawing.Point(3, 137);
+            this.ConfigTokenl.Location = new System.Drawing.Point(17, 136);
             this.ConfigTokenl.Name = "ConfigTokenl";
             this.ConfigTokenl.Size = new System.Drawing.Size(50, 20);
             this.ConfigTokenl.TabIndex = 21;
@@ -276,7 +238,7 @@ namespace UI
             // 
             // RegKey
             // 
-            this.RegKey.Location = new System.Drawing.Point(91, 101);
+            this.RegKey.Location = new System.Drawing.Point(105, 100);
             this.RegKey.Name = "RegKey";
             this.RegKey.Size = new System.Drawing.Size(229, 27);
             this.RegKey.TabIndex = 3;
@@ -284,24 +246,15 @@ namespace UI
             // 
             // RegToken
             // 
-            this.RegToken.Location = new System.Drawing.Point(91, 133);
+            this.RegToken.Location = new System.Drawing.Point(105, 132);
             this.RegToken.Name = "RegToken";
             this.RegToken.Size = new System.Drawing.Size(229, 27);
             this.RegToken.TabIndex = 20;
             this.RegToken.Text = "PhVLNBRGA199lGgrQ2bbf59Ux7yRsgwkn-sfigW7rMOPoPWh";
             // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(123, 1);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(108, 20);
-            this.label2.TabIndex = 2;
-            this.label2.Text = "REGISTRATION";
-            // 
             // RegPass
             // 
-            this.RegPass.Location = new System.Drawing.Point(91, 67);
+            this.RegPass.Location = new System.Drawing.Point(105, 66);
             this.RegPass.Name = "RegPass";
             this.RegPass.Size = new System.Drawing.Size(229, 27);
             this.RegPass.TabIndex = 1;
@@ -309,28 +262,14 @@ namespace UI
             // 
             // RegLog
             // 
-            this.RegLog.Location = new System.Drawing.Point(91, 35);
+            this.RegLog.Location = new System.Drawing.Point(105, 34);
             this.RegLog.Name = "RegLog";
             this.RegLog.Size = new System.Drawing.Size(229, 27);
             this.RegLog.TabIndex = 0;
             // 
-            // LogginPanel
-            // 
-            this.LogginPanel.Controls.Add(this.LoginButton);
-            this.LogginPanel.Controls.Add(this.label3);
-            this.LogginPanel.Controls.Add(this.label8);
-            this.LogginPanel.Controls.Add(this.LogLogTextBox);
-            this.LogginPanel.Controls.Add(this.label9);
-            this.LogginPanel.Controls.Add(this.LogPassTextBox);
-            this.LogginPanel.Location = new System.Drawing.Point(174, 12);
-            this.LogginPanel.Name = "LogginPanel";
-            this.LogginPanel.Size = new System.Drawing.Size(349, 344);
-            this.LogginPanel.TabIndex = 19;
-            this.LogginPanel.Visible = false;
-            // 
             // LoginButton
             // 
-            this.LoginButton.Location = new System.Drawing.Point(0, 284);
+            this.LoginButton.Location = new System.Drawing.Point(340, 67);
             this.LoginButton.Name = "LoginButton";
             this.LoginButton.Size = new System.Drawing.Size(349, 60);
             this.LoginButton.TabIndex = 35;
@@ -338,19 +277,10 @@ namespace UI
             this.LoginButton.UseVisualStyleBackColor = true;
             this.LoginButton.Click += new System.EventHandler(this.LoginButton_Click);
             // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(155, 1);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(51, 20);
-            this.label3.TabIndex = 0;
-            this.label3.Text = "LOGIN";
-            // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(2, 103);
+            this.label8.Location = new System.Drawing.Point(6, 103);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(70, 20);
             this.label8.TabIndex = 33;
@@ -358,7 +288,7 @@ namespace UI
             // 
             // LogLogTextBox
             // 
-            this.LogLogTextBox.Location = new System.Drawing.Point(79, 67);
+            this.LogLogTextBox.Location = new System.Drawing.Point(83, 67);
             this.LogLogTextBox.Name = "LogLogTextBox";
             this.LogLogTextBox.Size = new System.Drawing.Size(229, 27);
             this.LogLogTextBox.TabIndex = 27;
@@ -367,7 +297,7 @@ namespace UI
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(2, 69);
+            this.label9.Location = new System.Drawing.Point(6, 69);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(46, 20);
             this.label9.TabIndex = 32;
@@ -375,33 +305,89 @@ namespace UI
             // 
             // LogPassTextBox
             // 
-            this.LogPassTextBox.Location = new System.Drawing.Point(79, 100);
+            this.LogPassTextBox.Location = new System.Drawing.Point(83, 100);
             this.LogPassTextBox.Name = "LogPassTextBox";
             this.LogPassTextBox.Size = new System.Drawing.Size(229, 27);
             this.LogPassTextBox.TabIndex = 28;
             this.LogPassTextBox.Text = "123";
             this.LogPassTextBox.UseSystemPasswordChar = true;
             // 
+            // MainMenuGroupBox
+            // 
+            this.MainMenuGroupBox.Controls.Add(this.ConfigIntervalOfAnalysis);
+            this.MainMenuGroupBox.Controls.Add(this.StartButton);
+            this.MainMenuGroupBox.Controls.Add(this.label1);
+            this.MainMenuGroupBox.Controls.Add(this.ConfigIntervalOfAnalysisl);
+            this.MainMenuGroupBox.Controls.Add(this.ConfigUpdatePriceRange);
+            this.MainMenuGroupBox.Controls.Add(this.ConfigAvailableBalance);
+            this.MainMenuGroupBox.Controls.Add(this.ConfigRequiredProfitl);
+            this.MainMenuGroupBox.Controls.Add(this.ConfigUpdatePriceRangel);
+            this.MainMenuGroupBox.Controls.Add(this.ConfigVolumeOfContracts);
+            this.MainMenuGroupBox.Controls.Add(this.ConfigRequiredProfit);
+            this.MainMenuGroupBox.Controls.Add(this.ConfigVolumeOfContractsl);
+            this.MainMenuGroupBox.Location = new System.Drawing.Point(32, 328);
+            this.MainMenuGroupBox.Name = "MainMenuGroupBox";
+            this.MainMenuGroupBox.Size = new System.Drawing.Size(695, 310);
+            this.MainMenuGroupBox.TabIndex = 20;
+            this.MainMenuGroupBox.TabStop = false;
+            this.MainMenuGroupBox.Text = "Main Menu";
+            // 
+            // SignUpGroupBox
+            // 
+            this.SignUpGroupBox.Controls.Add(this.RegistrationButton);
+            this.SignUpGroupBox.Controls.Add(this.label6);
+            this.SignUpGroupBox.Controls.Add(this.RegLog);
+            this.SignUpGroupBox.Controls.Add(this.label5);
+            this.SignUpGroupBox.Controls.Add(this.RegPass);
+            this.SignUpGroupBox.Controls.Add(this.label4);
+            this.SignUpGroupBox.Controls.Add(this.RegToken);
+            this.SignUpGroupBox.Controls.Add(this.ConfigTokenl);
+            this.SignUpGroupBox.Controls.Add(this.RegKey);
+            this.SignUpGroupBox.Enabled = false;
+            this.SignUpGroupBox.Location = new System.Drawing.Point(142, 328);
+            this.SignUpGroupBox.Name = "SignUpGroupBox";
+            this.SignUpGroupBox.Size = new System.Drawing.Size(695, 310);
+            this.SignUpGroupBox.TabIndex = 21;
+            this.SignUpGroupBox.TabStop = false;
+            this.SignUpGroupBox.Text = "Sign Up";
+            this.SignUpGroupBox.Visible = false;
+            // 
+            // SignInGroupBox
+            // 
+            this.SignInGroupBox.Controls.Add(this.LoginButton);
+            this.SignInGroupBox.Controls.Add(this.LogLogTextBox);
+            this.SignInGroupBox.Controls.Add(this.LogPassTextBox);
+            this.SignInGroupBox.Controls.Add(this.label8);
+            this.SignInGroupBox.Controls.Add(this.label9);
+            this.SignInGroupBox.Enabled = false;
+            this.SignInGroupBox.Location = new System.Drawing.Point(142, 12);
+            this.SignInGroupBox.Name = "SignInGroupBox";
+            this.SignInGroupBox.Size = new System.Drawing.Size(695, 310);
+            this.SignInGroupBox.TabIndex = 22;
+            this.SignInGroupBox.TabStop = false;
+            this.SignInGroupBox.Text = "Sign In";
+            this.SignInGroupBox.Visible = false;
+            // 
             // TradeBotUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(533, 365);
+            this.ClientSize = new System.Drawing.Size(849, 781);
+            this.Controls.Add(this.SignUpGroupBox);
             this.Controls.Add(this.ShowMainMenu);
             this.Controls.Add(this.ShowLoginPanel);
             this.Controls.Add(this.ShowRegistrationPanel);
-            this.Controls.Add(this.MainMenuPanel);
-            this.Controls.Add(this.RegistrationPanel);
-            this.Controls.Add(this.LogginPanel);
+            this.Controls.Add(this.SignInGroupBox);
+            this.Controls.Add(this.MainMenuGroupBox);
             this.Name = "TradeBotUI";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "TradeBot";
-            this.MainMenuPanel.ResumeLayout(false);
-            this.MainMenuPanel.PerformLayout();
-            this.RegistrationPanel.ResumeLayout(false);
-            this.RegistrationPanel.PerformLayout();
-            this.LogginPanel.ResumeLayout(false);
-            this.LogginPanel.PerformLayout();
+            this.MainMenuGroupBox.ResumeLayout(false);
+            this.MainMenuGroupBox.PerformLayout();
+            this.SignUpGroupBox.ResumeLayout(false);
+            this.SignUpGroupBox.PerformLayout();
+            this.SignInGroupBox.ResumeLayout(false);
+            this.SignInGroupBox.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -419,19 +405,14 @@ namespace UI
         private System.Windows.Forms.Label ConfigVolumeOfContractsl;
         private System.Windows.Forms.Label ConfigUpdatePriceRangel;
         private System.Windows.Forms.Label ConfigIntervalOfAnalysisl;
-        private System.Windows.Forms.Panel MainMenuPanel;
         private System.Windows.Forms.Button ShowRegistrationPanel;
         private System.Windows.Forms.Button ShowLoginPanel;
         private System.Windows.Forms.Button ShowMainMenu;
-        private System.Windows.Forms.Panel RegistrationPanel;
-        private System.Windows.Forms.Panel LogginPanel;
         private System.Windows.Forms.Label ConfigTokenl;
         private System.Windows.Forms.TextBox RegKey;
         private System.Windows.Forms.TextBox RegToken;
-        private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox RegPass;
         private System.Windows.Forms.TextBox RegLog;
-        private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button RegistrationButton;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label5;
@@ -441,6 +422,9 @@ namespace UI
         private System.Windows.Forms.TextBox LogLogTextBox;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TextBox LogPassTextBox;
+        private System.Windows.Forms.GroupBox MainMenuGroupBox;
+        private System.Windows.Forms.GroupBox SignUpGroupBox;
+        private System.Windows.Forms.GroupBox SignInGroupBox;
     }
 }
 

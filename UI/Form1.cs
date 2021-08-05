@@ -51,32 +51,32 @@ namespace UI
 
         private void ShowRegistrationPanel_Click(object sender, EventArgs e)
         {
-            RegistrationPanel.Visible = true;
-            RegistrationPanel.Enabled = true;
-            LogginPanel.Visible = false;
-            LogginPanel.Enabled = false;
-            MainMenuPanel.Visible = false;
-            MainMenuPanel.Enabled = false;
+            SignUpGroupBox.Visible = true;
+            SignUpGroupBox.Enabled = true;
+            SignInGroupBox.Visible = false;
+            SignInGroupBox.Enabled = false;
+            MainMenuGroupBox.Visible = false;
+            MainMenuGroupBox.Enabled = false;
         }
 
         private void ShowLoginPanel_Click(object sender, EventArgs e)
         {
-            RegistrationPanel.Visible = false;
-            RegistrationPanel.Enabled = false;
-            LogginPanel.Visible = true;
-            LogginPanel.Enabled = true;
-            MainMenuPanel.Visible = false;
-            MainMenuPanel.Enabled = false;
+            SignUpGroupBox.Visible = false;
+            SignUpGroupBox.Enabled = false;
+            SignInGroupBox.Visible = true;
+            SignInGroupBox.Enabled = true;
+            MainMenuGroupBox.Visible = false;
+            MainMenuGroupBox.Enabled = false;
         }
 
         private void ShowMainMenu_Click(object sender, EventArgs e)
         {
-            RegistrationPanel.Visible = false;
-            RegistrationPanel.Enabled = false;
-            LogginPanel.Visible = false;
-            LogginPanel.Enabled = false;
-            MainMenuPanel.Visible = true;
-            MainMenuPanel.Enabled = true;
+            SignUpGroupBox.Visible = false;
+            SignUpGroupBox.Enabled = false;
+            SignInGroupBox.Visible = false;
+            SignInGroupBox.Enabled = false;
+            MainMenuGroupBox.Visible = true;
+            MainMenuGroupBox.Enabled = true;
         }
 
         private async void RegistrationButton_Click(object sender, EventArgs e)
