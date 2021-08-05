@@ -10,11 +10,11 @@ namespace UI
 {
     public partial class TradeBotUI : Form
     {
-        private TradeBot.Facade.FacadeService.v1.FacadeService.FacadeServiceClient client;
+        private FacadeService.FacadeServiceClient client;
         private Metadata meta;
         public TradeBotUI()
         {
-            client = new TradeBot.Facade.FacadeService.v1.FacadeService.FacadeServiceClient(GrpcChannel.ForAddress("https://localhost:5002"));
+            client = new FacadeService.FacadeServiceClient(GrpcChannel.ForAddress("https://localhost:5002"));
             InitializeComponent();
         }
 
@@ -23,7 +23,7 @@ namespace UI
             using var channel = GrpcChannel.ForAddress("https://localhost:5002");
             var facadeClient = new TradeBot.Facade.FacadeService.v1.FacadeService.FacadeServiceClient(channel);
 
-            Config config = new Config()
+            var config = new Config
             {
                 AvaibleBalance = double.Parse(ConfigAvailableBalance.Text),
                 RequiredProfit = double.Parse(ConfigRequiredProfit.Text),
@@ -34,7 +34,7 @@ namespace UI
                 TotalBalance = 100.0
             };
 
-            var requestForRelay = new TradeBot.Facade.FacadeService.v1.SwitchBotRequest()
+            var requestForRelay = new SwitchBotRequest()
             {
                 Config = config
 
@@ -51,32 +51,32 @@ namespace UI
 
         private void ShowRegistrationPanel_Click(object sender, EventArgs e)
         {
-            RegistrationPanel.Visible = true;
-            RegistrationPanel.Enabled = true;
-            LogginPanel.Visible = false;
-            LogginPanel.Enabled = false;
-            MainMenuPanel.Visible = false;
-            MainMenuPanel.Enabled = false;
+            SignUpGroupBox.Visible = true;
+            SignUpGroupBox.Enabled = true;
+            SignInGroupBox.Visible = false;
+            SignInGroupBox.Enabled = false;
+            MainMenuGroupBox.Visible = false;
+            MainMenuGroupBox.Enabled = false;
         }
 
         private void ShowLoginPanel_Click(object sender, EventArgs e)
         {
-            RegistrationPanel.Visible = false;
-            RegistrationPanel.Enabled = false;
-            LogginPanel.Visible = true;
-            LogginPanel.Enabled = true;
-            MainMenuPanel.Visible = false;
-            MainMenuPanel.Enabled = false;
+            SignUpGroupBox.Visible = false;
+            SignUpGroupBox.Enabled = false;
+            SignInGroupBox.Visible = true;
+            SignInGroupBox.Enabled = true;
+            MainMenuGroupBox.Visible = false;
+            MainMenuGroupBox.Enabled = false;
         }
 
         private void ShowMainMenu_Click(object sender, EventArgs e)
         {
-            RegistrationPanel.Visible = false;
-            RegistrationPanel.Enabled = false;
-            LogginPanel.Visible = false;
-            LogginPanel.Enabled = false;
-            MainMenuPanel.Visible = true;
-            MainMenuPanel.Enabled = true;
+            SignUpGroupBox.Visible = false;
+            SignUpGroupBox.Enabled = false;
+            SignInGroupBox.Visible = false;
+            SignInGroupBox.Enabled = false;
+            MainMenuGroupBox.Visible = true;
+            MainMenuGroupBox.Enabled = true;
         }
 
         private async void RegistrationButton_Click(object sender, EventArgs e)

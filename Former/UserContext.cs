@@ -11,7 +11,7 @@ namespace Former
         public string TradeMarket => Meta.GetValue("trademarket");
         public string Slot => Meta.GetValue("slot");
         private Config _configuration;
-        private readonly Storage _storage = new ();
+        private readonly Storage _storage;
         private readonly TradeMarketClient _tradeMarketClient;
         private readonly Former _former;
         private readonly UpdateHandlers _updateHandlers;
@@ -28,8 +28,9 @@ namespace Former
                 { "slot", slot }
             };
             TradeMarketClient.Configure("https://localhost:5005", 10000);
-            _tradeMarketClient = new TradeMarketClient();
 
+            _tradeMarketClient = new TradeMarketClient();
+            _storage = new Storage();
             _former = new Former(_storage, _configuration, _tradeMarketClient, Meta);
             _updateHandlers = new UpdateHandlers(_storage, _configuration, _tradeMarketClient, Meta);
 

@@ -13,6 +13,10 @@ service FormerService{
 	*/
 	rpc SendPurchasePrice (SendPurchasePriceRequest) returns (SendPurchasePriceResponse);
 	/*
+		Подписка на логи нужного сервиса
+	*/
+	rpc SubscribeLogs(SubscribeLogsRequest) returns (stream SubscribeLogsResponse);
+	/*
 		Клиент говорит обновиться серверу
 	*/
 	rpc UpdateServerConfig (UpdateServerConfigRequest) returns (UpdateServerConfigResponse);

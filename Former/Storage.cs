@@ -25,11 +25,11 @@ namespace Former
         public double SellMarketPrice;
         public double BuyMarketPrice;
 
-        public bool PlaceLocker;
-        public bool FitPricesLocker;
-
         public double SavedMarketBuyPrice;
         public double SavedMarketSellPrice;
+
+        public bool PlaceLocker;
+        public bool FitPricesLocker;
 
         public Storage()
         {
