@@ -134,7 +134,7 @@ namespace Algorithm.Analysis
             }
             return 0;
         }
-        //func to find average price of a dict (used so that we don't have to iterate the dict in the other funcs)
+        //func to find average price
         private static double CalculateSMA(List<double> points)
         {
             return points.Sum() / points.Count;
