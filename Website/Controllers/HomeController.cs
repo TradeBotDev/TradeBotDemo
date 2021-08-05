@@ -26,5 +26,11 @@ namespace Website.Controllers
             ViewBag.SectionTitle = "О нас";
             return View();
         }
+
+        [Route("Tradebot")]
+        public IActionResult Tradebot()
+        {
+            return View();
+        }
     }
 }

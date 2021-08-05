@@ -51,12 +51,7 @@ namespace Website.Controllers
                 HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
                 return RedirectToAction("Account", "Account");
             }
-            else
-            {
-                ViewBag.Title = "Произошла ошибка";
-                ViewBag.SectionTitle = "Произошла ошибка";
-                return View("~/Views/Error/Error.cshtml", loginReply.Message);
-            }
+            else return View("~/Views/Shared/Error.cshtml", loginReply.Message);
         }
 
         [HttpGet]
@@ -79,12 +74,7 @@ namespace Website.Controllers
 
             if (registerReply.Result == AccountActionCode.Successful)
                 return Content("Успешная регистрация");
-            else
-            {
-                ViewBag.Title = "Произошла ошибка";
-                ViewBag.SectionTitle = "Произошла ошибка";
-                return View("~/Views/Error/Error.cshtml", registerReply.Message);
-            }
+            else return View("~/Views/Shared/Error.cshtml", registerReply.Message);
         }
 
         [HttpGet]
@@ -100,12 +90,7 @@ namespace Website.Controllers
 
             if (logoutReply.Result == AccountActionCode.Successful)
                 return Content("Вы вышли");
-            else
-            {
-                ViewBag.Title = "Произошла ошибка";
-                ViewBag.SectionTitle = "Произошла ошибка";
-                return View("~/Views/Error/Error.cshtml", logoutReply.Message);
-            }
+            else return View("~/Views/Shared/Error.cshtml", logoutReply.Message);
         }
     }
 }

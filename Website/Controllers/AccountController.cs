@@ -43,12 +43,7 @@ namespace Website.Controllers
                 ViewBag.SectionTitle = "Аккаунт";
                 return View(model);
             }
-            else
-            {
-                ViewBag.Title = "Произошла ошибка";
-                ViewBag.SectionTitle = "Произошла ошибка";
-                return View("~/Views/Error/Error.cshtml", accountData.Message);
-            }
+            else return View("~/Views/Shared/Error.cshtml", accountData.Message);
         }
 
         [HttpGet]
@@ -83,13 +78,9 @@ namespace Website.Controllers
                 Secret = model.Secret
             });
 
-            if (reply.Result != ExchangeAccessActionCode.Successful)
-            {
-                ViewBag.Title = "Произошла ошибка";
-                ViewBag.SectionTitle = "Произошла ошибка";
-                return View("~/Views/Error/Error.cshtml", reply.Message);
-            }
-            else return RedirectToAction("account", "account");
+            if (reply.Result == ExchangeAccessActionCode.Successful)
+                return RedirectToAction("account", "account");
+            else return View("~/Views/Shared/Error.cshtml", reply.Message);
         }
     }
 }
