@@ -3,7 +3,7 @@ using TradeBot.Account.AccountService.v1;
 
 namespace AccountGRPC.AccountMessages
 {
-    public static class CurrentAccountReplies
+    public static class AccountDataReplies
     {
         public static AccountDataResponse AccountNotFound()
         {

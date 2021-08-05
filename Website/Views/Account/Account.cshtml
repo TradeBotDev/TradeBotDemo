@@ -1,6 +1,16 @@
-﻿
+﻿@model Website.Models.AccountDataModel
+@using TradeBot.Account.AccountService.v1;
 
-<p>Здесь будет информация об аккаунте</p>
+<p>Электронная почта: @Model.Email</p>
 
-@User.Identity.IsAuthenticated
-@User.Identity.Name
+@if (Model.Exchanges.Count() == 0)
+{
+    <p>Добавленных бирж нет.</p>
+}
+else
+{
+    foreach (ExchangeAccessInfo exchange in Model.Exchanges)
+    {
+        <p>Название: @exchange.Name, Токен: @exchange.Token, Секрет: @exchange.Secret</p>
+    }
+}

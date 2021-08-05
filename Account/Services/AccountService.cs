@@ -186,16 +186,16 @@ namespace AccountGRPC
         // Метод получения информации о текущем пользователе по Id сессии.
         public override Task<AccountDataResponse> AccountData(AccountDataRequest request, ServerCallContext context)
         {
-            Log.Information($"CurrentAccountData получил запрос: SessionId - {request.SessionId}.");
+            Log.Information($"AccountData получил запрос: SessionId - {request.SessionId}.");
             using (var database = new Models.AccountContext())
             {
                 var checkAccount = database.LoggedAccounts.Where(account => account.SessionId == request.SessionId);
 
                 // Производится проверка на то, является ли текущий пользователь вошедшим (по Id сессии).
                 if (checkAccount.Count() == 0)
-                    return Task.FromResult(CurrentAccountReplies.AccountNotFound());
+                    return Task.FromResult(AccountDataReplies.AccountNotFound());
                 else if (LoggedAccountsManagement.TimeOutAction(request.SessionId))
-                    return Task.FromResult(CurrentAccountReplies.TimePassed());
+                    return Task.FromResult(AccountDataReplies.TimePassed());
 
                 // Если текущий пользователь вошедший, то сервер возвращает данные этого пользователя.
                 else
@@ -206,7 +206,7 @@ namespace AccountGRPC
                         .Include(account => account.Account).First();
 
                     // Формирование ответа.
-                    var reply = CurrentAccountReplies.SuccessfulGettingAccountData(new AccountInfo
+                    var reply = AccountDataReplies.SuccessfulGettingAccountData(new AccountInfo
                     {
                         AccountId = login.Account.AccountId,
                         Email = login.Account.Email,
