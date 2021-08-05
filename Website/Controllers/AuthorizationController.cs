@@ -54,8 +54,8 @@ namespace Website.Controllers
             else
             {
                 ViewBag.Title = "Произошла ошибка";
-                ViewBag.SectionTitle = "Ошибка при входе";
-                return View("Failed", loginReply.Message);
+                ViewBag.SectionTitle = "Произошла ошибка";
+                return View("~/Views/Error/Error.cshtml", loginReply.Message);
             }
         }
 
@@ -82,8 +82,8 @@ namespace Website.Controllers
             else
             {
                 ViewBag.Title = "Произошла ошибка";
-                ViewBag.SectionTitle = "Ошибка при регистрации";
-                return View("Failed", registerReply.Message);
+                ViewBag.SectionTitle = "Произошла ошибка";
+                return View("~/Views/Error/Error.cshtml", registerReply.Message);
             }
         }
 
@@ -103,8 +103,8 @@ namespace Website.Controllers
             else
             {
                 ViewBag.Title = "Произошла ошибка";
-                ViewBag.SectionTitle = "Ошибка при выходе";
-                return View("Failed", logoutReply.Message);
+                ViewBag.SectionTitle = "Произошла ошибка";
+                return View("~/Views/Error/Error.cshtml", logoutReply.Message);
             }
         }
     }

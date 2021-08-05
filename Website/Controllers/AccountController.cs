@@ -25,20 +25,30 @@ namespace Website.Controllers
                 SessionId = User.Identity.Name
             });
 
-            var allExchanges = exchangeClient.AllExchangesBySession(new AllExchangesBySessionRequest
+            if (accountData.Result == AccountActionCode.Successful)
             {
-                SessionId = User.Identity.Name
-            });
 
-            var model = new AccountPageModel
+                var allExchanges = exchangeClient.AllExchangesBySession(new AllExchangesBySessionRequest
+                {
+                    SessionId = User.Identity.Name
+                });
+
+                var model = new AccountPageModel
+                {
+                    Email = accountData.CurrentAccount.Email,
+                    Exchanges = allExchanges.Exchanges
+                };
+
+                ViewBag.Title = "Аккаунт";
+                ViewBag.SectionTitle = "Аккаунт";
+                return View(model);
+            }
+            else
             {
-                Email = accountData.CurrentAccount.Email,
-                Exchanges = allExchanges.Exchanges
-            };
-
-            ViewBag.Title = "Аккаунт";
-            ViewBag.SectionTitle = "Аккаунт";
-            return View(model);
+                ViewBag.Title = "Произошла ошибка";
+                ViewBag.SectionTitle = "Произошла ошибка";
+                return View("~/Views/Error/Error.cshtml", accountData.Message);
+            }
         }
 
         [HttpGet]
@@ -74,7 +84,11 @@ namespace Website.Controllers
             });
 
             if (reply.Result != ExchangeAccessActionCode.Successful)
-                return Content(reply.Message);
+            {
+                ViewBag.Title = "Произошла ошибка";
+                ViewBag.SectionTitle = "Произошла ошибка";
+                return View("~/Views/Error/Error.cshtml", reply.Message);
+            }
             else return RedirectToAction("account", "account");
         }
     }
