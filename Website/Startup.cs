@@ -27,8 +27,8 @@ namespace Website
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
             {
                 options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/authorization/login");
+                options.LogoutPath = new Microsoft.AspNetCore.Http.PathString("/authorization/logout");
             });
-
 
             services.AddControllersWithViews();
         }

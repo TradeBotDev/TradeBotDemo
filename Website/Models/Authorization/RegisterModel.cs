@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace Website.Models
+namespace Website.Models.Authorization
 {
-    public class LoginModel
+    public class RegisterModel
     {
         [Required(ErrorMessage = "Отсутствуют данные в поле Email")]
         [DataType(DataType.EmailAddress)]
@@ -15,5 +11,9 @@ namespace Website.Models
         [Required(ErrorMessage = "Отсутствует данные в поле пароля")]
         [DataType(DataType.Password)]
         public string Password { get; set; }
+
+        [Required(ErrorMessage = "Отсутствует данные в поле подтверждения пароля")]
+        [DataType(DataType.Password)]
+        public string VerifyPassword { get; set; }
     }
 }

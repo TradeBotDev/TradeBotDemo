@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
 using Website.Models;
+using Website.Models.Authorization;
 
 namespace Website.Controllers.Clients
 {

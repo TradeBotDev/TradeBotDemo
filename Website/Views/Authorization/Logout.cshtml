@@ -1,0 +1,10 @@
+﻿@model Website.Models.Authorization.LogoutModel
+
+<form method="post">
+    <p>Вы действительно хотите выйти?</p>
+    <input type="checkbox" id="SaveExchanges" name="SaveExchanges" value="true"/>
+    <label for="SaveExchanges">Сохранить данные о доступе к биржам</label>
+    <input type="submit" name="Button" value="Выйти"/>
+    <input type="submit" name="Button" value="Назад"/>
+    <input type="hidden" name="PreviousUrl" value="@ViewBag.ReturnUrl" />
+</form>

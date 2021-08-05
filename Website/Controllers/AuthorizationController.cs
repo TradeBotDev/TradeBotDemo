@@ -10,6 +10,7 @@ using System.Security.Principal;
 using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
 using Website.Models;
+using Website.Models.Authorization;
 
 namespace Website.Controllers
 {
@@ -63,12 +64,28 @@ namespace Website.Controllers
         [HttpGet]
         public IActionResult Logout()
         {
-            var reply = Clients.AccountServiceClient.Logout(User.Identity.Name, false);
-            HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            ViewBag.ReturnUrl = Request.Headers["Referer"].ToString();
 
-            if (reply.Result == AccountActionCode.Successful)
-                return Redirect(Request.Headers["Referer"].ToString());
-            else return View("~/Views/Shared/Error.cshtml", reply.Message);
+            if (!User.Identity.IsAuthenticated)
+                return View("~/Views/Shared/Error.cshtml", "Вы уже вышли.");
+
+            ViewBag.Title = "Выход из аккаунта";
+            ViewBag.SectionTitle = "Выход из аккаунта";
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Logout(LogoutModel model)
+        {
+            if (model.Button == "Выйти")
+            {
+                var reply = Clients.AccountServiceClient.Logout(User.Identity.Name, model.SaveExchanges);
+                HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+                if (reply.Result != AccountActionCode.Successful)
+                    return View("~/Views/Shared/Error.cshtml", reply.Message);
+            }
+            return Redirect(model.PreviousUrl);
         }
     }
 }
