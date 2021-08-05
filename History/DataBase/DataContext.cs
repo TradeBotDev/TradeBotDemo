@@ -9,12 +9,10 @@ namespace History.DataBase
     public class DataContext : DbContext
     {
         public DbSet<Order> Orders { get; set; }
-
         public DataContext()
         {
             Database.EnsureCreated();
         }
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=historydb;Username=postgres;Password=password");
