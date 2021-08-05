@@ -1,8 +1,8 @@
 ﻿using Google.Protobuf.WellKnownTypes;
 using Serilog;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
+using Grpc.Core;
 using TradeBot.Common.v1;
 
 namespace Former
@@ -10,24 +10,30 @@ namespace Former
     public class Former
     {
         private readonly Storage _storage;
+        private readonly Config _configuration;
+        private readonly TradeMarketClient _tradeMarketClient;
+        private readonly Metadata _metadata;
 
-        public Former(Storage storage)
+        public Former(Storage storage, Config configuration, TradeMarketClient tradeMarketClient, Metadata metadata)
         {
             _storage = storage;
             _storage.PlaceOrderEvent += PlaceCounterOrder;
+            _configuration = configuration;
+            _tradeMarketClient = tradeMarketClient;
+            _metadata = metadata;
         }
 
         /// <summary>
         /// Выставляет контр-ордер на основе информации старого и обновлённого ордера, и добавляет в список контр-ордеров
         /// </summary>
-        public async Task PlaceCounterOrder(Order oldOrder, Order newComingOrder, UserContext context)
+        private async Task PlaceCounterOrder(Order oldOrder, Order newComingOrder)
         {
             var quantity = oldOrder.Quantity - newComingOrder.Quantity;
-            var price = oldOrder.Signature.Type == OrderType.Buy ? oldOrder.Price + oldOrder.Price * context.Configuration.RequiredProfit : oldOrder.Price - oldOrder.Price * context.Configuration.RequiredProfit;
+            var price = oldOrder.Signature.Type == OrderType.Buy ? oldOrder.Price + oldOrder.Price * _configuration.RequiredProfit : oldOrder.Price - oldOrder.Price * _configuration.RequiredProfit;
             var type = oldOrder.Signature.Type == OrderType.Buy ? OrderType.Sell : OrderType.Buy;
             var addResponse = false;
 
-            var placeResponse = await context.PlaceOrder(price, -quantity);
+            var placeResponse = await _tradeMarketClient.PlaceOrder(price, -quantity, _metadata);
             if (placeResponse.Response.Code == ReplyCode.Succeed)
             {
                 addResponse = _storage.AddOrder(placeResponse.OrderId,
@@ -47,11 +53,11 @@ namespace Former
         /// <summary>
         /// Возвращает false, если текущий баланс и маржа не позволяют выставить ордер на покупку/продажу, иначе true
         /// </summary>
-        private bool CheckPossibilityPlacingOrder(OrderType type, UserContext context)
+        private bool CheckPossibilityPlacingOrder(OrderType type)
         {
-            var orderCost = context.Configuration.ContractValue / (type == OrderType.Sell ? _storage.SellMarketPrice : _storage.BuyMarketPrice);
-            var availableBalanceWithConfigurationReduction = ConvertSatoshiToXBT(_storage.AvailableBalance) * context.Configuration.AvaibleBalance;
-            var totalBalanceWithConfigurationReduction = ConvertSatoshiToXBT(_storage.TotalBalance) * context.Configuration.AvaibleBalance;
+            var orderCost = _configuration.ContractValue / (type == OrderType.Sell ? _storage.SellMarketPrice : _storage.BuyMarketPrice);
+            var availableBalanceWithConfigurationReduction = ConvertSatoshiToXBT(_storage.AvailableBalance) * _configuration.AvaibleBalance;
+            var totalBalanceWithConfigurationReduction = ConvertSatoshiToXBT(_storage.TotalBalance) * _configuration.AvaibleBalance;
 
             double marginOfAlreadyPlacedSellOrders = 0;
             double marginOfAlreadyPlacedBuyOrders = 0;
@@ -83,16 +89,16 @@ namespace Former
         /// <summary>
         /// Формирует в зависимости от решения алгоритма
         /// </summary>
-        public async Task FormOrder(int decision, UserContext context)
+        internal async Task FormOrder(int decision)
         {
             if (_storage.PlaceLocker) return;
             var orderType = decision > 0 ? OrderType.Buy : OrderType.Sell;
-            if (!CheckPossibilityPlacingOrder(orderType, context)) return;
+            if (!CheckPossibilityPlacingOrder(orderType)) return;
 
-            var quantity = orderType == OrderType.Buy ? context.Configuration.ContractValue : -context.Configuration.ContractValue;
+            var quantity = orderType == OrderType.Buy ? _configuration.ContractValue : -_configuration.ContractValue;
             var price = orderType == OrderType.Buy ? _storage.BuyMarketPrice : _storage.SellMarketPrice;
 
-            var response = await context.PlaceOrder(price, quantity);
+            var response = await _tradeMarketClient.PlaceOrder(price, quantity, _metadata);
             if (response.Response.Code == ReplyCode.Succeed)
             {
                 var addResponse = _storage.AddOrder(response.OrderId,

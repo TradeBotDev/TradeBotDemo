@@ -8,10 +8,10 @@ namespace Former
 {
     public class Storage
     {
-        public delegate Task NeedPlaceOrderEvent(Order oldOrder, Order newComingOrder, UserContext context);
+        public delegate Task NeedPlaceOrderEvent(Order oldOrder, Order newComingOrder);
         public NeedPlaceOrderEvent PlaceOrderEvent;
 
-        public delegate Task NeedHandleUpdate(UserContext context);
+        public delegate Task NeedHandleUpdate();
         public NeedHandleUpdate HandleUpdateEvent;
 
         public readonly ConcurrentDictionary<string, Order> MyOrders;
@@ -40,22 +40,18 @@ namespace Former
         /// <summary>
         /// Обновляет рыночные цены на продажу и на покупку
         /// </summary>
-        internal async Task UpdateMarketPrices(double bid, double ask, UserContext context)
+        internal async Task UpdateMarketPrices(double bid, double ask)
         {
-            if (CheckContext(context)) return;
-
             if (bid > 0) BuyMarketPrice = bid;
             if (ask > 0) SellMarketPrice = ask;
-            await HandleUpdateEvent.Invoke(context);
+            await HandleUpdateEvent.Invoke();
         }
 
         /// <summary>
         /// Обновляет список моих ордеров по подписке, и выставляет контр-ордер в случае частичного или полного исполнения моего ордера
         /// </summary>
-        internal async Task UpdateMyOrderList(Order newComingOrder, ChangesType changesType, UserContext context)
+        internal async Task UpdateMyOrderList(Order newComingOrder, ChangesType changesType)
         {
-            if (CheckContext(context)) return;
-
             var id = newComingOrder.Id;
             var itsMyOrder = MyOrders.TryGetValue(id, out var myOldOrder);
             var itsCounterOrder = CounterOrders.TryGetValue(id, out var counterOldOrder);
@@ -69,7 +65,7 @@ namespace Former
                     var updateMyOrderResponse = UpdateOrder(newComingOrder, MyOrders);
                     Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} updated {@ResponseCode}", "Former", myOldOrder.Id, myOldOrder.Price, myOldOrder.Quantity, myOldOrder.Signature.Type, updateMyOrderResponse ? ReplyCode.Succeed : ReplyCode.Failure);
                     LockPlacingOrders(true);
-                    if (newComingOrder.Quantity != 0) await PlaceOrderEvent.Invoke(myOldOrder, newComingOrder, context);
+                    if (newComingOrder.Quantity != 0) await PlaceOrderEvent.Invoke(myOldOrder, newComingOrder);
                     LockPlacingOrders(false);
                     break;
                 case ChangesType.Update when itsCounterOrder:
@@ -80,13 +76,12 @@ namespace Former
                     var removeMyOrderResponse = RemoveOrder(id, MyOrders);
                     Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed {@ResponseCode}", "Former", myOldOrder.Id, myOldOrder.Price, myOldOrder.Quantity, myOldOrder.Signature.Type, removeMyOrderResponse ? ReplyCode.Succeed : ReplyCode.Failure);
                     LockPlacingOrders(true);
-                    await PlaceOrderEvent.Invoke(myOldOrder, newComingOrder, context);
+                    await PlaceOrderEvent.Invoke(myOldOrder, newComingOrder);
                     LockPlacingOrders(false);
                     break;
                 case ChangesType.Delete when itsCounterOrder:
                     var removeCounterOrderResponse = RemoveOrder(id, CounterOrders);
                     Log.Information("{@Where}: Counter order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed {@ResponseCode}", "Former", counterOldOrder.Id, counterOldOrder.Price, counterOldOrder.Quantity, counterOldOrder.Signature.Type, removeCounterOrderResponse ? ReplyCode.Succeed : ReplyCode.Failure);
-
                     break;
                 //вновь пришедший ордер не помещается в список моих ордеров здесь, потому что это делается только по событию из алгоритма, во избежание
                 //зацикливания выставления ордеров и контр-ордеров
@@ -132,7 +127,7 @@ namespace Former
         /// <summary>
         /// Возвращает true, если получилось удалить ордер по идентификатору из выбранного списка, иначе false
         /// </summary>
-        public bool RemoveOrder(string id, ConcurrentDictionary<string, Order> list)
+        internal bool RemoveOrder(string id, ConcurrentDictionary<string, Order> list)
         {
             return list.TryRemove(id, out _);
         }
@@ -140,7 +135,7 @@ namespace Former
         /// <summary>
         /// Обновляет запись в выбранном списке, если она там существует
         /// </summary>
-        public bool UpdateOrder(Order newComingOrder, ConcurrentDictionary<string, Order> list)
+        internal bool UpdateOrder(Order newComingOrder, ConcurrentDictionary<string, Order> list)
         {
             if (!list.ContainsKey(newComingOrder.Id)) return false;
             list.AddOrUpdate(newComingOrder.Id, newComingOrder, (_, v) =>
@@ -174,27 +169,9 @@ namespace Former
         /// <summary>
         /// Добавляет запись в выбранный список 
         /// </summary>
-        public bool AddOrder(string id, Order order, ConcurrentDictionary<string, Order> list)
+        internal bool AddOrder(string id, Order order, ConcurrentDictionary<string, Order> list)
         {
             return list.TryAdd(id, order);
-        }
-
-        /// <summary>
-        /// Возвращает true если контекст нулевой или имеет нулевые поля, false иначе
-        /// </summary>
-        private bool CheckContext(UserContext context)
-        {
-            if (context is null)
-            {
-                Log.Error("{@Where}: Bad user context (null)", "Former");
-                return true;
-            }
-            if (context.Configuration is null || context.SessionId is null || context.Slot is null || context.TradeMarket is null)
-            {
-                Log.Error("{@Where}: Bad user context (some field is null)", "Former");
-                return true;
-            }
-            return false;
         }
 
         /// <summary>
