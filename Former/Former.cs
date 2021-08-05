@@ -1,7 +1,5 @@
-﻿using Serilog;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using Google.Protobuf.WellKnownTypes;
+using Serilog;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Common.v1;
@@ -10,236 +8,110 @@ namespace Former
 {
     public class Former
     {
-        private readonly ConcurrentDictionary<string, Order> _purchaseOrderBook;
+        private readonly Storage _storage;
 
-        private readonly ConcurrentDictionary<string, Order> _sellOrderBook;
-
-        private readonly ConcurrentDictionary<string, Order> _myOrders;
-
-        private int _balanceToBuy;
-
-        private int _balanceToSell;
-
-        private int _bookSize;
-
-        enum OrderBookType 
+        public Former(Storage storage)
         {
-            Sell,
-            Buy
-        }
-
-        public Former(int bookSize)
-        {
-            _sellOrderBook = new ConcurrentDictionary<string, Order>();
-            _purchaseOrderBook = new ConcurrentDictionary<string, Order>();
-            _myOrders = new ConcurrentDictionary<string, Order>();
-            _bookSize = bookSize;
+            _storage = storage;
+            _storage.PlaceOrderEvent += PlaceCounterOrder;
         }
 
         /// <summary>
-        /// апдейтит конкретную книгу ордеров (на покупку или продажу)
+        /// Выставляет контр-ордер на основе информации старого и обновлённого ордера, и добавляет в список контр-ордеров
         /// </summary>
-        private async Task UpdateConcreteBook(ConcurrentDictionary<string, Order> bookNeededUpdate, Order order, UserContext context)
+        public async Task PlaceCounterOrder(Order oldOrder, Order newComingOrder, UserContext context)
         {
-            var task = Task.Run(() =>
+            var quantity = oldOrder.Quantity - newComingOrder.Quantity;
+            var price = oldOrder.Signature.Type == OrderType.Buy ? oldOrder.Price + oldOrder.Price * context.Configuration.RequiredProfit : oldOrder.Price - oldOrder.Price * context.Configuration.RequiredProfit;
+            var type = oldOrder.Signature.Type == OrderType.Buy ? OrderType.Sell : OrderType.Buy;
+            var addResponse = false;
+
+            var placeResponse = await context.PlaceOrder(price, -quantity);
+            if (placeResponse.Response.Code == ReplyCode.Succeed)
             {
-                //если ордер имеет статус открытый, то он добавляется, либо апдейтится, если закрытый, то удаляется из книги
-                if (order.Signature.Status == OrderStatus.Open)
-                    bookNeededUpdate.AddOrUpdate(order.Id, order, (k, v) =>
+                addResponse = _storage.AddOrder(placeResponse.OrderId,
+                    new Order
                     {
-                        if (order.Price != 0) v.Price = order.Price;
-                        if (order.Quantity != 0) v.Quantity = order.Quantity;
-                        if (order.Signature.Type != OrderType.Unspecified) v.Signature = order.Signature;
-                        v.LastUpdateDate = order.LastUpdateDate;
-                        return v;
-                    });
-                else if (bookNeededUpdate.ContainsKey(order.Id))
-                    bookNeededUpdate.TryRemove(order.Id, out _);
-            });
-            await task;
-        }
-
-        /// <summary>
-        /// Обновляет одну из книг ордеров с вновь пришедшим ордером
-        /// </summary>
-        public async Task UpdateOrderBooks(Order newComingOrder, UserContext context)
-        {
-            var task = Task.Run(async () =>
-            {
-                //выбирает, какую книгу апдейтить
-                if (newComingOrder.Signature.Type == OrderType.Buy)
-                {
-                    await UpdateConcreteBook(_purchaseOrderBook, newComingOrder, context);
-                    //если книга ордеров полностью заполнилась, вычисление рыночной цены, выполняющейся в методе FitPrices, будет корректным 
-                    if (_purchaseOrderBook.Count >= _bookSize) await FitPrices(_purchaseOrderBook, OrderBookType.Buy, context);
-                }
-                if (newComingOrder.Signature.Type == OrderType.Sell)
-                {
-                    await UpdateConcreteBook(_sellOrderBook, newComingOrder, context);
-                    //если книга ордеров полностью заполнилась, вычисление рыночной цены, выполняющейся в методе FitPrices, будет корректным 
-                    if (_purchaseOrderBook.Count >= _bookSize)  await FitPrices(_sellOrderBook, OrderBookType.Sell, context);
-                }
-            });
-            await task;
-        }
-
-        /// <summary>
-        /// подгоняет мои ордера под рыночную цену (и на покупку и на продажу)
-        /// </summary>
-        private async Task FitPrices(ConcurrentDictionary<string, Order> ordersForFairPrice, OrderBookType bookType, UserContext context)
-        {
-            var checkPrices = Task.Run(async () =>
-            {
-                //в зависимости от того, какая книга обновлялась, вычисляется рыночная цена
-                if (bookType == OrderBookType.Sell)
-                {
-                    double fairPrice = ordersForFairPrice.Min(x => x.Value.Price);
-                    foreach (var order in _myOrders)
-                    {
-                        //проверяем все свои ордера, необходимо ли им подогнаться по рыночную цену
-                        if (order.Value.Price > fairPrice)
-                        {
-                            var temp = order.Value;
-                            order.Value.Price = fairPrice;
-                            _myOrders.TryUpdate(order.Key, order.Value, temp);
-                            //отправляется запрос в тм, чтобы он перевыставил ордер (поменял цену ордера) на новую (рыночную)
-                            await context.SetNewPrice(order.Value);
-                        }
-                    }
-                }
-                if (bookType == OrderBookType.Buy)
-                {
-                    double fairPrice = ordersForFairPrice.Max(x => x.Value.Price);
-                    foreach (var order in _myOrders)
-                    {
-                        if (order.Value.Price < fairPrice)
-                        {
-                            var temp = order.Value;
-                            order.Value.Price = fairPrice;
-                            _myOrders.TryUpdate(order.Key, order.Value, temp);
-                            //отправляется запрос в тм, чтобы он перевыставил ордер (поменял цену ордера) на новую (рыночную)
-                            await context.SetNewPrice(order.Value);
-                        }
-                    }
-                }
-            });
-            await checkPrices;
-        }
-
-        /// <summary>
-        /// обновляет балан для формирования верных списков 
-        /// </summary>
-        public Task UpdateBalance(int balanceToBuy, int balanceToSell)
-        {
-            Log.Information("Balance updated. To buy: {0}, To sell: {1}", balanceToBuy, balanceToSell);
-            _balanceToBuy = balanceToBuy;
-            _balanceToSell = balanceToSell;
-            return Task.CompletedTask;
-        }
-
-        /// <summary>
-        /// обновляет список моих ордеров по подписке
-        /// </summary>
-        public async Task UpdateMyOrderList(Order newComingOrder, UserContext context)
-        {
-            Order oldOrder;
-            var id = newComingOrder.Id;
-            var price = newComingOrder.Price;
-            var quantity = newComingOrder.Quantity;
-            var type = newComingOrder.Signature.Type;
-            var status = newComingOrder.Signature.Status;
-
-
-
-            //пытается получить ордер из списка, если его нет, то добавляет его
-            if (_myOrders.TryGetValue(id, out oldOrder))
-            {
-                //так как ордер сущетсвует в нашем списке, вероятно он закрыт почти или полностью и мы будем его продвать, поэтому сразу вычисляем цену для продажи
-                double sellPrice = oldOrder.Price + oldOrder.Price * context.configuration.RequiredProfit;
-                double newQuantity;
-
-                if (status == OrderStatus.Closed && oldOrder.Signature.Type == OrderType.Buy)
-                {
-                    //если вновь пришедший ордер закрыт и он был на покупку, то запрашиваем продажу по вычисленной цене с отрицательным объёмом (нужно для тма, так он понимает, что это продажа)
-                    Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} removed", id, price, quantity, type, status);
-                    await context.PlaceOrder(sellPrice, -oldOrder.Quantity);
-                    _myOrders.TryRemove(id, out _);
-                    return;
-                }
-
-                //если вновь пришедший ордер закрыт и он был на продажу, то просто удаляем его из нашего списка и больше не подгоняем его цену
-                if (status == OrderStatus.Closed && oldOrder.Signature.Type == OrderType.Sell)
-                {
-                    Log.Information("My order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} fully removed", id, price, quantity, type, status);
-                    _myOrders.TryRemove(id, out _);
-                    return;
-                } 
-
-                if (quantity != 0 && (newQuantity = oldOrder.Quantity - quantity) > 0)
-                {
-                    //если вновь пришедний ордер имеет не нулевой объём, значит имеено объём был изменён, потому что не изменённые позиции приходят нулевыми или дефолтными
-                    //поэтому следует обновить объём для этого ордера, а также продать часть ордера, которая была куплена 
-                    Log.Information("My order {0}, price: {1}, new quantity: {2}, type: {3}, status: {4} partionally removed", id, price, quantity, type, status);
-                    await context.PlaceOrder(sellPrice, -newQuantity);
-                    _myOrders.TryUpdate(id, newComingOrder, oldOrder);
-                    return;
-                }
-                //обновляем цену ордера, неважно на покупку он или на продажу 
-                if (price != 0)
-                {
-                    Log.Information("My order {0}, new price: {1}, quantity: {2}, type: {3}, status: {4} price updated", id, price, quantity, type, status);
-                    _myOrders.TryUpdate(id, newComingOrder, oldOrder);
-                    return;
-                } 
+                        Id = placeResponse.OrderId,
+                        Price = price,
+                        Quantity = -quantity,
+                        Signature = new OrderSignature { Status = OrderStatus.Open, Type = type },
+                        LastUpdateDate = new Timestamp()
+                    }, _storage.CounterOrders);
             }
-            else
+            Log.Information("Counter order {0} price: {1}, quantity: {2} placed {3} {4}", oldOrder.Id, price, -quantity, placeResponse.Response.Code, placeResponse.Response.Code == ReplyCode.Succeed ? "" : placeResponse.Response.Message);
+            Log.Information("Order {0}, price: {1}, quantity: {2}, type: {3} added to counter orders list {4}", placeResponse.OrderId, price, -quantity, type, addResponse ? ReplyCode.Succeed : ReplyCode.Failure);
+        }
+
+        /// <summary>
+        /// Возвращает false, если текущий баланс и маржа не позволяют выставить ордер на покупку/продажу, иначе true
+        /// </summary>
+        private bool CheckPossibilityPlacingOrder(OrderType type, UserContext context)
+        {
+            var orderCost = context.Configuration.ContractValue / (type == OrderType.Sell ? _storage.SellMarketPrice : _storage.BuyMarketPrice);
+            var availableBalanceWithConfigurationReduction = ConvertSatoshiToXBT(_storage.AvailableBalance) * context.Configuration.AvaibleBalance;
+            var totalBalanceWithConfigurationReduction = ConvertSatoshiToXBT(_storage.TotalBalance) * context.Configuration.AvaibleBalance;
+
+            double marginOfAlreadyPlacedSellOrders = 0;
+            double marginOfAlreadyPlacedBuyOrders = 0;
+
+            if (!_storage.MyOrders.IsEmpty || !_storage.CounterOrders.IsEmpty)
             {
-                Log.Information("Order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} added to my orders", id, price, quantity, type, status);
-                _myOrders.TryAdd(id, newComingOrder);
+                var marginOfMySellOrders = _storage.MyOrders.Where(x => x.Value.Signature.Type == OrderType.Sell).Sum(x => x.Value.Quantity / x.Value.Price);
+                var marginOfCounterSellOrders = _storage.CounterOrders.Where(x => x.Value.Signature.Type == OrderType.Sell).Sum(x => x.Value.Quantity / x.Value.Price);
+                marginOfAlreadyPlacedSellOrders = marginOfMySellOrders + marginOfCounterSellOrders;
+
+                var marginOfMyBuyOrders = _storage.MyOrders.Where(x => x.Value.Signature.Type == OrderType.Buy).Sum(x => x.Value.Quantity / x.Value.Price);
+                var marginOfCounterBuyOrders = _storage.CounterOrders.Where(x => x.Value.Signature.Type == OrderType.Buy).Sum(x => x.Value.Quantity / x.Value.Price);
+                marginOfAlreadyPlacedBuyOrders = marginOfMyBuyOrders + marginOfCounterBuyOrders;
+            }
+
+            switch (type == OrderType.Sell ? -_storage.PositionSize : _storage.PositionSize)
+            {
+                case > 0 when availableBalanceWithConfigurationReduction < orderCost:
+                    Log.Debug("Cannot place {0} order. Insufficient available balance.", type);
+                    return false;
+                case <= 0 when totalBalanceWithConfigurationReduction + marginOfAlreadyPlacedSellOrders - marginOfAlreadyPlacedBuyOrders < orderCost:
+                    Log.Debug("Cannot place {0} order. Insufficient total balance.", type);
+                    return false;
+                default:
+                    return true;
             }
         }
 
         /// <summary>
-        /// формируется ордер на покупку
+        /// Формирует в зависимости от решения алгоритма
         /// </summary>
-        public async Task FormPurchaseOrder(UserContext context)
+        public async Task FormOrder(int decision, UserContext context)
         {
-            Log.Debug("Playing long...");
-            double availableBalance = ConvertSatoshiToXBT(_balanceToBuy) * context.configuration.AvaibleBalance;
+            if (_storage.PlaceLocker) return;
+            var orderType = decision > 0 ? OrderType.Buy : OrderType.Sell;
+            if (!CheckPossibilityPlacingOrder(orderType, context)) return;
 
-            //Вычисляем рыночную цену, для выставления лимитного ордера
-            double purchaseFairPrice = _purchaseOrderBook.Max(x => x.Value.Price);
+            var quantity = orderType == OrderType.Buy ? context.Configuration.ContractValue : -context.Configuration.ContractValue;
+            var price = orderType == OrderType.Buy ? _storage.BuyMarketPrice : _storage.SellMarketPrice;
 
-            //вычисляем объём контракта, который может позволить наш баланс с учётом настройки доступности баланса 
-            double quantity = context.configuration.ContractValue * Math.Floor(availableBalance * purchaseFairPrice / context.configuration.ContractValue);
-            
-            //купить ордер по рыночной цене, но ордер при этом лимитный 
-            if (quantity > 0) await context.PlaceOrder(purchaseFairPrice, quantity);
-            else Log.Debug("Insufficient balance");
+            var response = await context.PlaceOrder(price, quantity);
+            if (response.Response.Code == ReplyCode.Succeed)
+            {
+                var addResponse = _storage.AddOrder(response.OrderId,
+                    new Order
+                    {
+                        Id = response.OrderId,
+                        Price = price,
+                        Quantity = quantity,
+                        Signature = new OrderSignature { Status = OrderStatus.Open, Type = orderType },
+                        LastUpdateDate = new Timestamp()
+                    }, _storage.MyOrders);
+                Log.Information("Order {0}, price: {1}, quantity: {2}, type: {3} added to my orders list {4}", response.OrderId, price, quantity, orderType, addResponse ? ReplyCode.Succeed : ReplyCode.Failure);
+            }
+            Log.Information("Order {0} price: {1}, quantity: {2} placed for {3} {4} {5}", response.OrderId, price, quantity, orderType, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
         }
 
         /// <summary>
-        /// формируется ордер на продажу
+        /// Конвертирует сатоши в биткоины
         /// </summary>
-        public async Task FormSellOrder(UserContext context)
-        {
-            Log.Debug("Playing short...");
-
-            //вычисляется доступный баланс в зависимости от настроек пользователя
-            double availableBalance = ConvertSatoshiToXBT(_balanceToSell) * context.configuration.AvaibleBalance;
-
-            //вычисляем рыночную цену 
-            double sellFairPrice = _sellOrderBook.Min(x => x.Value.Price);
-
-            //вычисляем объём контракта, который может позволить наш баланс с учётом настройки доступности баланса 
-            double quantity = context.configuration.ContractValue * Math.Floor(availableBalance * sellFairPrice / context.configuration.ContractValue);
-
-            //продать ордер по рыночной цене, но ордер при этом лимитный 
-            if (quantity > 0) await context.PlaceOrder(sellFairPrice, -quantity);
-            else Log.Debug("Insufficient balance");
-        }
-
-        private double ConvertSatoshiToXBT(int satoshiValue) 
+        private double ConvertSatoshiToXBT(int satoshiValue)
         {
             return satoshiValue * 0.00000001;
         }

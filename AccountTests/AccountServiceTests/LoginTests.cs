@@ -61,6 +61,7 @@ namespace AccountTests.AccountServiceTests
         [Fact]
         public void DoubleLogin()
         {
+            // Очистка списка вошедших аккаунтов для того, чтобы не было конфликтов.
             State.loggedIn = new();
 
             var registerRequest = new RegisterRequest

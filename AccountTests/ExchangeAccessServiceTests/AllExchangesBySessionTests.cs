@@ -14,11 +14,11 @@ namespace AccountTests.ExchangeAccessServiceTests
             State.loggedIn = new();
 
             // Переменная, в которую будет записываться итоговый Id сессии.
-            string sessionId = "Отсутствует";
+            string sessionId = "none";
 
             // Локальный метод, который необходим для того, чтобы записать Id сессии при использовании объекта
             // запроса в качестве параметра.
-            AddExchangeAccessRequest GenerateReply(string _sessionId)
+            AddExchangeAccessRequest GenerateRequest(string _sessionId)
             {
                 sessionId = _sessionId;
                 return new AddExchangeAccessRequest
@@ -34,7 +34,7 @@ namespace AccountTests.ExchangeAccessServiceTests
             // Последовательная регистрация и вход (внутри метода GenerateLogin), добавление информации о
             // доступе к бирже, а затем ее чтение.
             var reply = GenerateLogin("all_exs_from_acc")
-                .ContinueWith(loginReply => exchangeAccessService.AddExchangeAccess(GenerateReply(loginReply.Result.Result.SessionId), null))
+                .ContinueWith(loginReply => exchangeAccessService.AddExchangeAccess(GenerateRequest(loginReply.Result.Result.SessionId), null))
                 .ContinueWith(addExchangeReply => exchangeAccessService.AllExchangesBySession(
                 new SessionRequest { SessionId = sessionId }, null));
 

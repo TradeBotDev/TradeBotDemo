@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -10,6 +11,11 @@ namespace TradeMarket.DataTransfering.Bitmex.Rest.Requests
 {
     public class BitmexRestfulRequest<ResultType> : HttpRequestMessage
     {
+        public static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings
+        {
+            NullValueHandling = NullValueHandling.Ignore,
+            DefaultValueHandling = DefaultValueHandling.Ignore
+        };
 
         public UserAuthentication Authentication;
         public BitmexRestfulRequest(string key,string secret,HttpMethod method, string uri,string postdata) : base(method, BitmexRestfulClient.BitmexUri+uri) {

@@ -1,7 +1,10 @@
 ﻿using Bitmex.Client.Websocket;
 using Bitmex.Client.Websocket.Client;
+using Bitmex.Client.Websocket.Responses.Books;
+using Bitmex.Client.Websocket.Responses.Instruments;
 using Bitmex.Client.Websocket.Responses.Orders;
 using Bitmex.Client.Websocket.Responses.Positions;
+using Bitmex.Client.Websocket.Responses.Wallets;
 using Bitmex.Client.Websocket.Websockets;
 using Serilog;
 using System;
@@ -29,16 +32,17 @@ namespace TradeMarket.Model
 
         public Model.TradeMarket TradeMarket { get; set; }
 
-        public event EventHandler<FullOrder> Book25;
-        public event EventHandler<FullOrder> Book;
-        public event EventHandler<Order> UserOrders;
-        public event EventHandler<Model.Balance> UserBalance;
+        public event EventHandler<IPublisher<BookLevel>.ChangedEventArgs> Book25;
+        public event EventHandler<IPublisher<BookLevel>.ChangedEventArgs> Book;
+        public event EventHandler<IPublisher<Order>.ChangedEventArgs> UserOrders;
+        public event EventHandler<IPublisher<Wallet>.ChangedEventArgs> UserBalance;
         public event EventHandler<IPublisher<Margin>.ChangedEventArgs> UserMargin;
         public event EventHandler<IPublisher<Position>.ChangedEventArgs> UserPosition;
+        public event EventHandler<IPublisher<Instrument>.ChangedEventArgs> InstrumentUpdate;
 
 
-        public List<IPublisher<Margin>.ChangedEventArgs> MarginCache = new List<IPublisher<Margin>.ChangedEventArgs>();
-        public List<Balance> BalanceCache = new List<Balance>();
+
+        //TODO тут должен быть кэш из редиса
 
         //TODO сделать эти классы абстрактными
         internal BitmexWebsocketClient WSClient { get; set; }
@@ -49,31 +53,24 @@ namespace TradeMarket.Model
         /// <summary>
         /// Метод инициализации контекста. 
         /// </summary>
-        public async Task initAsync()
+        public void init()
         {
-            
-            var keySecretPair = await _accountClient.GetUserInfo(SessionId).ContinueWith(el => {
-                try
-                {
-                    Key = el.Result.Key;
-                    Secret = el.Result.Secret;
-                    return AutheticateUser();
-                }
-                catch (Exception e)
-                {
-                    Log.Logger.Error($"Exception: {e.Message}");
-                }
-                return Task.Delay(0);
 
-            });
+            var keySecretPair = _accountClient.GetUserInfo(SessionId);
+            Key = keySecretPair.Key;
+            Secret = keySecretPair.Secret;
+
+            //TODO что-то сделать с этим методом
+            AutheticateUser();
 
             //инициализация подписок
-            TradeMarket.SubscribeToBalance((sender, el) => { BalanceCache.Add(el); UserBalance?.Invoke(sender, el); }, this);
-            TradeMarket.SubscribeToBook((sender, el) => {Book?.Invoke(sender, el); }, this);
+            TradeMarket.SubscribeToBalance((sender, el) => {UserBalance?.Invoke(sender, el); }, this);
+            //TradeMarket.SubscribeToBook((sender, el) => {Book?.Invoke(sender, el); }, this);
             TradeMarket.SubscribeToBook25((sender, el) => Book25?.Invoke(sender, el), this);
             TradeMarket.SubscribeToUserOrders((sender, el) => UserOrders?.Invoke(sender, el), this);
             TradeMarket.SubscribeToUserMargin((sender, el) => UserMargin?.Invoke(sender, el), this);
             TradeMarket.SubscribeToUserPositions((sender, el) => UserPosition?.Invoke(sender, el), this);
+            TradeMarket.SubscribeToInstruments((sender, el) => InstrumentUpdate?.Invoke(sender, el), this);
         }
 
         /// <summary>
@@ -151,35 +148,7 @@ namespace TradeMarket.Model
 
         #endregion
 
-        #region Static Part
-        internal static List<UserContext> RegisteredUsers = new List<UserContext>();
-        private static object locker = new();
-
-        public static async Task<UserContext> GetUserContextAsync(string sessionId, string slotName, string tradeMarketName)
-        {
-            UserContext userContext = null;
-            try
-            {
-                System.Threading.Monitor.Enter(locker);
-                Log.Logger.Information("Getting UserContext {@sessionId} : {@slotName} : {@tradeMarketName}", sessionId, slotName, tradeMarketName);
-                Log.Logger.Information("Stored Contexts : {@RegisteredUsers}", RegisteredUsers);
-                userContext = RegisteredUsers.FirstOrDefault(el => el.IsEquevalentTo(sessionId, slotName, tradeMarketName));
-                if (userContext is null)
-                {
-                    Log.Logger.Information("Creating new UserContext {@sessionId} : {@slotName} : {@tradeMarketName}", sessionId, slotName, tradeMarketName);
-                    userContext = new UserContext(sessionId, slotName, TradeMarket.GetTradeMarket(tradeMarketName));
-                    //контекст сначала добавляется , а затеми инициализируется для того чтобы избежать создание нескольких контекстов
-                    RegisteredUsers.Add(userContext);
-                    await userContext.initAsync();
-                }
-            } finally {
-                System.Threading.Monitor.Exit(locker);
-            }
-            return userContext;
-
-
-        }
-        #endregion
+        
     }
 }
 

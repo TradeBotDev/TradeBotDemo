@@ -1,25 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using TradeBot.Common.v1;
 
 namespace Former
 {
     public static class Clients
     {
         //Класс для хранения контекстов клиентов
-        private static readonly List<UserContext> contexts = new List<UserContext>();
+        private static readonly List<UserContext> Contexts = new();
 
         //Получает контекст пользователя по его sessionId, trademarket name, slot name если он уже существует или создаёт новый
-        public static UserContext GetUserContext(string sessionId, string trademarket, string slot)
+        public static UserContext GetUserContext(string sessionId, string tradeMarket, string slot)
         {
-            UserContext result = contexts.FirstOrDefault(el => el.sessionId == sessionId && el.trademarket == trademarket && el.slot == slot);
-            if (result is null)
-            {
-                result = new UserContext(sessionId, trademarket, slot);
-                contexts.Add(result);
-            }
+            var result = Contexts.FirstOrDefault(el => el.SessionId == sessionId && el.TradeMarket == tradeMarket && el.Slot == slot);
+            if (result is not null) return result;
+            result = new UserContext(sessionId, tradeMarket, slot);
+            Contexts.Add(result);
             return result;
         }
     }

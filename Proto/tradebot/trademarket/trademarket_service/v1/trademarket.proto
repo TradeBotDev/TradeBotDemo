@@ -65,20 +65,31 @@ service TradeMarketService {
 	*/
 	rpc SubscribePosition(SubscribePositionRequest) returns (stream SubscribePositionResponse);
 
+	/*
+		Подписка на изменение цен в стаканах
+	*/
+	rpc SubscribePrice(SubscribePriceRequest) returns (stream SubscribePriceResponse);
+
 }
+
+message SubscribePriceRequest{
+
+}
+
+message SubscribePriceResponse{
+	double bid_price = 1;
+	double ask_price = 2;
+	double fair_price = 3;
+	ChangesType changed_type = 4;
+}
+
 
 message SubscribePositionRequest{
-
-}
-
-enum PositionState{
-	POSITION_STATE_UNDEFIEND = 0;
-	POSITION_STATE_LONG = 1;
-	POSITION_STATE_SHORT = 2;
+	google.protobuf.Empty empty = 1;
 }
 
 message SubscribePositionResponse{
-	PositionState position_state = 1;
+	int64 current_qty = 1;
 }
 
 message SubscribeMarginRequest{
@@ -187,7 +198,7 @@ message SubscribeMyOrdersRequest{
 message SubscribeMyOrdersResponse {
 	tradebot.common.v1.DefaultResponse response = 1;
 	tradebot.common.v1.Order changed = 2;
-
+	ChangesType changes_type = 3;
 }
 
 message SubscribeOrdersRequest{
@@ -197,6 +208,7 @@ message SubscribeOrdersRequest{
 
 message SubscribeOrdersResponse{
 	tradebot.common.v1.SubscribeOrdersResponse response = 1;
+	ChangesType changed_type = 2;
 
 }
 

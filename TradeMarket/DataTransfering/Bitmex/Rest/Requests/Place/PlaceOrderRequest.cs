@@ -13,11 +13,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Rest.Requests.Place
     {
         public PlaceOrderRequest(string key, string secret, Order order) 
             : base(key, secret, HttpMethod.Post, "/api/v1/order", 
-                  JsonConvert.SerializeObject(order,Formatting.None,
-                      new JsonSerializerSettings { 
-                          NullValueHandling = NullValueHandling.Ignore, 
-                          DefaultValueHandling = DefaultValueHandling.Ignore
-                      })) {
+                  ContextConverter.Convert(order)) {
         }
     }
 }

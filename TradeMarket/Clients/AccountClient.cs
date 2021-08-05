@@ -40,11 +40,11 @@ namespace TradeMarket.Clients
             _client = client;
         }
 
-        public async Task<UserAccessInfo> GetUserInfo(string sessionId)
+        public UserAccessInfo GetUserInfo(string sessionId)
         {
             Log.Logger.Information($"Fetching key and secret by sessionId {sessionId}");
 
-            var reply = await _client.ExchangeBySessionAsync(new()
+            var reply =  _client.ExchangeBySession(new()
             {
                 Code = ExchangeCode.Bitmex,
                 SessionId = sessionId
