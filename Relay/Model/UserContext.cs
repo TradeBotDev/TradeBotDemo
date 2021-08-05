@@ -17,6 +17,7 @@ namespace Relay.Model
         public AlgorithmClient _algorithmClient { get; internal set; }
         public TradeMarketClient _tradeMarketClient { get; internal set; }
 
+        private bool IsStart = false;
         public Metadata Meta { get; internal set; }
 
         private IClientStreamWriter<AddOrderRequest> _algorithmStream;
@@ -32,9 +33,6 @@ namespace Relay.Model
 
             _algorithmStream = _algorithmClient.OpenStream(meta);
             _tradeMarketStream = _tradeMarketClient.OpenStream(meta);
-
-
-            //_tradeMarketClient.OrderRecievedEvent += _tradeMarketClient_OrderRecievedEvent;
         }
 
         public void StatusOfWork()
@@ -61,7 +59,10 @@ namespace Relay.Model
         private void _tradeMarketClient_OrderRecievedEvent(object sender, TradeBot.Common.v1.Order e)
         {
             Log.Information($"Sending order {e.Price} : {e.Quantity} : {e.Id}");
-            _algorithmClient.WriteOrder(_algorithmStream, e);
+            Task.Run(async()=> 
+            { 
+                await _algorithmClient.WriteOrder(_algorithmStream, e);
+            }).Wait();
         }
 
         public void UpdateConfig(Config config)
@@ -69,10 +70,15 @@ namespace Relay.Model
             _ = _algorithmClient.UpdateConfig(config, Meta);
             _ = _formerClient.UpdateConfig(config, Meta);
         }
+        
 
         public void SubscribeForOrders()
         {
-            if (IsWorking) _tradeMarketClient.SubscribeForOrders(_tradeMarketStream, this);
+            if (IsWorking && !IsStart)
+            {
+                IsStart = true;
+                _tradeMarketClient.SubscribeForOrders(_tradeMarketStream);
+            }
         }
 
     }

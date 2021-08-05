@@ -24,7 +24,6 @@ namespace Relay.Services
 
         private static IDictionary<Metadata, UserContext> contexts = new Dictionary<Metadata, UserContext>(new MetaComparer());
 
-
         public class MetaComparer : IEqualityComparer<Metadata>
         {
             public bool Equals(Metadata x, Metadata y)
@@ -60,6 +59,7 @@ namespace Relay.Services
 
         public RelayService(AlgorithmClient algorithm, TradeMarketClient tradeMarket, FormerClient former)
         {
+            Log.Information("new RelayService");
             _algorithmClient = algorithm;
             _tradeMarketClient = tradeMarket;
             _former = former;
@@ -69,7 +69,7 @@ namespace Relay.Services
         {
             var user = GetUserContext(context.RequestHeaders);
             user.StatusOfWork();
-            user.SubscribeForOrders();
+                user.SubscribeForOrders();
             user.UpdateConfig(request.Config);
             //_algorithmClient.IsOn = true;
             return await Task.FromResult(new StartBotResponse()

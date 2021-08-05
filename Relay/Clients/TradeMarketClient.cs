@@ -37,33 +37,46 @@ namespace Relay.Clients
             }, meta).ResponseStream;
         }
 
-        public async void SubscribeForOrders(IAsyncStreamReader<SubscribeOrdersResponse> stream, UserContext user)
+        private async Task Reading(IAsyncStreamReader<SubscribeOrdersResponse> stream)
         {
-            while (true)
+
+            //while(true)
+            //{
+            //    var read = stream.MoveNext();
+            //}
+            await foreach (var item in SubscribeForOrders(null))
             {
-                try
-                {
-                    while (await stream.MoveNext())
-                    {
-                        OrderRecievedEvent?.Invoke(this, new(stream.Current.Response.Order));
-                    }
-                    _ = stream.MoveNext();
-                    break;
-                }
-                catch (RpcException e)
-                {
-                    if (stream.Current != null)
-                    {
-                        OrderRecievedEvent?.Invoke(this, new(stream.Current.Response.Order));
-                    }
-                    stream = user.ReConnect();
-                }
-                catch (System.InvalidOperationException e)
-                {
-                    Log.Information(e.Message);
-                    _ = stream.MoveNext();
-                }
+
             }
+            
+        }
+
+
+        public IAsyncEnumerable<Order> SubscribeForOrders(IAsyncStreamReader<SubscribeOrdersResponse> stream)
+        {
+            System.Threading.Channels.Channel<Order> channel = System.Threading.Channels.Channel.CreateUnbounded<Order>();
+            Task.Run(async() =>
+            {
+                while (true)
+                {
+                    try
+                    {
+                        while (await stream.MoveNext())
+                        {
+                            await channel.Writer.WriteAsync(new(stream.Current.Response.Order));
+                            OrderRecievedEvent?.Invoke(this, new(stream.Current.Response.Order));
+                        }
+                        break;
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e.Message);
+                        //reconnect
+                    }
+                }
+            });
+            return channel.Reader.ReadAllAsync();
+
         }
 
         public event EventHandler<Order> OrderRecievedEvent;
