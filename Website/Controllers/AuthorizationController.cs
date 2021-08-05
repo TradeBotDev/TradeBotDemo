@@ -9,11 +9,20 @@ using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
+using Website.Models;
 
 namespace Website.Controllers
 {
     public class AuthorizationController : Controller
     {
+        private Account.AccountClient accountClient;
+
+        public AuthorizationController()
+        {
+            var channel = GrpcChannel.ForAddress("http://localhost:5000");
+            accountClient = new(channel);
+        }
+
         [HttpGet]
         public IActionResult Login()
         {
@@ -23,15 +32,12 @@ namespace Website.Controllers
         }
 
         [HttpPost]
-        public IActionResult Login(string email, string password)
+        public IActionResult Login(LoginModel model)
         {
-            var channel = GrpcChannel.ForAddress("http://localhost:5000");
-            var accountClient = new Account.AccountClient(channel);
-
             var loginReply = accountClient.Login(new LoginRequest
             {
-                Email = email,
-                Password = password
+                Email = model.Email,
+                Password = model.Password
             });
 
             if (loginReply.Result == AccountActionCode.Successful)
@@ -62,21 +68,17 @@ namespace Website.Controllers
         }
 
         [HttpPost]
-        public IActionResult Register(string email, string password, string verify_password)
+        public IActionResult Register(RegisterModel model)
         {
-            var channel = GrpcChannel.ForAddress("http://localhost:5000");
-            var accountClient = new Account.AccountClient(channel);
-
             var registerReply = accountClient.Register(new RegisterRequest
             {
-                Email = email,
-                Password = password,
-                VerifyPassword = verify_password
+                Email = model.Email,
+                Password = model.Password,
+                VerifyPassword = model.VerifyPassword
             });
+
             if (registerReply.Result == AccountActionCode.Successful)
-            {
                 return Content("Успешная регистрация");
-            }
             else
             {
                 ViewBag.Title = "Произошла ошибка";
@@ -88,18 +90,16 @@ namespace Website.Controllers
         [HttpGet]
         public IActionResult Logout()
         {
-            var channel = GrpcChannel.ForAddress("http://localhost:5000");
-            var accountClient = new Account.AccountClient(channel);
             var logoutReply = accountClient.Logout(new LogoutRequest
             {
                 SessionId = User.Identity.Name,
                 SaveExchangeAccesses = false
             });
+
+            HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
             if (logoutReply.Result == AccountActionCode.Successful)
-            {
-                HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 return Content("Вы вышли");
-            }
             else
             {
                 ViewBag.Title = "Произошла ошибка";
