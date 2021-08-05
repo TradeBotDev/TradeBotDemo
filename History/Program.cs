@@ -8,6 +8,8 @@ using System.Linq;
 using System.Threading;
 using TradeBot.Common.v1;
 using Newtonsoft.Json;
+using History.Cache;
+using StackExchange.Redis;
 
 namespace History
 {
@@ -15,9 +17,13 @@ namespace History
     {
         public static void Main(string[] args)
         {
-            DataContext db = new();
+            DataContext postgres = new();
+            ConnectionMultiplexer connectionMultiplexer = ConnectionMultiplexer.Connect("localhost");     
+            IDatabase redis = connectionMultiplexer.GetDatabase();
 
             Thread.Sleep(3000);
+
+            Console.ReadKey();
         }
     }
 }
