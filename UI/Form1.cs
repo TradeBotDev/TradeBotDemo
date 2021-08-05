@@ -10,11 +10,11 @@ namespace UI
 {
     public partial class TradeBotUI : Form
     {
-        private TradeBot.Facade.FacadeService.v1.FacadeService.FacadeServiceClient client;
+        private FacadeService.FacadeServiceClient client;
         private Metadata meta;
         public TradeBotUI()
         {
-            client = new TradeBot.Facade.FacadeService.v1.FacadeService.FacadeServiceClient(GrpcChannel.ForAddress("https://localhost:5002"));
+            client = new FacadeService.FacadeServiceClient(GrpcChannel.ForAddress("https://localhost:5002"));
             InitializeComponent();
         }
 
@@ -23,7 +23,7 @@ namespace UI
             using var channel = GrpcChannel.ForAddress("https://localhost:5002");
             var facadeClient = new TradeBot.Facade.FacadeService.v1.FacadeService.FacadeServiceClient(channel);
 
-            Config config = new Config()
+            var config = new Config
             {
                 AvaibleBalance = double.Parse(ConfigAvailableBalance.Text),
                 RequiredProfit = double.Parse(ConfigRequiredProfit.Text),
@@ -34,7 +34,7 @@ namespace UI
                 TotalBalance = 100.0
             };
 
-            var requestForRelay = new TradeBot.Facade.FacadeService.v1.SwitchBotRequest()
+            var requestForRelay = new SwitchBotRequest()
             {
                 Config = config
 
