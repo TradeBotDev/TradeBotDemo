@@ -67,7 +67,7 @@ namespace Website.Controllers
             HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
             if (reply.Result == AccountActionCode.Successful)
-                return Content("Вы вышли");
+                return Redirect(Request.Headers["Referer"].ToString());
             else return View("~/Views/Shared/Error.cshtml", reply.Message);
         }
     }
