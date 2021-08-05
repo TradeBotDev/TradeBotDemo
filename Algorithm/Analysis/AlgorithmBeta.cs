@@ -35,19 +35,16 @@ namespace Algorithm.Analysis
         //if the storage is overfilled we remove the oldest point
         private void NewPointAlert(KeyValuePair<DateTime, double> point)
         {
-            if (point.Value != 0)
-            {
-                _storage.Add(point.Key, point.Value);
+            _storage.Add(point.Key, point.Value);
 
-                if (_storage.Count > _durationInSeconds)
-                {
-                    var toRemove = _storage.First();
-                    _storage.Remove(toRemove.Key);
-                }
-                if (_storage.Count == _durationInSeconds)
-                {
-                    PerformCalculations(_storage);
-                }
+            if (_storage.Count > _durationInSeconds)
+            {
+                var toRemove = _storage.First();
+                _storage.Remove(toRemove.Key);
+            }
+            if (_storage.Count == _durationInSeconds)
+            {
+                PerformCalculations(_storage);
             }
         }
 
@@ -76,14 +73,14 @@ namespace Algorithm.Analysis
                 subTrends.Add(CalculateSMA(subSet));
             }
             //after all the data is prepared the actual analysis takes place
-            int trend = TrendAnalyser(subTrends, points);
+            int trend = AnalyseTrend(subTrends, points);
             if (trend != 0)
             {
                 PriceSender.SendPrice(trend);
             }
         }
         //this func needs points and subset averages and decides if it's time to buy
-        private static int TrendAnalyser(IReadOnlyCollection<double> subTrends, Dictionary<DateTime, double> points)
+        private static int AnalyseTrend(IReadOnlyCollection<double> subTrends, Dictionary<DateTime, double> points)
         {
             Log.Information("Analysis...");
             bool downtrend = true;
@@ -93,7 +90,7 @@ namespace Algorithm.Analysis
             for (int i = 1; i < subTrends.Count; i++)
             {
                 //if any of the subset averages are bigger than the previous we assume the trend is NOT downward
-                if (subTrends.ElementAt(i-1) < subTrends.ElementAt(i))
+                if (subTrends.ElementAt(i - 1) < subTrends.ElementAt(i))
                 {
                     downtrend = false;
                     break;
