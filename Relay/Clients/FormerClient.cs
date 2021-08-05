@@ -22,6 +22,8 @@ namespace Relay.Clients
         {
              await _client.UpdateServerConfigAsync(new() {Request = config }, meta);
         }
+
+        
     }
 }
 

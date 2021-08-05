@@ -33,6 +33,7 @@ namespace Relay.Model
 
             _algorithmStream = _algorithmClient.OpenStream(meta);
             _tradeMarketStream = _tradeMarketClient.OpenStream(meta);
+            
         }
 
         public void StatusOfWork()

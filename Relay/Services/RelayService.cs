@@ -24,7 +24,7 @@ namespace Relay.Services
 
         private static IDictionary<Metadata, UserContext> contexts = new Dictionary<Metadata, UserContext>(new MetaComparer());
 
-        public class MetaComparer : IEqualityComparer<Metadata>
+        private class MetaComparer : IEqualityComparer<Metadata>
         {
             public bool Equals(Metadata x, Metadata y)
             {
@@ -45,7 +45,7 @@ namespace Relay.Services
             }
         }
 
-        public UserContext GetUserContext(Metadata meta)
+        private UserContext GetUserContext(Metadata meta)
         {
             //TODO Возможно он тут проверяет по ссылке. так что надо бы сделать Equals
             if (contexts.Keys.FirstOrDefault(x => x[2].Value == meta[2].Value) != null)
@@ -71,12 +71,11 @@ namespace Relay.Services
             user.StatusOfWork();
                 user.SubscribeForOrders();
             user.UpdateConfig(request.Config);
-            //_algorithmClient.IsOn = true;
             return await Task.FromResult(new StartBotResponse()
             {
                 Response = new DefaultResponse()
                 {
-                    Message = "Bot was launched",
+                    Message = "Command has been complited",
                     Code = ReplyCode.Succeed
                 }
             });
@@ -94,9 +93,6 @@ namespace Relay.Services
         {
             return base.SubscribeLogs(request, responseStream, context);
         }
-        //public async override Task SubscribeOrders(TradeBot.Relay.RelayService.v1.SubscribeOrdersRequest request, IServerStreamWriter<TradeBot.Relay.RelayService.v1.SubscribeOrdersResponse> responseStream, ServerCallContext context)
-        //{
 
-        //}
     }
 }
