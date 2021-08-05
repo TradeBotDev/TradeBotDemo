@@ -1,16 +1,9 @@
-﻿using Grpc.Net.Client;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Security.Principal;
-using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
-using Website.Models;
 using Website.Models.Authorization;
 
 namespace Website.Controllers
