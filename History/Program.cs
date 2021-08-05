@@ -5,8 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Threading;
 using TradeBot.Common.v1;
+using Newtonsoft.Json;
 
 namespace History
 {
@@ -16,7 +17,7 @@ namespace History
         {
             DataContext db = new();
 
-
+            Thread.Sleep(3000);
         }
     }
 }
