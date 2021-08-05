@@ -1,9 +1,9 @@
-﻿@model Website.Models.AccountDataModel
+﻿@model Website.Models.AccountPageModel
 @using TradeBot.Account.AccountService.v1;
 
 <p>Электронная почта: @Model.Email</p>
-
-@if (Model.Exchanges.Count() == 0)
+<!--
+if (Model.Exchanges.Count() == 0)
 {
     <p>Добавленных бирж нет.</p>
 }
@@ -11,6 +11,15 @@ else
 {
     foreach (ExchangeAccessInfo exchange in Model.Exchanges)
     {
-        <p>Название: @exchange.Name, Токен: @exchange.Token, Секрет: @exchange.Secret</p>
+        <p>Название: exchange.Name, Токен: exchange.Token, Секрет: exchange.Secret</p>
     }
 }
+-->
+@foreach (ExchangeAccessInfo exchange in Model.Exchanges)
+{
+    <p>Название: @exchange.Name, Токен: @exchange.Token, Секрет: @exchange.Secret</p>
+}
+
+<form action="account/addexchangeaccess">
+    <input type="submit" value="Добавить новую биржу" />
+</form>

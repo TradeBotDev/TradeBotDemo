@@ -7,7 +7,7 @@ using TradeBot.Account.AccountService.v1;
 
 namespace Website.Models
 {
-    public class AccountDataModel
+    public class AccountPageModel
     {
         public string Email { get; set; }
 

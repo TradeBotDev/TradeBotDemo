@@ -18,20 +18,64 @@ namespace Website.Controllers
         {
             var channel = GrpcChannel.ForAddress("http://localhost:5000");
             var accountClient = new Account.AccountClient(channel);
-            var reply = accountClient.AccountData(new AccountDataRequest
+            var exchangeClient = new ExchangeAccess.ExchangeAccessClient(channel);
+
+            var accountData = accountClient.AccountData(new AccountDataRequest
             {
                 SessionId = User.Identity.Name
             });
 
-            var model = new AccountDataModel
+            var allExchanges = exchangeClient.AllExchangesBySession(new AllExchangesBySessionRequest
             {
-                Email = reply.CurrentAccount.Email,
-                Exchanges = reply.CurrentAccount.Exchanges
+                SessionId = User.Identity.Name
+            });
+
+            var model = new AccountPageModel
+            {
+                Email = accountData.CurrentAccount.Email,
+                Exchanges = allExchanges.Exchanges
             };
 
             ViewBag.Title = "Аккаунт";
             ViewBag.SectionTitle = "Аккаунт";
             return View(model);
+        }
+
+        [HttpGet]
+        public IActionResult AddExchangeAccess()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult AddExchangeAccess(AddExchangeAccessModel model)
+        {
+            var channel = GrpcChannel.ForAddress("http://localhost:5000");
+            var exchangeClient = new ExchangeAccess.ExchangeAccessClient(channel);
+
+            ExchangeAccessCode exchangeAccessCode;
+            switch (model.SelectExchange)
+            {
+                case "Bitmex":
+                    exchangeAccessCode = ExchangeAccessCode.Bitmex;
+                    break;
+                default:
+                    exchangeAccessCode = ExchangeAccessCode.Unspecified;
+                    break;
+            }
+
+            var reply = exchangeClient.AddExchangeAccess(new AddExchangeAccessRequest
+            {
+                SessionId = User.Identity.Name,
+                Code = exchangeAccessCode,
+                ExchangeName = model.SelectExchange,
+                Token = model.Token,
+                Secret = model.Secret
+            });
+
+            if (reply.Result != ExchangeAccessActionCode.Successful)
+                return Content(reply.Message);
+            else return RedirectToAction("account", "account");
         }
     }
 }
