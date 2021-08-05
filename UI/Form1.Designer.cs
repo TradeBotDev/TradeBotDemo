@@ -164,7 +164,7 @@ namespace UI
             // 
             this.ShowRegistrationPanel.Location = new System.Drawing.Point(11, 12);
             this.ShowRegistrationPanel.Name = "ShowRegistrationPanel";
-            this.ShowRegistrationPanel.Size = new System.Drawing.Size(106, 61);
+            this.ShowRegistrationPanel.Size = new System.Drawing.Size(117, 61);
             this.ShowRegistrationPanel.TabIndex = 14;
             this.ShowRegistrationPanel.Text = "Registration";
             this.ShowRegistrationPanel.UseVisualStyleBackColor = true;
@@ -174,7 +174,7 @@ namespace UI
             // 
             this.ShowLoginPanel.Location = new System.Drawing.Point(11, 79);
             this.ShowLoginPanel.Name = "ShowLoginPanel";
-            this.ShowLoginPanel.Size = new System.Drawing.Size(106, 61);
+            this.ShowLoginPanel.Size = new System.Drawing.Size(117, 61);
             this.ShowLoginPanel.TabIndex = 15;
             this.ShowLoginPanel.Text = "Login";
             this.ShowLoginPanel.UseVisualStyleBackColor = true;
@@ -184,7 +184,7 @@ namespace UI
             // 
             this.ShowMainMenu.Location = new System.Drawing.Point(11, 147);
             this.ShowMainMenu.Name = "ShowMainMenu";
-            this.ShowMainMenu.Size = new System.Drawing.Size(106, 61);
+            this.ShowMainMenu.Size = new System.Drawing.Size(117, 61);
             this.ShowMainMenu.TabIndex = 16;
             this.ShowMainMenu.Text = "Main Menu";
             this.ShowMainMenu.UseVisualStyleBackColor = true;
@@ -325,7 +325,7 @@ namespace UI
             this.MainMenuGroupBox.Controls.Add(this.ConfigVolumeOfContracts);
             this.MainMenuGroupBox.Controls.Add(this.ConfigRequiredProfit);
             this.MainMenuGroupBox.Controls.Add(this.ConfigVolumeOfContractsl);
-            this.MainMenuGroupBox.Location = new System.Drawing.Point(32, 328);
+            this.MainMenuGroupBox.Location = new System.Drawing.Point(145, 10);
             this.MainMenuGroupBox.Name = "MainMenuGroupBox";
             this.MainMenuGroupBox.Size = new System.Drawing.Size(695, 310);
             this.MainMenuGroupBox.TabIndex = 20;
@@ -344,7 +344,7 @@ namespace UI
             this.SignUpGroupBox.Controls.Add(this.ConfigTokenl);
             this.SignUpGroupBox.Controls.Add(this.RegKey);
             this.SignUpGroupBox.Enabled = false;
-            this.SignUpGroupBox.Location = new System.Drawing.Point(142, 328);
+            this.SignUpGroupBox.Location = new System.Drawing.Point(145, 10);
             this.SignUpGroupBox.Name = "SignUpGroupBox";
             this.SignUpGroupBox.Size = new System.Drawing.Size(695, 310);
             this.SignUpGroupBox.TabIndex = 21;
@@ -360,7 +360,7 @@ namespace UI
             this.SignInGroupBox.Controls.Add(this.label8);
             this.SignInGroupBox.Controls.Add(this.label9);
             this.SignInGroupBox.Enabled = false;
-            this.SignInGroupBox.Location = new System.Drawing.Point(142, 12);
+            this.SignInGroupBox.Location = new System.Drawing.Point(145, 10);
             this.SignInGroupBox.Name = "SignInGroupBox";
             this.SignInGroupBox.Size = new System.Drawing.Size(695, 310);
             this.SignInGroupBox.TabIndex = 22;
@@ -372,7 +372,7 @@ namespace UI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(849, 781);
+            this.ClientSize = new System.Drawing.Size(858, 755);
             this.Controls.Add(this.SignUpGroupBox);
             this.Controls.Add(this.ShowMainMenu);
             this.Controls.Add(this.ShowLoginPanel);
