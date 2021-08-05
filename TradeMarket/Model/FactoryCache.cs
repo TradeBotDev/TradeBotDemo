@@ -14,7 +14,7 @@ namespace TradeMarket.Model
 
         private IDictionary<string, TradeMarket> _tradeMarkets;
 
-        public TradeMarketFactory(/*IConnectionMultiplexer multiplexer*/)
+        public FactoryCache(/*IConnectionMultiplexer multiplexer*/)
         {
             //_multiplexer = multiplexer;
             _tradeMarkets = new Dictionary<string, TradeMarket>(new List<KeyValuePair<string, TradeMarket>>

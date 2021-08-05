@@ -97,7 +97,7 @@ namespace TradeMarket.DataTransfering.Bitmex
             if(_book25Publisher is null)
             {
                 _book25Publisher = new BookPublisher(context.WSClient, context.WSClient.Streams.Book25Stream/*,_multiplexer*/);
-                _book25Publisher.Changed += _book25Publisher_Changed;
+                _book25Publisher.Changed += handler;
             }
             await _book25Publisher.SubscribeAsync(new Book25SubscribeRequest(context.SlotName), new System.Threading.CancellationToken());
         }
@@ -107,7 +107,7 @@ namespace TradeMarket.DataTransfering.Bitmex
             if (_bookPublisher is null)
             {
                 _bookPublisher = new BookPublisher(context.WSClient, context.WSClient.Streams.BookStream/*,_multiplexer*/);
-                _bookPublisher.Changed += _bookPublisher_Changed;
+                _bookPublisher.Changed += handler;
             }
             await _bookPublisher.SubscribeAsync(new BookSubscribeRequest(context.SlotName), new System.Threading.CancellationToken());
         }

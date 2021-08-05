@@ -4,11 +4,8 @@ using Serilog;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-
 using TradeBot.Common.v1;
 using TradeBot.TradeMarket.TradeMarketService.v1;
-
-using SubscribeOrdersRequest = TradeBot.TradeMarket.TradeMarketService.v1.SubscribeOrdersRequest;
 
 namespace Former
 {
@@ -17,14 +14,14 @@ namespace Former
         public delegate Task MyOrdersEvent(Order newComingOrder, ChangesType changesType);
         public MyOrdersEvent UpdateMyOrders;
 
-        public delegate Task BalanceEvent(int balanceToBuy, int balanceToSell);
+        public delegate Task BalanceEvent(int availableBalance, int totalBalance);
         public BalanceEvent UpdateBalance;
 
-        public delegate Task PositionUpdate(double currentQuantity);
-        public PositionUpdate UpdatePosition;
+        public delegate Task PositionEvent(double positionQuantity);
+        public PositionEvent UpdatePosition;
 
-        public delegate Task MarketPricesUpdate(double bid, double ask);
-        public MarketPricesUpdate UpdateMarketPrices;
+        public delegate Task MarketPricesEvent(double bid, double ask);
+        public MarketPricesEvent UpdateMarketPrices;
 
         private static int _retryDelay;
         private static string _connectionString;
@@ -56,21 +53,24 @@ namespace Former
                 }
                 catch (RpcException e)
                 {
-                    Log.Error("Error {1}. Retrying...\r\n{0}", e.StackTrace);
+                    Log.Error("{@Where}: Error {@ExceptionMessage}. Retrying...\r\n{@ExceptionStackTrace}", "Former", e.Message, e.StackTrace);
                     Thread.Sleep(_retryDelay);
                 }
             }
         }
 
-        public async Task ObserveMarketPrices(UserContext context)
+        /// <summary>
+        /// Наблиюдает за изменением рыночных цен
+        /// </summary>
+        private async Task ObserveMarketPrices(Metadata meta)
         {
-            using var call = _client.SubscribePrice(new SubscribePriceRequest(), context.Meta);
+            using var call = _client.SubscribePrice(new SubscribePriceRequest(), meta);
 
             async Task ObserveMarketPricesFunc()
             {
                 while (await call.ResponseStream.MoveNext())
                 {
-                    UpdateMarketPrices?.Invoke(call.ResponseStream.Current.BidPrice,call.ResponseStream.Current.AskPrice);
+                    await UpdateMarketPrices?.Invoke(call.ResponseStream.Current.BidPrice,call.ResponseStream.Current.AskPrice);
                 }
             }
 
@@ -80,15 +80,15 @@ namespace Former
         /// <summary>
         /// Наблюдает за обновлением доступного баланса 
         /// </summary>
-        public async Task ObserveBalance(UserContext context)
+        private async Task ObserveBalance(Metadata meta)
         {
-            using var call = _client.SubscribeMargin(new SubscribeMarginRequest(), context.Meta);
+            using var call = _client.SubscribeMargin(new SubscribeMarginRequest(), meta);
 
             async Task ObserveBalanceFunc()
             {
                 while (await call.ResponseStream.MoveNext())
                 {
-                    UpdateBalance?.Invoke((int) call.ResponseStream.Current.Margin.AvailableMargin, (int)call.ResponseStream.Current.Margin.MarginBalance);
+                    await UpdateBalance?.Invoke((int) call.ResponseStream.Current.Margin.AvailableMargin, (int)call.ResponseStream.Current.Margin.MarginBalance);
                 }
             }
 
@@ -98,9 +98,9 @@ namespace Former
         /// <summary>
         /// Наблюдает за событиями моих ордеров
         /// </summary>
-        public async Task ObserveMyOrders(UserContext context)
+        private async Task ObserveMyOrders(Metadata meta)
         {
-            using var call = _client.SubscribeMyOrders(new SubscribeMyOrdersRequest(), context.Meta);
+            using var call = _client.SubscribeMyOrders(new SubscribeMyOrdersRequest(), meta);
 
             async Task ObserveMyOrdersFunc()
             {
@@ -108,11 +108,11 @@ namespace Former
                 {
                     if (call.ResponseStream.Current.Response.Code == ReplyCode.Failure)
                     {
-                        Log.Information("order was rejected with message: {0}", call.ResponseStream.Current.Response.Message);
+                        Log.Error("{@Where}: Order was rejected by trade market with message: {@ResponseMessage}", "Former", call.ResponseStream.Current.Response.Message);
                         continue;
                     }
 
-                    UpdateMyOrders?.Invoke(call.ResponseStream.Current.Changed, call.ResponseStream.Current.ChangesType);
+                    await UpdateMyOrders?.Invoke(call.ResponseStream.Current.Changed, call.ResponseStream.Current.ChangesType);
                 }
             }
 
@@ -122,15 +122,15 @@ namespace Former
         /// <summary>
         /// Наблюдает за событиями моих позиций
         /// </summary>
-        public async Task ObservePositions(UserContext context)
+        private async Task ObservePositions(Metadata meta)
         {
-            using var call = _client.SubscribePosition(new SubscribePositionRequest(), context.Meta);
+            using var call = _client.SubscribePosition(new SubscribePositionRequest(), meta);
 
             async Task ObservePositionFunc()
             {
                 while (await call.ResponseStream.MoveNext())
                 {
-                    UpdatePosition?.Invoke(call.ResponseStream.Current.CurrentQty);
+                    await UpdatePosition?.Invoke(call.ResponseStream.Current.CurrentQty);
                 }
             }
 
@@ -140,13 +140,13 @@ namespace Former
         /// <summary>
         /// Отправляет запрос в биржу на выставление своего ордера
         /// </summary>
-        public async Task<PlaceOrderResponse> PlaceOrder(double sellPrice, double contractValue, UserContext context)
+        internal async Task<PlaceOrderResponse> PlaceOrder(double sellPrice, double contractValue, Metadata metadata)
         {
             PlaceOrderResponse response = null;
 
             async Task PlaceOrdersFunc()
             {
-                response = await _client.PlaceOrderAsync(new PlaceOrderRequest {Price = sellPrice, Value = contractValue}, context.Meta);
+                response = await _client.PlaceOrderAsync(new PlaceOrderRequest {Price = sellPrice, Value = contractValue}, metadata);
             }
 
             await ConnectionTester(PlaceOrdersFunc);
@@ -156,7 +156,7 @@ namespace Former
         /// <summary>
         /// Отправляет запрос в биржу на изменение цены своего ордера
         /// </summary>
-        public async Task<AmmendOrderResponse> AmendOrder(string id, double newPrice, UserContext context)
+        internal async Task<AmmendOrderResponse> AmendOrder(string id, double newPrice, Metadata metadata)
         {
             AmmendOrderResponse response = null;
 
@@ -169,11 +169,19 @@ namespace Former
                     QuantityType = QuantityType.None,
                     NewQuantity = 0,
                     PriceType = PriceType.Default
-                }, context.Meta);
+                }, metadata);
             }
 
             await ConnectionTester(PlaceOrdersFunc);
             return response;
+        }
+
+        internal void Start(Metadata meta)
+        {
+            ObservePositions(meta);
+            ObserveBalance(meta);
+            ObserveMarketPrices(meta);
+            ObserveMyOrders(meta);
         }
     }
 }
