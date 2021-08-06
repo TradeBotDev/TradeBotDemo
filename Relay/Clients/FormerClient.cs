@@ -44,7 +44,13 @@ namespace Relay.Clients
                     {
                         while (await stream.MoveNext())
                         {
-                            await channel.Writer.WriteAsync(new TradeBot.Former.FormerService.v1.SubscribeLogsResponse { Response=new TradeBot.Common.v1.SubscribeLogsResponse { Level=LogLevel.None} });
+                            await channel.Writer.WriteAsync(new TradeBot.Former.FormerService.v1.SubscribeLogsResponse 
+                            { 
+                                Response=new TradeBot.Common.v1.SubscribeLogsResponse 
+                                { 
+                                    LogMessage=stream.Current.Response.LogMessage
+                                } 
+                            });
                         }
                         break;
                     }
