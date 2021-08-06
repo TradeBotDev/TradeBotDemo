@@ -12,8 +12,8 @@ namespace Algorithm.DataManipulation
     //later will be decided by user
     public class PointMaker
     {
-        private static  KeyValuePair<DateTime, double> MakePoint(List<Order> orders, DateTime timestamp)
-        {           
+        private static KeyValuePair<DateTime, double> MakePoint(List<Order> orders, DateTime timestamp)
+        {
             double price = 0;
             int numberOfOrders = 0;
 
@@ -32,8 +32,14 @@ namespace Algorithm.DataManipulation
             if (numberOfOrders != 0)
             {
                 price /= numberOfOrders;
-            } else { price = 0; }
-            Log.Information("Made a point: " + timestamp.TimeOfDay + "    " + price);
+                Log.Information("Made a point: " + timestamp.TimeOfDay + "    " + price);
+            }
+            else
+            {
+                price = 0;
+                Log.Information("No new orders were recieved");
+            }
+
             return new KeyValuePair<DateTime, double>(timestamp, price);
         }
 
@@ -46,11 +52,14 @@ namespace Algorithm.DataManipulation
                 if (DataCollector.Orders.Count == 0)
                     continue;
 
-                    var newOrders = DataCollector.Orders;
-                    var newPoint = MakePoint(new List<Order>(newOrders), DateTime.Now);
+                var newOrders = DataCollector.Orders;
+                var newPoint = MakePoint(new List<Order>(newOrders), DateTime.Now);
                 //if a point was made we notify everyone involved (algo and dataCollector) 
-                    publisher.Publish(newPoint);                     
+                if (newPoint.Value != 0)
+                {
+                    publisher.Publish(newPoint);
+                }
             }
-        }       
+        }
     }
 }
