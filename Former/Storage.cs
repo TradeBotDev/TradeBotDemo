@@ -122,17 +122,16 @@ namespace Former
         /// </summary>
         public Task UpdateBalance(int availableBalance, int totalBalance)
         {
-            if (availableBalance != 0)
+            if (availableBalance > 0)
             {
                 AvailableBalance = availableBalance;
                 Log.Information("{@Where}: Balance updated. Available balance: {@AvailableBalance}, Total balance: {@TotalBalance}", "Former", availableBalance, totalBalance);
                 _logger.WriteToLog($"Balance available: {availableBalance}", LogLevel.Information, DateTimeOffset.Now);
             }
-            if (totalBalance != 0)
+            if (totalBalance > 0)
             {
                 TotalBalance = totalBalance;
                 _logger.WriteToLog($"Balance total: {totalBalance}", LogLevel.Information, DateTimeOffset.Now);
-
             }
             return Task.CompletedTask;
         }
