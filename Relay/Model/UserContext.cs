@@ -22,6 +22,7 @@ namespace Relay.Model
 
         private IClientStreamWriter<AddOrderRequest> _algorithmStream;
         private IAsyncStreamReader<SubscribeOrdersResponse> _tradeMarketStream;
+        private IAsyncStreamReader<TradeBot.Former.FormerService.v1.SubscribeLogsResponse> _formerStream;
         private bool IsWorking = false;
 
         public UserContext(Metadata meta, FormerClient formerClient, AlgorithmClient algorithmClient, TradeMarketClient tradeMarketClient)
@@ -30,10 +31,10 @@ namespace Relay.Model
             _formerClient = formerClient;
             _algorithmClient = algorithmClient;
             _tradeMarketClient = tradeMarketClient;
-
+            
             _algorithmStream = _algorithmClient.OpenStream(meta);
             _tradeMarketStream = _tradeMarketClient.OpenStream(meta);
-            
+            _formerStream = _formerClient.OpenStream();//мб нужно будет кидать мету
         }
 
         public void StatusOfWork()
@@ -73,6 +74,22 @@ namespace Relay.Model
             _ = _formerClient.UpdateConfig(config, Meta);
         }
         
+        public async void RepeatLogsFormer(TradeBot.Relay.RelayService.v1.SubscribeLogsRequest request, IServerStreamWriter<TradeBot.Relay.RelayService.v1.SubscribeLogsResponse> responseStream)
+        {
+            await foreach (var item in _formerClient.SubscribeForLogs(_formerStream))
+            {
+                try {
+                    await responseStream.WriteAsync(new TradeBot.Relay.RelayService.v1.SubscribeLogsResponse { Response = item.Response });
+                }
+                catch(Exception e)
+                {
+                    Log.Error(e.Message);
+                }
+            }
+
+        }
+
+
 
         public void SubscribeForOrders()
         {

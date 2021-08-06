@@ -20,7 +20,8 @@ namespace Relay.Services
     {
         private static AlgorithmClient _algorithmClient = null;
         private static TradeMarketClient _tradeMarketClient = null;
-        private static FormerClient _former;
+        private static FormerClient _formerClient=null;//добавил null
+        private UserContext cont;
 
         private static IDictionary<Metadata, UserContext> contexts = new Dictionary<Metadata, UserContext>(new MetaComparer());
 
@@ -52,7 +53,7 @@ namespace Relay.Services
             {
                 return contexts.First(x => x.Value.Meta[2].Value == meta[2].Value).Value;
             }
-            UserContext newContext = new(meta, _former, _algorithmClient, _tradeMarketClient);
+            UserContext newContext = new(meta, _formerClient, _algorithmClient, _tradeMarketClient);
             contexts.Add(meta, newContext);
             return newContext;
         }
@@ -62,7 +63,7 @@ namespace Relay.Services
             Log.Information("new RelayService");
             _algorithmClient = algorithm;
             _tradeMarketClient = tradeMarket;
-            _former = former;
+            _formerClient = former;
         }
 
         public override async Task<StartBotResponse> StartBot(StartBotRequest request, ServerCallContext context)
@@ -71,6 +72,7 @@ namespace Relay.Services
             user.StatusOfWork();
                 user.SubscribeForOrders();
             user.UpdateConfig(request.Config);
+            cont = user;
             return await Task.FromResult(new StartBotResponse()
             {
                 Response = new DefaultResponse()
@@ -89,9 +91,9 @@ namespace Relay.Services
             return await Task.FromResult(new UpdateServerConfigResponse());
         }
 
-        public override Task SubscribeLogs(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
+        public async override Task SubscribeLogs(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
         {
-            return base.SubscribeLogs(request, responseStream, context);
+            cont.RepeatLogsFormer(request,responseStream);
         }
 
     }

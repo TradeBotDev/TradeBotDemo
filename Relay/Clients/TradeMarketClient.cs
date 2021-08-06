@@ -37,19 +37,6 @@ namespace Relay.Clients
             }, meta).ResponseStream;
         }
 
-        private async Task Reading(IAsyncStreamReader<SubscribeOrdersResponse> stream)
-        {
-
-            //while(true)
-            //{
-            //    var read = stream.MoveNext();
-            //}
-            await foreach (var item in SubscribeForOrders(null))
-            {
-
-            }
-            
-        }
 
 
         public IAsyncEnumerable<Order> SubscribeForOrders(IAsyncStreamReader<SubscribeOrdersResponse> stream)
