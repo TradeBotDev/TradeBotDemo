@@ -34,7 +34,7 @@ namespace Relay.Model
             
             _algorithmStream = _algorithmClient.OpenStream(meta);
             _tradeMarketStream = _tradeMarketClient.OpenStream(meta);
-            _formerStream = _formerClient.OpenStream();//мб нужно будет кидать мету
+            _formerStream = _formerClient.OpenStream(meta);//мб нужно будет кидать мету
         }
         public IAsyncStreamReader<SubscribeOrdersResponse> ReConnect()
         {

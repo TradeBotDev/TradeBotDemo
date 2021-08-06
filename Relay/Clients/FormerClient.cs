@@ -23,7 +23,7 @@ namespace Relay.Clients
              await _client.UpdateServerConfigAsync(new() {Request = config }, meta);
         }
 
-        public IAsyncStreamReader<TradeBot.Former.FormerService.v1.SubscribeLogsResponse> OpenStream()
+        public IAsyncStreamReader<TradeBot.Former.FormerService.v1.SubscribeLogsResponse> OpenStream(Metadata meta)
         {
             return _client.SubscribeLogs(new TradeBot.Former.FormerService.v1.SubscribeLogsRequest 
             { 
@@ -31,7 +31,7 @@ namespace Relay.Clients
                 {
                     Level=LogLevel.None 
                 } 
-            }).ResponseStream;
+            }, meta).ResponseStream;
         }
         public IAsyncEnumerable<TradeBot.Former.FormerService.v1.SubscribeLogsResponse> SubscribeForLogs(IAsyncStreamReader<TradeBot.Former.FormerService.v1.SubscribeLogsResponse> stream)
         {
