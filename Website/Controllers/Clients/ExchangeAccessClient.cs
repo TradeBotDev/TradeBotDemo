@@ -35,5 +35,31 @@ namespace Website.Controllers.Clients
 
             return client.AddExchangeAccess(request);
         }
+
+        public static AllExchangesBySessionResponse AllExchangesBySession(string sessionId)
+        {
+            var request = new AllExchangesBySessionRequest
+            {
+                SessionId = sessionId
+            };
+
+            return client.AllExchangesBySession(request);
+        }
+
+        public static DeleteExchangeAccessResponse DeleteExchangeAccess(string sessionId, ExchangeAccessCode code)
+        {
+            var request = new DeleteExchangeAccessRequest
+            {
+                SessionId = sessionId,
+                Code = code
+            };
+
+            return client.DeleteExchangeAccess(request);
+        }
+
+        public static ExchangeBySessionResponse ExchangeBySession()
+        {
+            return null;
+        }
     }
 }

@@ -10,6 +10,7 @@ namespace Website.Controllers
     public class AccountController : Controller
     {
         [Route("Account")]
+        [HttpGet]
         public IActionResult Account()
         {
             var accountData = Clients.AccountServiceClient.AccountData(User.Identity.Name);
@@ -26,6 +27,16 @@ namespace Website.Controllers
                 return View(model);
             }
             else return View("~/Views/Shared/Error.cshtml", accountData.Message);
+        }
+
+        [Route("Account")]
+        [HttpPost]
+        public IActionResult Account(ExchangeAccessCode exchangeCode)
+        {
+            var reply = Clients.ExchangeAccessClient.DeleteExchangeAccess(User.Identity.Name, exchangeCode);
+            if (reply.Result == ExchangeAccessActionCode.Successful)
+                return RedirectToAction("account", "account");
+            else return View("~/Views/Shared/Error.cshtml", reply.Message);
         }
 
         [HttpGet]
