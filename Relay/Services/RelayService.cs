@@ -20,12 +20,12 @@ namespace Relay.Services
     {
         private static AlgorithmClient _algorithmClient = null;
         private static TradeMarketClient _tradeMarketClient = null;
-        private static FormerClient _former;
+        private static FormerClient _formerClient=null;//добавил null
+        private UserContext cont;
 
         private static IDictionary<Metadata, UserContext> contexts = new Dictionary<Metadata, UserContext>(new MetaComparer());
 
-
-        public class MetaComparer : IEqualityComparer<Metadata>
+        private class MetaComparer : IEqualityComparer<Metadata>
         {
             public bool Equals(Metadata x, Metadata y)
             {
@@ -46,37 +46,38 @@ namespace Relay.Services
             }
         }
 
-        public UserContext GetUserContext(Metadata meta)
+        private UserContext GetUserContext(Metadata meta)
         {
             //TODO Возможно он тут проверяет по ссылке. так что надо бы сделать Equals
-            if (contexts.ContainsKey(meta)) 
+            if (contexts.Keys.FirstOrDefault(x => x[2].Value == meta[2].Value) != null)
             {
-                return contexts[meta];
+                return contexts.First(x => x.Value.Meta[2].Value == meta[2].Value).Value;
             }
-            UserContext newContext = new(meta, _former, _algorithmClient, _tradeMarketClient);
-            contexts.Add(meta,newContext);
+            UserContext newContext = new(meta, _formerClient, _algorithmClient, _tradeMarketClient);
+            contexts.Add(meta, newContext);
             return newContext;
         }
 
-        public RelayService(AlgorithmClient algorithm,TradeMarketClient tradeMarket,FormerClient former)
+        public RelayService(AlgorithmClient algorithm, TradeMarketClient tradeMarket, FormerClient former)
         {
+            Log.Information("new RelayService");
             _algorithmClient = algorithm;
             _tradeMarketClient = tradeMarket;
-            _former = former;
+            _formerClient = former;
         }
 
         public override async Task<StartBotResponse> StartBot(StartBotRequest request, ServerCallContext context)
         {
-            Log.Information($"StartBot requested form {context.Host} with meta : \n {context.RequestHeaders}");
             var user = GetUserContext(context.RequestHeaders);
-            user.SubscribeForOrders();
+            user.StatusOfWork();
+                user.SubscribeForOrders();
             user.UpdateConfig(request.Config);
-            //_algorithmClient.IsOn = true;
+            cont = user;
             return await Task.FromResult(new StartBotResponse()
             {
                 Response = new DefaultResponse()
                 {
-                    Message = "Bot was launched",
+                    Message = "Command has been complited",
                     Code = ReplyCode.Succeed
                 }
             });
@@ -90,13 +91,10 @@ namespace Relay.Services
             return await Task.FromResult(new UpdateServerConfigResponse());
         }
 
-        public override Task SubscribeLogs(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
+        public async override Task SubscribeLogs(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
         {
-            return base.SubscribeLogs(request, responseStream, context);
+            cont.RepeatLogsFormer(request,responseStream);
         }
-        //public async override Task SubscribeOrders(TradeBot.Relay.RelayService.v1.SubscribeOrdersRequest request, IServerStreamWriter<TradeBot.Relay.RelayService.v1.SubscribeOrdersResponse> responseStream, ServerCallContext context)
-        //{
-           
-        //}
+
     }
 }

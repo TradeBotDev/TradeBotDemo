@@ -4,6 +4,7 @@ using Xunit;
 
 namespace AccountTests.ValidationTests
 {
+    [Collection("AccountTests")]
     public class RegisterFieldsTests
     {
         // Тест проверки на то, какой результат вернет валидация, если есть пустые поля.

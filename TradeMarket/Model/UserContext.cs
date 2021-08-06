@@ -1,5 +1,10 @@
 ﻿using Bitmex.Client.Websocket;
 using Bitmex.Client.Websocket.Client;
+using Bitmex.Client.Websocket.Responses.Books;
+using Bitmex.Client.Websocket.Responses.Instruments;
+using Bitmex.Client.Websocket.Responses.Orders;
+using Bitmex.Client.Websocket.Responses.Positions;
+using Bitmex.Client.Websocket.Responses.Wallets;
 using Bitmex.Client.Websocket.Websockets;
 using Serilog;
 using System;
@@ -9,11 +14,14 @@ using System.Threading.Tasks;
 using TradeBot.Common.v1;
 using TradeBot.TradeMarket.TradeMarketService.v1;
 using TradeMarket.Clients;
+using TradeMarket.DataTransfering;
 using TradeMarket.DataTransfering.Bitmex.Rest.Client;
+using Margin = Bitmex.Client.Websocket.Responses.Margins.Margin;
+using Order = Bitmex.Client.Websocket.Responses.Orders.Order;
 
 namespace TradeMarket.Model
 {
-    public class UserContext
+    public class UserContext : IEquatable<UserContext>
     {
         #region Dynamic Part
         public String SessionId { get; set; }
@@ -24,10 +32,17 @@ namespace TradeMarket.Model
 
         public Model.TradeMarket TradeMarket { get; set; }
 
-        public event EventHandler<FullOrder> Book25;
-        public event EventHandler<FullOrder> Book;
-        public event EventHandler<FullOrder> UserOrders;
-        public event EventHandler<Model.Balance> UserBalance;
+        public event EventHandler<IPublisher<BookLevel>.ChangedEventArgs> Book25;
+        public event EventHandler<IPublisher<BookLevel>.ChangedEventArgs> Book;
+        public event EventHandler<IPublisher<Order>.ChangedEventArgs> UserOrders;
+        public event EventHandler<IPublisher<Wallet>.ChangedEventArgs> UserBalance;
+        public event EventHandler<IPublisher<Margin>.ChangedEventArgs> UserMargin;
+        public event EventHandler<IPublisher<Position>.ChangedEventArgs> UserPosition;
+        public event EventHandler<IPublisher<Instrument>.ChangedEventArgs> InstrumentUpdate;
+
+
+
+        //TODO тут должен быть кэш из редиса
 
         //TODO сделать эти классы абстрактными
         internal BitmexWebsocketClient WSClient { get; set; }
@@ -35,31 +50,32 @@ namespace TradeMarket.Model
 
         private AccountClient _accountClient;
 
-        private async void init()
+        /// <summary>
+        /// Метод инициализации контекста. 
+        /// </summary>
+        public void init()
         {
-            var keySecretPair = await _accountClient.GetUserInfo(SessionId).ContinueWith(el => {
-                try
-                {
-                    Key = el.Result.Key;
-                    Secret = el.Result.Secret;   
-                    return AutheticateUser();
-                }
-                catch (Exception e)
-                {
-                    Log.Logger.Error($"Exception: {e.Message}");
-                }
-                return Task.Delay(0);
-               
-            } );
+
+            var keySecretPair = _accountClient.GetUserInfo(SessionId);
+            Key = keySecretPair.Key;
+            Secret = keySecretPair.Secret;
+
+            //TODO что-то сделать с этим методом
+            AutheticateUser();
 
             //инициализация подписок
-            TradeMarket.SubscribeToBalance((sender, el) => { UserBalance?.Invoke(sender, el); }, this);
-            TradeMarket.SubscribeToBook((sender, el) => { Book?.Invoke(sender, el); }, this);
+            TradeMarket.SubscribeToBalance((sender, el) => {UserBalance?.Invoke(sender, el); }, this);
+            //TradeMarket.SubscribeToBook((sender, el) => {Book?.Invoke(sender, el); }, this);
             TradeMarket.SubscribeToBook25((sender, el) => Book25?.Invoke(sender, el), this);
             TradeMarket.SubscribeToUserOrders((sender, el) => UserOrders?.Invoke(sender, el), this);
+            TradeMarket.SubscribeToUserMargin((sender, el) => UserMargin?.Invoke(sender, el), this);
+            TradeMarket.SubscribeToUserPositions((sender, el) => UserPosition?.Invoke(sender, el), this);
+            TradeMarket.SubscribeToInstruments((sender, el) => InstrumentUpdate?.Invoke(sender, el), this);
         }
 
-
+        /// <summary>
+        /// После создание нового объекта необходима инициализация некоторых полей и ивентов через метод init()
+        /// </summary>
         internal UserContext(string sessionId, string slotName, Model.TradeMarket tradeMarket)
         {
             //инициализация websocket клиента
@@ -75,8 +91,6 @@ namespace TradeMarket.Model
 
             TradeMarket = tradeMarket;
             _accountClient = AccountClient.GetInstance();
-            init();
-
         }
 
         public async Task<PlaceOrderResponse> PlaceOrder(double quontity, double price)
@@ -103,31 +117,38 @@ namespace TradeMarket.Model
         {
             return this.SessionId == sessionId && this.SlotName == slotName && this.TradeMarket.Name == tradeMarketName;
         }
-        #endregion
 
-        #region Static Part
-        internal static List<UserContext> RegisteredUsers = new List<UserContext>();
-
-        public static UserContext GetUserContext(string sessionId, string slotName)
+        public override bool Equals(object obj)
         {
-            Log.Logger.Information($"Getting UserContext with sessionId: {sessionId} and slot: {slotName}");
-            var userContext = RegisteredUsers.FirstOrDefault(el => el.IsEquevalentTo(sessionId, slotName, "Bitmex"));
-            if (userContext is null)
-            {
-                userContext = RegisterUser(sessionId, slotName, "Bitmex");
-            }
-            return userContext;
+            return Equals(obj as UserContext);
         }
 
-        public static UserContext RegisterUser(string sessionId, string slotName, string tradeMarketName) 
+        public bool Equals(UserContext other)
         {
-            Log.Logger.Information($"Creating new UserContext with sessionId: {sessionId} and slot: {slotName}");
-            UserContext user = new UserContext(sessionId, slotName, TradeMarket.GetTradeMarket(tradeMarketName));
-
-            RegisteredUsers.Add(user);
-            return user;
+            return other != null &&
+                   SessionId == other.SessionId &&
+                   SlotName == other.SlotName &&
+                   TradeMarket.Name == other.TradeMarket.Name;
         }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(SessionId, SlotName, TradeMarket.Name);
+        }
+
+        public static bool operator ==(UserContext left, UserContext right)
+        {
+            return EqualityComparer<UserContext>.Default.Equals(left, right);
+        }
+
+        public static bool operator !=(UserContext left, UserContext right)
+        {
+            return !(left == right);
+        }
+
         #endregion
+
+        
     }
 }
 

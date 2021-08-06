@@ -4,30 +4,29 @@ using Serilog;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-
 using TradeBot.Common.v1;
 using TradeBot.TradeMarket.TradeMarketService.v1;
-
-using SubscribeOrdersRequest = TradeBot.TradeMarket.TradeMarketService.v1.SubscribeOrdersRequest;
 
 namespace Former
 {
     public class TradeMarketClient
     {
-        public delegate void OrderBookEvent(Order purchaseOrdersToUpdate);
-        public OrderBookEvent UpdateOrderBook;
-
-        public delegate void MyOrdersEvent(Order myOrderToUpdate);
+        public delegate Task MyOrdersEvent(Order newComingOrder, ChangesType changesType);
         public MyOrdersEvent UpdateMyOrders;
 
-        public delegate void BalanceEvent(Balance balanceToUpdate);
+        public delegate Task BalanceEvent(int availableBalance, int totalBalance);
         public BalanceEvent UpdateBalance;
+
+        public delegate Task PositionEvent(double positionQuantity);
+        public PositionEvent UpdatePosition;
+
+        public delegate Task MarketPricesEvent(double bid, double ask);
+        public MarketPricesEvent UpdateMarketPrices;
 
         private static int _retryDelay;
         private static string _connectionString;
 
         private readonly TradeMarketService.TradeMarketServiceClient _client;
-        private readonly GrpcChannel _channel;
 
         public static void Configure(string connectionString, int retryDelay)
         {
@@ -37,10 +36,12 @@ namespace Former
 
         public TradeMarketClient()
         {
-            _channel = GrpcChannel.ForAddress(_connectionString);
-            _client = new TradeMarketService.TradeMarketServiceClient(_channel);
+            _client = new TradeMarketService.TradeMarketServiceClient(GrpcChannel.ForAddress(_connectionString));
         }
 
+        /// <summary>
+        /// Проверяет соединение с биржей, на вход принимает функцию, осуществляющую общение с биржей
+        /// </summary>
         private async Task ConnectionTester(Func<Task> func)
         {
             while (true)
@@ -52,102 +53,135 @@ namespace Former
                 }
                 catch (RpcException e)
                 {
-                    Log.Error("Error {1}. Retrying...\r\n{0}", e.StackTrace);
+                    Log.Error("{@Where}: Error {@ExceptionMessage}. Retrying...\r\n{@ExceptionStackTrace}", "Former", e.Message, e.StackTrace);
                     Thread.Sleep(_retryDelay);
                 }
             }
         }
 
-        public async Task ObserveOrderBook(UserContext context)
+        /// <summary>
+        /// Наблиюдает за изменением рыночных цен
+        /// </summary>
+        private async Task ObserveMarketPrices(Metadata meta)
         {
-            var request = new SubscribeOrdersRequest
+            using var call = _client.SubscribePrice(new SubscribePriceRequest(), meta);
+
+            async Task ObserveMarketPricesFunc()
             {
-                Request = new TradeBot.Common.v1.SubscribeOrdersRequest
+                while (await call.ResponseStream.MoveNext())
                 {
-                    Signature = new OrderSignature
+                    await UpdateMarketPrices?.Invoke(call.ResponseStream.Current.BidPrice,call.ResponseStream.Current.AskPrice);
+                }
+            }
+
+            await ConnectionTester(ObserveMarketPricesFunc);
+        }
+
+        /// <summary>
+        /// Наблюдает за обновлением доступного баланса 
+        /// </summary>
+        private async Task ObserveBalance(Metadata meta)
+        {
+            using var call = _client.SubscribeMargin(new SubscribeMarginRequest(), meta);
+
+            async Task ObserveBalanceFunc()
+            {
+                while (await call.ResponseStream.MoveNext())
+                {
+                    await UpdateBalance?.Invoke((int) call.ResponseStream.Current.Margin.AvailableMargin, (int)call.ResponseStream.Current.Margin.MarginBalance);
+                }
+            }
+
+            await ConnectionTester(ObserveBalanceFunc);
+        }
+
+        /// <summary>
+        /// Наблюдает за событиями моих ордеров
+        /// </summary>
+        private async Task ObserveMyOrders(Metadata meta)
+        {
+            using var call = _client.SubscribeMyOrders(new SubscribeMyOrdersRequest(), meta);
+
+            async Task ObserveMyOrdersFunc()
+            {
+                while (await call.ResponseStream.MoveNext())
+                {
+                    if (call.ResponseStream.Current.Response.Code == ReplyCode.Failure)
                     {
-                        Status = OrderStatus.Open,
-                        Type = OrderType.Unspecified
+                        Log.Error("{@Where}: Order was rejected by trade market with message: {@ResponseMessage}", "Former", call.ResponseStream.Current.Response.Message);
+                        continue;
                     }
+
+                    await UpdateMyOrders?.Invoke(call.ResponseStream.Current.Changed, call.ResponseStream.Current.ChangesType);
                 }
-            };
+            }
 
-            using var call = _client.SubscribeOrders(request, context.Meta);
+            await ConnectionTester(ObserveMyOrdersFunc);
+        }
 
-            Func<Task> observeCurrentPurchaseOrders = async () =>
+        /// <summary>
+        /// Наблюдает за событиями моих позиций
+        /// </summary>
+        private async Task ObservePositions(Metadata meta)
+        {
+            using var call = _client.SubscribePosition(new SubscribePositionRequest(), meta);
+
+            async Task ObservePositionFunc()
             {
                 while (await call.ResponseStream.MoveNext())
                 {
-                    UpdateOrderBook?.Invoke(call.ResponseStream.Current.Response.Order);
+                    await UpdatePosition?.Invoke(call.ResponseStream.Current.CurrentQty);
                 }
-            };
+            }
 
-            await ConnectionTester(observeCurrentPurchaseOrders);
+            await ConnectionTester(ObservePositionFunc);
         }
 
-        public async Task ObserveBalance(UserContext context)
+        /// <summary>
+        /// Отправляет запрос в биржу на выставление своего ордера
+        /// </summary>
+        internal async Task<PlaceOrderResponse> PlaceOrder(double sellPrice, double contractValue, Metadata metadata)
         {
-            var request = new TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceRequest
-            {
-                Request = new TradeBot.Common.v1.SubscribeBalanceRequest(),
-                SlotName = context.slotName
-            };
-            using var call = _client.SubscribeBalance(request, context.Meta);
-
-            Func<Task> observeBalance = async () =>
-            {
-                while (await call.ResponseStream.MoveNext())
-                {
-                    UpdateBalance?.Invoke(call.ResponseStream.Current.Response.Balance);
-                }
-            };
-
-            await ConnectionTester(observeBalance);
-        }
-
-        public async Task ObserveMyOrders(UserContext context)
-        {
-            using var call = _client.SubscribeMyOrders(new SubscribeMyOrdersRequest(), context.Meta);
-            Func<Task> observeMyOrders = async () =>
-            {
-                while (await call.ResponseStream.MoveNext())
-                {
-                    UpdateMyOrders?.Invoke(call.ResponseStream.Current.Changed);
-                }
-            };
-            await ConnectionTester(observeMyOrders);
-        }
-
-        public async Task PlaceOrder(double sellPrice, double contractValue, UserContext context)
-        {
-            Log.Information("Order price: {0}, quantity: {1} placed", sellPrice, contractValue);
             PlaceOrderResponse response = null;
-            Func<Task> placeOrders = async () =>
-            {
-                response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = sellPrice, Value = contractValue }, context.Meta);
-                Log.Information(response.OrderId + " placed " + response.Response.Code.ToString() + " message " + response.Response.Message);
-            };
 
-            await ConnectionTester(placeOrders);
+            async Task PlaceOrdersFunc()
+            {
+                response = await _client.PlaceOrderAsync(new PlaceOrderRequest {Price = sellPrice, Value = contractValue}, metadata);
+            }
+
+            await ConnectionTester(PlaceOrdersFunc);
+            return response;
         }
 
-        public async Task SetNewPrice(Order orderNeededToUpdate, UserContext context)
+        /// <summary>
+        /// Отправляет запрос в биржу на изменение цены своего ордера
+        /// </summary>
+        internal async Task<AmmendOrderResponse> AmendOrder(string id, double newPrice, Metadata metadata)
         {
-            Log.Debug("Update order id: {0}, new price: {1}", orderNeededToUpdate.Id, orderNeededToUpdate.Price);
             AmmendOrderResponse response = null;
-            Func<Task> placeOrders = async () =>
+
+            async Task PlaceOrdersFunc()
             {
                 response = await _client.AmmendOrderAsync(new AmmendOrderRequest
                 {
-                    Id = orderNeededToUpdate.Id,
-                    NewPrice = orderNeededToUpdate.Price,
+                    Id = id,
+                    NewPrice = newPrice,
                     QuantityType = QuantityType.None,
-                    NewQuantity = (int)orderNeededToUpdate.Quantity,
+                    NewQuantity = 0,
                     PriceType = PriceType.Default
-                }, context.Meta);
-                Log.Information(response.Response.Code.ToString());
-            };
-            await ConnectionTester(placeOrders);
+                }, metadata);
+            }
+
+            await ConnectionTester(PlaceOrdersFunc);
+            return response;
+        }
+
+        internal void Start(Metadata meta)
+        {
+            ObservePositions(meta);
+            ObserveBalance(meta);
+            ObserveMarketPrices(meta);
+            ObserveMyOrders(meta);
         }
     }
 }

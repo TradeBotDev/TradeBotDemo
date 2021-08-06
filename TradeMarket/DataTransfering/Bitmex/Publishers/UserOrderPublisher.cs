@@ -1,6 +1,8 @@
 ﻿using Bitmex.Client.Websocket.Client;
 using Bitmex.Client.Websocket.Requests;
+using Bitmex.Client.Websocket.Responses;
 using Bitmex.Client.Websocket.Responses.Orders;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +17,14 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         {
             foreach (var data in response.Data)
             {
-                e?.Invoke(nameof(UserOrderPublisher), new(data, response.Action));
+                //при исполнении ордера с биржи прилетает не делит а апдейт
+                BitmexAction action = response.Action;
+                if(data.Price is null && data.OrderQty is null)
+                {
+                    action = BitmexAction.Delete;
+                }
+                Log.Information("{@Where} {@OrderId} {@OrderQuantity} @{OrderPrice} @{OrderAction}", "Trademarket", data.OrderId, data.OrderQty, data.Price, action);
+                e?.Invoke(nameof(UserOrderPublisher), new(data, action));
             }
         };
 
@@ -24,6 +33,11 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         public UserOrderPublisher(BitmexWebsocketClient client,IObservable<OrderResponse> orderStream) : base(client,_action)
         {
             _stream = orderStream;
+        }
+
+        public override void Start()
+        {
+            throw new NotImplementedException();
         }
 
         public async Task SubcribeAsync(CancellationToken token)

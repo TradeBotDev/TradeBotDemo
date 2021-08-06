@@ -4,12 +4,14 @@ using Xunit;
 
 namespace AccountTests.AccountServiceTests
 {
+    [Collection("AccountTests")]
     public class LogoutTests : AccountServiceTestsData
     {
         // Тестирование выхода из существующего аккаунта.
         [Fact]
         public void LogoutFromLoggedAccount()
         {
+            // Очистка списка вошедших аккаунтов для того, чтобы не было конфликтов.
             State.loggedIn = new();
 
             var registerRequest = new RegisterRequest()
@@ -41,6 +43,7 @@ namespace AccountTests.AccountServiceTests
         {
             var request = new SessionRequest { SessionId = "non_existing_sessionId" };
             var reply = service.Logout(request, null);
+            
             // Ожадиается, что придет сообщение о том, что пользователь уже вышел из данного аккаунта.
             Assert.Equal(ActionCode.AccountNotFound, reply.Result.Result);
         }

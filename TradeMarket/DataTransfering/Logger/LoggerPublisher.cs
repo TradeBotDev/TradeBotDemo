@@ -10,5 +10,10 @@ namespace TradeMarket.DataTransfering
     public class LoggerPublisher<T> : IPublisher<ILogger<T>>
     {
         public event EventHandler<IPublisher<ILogger<T>>.ChangedEventArgs> Changed;
+
+        public void Start()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

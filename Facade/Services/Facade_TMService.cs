@@ -1,6 +1,5 @@
 using Grpc.Core;
 using Grpc.Net.Client;
-using Microsoft.Extensions.Logging;
 using Serilog;
 using System.Threading.Tasks;
 using TradeBot.Facade.FacadeService.v1;
@@ -14,8 +13,6 @@ namespace Facade
         private TradeBot.Relay.RelayService.v1.RelayService.RelayServiceClient clientRelay = new TradeBot.Relay.RelayService.v1.RelayService.RelayServiceClient(GrpcChannel.ForAddress("https://localhost:5004"));
         private TradeBot.Account.AccountService.v1.Account.AccountClient clientAccount = new TradeBot.Account.AccountService.v1.Account.AccountClient(GrpcChannel.ForAddress("https://localhost:5000"));
         private TradeBot.Account.AccountService.v1.ExchangeAccess.ExchangeAccessClient clientExchange = new TradeBot.Account.AccountService.v1.ExchangeAccess.ExchangeAccessClient(GrpcChannel.ForAddress("https://localhost:5000"));
-        private readonly ILogger<FacadeTMService> _logger;
-        
         #region TradeMarket
         public override async Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<SubscribeBalanceResponse> responseStream, ServerCallContext context)
         {
@@ -28,10 +25,13 @@ namespace Facade
                     {
                         if (response.ResponseStream.Current != null)
                         {
-                            Log.Information($"Function: SubscribeBalance \n args: request={request}");
+                            System.Diagnostics.StackFrame frame = new System.Diagnostics.StackFrame();
+                            var method = frame.GetMethod();
+                            Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
                             while (await response.ResponseStream.MoveNext())
                             {
-                                Log.Information($"Function: SubscribeBalance \n args: response={response.ResponseStream.Current.Response.Balance}");
+                                Log.Information("{@Where}: {@MethodName} \n args: response={@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response.ResponseStream.Current.Response.Balance);
+
                                 await responseStream.WriteAsync(new TradeBot.Facade.FacadeService.v1.SubscribeBalanceResponse
                                 {
                                     Money = response.ResponseStream.Current.Response.Balance
@@ -47,17 +47,17 @@ namespace Facade
                     }
                     else
                     {
-                        Log.Information("Client disconnected");
+                        Log.Information("{@Where}: Client disconnected", "Facade");
                         break;
                     }
                 }
                 catch (RpcException e)
                 {
-                    Log.Error("Exception" + e.Message);
+                    Log.Error("{@Where}: Exception" + e.Message, "Facade");
                 }
             }
         }
-        
+
         public override async Task Slots(SlotsRequest request, IServerStreamWriter<SlotsResponse> responseStream, ServerCallContext context)
         {
             while (true)
@@ -69,10 +69,9 @@ namespace Facade
                     {
                         if (response.ResponseStream.Current != null)
                         {
-                            Log.Information($"Function: Slots \n args: request={request}");
-                            while (await response.ResponseStream.MoveNext())
+                            Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request); while (await response.ResponseStream.MoveNext())
                             {
-                                Log.Information($"Function: Slots \n args: response={response.ResponseStream.Current.SlotName}");
+                                Log.Information("{@Where}: {@MethodName} \n args: response={@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response.ResponseStream.Current.SlotName);
 
                                 await responseStream.WriteAsync(new SlotsResponse
                                 {
@@ -88,17 +87,15 @@ namespace Facade
                     }
                     else
                     {
-                        Log.Information("Client disconnected");
+                        Log.Information("{@Where}: Client disconnected", "Facade");
                         break;
                     }
                 }
                 catch (RpcException e)
                 {
-                    Log.Error("Exception" + e.Message);
+                    Log.Error("{@Where}: Exception" + e.Message, "Facade");
                 }
             }
-
-
         }
 
         public override async Task SubscribeLogsTM(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
@@ -112,11 +109,9 @@ namespace Facade
                     {
                         if (response.ResponseStream.Current != null)
                         {
-                            Log.Information($"Function: SubscribeLogsTM \n args: request={request}");
-                            while (await response.ResponseStream.MoveNext())
+                            Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request); while (await response.ResponseStream.MoveNext())
                             {
-                                Log.Information($"Function: SubscribeBalance \n args: response={response.ResponseStream.Current.Response}");
-                                await responseStream.WriteAsync(new SubscribeLogsResponse
+                                Log.Information("{@Where}: {@MethodName} \n args: response={@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response.ResponseStream.Current.Response); await responseStream.WriteAsync(new SubscribeLogsResponse
                                 {
                                     Response = response.ResponseStream.Current.Response
                                 });
@@ -130,13 +125,13 @@ namespace Facade
                     }
                     else
                     {
-                        Log.Information("Client disconnected");
+                        Log.Information("{@Where}: Client disconnected", "Facade");
                         break;
                     }
                 }
                 catch (RpcException e)
                 {
-                    Log.Error("Exception" + e.Message);
+                    Log.Error("{@Where}: Exception" + e.Message, "Facade");
                 }
             }
 
@@ -149,21 +144,24 @@ namespace Facade
                 try
                 {
                     if (context.CancellationToken.IsCancellationRequested) break;
-                    var response = clientTM.AuthenticateToken(new TradeBot.TradeMarket.TradeMarketService.v1.AuthenticateTokenRequest { Token=request.Token});
-                    Log.Information($"Function: AuthenticateToken \n args: request={request}");
-                    Log.Information($"Function: AuthenticateToken \n args: response={response}");
-                    return Task.FromResult(new AuthenticateTokenResponse { Response=response.Response});
+                    var response = clientTM.AuthenticateToken(new TradeBot.TradeMarket.TradeMarketService.v1.AuthenticateTokenRequest { Token = request.Token });
+                    Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
+                    Log.Information("{@Where}: {@MethodName} \n args: response={@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
+                    return Task.FromResult(new AuthenticateTokenResponse { Response = response.Response });
                 }
                 catch (RpcException e)
                 {
-                    Log.Information("Exception:" + e.Message);
+                    Log.Error("{@Where}: Exception" + e.Message, "Facade");
                 }
             }
             return Task.FromResult(new AuthenticateTokenResponse { });
 
         }
 
+
+
         #endregion
+
         #region Relay
         public override async Task SubscribeLogsRelay(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
         {
@@ -176,10 +174,10 @@ namespace Facade
                     {
                         if (response.ResponseStream.Current != null)
                         {
-                            Log.Information($"Function: SubscribeLogsRelay \n args: request={request}");
+                            Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
                             while (await response.ResponseStream.MoveNext())
                             {
-                                Log.Information($"Function: SubscribeLogsRelay \n args: response={response.ResponseStream.Current.Response}");
+                                Log.Information("{@Where}: {@MethodName} \n args: response={@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response.ResponseStream.Current.Response);
                                 await responseStream.WriteAsync(new SubscribeLogsResponse
                                 {
                                     Response = response.ResponseStream.Current.Response
@@ -194,13 +192,13 @@ namespace Facade
                     }
                     else
                     {
-                        Log.Information("Client disconnected");
+                        Log.Information("{@Where}: Client disconnected", "Facade");
                         break;
                     }
                 }
                 catch (RpcException e)
                 {
-                    Log.Error("Exception" + e);
+                    Log.Error("{@Where}: Exception" + e.Message, "Facade");
                 }
             }
         }
@@ -211,12 +209,12 @@ namespace Facade
                 try
                 {
                     if (context.CancellationToken.IsCancellationRequested) break;
-                    var response = clientRelay.StartBot(new TradeBot.Relay.RelayService.v1.StartBotRequest 
-                    { 
-                        Config = request.Config 
+                    var response = clientRelay.StartBot(new TradeBot.Relay.RelayService.v1.StartBotRequest
+                    {
+                        Config = request.Config
                     }, context.RequestHeaders);
-                    Log.Information($"Function: SwitchBot \n args: request={request}");
-                    Log.Information($"Function: SwitchBot \n args: response={response}");
+                    Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
+                    Log.Information("{@Where}: {@MethodName} \n args: response={@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
                     return Task.FromResult(new SwitchBotResponse
                     {
                         Response = response.Response
@@ -224,10 +222,10 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Error("Exception:"+e.Message);
+                    Log.Error("{@Where}: Exception" + e.Message, "Facade");
                 }
             }
-            Log.Information("Client disconnected");
+            Log.Information("{@Where}: Client disconnected", "Facade");
             return Task.FromResult(new SwitchBotResponse { });
         }
         public override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request, ServerCallContext context)
@@ -236,10 +234,11 @@ namespace Facade
             {
                 try
                 {
+
                     if (context.CancellationToken.IsCancellationRequested) break;
                     var response = clientRelay.UpdateServerConfig(new TradeBot.Relay.RelayService.v1.UpdateServerConfigRequest() { Request = request.Request });
-                    Log.Information($"Function: UpdateServerConfig \n args: request={request}");
-                    Log.Information($"Function: UpdateServerConfig \n args: response={response}");
+                    Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
+                    Log.Information("{@Where}: {@MethodName} \n args: response: {@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
                     return Task.FromResult(new UpdateServerConfigResponse
                     {
                         Response = response.Response
@@ -247,13 +246,14 @@ namespace Facade
                 }
                 catch (RpcException e)
                 {
-                    Log.Error("Exception:" + e.Message);
+                    Log.Error("{@Where}: Exception:" + e.Message, "Facade");
                 }
             }
-            Log.Information("Client disconnected");
+            Log.Information("{@Where}: Client disconnected", "Facade");
             return Task.FromResult(new UpdateServerConfigResponse { });
         }
         #endregion
+
         #region Account
         public override Task<LoginReply> Login(LoginRequest request, ServerCallContext context)
         {
@@ -269,21 +269,21 @@ namespace Facade
                         SaveExchangesAfterLogout = request.SaveExchangesAfterLogout,
                         Password = request.Password
                     });
-                    Log.Information($"Function: Login \n args: request={request}");
-                    Log.Information($"Function: Login \n args: response={response}");
-                    return Task.FromResult(new LoginReply 
-                    { 
-                        Message=response.Message,
-                        SessionId=response.SessionId,
-                        Result= (ActionCode)response.Result
+                    Log.Information("{@Where}: {@MethodName} \n args: request: {@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
+                    Log.Information("{@Where}: {@MethodName} \n args: response: {@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
+                    return Task.FromResult(new LoginReply
+                    {
+                        Message = response.Message,
+                        SessionId = response.SessionId,
+                        Result = (ActionCode)response.Result
                     });
                 }
                 catch (RpcException e)
                 {
-                    Log.Error("Exception:" + e.Message);
+                    Log.Error("{@Where}: Exception:" + e.Message, "Facade");
                 }
             }
-            Log.Information("Client disconnected");
+            Log.Information("{@Where}: Client disconnected", "Facade");
             return Task.FromResult(new LoginReply { });
         }
 
@@ -296,22 +296,22 @@ namespace Facade
                     if (context.CancellationToken.IsCancellationRequested) break;
 
                     var response = clientAccount.Logout(new TradeBot.Account.AccountService.v1.SessionRequest { SessionId = request.SessionId });
-                    Log.Information($"Function: Logout \n args: request={request}");
-                    Log.Information($"Function: Logout \n args: response={response}");
+                    Log.Information("{@Where}: {@MethodName} \n args: request: {@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
+                    Log.Information("{@Where}: {@MethodName} \n args: response: {@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
 
-                    return Task.FromResult(new LogoutReply 
-                    { 
-                        Message=response.Message,
-                        Result= (ActionCode)response.Result
+                    return Task.FromResult(new LogoutReply
+                    {
+                        Message = response.Message,
+                        Result = (ActionCode)response.Result
                     });
-                    
+
                 }
                 catch (RpcException e)
                 {
-                    Log.Error("Exception:" + e.Message);
+                    Log.Error("{@Where}: Exception:" + e.Message, "Facade");
                 }
             }
-            Log.Information("Client disconnected");
+            Log.Information("{@Where}: Client disconnected", "Facade");
             return Task.FromResult(new LogoutReply { });
         }
 
@@ -323,27 +323,27 @@ namespace Facade
                 {
                     if (context.CancellationToken.IsCancellationRequested) break;
 
-                    var response = clientAccount.Register(new TradeBot.Account.AccountService.v1.RegisterRequest 
-                    { 
-                        Email= request.Email,
-                        Password=request.Password,
-                        VerifyPassword=request.VerifyPassword
-                    });
-                    Log.Information($"Function: Register \n args: request={request}");
-                    Log.Information($"Function: Register \n args: response={response}");
-                    return Task.FromResult(new RegisterReply 
+                    var response = clientAccount.Register(new TradeBot.Account.AccountService.v1.RegisterRequest
                     {
-                        Message=response.Message,
-                        Result= (ActionCode)response.Result
+                        Email = request.Email,
+                        Password = request.Password,
+                        VerifyPassword = request.VerifyPassword
+                    });
+                    Log.Information("{@Where}: {@MethodName} \n args: request: {@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
+                    Log.Information("{@Where}: {@MethodName} \n args: response: {@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
+                    return Task.FromResult(new RegisterReply
+                    {
+                        Message = response.Message,
+                        Result = (ActionCode)response.Result
 
                     });
                 }
                 catch (RpcException e)
                 {
-                    Log.Error("Exception:" + e.Message);
+                    Log.Error("{@Where}: Exception:" + e.Message, "Facade");
                 }
             }
-            Log.Information("Client disconnected");
+            Log.Information("{@Where}: Client disconnected", "Facade");
             return Task.FromResult(new RegisterReply { });
         }
 
@@ -356,20 +356,20 @@ namespace Facade
                     if (context.CancellationToken.IsCancellationRequested) break;
 
                     var response = clientAccount.IsValidSession(new TradeBot.Account.AccountService.v1.SessionRequest { SessionId = request.SessionId });
-                    Log.Information($"Function: IsValidSession \n args: request={request}");
-                    Log.Information($"Function: IsValidSession \n args: response={response}");
+                    Log.Information("{@Where}: {@MethodName} \n args: request: {@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
+                    Log.Information("{@Where}: {@MethodName} \n args: response: {@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
                     return Task.FromResult(new SessionReply
                     {
-                        IsValid=response.IsValid,
-                        Message=response.Message
+                        IsValid = response.IsValid,
+                        Message = response.Message
                     });
                 }
                 catch (RpcException e)
                 {
-                    Log.Error("Exception:" + e.Message);
+                    Log.Error("{@Where}: Exception:" + e.Message, "Facade");
                 }
             }
-            Log.Information("Client disconnected");
+            Log.Information("{@Where}: Client disconnected", "Facade");
             return Task.FromResult(new SessionReply { });
         }
 
@@ -382,7 +382,7 @@ namespace Facade
                     if (context.CancellationToken.IsCancellationRequested) break;
 
                     var response = clientAccount.CurrentAccountData(new TradeBot.Account.AccountService.v1.SessionRequest { SessionId = request.SessionId });
-                    Log.Information($"Function: CurrentAccountData \n args: request={request}");
+                    Log.Information("{@Where}: {@MethodName} \n args: request: {@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
                     var accountResponse = new CurrentAccountReply()
                     {
                         Message = response.Message,
@@ -398,21 +398,21 @@ namespace Facade
                         accountResponse.CurrentAccount.Exchanges.Add(new ExchangeAccessInfo
                         {
                             Secret = item.Secret,
-                            Code= (ExchangeCode)item.Code,
-                            ExchangeAccessId=item.ExchangeAccessId,
-                            Name=item.Name,
-                            Token=item.Token
+                            Code = (ExchangeCode)item.Code,
+                            ExchangeAccessId = item.ExchangeAccessId,
+                            Name = item.Name,
+                            Token = item.Token
                         });
                     }
-                    Log.Information($"Function: CurrentAccountData \n args: response={response}");
+                    Log.Information("{@Where}: {@MethodName} \n args: response: {@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
                     return Task.FromResult(accountResponse);
                 }
                 catch (RpcException e)
                 {
-                    Log.Error("Exception:" + e.Message);
+                    Log.Error("{@Where}: Exception:" + e.Message, "Facade");
                 }
             }
-            Log.Information("Client disconnected");
+            Log.Information("{@Where}: Client disconnected", "Facade");
             return Task.FromResult(new CurrentAccountReply { });
         }
 
@@ -424,28 +424,28 @@ namespace Facade
                 {
                     if (context.CancellationToken.IsCancellationRequested) break;
 
-                    var response = clientExchange.AddExchangeAccess(new TradeBot.Account.AccountService.v1.AddExchangeAccessRequest 
-                    { 
-                        Code= (TradeBot.Account.AccountService.v1.ExchangeCode)request.Code,
-                        Secret =request.Secret,
-                        ExchangeName=request.ExchangeName,
-                        SessionId=request.SessionId,
-                        Token=request.Token
+                    var response = clientExchange.AddExchangeAccess(new TradeBot.Account.AccountService.v1.AddExchangeAccessRequest
+                    {
+                        Code = (TradeBot.Account.AccountService.v1.ExchangeCode)request.Code,
+                        Secret = request.Secret,
+                        ExchangeName = request.ExchangeName,
+                        SessionId = request.SessionId,
+                        Token = request.Token
                     });
-                    Log.Information($"Function: AddExchangeAccess \n args: request={request}");
-                    Log.Information($"Function: AddExchangeAccess \n args: response={response}");
+                    Log.Information("{@Where}: {@MethodName} \n args: request: {@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
+                    Log.Information("{@Where}: {@MethodName} \n args: response: {@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
                     return Task.FromResult(new AddExchangeAccessReply
                     {
-                        Message=response.Message,
-                        Result= (ActionCode)response.Result
+                        Message = response.Message,
+                        Result = (ActionCode)response.Result
                     });
                 }
                 catch (RpcException e)
                 {
-                    Log.Error("Exception:" + e.Message);
+                    Log.Error("{@Where}: Exception:" + e.Message, "Facade");
                 }
             }
-            Log.Information("Client disconnected");
+            Log.Information("{@Where}: Client disconnected", "Facade");
             return Task.FromResult(new AddExchangeAccessReply { });
         }
 
@@ -456,8 +456,8 @@ namespace Facade
                 try
                 {
                     if (context.CancellationToken.IsCancellationRequested) break;
-                    var response = clientExchange.AllExchangesBySession(new TradeBot.Account.AccountService.v1.SessionRequest{SessionId=request.SessionId});
-                    Log.Information($"Function: AllExchangesBySession \n args: request={request}");
+                    var response = clientExchange.AllExchangesBySession(new TradeBot.Account.AccountService.v1.SessionRequest { SessionId = request.SessionId });
+                    Log.Information("{@Where}: {@MethodName} \n args: request: {@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
                     var accountResponse = new AllExchangesBySessionReply()
                     {
                         Message = response.Message,
@@ -474,15 +474,15 @@ namespace Facade
                             Token = item.Token
                         });
                     }
-                    Log.Information($"Function: AllExchangesBySession \n args: response={response}");
+                    Log.Information("{@Where}: {@MethodName} \n args: response: {@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
                     return Task.FromResult(accountResponse);
                 }
                 catch (RpcException e)
                 {
-                    Log.Error("Exception:" + e.Message);
+                    Log.Error("{@Where}: Exception:" + e.Message, "Facade");
                 }
             }
-            Log.Information("Client disconnected");
+            Log.Information("{@Where}: Client disconnected", "Facade");
             return Task.FromResult(new AllExchangesBySessionReply { });
         }
 
@@ -494,13 +494,13 @@ namespace Facade
                 {
                     if (context.CancellationToken.IsCancellationRequested) break;
 
-                    var response = clientExchange.DeleteExchangeAccess(new TradeBot.Account.AccountService.v1.DeleteExchangeAccessRequest { SessionId=request.SessionId,Code= (TradeBot.Account.AccountService.v1.ExchangeCode)request.Code});
-                    Log.Information($"Function: DeleteExchangeAccess \n args: request={request}");
-                    Log.Information($"Function: DeleteExchangeAccess \n args: response={response}");
+                    var response = clientExchange.DeleteExchangeAccess(new TradeBot.Account.AccountService.v1.DeleteExchangeAccessRequest { SessionId = request.SessionId, Code = (TradeBot.Account.AccountService.v1.ExchangeCode)request.Code });
+                    Log.Information("{@Where}: {@MethodName} \n args: request: {@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
+                    Log.Information("{@Where}: {@MethodName} \n args: response: {@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
                     return Task.FromResult(new DeleteExchangeAccessReply
                     {
-                        Message=response.Message,
-                        Result= (ActionCode)response.Result
+                        Message = response.Message,
+                        Result = (ActionCode)response.Result
                     });
                 }
                 catch (RpcException e)
@@ -510,6 +510,7 @@ namespace Facade
             }
             return Task.FromResult(new DeleteExchangeAccessReply { });
         }
+
         public override Task<ExchangeBySessionReply> ExchangeBySession(ExchangeBySessionRequest request, ServerCallContext context)
         {
             while (true)
@@ -518,34 +519,35 @@ namespace Facade
                 {
                     if (context.CancellationToken.IsCancellationRequested) break;
 
-                    var response = clientExchange.ExchangeBySession(new TradeBot.Account.AccountService.v1.ExchangeBySessionRequest { SessionId=request.SessionId,Code= (TradeBot.Account.AccountService.v1.ExchangeCode)request.Code});
-                    Log.Information($"Function: ExchangeBySession \n args: request={request}");
-                    Log.Information($"Function: ExchangeBySession \n args: response={response}");
+                    var response = clientExchange.ExchangeBySession(new TradeBot.Account.AccountService.v1.ExchangeBySessionRequest { SessionId = request.SessionId, Code = (TradeBot.Account.AccountService.v1.ExchangeCode)request.Code });
+                    Log.Information("{@Where}: {@MethodName} \n args: request: {@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
+                    Log.Information("{@Where}: {@MethodName} \n args: response: {@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
                     return Task.FromResult(new ExchangeBySessionReply
                     {
-                        Message=response.Message,
-                        Result= (ActionCode)response.Result,
-                        Exchange = new ExchangeAccessInfo 
-                        { 
-                            Secret=response.Exchange.Secret,
-                            Code= (ExchangeCode)response.Exchange.Code,
-                            ExchangeAccessId=response.Exchange.ExchangeAccessId,
-                            Name=response.Exchange.Name,
-                            Token=response.Exchange.Token
+                        Message = response.Message,
+                        Result = (ActionCode)response.Result,
+                        Exchange = new ExchangeAccessInfo
+                        {
+                            Secret = response.Exchange.Secret,
+                            Code = (ExchangeCode)response.Exchange.Code,
+                            ExchangeAccessId = response.Exchange.ExchangeAccessId,
+                            Name = response.Exchange.Name,
+                            Token = response.Exchange.Token
                         }
                     });
                 }
                 catch (RpcException e)
                 {
-                    Log.Error("Exception:" + e.Message);
+                    Log.Error("{@Where}: Exception:" + e.Message, "Facade");
                 }
             }
-            Log.Information("Client disconnected");
+            Log.Information("{@Where}: Client disconnected", "Facade");
             return Task.FromResult(new ExchangeBySessionReply { });
         }
+
         #endregion
 
-        
+
     }
 
 }

@@ -1,155 +1,131 @@
-﻿using Serilog;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System;
+using Google.Protobuf.WellKnownTypes;
+using Serilog;
 using System.Linq;
 using System.Threading.Tasks;
+using Grpc.Core;
 using TradeBot.Common.v1;
 
 namespace Former
 {
     public class Former
     {
-        private readonly ConcurrentDictionary<string, Order> _purchaseOrderBook;
+        private readonly Storage _storage;
+        private readonly Config _configuration;
+        private readonly TradeMarketClient _tradeMarketClient;
+        private readonly Metadata _metadata;
+        private readonly Logger _logger; 
 
-        private readonly ConcurrentDictionary<string, Order> _sellOrderBook;
-
-        private readonly ConcurrentDictionary<string, Order> _myOrders;
-
-        private double _balance;
-
-        //TODO формер не должне принимать конфиг как аргмунет конструктора, но должен принимать конфиг ( или контекст пользователя) как аргумент своих методов
-        public Former()
+        public Former(Storage storage, Config configuration, TradeMarketClient tradeMarketClient, Metadata metadata, Logger logger)
         {
-            _sellOrderBook = new ConcurrentDictionary<string, Order>();
-            _purchaseOrderBook = new ConcurrentDictionary<string, Order>();
-
-            _myOrders = new ConcurrentDictionary<string, Order>();
+            _storage = storage;
+            _storage.PlaceOrderEvent += PlaceCounterOrder;
+            _configuration = configuration;
+            _tradeMarketClient = tradeMarketClient;
+            _metadata = metadata;
+            _logger = logger;
         }
 
-        private async Task UpdateConcreteBook(ConcurrentDictionary<string, Order> bookNeededUpdate, string whatBook, Order order, UserContext context)
+        /// <summary>
+        /// Выставляет контр-ордер на основе информации старого и обновлённого ордера, и добавляет в список контр-ордеров
+        /// </summary>
+        private async Task PlaceCounterOrder(Order oldOrder, Order newComingOrder)
         {
-            var task = Task.Run(async () =>
+            var quantity = oldOrder.Quantity - newComingOrder.Quantity;
+            var price = oldOrder.Signature.Type == OrderType.Buy ? oldOrder.Price + oldOrder.Price * _configuration.RequiredProfit : oldOrder.Price - oldOrder.Price * _configuration.RequiredProfit;
+            var type = oldOrder.Signature.Type == OrderType.Buy ? OrderType.Sell : OrderType.Buy;
+            var addResponse = false;
+
+            var placeResponse = await _tradeMarketClient.PlaceOrder(price, -quantity, _metadata);
+            if (placeResponse.Response.Code == ReplyCode.Succeed)
             {
-                if (order.Signature.Status == OrderStatus.Open)
-                    bookNeededUpdate.AddOrUpdate(order.Id, order, (k, v) =>
+                addResponse = _storage.AddOrder(placeResponse.OrderId,
+                    new Order
                     {
-                        var price = order.Price;
-                        if (price != 0) v.Price = price;
-                        v.Quantity = order.Quantity;
-                        v.Signature = order.Signature;
-                        v.LastUpdateDate = order.LastUpdateDate;
-                        return v;
-                    });
-                else if (bookNeededUpdate.ContainsKey(order.Id))
-                    bookNeededUpdate.TryRemove(order.Id, out _);
-                await FitPrices(bookNeededUpdate, whatBook, context);
-            });
-            await task;
-        }
-
-        public async Task UpdateOrderBooks(Order orderNeededUpdate, UserContext context)
-        {
-            var task = Task.Run(async () =>
-            {
-                if (orderNeededUpdate.Signature.Type == OrderType.Buy) await UpdateConcreteBook(_purchaseOrderBook, "purchase", orderNeededUpdate, context);
-                if (orderNeededUpdate.Signature.Type == OrderType.Sell) await UpdateConcreteBook(_sellOrderBook, "sell", orderNeededUpdate, context);
-            });
-            await task;
-        }
-
-        public Task UpdateBalance(Balance balance)
-        {
-            Log.Information("Balance updated. New balance: {0}", balance.Value);
-            _balance = double.Parse(balance.Value);
-            return Task.CompletedTask;
-        }
-
-        public async Task UpdateMyOrderList(Order orderNeededUpdate, UserContext context)
-        {
-            Order oldOrder;
-            var id = orderNeededUpdate.Id;
-
-            if (_myOrders.TryGetValue(id, out oldOrder))
-            {
-                double sellPrice = oldOrder.Price + oldOrder.Price * context.configuration.RequiredProfit;
-                double newQuantity;
-
-                if (orderNeededUpdate.Signature.Status == OrderStatus.Closed)
-                {
-                    Log.Information("Order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} removed", id, orderNeededUpdate.Price, orderNeededUpdate.Quantity, orderNeededUpdate.Signature.Type, orderNeededUpdate.Signature.Status);
-                    await context.PlaceOrder(sellPrice, -oldOrder.Quantity);
-                    _myOrders.TryRemove(id, out _);
-                }
-
-                if (orderNeededUpdate.Quantity != 0 && (newQuantity = oldOrder.Quantity - orderNeededUpdate.Quantity) > 0)
-                {
-                    Log.Information("Order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} updated", id, orderNeededUpdate.Price, orderNeededUpdate.Quantity, orderNeededUpdate.Signature.Type, orderNeededUpdate.Signature.Status);
-                    await context.PlaceOrder(sellPrice, -newQuantity);
-                    _myOrders.TryUpdate(id, orderNeededUpdate, oldOrder);
-                }
-
-                if (orderNeededUpdate.Price != 0) _myOrders.TryUpdate(id, orderNeededUpdate, oldOrder);
+                        Id = placeResponse.OrderId,
+                        Price = price,
+                        Quantity = -quantity,
+                        Signature = new OrderSignature { Status = OrderStatus.Open, Type = type },
+                        LastUpdateDate = new Timestamp()
+                    }, _storage.CounterOrders);
             }
-            else
+            Log.Information("{@Where}: Counter order {@Id} price: {@Price}, quantity: {@Quantity} placed {@ResponseCode} {@ResponseMessage}", "Former", oldOrder.Id, price, -quantity, placeResponse.Response.Code, placeResponse.Response.Code == ReplyCode.Succeed ? "" : placeResponse.Response.Message);
+            Log.Information("{@Where}: Order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@ResponseCode} added to counter orders list {@ResponseMessage}", "Former", placeResponse.OrderId, price, -quantity, type, addResponse ? ReplyCode.Succeed : ReplyCode.Failure);
+            _logger.WriteToLog($"Former: Counter order {oldOrder.Id} price: {price}, quantity: {-quantity} placed {placeResponse.Response.Code} {(placeResponse.Response.Code == ReplyCode.Succeed ? "" : placeResponse.Response.Message)}", LogLevel.Information, DateTimeOffset.Now);
+        }
+
+        /// <summary>
+        /// Возвращает false, если текущий баланс и маржа не позволяют выставить ордер на покупку/продажу, иначе true
+        /// </summary>
+        private bool CheckPossibilityPlacingOrder(OrderType type)
+        {
+            var orderCost = _configuration.ContractValue / (type == OrderType.Sell ? _storage.SellMarketPrice : _storage.BuyMarketPrice);
+            var availableBalanceWithConfigurationReduction = ConvertSatoshiToXBT(_storage.AvailableBalance) * _configuration.AvaibleBalance;
+            var totalBalanceWithConfigurationReduction = ConvertSatoshiToXBT(_storage.TotalBalance) * _configuration.AvaibleBalance;
+
+            double marginOfAlreadyPlacedSellOrders = 0;
+            double marginOfAlreadyPlacedBuyOrders = 0;
+
+            if (!_storage.MyOrders.IsEmpty || !_storage.CounterOrders.IsEmpty)
             {
-                Log.Information("Order {0}, price: {1}, quantity: {2}, type: {3}, status: {4} added to my orders", id, orderNeededUpdate.Price, orderNeededUpdate.Quantity, orderNeededUpdate.Signature.Type, orderNeededUpdate.Signature.Status);
-                _myOrders.TryAdd(orderNeededUpdate.Id, orderNeededUpdate);
+                var marginOfMySellOrders = _storage.MyOrders.Where(x => x.Value.Signature.Type == OrderType.Sell).Sum(x => x.Value.Quantity / x.Value.Price);
+                var marginOfCounterSellOrders = _storage.CounterOrders.Where(x => x.Value.Signature.Type == OrderType.Sell).Sum(x => x.Value.Quantity / x.Value.Price);
+                marginOfAlreadyPlacedSellOrders = marginOfMySellOrders + marginOfCounterSellOrders;
+
+                var marginOfMyBuyOrders = _storage.MyOrders.Where(x => x.Value.Signature.Type == OrderType.Buy).Sum(x => x.Value.Quantity / x.Value.Price);
+                var marginOfCounterBuyOrders = _storage.CounterOrders.Where(x => x.Value.Signature.Type == OrderType.Buy).Sum(x => x.Value.Quantity / x.Value.Price);
+                marginOfAlreadyPlacedBuyOrders = marginOfMyBuyOrders + marginOfCounterBuyOrders;
+            }
+
+            switch (type == OrderType.Sell ? -_storage.PositionSize : _storage.PositionSize)
+            {
+                case > 0 when availableBalanceWithConfigurationReduction < orderCost:
+                    Log.Debug("{@Where}: Cannot place {@Type} order. Insufficient available balance.", "Former", type);
+                    return false;
+                case <= 0 when totalBalanceWithConfigurationReduction + marginOfAlreadyPlacedSellOrders - marginOfAlreadyPlacedBuyOrders < orderCost:
+                    Log.Debug("{@Where}: Cannot place {@Type} order. Insufficient total balance.", "Former", type);
+                    return false;
+                default:
+                    return true;
             }
         }
 
-        private async Task FitPrices(ConcurrentDictionary<string, Order> ordersForFairPrice, string whatBook, UserContext context)
+        /// <summary>
+        /// Формирует в зависимости от решения алгоритма
+        /// </summary>
+        internal async Task FormOrder(int decision)
         {
-            //????????????????????????????????????????????????
-            double fairPrice = 0;
-            var ordersNeededToFit = new Dictionary<string, double>();
+            if (_storage.PlaceLocker) return;
+            var orderType = decision > 0 ? OrderType.Buy : OrderType.Sell;
+            if (!CheckPossibilityPlacingOrder(orderType)) return;
 
-            var checkPrices = Task.Run(async () =>
+            var quantity = orderType == OrderType.Buy ? _configuration.ContractValue : -_configuration.ContractValue;
+            var price = orderType == OrderType.Buy ? _storage.BuyMarketPrice : _storage.SellMarketPrice;
+
+            var response = await _tradeMarketClient.PlaceOrder(price, quantity, _metadata);
+            if (response.Response.Code == ReplyCode.Succeed)
             {
-                if (whatBook == "sell") fairPrice = ordersForFairPrice.Min(x => x.Value.Price);
-                if (whatBook == "purchase") fairPrice = ordersForFairPrice.Max(x => x.Value.Price);
-
-                foreach (var order in _myOrders)
-                {
-                    if (order.Value.Price < fairPrice)
+                var addResponse = _storage.AddOrder(response.OrderId,
+                    new Order
                     {
-                        order.Value.Price = fairPrice;
-                        _myOrders.TryUpdate(order.Key, order.Value, order.Value);
-
-                        await context.SetNewPrice(order.Value);
-                    }
-                }
-            });
-            await checkPrices;
+                        Id = response.OrderId,
+                        Price = price,
+                        Quantity = quantity,
+                        Signature = new OrderSignature { Status = OrderStatus.Open, Type = orderType },
+                        LastUpdateDate = new Timestamp()
+                    }, _storage.MyOrders);
+                Log.Information("{@Where}: Order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} added to my orders list {@ResponseCode}", "Former", response.OrderId, price, quantity, orderType, addResponse ? ReplyCode.Succeed : ReplyCode.Failure);
+            }
+            Log.Information("{@Where}: Order {@Id} price: {@Price}, quantity: {@Quantity} placed for {@Type} {@ResponseCode} {@ResponseMessage}", "Former", response.OrderId, price, quantity, orderType, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
+            _logger.WriteToLog($"Former: Order {response.OrderId} price: {price}, quantity: {quantity} placed for {orderType} {response.Response.Code.ToString()} {(response.Response.Code == ReplyCode.Failure ? response.Response.Message : "")}", LogLevel.Information, DateTimeOffset.Now);
         }
 
-        public async Task FormPurchaseOrder(UserContext context)
+        /// <summary>
+        /// Конвертирует сатоши в биткоины
+        /// </summary>
+        private double ConvertSatoshiToXBT(int satoshiValue)
         {
-            Log.Debug("Playing long...");
-            double availableBalance = _balance * context.configuration.AvaibleBalance;
-            //Calc pruchase price
-
-            double purchaseFairPrice = _purchaseOrderBook.Max(x => x.Value.Price);
-
-            double quantity = context.configuration.ContractValue * Math.Floor(availableBalance * purchaseFairPrice / context.configuration.ContractValue);
-            
-            //купить ордер по рыночной цене, но ордер при этом лимитный 
-            if (quantity != 0) await context.PlaceOrder(purchaseFairPrice, quantity);
-            else Log.Debug("Insufficient balance");
-        }
-
-        public async Task FormSellOrder(UserContext context)
-        {
-            Log.Debug("Playing short...");
-            double availableBalance = _balance * context.configuration.AvaibleBalance;
-            //Calc pruchase price
-            double sellFairPrice = _sellOrderBook.Min(x => x.Value.Price);
-
-            double quantity = context.configuration.ContractValue * Math.Floor(availableBalance * sellFairPrice / context.configuration.ContractValue);
-
-            //продать ордер по рыночной цене, но ордер при этом лимитный 
-            if (quantity != 0) await context.PlaceOrder(sellFairPrice, -quantity);
-            else Log.Debug("Insufficient balance");
+            return satoshiValue * 0.00000001;
         }
     }
 }

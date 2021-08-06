@@ -1,7 +1,4 @@
 ﻿using Grpc.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Common.v1;
 
@@ -9,81 +6,47 @@ namespace Former
 {
     public class UserContext
     {
-        public string sessionId;
-        public string trademarketName;
-        public string slotName;
-        public Config configuration;
+        //Класс контекста пользователя
+        public string SessionId => Meta.GetValue("sessionid");
+        public string TradeMarket => Meta.GetValue("trademarket");
+        public string Slot => Meta.GetValue("slot");
+        public Logger Logger { get; }
+        private Config _configuration;
+        private readonly Storage _storage;
         private readonly TradeMarketClient _tradeMarketClient;
         private readonly Former _former;
+        private readonly UpdateHandlers _updateHandlers;
 
-        public Metadata Meta { get; internal set; }
+        public Metadata Meta { get; }
 
-        internal UserContext(string sessionId, string trademarket, string slot)
+        internal UserContext(string sessionId, string tradeMarket, string slot, Config configuration)
         {
-            this.sessionId = sessionId;
-            this.trademarketName = trademarket;
-            this.slotName = slot;
-
-
-            Meta = new Metadata();
-            Meta.Add("sessionid", sessionId);
-            Meta.Add("trademarket", trademarket);
-            Meta.Add("slot", slot);
-
+            _configuration = configuration;
+            Meta = new Metadata
+            {
+                { "sessionid", sessionId },
+                { "trademarket", tradeMarket },
+                { "slot", slot }
+            };
             TradeMarketClient.Configure("https://localhost:5005", 10000);
 
+            Logger = new Logger();
             _tradeMarketClient = new TradeMarketClient();
-            _former = new Former();
-            //Конфиг передается как параметр для любого метода
+            _storage = new Storage(Logger);
+            _former = new Former(_storage, _configuration, _tradeMarketClient, Meta, Logger);
+            _updateHandlers = new UpdateHandlers(_storage, _configuration, _tradeMarketClient, Meta, Logger);
 
-            _tradeMarketClient.UpdateOrderBook += UpdateOrderBooks;
-            _tradeMarketClient.UpdateBalance += UpdateBalance;
-            _tradeMarketClient.UpdateMyOrders += UpdateMyOrderList;
+            _tradeMarketClient.UpdateMarketPrices += _storage.UpdateMarketPrices;
+            _tradeMarketClient.UpdateBalance += _storage.UpdateBalance;
+            _tradeMarketClient.UpdateMyOrders += _storage.UpdateMyOrderList;
+            _tradeMarketClient.UpdatePosition += _storage.UpdatePosition;
 
-            ObserveOrderBook();
-            ObserveBalance();
-            ObserveMyOrders();
+            _tradeMarketClient.Start(Meta);
         }
 
-        public async void FormPurchaseOrder()
+        public async Task FormOrder(int decision)
         {
-            await _former.FormPurchaseOrder(this);
-        }
-        public async void FormSellOrder()
-        {
-            await _former.FormSellOrder(this);
-        }
-        private async void UpdateOrderBooks(Order orderNeededUpdate) 
-        {
-           await _former.UpdateOrderBooks(orderNeededUpdate, this);
-        }
-        private async void UpdateMyOrderList(Order orderNeededUpdate)
-        {
-            await _former.UpdateMyOrderList(orderNeededUpdate, this);
-        }
-        private async void UpdateBalance(Balance balance)
-        {
-            await _former.UpdateBalance(balance);
-        }
-        public async Task PlaceOrder(double sellPrice, double contractValue)
-        {
-             await _tradeMarketClient.PlaceOrder(sellPrice, contractValue, this);
-        }
-        public async Task SetNewPrice(Order orderNeededToUpdate)
-        {
-            await _tradeMarketClient.SetNewPrice(orderNeededToUpdate, this);
-        }
-        private async void ObserveOrderBook()
-        {
-            await _tradeMarketClient.ObserveOrderBook(this);
-        }
-        private async void ObserveBalance()
-        {
-            await _tradeMarketClient.ObserveBalance(this);
-        }
-        private async void ObserveMyOrders()
-        {
-            await _tradeMarketClient.ObserveMyOrders(this);
+            await _former.FormOrder(decision);
         }
     }
 }

@@ -22,116 +22,149 @@ using TradeMarket.DataTransfering.Bitmex.Rest.Requests.Place;
 using Newtonsoft.Json;
 using Order = Bitmex.Client.Websocket.Responses.Orders.Order;
 using TradeMarket.DataTransfering.Bitmex.Rest.Requests.Ammend;
+using Bitmex.Client.Websocket.Responses.Margins;
+using TradeBot.TradeMarket.TradeMarketService.v1;
+using Margin = Bitmex.Client.Websocket.Responses.Margins.Margin;
+using DeleteOrderRequest = TradeMarket.DataTransfering.Bitmex.Rest.Requests.DeleteOrderRequest;
+using PlaceOrderRequest = TradeMarket.DataTransfering.Bitmex.Rest.Requests.Place.PlaceOrderRequest;
+using AmmendOrderRequest = TradeMarket.DataTransfering.Bitmex.Rest.Requests.Ammend.AmmendOrderRequest;
+using Bitmex.Client.Websocket.Responses.Positions;
+using Bitmex.Client.Websocket.Responses.Books;
+using Bitmex.Client.Websocket.Responses.Wallets;
+using StackExchange.Redis;
+using Bitmex.Client.Websocket.Responses.Instruments;
 
 namespace TradeMarket.DataTransfering.Bitmex
 {
     public class BitmexTradeMarket : Model.TradeMarket
     {
-        private BookPublisher Book25Publisher;
-        private BookPublisher BookPublisher;
-        private UserOrderPublisher UserOrdersPublisher;
-        private UserWalletPublisher UserWalletPublisher;
-        private AuthenticationPublisher UserAuthenticationPublisher;
+        private BookPublisher _book25Publisher;
+        private BookPublisher _bookPublisher;
+        private UserOrderPublisher _userOrdersPublisher;
+        private UserWalletPublisher _userWalletPublisher;
+        private AuthenticationPublisher _userAuthenticationPublisher;
+        private UserMarginPublisher _userMarginPublisher;
+        private UserPositionPublisher _userPositionPublisher;
+        private InstrumentPublisher _instrumentPublisher;
 
-        public override event EventHandler<FullOrder> Book25Update;
-        public override event EventHandler<FullOrder> BookUpdate;
-        public override event EventHandler<FullOrder> UserOrdersUpdate;
-        public override event EventHandler<Model.Balance> BalanceUpdate;
 
-        public BitmexTradeMarket(string name)
+        private IConnectionMultiplexer _multiplexer;
+
+
+
+        public BitmexTradeMarket(string name/*,IConnectionMultiplexer multiplexer*/)
         {
+            //_multiplexer = multiplexer;
             Name = name;
         }
 
-        private void _userWalletPublisher_Changed(object sender, IPublisher<global::Bitmex.Client.Websocket.Responses.Wallets.Wallet>.ChangedEventArgs e)
-        {
+      
+        #region SubscribeRequests
 
-            BalanceUpdate?.Invoke(sender, new Model.Balance(e.Changed.Currency, e.Changed.BalanceBtc));
-        }
-
-        private void _userOrdersPublisher_Changed(object sender, IPublisher<global::Bitmex.Client.Websocket.Responses.Orders.Order>.ChangedEventArgs e)
+        public async override void SubscribeToInstruments(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler, UserContext context)
         {
-            UserOrdersUpdate?.Invoke(sender, ConverFromOrder(e));
-        }
-
-        private void _bookPublisher_Changed(object sender, IPublisher<global::Bitmex.Client.Websocket.Responses.Books.BookLevel>.ChangedEventArgs e)
-        {
-            BookUpdate?.Invoke(sender, ConvertFromBookLevel(e));
-        }
-
-        private void _book25Publisher_Changed(object sender, IPublisher<global::Bitmex.Client.Websocket.Responses.Books.BookLevel>.ChangedEventArgs e)
-        {
-            Book25Update?.Invoke(sender, ConvertFromBookLevel(e));
-        }
-
-        private FullOrder ConverFromOrder(IPublisher<global::Bitmex.Client.Websocket.Responses.Orders.Order>.ChangedEventArgs e)
-        {
-            FullOrder order = new FullOrder
+            if (_instrumentPublisher is null)
             {
-                Signature = new OrderSignature
+                _instrumentPublisher = new InstrumentPublisher(context.WSClient, context.WSClient.Streams.InstrumentStream);
+                _instrumentPublisher.Changed += handler;
+            }
+            await _instrumentPublisher.SubcribeAsync(context.SlotName,new System.Threading.CancellationToken());
+        }
+
+
+        public async override void SubscribeToUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, UserContext context)
+        {
+            if (_userPositionPublisher is null)
+            {
+                _userPositionPublisher = new UserPositionPublisher(context.WSClient, context.WSClient.Streams.PositionStream);
+                _userPositionPublisher.Changed += handler;
+            }
+            await _userPositionPublisher.SubcribeAsync(new System.Threading.CancellationToken());
+        }
+
+        public async override void SubscribeToUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, UserContext context)
+        {
+            if (_userMarginPublisher is null)
+            {
+                _userMarginPublisher = new UserMarginPublisher(context.WSClient, context.WSClient.Streams.MarginStream);
+                _userMarginPublisher.Changed += handler;
+            }
+            await _userMarginPublisher.SubcribeAsync(new System.Threading.CancellationToken());
+        }
+
+        public async override void SubscribeToBook25(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, UserContext context)
+        {
+            if(_book25Publisher is null)
+            {
+                _book25Publisher = new BookPublisher(context.WSClient, context.WSClient.Streams.Book25Stream/*,_multiplexer*/);
+                _book25Publisher.Changed += handler;
+            }
+            await _book25Publisher.SubscribeAsync(new Book25SubscribeRequest(context.SlotName), new System.Threading.CancellationToken());
+        }
+
+        public async override void SubscribeToBook(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, UserContext context)
+        {
+            if (_bookPublisher is null)
+            {
+                _bookPublisher = new BookPublisher(context.WSClient, context.WSClient.Streams.BookStream/*,_multiplexer*/);
+                _bookPublisher.Changed += handler;
+            }
+            await _bookPublisher.SubscribeAsync(new BookSubscribeRequest(context.SlotName), new System.Threading.CancellationToken());
+        }
+
+        public async override void SubscribeToUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, UserContext context)
+        {
+            if (_userOrdersPublisher is null)
+            {
+                _userOrdersPublisher = new UserOrderPublisher(context.WSClient, context.WSClient.Streams.OrderStream);
+                _userOrdersPublisher.Changed += handler;
+            }
+            await _userOrdersPublisher.SubcribeAsync(new System.Threading.CancellationToken());
+        }
+
+        public async override void SubscribeToBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, UserContext context)
+        {
+            if (_userWalletPublisher is null)
+            {
+                _userWalletPublisher = new UserWalletPublisher(context.WSClient, context.WSClient.Streams.WalletStream);
+                _userWalletPublisher.Changed += handler;
+            }
+            await _userWalletPublisher.SubcribeAsync(new System.Threading.CancellationToken());
+        }
+        #endregion
+
+        #region RestREquests
+        public async override Task<DefaultResponse> AmmendOrder(string id, double? price, long? Quantity, long? LeavesQuantity, UserContext context)
+        {
+            var response = await context.RestClient.SendAsync(new AmmendOrderRequest(context.Key, context.Secret, new() {Id = id, LeavesQuantity = LeavesQuantity, Price = price, Quantity = Quantity }), new System.Threading.CancellationToken());
+            if (response.Error is not null)
+            {
+                return new()
                 {
-                    Status = GetSignatureStatusFromAction(e.Action),
-                    Type = e.Changed.Side == BitmexSide.Buy ? OrderType.Buy : OrderType.Sell
-                },
-                Id = e.Changed.OrderId,
-                LastUpdateDate = DateTime.Now,
-                Price = e.Changed.Price.HasValue ? e.Changed.Price.Value : default(double),
-                Quantity = e.Changed.OrderQty.HasValue ? (int)e.Changed.OrderQty.Value : default(int)
-            };
-            return order;
-
-        }
-
-        private TradeBot.Common.v1.OrderStatus GetSignatureStatusFromAction(BitmexAction action)
-        {
-            switch (action)
-            {
-                case BitmexAction.Partial: return TradeBot.Common.v1.OrderStatus.Open;
-                case BitmexAction.Insert: return TradeBot.Common.v1.OrderStatus.Open; 
-                case BitmexAction.Delete: return TradeBot.Common.v1.OrderStatus.Closed;
-                case BitmexAction.Update: return TradeBot.Common.v1.OrderStatus.Open;
+                    Code = ReplyCode.Failure,
+                    Message = response.Error.Message
+                };
             }
-            return TradeBot.Common.v1.OrderStatus.Unspecified;
-        }
-
-        private FullOrder ConvertFromBookLevel(IPublisher<global::Bitmex.Client.Websocket.Responses.Books.BookLevel>.ChangedEventArgs e)
-        { 
-            FullOrder order = new FullOrder();
-            OrderSignature signature = new OrderSignature()
+            var orderMessage = response.Message;
+            if (!string.IsNullOrEmpty(orderMessage.OrdRejReason))
             {
-                Status = GetSignatureStatusFromAction(e.Action),
-                Type = e.Changed.Side == BitmexSide.Buy ? OrderType.Buy : OrderType.Sell
-            };
-            order.Id = e.Changed.Id.ToString();
-            //это время последнего обновления. оно пока что берется с текущей даты
-            order.LastUpdateDate = DateTime.Now;
-            order.Price = e.Changed.Price.HasValue ? (double)e.Changed.Price : default(double);
-            order.Quantity = e.Changed.Size.HasValue ? (int)e.Changed.Size : default(int);
-            
-            order.Signature = signature;
-            return order;
-        }
-
-        public async override Task<DefaultResponse> AutheticateUser(string api, string secret, UserContext context)
-        {
-            if(UserAuthenticationPublisher is null){
-                UserAuthenticationPublisher = new AuthenticationPublisher(context.WSClient, context.WSClient.Streams.AuthenticationStream);
+                Log.Error("Id {0}, quantity {1}, price {2}, leavesQty {3}", id, Quantity, price, LeavesQuantity);
+                return new()
+                {
+                    Code = ReplyCode.Failure,
+                    Message = orderMessage.OrdRejReason
+                };
             }
-            bool answer = false;
-            UserAuthenticationPublisher.Changed += (sender, args) => { answer = args.Changed; };
-
-            await UserAuthenticationPublisher.SubcribeAsync(context.Key, context.Secret, new System.Threading.CancellationToken());
-            return new DefaultResponse
-            { 
-                Code = answer ? ReplyCode.Succeed : ReplyCode.Failure,
-                Message = ""
+            return new()
+            {
+                Code = ReplyCode.Succeed,
+                Message = $"Order {orderMessage.OrderId} Ammended"
             };
         }
-
         public async override Task<DefaultResponse> DeleteOrder(string id, UserContext context)
         {
             var response = await context.RestClient.SendAsync(new DeleteOrderRequest(context.Key, context.Secret, id), new System.Threading.CancellationToken());
-            if(response.Error is not null)
+            if (response.Error is not null)
             {
                 return new()
                 {
@@ -147,13 +180,29 @@ namespace TradeMarket.DataTransfering.Bitmex
             };
         }
 
-        public async override Task<TradeBot.TradeMarket.TradeMarketService.v1.PlaceOrderResponse> PlaceOrder(double quontity, double price,UserContext context)
+        //TODO перенести в конвертер
+        public static double RoundToHalfOrZero(double value)
+        {
+            double truncatedDifference = value - Math.Truncate(value);
+            //если что-то случилось и пришло не ровно 0.5
+            //разница с 0.5 больше чем 0.01 считается нарошной 
+            if (Math.Abs(truncatedDifference - 0.5) < 0.01)
+            {
+                return Math.Truncate(value) + 0.5;
+            }
+            else
+            {
+                return Math.Truncate(value);
+            }
+        }
+
+        public async override Task<TradeBot.TradeMarket.TradeMarketService.v1.PlaceOrderResponse> PlaceOrder(double quontity, double price, UserContext context)
         {
             var response = await context.RestClient.SendAsync(new PlaceOrderRequest(context.Key, context.Secret, new Order
             {
                 Symbol = context.SlotName,
                 OrdType = "Limit",
-                Price = (int)price,
+                Price = RoundToHalfOrZero(price),
                 OrderQty = (long?)quontity
             }), new System.Threading.CancellationToken());
             if (response.Error is not null)
@@ -169,7 +218,7 @@ namespace TradeMarket.DataTransfering.Bitmex
                 };
             }
             var orderMessage = response.Message;
-            if(orderMessage.OrdRejReason is not null)
+            if (!string.IsNullOrEmpty(orderMessage.OrdRejReason))
             {
                 return new()
                 {
@@ -191,75 +240,22 @@ namespace TradeMarket.DataTransfering.Bitmex
                 }
             };
         }
+        #endregion
 
-        public async override void SubscribeToBook25(EventHandler<FullOrder> handler, UserContext context)
+        public async override Task<DefaultResponse> AutheticateUser(string api, string secret, UserContext context)
         {
-            if(Book25Publisher is null)
+            if (_userAuthenticationPublisher is null)
             {
-                Book25Publisher = new BookPublisher(context.WSClient, context.WSClient.Streams.Book25Stream);
-                Book25Publisher.Changed += _book25Publisher_Changed;
+                _userAuthenticationPublisher = new AuthenticationPublisher(context.WSClient, context.WSClient.Streams.AuthenticationStream);
             }
-            await Book25Publisher.SubscribeAsync(new Book25SubscribeRequest(context.SlotName), new System.Threading.CancellationToken());
-            Book25Update += handler;
-        }
+            bool answer = false;
+            _userAuthenticationPublisher.Changed += (sender, args) => { answer = args.Changed; };
 
-        public async override void SubscribeToBook(EventHandler<FullOrder> handler, UserContext context)
-        {
-            if (BookPublisher is null)
+            await _userAuthenticationPublisher.SubcribeAsync(context.Key, context.Secret, new System.Threading.CancellationToken());
+            return new DefaultResponse
             {
-                BookPublisher = new BookPublisher(context.WSClient, context.WSClient.Streams.BookStream);
-                BookPublisher.Changed += _bookPublisher_Changed;
-            }
-            await BookPublisher.SubscribeAsync(new BookSubscribeRequest(context.SlotName), new System.Threading.CancellationToken());
-            BookUpdate += handler;
-        }
-
-        public async override void SubscribeToUserOrders(EventHandler<FullOrder> handler, UserContext context)
-        {
-            if (UserOrdersPublisher is null)
-            {
-                UserOrdersPublisher = new UserOrderPublisher(context.WSClient, context.WSClient.Streams.OrderStream);
-                UserOrdersPublisher.Changed += _userOrdersPublisher_Changed;
-            }
-            await UserOrdersPublisher.SubcribeAsync(new System.Threading.CancellationToken());
-            UserOrdersUpdate += handler;
-        }
-
-        public async override void SubscribeToBalance(EventHandler<Model.Balance> handler, UserContext context)
-        {
-            if (UserWalletPublisher is null)
-            {
-                UserWalletPublisher = new UserWalletPublisher(context.WSClient, context.WSClient.Streams.WalletStream);
-                UserWalletPublisher.Changed += _userWalletPublisher_Changed;
-            }
-            await UserWalletPublisher.SubcribeAsync(new System.Threading.CancellationToken());
-            BalanceUpdate += handler;
-        }
-
-        public async override Task<DefaultResponse> AmmendOrder(string id, double? price, long? Quantity, long? LeavesQuantity, UserContext context)
-        {
-            var response = await context.RestClient.SendAsync(new AmmendOrderRequest(context.Key, context.Secret, new() {Id = id, LeavesQuantity = LeavesQuantity, Price = price, Quantity = Quantity }), new System.Threading.CancellationToken());
-            if (response.Error is not null)
-            {
-                return new()
-                {
-                    Code = ReplyCode.Failure,
-                    Message = response.Error.Message
-                };
-            }
-            var orderMessage = response.Message;
-            if (orderMessage.OrdRejReason is not null)
-            {
-                return new()
-                {
-                    Code = ReplyCode.Failure,
-                    Message = orderMessage.OrdRejReason
-                };
-            }
-            return new()
-            {
-                Code = ReplyCode.Succeed,
-                Message = $"Order {orderMessage.OrderId} Ammended"
+                Code = answer ? ReplyCode.Succeed : ReplyCode.Failure,
+                Message = ""
             };
         }
     }

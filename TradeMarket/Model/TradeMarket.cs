@@ -1,11 +1,19 @@
-﻿using System;
+﻿using Bitmex.Client.Websocket.Responses.Books;
+using Bitmex.Client.Websocket.Responses.Instruments;
+using Bitmex.Client.Websocket.Responses.Orders;
+using Bitmex.Client.Websocket.Responses.Positions;
+using Bitmex.Client.Websocket.Responses.Wallets;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Common.v1;
 using TradeBot.TradeMarket.TradeMarketService.v1;
+using TradeMarket.DataTransfering;
 using TradeMarket.DataTransfering.Bitmex;
 using TradeMarket.Model;
+using Margin = Bitmex.Client.Websocket.Responses.Margins.Margin;
+using Order = Bitmex.Client.Websocket.Responses.Orders.Order;
 
 namespace TradeMarket.Model
 {
@@ -23,36 +31,21 @@ namespace TradeMarket.Model
 
         public abstract Task<DefaultResponse> AutheticateUser(string api, string secret,UserContext context);
 
-        public abstract void SubscribeToBook25(EventHandler<FullOrder> handler, UserContext context);
+        public abstract void SubscribeToBook25(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, UserContext context);
         
-        public abstract void SubscribeToBook(EventHandler<FullOrder> handler, UserContext context);
+        public abstract void SubscribeToBook(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, UserContext context);
 
-        public abstract void SubscribeToUserOrders(EventHandler<FullOrder> handler, UserContext context);
+        public abstract void SubscribeToUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, UserContext context);
 
-        public abstract void SubscribeToBalance(EventHandler<Balance> handler, UserContext context);
+        public abstract void SubscribeToBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, UserContext context);
 
+        public abstract void SubscribeToUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, UserContext context);
 
-        public abstract event EventHandler<FullOrder> Book25Update;
-        public abstract event EventHandler<FullOrder> BookUpdate;
-        public abstract event EventHandler<FullOrder> UserOrdersUpdate;
-        public abstract event EventHandler<Balance> BalanceUpdate;
+        public abstract void SubscribeToUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, UserContext context);
+
+        public abstract void SubscribeToInstruments(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler, UserContext context);
         #endregion
 
-        #region Static Part
-
-        private static IDictionary<string, TradeMarket> _tradeMarkets = new Dictionary<string, TradeMarket>(new List<KeyValuePair<string, TradeMarket>>
-        {
-            new KeyValuePair<string, TradeMarket>("Bitmex",new BitmexTradeMarket("Bitmex"))
-        });
-
-        public static TradeMarket GetTradeMarket(string name)
-        {
-            if (_tradeMarkets.ContainsKey(name))
-            {
-                return _tradeMarkets[name];
-            }
-            throw new ArgumentException($"{name} hasn't been implemented yet");
-        }
-        #endregion
+        
     }
 }

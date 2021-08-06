@@ -27,7 +27,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         public BitmexPublisher(BitmexWebsocketClient client,Action<TResponse, EventHandler<IPublisher<TModel>.ChangedEventArgs>> action)
         {
             _client = client;
-            _invokeActionOnNext = action ?? throw new ArgumentNullException(nameof(action));
+            _invokeActionOnNext = action;
         }
 
 
@@ -38,24 +38,10 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         internal async Task SubscribeAsync(TRequest request, IObservable<TResponse> stream, CancellationToken token)
         {
-
             _client.Send(request);
-            //TODO это просто жесть c действием. чувствую что нужно как-то по другому
             stream.Subscribe(responseAction);
-            //TODO строчки ниже должна жить в классе биржи
-            //await communicator.Start();
-            //exitEvent.WaitOne(TimeSpan.FromSeconds(30));
-
-            //TODO закоментил чтобы поток не блокировался
-            //await AwaitCancellation(token);
-        }
-       
-        private static Task AwaitCancellation(CancellationToken token)
-        {
-            var completion = new TaskCompletionSource<object>();
-            token.Register(() => completion.SetResult(null));
-            return completion.Task;
         }
 
+        public abstract void Start();
     }
 }

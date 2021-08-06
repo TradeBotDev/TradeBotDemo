@@ -4,15 +4,19 @@ using Xunit;
 
 namespace AccountTests.AccountServiceTests
 {
+    [Collection("AccountTests")]
     public class CurrentAccountDataTests : AccountServiceTestsData
     {
         // Тестирование получения данных из существующего аккаунта.
         [Fact]
         public void DataFromExistingAccount()
         {
+            // Очистка списка вошедших аккаунтов для того, чтобы не было конфликтов.
+            State.loggedIn = new();
+
             var registerRequest = new RegisterRequest
             {
-                Email = $"existing_user{random.Next(0, 10000)}@pochta.test",
+                Email = $"existing_user@pochta.test",
                 Password = "password",
                 VerifyPassword = "password"
             };
@@ -20,7 +24,7 @@ namespace AccountTests.AccountServiceTests
             var loginRequest = new LoginRequest()
             {
                 Email = registerRequest.Email,
-                Password = "password",
+                Password = registerRequest.Password,
                 SaveExchangesAfterLogout = false
             };
 
@@ -40,7 +44,6 @@ namespace AccountTests.AccountServiceTests
         {
             // Намеренное отправление несуществующего id сессии в метод CurrentAccountData.
             var request = new SessionRequest { SessionId = "non_existing_session_id" };
-            State.loggedIn = new();
             var reply = service.CurrentAccountData(request, null);
 
             // Ожидается, что в качествет ответа придет сообщение о том, что аккаунт не был найден.

@@ -1,23 +1,69 @@
+using System;
 using Grpc.Core;
-
+using System.Linq;
 using System.Threading.Tasks;
-
+using Google.Protobuf.WellKnownTypes;
+using TradeBot.Common.v1;
 using TradeBot.Former.FormerService.v1;
+using SubscribeLogsRequest = TradeBot.Former.FormerService.v1.SubscribeLogsRequest;
+using SubscribeLogsResponse = TradeBot.Former.FormerService.v1.SubscribeLogsResponse;
+using UpdateServerConfigRequest = TradeBot.Former.FormerService.v1.UpdateServerConfigRequest;
+using UpdateServerConfigResponse = TradeBot.Former.FormerService.v1.UpdateServerConfigResponse;
 
 namespace Former
 {
     public class ListenerImpl : FormerService.FormerServiceBase
     {
-        public override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request, ServerCallContext context)
+        public override async Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request,
+            ServerCallContext context)
         {
-            Clients.GetUserContext(context.RequestHeaders.GetValue("sessionid"), context.RequestHeaders.GetValue("trademarket"), context.RequestHeaders.GetValue("slot")).configuration = request.Request;
-            return Task.FromResult(new UpdateServerConfigResponse());
+            var meta = context.RequestHeaders.ToDictionary(x => x.Key, x => x.Value);
+            Clients.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"], request.Request);
+            return new UpdateServerConfigResponse();
         }
-        public override Task<SendPurchasePriceResponse> SendPurchasePrice(SendPurchasePriceRequest request, ServerCallContext context)
+
+        public override async Task<SendPurchasePriceResponse> SendPurchasePrice(SendPurchasePriceRequest request,
+            ServerCallContext context)
         {
-            if (request.PurchasePrice == 1) Clients.GetUserContext(context.RequestHeaders.GetValue("sessionid"), context.RequestHeaders.GetValue("trademarket"), context.RequestHeaders.GetValue("slot")).FormPurchaseOrder();
-            else Clients.GetUserContext(context.RequestHeaders.GetValue("sessionid"), context.RequestHeaders.GetValue("trademarket"), context.RequestHeaders.GetValue("slot")).FormSellOrder();
-            return Task.FromResult(new SendPurchasePriceResponse());
+            //в зависимости от числа, присланного алгоритмом производится формирование цены на покупку или на продажу с учётом контекста пользователя
+            var meta = context.RequestHeaders.ToDictionary(x => x.Key, x => x.Value);
+            await Clients.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"])
+                .FormOrder((int)request.PurchasePrice);
+            return new SendPurchasePriceResponse();
+        }
+
+        public override async Task SubscribeLogs(SubscribeLogsRequest request,
+            IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
+        {
+            var meta = context.RequestHeaders.ToDictionary(x => x.Key, x => x.Value);
+            var userContext = Clients.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"]);
+
+            async Task LoggerOnNewLog(string arg1, LogLevel arg2, DateTimeOffset arg3)
+            {
+               
+                try
+                {
+                    await responseStream.WriteAsync(new SubscribeLogsResponse()
+                    {
+                        Response = new TradeBot.Common.v1.SubscribeLogsResponse
+                        {
+                            Level = arg2, LogMessage = arg1, Where = "Former",
+                            When =  arg3.ToTimestamp()
+                        }
+                    });
+                }
+                catch
+                { }
+            }
+            try
+            {
+                userContext.Logger.NewLog += LoggerOnNewLog;
+            }
+
+            finally
+            {
+                userContext.Logger.NewLog -= LoggerOnNewLog;
+            }
         }
     }
 }

@@ -55,7 +55,107 @@ service TradeMarketService {
 	*/
 	rpc DeleteOrder(DeleteOrderRequest) returns (DeleteOrderResponse);
 
+	/*
+		Подписка на изменения полного баланса пользователя
+	*/
+	rpc SubscribeMargin(SubscribeMarginRequest) returns (stream SubscribeMarginResponse);
+
+	/*
+		Подписка на обновление позиций
+	*/
+	rpc SubscribePosition(SubscribePositionRequest) returns (stream SubscribePositionResponse);
+
+	/*
+		Подписка на изменение цен в стаканах
+	*/
+	rpc SubscribePrice(SubscribePriceRequest) returns (stream SubscribePriceResponse);
+
 }
+
+message SubscribePriceRequest{
+
+}
+
+message SubscribePriceResponse{
+	double bid_price = 1;
+	double ask_price = 2;
+	double fair_price = 3;
+	ChangesType changed_type = 4;
+}
+
+
+message SubscribePositionRequest{
+	google.protobuf.Empty empty = 1;
+}
+
+message SubscribePositionResponse{
+	int64 current_qty = 1;
+}
+
+message SubscribeMarginRequest{
+	google.protobuf.Empty empty = 1;
+}
+
+enum ChangesType{
+	CHANGES_TYPE_UNDEFIEND = 0; 
+	CHANGES_TYPE_PARTITIAL = 1;
+	CHANGES_TYPE_UPDATE = 2; 
+	CHANGES_TYPE_INSERT = 3;
+	CHANGES_TYPE_DELETE = 4; 
+}
+
+message Margin{
+	 /*int64 account = 1;
+     string currency = 2;
+     int64 risk_limit = 3;
+     string prev_state = 4;
+     string state = 5;
+     string action = 6;
+     int64 amount = 7;
+     int64 pending_credit = 8;
+     int64 pending_debit = 9;
+     int64 confirmed_debit = 10;
+     int64 prev_realised_pnl = 11;
+     int64 prev_unrealised_pnl = 12;
+     int64 gross_comm = 13;
+     int64 gross_open_cost = 14;
+     int64 gross_open_premium = 15;
+     int64 gross_exec_cost = 16;
+     int64 gross_mark_value = 17;
+     int64 risk_value = 18;
+         int64 taxable_margin = 19;
+         int64 init_margin = 20;
+         int64 maint_margin = 21;
+         int64 session_margin = 22;
+         int64 target_excess_margin = 23;
+         int64 var_margin = 24;
+		 */
+         int64 realised_pnl = 25;
+		 /*
+         int64 unrealised_pnl = 26;
+         int64 indicative_tax = 27;
+         int64 unrealised_profit = 28;
+         int64 synthetic_margin = 29;
+         int64 wallet_balance = 30;*/
+         int64 margin_balance = 31;
+		 /*
+         int64 margin_balance_pcnt = 32;
+         int64 margin_leverage = 33;
+         int64 margin_used_pcnt = 34;
+         int64 excess_margin = 35;
+         int64 excess_margin_pcnt = 36;*/
+         int64 available_margin = 37;
+        /* int64 withdrawable_margin = 38;
+         google.protobuf.Timestamp timestamp = 39;
+         int64 gross_last_value = 40;
+         double commission = 41;*/
+}
+
+message SubscribeMarginResponse{
+	ChangesType changed_type = 1;
+	Margin margin = 2;
+}
+
 
 message DeleteOrderRequest{
 	string order_id = 1;
@@ -96,8 +196,9 @@ message SubscribeMyOrdersRequest{
 }
 
 message SubscribeMyOrdersResponse {
+	tradebot.common.v1.DefaultResponse response = 1;
 	tradebot.common.v1.Order changed = 2;
-
+	ChangesType changes_type = 3;
 }
 
 message SubscribeOrdersRequest{
@@ -107,6 +208,7 @@ message SubscribeOrdersRequest{
 
 message SubscribeOrdersResponse{
 	tradebot.common.v1.SubscribeOrdersResponse response = 1;
+	ChangesType changed_type = 2;
 
 }
 

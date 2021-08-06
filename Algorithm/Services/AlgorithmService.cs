@@ -13,7 +13,7 @@ namespace Algorithm.Services
     {
         public override async Task<AddOrderResponse> AddOrder(IAsyncStreamReader<AddOrderRequest> requestStream, ServerCallContext context)
         {
-            Log.Information("Listening to the Relay...");
+            Log.Information("Listening to Relay...");
             while (await requestStream.MoveNext())
             {
                 var order = requestStream.Current;

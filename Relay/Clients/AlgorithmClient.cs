@@ -47,11 +47,11 @@ namespace Relay.Clients
             return _client.AddOrder(meta).RequestStream;
         }
 
-        public void WriteOrder(IClientStreamWriter<AddOrderRequest> stream,Order order)
+        public async Task WriteOrder(IClientStreamWriter<AddOrderRequest> stream,Order order)
         {
             try
             {
-               stream.WriteAsync(new AddOrderRequest()
+               await stream.WriteAsync(new AddOrderRequest()
                {
                    Order = order
                });

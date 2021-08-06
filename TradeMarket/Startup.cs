@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,19 +13,27 @@ using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
 using TradeMarket.Clients;
 using TradeMarket.DataTransfering;
+using TradeMarket.Model;
 using TradeMarket.Services;
 
 namespace TradeMarket
 {
     public class Startup
     {
+        public IConfiguration Configuration { get; }
+
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddGrpc();
-            //services.AddGrpcClient<ExchangeAccess.ExchangeAccessClient>(val => val.Address = new Uri("https://localhost:5000"));
-            services.AddSingleton(new AccountClient(new ExchangeAccess.ExchangeAccessClient(GrpcChannel.ForAddress(new Uri("https://localhost:5000")))));
+            services.AddSingleton(new AccountClient(new ExchangeAccess.ExchangeAccessClient(GrpcChannel.ForAddress(Configuration.GetConnectionString("AccountService")))));
+            //services.AddSingleton<IConnectionMultiplexer>(options => ConnectionMultiplexer.Connect(Configuration.GetConnectionString("Redis")));
+            services.AddSingleton<FactoryCache>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
