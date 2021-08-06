@@ -23,6 +23,16 @@ namespace Website.Controllers.Clients
             return client.Login(request);
         }
 
+        public static LogoutResponse Logout(string sessionId, bool saveExchangeAccesses)
+        {
+            var request = new LogoutRequest
+            {
+                SessionId = sessionId,
+                SaveExchangeAccesses = saveExchangeAccesses
+            };
+            return client.Logout(request);
+        }
+
         public static RegisterResponse Register(RegisterModel model)
         {
             var request = new RegisterRequest
@@ -34,14 +44,31 @@ namespace Website.Controllers.Clients
             return client.Register(request);
         }
 
-        public static LogoutResponse Logout(string sessionId, bool saveExchangeAccesses)
+        public static IsValidSessionResponse IsValidSession(string sessionId)
         {
-            var request = new LogoutRequest
+            var request = new IsValidSessionRequest
             {
-                SessionId = sessionId,
-                SaveExchangeAccesses = saveExchangeAccesses
+                SessionId = sessionId
             };
-            return client.Logout(request);
+            return client.IsValidSession(request);
+        }
+
+        public static AccountDataResponse AccountData(string sessionId)
+        {
+            var request = new AccountDataRequest
+            {
+                SessionId = sessionId
+            };
+            return client.AccountData(request);
+        }
+
+        public static CheckLicenseResponse CheckLicense(string sessionId)
+        {
+            var request = new CheckLicenseRequest
+            {
+                SessionId = sessionId
+            };
+            return client.CheckLicense(request);
         }
     }
 }

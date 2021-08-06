@@ -203,14 +203,11 @@ namespace AccountGRPC
                     // Получение данных вошедшего пользователя.
                     var login = database.LoggedAccounts
                         .Where(login => login.SessionId == request.SessionId)
-                        .Include(account => account.Account).First();
+                        .Include(account => account.Account)
+                        .Include(exchange => exchange.Account.ExchangeAccesses).First();
 
                     // Формирование ответа.
-                    var reply = AccountDataReplies.SuccessfulGettingAccountData(new AccountInfo
-                    {
-                        AccountId = login.Account.AccountId,
-                        Email = login.Account.Email,
-                    });
+                    var reply = AccountDataReplies.SuccessfulGettingAccountData(login);
                     return Task.FromResult(reply);
                 }
             }

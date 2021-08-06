@@ -12,27 +12,13 @@ namespace Website.Controllers
         [Route("Account")]
         public IActionResult Account()
         {
-            var channel = GrpcChannel.ForAddress("http://localhost:5000");
-            var accountClient = new Account.AccountClient(channel);
-            var exchangeClient = new ExchangeAccess.ExchangeAccessClient(channel);
-
-            var accountData = accountClient.AccountData(new AccountDataRequest
-            {
-                SessionId = User.Identity.Name
-            });
-
+            var accountData = Clients.AccountServiceClient.AccountData(User.Identity.Name);
             if (accountData.Result == AccountActionCode.Successful)
             {
-
-                var allExchanges = exchangeClient.AllExchangesBySession(new AllExchangesBySessionRequest
-                {
-                    SessionId = User.Identity.Name
-                });
-
-                var model = new AccountPageModel
+                var model = new AccountDataModel
                 {
                     Email = accountData.CurrentAccount.Email,
-                    Exchanges = allExchanges.Exchanges
+                    Exchanges = accountData.CurrentAccount.Exchanges
                 };
 
                 ViewBag.Title = "Аккаунт";
@@ -51,28 +37,7 @@ namespace Website.Controllers
         [HttpPost]
         public IActionResult AddExchangeAccess(AddExchangeAccessModel model)
         {
-            var channel = GrpcChannel.ForAddress("http://localhost:5000");
-            var exchangeClient = new ExchangeAccess.ExchangeAccessClient(channel);
-
-            ExchangeAccessCode exchangeAccessCode;
-            switch (model.SelectExchange)
-            {
-                case "Bitmex":
-                    exchangeAccessCode = ExchangeAccessCode.Bitmex;
-                    break;
-                default:
-                    exchangeAccessCode = ExchangeAccessCode.Unspecified;
-                    break;
-            }
-
-            var reply = exchangeClient.AddExchangeAccess(new AddExchangeAccessRequest
-            {
-                SessionId = User.Identity.Name,
-                Code = exchangeAccessCode,
-                ExchangeName = model.SelectExchange,
-                Token = model.Token,
-                Secret = model.Secret
-            });
+            var reply = Clients.ExchangeAccessClient.AddExchangeAccess(User.Identity.Name, model);
 
             if (reply.Result == ExchangeAccessActionCode.Successful)
                 return RedirectToAction("account", "account");

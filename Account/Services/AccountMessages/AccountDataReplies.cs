@@ -31,17 +31,33 @@ namespace AccountGRPC.AccountMessages
             };
         }
 
-        public static AccountDataResponse SuccessfulGettingAccountData(AccountInfo currentAccount)
+        public static AccountDataResponse SuccessfulGettingAccountData(Models.LoggedAccount currentAccount)
         {
             const string Message = "Получение данных текущего пользователя завершено успешно.";
             Log.Information(Message);
 
-            return new AccountDataResponse
+            var reply = new AccountDataResponse
             {
                 Result = AccountActionCode.Successful,
                 Message = Message,
-                CurrentAccount = currentAccount
+                CurrentAccount = new AccountInfo
+                {
+                    AccountId = currentAccount.AccountId,
+                    Email = currentAccount.Account.Email
+                }
             };
+            foreach (Models.ExchangeAccess exchange in currentAccount.Account.ExchangeAccesses)
+            {
+                reply.CurrentAccount.Exchanges.Add(new ExchangeAccessInfo
+                {
+                    ExchangeAccessId = exchange.ExchangeAccessId,
+                    Code = exchange.Code,
+                    Name = exchange.Name,
+                    Token = exchange.Token,
+                    Secret = exchange.Secret
+                });
+            }
+            return reply;
         }
     }
 }
