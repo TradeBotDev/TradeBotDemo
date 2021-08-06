@@ -1,4 +1,5 @@
-﻿using Google.Protobuf.WellKnownTypes;
+﻿using System;
+using Google.Protobuf.WellKnownTypes;
 using Serilog;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,14 +14,16 @@ namespace Former
         private readonly Config _configuration;
         private readonly TradeMarketClient _tradeMarketClient;
         private readonly Metadata _metadata;
+        private readonly Logger _logger; 
 
-        public Former(Storage storage, Config configuration, TradeMarketClient tradeMarketClient, Metadata metadata)
+        public Former(Storage storage, Config configuration, TradeMarketClient tradeMarketClient, Metadata metadata, Logger logger)
         {
             _storage = storage;
             _storage.PlaceOrderEvent += PlaceCounterOrder;
             _configuration = configuration;
             _tradeMarketClient = tradeMarketClient;
             _metadata = metadata;
+            _logger = logger;
         }
 
         /// <summary>
@@ -48,6 +51,7 @@ namespace Former
             }
             Log.Information("{@Where}: Counter order {@Id} price: {@Price}, quantity: {@Quantity} placed {@ResponseCode} {@ResponseMessage}", "Former", oldOrder.Id, price, -quantity, placeResponse.Response.Code, placeResponse.Response.Code == ReplyCode.Succeed ? "" : placeResponse.Response.Message);
             Log.Information("{@Where}: Order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@ResponseCode} added to counter orders list {@ResponseMessage}", "Former", placeResponse.OrderId, price, -quantity, type, addResponse ? ReplyCode.Succeed : ReplyCode.Failure);
+            await _logger.WriteToLog($"Former: Counter order {oldOrder.Id} price: {price}, quantity: {-quantity} placed {placeResponse.Response.Code} {(placeResponse.Response.Code == ReplyCode.Succeed ? "" : placeResponse.Response.Message)}", LogLevel.Information, DateTimeOffset.Now);
         }
 
         /// <summary>
@@ -113,6 +117,7 @@ namespace Former
                 Log.Information("{@Where}: Order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} added to my orders list {@ResponseCode}", "Former", response.OrderId, price, quantity, orderType, addResponse ? ReplyCode.Succeed : ReplyCode.Failure);
             }
             Log.Information("{@Where}: Order {@Id} price: {@Price}, quantity: {@Quantity} placed for {@Type} {@ResponseCode} {@ResponseMessage}", "Former", response.OrderId, price, quantity, orderType, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
+            await _logger.WriteToLog($"Former: Order {response.OrderId} price: {price}, quantity: {quantity} placed for {orderType} {response.Response.Code.ToString()} {(response.Response.Code == ReplyCode.Failure ? response.Response.Message : "")}", LogLevel.Information, DateTimeOffset.Now);
         }
 
         /// <summary>

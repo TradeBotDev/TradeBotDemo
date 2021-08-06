@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using System;
+using Serilog;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using TradeBot.Common.v1;
@@ -31,10 +32,13 @@ namespace Former
         public bool PlaceLocker;
         public bool FitPricesLocker;
 
-        public Storage()
+        private Logger _logger; 
+
+        public Storage(Logger logger)
         {
             MyOrders = new ConcurrentDictionary<string, Order>();
             CounterOrders = new ConcurrentDictionary<string, Order>();
+            _logger = logger;
         }
 
         /// <summary>
@@ -116,10 +120,13 @@ namespace Former
             {
                 AvailableBalance = availableBalance;
                 Log.Information("{@Where}: Balance updated. Available balance: {@AvailableBalance}, Total balance: {@TotalBalance}", "Former", availableBalance, totalBalance);
+                _logger.WriteToLog($"Balance available: {availableBalance}", LogLevel.Information, DateTimeOffset.Now);
             }
             if (totalBalance != 0)
             {
                 TotalBalance = totalBalance;
+                _logger.WriteToLog($"Balance total: {totalBalance}", LogLevel.Information, DateTimeOffset.Now);
+
             }
             return Task.CompletedTask;
         }
