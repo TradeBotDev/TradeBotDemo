@@ -40,7 +40,6 @@ namespace Former
 
             async Task LoggerOnNewLog(string arg1, LogLevel arg2, DateTimeOffset arg3)
             {
-               
                 try
                 {
                     await responseStream.WriteAsync(new SubscribeLogsResponse()
@@ -58,9 +57,11 @@ namespace Former
             try
             {
                 userContext.Logger.NewLog += LoggerOnNewLog;
+                while (!context.CancellationToken.IsCancellationRequested)
+                { }
+                throw new Exception();
             }
-
-            finally
+            catch
             {
                 userContext.Logger.NewLog -= LoggerOnNewLog;
             }
