@@ -57,13 +57,13 @@ namespace Website.Controllers.Clients
             return client.AccountData(request);
         }
 
-        public static CheckLicenseResponse CheckLicense(string sessionId)
+        public static IsLicensedResponse CheckLicense(string sessionId)
         {
-            var request = new CheckLicenseRequest
+            var request = new IsLicensedRequest
             {
                 SessionId = sessionId
             };
-            return client.CheckLicense(request);
+            return client.IsLicensed(request);
         }
     }
 }

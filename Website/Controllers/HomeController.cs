@@ -7,7 +7,7 @@ namespace Website.Controllers
         public IActionResult Index()
         {
             ViewBag.Title = "Главная страница";
-            ViewBag.SectionTitle = "Главная страница";
+            ViewBag.SectionTitle = "Представляем нашего бота";
             return View();
         }
 
@@ -16,12 +16,6 @@ namespace Website.Controllers
         {
             ViewBag.Title = "О нас";
             ViewBag.SectionTitle = "О нас";
-            return View();
-        }
-
-        [Route("Tradebot")]
-        public IActionResult Tradebot()
-        {
             return View();
         }
     }
