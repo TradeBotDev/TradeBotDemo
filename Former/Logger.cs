@@ -8,9 +8,9 @@ namespace Former
     {
         public event Func<string, LogLevel, DateTimeOffset, Task> NewLog;
 
-        public async Task WriteToLog(string message, LogLevel level, DateTimeOffset time)
+        public void WriteToLog(string message, LogLevel level, DateTimeOffset time)
         {
-            await NewLog?.Invoke(message, level, time);
+            NewLog?.Invoke(message, level, time);
         }
     }
 }
