@@ -58,11 +58,6 @@ namespace Relay.Model
             }
         }
 
-        public IAsyncStreamReader<SubscribeOrdersResponse> ReConnect()
-        {
-            _tradeMarketStream = _tradeMarketClient.OpenStream(Meta);
-            return _tradeMarketStream;
-        }
 
         private void _tradeMarketClient_OrderRecievedEvent(object sender, TradeBot.Common.v1.Order e)
         {
