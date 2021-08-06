@@ -1,20 +1,24 @@
 ﻿@model Website.Models.AccountDataModel
 @using TradeBot.Account.AccountService.v1;
 
+<!--Получение электронной почты из переданной модели-->
 <p>Электронная почта: @Model.Email</p>
 @{
+    <!--Если в аккаунте есть биржи, они последовательно выводятся на страницу-->
     if (Model.Exchanges.Count > 0)
         foreach (ExchangeAccessInfo exchange in Model.Exchanges)
         {
         <p>Название: @exchange.Name, Токен: @exchange.Token, Секрет: @exchange.Secret</p>
         <form method="post">
             <input type="submit" name="DeleteButton" value="Удалить"/>
+            <!--Скрытый элемент, содержаний в себе код биржи-->
             <input type="hidden" name="exchangeCode" value="@((int)exchange.Code)"/>
         </form>
         }
     else { <p>Биржи отсутствуют.</p> }
 }
 
+<!--Кнопка, перенаправляющая на форму добавления биржи-->
 <form action="account/addexchangeaccess">
     <input type="submit" value="Добавить новую биржу" />
 </form>

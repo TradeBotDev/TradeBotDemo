@@ -1,10 +1,13 @@
 ﻿@model Website.Models.Authorization.LogoutModel
 
+<!--Форма выхода из аккаунта-->
 <form method="post">
     <p>Вы действительно хотите выйти?</p>
     <input type="checkbox" id="SaveExchanges" name="SaveExchanges" value="true"/>
     <label for="SaveExchanges">Сохранить данные о доступе к биржам</label>
     <input type="submit" name="Button" value="Выйти"/>
     <input type="submit" name="Button" value="Назад"/>
+    <!--Скрытая информация, передающаяся в форме, которая содержи в себе ссылку на предыдущую страницу. Так сделано,
+        потому что в post-методе будет перенаправление на get-метод, то есть ту же страницу, что не нужно-->
     <input type="hidden" name="PreviousUrl" value="@ViewBag.ReturnUrl" />
 </form>

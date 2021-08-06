@@ -1,32 +1,39 @@
 ﻿<html>
     <head>
+        <!--Невидимые на странице подключения и прочее-->
         <title>@ViewBag.Title | Tradebot</title>
         <link rel="stylesheet" type="text/css" href="~/css/Style.css"/>
     </head>
     <body>
+        <!--Шапка сайта с горизонтальным меню.-->
         <header>
-            <!--Здесь находится менюшка и всякое такое-->
             <h1>Tradebot</h1>
             <a href="/">Главная страница</a>
             <a href="/about">О нас</a>
             <a href="/tradebot">Tradebot</a>
             @if (User.Identity.IsAuthenticated)
             {
+                <!--Если пользователь аутентифицирован, ему показываются кнопки аккаунта и выхода-->
                 <a href="/account">Аккаунт</a>
                 <a href="authorization/logout">Выйти</a>
             }
             else
             {
+                <!--Иначе ему показываются кнопки входа и регистрации-->
                 <a href="/authorization/login">Войти</a>
                 <a href="/authorization/register">Регистрация</a>
             }
         </header>
+        <!--Главной блок с контентов внутри страницы-->
         <article>
+            <!--Отображение установленного в контроллере заголока-->
             <h1>@ViewBag.SectionTitle</h1>
+
+            <!--Отображение контента внутри страницы-->
             @RenderBody()
         </article>
+        <!--Подвал сайта-->
         <footer>
-            <!--Подвал сайта-->
             <p>Безымянная команда 2021-2021</p>
         </footer>
     </body>
