@@ -1,9 +1,7 @@
-﻿using Grpc.Net.Client;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Collections;
-using System.Collections.Generic;
 using TradeBot.Account.AccountService.v1;
 using Website.Models;
 
@@ -29,7 +27,8 @@ namespace Website.Controllers
                 ViewBag.SectionTitle = "Аккаунт";
                 return View(model);
             }
-            else return View("~/Views/Shared/Error.cshtml", accountData.Message);
+            else HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return View("~/Views/Shared/Error.cshtml", accountData.Message);
         }
 
         [Route("Account")]
@@ -39,7 +38,10 @@ namespace Website.Controllers
             var reply = Clients.ExchangeAccessClient.DeleteExchangeAccess(User.Identity.Name, exchangeCode);
             if (reply.Result == ExchangeAccessActionCode.Successful)
                 return RedirectToAction("account", "account");
-            else return View("~/Views/Shared/Error.cshtml", reply.Message);
+            else if (reply.Result == ExchangeAccessActionCode.AccountNotFound)
+                HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            return View("~/Views/Shared/Error.cshtml", reply.Message);
         }
 
         [HttpGet]
@@ -55,7 +57,10 @@ namespace Website.Controllers
 
             if (reply.Result == ExchangeAccessActionCode.Successful)
                 return RedirectToAction("account", "account");
-            else return View("~/Views/Shared/Error.cshtml", reply.Message);
+            else if (reply.Result == ExchangeAccessActionCode.AccountNotFound || reply.Result == ExchangeAccessActionCode.TimePassed)
+                HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            return View("~/Views/Shared/Error.cshtml", reply.Message);
         }
     }
 }
