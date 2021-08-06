@@ -93,7 +93,7 @@ namespace Former
         /// <summary>
         /// Формирует в зависимости от решения алгоритма
         /// </summary>
-        public async Task FormOrder(int decision)
+        internal async Task FormOrder(int decision)
         {
             if (_storage.PlaceLocker) return;
             var orderType = decision > 0 ? OrderType.Buy : OrderType.Sell;

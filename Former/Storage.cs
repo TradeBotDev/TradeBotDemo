@@ -44,7 +44,7 @@ namespace Former
         /// <summary>
         /// Обновляет рыночные цены на продажу и на покупку
         /// </summary>
-        public async Task UpdateMarketPrices(double bid, double ask)
+        internal async Task UpdateMarketPrices(double bid, double ask)
         {
             if (bid > 0) BuyMarketPrice = bid;
             if (ask > 0) SellMarketPrice = ask;
@@ -54,7 +54,7 @@ namespace Former
         /// <summary>
         /// Обновляет список моих ордеров по подписке, и выставляет контр-ордер в случае частичного или полного исполнения моего ордера
         /// </summary>
-        public async Task UpdateMyOrderList(Order newComingOrder, ChangesType changesType)
+        internal async Task UpdateMyOrderList(Order newComingOrder, ChangesType changesType)
         {
             var id = newComingOrder.Id;
             var itsMyOrder = MyOrders.TryGetValue(id, out var myOldOrder);
@@ -107,7 +107,7 @@ namespace Former
         /// <summary>
         /// Обновляет размер позиции, для того чтобы знать, короткая позиция или длинная
         /// </summary>
-        public Task UpdatePosition(double positionQuantity)
+        internal Task UpdatePosition(double positionQuantity)
         {
             if (PositionSize != (int)positionQuantity)
             {
@@ -120,7 +120,7 @@ namespace Former
         /// <summary>
         /// Обновляет доступный и общий баланс
         /// </summary>
-        public Task UpdateBalance(int availableBalance, int totalBalance)
+        internal Task UpdateBalance(int availableBalance, int totalBalance)
         {
             if (availableBalance > 0)
             {
@@ -139,7 +139,7 @@ namespace Former
         /// <summary>
         /// Возвращает true, если получилось удалить ордер по идентификатору из выбранного списка, иначе false
         /// </summary>
-        public bool RemoveOrder(string id, ConcurrentDictionary<string, Order> list)
+        internal bool RemoveOrder(string id, ConcurrentDictionary<string, Order> list)
         {
             return list.TryRemove(id, out _);
         }
@@ -147,7 +147,7 @@ namespace Former
         /// <summary>
         /// Обновляет запись в выбранном списке, если она там существует
         /// </summary>
-        public bool UpdateOrder(Order newComingOrder, ConcurrentDictionary<string, Order> list)
+        internal bool UpdateOrder(Order newComingOrder, ConcurrentDictionary<string, Order> list)
         {
             if (!list.ContainsKey(newComingOrder.Id)) return false;
             list.AddOrUpdate(newComingOrder.Id, newComingOrder, (_, v) =>
@@ -181,7 +181,7 @@ namespace Former
         /// <summary>
         /// Добавляет запись в выбранный список 
         /// </summary>
-        public bool AddOrder(string id, Order order, ConcurrentDictionary<string, Order> list)
+        internal bool AddOrder(string id, Order order, ConcurrentDictionary<string, Order> list)
         {
             return list.TryAdd(id, order);
         }

@@ -17,8 +17,12 @@ namespace Former
         public override async Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request,
             ServerCallContext context)
         {
-            var meta = context.RequestHeaders.ToDictionary(x => x.Key, x => x.Value);
-            Clients.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"], request.Request);
+            var task = Task.Run(() =>
+            {
+                var meta = context.RequestHeaders.ToDictionary(x => x.Key, x => x.Value);
+                Clients.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"], request.Request);
+            });
+            await task;
             return new UpdateServerConfigResponse();
         }
 
@@ -26,6 +30,7 @@ namespace Former
             ServerCallContext context)
         {
             //в зависимости от числа, присланного алгоритмом производится формирование цены на покупку или на продажу с учётом контекста пользователя
+
             var meta = context.RequestHeaders.ToDictionary(x => x.Key, x => x.Value);
             await Clients.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"])
                 .FormOrder((int)request.PurchasePrice);
@@ -35,36 +40,41 @@ namespace Former
         public override async Task SubscribeLogs(SubscribeLogsRequest request,
             IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
         {
-            var meta = context.RequestHeaders.ToDictionary(x => x.Key, x => x.Value);
-            var userContext = Clients.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"]);
-
-            async Task LoggerOnNewLog(string arg1, LogLevel arg2, DateTimeOffset arg3)
+            var task = Task.Run(() =>
             {
+                var meta = context.RequestHeaders.ToDictionary(x => x.Key, x => x.Value);
+                var userContext = Clients.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"]);
+
+                async Task LoggerOnNewLog(string arg1, LogLevel arg2, DateTimeOffset arg3)
+                {
+                    try
+                    {
+                        await responseStream.WriteAsync(new SubscribeLogsResponse()
+                        {
+                            Response = new TradeBot.Common.v1.SubscribeLogsResponse
+                            {
+                                Level = arg2, LogMessage = arg1, Where = "Former",
+                                When =  arg3.ToTimestamp()
+                            }
+                        });
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+                }
                 try
                 {
-                    await responseStream.WriteAsync(new SubscribeLogsResponse()
-                    {
-                        Response = new TradeBot.Common.v1.SubscribeLogsResponse
-                        {
-                            Level = arg2, LogMessage = arg1, Where = "Former",
-                            When =  arg3.ToTimestamp()
-                        }
-                    });
+                    userContext.Logger.NewLog += LoggerOnNewLog;
+                    while (!context.CancellationToken.IsCancellationRequested) { }
+                    throw new Exception();
                 }
                 catch
-                { }
-            }
-            try
-            {
-                userContext.Logger.NewLog += LoggerOnNewLog;
-                while (!context.CancellationToken.IsCancellationRequested)
-                { }
-                throw new Exception();
-            }
-            catch
-            {
-                userContext.Logger.NewLog -= LoggerOnNewLog;
-            }
+                {
+                    userContext.Logger.NewLog -= LoggerOnNewLog;
+                }
+            });
+            await task;
         }
     }
 }
