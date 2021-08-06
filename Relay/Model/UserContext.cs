@@ -79,6 +79,7 @@ namespace Relay.Model
             await foreach (var item in _formerClient.SubscribeForLogs(_formerStream))
             {
                 try {
+                    Log.Information("{@Where}: {@MethodName}, response: {@}","Relay", new System.Diagnostics.StackFrame().GetMethod().Name,item.Response);
                     await responseStream.WriteAsync(new TradeBot.Relay.RelayService.v1.SubscribeLogsResponse { Response = item.Response });
                 }
                 catch(Exception e)

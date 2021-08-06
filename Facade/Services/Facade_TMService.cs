@@ -165,43 +165,36 @@ namespace Facade
         #region Relay
         public override async Task SubscribeLogsRelay(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
         {
-            while (true)
+            try
             {
-                try
+                var response = clientRelay.SubscribeLogs(new TradeBot.Relay.RelayService.v1.SubscribeLogsRequest { Request = request.R }, context.RequestHeaders);
+                if (!context.CancellationToken.IsCancellationRequested)
                 {
-                    var response = clientRelay.SubscribeLogs(new TradeBot.Relay.RelayService.v1.SubscribeLogsRequest { Request = request.R });
-                    if (!context.CancellationToken.IsCancellationRequested)
+                    Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
+                    while (await response.ResponseStream.MoveNext())
                     {
-                        if (response.ResponseStream.Current != null)
+                        Log.Information("{@Where}: {@MethodName} \n args: response={@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response.ResponseStream.Current.Response);
+                        await responseStream.WriteAsync(new SubscribeLogsResponse
                         {
-                            Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
-                            while (await response.ResponseStream.MoveNext())
-                            {
-                                Log.Information("{@Where}: {@MethodName} \n args: response={@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response.ResponseStream.Current.Response);
-                                await responseStream.WriteAsync(new SubscribeLogsResponse
-                                {
-                                    Response = response.ResponseStream.Current.Response
-                                });
-                            }
-                            break;
-                        }
-                        else
-                        {
-                            //Log.Information("Trying to reconnect")
-                        }
+                            Response = response.ResponseStream.Current.Response
+                        });
                     }
-                    else
-                    {
-                        Log.Information("{@Where}: Client disconnected", "Facade");
-                        break;
-                    }
+
                 }
-                catch (RpcException e)
+
+
+                else
                 {
-                    Log.Error("{@Where}: Exception" + e.Message, "Facade");
+                    Log.Information("{@Where}: Client disconnected", "Facade");
+
                 }
             }
+            catch (RpcException e)
+            {
+                Log.Error("{@Where}: Exception" + e.Message, "Facade");
+            }
         }
+        
         public override Task<SwitchBotResponse> SwitchBot(SwitchBotRequest request, ServerCallContext context)
         {
             while (true)

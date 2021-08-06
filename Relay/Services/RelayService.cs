@@ -21,7 +21,6 @@ namespace Relay.Services
         private static AlgorithmClient _algorithmClient = null;
         private static TradeMarketClient _tradeMarketClient = null;
         private static FormerClient _formerClient=null;//добавил null
-        private UserContext cont;
 
         private static IDictionary<Metadata, UserContext> contexts = new Dictionary<Metadata, UserContext>(new MetaComparer());
 
@@ -72,7 +71,6 @@ namespace Relay.Services
             user.StatusOfWork();
                 user.SubscribeForOrders();
             user.UpdateConfig(request.Config);
-            cont = user;
             return await Task.FromResult(new StartBotResponse()
             {
                 Response = new DefaultResponse()
@@ -93,7 +91,8 @@ namespace Relay.Services
 
         public async override Task SubscribeLogs(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
         {
-            cont.RepeatLogsFormer(request,responseStream);
+            Log.Information("{@Where}: SubscribeLogs", "Relay");
+            contexts.FirstOrDefault(x=>x.Key[2].Value==context.RequestHeaders[2].Value).Value.RepeatLogsFormer(request,responseStream);
         }
 
     }
