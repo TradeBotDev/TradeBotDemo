@@ -13,14 +13,16 @@ namespace Former
         private readonly Config _configuration;
         private readonly TradeMarketClient _tradeMarketClient;
         private readonly Metadata _metadata;
+        private readonly Logger _logger; 
 
-        public UpdateHandlers(Storage storage, Config configuration, TradeMarketClient tradeMarketClient, Metadata metadata)
+        public UpdateHandlers(Storage storage, Config configuration, TradeMarketClient tradeMarketClient, Metadata metadata, Logger logger)
         {
             _storage = storage;
             _storage.HandleUpdateEvent += CheckAndFitPrices;
             _configuration = configuration;
             _metadata = metadata;
             _tradeMarketClient = tradeMarketClient;
+            _logger = logger;
         }
 
         /// <summary>
