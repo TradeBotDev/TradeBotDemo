@@ -1,8 +1,4 @@
 ﻿using Grpc.Net.Client;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
 using Website.Models;
 
@@ -14,7 +10,8 @@ namespace Website.Controllers.Clients
 
         public static AddExchangeAccessResponse AddExchangeAccess(string sessionId, AddExchangeAccessModel model)
         {
-            var request = new AddExchangeAccessRequest {
+            var request = new AddExchangeAccessRequest
+            {
                 SessionId = sessionId,
                 Code = model.ExchangeCode,
                 ExchangeName = model.ExchangeCode.ToString(),
@@ -46,9 +43,15 @@ namespace Website.Controllers.Clients
             return client.DeleteExchangeAccess(request);
         }
 
-        public static ExchangeBySessionResponse ExchangeBySession()
+        public static ExchangeBySessionResponse ExchangeBySession(string sessionId, ExchangeAccessCode code)
         {
-            return null;
+            var request = new ExchangeBySessionRequest
+            {
+                SessionId = sessionId,
+                Code = code
+            };
+
+            return client.ExchangeBySession(request);
         }
     }
 }

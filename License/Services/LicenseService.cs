@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -42,7 +41,7 @@ namespace LicenseGRPC
         }
 
         // Метод проверки лицензии по трем параметрам - аккаунт, ключ и продукт.
-        public override Task<LicenseCheckResponse> CheckLicense(LicenseCheckRequest request, ServerCallContext context)
+        public override Task<CheckLicenseResponse> CheckLicense(CheckLicenseRequest request, ServerCallContext context)
         {
             Log.Information($"LicenseCheck получил запрос: AccountId - {request.AccountId}, Product - {request.Product}.");
             using (var database = new Models.LicenseContext())
@@ -54,9 +53,9 @@ namespace LicenseGRPC
 
                 // В случае, если она была найдена, возвращается сообщени об этом.
                 if (isExists)
-                    return Task.FromResult(LicenseCheckReplies.LicenseIsExists());
+                    return Task.FromResult(CheckLicenseReplies.LicenseIsExists());
                 // Иначе возвращается сообщение о том, что она не была найдена.
-                else return Task.FromResult(LicenseCheckReplies.LicenseIsNotExists());
+                else return Task.FromResult(CheckLicenseReplies.LicenseIsNotExists());
             }
         }
     }

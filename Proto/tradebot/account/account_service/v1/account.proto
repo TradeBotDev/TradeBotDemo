@@ -17,7 +17,7 @@ service Account {
 	// Получение данных текущего пользователя
 	rpc AccountData (AccountDataRequest) returns (AccountDataResponse);
 
-	rpc CheckLicense (CheckLicenseRequest) returns (CheckLicenseResponse);
+	rpc IsLicensed (IsLicensedRequest) returns (IsLicensedResponse);
 }
 
 // Данные для входа в аккаунт.
@@ -97,11 +97,11 @@ message ExchangeAccessInfo {
 	string secret = 5;
 }
 
-message CheckLicenseRequest {
+message IsLicensedRequest {
 	string session_id = 1;
 }
 
-message CheckLicenseResponse {
+message IsLicensedResponse {
 	bool access = 1;
 	string message = 2;
 }

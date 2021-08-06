@@ -3,14 +3,14 @@ using TradeBot.License.LicenseService.v1;
 
 namespace LicenseGRPC.LicenseMessages
 {
-    public static class LicenseCheckReplies
+    public static class CheckLicenseReplies
     {
-        public static LicenseCheckResponse LicenseIsExists()
+        public static CheckLicenseResponse LicenseIsExists()
         {
             const string Message = "Данная лицензия существует..";
             Log.Information(Message);
 
-            return new LicenseCheckResponse
+            return new CheckLicenseResponse
             {
                 Code = LicenseCode.HaveAccess,
                 Message = Message,
@@ -18,12 +18,12 @@ namespace LicenseGRPC.LicenseMessages
             };
         }
 
-        public static LicenseCheckResponse LicenseIsNotExists()
+        public static CheckLicenseResponse LicenseIsNotExists()
         {
             const string Message = "Произошла ошибка: данная лицензия не существует.";
             Log.Information(Message);
 
-            return new LicenseCheckResponse
+            return new CheckLicenseResponse
             {
                 Code = LicenseCode.NoAccess,
                 Message = Message,

@@ -9,7 +9,7 @@ service License {
 	// Метод для сайта. Позволяет добавить лицензию в аккаунт при покупке продукта.
 	rpc SetLicense (SetLicenseRequest) returns (SetLicenseResponse);
 	// Метод для сервиса Account. Позволяет проверить, есть ли лицензия на продукт для данного аккаунта.
-	rpc CheckLicense (LicenseCheckRequest) returns (LicenseCheckResponse);
+	rpc CheckLicense (CheckLicenseRequest) returns (CheckLicenseResponse);
 }
 
 // Запрос на установку лицензии.
@@ -25,13 +25,13 @@ message SetLicenseResponse {
 }
 
 // Запрос на проверку лицензии.
-message LicenseCheckRequest {
+message CheckLicenseRequest {
 	int32 account_id = 1;
 	ProductCode product = 2;
 }
 
 // Ответ на запрос о проверке лицензии.
-message LicenseCheckResponse {
+message CheckLicenseResponse {
 	LicenseCode code = 1;
 	string message = 2;
 	bool have_access = 3;

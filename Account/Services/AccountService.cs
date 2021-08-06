@@ -214,7 +214,7 @@ namespace AccountGRPC
         }
         
         // Метод, проверяющий лицензию для текущего пользователя по Id сессии.
-        public override Task<CheckLicenseResponse> CheckLicense(CheckLicenseRequest request, ServerCallContext context)
+        public override Task<IsLicensedResponse> IsLicensed(IsLicensedRequest request, ServerCallContext context)
         {
             Log.Information($"CheckLicense получил запрос: SessionId - {request.SessionId}.");
             using (var database = new Models.AccountContext())
@@ -223,7 +223,7 @@ namespace AccountGRPC
                 // Сообщение об этом.
                 var accounts = database.LoggedAccounts.Where(login => login.SessionId == request.SessionId);
                 if (accounts.Count() == 0)
-                    return Task.FromResult(CheckLicenseReplies.AccountNotFound());
+                    return Task.FromResult(IsLicensedReplies.AccountNotFound());
 
                 // Получение строки подключения сервиса LicenseService.
                 string stroke = config.GetSection("GrpcClients").GetSection("LicenseService").Value;
@@ -232,7 +232,7 @@ namespace AccountGRPC
                 var client = new License.LicenseClient(channel);
 
                 // Отправка запроса и сразу же запись ответа.
-                var reply = client.CheckLicense(new LicenseCheckRequest
+                var reply = client.CheckLicense(new CheckLicenseRequest
                 {
                     AccountId = accounts.First().AccountId,
                     Product = ProductCode.Tradebot
@@ -240,9 +240,9 @@ namespace AccountGRPC
 
                 // В случае, если лицензия есть, возвращается сообщение об этом.
                 if (reply.HaveAccess)
-                    return Task.FromResult(CheckLicenseReplies.HaveAccess());
+                    return Task.FromResult(IsLicensedReplies.HaveAccess());
                 // Иначе возвращается сообщение о том, что пользователь не имеет лицензию.
-                else return Task.FromResult(CheckLicenseReplies.NotHaveAccess());
+                else return Task.FromResult(IsLicensedReplies.NotHaveAccess());
             }
         }
     }
