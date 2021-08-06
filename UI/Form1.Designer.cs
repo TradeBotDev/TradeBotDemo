@@ -373,6 +373,7 @@ namespace UI
             // 
             this.EventConsole.Location = new System.Drawing.Point(11, 335);
             this.EventConsole.Name = "EventConsole";
+            this.EventConsole.ReadOnly = true;
             this.EventConsole.Size = new System.Drawing.Size(835, 408);
             this.EventConsole.TabIndex = 23;
             this.EventConsole.Text = "";

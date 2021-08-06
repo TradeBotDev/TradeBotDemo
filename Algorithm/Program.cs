@@ -49,7 +49,7 @@ namespace Algorithm
             Publisher publisher = new();
             DataCollector dc = new(publisher);
             var pm = new PointMaker();
-            AlgorithmAlpha algo = new(publisher);
+            AlgorithmBeta algo = new(publisher);
             pm.Launch(publisher, dc);
         }
     }

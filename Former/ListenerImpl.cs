@@ -57,9 +57,11 @@ namespace Former
             try
             {
                 userContext.Logger.NewLog += LoggerOnNewLog;
+                while (!context.CancellationToken.IsCancellationRequested)
+                { }
+                throw new Exception();
             }
-
-            finally
+            catch
             {
                 userContext.Logger.NewLog -= LoggerOnNewLog;
             }

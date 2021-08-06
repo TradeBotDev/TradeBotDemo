@@ -12,6 +12,7 @@ namespace UI
     {
         private FacadeService.FacadeServiceClient client;
         private Metadata meta;
+        private bool IsSub=false;
         public TradeBotUI()
         {
             client = new FacadeService.FacadeServiceClient(GrpcChannel.ForAddress("https://localhost:5002"));
@@ -47,6 +48,19 @@ namespace UI
 
             var call2 = await facadeClient.SwitchBotAsync(requestForRelay, meta);
             Console.WriteLine("Запустил бота с конфигом {0}", requestForRelay.Config);
+
+            if (!IsSub)
+            {
+                IsSub = true;
+                var call3 = facadeClient.SubscribeLogsRelay(new TradeBot.Facade.FacadeService.v1.SubscribeLogsRequest() { R = new TradeBot.Common.v1.SubscribeLogsRequest() { Level = LogLevel.Information } },meta);
+
+                while (await call3.ResponseStream.MoveNext())
+                {
+                    EventConsole.Text += call3.ResponseStream.Current.Message.Message + "\r\n";
+
+
+                }
+            }
         }
 
         private void ShowRegistrationPanel_Click(object sender, EventArgs e)
