@@ -47,6 +47,16 @@ namespace UI
 
             var call2 = await facadeClient.SwitchBotAsync(requestForRelay, meta);
             Console.WriteLine("Запустил бота с конфигом {0}", requestForRelay.Config);
+
+            var call3 = facadeClient.SubscribeLogsRelay(new TradeBot.Facade.FacadeService.v1.SubscribeLogsRequest() { R = new TradeBot.Common.v1.SubscribeLogsRequest() { Level = LogLevel.Information}});
+
+            while (await call3.ResponseStream.MoveNext())
+            {
+                EventConsole.Text += call3.ResponseStream.Current.Message.Message + "\r\n";
+
+
+            }
+
         }
 
         private void ShowRegistrationPanel_Click(object sender, EventArgs e)
