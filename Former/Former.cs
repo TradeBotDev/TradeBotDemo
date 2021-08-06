@@ -51,7 +51,7 @@ namespace Former
             }
             Log.Information("{@Where}: Counter order {@Id} price: {@Price}, quantity: {@Quantity} placed {@ResponseCode} {@ResponseMessage}", "Former", oldOrder.Id, price, -quantity, placeResponse.Response.Code, placeResponse.Response.Code == ReplyCode.Succeed ? "" : placeResponse.Response.Message);
             Log.Information("{@Where}: Order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@ResponseCode} added to counter orders list {@ResponseMessage}", "Former", placeResponse.OrderId, price, -quantity, type, addResponse ? ReplyCode.Succeed : ReplyCode.Failure);
-            await _logger.WriteToLog($"Former: Counter order {oldOrder.Id} price: {price}, quantity: {-quantity} placed {placeResponse.Response.Code} {(placeResponse.Response.Code == ReplyCode.Succeed ? "" : placeResponse.Response.Message)}", LogLevel.Information, DateTimeOffset.Now);
+            _logger.WriteToLog($"Former: Counter order {oldOrder.Id} price: {price}, quantity: {-quantity} placed {placeResponse.Response.Code} {(placeResponse.Response.Code == ReplyCode.Succeed ? "" : placeResponse.Response.Message)}", LogLevel.Information, DateTimeOffset.Now);
         }
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace Former
         /// <summary>
         /// Формирует в зависимости от решения алгоритма
         /// </summary>
-        internal async Task FormOrder(int decision)
+        public async Task FormOrder(int decision)
         {
             if (_storage.PlaceLocker) return;
             var orderType = decision > 0 ? OrderType.Buy : OrderType.Sell;
@@ -117,7 +117,7 @@ namespace Former
                 Log.Information("{@Where}: Order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} added to my orders list {@ResponseCode}", "Former", response.OrderId, price, quantity, orderType, addResponse ? ReplyCode.Succeed : ReplyCode.Failure);
             }
             Log.Information("{@Where}: Order {@Id} price: {@Price}, quantity: {@Quantity} placed for {@Type} {@ResponseCode} {@ResponseMessage}", "Former", response.OrderId, price, quantity, orderType, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
-            await _logger.WriteToLog($"Former: Order {response.OrderId} price: {price}, quantity: {quantity} placed for {orderType} {response.Response.Code.ToString()} {(response.Response.Code == ReplyCode.Failure ? response.Response.Message : "")}", LogLevel.Information, DateTimeOffset.Now);
+            _logger.WriteToLog($"Former: Order {response.OrderId} price: {price}, quantity: {quantity} placed for {orderType} {response.Response.Code.ToString()} {(response.Response.Code == ReplyCode.Failure ? response.Response.Message : "")}", LogLevel.Information, DateTimeOffset.Now);
         }
 
         /// <summary>

@@ -32,7 +32,7 @@ namespace Former
         public bool PlaceLocker;
         public bool FitPricesLocker;
 
-        private Logger _logger; 
+        private readonly Logger _logger; 
 
         public Storage(Logger logger)
         {
@@ -44,17 +44,17 @@ namespace Former
         /// <summary>
         /// Обновляет рыночные цены на продажу и на покупку
         /// </summary>
-        internal async Task UpdateMarketPrices(double bid, double ask)
+        public async Task UpdateMarketPrices(double bid, double ask)
         {
             if (bid > 0) BuyMarketPrice = bid;
             if (ask > 0) SellMarketPrice = ask;
-            await HandleUpdateEvent.Invoke();
+            if (HandleUpdateEvent is not null) await HandleUpdateEvent.Invoke();
         }
 
         /// <summary>
         /// Обновляет список моих ордеров по подписке, и выставляет контр-ордер в случае частичного или полного исполнения моего ордера
         /// </summary>
-        internal async Task UpdateMyOrderList(Order newComingOrder, ChangesType changesType)
+        public async Task UpdateMyOrderList(Order newComingOrder, ChangesType changesType)
         {
             var id = newComingOrder.Id;
             var itsMyOrder = MyOrders.TryGetValue(id, out var myOldOrder);
@@ -69,7 +69,13 @@ namespace Former
                     var updateMyOrderResponse = UpdateOrder(newComingOrder, MyOrders);
                     Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} updated {@ResponseCode}", "Former", myOldOrder.Id, myOldOrder.Price, myOldOrder.Quantity, myOldOrder.Signature.Type, updateMyOrderResponse ? ReplyCode.Succeed : ReplyCode.Failure);
                     LockPlacingOrders(true);
-                    if (newComingOrder.Quantity != 0) await PlaceOrderEvent.Invoke(myOldOrder, newComingOrder);
+                    if (newComingOrder.Quantity != 0)
+                    {
+                        if (PlaceOrderEvent is not null)
+                        {
+                            await PlaceOrderEvent?.Invoke(myOldOrder, newComingOrder);
+                        }
+                    }
                     LockPlacingOrders(false);
                     break;
                 case ChangesType.Update when itsCounterOrder:
@@ -80,7 +86,7 @@ namespace Former
                     var removeMyOrderResponse = RemoveOrder(id, MyOrders);
                     Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed {@ResponseCode}", "Former", myOldOrder.Id, myOldOrder.Price, myOldOrder.Quantity, myOldOrder.Signature.Type, removeMyOrderResponse ? ReplyCode.Succeed : ReplyCode.Failure);
                     LockPlacingOrders(true);
-                    await PlaceOrderEvent.Invoke(myOldOrder, newComingOrder);
+                    if (PlaceOrderEvent is not null) await PlaceOrderEvent?.Invoke(myOldOrder, newComingOrder);
                     LockPlacingOrders(false);
                     break;
                 case ChangesType.Delete when itsCounterOrder:
@@ -101,7 +107,7 @@ namespace Former
         /// <summary>
         /// Обновляет размер позиции, для того чтобы знать, короткая позиция или длинная
         /// </summary>
-        internal Task UpdatePosition(double positionQuantity)
+        public Task UpdatePosition(double positionQuantity)
         {
             if (PositionSize != (int)positionQuantity)
             {
@@ -114,7 +120,7 @@ namespace Former
         /// <summary>
         /// Обновляет доступный и общий баланс
         /// </summary>
-        internal Task UpdateBalance(int availableBalance, int totalBalance)
+        public Task UpdateBalance(int availableBalance, int totalBalance)
         {
             if (availableBalance != 0)
             {
@@ -134,7 +140,7 @@ namespace Former
         /// <summary>
         /// Возвращает true, если получилось удалить ордер по идентификатору из выбранного списка, иначе false
         /// </summary>
-        internal bool RemoveOrder(string id, ConcurrentDictionary<string, Order> list)
+        public bool RemoveOrder(string id, ConcurrentDictionary<string, Order> list)
         {
             return list.TryRemove(id, out _);
         }
@@ -142,7 +148,7 @@ namespace Former
         /// <summary>
         /// Обновляет запись в выбранном списке, если она там существует
         /// </summary>
-        internal bool UpdateOrder(Order newComingOrder, ConcurrentDictionary<string, Order> list)
+        public bool UpdateOrder(Order newComingOrder, ConcurrentDictionary<string, Order> list)
         {
             if (!list.ContainsKey(newComingOrder.Id)) return false;
             list.AddOrUpdate(newComingOrder.Id, newComingOrder, (_, v) =>
@@ -176,7 +182,7 @@ namespace Former
         /// <summary>
         /// Добавляет запись в выбранный список 
         /// </summary>
-        internal bool AddOrder(string id, Order order, ConcurrentDictionary<string, Order> list)
+        public bool AddOrder(string id, Order order, ConcurrentDictionary<string, Order> list)
         {
             return list.TryAdd(id, order);
         }
