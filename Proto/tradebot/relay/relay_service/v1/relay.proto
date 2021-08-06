@@ -16,7 +16,6 @@ service RelayService{
 	/*
 		Подписка на логи нужного сервиса
 	*/
-	//TODO в каждом сервисе нужно написать 
 	rpc SubscribeLogs(SubscribeLogsRequest) returns (stream SubscribeLogsResponse);
 
 }

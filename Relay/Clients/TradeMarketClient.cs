@@ -13,14 +13,15 @@ using SubscribeOrdersResponse = TradeBot.TradeMarket.TradeMarketService.v1.Subsc
 
 namespace Relay.Clients
 {
-    public class TradeMarketClient 
+    public class TradeMarketClient
     {
         private TradeMarketService.TradeMarketServiceClient _client;
 
         public TradeMarketClient(Uri uri)
         {
-             _client = new TradeMarketService.TradeMarketServiceClient(GrpcChannel.ForAddress(uri));   
+            _client = new TradeMarketService.TradeMarketServiceClient(GrpcChannel.ForAddress(uri));
         }
+
         public IAsyncStreamReader<SubscribeOrdersResponse> OpenStream(Metadata meta)
         {
             var response = _client.SubscribeOrders(new SubscribeOrdersRequest()
@@ -36,29 +37,36 @@ namespace Relay.Clients
             }, meta);
             return response.ResponseStream;
         }
-        public async void SubscribeForOrders(IAsyncStreamReader<SubscribeOrdersResponse> stream, UserContext user)
+
+
+
+        public IAsyncEnumerable<Order> SubscribeForOrders(IAsyncStreamReader<SubscribeOrdersResponse> stream)
         {
-            while (true)
+            System.Threading.Channels.Channel<Order> channel = System.Threading.Channels.Channel.CreateUnbounded<Order>();
+            Task.Run(async() =>
             {
-                try
+                while (true)
                 {
-                    while (await stream.MoveNext())
+                    try
                     {
-                        OrderRecievedEvent?.Invoke(this, new(stream.Current.Response.Order));
+                        while (await stream.MoveNext())
+                        {
+                            await channel.Writer.WriteAsync(new(stream.Current.Response.Order));
+                            OrderRecievedEvent?.Invoke(this, new(stream.Current.Response.Order));
+                        }
+                        break;
                     }
-                    break;
-                }
-                catch (Exception)
-                {
-                    if (stream.Current != null)
+                    catch (Exception e)
                     {
-                        OrderRecievedEvent?.Invoke(this, new(stream.Current.Response.Order));
+                        Log.Error(e.Message);
+                        //reconnect
                     }
-                    stream = user.ReConnect();
-                    _ = stream.MoveNext();
                 }
-            }
+            });
+            return channel.Reader.ReadAllAsync();
+
         }
+
         public event EventHandler<Order> OrderRecievedEvent;
     }
 }

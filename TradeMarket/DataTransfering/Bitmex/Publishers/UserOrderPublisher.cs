@@ -19,7 +19,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             {
                 //при исполнении ордера с биржи прилетает не делит а апдейт
                 BitmexAction action = response.Action;
-                if(data.Price is null || data.OrderQty is null)
+                if(data.Price is null && data.OrderQty is null)
                 {
                     action = BitmexAction.Delete;
                 }
@@ -33,6 +33,11 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         public UserOrderPublisher(BitmexWebsocketClient client,IObservable<OrderResponse> orderStream) : base(client,_action)
         {
             _stream = orderStream;
+        }
+
+        public override void Start()
+        {
+            throw new NotImplementedException();
         }
 
         public async Task SubcribeAsync(CancellationToken token)
