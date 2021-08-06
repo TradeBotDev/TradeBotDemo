@@ -14,21 +14,10 @@ namespace Website.Controllers.Clients
 
         public static AddExchangeAccessResponse AddExchangeAccess(string sessionId, AddExchangeAccessModel model)
         {
-            ExchangeAccessCode exchangeAccessCode;
-            switch (model.SelectExchange)
-            {
-                case "Bitmex":
-                    exchangeAccessCode = ExchangeAccessCode.Bitmex;
-                    break;
-                default:
-                    exchangeAccessCode = ExchangeAccessCode.Unspecified;
-                    break;
-            }
-
-            var request = new AddExchangeAccessRequest{
+            var request = new AddExchangeAccessRequest {
                 SessionId = sessionId,
-                Code = exchangeAccessCode,
-                ExchangeName = model.SelectExchange,
+                Code = model.ExchangeCode,
+                ExchangeName = model.ExchangeCode.ToString(),
                 Token = model.Token,
                 Secret = model.Secret
             };

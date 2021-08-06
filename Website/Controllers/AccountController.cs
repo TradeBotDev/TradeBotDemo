@@ -1,6 +1,9 @@
 ﻿using Grpc.Net.Client;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Collections;
+using System.Collections.Generic;
 using TradeBot.Account.AccountService.v1;
 using Website.Models;
 

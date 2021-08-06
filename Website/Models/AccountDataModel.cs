@@ -1,8 +1,4 @@
 ﻿using Google.Protobuf.Collections;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
 
 namespace Website.Models

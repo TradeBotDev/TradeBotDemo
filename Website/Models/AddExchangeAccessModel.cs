@@ -1,16 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
+using TradeBot.Account.AccountService.v1;
 
 namespace Website.Models
 {
     public class AddExchangeAccessModel
     {
         [Required]
-        public string SelectExchange { get; set; }
+        public ExchangeAccessCode ExchangeCode { get; set; }
 
         [Required]
         public string Token { get; set; }

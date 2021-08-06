@@ -1,15 +1,15 @@
-﻿<form method="post">
+﻿@model Website.Models.AddExchangeAccessModel
+
+<form method="post">
     <p>Выберите биржу:</p>
 
-    <select name="SelectExchange">
-        <option value="Bitmex">Bitmex</option>
+    <select name="ExchangeCode">
+        <option value="1">Bitmex</option>
     </select>
 
     <p>Токен:</p>
-    <input type="text" name="Token"/>
-
+    <input type="text" name="Token" />
     <p>Секрет:</p>
-    <input type="text" name="Secret"/>
-
-    <input type="submit" value="Добавить"/>
+    <input type="text" name="Secret" />
+    <input type="submit" value="Добавить" />
 </form>
