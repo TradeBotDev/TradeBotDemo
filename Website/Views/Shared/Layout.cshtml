@@ -1,28 +1,34 @@
-﻿<html>
+﻿<!doctype html>
+<html>
     <head>
         <!--Невидимые на странице подключения и прочее-->
         <title>@ViewBag.Title | Tradebot</title>
-        <link rel="stylesheet" type="text/css" href="~/css/Style.css"/>
+        <link rel="stylesheet" type="text/css" href="~/css/style.css"/>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     </head>
     <body>
         <!--Шапка сайта с горизонтальным меню.-->
-        <header>
+        <header class="header">
             <h1>Tradebot</h1>
-            <a href="/">Главная страница</a>
-            <a href="/about">О нас</a>
-            <a href="/purchase/buy">Купить</a>
-            @if (User.Identity.IsAuthenticated)
-            {
-                <!--Если пользователь аутентифицирован, ему показываются кнопки аккаунта и выхода-->
-                <a href="/account">Аккаунт</a>
-                <a href="authorization/logout">Выйти</a>
-            }
-            else
-            {
-                <!--Иначе ему показываются кнопки входа и регистрации-->
-                <a href="/authorization/login">Войти</a>
-                <a href="/authorization/register">Регистрация</a>
-            }
+            <ul>
+                <li><a href="/">Главная страница</a></li>
+                <li><a href="/about">О нас</a></li>
+                <li><a href="/purchase/buy">Купить</a></li>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <!--Если пользователь аутентифицирован, ему показываются кнопки аккаунта и выхода-->
+                    <li><a href="/account">Аккаунт</a></li>
+                    <li><a href="authorization/logout">Выйти</a></li>
+                }
+                else
+                {
+                    <!--Иначе ему показываются кнопки входа и регистрации-->
+                    <li><a href="/authorization/login">Войти</a></li>
+                    <li><a href="/authorization/register">Регистрация</a></li>
+                }
+            </ul>
         </header>
         <!--Главной блок с контентов внутри страницы-->
         <article>
