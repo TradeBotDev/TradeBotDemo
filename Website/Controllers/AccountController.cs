@@ -24,7 +24,7 @@ namespace Website.Controllers
                 };
 
                 ViewBag.Title = "Управление биржами";
-                ViewBag.SectionTitle = "Управление биржами";
+                ViewBag.SectionTitle = $"Управление биржами: {model.Email}";
                 return View(model);
             }
             else HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
