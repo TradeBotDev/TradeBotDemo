@@ -1,6 +1,13 @@
 ﻿* {
     margin: 0;
     padding: 0;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+}
+
+p {
+    margin-top: 16px;
+    margin-bottom: 16px;
 }
 
 body {
@@ -26,7 +33,7 @@ body {
 .header h1 {
     color: #fff;
     margin-left: 30px;
-    margin-right: 15px;
+    margin-right: 30px;
     font-family: 'Roboto', sans-serif;
     font-weight: 700;
 }
@@ -48,8 +55,6 @@ body {
     text-decoration: none;
     display: block;
     color: #fff;
-    font-family: 'Roboto', sans-serif;
-    font-weight: 500;
     font-size: 14px;
 }
 
@@ -65,10 +70,17 @@ article {
     flex: 1 0 auto;
 }
 
+article h1 {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 700;
+    font-size: 24px;
+}
+
 footer {
     height: 35px;
     flex: 0 0 auto;
     display: flex;
     justify-content: center;
     align-items: center;
+    font-size: 14px;
 }

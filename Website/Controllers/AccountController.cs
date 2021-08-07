@@ -23,8 +23,8 @@ namespace Website.Controllers
                     Exchanges = accountData.CurrentAccount.Exchanges
                 };
 
-                ViewBag.Title = "Аккаунт";
-                ViewBag.SectionTitle = "Аккаунт";
+                ViewBag.Title = "Управление биржами";
+                ViewBag.SectionTitle = "Управление биржами";
                 return View(model);
             }
             else HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
