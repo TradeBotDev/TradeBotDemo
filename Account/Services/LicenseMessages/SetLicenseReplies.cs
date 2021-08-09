@@ -24,7 +24,7 @@ namespace AccountGRPC.LicenseMessages
 
             return new SetLicenseResponse
             {
-                Code = LicenseCode.IsExists,
+                Code = LicenseCode.NoAccess,
                 Message = Message
             };
         }

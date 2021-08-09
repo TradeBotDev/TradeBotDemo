@@ -30,5 +30,18 @@ namespace AccountGRPC.LicenseMessages
                 HaveAccess = false
             };
         }
+
+        public static CheckLicenseResponse AccountNotFound()
+        {
+            const string Message = "Произошла ошибка: пользователь не найден не существует.";
+            Log.Information(Message);
+
+            return new CheckLicenseResponse
+            {
+                Code = LicenseCode.NoAccess,
+                Message = Message,
+                HaveAccess = false
+            };
+        }
     }
 }
