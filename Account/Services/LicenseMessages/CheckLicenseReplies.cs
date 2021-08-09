@@ -7,7 +7,7 @@ namespace AccountGRPC.LicenseMessages
     {
         public static CheckLicenseResponse LicenseIsExists()
         {
-            const string Message = "Данная лицензия существует..";
+            const string Message = "Данный пользователь обладает лицензией на продукт.";
             Log.Information(Message);
 
             return new CheckLicenseResponse
@@ -20,7 +20,7 @@ namespace AccountGRPC.LicenseMessages
 
         public static CheckLicenseResponse LicenseIsNotExists()
         {
-            const string Message = "Произошла ошибка: данная лицензия не существует.";
+            const string Message = "Произошла ошибка проверки лицензии: данный пользователь не обладает лицензией на продукт.";
             Log.Information(Message);
 
             return new CheckLicenseResponse
@@ -33,7 +33,7 @@ namespace AccountGRPC.LicenseMessages
 
         public static CheckLicenseResponse AccountNotFound()
         {
-            const string Message = "Произошла ошибка: пользователь не найден не существует.";
+            const string Message = "Произошла ошибка проверки лицензии: пользователь не найден.";
             Log.Information(Message);
 
             return new CheckLicenseResponse
