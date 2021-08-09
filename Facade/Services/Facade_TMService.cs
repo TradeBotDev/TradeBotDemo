@@ -225,7 +225,7 @@ namespace Facade
                     if (context.CancellationToken.IsCancellationRequested) break;
                     var response = clientRelay.StartBot(new TradeBot.Relay.RelayService.v1.StartBotRequest
                     {
-                        Config = request.Config
+                        Config=request.Config
                     }, context.RequestHeaders);
                     Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
                     Log.Information("{@Where}: {@MethodName} \n args: response={@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
