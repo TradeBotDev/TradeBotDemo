@@ -63,13 +63,14 @@ namespace Relay.Clients
             }
         }
 
-        public async Task UpdateConfig(Config config,Metadata meta)
+        public async Task UpdateConfig(TradeBot.Common.v1.UpdateServerConfigRequest update ,Metadata meta)
         {
             await _client.UpdateServerConfigAsync(new UpdateServerConfigRequest()
             {
                 Request = new TradeBot.Common.v1.UpdateServerConfigRequest()
                 {
-                    Config = config
+                    Config = update.Config,
+                    Switch =update.Switch
                 }
             },meta);
         }

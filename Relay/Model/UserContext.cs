@@ -68,10 +68,10 @@ namespace Relay.Model
             }).Wait();
         }
 
-        public void UpdateConfig(Config config)
+        public void UpdateConfig(TradeBot.Common.v1.UpdateServerConfigRequest update)
         {
-            _ = _algorithmClient.UpdateConfig(config, Meta);
-            _ = _formerClient.UpdateConfig(config, Meta);
+            _ = _algorithmClient.UpdateConfig(update, Meta);
+            _ = _formerClient.UpdateConfig(update, Meta);
         }
         
         public async Task RepeatLogsFormer(TradeBot.Relay.RelayService.v1.SubscribeLogsRequest request, IServerStreamWriter<TradeBot.Relay.RelayService.v1.SubscribeLogsResponse> responseStream)

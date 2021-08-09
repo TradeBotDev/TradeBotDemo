@@ -70,7 +70,7 @@ namespace Relay.Services
             var user = GetUserContext(context.RequestHeaders);
             user.StatusOfWork();
                 user.SubscribeForOrders();
-            user.UpdateConfig(request.Config);
+            user.UpdateConfig(new TradeBot.Common.v1.UpdateServerConfigRequest { Config=request.Config });
             return await Task.FromResult(new StartBotResponse()
             {
                 Response = new DefaultResponse()
@@ -91,7 +91,7 @@ namespace Relay.Services
             ServerCallContext context)
         {
             var user = GetUserContext(context.RequestHeaders);
-            user.UpdateConfig(request.Request.Config);
+            user.UpdateConfig(new TradeBot.Common.v1.UpdateServerConfigRequest { Config=request.Request.Config,Switch=request.Request.Switch });
             return await Task.FromResult(new UpdateServerConfigResponse());
         }
 
