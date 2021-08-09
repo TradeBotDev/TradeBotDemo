@@ -1,5 +1,6 @@
 ﻿using AccountGRPC.LicenseMessages;
 using Grpc.Core;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,10 @@ namespace AccountGRPC
         {
             using (var database = new Models.AccountContext())
             {
-                var account = database.LoggedAccounts.Where(login => login.SessionId == request.SessionId);
+                var account = database.LoggedAccounts
+                    .Where(login => login.SessionId == request.SessionId)
+                    .Include(login => login.Account);
+                
                 if (account.Count() == 0)
                     return Task.FromResult(SetLicenseReplies.AccountNotFound());
 

@@ -45,6 +45,7 @@ namespace AccountGRPC
             {
                 endpoints.MapGrpcService<AccountService>();
                 endpoints.MapGrpcService<ExchangeAccessService>();
+                endpoints.MapGrpcService<LicenseService>();
 
                 endpoints.MapGet("/", async context =>
                 {
