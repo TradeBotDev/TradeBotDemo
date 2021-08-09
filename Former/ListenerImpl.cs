@@ -28,6 +28,12 @@ namespace Former
             return new UpdateServerConfigResponse();
         }
 
+        //public override async Task<DeleteOrderResponse> DeleteOrder(DeleteOrderRequest request, ServerCallContext context)
+        //{
+            
+        //}
+
+
         public override async Task<SendAlgorithmDecisionResponse> SendAlgorithmDecision(SendAlgorithmDecisionRequest request,
             ServerCallContext context)
         {

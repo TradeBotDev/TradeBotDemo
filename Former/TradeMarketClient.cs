@@ -123,7 +123,8 @@ namespace Former
 
             async Task ObservePositionFunc()
             {
-                while (await call.ResponseStream.MoveNext() && !_token.IsCancellationRequested)
+                var token = new CancellationTokenSource();
+                while (await call.ResponseStream.MoveNext(token.Token) && !_token.IsCancellationRequested)
                 {
                     await UpdatePosition?.Invoke(call.ResponseStream.Current.CurrentQty);
                 }
@@ -170,6 +171,8 @@ namespace Former
             await ConnectionTester(PlaceOrdersFunc);
             return response;
         }
+
+        //internal async 
 
 
         internal void StartObserving(Metadata meta, CancellationToken token)

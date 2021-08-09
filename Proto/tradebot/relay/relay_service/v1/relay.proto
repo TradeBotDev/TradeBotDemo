@@ -11,7 +11,6 @@ service RelayService{
 		Клиент говорит обновиться серверу
 	*/
 	rpc UpdateServerConfig (UpdateServerConfigRequest) returns (UpdateServerConfigResponse);
-
 	/*
 		Подписка на логи нужного сервиса
 	*/
