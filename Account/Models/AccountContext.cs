@@ -33,5 +33,7 @@ namespace AccountGRPC.Models
 
         // Таблица с данными о вошедших аккаунтах.
         public DbSet<LoggedAccount> LoggedAccounts { get; set; }
+
+        public DbSet<License> Licenses { get; set; }
     }
 }

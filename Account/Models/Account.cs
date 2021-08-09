@@ -14,5 +14,7 @@ namespace AccountGRPC.Models
         public List<ExchangeAccess> ExchangeAccesses { get; set; } = new List<ExchangeAccess>();
         
         public LoggedAccount LoggedAccount { get; set; }
+
+        public List<License> Licenses { get; set; } = new List<License>();
     }
 }

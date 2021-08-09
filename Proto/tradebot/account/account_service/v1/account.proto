@@ -16,8 +16,6 @@ service Account {
 	rpc IsValidSession (IsValidSessionRequest) returns (IsValidSessionResponse);
 	// Получение данных текущего пользователя
 	rpc AccountData (AccountDataRequest) returns (AccountDataResponse);
-
-	rpc IsLicensed (IsLicensedRequest) returns (IsLicensedResponse);
 }
 
 // Данные для входа в аккаунт.
@@ -95,15 +93,6 @@ message ExchangeAccessInfo {
 	string name = 3;
 	string token = 4;
 	string secret = 5;
-}
-
-message IsLicensedRequest {
-	string session_id = 1;
-}
-
-message IsLicensedResponse {
-	bool access = 1;
-	string message = 2;
 }
 
 // Коды всех бирж.
