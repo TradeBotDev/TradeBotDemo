@@ -190,7 +190,32 @@ namespace Facade
                 Log.Error("{@Where}: Exception" + e.Message, "Facade");
             }
         }
-        
+
+        public override Task<DeleteOrderResponse> DeleteOrder(DeleteOrderRequest request, ServerCallContext context)
+        {
+            while (true)
+            {
+                try
+                {
+                    if (context.CancellationToken.IsCancellationRequested) break;
+                    var response = clientRelay.DeleteOrder(new TradeBot.Relay.RelayService.v1.DeleteOrderRequest {});
+                    Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
+                    Log.Information("{@Where}: {@MethodName} \n args: response={@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
+                    return Task.FromResult(new DeleteOrderResponse { Response=new TradeBot.Common.v1.DefaultResponse 
+                    { 
+                        Code=response.Response.Code,
+                        Message=response.Response.Message
+                    } 
+                    });
+                }
+                catch (RpcException e)
+                {
+                    Log.Error("{@Where}: Exception" + e.Message, "Facade");
+                }
+            }
+            Log.Information("{@Where}: Client disconnected", "Facade");
+            return Task.FromResult(new DeleteOrderResponse { });
+        }
         public override Task<SwitchBotResponse> SwitchBot(SwitchBotRequest request, ServerCallContext context)
         {
             while (true)
