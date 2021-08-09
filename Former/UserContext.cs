@@ -39,12 +39,25 @@ namespace Former
             _former = new Former(_storage, _configuration, _tradeMarketClient, Meta, Logger);
             _updateHandlers = new UpdateHandlers(_storage, _configuration, _tradeMarketClient, Meta, Logger);
 
+            SubscribeStorageToMarket();
+
+            _tradeMarketClient.StartObserving(Meta, Token);
+        }
+
+        public void SubscribeStorageToMarket()
+        {
             _tradeMarketClient.UpdateMarketPrices += _storage.UpdateMarketPrices;
             _tradeMarketClient.UpdateBalance += _storage.UpdateBalance;
             _tradeMarketClient.UpdateMyOrders += _storage.UpdateMyOrderList;
             _tradeMarketClient.UpdatePosition += _storage.UpdatePosition;
+        }
 
-            _tradeMarketClient.Start(Meta, Token);
+        public void UnsubscribeStorage()
+        {
+            _tradeMarketClient.UpdateMarketPrices -= _storage.UpdateMarketPrices;
+            _tradeMarketClient.UpdateBalance -= _storage.UpdateBalance;
+            _tradeMarketClient.UpdateMyOrders -= _storage.UpdateMyOrderList;
+            _tradeMarketClient.UpdatePosition -= _storage.UpdatePosition;
         }
 
         public async Task FormOrder(int decision)

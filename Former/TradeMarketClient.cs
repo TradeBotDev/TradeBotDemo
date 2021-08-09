@@ -45,7 +45,7 @@ namespace Former
         /// </summary>
         private async Task ConnectionTester(Func<Task> func)
         {
-            while (!_token.IsCancellationRequested)
+            while (true)
             {
                 try
                 {
@@ -69,7 +69,7 @@ namespace Former
 
             async Task ObserveMarketPricesFunc()
             {
-                while (await call.ResponseStream.MoveNext())
+                while (await call.ResponseStream.MoveNext() && !_token.IsCancellationRequested)
                 {
                     await UpdateMarketPrices?.Invoke(call.ResponseStream.Current.BidPrice,call.ResponseStream.Current.AskPrice);
                 }
@@ -87,7 +87,7 @@ namespace Former
 
             async Task ObserveBalanceFunc()
             {
-                while (await call.ResponseStream.MoveNext())
+                while (await call.ResponseStream.MoveNext() && !_token.IsCancellationRequested)
                 {
                     await UpdateBalance?.Invoke((int) call.ResponseStream.Current.Margin.AvailableMargin, (int)call.ResponseStream.Current.Margin.MarginBalance);
                 }
@@ -105,14 +105,8 @@ namespace Former
 
             async Task ObserveMyOrdersFunc()
             {
-                while (await call.ResponseStream.MoveNext())
+                while (await call.ResponseStream.MoveNext() && !_token.IsCancellationRequested)
                 {
-                    if (call.ResponseStream.Current.Response.Code == ReplyCode.Failure)
-                    {
-                        Log.Error("{@Where}: Order was rejected by trade market with message: {@ResponseMessage}", "Former", call.ResponseStream.Current.Response.Message);
-                        continue;
-                    }
-
                     await UpdateMyOrders?.Invoke(call.ResponseStream.Current.Changed, call.ResponseStream.Current.ChangesType);
                 }
             }
@@ -129,7 +123,7 @@ namespace Former
 
             async Task ObservePositionFunc()
             {
-                while (await call.ResponseStream.MoveNext())
+                while (await call.ResponseStream.MoveNext() && !_token.IsCancellationRequested)
                 {
                     await UpdatePosition?.Invoke(call.ResponseStream.Current.CurrentQty);
                 }
@@ -177,7 +171,8 @@ namespace Former
             return response;
         }
 
-        internal void Start(Metadata meta, CancellationToken token)
+
+        internal void StartObserving(Metadata meta, CancellationToken token)
         {
             _token = token;
             _ = ObservePositions(meta);
