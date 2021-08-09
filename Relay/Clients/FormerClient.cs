@@ -24,24 +24,25 @@ namespace Relay.Clients
              await _client.UpdateServerConfigAsync(new() {Request = config }, meta);
         }
 
-        private Task<DeleteOrderResponse> SendDeleteOrder(DeleteOrderRequest request, ServerCallContext context)
+        public Task<TradeBot.Relay.RelayService.v1.DeleteOrderResponse> SendDeleteOrder(TradeBot.Relay.RelayService.v1.DeleteOrderRequest request, ServerCallContext context)
         {
             while (true)
             {
                 try
                 {
                     if (context.CancellationToken.IsCancellationRequested) break;
-                    var response = _client (new TradeBot.Relay.RelayService.v1.DeleteOrderRequest { });
+                    var response = _client.DeleteOrder(new TradeBot.Former.FormerService.v1.DeleteOrderRequest {});
                     Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
                     Log.Information("{@Where}: {@MethodName} \n args: response={@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
-                    return Task.FromResult(new DeleteOrderResponse
+                    return Task.FromResult(new TradeBot.Relay.RelayService.v1.DeleteOrderResponse
                     {
                         Response = new TradeBot.Common.v1.DefaultResponse
                         {
                             Code = response.Response.Code,
                             Message = response.Response.Message
                         }
-                    });
+                    }
+                    );
                 }
                 catch (RpcException e)
                 {
@@ -49,7 +50,7 @@ namespace Relay.Clients
                 }
             }
             Log.Information("{@Where}: Client disconnected", "Facade");
-            return Task.FromResult(new DeleteOrderResponse { });
+            return Task.FromResult(new TradeBot.Relay.RelayService.v1.DeleteOrderResponse { });
         }
         public IAsyncStreamReader<TradeBot.Former.FormerService.v1.SubscribeLogsResponse> OpenStream(Metadata meta)
         {

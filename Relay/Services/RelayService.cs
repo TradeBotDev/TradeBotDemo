@@ -81,9 +81,10 @@ namespace Relay.Services
             });
         }
 
-        public override Task<DeleteOrderResponse> DeleteOrder(DeleteOrderRequest request, ServerCallContext context)
+        public async override Task<DeleteOrderResponse> DeleteOrder(DeleteOrderRequest request, ServerCallContext context)
         {
-                
+            await _formerClient.SendDeleteOrder(new DeleteOrderRequest {},context);
+            return await Task.FromResult(new DeleteOrderResponse { });
         }
 
         public async override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request,
