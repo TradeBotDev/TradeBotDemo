@@ -24,7 +24,7 @@ namespace Algorithm.Analysis
         //each second = one point
         private readonly int _durationInSeconds = 5;
 
-        //when an algo is created it's immediately subsribed to new points 
+        //when an algo is created it's immediately subscribed to new points 
         public AlgorithmBeta(Publisher publisher)
         {
             publisher.PointMadeEvent += NewPointAlert;
