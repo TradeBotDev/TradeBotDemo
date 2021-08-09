@@ -15,18 +15,20 @@ namespace UI
         private Metadata _meta;
         private string _sessionId;
 
-        private Dictionary<string, Duration> map;
+        private Dictionary<string, Duration> _intervalMap;
+        private Dictionary<string, int> _sensitivityMap;
 
         public TradeBotUi()
         {
             _client = new FacadeService.FacadeServiceClient(GrpcChannel.ForAddress("https://localhost:5002"));
             InitializeComponent();
             InitIntervalMap();
+
         }
 
         private void InitIntervalMap()
         {
-            map = new Dictionary<string, Duration>
+            _intervalMap = new Dictionary<string, Duration>
             {
                 { "5s", Duration.FromTimeSpan(new TimeSpan(0, 0, 0, 5)) },
                 { "30s", Duration.FromTimeSpan(new TimeSpan(0, 0, 0, 30)) },
@@ -49,11 +51,22 @@ namespace UI
             };
         }
 
+        private void InitSensitivity()
+        {
+            _sensitivityMap = new Dictionary<string, int>
+            {
+                { "minimal", 1},
+                { "medium", 2},
+                { "high", 3}
+            };
+        }
+
         private async void StartButton_Click(object sender, EventArgs e)
         {
             using var channel = GrpcChannel.ForAddress("https://localhost:5002");
             var facadeClient = new FacadeService.FacadeServiceClient(channel);
-            map.TryGetValue(ConfigIntervalOfAnalysisl.Text, out var interval);
+            _intervalMap.TryGetValue(ConfigIntervalOfAnalysisl.Text, out var interval);
+            _sensitivityMap.TryGetValue(ConfigAlgorithmSensivity.Text, out var sensitivity);
             var config = new Config
             {
                 AvaibleBalance = double.Parse(ConfigAvailableBalance.Text),
@@ -62,7 +75,7 @@ namespace UI
                 AlgorithmInfo = new AlgorithmInfo
                 {
                     Interval = interval,
-                    Sensivity = int.Parse(ConfigAlgorithmSensivity.Text)
+                    Sensivity = sensitivity
                 },
                 OrderUpdatePriceRange = double.Parse(ConfigUpdatePriceRange.Text),
             };
