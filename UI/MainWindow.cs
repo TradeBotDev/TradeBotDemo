@@ -85,7 +85,7 @@ namespace UI
                 Config = config
             };
 
-            var call2 = await facadeClient.SwitchBotAsync(requestForRelay, _meta);
+            var call2 = await facadeClient.StartBotAsync(requestForRelay, _meta);
             Console.WriteLine("Запустил бота с конфигом {0}", requestForRelay.Config);
         }
 
