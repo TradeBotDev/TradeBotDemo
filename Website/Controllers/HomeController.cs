@@ -10,13 +10,5 @@ namespace Website.Controllers
             ViewBag.SectionTitle = "Представляем нашего бота";
             return View();
         }
-
-        [Route("About")]
-        public IActionResult About()
-        {
-            ViewBag.Title = "О нас";
-            ViewBag.SectionTitle = "О нас";
-            return View();
-        }
     }
 }

@@ -218,6 +218,8 @@ footer {
     justify-content: flex-start;
     align-items: center;
     font-size: 14px;
+    margin-top: 24px;
+    margin-bottom: 8px;
 }
 
 .form_checkbox_container input {
@@ -227,5 +229,4 @@ footer {
 .form h3 {
     font-weight: 700;
     font-size: 16px;
-    margin-bottom: 16px;
 }

@@ -14,7 +14,7 @@ namespace Website.Controllers
         public IActionResult Login()
         {
             ViewBag.Title = "Вход";
-            ViewBag.SectionTitle = "Вход";
+            //ViewBag.SectionTitle = "Вход";
             return View();
         }
 
@@ -36,7 +36,7 @@ namespace Website.Controllers
         public IActionResult Register()
         {
             ViewBag.Title = "Регистрация";
-            ViewBag.SectionTitle = "Регистрация";
+            //ViewBag.SectionTitle = "Регистрация";
             return View();
         }
 
@@ -64,7 +64,7 @@ namespace Website.Controllers
                 return View("~/Views/Shared/Error.cshtml", "Вы уже вышли.");
 
             ViewBag.Title = "Выход из аккаунта";
-            ViewBag.SectionTitle = "Выход из аккаунта";
+            //ViewBag.SectionTitle = "Выход из аккаунта";
             return View();
         }
 
