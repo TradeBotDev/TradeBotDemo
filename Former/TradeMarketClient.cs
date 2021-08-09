@@ -25,6 +25,7 @@ namespace Former
 
         private static int _retryDelay;
         private static string _connectionString;
+        private bool _isDisposeRequested;
 
         private readonly TradeMarketService.TradeMarketServiceClient _client;
 
@@ -68,9 +69,9 @@ namespace Former
 
             async Task ObserveMarketPricesFunc()
             {
-                while (await call.ResponseStream.MoveNext())
+                while (await call.ResponseStream.MoveNext() && !_isDisposeRequested)
                 {
-                    await UpdateMarketPrices?.Invoke(call.ResponseStream.Current.BidPrice,call.ResponseStream.Current.AskPrice);
+                    await UpdateMarketPrices?.Invoke(call.ResponseStream.Current.BidPrice, call.ResponseStream.Current.AskPrice);
                 }
             }
 
@@ -86,7 +87,7 @@ namespace Former
 
             async Task ObserveBalanceFunc()
             {
-                while (await call.ResponseStream.MoveNext())
+                while (await call.ResponseStream.MoveNext() && !_isDisposeRequested)
                 {
                     await UpdateBalance?.Invoke((int) call.ResponseStream.Current.Margin.AvailableMargin, (int)call.ResponseStream.Current.Margin.MarginBalance);
                 }
@@ -104,14 +105,8 @@ namespace Former
 
             async Task ObserveMyOrdersFunc()
             {
-                while (await call.ResponseStream.MoveNext())
+                while (await call.ResponseStream.MoveNext() && !_isDisposeRequested)
                 {
-                    if (call.ResponseStream.Current.Response.Code == ReplyCode.Failure)
-                    {
-                        Log.Error("{@Where}: Order was rejected by trade market with message: {@ResponseMessage}", "Former", call.ResponseStream.Current.Response.Message);
-                        continue;
-                    }
-
                     await UpdateMyOrders?.Invoke(call.ResponseStream.Current.Changed, call.ResponseStream.Current.ChangesType);
                 }
             }
@@ -128,7 +123,8 @@ namespace Former
 
             async Task ObservePositionFunc()
             {
-                while (await call.ResponseStream.MoveNext())
+                var token = new CancellationTokenSource();
+                while (await call.ResponseStream.MoveNext() && !_isDisposeRequested)
                 {
                     await UpdatePosition?.Invoke(call.ResponseStream.Current.CurrentQty);
                 }
@@ -176,12 +172,18 @@ namespace Former
             return response;
         }
 
-        internal void Start(Metadata meta)
+        internal void StartObserving(Metadata meta)
         {
-            ObservePositions(meta);
-            ObserveBalance(meta);
-            ObserveMarketPrices(meta);
-            ObserveMyOrders(meta);
+            _isDisposeRequested = false;
+            _ = ObservePositions(meta);
+            _ = ObserveBalance(meta);
+            _ = ObserveMarketPrices(meta);
+            _ = ObserveMyOrders(meta);
         }
+        internal void StopObserving()
+        {
+            _isDisposeRequested = true;
+        }
+
     }
 }

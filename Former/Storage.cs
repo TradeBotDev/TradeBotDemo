@@ -32,7 +32,7 @@ namespace Former
         public bool PlaceLocker;
         public bool FitPricesLocker;
 
-        private Logger _logger; 
+        private readonly Logger _logger; 
 
         public Storage(Logger logger)
         {
@@ -48,7 +48,7 @@ namespace Former
         {
             if (bid > 0) BuyMarketPrice = bid;
             if (ask > 0) SellMarketPrice = ask;
-            await HandleUpdateEvent.Invoke();
+            if (HandleUpdateEvent is not null) await HandleUpdateEvent.Invoke();
         }
 
         /// <summary>
@@ -69,7 +69,13 @@ namespace Former
                     var updateMyOrderResponse = UpdateOrder(newComingOrder, MyOrders);
                     Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} updated {@ResponseCode}", "Former", myOldOrder.Id, myOldOrder.Price, myOldOrder.Quantity, myOldOrder.Signature.Type, updateMyOrderResponse ? ReplyCode.Succeed : ReplyCode.Failure);
                     LockPlacingOrders(true);
-                    if (newComingOrder.Quantity != 0) await PlaceOrderEvent.Invoke(myOldOrder, newComingOrder);
+                    if (newComingOrder.Quantity != 0)
+                    {
+                        if (PlaceOrderEvent is not null)
+                        {
+                            await PlaceOrderEvent?.Invoke(myOldOrder, newComingOrder);
+                        }
+                    }
                     LockPlacingOrders(false);
                     break;
                 case ChangesType.Update when itsCounterOrder:
@@ -80,7 +86,7 @@ namespace Former
                     var removeMyOrderResponse = RemoveOrder(id, MyOrders);
                     Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed {@ResponseCode}", "Former", myOldOrder.Id, myOldOrder.Price, myOldOrder.Quantity, myOldOrder.Signature.Type, removeMyOrderResponse ? ReplyCode.Succeed : ReplyCode.Failure);
                     LockPlacingOrders(true);
-                    await PlaceOrderEvent.Invoke(myOldOrder, newComingOrder);
+                    if (PlaceOrderEvent is not null) await PlaceOrderEvent?.Invoke(myOldOrder, newComingOrder);
                     LockPlacingOrders(false);
                     break;
                 case ChangesType.Delete when itsCounterOrder:
@@ -116,17 +122,16 @@ namespace Former
         /// </summary>
         internal Task UpdateBalance(int availableBalance, int totalBalance)
         {
-            if (availableBalance != 0)
+            if (availableBalance > 0)
             {
                 AvailableBalance = availableBalance;
                 Log.Information("{@Where}: Balance updated. Available balance: {@AvailableBalance}, Total balance: {@TotalBalance}", "Former", availableBalance, totalBalance);
                 _logger.WriteToLog($"Balance available: {availableBalance}", LogLevel.Information, DateTimeOffset.Now);
             }
-            if (totalBalance != 0)
+            if (totalBalance > 0)
             {
                 TotalBalance = totalBalance;
                 _logger.WriteToLog($"Balance total: {totalBalance}", LogLevel.Information, DateTimeOffset.Now);
-
             }
             return Task.CompletedTask;
         }

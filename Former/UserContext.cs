@@ -1,4 +1,5 @@
-﻿using Grpc.Core;
+﻿using System.Threading;
+using Grpc.Core;
 using System.Threading.Tasks;
 using TradeBot.Common.v1;
 
@@ -11,11 +12,13 @@ namespace Former
         public string TradeMarket => Meta.GetValue("trademarket");
         public string Slot => Meta.GetValue("slot");
         public Logger Logger { get; }
+        public CancellationToken Token;
         private Config _configuration;
         private readonly Storage _storage;
         private readonly TradeMarketClient _tradeMarketClient;
         private readonly Former _former;
         private readonly UpdateHandlers _updateHandlers;
+        
 
         public Metadata Meta { get; }
 
@@ -36,12 +39,25 @@ namespace Former
             _former = new Former(_storage, _configuration, _tradeMarketClient, Meta, Logger);
             _updateHandlers = new UpdateHandlers(_storage, _configuration, _tradeMarketClient, Meta, Logger);
 
+            SubscribeStorageToMarket();
+        }
+
+        public void SubscribeStorageToMarket()
+        {
             _tradeMarketClient.UpdateMarketPrices += _storage.UpdateMarketPrices;
             _tradeMarketClient.UpdateBalance += _storage.UpdateBalance;
             _tradeMarketClient.UpdateMyOrders += _storage.UpdateMyOrderList;
             _tradeMarketClient.UpdatePosition += _storage.UpdatePosition;
+            _tradeMarketClient.StartObserving(Meta);
+        }
 
-            _tradeMarketClient.Start(Meta);
+        public void UnsubscribeStorage()
+        {
+            _tradeMarketClient.StopObserving();
+            _tradeMarketClient.UpdateMarketPrices -= _storage.UpdateMarketPrices;
+            _tradeMarketClient.UpdateBalance -= _storage.UpdateBalance;
+            _tradeMarketClient.UpdateMyOrders -= _storage.UpdateMyOrderList;
+            _tradeMarketClient.UpdatePosition -= _storage.UpdatePosition;
         }
 
         public async Task FormOrder(int decision)
