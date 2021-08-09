@@ -1,51 +1,78 @@
 ﻿using Grpc.Core;
 using Grpc.Net.Client;
 using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
+using Google.Protobuf.WellKnownTypes;
 using TradeBot.Common.v1;
 using TradeBot.Facade.FacadeService.v1;
-//using StartBotRequest = TradeBot.Relay.RelayService.v1.StartBotRequest;
 
 namespace UI
 {
-    public partial class TradeBotUI : Form
+    public partial class TradeBotUi : Form
     {
-        private FacadeService.FacadeServiceClient client;
-        private Metadata meta;
-        public TradeBotUI()
+        private readonly FacadeService.FacadeServiceClient _client;
+        private Metadata _meta;
+        private string _sessionId;
+
+        private Dictionary<string, Duration> map;
+
+        public TradeBotUi()
         {
-            client = new FacadeService.FacadeServiceClient(GrpcChannel.ForAddress("https://localhost:5002"));
+            _client = new FacadeService.FacadeServiceClient(GrpcChannel.ForAddress("https://localhost:5002"));
             InitializeComponent();
+            InitIntervalMap();
+        }
+
+        private void InitIntervalMap()
+        {
+            map = new Dictionary<string, Duration>
+            {
+                { "5s", Duration.FromTimeSpan(new TimeSpan(0, 0, 0, 5)) },
+                { "30s", Duration.FromTimeSpan(new TimeSpan(0, 0, 0, 30)) },
+                { "1m", Duration.FromTimeSpan(new TimeSpan(0, 0, 1, 0)) },
+                { "3m", Duration.FromTimeSpan(new TimeSpan(0, 0, 3, 0)) },
+                { "5m", Duration.FromTimeSpan(new TimeSpan(0, 0, 5, 0)) },
+                { "15m", Duration.FromTimeSpan(new TimeSpan(0, 0, 15, 0)) },
+                { "30m", Duration.FromTimeSpan(new TimeSpan(0, 0, 30, 0)) },
+                { "1h", Duration.FromTimeSpan(new TimeSpan(0, 1, 0, 0)) },
+                { "2h", Duration.FromTimeSpan(new TimeSpan(0, 2, 0, 0)) },
+                { "3h", Duration.FromTimeSpan(new TimeSpan(0, 3, 0, 0)) },
+                { "4h", Duration.FromTimeSpan(new TimeSpan(0, 4, 0, 0)) },
+                { "6h", Duration.FromTimeSpan(new TimeSpan(0, 6, 0, 0)) },
+                { "12h", Duration.FromTimeSpan(new TimeSpan(0, 12, 0, 0)) },
+                { "1d", Duration.FromTimeSpan(new TimeSpan(1, 0, 0, 0)) },
+                { "2d", Duration.FromTimeSpan(new TimeSpan(2, 0, 0, 0)) },
+                { "1w", Duration.FromTimeSpan(new TimeSpan(7, 0, 0, 0)) },
+                { "2w", Duration.FromTimeSpan(new TimeSpan(14, 0, 0, 0)) },
+                { "1M", Duration.FromTimeSpan(new TimeSpan(30, 0, 0, 0)) }
+            };
         }
 
         private async void StartButton_Click(object sender, EventArgs e)
         {
             using var channel = GrpcChannel.ForAddress("https://localhost:5002");
-            var facadeClient = new TradeBot.Facade.FacadeService.v1.FacadeService.FacadeServiceClient(channel);
-
+            var facadeClient = new FacadeService.FacadeServiceClient(channel);
+            map.TryGetValue(ConfigIntervalOfAnalysisl.Text, out var interval);
             var config = new Config
             {
                 AvaibleBalance = double.Parse(ConfigAvailableBalance.Text),
                 RequiredProfit = double.Parse(ConfigRequiredProfit.Text),
                 ContractValue = double.Parse(ConfigVolumeOfContracts.Text),
-                //AlgorithmInfo = new AlgorithmInfo() { Interval = new Google.Protobuf.WellKnownTypes.Timestamp() { Seconds = int.Parse(ConfigIntervalOfAnalysis.Text) } },
+                AlgorithmInfo = new AlgorithmInfo
+                {
+                    Interval = interval,
+                    Sensivity = int.Parse(ConfigAlgorithmSensivity.Text)
+                },
                 OrderUpdatePriceRange = double.Parse(ConfigUpdatePriceRange.Text),
-                SlotFee = 0.1D,
-                TotalBalance = 100.0
             };
 
             var requestForRelay = new SwitchBotRequest()
             {
                 Config = config
-
             };
-            //var requestForFacade = new AuthenticateTokenRequest()
-            //{
-            //    Token = ConfigTokenl.Text
-            //};
 
-
-            var call2 = await facadeClient.SwitchBotAsync(requestForRelay, meta);
+            var call2 = await facadeClient.SwitchBotAsync(requestForRelay, _meta);
             Console.WriteLine("Запустил бота с конфигом {0}", requestForRelay.Config);
         }
 
@@ -81,30 +108,31 @@ namespace UI
 
         private async void RegistrationButton_Click(object sender, EventArgs e)
         {
-            var regResponse = await client.RegisterAsync(new RegisterRequest
+            var regResponse = await _client.RegisterAsync(new RegisterRequest
             {
                 Email = RegLog.Text,
                 Password = RegPass.Text,
                 VerifyPassword = RegPass.Text
             });
-
-
         }
 
         private async void LoginButton_Click(object sender, EventArgs e)
         {
-            var logResponse = await client.LoginAsync(new LoginRequest
+            var logResponse = await _client.LoginAsync(new LoginRequest
             {
                 Email = LogLogTextBox.Text,
                 Password = LogPassTextBox.Text,
                 SaveExchangesAfterLogout = true
             });
-            meta = new Metadata();
-            meta.Add("sessionid", logResponse.SessionId);
-            meta.Add("slot", "XBTUSD");
-            meta.Add("trademarket", "bitmex");
+            _sessionId = logResponse.SessionId;
+            _meta = new Metadata
+            {
+                { "sessionid", logResponse.SessionId },
+                { "slot", "XBTUSD" },
+                { "trademarket", "bitmex" }
+            };
 
-            var exchangeResponse = client.AddExchangeAccess(new AddExchangeAccessRequest
+            var exchangeResponse = _client.AddExchangeAccess(new AddExchangeAccessRequest
             {
                 SessionId = logResponse.SessionId,
                 Token = RegKey.Text,
@@ -112,6 +140,20 @@ namespace UI
                 Code = ExchangeCode.Bitmex,
                 ExchangeName = "BitMEX"
             });
+            LoggedGroupBox.Visible = true;
+            LoggedGroupBox.Enabled = true;
+            LoggedGroupBox.Text = "Signed in as " + LogLogTextBox.Text;
+            SignInGroupBox.Visible = false;
+            SignInGroupBox.Enabled = false;
+        }
+
+        private async void SignOutButton_Click(object sender, EventArgs e)
+        {
+            var logOutResponse = await _client.LogoutAsync( new SessionRequest() { SessionId = _sessionId});
+            SignInGroupBox.Visible = true;
+            SignInGroupBox.Enabled = true;
+            LoggedGroupBox.Visible = false;
+            LoggedGroupBox.Enabled = false;
         }
     }
 }

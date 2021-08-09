@@ -15,14 +15,13 @@ namespace Former
             return new UpdateServerConfigResponse();
         }
 
-        public override async Task<SendPurchasePriceResponse> SendPurchasePrice(SendPurchasePriceRequest request,
+        public override async Task<SendAlgorithmDecisionResponse> SendAlgorithmDecision(SendAlgorithmDecisionRequest request,
             ServerCallContext context)
         {
             //в зависимости от числа, присланного алгоритмом производится формирование цены на покупку или на продажу с учётом контекста пользователя
             var meta = context.RequestHeaders.ToDictionary(x => x.Key, x => x.Value);
-            _ = Clients.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"])
-                .FormOrder((int)request.PurchasePrice);
-            return new SendPurchasePriceResponse();
+            await Clients.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"]).FormOrder(request.Decision);
+            return new SendAlgorithmDecisionResponse();
         }
     }
 }

@@ -2,6 +2,7 @@
 
 option csharp_namespace = "TradeBot.Common.v1";
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
 import "google/protobuf/empty.proto";
 
 
@@ -45,20 +46,16 @@ message Order {
 
 message AlgorithmInfo{
     //интервал анализа
-	google.protobuf.Timestamp interval = 1;
-	//количество точек в интервале (между точками берется среднее)
-	int32 point_split_count = 2;
+	google.protobuf.Duration interval = 1;
+	//чувствительность алгоритма
+	int32 sensivity = 2;
 }
 
 message Config{
-	//общий баланс на счету 
-	double total_balance = 1;
 	//доступный процент из общего баланса
 	double avaible_balance = 2;
 	//сколько мы хотим прибыли получать с контракта
 	double required_profit = 3;
-	//налоги на слот
-	double slot_fee = 4;
 	//точный объем контракта
 	double contract_value = 5;
 	//когда снимать свои ордера с биржы

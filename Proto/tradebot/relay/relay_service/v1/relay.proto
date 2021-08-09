@@ -7,7 +7,6 @@ package tradebot.relay.relay_service.v1;
 
 service RelayService{
 	rpc StartBot (StartBotRequest) returns (StartBotResponse);
-
 	/*
 		Клиент говорит обновиться серверу
 	*/
@@ -18,7 +17,6 @@ service RelayService{
 	*/
 	//TODO в каждом сервисе нужно написать 
 	rpc SubscribeLogs(SubscribeLogsRequest) returns (stream SubscribeLogsResponse);
-
 }
 
 message SubscribeLogsRequest{

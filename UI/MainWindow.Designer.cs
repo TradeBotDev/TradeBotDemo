@@ -1,7 +1,7 @@
 ﻿
 namespace UI
 {
-    partial class TradeBotUI
+    partial class TradeBotUi
     {
         /// <summary>
         ///  Required designer variable.
@@ -32,9 +32,7 @@ namespace UI
             this.StartButton = new System.Windows.Forms.Button();
             this.ConfigAvailableBalance = new System.Windows.Forms.TextBox();
             this.ConfigRequiredProfit = new System.Windows.Forms.TextBox();
-            this.ConfigVolumeOfContracts = new System.Windows.Forms.TextBox();
             this.ConfigUpdatePriceRange = new System.Windows.Forms.TextBox();
-            this.ConfigIntervalOfAnalysis = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.ConfigRequiredProfitl = new System.Windows.Forms.Label();
             this.ConfigVolumeOfContractsl = new System.Windows.Forms.Label();
@@ -58,12 +56,19 @@ namespace UI
             this.label9 = new System.Windows.Forms.Label();
             this.LogPassTextBox = new System.Windows.Forms.TextBox();
             this.MainMenuGroupBox = new System.Windows.Forms.GroupBox();
+            this.ConfigIntervalOfAnalysis = new System.Windows.Forms.ComboBox();
+            this.ConfigVolumeOfContracts = new System.Windows.Forms.ComboBox();
+            this.ConfigAlgorithmSensivity = new System.Windows.Forms.ComboBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.SignUpGroupBox = new System.Windows.Forms.GroupBox();
             this.SignInGroupBox = new System.Windows.Forms.GroupBox();
             this.EventConsole = new System.Windows.Forms.RichTextBox();
+            this.LoggedGroupBox = new System.Windows.Forms.GroupBox();
+            this.SignOutButton = new System.Windows.Forms.Button();
             this.MainMenuGroupBox.SuspendLayout();
             this.SignUpGroupBox.SuspendLayout();
             this.SignInGroupBox.SuspendLayout();
+            this.LoggedGroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // StartButton
@@ -80,7 +85,7 @@ namespace UI
             // 
             this.ConfigAvailableBalance.Location = new System.Drawing.Point(161, 40);
             this.ConfigAvailableBalance.Name = "ConfigAvailableBalance";
-            this.ConfigAvailableBalance.Size = new System.Drawing.Size(77, 27);
+            this.ConfigAvailableBalance.Size = new System.Drawing.Size(84, 27);
             this.ConfigAvailableBalance.TabIndex = 1;
             this.ConfigAvailableBalance.Text = "0,5";
             // 
@@ -88,33 +93,17 @@ namespace UI
             // 
             this.ConfigRequiredProfit.Location = new System.Drawing.Point(161, 73);
             this.ConfigRequiredProfit.Name = "ConfigRequiredProfit";
-            this.ConfigRequiredProfit.Size = new System.Drawing.Size(77, 27);
+            this.ConfigRequiredProfit.Size = new System.Drawing.Size(84, 27);
             this.ConfigRequiredProfit.TabIndex = 2;
             this.ConfigRequiredProfit.Text = "0,005";
-            // 
-            // ConfigVolumeOfContracts
-            // 
-            this.ConfigVolumeOfContracts.Location = new System.Drawing.Point(161, 105);
-            this.ConfigVolumeOfContracts.Name = "ConfigVolumeOfContracts";
-            this.ConfigVolumeOfContracts.Size = new System.Drawing.Size(77, 27);
-            this.ConfigVolumeOfContracts.TabIndex = 3;
-            this.ConfigVolumeOfContracts.Text = "100";
             // 
             // ConfigUpdatePriceRange
             // 
             this.ConfigUpdatePriceRange.Location = new System.Drawing.Point(161, 138);
             this.ConfigUpdatePriceRange.Name = "ConfigUpdatePriceRange";
-            this.ConfigUpdatePriceRange.Size = new System.Drawing.Size(77, 27);
+            this.ConfigUpdatePriceRange.Size = new System.Drawing.Size(84, 27);
             this.ConfigUpdatePriceRange.TabIndex = 4;
             this.ConfigUpdatePriceRange.Text = "50";
-            // 
-            // ConfigIntervalOfAnalysis
-            // 
-            this.ConfigIntervalOfAnalysis.Location = new System.Drawing.Point(161, 170);
-            this.ConfigIntervalOfAnalysis.Name = "ConfigIntervalOfAnalysis";
-            this.ConfigIntervalOfAnalysis.Size = new System.Drawing.Size(77, 27);
-            this.ConfigIntervalOfAnalysis.TabIndex = 5;
-            this.ConfigIntervalOfAnalysis.Text = "0,1";
             // 
             // label1
             // 
@@ -316,6 +305,9 @@ namespace UI
             // MainMenuGroupBox
             // 
             this.MainMenuGroupBox.Controls.Add(this.ConfigIntervalOfAnalysis);
+            this.MainMenuGroupBox.Controls.Add(this.ConfigVolumeOfContracts);
+            this.MainMenuGroupBox.Controls.Add(this.ConfigAlgorithmSensivity);
+            this.MainMenuGroupBox.Controls.Add(this.label2);
             this.MainMenuGroupBox.Controls.Add(this.StartButton);
             this.MainMenuGroupBox.Controls.Add(this.label1);
             this.MainMenuGroupBox.Controls.Add(this.ConfigIntervalOfAnalysisl);
@@ -323,7 +315,6 @@ namespace UI
             this.MainMenuGroupBox.Controls.Add(this.ConfigAvailableBalance);
             this.MainMenuGroupBox.Controls.Add(this.ConfigRequiredProfitl);
             this.MainMenuGroupBox.Controls.Add(this.ConfigUpdatePriceRangel);
-            this.MainMenuGroupBox.Controls.Add(this.ConfigVolumeOfContracts);
             this.MainMenuGroupBox.Controls.Add(this.ConfigRequiredProfit);
             this.MainMenuGroupBox.Controls.Add(this.ConfigVolumeOfContractsl);
             this.MainMenuGroupBox.Location = new System.Drawing.Point(145, 10);
@@ -332,6 +323,74 @@ namespace UI
             this.MainMenuGroupBox.TabIndex = 20;
             this.MainMenuGroupBox.TabStop = false;
             this.MainMenuGroupBox.Text = "Main Menu";
+            // 
+            // ConfigIntervalOfAnalysis
+            // 
+            this.ConfigIntervalOfAnalysis.DisplayMember = "0";
+            this.ConfigIntervalOfAnalysis.FormattingEnabled = true;
+            this.ConfigIntervalOfAnalysis.Items.AddRange(new object[] {
+            "5s",
+            "30s",
+            "1m",
+            "3m",
+            "5m",
+            "15m",
+            "30m",
+            "1h",
+            "2h",
+            "3h",
+            "4h",
+            "6h",
+            "12h",
+            "1d",
+            "3d",
+            "1w",
+            "2w",
+            "1mon"});
+            this.ConfigIntervalOfAnalysis.Location = new System.Drawing.Point(161, 169);
+            this.ConfigIntervalOfAnalysis.Name = "ConfigIntervalOfAnalysis";
+            this.ConfigIntervalOfAnalysis.Size = new System.Drawing.Size(84, 28);
+            this.ConfigIntervalOfAnalysis.TabIndex = 15;
+            this.ConfigIntervalOfAnalysis.Text = "5s";
+            // 
+            // ConfigVolumeOfContracts
+            // 
+            this.ConfigVolumeOfContracts.DisplayMember = "(none)";
+            this.ConfigVolumeOfContracts.FormattingEnabled = true;
+            this.ConfigVolumeOfContracts.Items.AddRange(new object[] {
+            "100",
+            "200",
+            "300",
+            "400",
+            "500"});
+            this.ConfigVolumeOfContracts.Location = new System.Drawing.Point(161, 106);
+            this.ConfigVolumeOfContracts.Name = "ConfigVolumeOfContracts";
+            this.ConfigVolumeOfContracts.Size = new System.Drawing.Size(84, 28);
+            this.ConfigVolumeOfContracts.TabIndex = 14;
+            this.ConfigVolumeOfContracts.Text = "100";
+            // 
+            // ConfigAlgorithmSensivity
+            // 
+            this.ConfigAlgorithmSensivity.DisplayMember = "0";
+            this.ConfigAlgorithmSensivity.FormattingEnabled = true;
+            this.ConfigAlgorithmSensivity.Items.AddRange(new object[] {
+            "Minimal",
+            "Medium",
+            "High"});
+            this.ConfigAlgorithmSensivity.Location = new System.Drawing.Point(161, 203);
+            this.ConfigAlgorithmSensivity.Name = "ConfigAlgorithmSensivity";
+            this.ConfigAlgorithmSensivity.Size = new System.Drawing.Size(84, 28);
+            this.ConfigAlgorithmSensivity.TabIndex = 13;
+            this.ConfigAlgorithmSensivity.Text = "Minimal";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(9, 204);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(135, 20);
+            this.label2.TabIndex = 12;
+            this.label2.Text = "Algorithm sensivity";
             // 
             // SignUpGroupBox
             // 
@@ -377,7 +436,29 @@ namespace UI
             this.EventConsole.TabIndex = 23;
             this.EventConsole.Text = "";
             // 
-            // TradeBotUI
+            // LoggedGroupBox
+            // 
+            this.LoggedGroupBox.Controls.Add(this.SignOutButton);
+            this.LoggedGroupBox.Enabled = false;
+            this.LoggedGroupBox.Location = new System.Drawing.Point(145, 12);
+            this.LoggedGroupBox.Name = "LoggedGroupBox";
+            this.LoggedGroupBox.Size = new System.Drawing.Size(695, 308);
+            this.LoggedGroupBox.TabIndex = 24;
+            this.LoggedGroupBox.TabStop = false;
+            this.LoggedGroupBox.Text = "Signed in as ///";
+            this.LoggedGroupBox.Visible = false;
+            // 
+            // SignOutButton
+            // 
+            this.SignOutButton.Location = new System.Drawing.Point(509, 241);
+            this.SignOutButton.Name = "SignOutButton";
+            this.SignOutButton.Size = new System.Drawing.Size(180, 61);
+            this.SignOutButton.TabIndex = 0;
+            this.SignOutButton.Text = "Sign Out";
+            this.SignOutButton.UseVisualStyleBackColor = true;
+            this.SignOutButton.Click += new System.EventHandler(this.SignOutButton_Click);
+            // 
+            // TradeBotUi
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -388,8 +469,9 @@ namespace UI
             this.Controls.Add(this.ShowRegistrationPanel);
             this.Controls.Add(this.MainMenuGroupBox);
             this.Controls.Add(this.SignUpGroupBox);
+            this.Controls.Add(this.LoggedGroupBox);
             this.Controls.Add(this.SignInGroupBox);
-            this.Name = "TradeBotUI";
+            this.Name = "TradeBotUi";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "TradeBot";
             this.MainMenuGroupBox.ResumeLayout(false);
@@ -398,6 +480,7 @@ namespace UI
             this.SignUpGroupBox.PerformLayout();
             this.SignInGroupBox.ResumeLayout(false);
             this.SignInGroupBox.PerformLayout();
+            this.LoggedGroupBox.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -407,9 +490,7 @@ namespace UI
         private System.Windows.Forms.Button StartButton;
         private System.Windows.Forms.TextBox ConfigAvailableBalance;
         private System.Windows.Forms.TextBox ConfigRequiredProfit;
-        private System.Windows.Forms.TextBox ConfigVolumeOfContracts;
         private System.Windows.Forms.TextBox ConfigUpdatePriceRange;
-        private System.Windows.Forms.TextBox ConfigIntervalOfAnalysis;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label ConfigRequiredProfitl;
         private System.Windows.Forms.Label ConfigVolumeOfContractsl;
@@ -436,6 +517,12 @@ namespace UI
         private System.Windows.Forms.GroupBox SignUpGroupBox;
         private System.Windows.Forms.GroupBox SignInGroupBox;
         private System.Windows.Forms.RichTextBox EventConsole;
+        private System.Windows.Forms.GroupBox LoggedGroupBox;
+        private System.Windows.Forms.Button SignOutButton;
+        private System.Windows.Forms.ComboBox ConfigAlgorithmSensivity;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.ComboBox ConfigIntervalOfAnalysis;
+        private System.Windows.Forms.ComboBox ConfigVolumeOfContracts;
     }
 }
 
