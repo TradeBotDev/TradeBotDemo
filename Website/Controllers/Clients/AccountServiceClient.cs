@@ -56,14 +56,5 @@ namespace Website.Controllers.Clients
             };
             return client.AccountData(request);
         }
-
-        public static IsLicensedResponse CheckLicense(string sessionId)
-        {
-            var request = new IsLicensedRequest
-            {
-                SessionId = sessionId
-            };
-            return client.IsLicensed(request);
-        }
     }
 }

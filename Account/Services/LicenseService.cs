@@ -1,8 +1,6 @@
 ﻿using AccountGRPC.LicenseMessages;
 using Grpc.Core;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
@@ -18,7 +16,7 @@ namespace AccountGRPC
                 var account = database.LoggedAccounts
                     .Where(login => login.SessionId == request.SessionId)
                     .Include(login => login.Account);
-                
+
                 if (account.Count() == 0)
                     return Task.FromResult(SetLicenseReplies.AccountNotFound());
 
