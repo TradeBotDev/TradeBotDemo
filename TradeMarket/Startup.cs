@@ -32,7 +32,7 @@ namespace TradeMarket
         {
             services.AddGrpc();
             services.AddSingleton(new AccountClient(new ExchangeAccess.ExchangeAccessClient(GrpcChannel.ForAddress(Configuration.GetConnectionString("AccountService")))));
-            services.AddSingleton<IConnectionMultiplexer>(options => ConnectionMultiplexer.Connect(Configuration.GetConnectionString("Redis")));
+            //services.AddSingleton<IConnectionMultiplexer>(options => ConnectionMultiplexer.Connect(Configuration.GetConnectionString("Redis")));
             services.AddSingleton<FactoryCache>();
         }
 

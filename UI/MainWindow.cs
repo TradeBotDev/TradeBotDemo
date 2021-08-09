@@ -55,9 +55,9 @@ namespace UI
         {
             _sensitivityMap = new Dictionary<string, int>
             {
-                { "Minimal", 1},
-                { "Medium", 2},
-                { "High", 3}
+                { "Minimal", 1 },
+                { "Medium", 2 },
+                { "High", 3 }
             };
         }
 
