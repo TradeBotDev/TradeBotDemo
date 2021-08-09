@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using Google.Protobuf.WellKnownTypes;
 using TradeBot.Common.v1;
 using TradeBot.Facade.FacadeService.v1;
+using UpdateServerConfigRequest = TradeBot.Facade.FacadeService.v1.UpdateServerConfigRequest;
 
 namespace UI
 {
@@ -63,8 +64,17 @@ namespace UI
 
         private async void StartButton_Click(object sender, EventArgs e)
         {
-            using var channel = GrpcChannel.ForAddress("https://localhost:5002");
-            var facadeClient = new FacadeService.FacadeServiceClient(channel);
+            var requestForRelay = new SwitchBotRequest()
+            {
+                Config = GetConfig()
+            };
+
+            var call2 = await _client.SwitchBotAsync(requestForRelay, _meta);
+            Console.WriteLine("Запустил бота с конфигом {0}", requestForRelay.Config);
+        }
+
+        private Config GetConfig()
+        {
             _intervalMap.TryGetValue(ConfigIntervalOfAnalysisl.Text, out var interval);
             _sensitivityMap.TryGetValue(ConfigAlgorithmSensivity.Text, out var sensitivity);
             var config = new Config
@@ -79,14 +89,7 @@ namespace UI
                 },
                 OrderUpdatePriceRange = double.Parse(ConfigUpdatePriceRange.Text),
             };
-
-            var requestForRelay = new SwitchBotRequest()
-            {
-                Config = config
-            };
-
-            var call2 = await facadeClient.SwitchBotAsync(requestForRelay, _meta);
-            Console.WriteLine("Запустил бота с конфигом {0}", requestForRelay.Config);
+            return config;
         }
 
         private void ShowRegistrationPanel_Click(object sender, EventArgs e)
@@ -172,6 +175,11 @@ namespace UI
         private async void RemoveMyOrdersButton_Click(object sender, EventArgs e)
         {
             var removeMyOrdersResponse = await _client.DeleteOrderAsync(new DeleteOrderRequest()); 
+        }
+
+        private async void UpdateConfigButton_Click(object sender, EventArgs e)
+        {
+            var updateConfigRespinse = await _client.UpdateServerConfigAsync(new UpdateServerConfigRequest { Request = new TradeBot.Common.v1.UpdateServerConfigRequest { Config = GetConfig(), Switch = false}});
         }
     }
 }
