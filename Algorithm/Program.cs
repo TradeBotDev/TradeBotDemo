@@ -45,7 +45,6 @@ namespace Algorithm
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            //await PriceSender.SendPrice();
             Publisher publisher = new();
             DataCollector dc = new(publisher);
             var pm = new PointMaker();

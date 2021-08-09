@@ -99,7 +99,7 @@ namespace Algorithm.Analysis
             if (downtrend)
             {
                 Log.Information("Downward trend detected");
-                //if the latest price is higher (but not too much, not over 15%) we think the price might start rising
+                //if the latest price is higher (but not by much, not over 15%) we think the price might start rising
                 //the 15% is needed to avoid accidentally buying on a sudden spike 
 
                 if (subTrends.Last() <= points.Last().Value &&
