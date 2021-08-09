@@ -38,10 +38,9 @@ service FacadeService{
 	*/
 	rpc SubscribeLogsRelay(SubscribeLogsRequest) returns (stream SubscribeLogsResponse);
 
-	/*
-		 бота
-	*/
 	rpc SwitchBot (SwitchBotRequest) returns (SwitchBotResponse);
+
+	rpc DeleteOrder(DeleteOrderRequest) returns (DeleteOrderResponse);
 
 	// Метод входа в аккаунт
 	rpc Login (LoginRequest) returns (LoginReply);
@@ -61,6 +60,15 @@ service FacadeService{
 	rpc DeleteExchangeAccess (DeleteExchangeAccessRequest) returns (DeleteExchangeAccessReply);
 	// Получение информации о доступе текущего пользователя к бирже
 	rpc ExchangeBySession (ExchangeBySessionRequest) returns (ExchangeBySessionReply);
+}
+
+
+message DeleteOrderRequest{
+	google.protobuf.Empty empty = 1;
+}
+
+message DeleteOrderResponse{
+	tradebot.common.v1.DefaultResponse response = 1;
 }
 // Данные для входа в аккаунт.
 message LoginRequest {
