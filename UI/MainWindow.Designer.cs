@@ -167,7 +167,7 @@ namespace UI
             this.ShowRegistrationPanel.Name = "ShowRegistrationPanel";
             this.ShowRegistrationPanel.Size = new System.Drawing.Size(117, 61);
             this.ShowRegistrationPanel.TabIndex = 14;
-            this.ShowRegistrationPanel.Text = "Registration";
+            this.ShowRegistrationPanel.Text = "Sign Up";
             this.ShowRegistrationPanel.UseVisualStyleBackColor = true;
             this.ShowRegistrationPanel.Click += new System.EventHandler(this.ShowRegistrationPanel_Click);
             // 
@@ -177,7 +177,7 @@ namespace UI
             this.ShowLoginPanel.Name = "ShowLoginPanel";
             this.ShowLoginPanel.Size = new System.Drawing.Size(117, 61);
             this.ShowLoginPanel.TabIndex = 15;
-            this.ShowLoginPanel.Text = "Login";
+            this.ShowLoginPanel.Text = "Sign In";
             this.ShowLoginPanel.UseVisualStyleBackColor = true;
             this.ShowLoginPanel.Click += new System.EventHandler(this.ShowLoginPanel_Click);
             // 
@@ -197,7 +197,7 @@ namespace UI
             this.RegistrationButton.Name = "RegistrationButton";
             this.RegistrationButton.Size = new System.Drawing.Size(349, 60);
             this.RegistrationButton.TabIndex = 26;
-            this.RegistrationButton.Text = "Registration";
+            this.RegistrationButton.Text = "Sign Up";
             this.RegistrationButton.UseVisualStyleBackColor = true;
             this.RegistrationButton.Click += new System.EventHandler(this.RegistrationButton_Click);
             // 
@@ -274,7 +274,7 @@ namespace UI
             this.LoginButton.Name = "LoginButton";
             this.LoginButton.Size = new System.Drawing.Size(349, 60);
             this.LoginButton.TabIndex = 35;
-            this.LoginButton.Text = "Login";
+            this.LoginButton.Text = "Sign In";
             this.LoginButton.UseVisualStyleBackColor = true;
             this.LoginButton.Click += new System.EventHandler(this.LoginButton_Click);
             // 
