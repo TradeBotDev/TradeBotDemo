@@ -14,30 +14,9 @@ service AlgorithmService {
 	rpc AddOrder (stream AddOrderRequest) returns ( AddOrderResponse);
 
 	/*
-		отправка цены 
-	*/
-	rpc SendPurchasePrice (SendPurchasePriceRequest) returns (SendPurchasePriceResponse);
-
-	/*
 		Клиент говорит обновиться серверу
 	*/
 	rpc UpdateServerConfig (UpdateServerConfigRequest) returns (UpdateServerConfigResponse);
-
-	/*
-		Подписка на логи нужного сервиса
-	*/
-	//TODO в каждом сервисе нужно написать 
-	rpc SubscribeLogs(SubscribeLogsRequest) returns (stream SubscribeLogsResponse);
-
-}
-
-
-message SubscribeLogsRequest{
-	tradebot.common.v1.SubscribeLogsRequest request = 1;
-}
-
-message SubscribeLogsResponse{
-	tradebot.common.v1.SubscribeLogsResponse response = 1;
 }
 
 message UpdateServerConfigRequest{
@@ -46,15 +25,6 @@ message UpdateServerConfigRequest{
 
 message UpdateServerConfigResponse{
 	tradebot.common.v1.UpdateServerConfigResponse response = 1;
-}
-
-message SendPurchasePriceRequest
-{
-	double purchase_price = 1;
-}
-message SendPurchasePriceResponse
-{
-	google.protobuf.Empty empty = 1;
 }
 
 message AddOrderRequest {
