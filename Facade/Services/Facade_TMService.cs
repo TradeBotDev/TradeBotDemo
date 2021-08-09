@@ -13,9 +13,11 @@ namespace Facade
         private TradeBot.Relay.RelayService.v1.RelayService.RelayServiceClient clientRelay = new TradeBot.Relay.RelayService.v1.RelayService.RelayServiceClient(GrpcChannel.ForAddress("https://localhost:5004"));
         private TradeBot.Account.AccountService.v1.Account.AccountClient clientAccount = new TradeBot.Account.AccountService.v1.Account.AccountClient(GrpcChannel.ForAddress("https://localhost:5000"));
         private TradeBot.Account.AccountService.v1.ExchangeAccess.ExchangeAccessClient clientExchange = new TradeBot.Account.AccountService.v1.ExchangeAccess.ExchangeAccessClient(GrpcChannel.ForAddress("https://localhost:5000"));
+        private IAsyncStreamReader<TradeBot.Relay.RelayService.v1.SubscribeLogsResponse> stream;
         #region TradeMarket
         public override async Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<SubscribeBalanceResponse> responseStream, ServerCallContext context)
         {
+            
             while (true)
             {
                 try
@@ -167,34 +169,53 @@ namespace Facade
         {
             try
             {
-                var response = clientRelay.SubscribeLogs(new TradeBot.Relay.RelayService.v1.SubscribeLogsRequest { Request = request.R }, context.RequestHeaders);
-                if (!context.CancellationToken.IsCancellationRequested)
+                stream = clientRelay.SubscribeLogs(new TradeBot.Relay.RelayService.v1.SubscribeLogsRequest { Request = request.R }, context.RequestHeaders).ResponseStream;
+                Log.Information("{@Where}: SubscribeLogsRelay \n args: request={@request}", "Facade", request);
+                while (!context.CancellationToken.IsCancellationRequested)
                 {
-                    Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
-                    while (await response.ResponseStream.MoveNext())
+
+                    while (await stream.MoveNext())
                     {
-                        Log.Information("{@Where}: {@MethodName} \n args: response={@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response.ResponseStream.Current.Response);
+                        Log.Information("{@Where}: SubscribeLogsRelay \n args: response={@response}", "Facade", stream.Current.Response);
                         await responseStream.WriteAsync(new SubscribeLogsResponse
                         {
-                            Response = response.ResponseStream.Current.Response
+                            Response = stream.Current.Response
                         });
                     }
-
                 }
-
-
-                else
-                {
-                    Log.Information("{@Where}: Client disconnected", "Facade");
-
-                }
+                Log.Information("{@Where}: Client disconnected", "Facade");
             }
             catch (RpcException e)
             {
                 Log.Error("{@Where}: Exception" + e.Message, "Facade");
             }
         }
-        
+
+        public override Task<DeleteOrderResponse> DeleteOrder(DeleteOrderRequest request, ServerCallContext context)
+        {
+            while (true)
+            {
+                try
+                {
+                    if (context.CancellationToken.IsCancellationRequested) break;
+                    var response = clientRelay.DeleteOrder(new TradeBot.Relay.RelayService.v1.DeleteOrderRequest {});
+                    Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
+                    Log.Information("{@Where}: {@MethodName} \n args: response={@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
+                    return Task.FromResult(new DeleteOrderResponse { Response=new TradeBot.Common.v1.DefaultResponse 
+                    { 
+                        Code=response.Response.Code,
+                        Message=response.Response.Message
+                    } 
+                    });
+                }
+                catch (RpcException e)
+                {
+                    Log.Error("{@Where}: Exception" + e.Message, "Facade");
+                }
+            }
+            Log.Information("{@Where}: Client disconnected", "Facade");
+            return Task.FromResult(new DeleteOrderResponse { });
+        }
         public override Task<SwitchBotResponse> SwitchBot(SwitchBotRequest request, ServerCallContext context)
         {
             while (true)

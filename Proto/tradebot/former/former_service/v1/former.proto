@@ -11,7 +11,7 @@ service FormerService{
 	/*
 		подписка на ответ алгоритма
 	*/
-	rpc SendPurchasePrice (SendPurchasePriceRequest) returns (SendPurchasePriceResponse);
+	rpc SendAlgorithmDecision (SendAlgorithmDecisionRequest) returns (SendAlgorithmDecisionResponse);
 	/*
 		Подписка на логи нужного сервиса
 	*/
@@ -21,6 +21,14 @@ service FormerService{
 	*/
 	rpc UpdateServerConfig (UpdateServerConfigRequest) returns (UpdateServerConfigResponse);
 
+	rpc DeleteOrder(DeleteOrderRequest) returns (DeleteOrderResponse);
+
+}message DeleteOrderRequest{
+	google.protobuf.Empty empty = 1;
+}
+
+message DeleteOrderResponse{
+	tradebot.common.v1.DefaultResponse response = 1;
 }
 
 message UpdateServerConfigRequest{
@@ -31,11 +39,11 @@ message UpdateServerConfigResponse{
 	google.protobuf.Empty empty = 1;
 }
 
-message SendPurchasePriceRequest
+message SendAlgorithmDecisionRequest
 {
-	double purchase_price = 1;
+	int32 decision = 1;
 }
-message SendPurchasePriceResponse
+message SendAlgorithmDecisionResponse
 {
 	google.protobuf.Empty empty = 1;
 }
