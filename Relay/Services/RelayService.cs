@@ -81,6 +81,12 @@ namespace Relay.Services
             });
         }
 
+        public async override Task<DeleteOrderResponse> DeleteOrder(DeleteOrderRequest request, ServerCallContext context)
+        {
+            await _formerClient.SendDeleteOrder(new DeleteOrderRequest {},context);
+            return await Task.FromResult(new DeleteOrderResponse { });
+        }
+
         public async override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request,
             ServerCallContext context)
         {
@@ -92,7 +98,7 @@ namespace Relay.Services
         public async override Task SubscribeLogs(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
         {
             Log.Information("{@Where}: SubscribeLogs", "Relay");
-            contexts.FirstOrDefault(x=>x.Key[2].Value==context.RequestHeaders[2].Value).Value.RepeatLogsFormer(request,responseStream);
+            await contexts.FirstOrDefault(x=>x.Key[2].Value==context.RequestHeaders[2].Value).Value.RepeatLogsFormer(request,responseStream);
         }
 
     }
