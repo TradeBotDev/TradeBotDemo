@@ -155,5 +155,10 @@ namespace UI
             LoggedGroupBox.Visible = false;
             LoggedGroupBox.Enabled = false;
         }
+
+        private async void RemoveMyOrdersButton_Click(object sender, EventArgs e)
+        {
+            var removeMyOrdersResponse = await _client.DeleteOrderAsync(new DeleteOrderRequest()); 
+        }
     }
 }

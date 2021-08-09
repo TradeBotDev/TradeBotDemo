@@ -17,8 +17,16 @@ service RelayService{
 	*/
 	//TODO в каждом сервисе нужно написать 
 	rpc SubscribeLogs(SubscribeLogsRequest) returns (stream SubscribeLogsResponse);
+	
+	rpc DeleteOrder(DeleteOrderRequest) returns (DeleteOrderResponse);
+}
+message DeleteOrderRequest{
+	google.protobuf.Empty empty = 1;
 }
 
+message DeleteOrderResponse{
+	tradebot.common.v1.DefaultResponse response = 1;
+}
 message SubscribeLogsRequest{
 	tradebot.common.v1.SubscribeLogsRequest request = 1;
 }

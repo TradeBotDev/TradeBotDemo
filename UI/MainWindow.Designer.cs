@@ -65,6 +65,7 @@ namespace UI
             this.EventConsole = new System.Windows.Forms.RichTextBox();
             this.LoggedGroupBox = new System.Windows.Forms.GroupBox();
             this.SignOutButton = new System.Windows.Forms.Button();
+            this.RemoveMyOrdersButton = new System.Windows.Forms.Button();
             this.MainMenuGroupBox.SuspendLayout();
             this.SignUpGroupBox.SuspendLayout();
             this.SignInGroupBox.SuspendLayout();
@@ -304,6 +305,7 @@ namespace UI
             // 
             // MainMenuGroupBox
             // 
+            this.MainMenuGroupBox.Controls.Add(this.RemoveMyOrdersButton);
             this.MainMenuGroupBox.Controls.Add(this.ConfigIntervalOfAnalysis);
             this.MainMenuGroupBox.Controls.Add(this.ConfigVolumeOfContracts);
             this.MainMenuGroupBox.Controls.Add(this.ConfigAlgorithmSensivity);
@@ -458,6 +460,16 @@ namespace UI
             this.SignOutButton.UseVisualStyleBackColor = true;
             this.SignOutButton.Click += new System.EventHandler(this.SignOutButton_Click);
             // 
+            // RemoveMyOrdersButton
+            // 
+            this.RemoveMyOrdersButton.Location = new System.Drawing.Point(9, 243);
+            this.RemoveMyOrdersButton.Name = "RemoveMyOrdersButton";
+            this.RemoveMyOrdersButton.Size = new System.Drawing.Size(144, 59);
+            this.RemoveMyOrdersButton.TabIndex = 16;
+            this.RemoveMyOrdersButton.Text = "Cancel my orders";
+            this.RemoveMyOrdersButton.UseVisualStyleBackColor = true;
+            this.RemoveMyOrdersButton.Click += new System.EventHandler(this.RemoveMyOrdersButton_Click);
+            // 
             // TradeBotUi
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -523,6 +535,7 @@ namespace UI
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox ConfigIntervalOfAnalysis;
         private System.Windows.Forms.ComboBox ConfigVolumeOfContracts;
+        private System.Windows.Forms.Button RemoveMyOrdersButton;
     }
 }
 
