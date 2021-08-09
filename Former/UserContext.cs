@@ -1,4 +1,5 @@
-﻿using Grpc.Core;
+﻿using System.Threading;
+using Grpc.Core;
 using System.Threading.Tasks;
 using TradeBot.Common.v1;
 
@@ -11,11 +12,13 @@ namespace Former
         public string TradeMarket => Meta.GetValue("trademarket");
         public string Slot => Meta.GetValue("slot");
         public Logger Logger { get; }
+        public CancellationToken Token;
         private Config _configuration;
         private readonly Storage _storage;
         private readonly TradeMarketClient _tradeMarketClient;
         private readonly Former _former;
         private readonly UpdateHandlers _updateHandlers;
+        
 
         public Metadata Meta { get; }
 
@@ -41,7 +44,7 @@ namespace Former
             _tradeMarketClient.UpdateMyOrders += _storage.UpdateMyOrderList;
             _tradeMarketClient.UpdatePosition += _storage.UpdatePosition;
 
-            _tradeMarketClient.Start(Meta);
+            _tradeMarketClient.Start(Meta, Token);
         }
 
         public async Task FormOrder(int decision)

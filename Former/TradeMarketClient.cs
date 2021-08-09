@@ -25,6 +25,7 @@ namespace Former
 
         private static int _retryDelay;
         private static string _connectionString;
+        private CancellationToken _token;
 
         private readonly TradeMarketService.TradeMarketServiceClient _client;
 
@@ -44,7 +45,7 @@ namespace Former
         /// </summary>
         private async Task ConnectionTester(Func<Task> func)
         {
-            while (true)
+            while (!_token.IsCancellationRequested)
             {
                 try
                 {
@@ -176,12 +177,13 @@ namespace Former
             return response;
         }
 
-        internal void Start(Metadata meta)
+        internal void Start(Metadata meta, CancellationToken token)
         {
-            ObservePositions(meta);
-            ObserveBalance(meta);
-            ObserveMarketPrices(meta);
-            ObserveMyOrders(meta);
+            _token = token;
+            _ = ObservePositions(meta);
+            _ = ObserveBalance(meta);
+            _ = ObserveMarketPrices(meta);
+            _ = ObserveMyOrders(meta);
         }
     }
 }

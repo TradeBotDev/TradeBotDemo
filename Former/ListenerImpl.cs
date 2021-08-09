@@ -1,8 +1,8 @@
-using System;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Google.Protobuf.WellKnownTypes;
 using TradeBot.Common.v1;
 using TradeBot.Former.FormerService.v1;
 using SubscribeLogsRequest = TradeBot.Former.FormerService.v1.SubscribeLogsRequest;
@@ -20,7 +20,7 @@ namespace Former
             var task = Task.Run(() =>
             {
                 var meta = context.RequestHeaders.ToDictionary(x => x.Key, x => x.Value);
-                Clients.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"], request.Request);
+                Clients.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"], request.Request).Token = context.CancellationToken;
             });
             await task;
             return new UpdateServerConfigResponse();
@@ -30,7 +30,6 @@ namespace Former
             ServerCallContext context)
         {
             //в зависимости от числа, присланного алгоритмом производится формирование цены на покупку или на продажу с учётом контекста пользователя
-
             var meta = context.RequestHeaders.ToDictionary(x => x.Key, x => x.Value);
             await Clients.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"]).FormOrder(request.Decision);
             return new SendAlgorithmDecisionResponse();
@@ -52,8 +51,10 @@ namespace Former
                         {
                             Response = new TradeBot.Common.v1.SubscribeLogsResponse
                             {
-                                Level = arg2, LogMessage = arg1, Where = "Former",
-                                When =  arg3.ToTimestamp()
+                                Level = arg2,
+                                LogMessage = arg1,
+                                Where = "Former",
+                                When = arg3.ToTimestamp()
                             }
                         });
                     }
@@ -62,16 +63,10 @@ namespace Former
                         // ignored
                     }
                 }
-                try
-                {
-                    userContext.Logger.NewLog += LoggerOnNewLog;
-                    while (!context.CancellationToken.IsCancellationRequested) { }
-                    throw new Exception();
-                }
-                catch
-                {
-                    userContext.Logger.NewLog -= LoggerOnNewLog;
-                }
+                userContext.Logger.NewLog += LoggerOnNewLog;
+                while (!context.CancellationToken.IsCancellationRequested) { }
+                userContext.Logger.NewLog -= LoggerOnNewLog;
+
             });
             await task;
         }
