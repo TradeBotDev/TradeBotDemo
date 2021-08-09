@@ -34,7 +34,7 @@ namespace Former
 
         private readonly Logger _logger; 
 
-        public Storage(Logger logger)
+        internal Storage(Logger logger)
         {
             MyOrders = new ConcurrentDictionary<string, Order>();
             CounterOrders = new ConcurrentDictionary<string, Order>();

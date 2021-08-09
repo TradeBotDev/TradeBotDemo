@@ -20,7 +20,7 @@ namespace Former
             var task = Task.Run(() =>
             {
                 var meta = context.RequestHeaders.ToDictionary(x => x.Key, x => x.Value);
-                var userContext = Clients.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"], request.Request.Config);
+                var userContext = Contexts.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"], request.Request.Config);
                 if (request.Request.Switch) userContext.UnsubscribeStorage();
             });
             await task;
@@ -30,7 +30,7 @@ namespace Former
         public override async Task<DeleteOrderResponse> DeleteOrder(DeleteOrderRequest request, ServerCallContext context)
         {
             var meta = context.RequestHeaders.ToDictionary(x => x.Key, x => x.Value);
-            await Clients.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"]).RemoveAllMyOrders();
+            await Contexts.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"]).RemoveAllMyOrders();
             return new DeleteOrderResponse();
         }
 
@@ -39,7 +39,7 @@ namespace Former
             ServerCallContext context)
         {
             var meta = context.RequestHeaders.ToDictionary(x => x.Key, x => x.Value);
-            await Clients.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"]).FormOrder(request.Decision);
+            await Contexts.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"]).FormOrder(request.Decision);
             return new SendAlgorithmDecisionResponse();
         }
 
@@ -49,7 +49,7 @@ namespace Former
             var task = Task.Run(() =>
             {
                 var meta = context.RequestHeaders.ToDictionary(x => x.Key, x => x.Value);
-                var userContext = Clients.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"]);
+                var userContext = Contexts.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"]);
 
                 async Task LoggerOnNewLog(string arg1, LogLevel arg2, DateTimeOffset arg3)
                 {

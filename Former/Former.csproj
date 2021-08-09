@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <Folder Include="Protos\" />
+    <Folder Include="Protos\" />
   </ItemGroup>
 
 </Project>
