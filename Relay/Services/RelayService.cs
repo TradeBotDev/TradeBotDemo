@@ -92,7 +92,7 @@ namespace Relay.Services
         public async override Task SubscribeLogs(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
         {
             Log.Information("{@Where}: SubscribeLogs", "Relay");
-            contexts.FirstOrDefault(x=>x.Key[2].Value==context.RequestHeaders[2].Value).Value.RepeatLogsFormer(request,responseStream);
+            await contexts.FirstOrDefault(x=>x.Key[2].Value==context.RequestHeaders[2].Value).Value.RepeatLogsFormer(request,responseStream);
         }
 
     }

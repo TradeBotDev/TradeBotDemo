@@ -56,7 +56,7 @@ namespace UI
 
                 while (await call3.ResponseStream.MoveNext())
                 {
-                    EventConsole.Text += call3.ResponseStream.Current.Message.Message + "\r\n";
+                    EventConsole.Text += call3.ResponseStream.Current.Response.LogMessage + "\r\n";
 
 
                 }

@@ -74,12 +74,12 @@ namespace Relay.Model
             _ = _formerClient.UpdateConfig(config, Meta);
         }
         
-        public async void RepeatLogsFormer(TradeBot.Relay.RelayService.v1.SubscribeLogsRequest request, IServerStreamWriter<TradeBot.Relay.RelayService.v1.SubscribeLogsResponse> responseStream)
+        public async Task RepeatLogsFormer(TradeBot.Relay.RelayService.v1.SubscribeLogsRequest request, IServerStreamWriter<TradeBot.Relay.RelayService.v1.SubscribeLogsResponse> responseStream)
         {
             await foreach (var item in _formerClient.SubscribeForLogs(_formerStream))
             {
                 try {
-                    Log.Information("{@Where}: {@MethodName}, response: {@}","Relay", new System.Diagnostics.StackFrame().GetMethod().Name,item.Response);
+                    Log.Information("{@Where}: RepeatLogsFormer, response: {@response}","Relay" ,item.Response);
                     await responseStream.WriteAsync(new TradeBot.Relay.RelayService.v1.SubscribeLogsResponse { Response = item.Response });
                 }
                 catch(Exception e)
