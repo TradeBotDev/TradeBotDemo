@@ -21,6 +21,14 @@ service FormerService{
 	*/
 	rpc UpdateServerConfig (UpdateServerConfigRequest) returns (UpdateServerConfigResponse);
 
+	rpc DeleteOrder(DeleteOrderRequest) returns (DeleteOrderResponse);
+
+}message DeleteOrderRequest{
+	google.protobuf.Empty empty = 1;
+}
+
+message DeleteOrderResponse{
+	tradebot.common.v1.DefaultResponse response = 1;
 }
 
 message UpdateServerConfigRequest{
