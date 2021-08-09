@@ -15,7 +15,7 @@ namespace Former
         private readonly Metadata _metadata;
         private readonly Logger _logger; 
 
-        public UpdateHandlers(Storage storage, Config configuration, TradeMarketClient tradeMarketClient, Metadata metadata, Logger logger)
+        internal UpdateHandlers(Storage storage, Config configuration, TradeMarketClient tradeMarketClient, Metadata metadata, Logger logger)
         {
             _storage = storage;
             _storage.HandleUpdateEvent += CheckAndFitPrices;

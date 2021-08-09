@@ -1,9 +1,9 @@
-﻿using System;
-using Google.Protobuf.WellKnownTypes;
+﻿using Google.Protobuf.WellKnownTypes;
+using Grpc.Core;
 using Serilog;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Grpc.Core;
 using TradeBot.Common.v1;
 
 namespace Former
@@ -14,9 +14,9 @@ namespace Former
         private readonly Config _configuration;
         private readonly TradeMarketClient _tradeMarketClient;
         private readonly Metadata _metadata;
-        private readonly Logger _logger; 
+        private readonly Logger _logger;
 
-        public Former(Storage storage, Config configuration, TradeMarketClient tradeMarketClient, Metadata metadata, Logger logger)
+        internal Former(Storage storage, Config configuration, TradeMarketClient tradeMarketClient, Metadata metadata, Logger logger)
         {
             _storage = storage;
             _storage.PlaceOrderEvent += PlaceCounterOrder;
@@ -126,6 +126,16 @@ namespace Former
         private double ConvertSatoshiToXBT(int satoshiValue)
         {
             return satoshiValue * 0.00000001;
+        }
+
+        internal async Task RemoveAllMyOrders()
+        {
+            foreach (var (key, _) in _storage.MyOrders)
+            {
+                var response = await _tradeMarketClient.DeleteOrder(key, _metadata);
+                if (response.Response.Code == ReplyCode.Succeed) _storage.MyOrders.TryRemove(key, out _);
+                else return;
+            }
         }
     }
 }

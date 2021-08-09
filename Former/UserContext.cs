@@ -64,5 +64,10 @@ namespace Former
         {
             await _former.FormOrder(decision);
         }
+
+        public async Task RemoveAllMyOrders()
+        {
+            await _former.RemoveAllMyOrders();
+        }
     }
 }

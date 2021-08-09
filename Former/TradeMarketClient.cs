@@ -156,7 +156,7 @@ namespace Former
         {
             AmmendOrderResponse response = null;
 
-            async Task PlaceOrdersFunc()
+            async Task AmendOrdersFunc()
             {
                 response = await _client.AmmendOrderAsync(new AmmendOrderRequest
                 {
@@ -168,7 +168,23 @@ namespace Former
                 }, metadata);
             }
 
-            await ConnectionTester(PlaceOrdersFunc);
+            await ConnectionTester(AmendOrdersFunc);
+            return response;
+        }
+
+        internal async Task<DeleteOrderResponse> DeleteOrder(string id, Metadata metadata)
+        {
+            DeleteOrderResponse response = null;
+
+            async Task DeleteOrderFunc()
+            {
+                response = await _client.DeleteOrderAsync(new DeleteOrderRequest
+                {
+                    OrderId = id
+                }, metadata);
+            }
+
+            await ConnectionTester(DeleteOrderFunc);
             return response;
         }
 
@@ -180,6 +196,7 @@ namespace Former
             _ = ObserveMarketPrices(meta);
             _ = ObserveMyOrders(meta);
         }
+
         internal void StopObserving()
         {
             _isDisposeRequested = true;
