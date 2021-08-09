@@ -321,8 +321,8 @@ namespace UI
             this.MainMenuGroupBox.Controls.Add(this.ConfigUpdatePriceRangel);
             this.MainMenuGroupBox.Controls.Add(this.ConfigRequiredProfit);
             this.MainMenuGroupBox.Controls.Add(this.ConfigVolumeOfContractsl);
-            this.MainMenuGroupBox.Controls.Add(this.StopButton);
             this.MainMenuGroupBox.Controls.Add(this.StartButton);
+            this.MainMenuGroupBox.Controls.Add(this.StopButton);
             this.MainMenuGroupBox.Location = new System.Drawing.Point(145, 10);
             this.MainMenuGroupBox.Name = "MainMenuGroupBox";
             this.MainMenuGroupBox.Size = new System.Drawing.Size(695, 310);
@@ -487,12 +487,15 @@ namespace UI
             // 
             // StopButton
             // 
+            this.StopButton.Enabled = false;
             this.StopButton.Location = new System.Drawing.Point(340, 243);
             this.StopButton.Name = "StopButton";
             this.StopButton.Size = new System.Drawing.Size(349, 61);
             this.StopButton.TabIndex = 18;
-            this.StopButton.Text = "button1";
+            this.StopButton.Text = "Stop bot";
             this.StopButton.UseVisualStyleBackColor = true;
+            this.StopButton.Visible = false;
+            this.StopButton.Click += new System.EventHandler(this.StopButton_Click);
             // 
             // TradeBotUi
             // 

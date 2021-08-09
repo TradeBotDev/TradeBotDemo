@@ -69,7 +69,13 @@ namespace UI
                 Config = GetConfig()
             };
 
-            var call2 = await _client.SwitchBotAsync(requestForRelay, _meta);
+            var call2 = await _client.StartBotAsync(requestForRelay, _meta);
+
+            StartButton.Enabled = false;
+            StartButton.Visible = false;
+            StopButton.Enabled = true;
+            StopButton.Visible = true;
+
             Console.WriteLine("Запустил бота с конфигом {0}", requestForRelay.Config);
         }
 
@@ -179,7 +185,16 @@ namespace UI
 
         private async void UpdateConfigButton_Click(object sender, EventArgs e)
         {
-            var updateConfigRespinse = await _client.UpdateServerConfigAsync(new UpdateServerConfigRequest { Request = new TradeBot.Common.v1.UpdateServerConfigRequest { Config = GetConfig(), Switch = false}});
+            var updateConfigResponse = await _client.UpdateServerConfigAsync(new UpdateServerConfigRequest { Request = new TradeBot.Common.v1.UpdateServerConfigRequest { Config = GetConfig(), Switch = false}});
+        }
+
+        private async void StopButton_Click(object sender, EventArgs e)
+        {
+            StartButton.Enabled = true;
+            StartButton.Visible = true;
+            StopButton.Enabled = false;
+            StopButton.Visible = false;
+            var stopBotResponse = await _client.UpdateServerConfigAsync(new UpdateServerConfigRequest { Request = new TradeBot.Common.v1.UpdateServerConfigRequest { Config = GetConfig(), Switch = true}});
         }
     }
 }
