@@ -20,9 +20,8 @@ namespace Former
             var task = Task.Run(() =>
             {
                 var meta = context.RequestHeaders.ToDictionary(x => x.Key, x => x.Value);
-                var userContext = Clients.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"], request.Request);
-                userContext.Token = context.CancellationToken;
-                if (context.CancellationToken.IsCancellationRequested) userContext.UnsubscribeStorage();
+                var userContext = Clients.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"], request.Request.Config);
+                if (request.Request.Switch) userContext.UnsubscribeStorage();
             });
             await task;
             return new UpdateServerConfigResponse();

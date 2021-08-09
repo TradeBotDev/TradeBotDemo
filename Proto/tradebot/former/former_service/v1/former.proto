@@ -32,7 +32,7 @@ message DeleteOrderResponse{
 }
 
 message UpdateServerConfigRequest{
-	tradebot.common.v1.Config request = 1;
+	tradebot.common.v1.UpdateServerConfigRequest request = 1;
 }
 
 message UpdateServerConfigResponse{

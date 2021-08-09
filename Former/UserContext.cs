@@ -40,8 +40,6 @@ namespace Former
             _updateHandlers = new UpdateHandlers(_storage, _configuration, _tradeMarketClient, Meta, Logger);
 
             SubscribeStorageToMarket();
-
-            _tradeMarketClient.StartObserving(Meta, Token);
         }
 
         public void SubscribeStorageToMarket()
@@ -50,10 +48,12 @@ namespace Former
             _tradeMarketClient.UpdateBalance += _storage.UpdateBalance;
             _tradeMarketClient.UpdateMyOrders += _storage.UpdateMyOrderList;
             _tradeMarketClient.UpdatePosition += _storage.UpdatePosition;
+            _tradeMarketClient.StartObserving(Meta);
         }
 
         public void UnsubscribeStorage()
         {
+            _tradeMarketClient.StopObserving();
             _tradeMarketClient.UpdateMarketPrices -= _storage.UpdateMarketPrices;
             _tradeMarketClient.UpdateBalance -= _storage.UpdateBalance;
             _tradeMarketClient.UpdateMyOrders -= _storage.UpdateMyOrderList;
