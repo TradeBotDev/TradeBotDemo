@@ -216,7 +216,7 @@ namespace Facade
             Log.Information("{@Where}: Client disconnected", "Facade");
             return Task.FromResult(new DeleteOrderResponse { });
         }
-        public override Task<SwitchBotResponse> SwitchBot(SwitchBotRequest request, ServerCallContext context)
+        public override Task<SwitchBotResponse> StartBot(SwitchBotRequest request, ServerCallContext context)
         {
             while (true)
             {
@@ -241,6 +241,28 @@ namespace Facade
             }
             Log.Information("{@Where}: Client disconnected", "Facade");
             return Task.FromResult(new SwitchBotResponse { });
+        }
+        public override Task<StopBotResponse> StopBot(StopBotRequest request, ServerCallContext context)
+        {
+            {
+                while (true)
+                {
+                    try
+                    {
+                        if (context.CancellationToken.IsCancellationRequested) break;
+                        var response = clientRelay.UpdateServerConfig(new TradeBot.Relay.RelayService.v1.UpdateServerConfigRequest {Request=request.Request});
+                        Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
+                        Log.Information("{@Where}: {@MethodName} \n args: response={@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
+                        return Task.FromResult(new StopBotResponse { });
+                    }
+                    catch (RpcException e)
+                    {
+                        Log.Error("{@Where}: Exception" + e.Message, "Facade");
+                    }
+                }
+                Log.Information("{@Where}: Client disconnected", "Facade");
+                return Task.FromResult(new StopBotResponse { });
+            }
         }
         public override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request, ServerCallContext context)
         {

@@ -71,6 +71,7 @@ namespace Relay.Services
             user.StatusOfWork();
                 user.SubscribeForOrders();
             //user.UpdateConfig(new TradeBot.Common.v1.UpdateServerConfigRequest { Config=request.Config });
+
             return await Task.FromResult(new StartBotResponse()
             {
                 Response = new DefaultResponse()
