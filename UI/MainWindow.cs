@@ -23,7 +23,7 @@ namespace UI
             _client = new FacadeService.FacadeServiceClient(GrpcChannel.ForAddress("https://localhost:5002"));
             InitializeComponent();
             InitIntervalMap();
-
+            InitSensitivityMap();
         }
 
         private void InitIntervalMap()
@@ -51,13 +51,13 @@ namespace UI
             };
         }
 
-        private void InitSensitivity()
+        private void InitSensitivityMap()
         {
             _sensitivityMap = new Dictionary<string, int>
             {
-                { "minimal", 1},
-                { "medium", 2},
-                { "high", 3}
+                { "Minimal", 1},
+                { "Medium", 2},
+                { "High", 3}
             };
         }
 
