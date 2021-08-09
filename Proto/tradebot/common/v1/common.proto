@@ -93,6 +93,7 @@ message SubscribeLogsResponse{
 
 message UpdateServerConfigRequest {
 	Config config = 1;
+	bool switch = 2;
 }
 message UpdateServerConfigResponse {
 	google.protobuf.Empty empty = 1;
