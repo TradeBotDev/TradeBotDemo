@@ -47,6 +47,8 @@ namespace Website.Controllers
         [HttpGet]
         public IActionResult AddExchangeAccess()
         {
+            ViewBag.Title = "Добавить биржу";
+            ViewBag.SectionTitle = $"Добавить биржу";
             return View();
         }
 

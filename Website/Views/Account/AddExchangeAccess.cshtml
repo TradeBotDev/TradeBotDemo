@@ -1,14 +1,14 @@
 ﻿<!--Форма добавления биржи-->
-<form method="post">
+<form class="form" method="post">
     <p>Выберите биржу:</p>
-    <select name="ExchangeCode">
+    <select class="form_select" name="ExchangeCode">
         <!--Пункты, которые содержат в себе код биржи (value)-->
         <option value="1">Bitmex</option>
     </select>
 
     <p>Токен:</p>
-    <input type="text" name="Token" />
+    <input class="form_input" type="text" name="Token" />
     <p>Секрет:</p>
-    <input type="text" name="Secret" />
-    <input type="submit" value="Добавить" />
+    <input class="form_input" type="text" name="Secret" />
+    <input class="button form_button" type="submit" value="Добавить" />
 </form>
