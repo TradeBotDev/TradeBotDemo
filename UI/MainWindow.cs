@@ -64,19 +64,26 @@ namespace UI
 
         private async void StartButton_Click(object sender, EventArgs e)
         {
-            var requestForRelay = new SwitchBotRequest()
-            {
-                Config = GetConfig()
-            };
+            var configuration = GetConfig();
 
-            var call2 = await _client.StartBotAsync(requestForRelay, _meta);
+            var startBotResponse = await _client.StartBotAsync(new SwitchBotRequest
+            {
+                Config = configuration
+            }, _meta);
+            var updateConfigResponse = await _client.UpdateServerConfigAsync(
+                new UpdateServerConfigRequest
+                {
+                    Request = new TradeBot.Common.v1.UpdateServerConfigRequest
+                        { Config = configuration, Switch = false }
+                }, _meta);
+
 
             StartButton.Enabled = false;
             StartButton.Visible = false;
             StopButton.Enabled = true;
             StopButton.Visible = true;
 
-            Console.WriteLine("Запустил бота с конфигом {0}", requestForRelay.Config);
+            Console.WriteLine("Запустил бота с конфигом {0}", configuration);
         }
 
         private Config GetConfig()
