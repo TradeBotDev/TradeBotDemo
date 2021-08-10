@@ -85,7 +85,9 @@ namespace Former.Model
 
         public async Task RemoveAllMyOrders()
         {
+            _tradeMarketClient.UpdateMyOrders -= _storage.UpdateMyOrderList;
             await _former.RemoveAllMyOrders();
+            _tradeMarketClient.UpdateMyOrders += _storage.UpdateMyOrderList;
         }
     }
 }
