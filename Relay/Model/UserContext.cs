@@ -23,7 +23,7 @@ namespace Relay.Model
         private IClientStreamWriter<AddOrderRequest> _algorithmStream;
         private IAsyncStreamReader<SubscribeOrdersResponse> _tradeMarketStream;
         private IAsyncStreamReader<TradeBot.Former.FormerService.v1.SubscribeLogsResponse> _formerStream;
-        private bool IsWorking = false;
+        private bool IsWorking = true;
 
         public UserContext(Metadata meta, FormerClient formerClient, AlgorithmClient algorithmClient, TradeMarketClient tradeMarketClient)
         {
@@ -34,6 +34,7 @@ namespace Relay.Model
             
             _algorithmStream = _algorithmClient.OpenStream(meta);
             _tradeMarketStream = _tradeMarketClient.OpenStream(meta);
+
         }
         public IAsyncStreamReader<SubscribeOrdersResponse> ReConnect()
         {
@@ -43,7 +44,7 @@ namespace Relay.Model
 
         public void StatusOfWork()
         {
-            if (IsWorking)
+            if (!IsWorking)
             {
                 IsWorking = false;
                 _tradeMarketClient.OrderRecievedEvent -= _tradeMarketClient_OrderRecievedEvent;
