@@ -21,7 +21,8 @@ namespace Website.Controllers
 
         public IActionResult Buy(CreditCardModel model)
         {
-            return Content(model.ToString());
+            if (ModelState.IsValid) return Content($"{model.CardNumber}, {model.Date}, {model.CVV}");
+            else return Content("Ошибка");
         }
     }
 }

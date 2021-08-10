@@ -13,11 +13,9 @@ namespace Website.Models
         public string CardNumber { get; set; }
 
         [Required]
-        [Range(4, 4)]
         public int Date { get; set; }
 
         [Required]
-        [Range(3, 3)]
         public int CVV { get; set; }
     }
 }
