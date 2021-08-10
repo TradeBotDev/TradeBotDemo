@@ -188,7 +188,7 @@ namespace UI
 
         private async void RemoveMyOrdersButton_Click(object sender, EventArgs e)
         {
-            var removeMyOrdersResponse = await _client.DeleteOrderAsync(new DeleteOrderRequest(), _meta); 
+            var removeMyOrdersResponse = await _client.DeleteOrderAsync(new DeleteOrderRequest(),_meta); 
         }
 
         private async void UpdateConfigButton_Click(object sender, EventArgs e)
@@ -202,7 +202,7 @@ namespace UI
             StartButton.Visible = true;
             StopButton.Enabled = false;
             StopButton.Visible = false;
-            var stopBotResponse = await _client.UpdateServerConfigAsync(new UpdateServerConfigRequest { Request = new TradeBot.Common.v1.UpdateServerConfigRequest { Config = GetConfig(), Switch = true}},_meta);
+            var stopBotResponse = await _client.StopBotAsync(new StopBotRequest { Request=new TradeBot.Common.v1.UpdateServerConfigRequest {Config=GetConfig(),Switch=true } },_meta);
         }
         private async void MainWindow_FormClosing(object sender, FormClosingEventArgs e) 
         {

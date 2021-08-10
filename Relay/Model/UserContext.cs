@@ -46,13 +46,13 @@ namespace Relay.Model
         {
             if (!IsWorking)
             {
-                IsWorking = false;
+                IsWorking = true;
                 _tradeMarketClient.OrderRecievedEvent -= _tradeMarketClient_OrderRecievedEvent;
                 Log.Information("The bot is stopping...");
             }
             else
             {
-                IsWorking = true;
+                IsWorking = false;
                 _tradeMarketClient.OrderRecievedEvent += _tradeMarketClient_OrderRecievedEvent;
                 Log.Information("The bot is starting...");
             }
@@ -61,7 +61,7 @@ namespace Relay.Model
 
         private void _tradeMarketClient_OrderRecievedEvent(object sender, TradeBot.Common.v1.Order e)
         {
-            Log.Information($"Sending order {e.Price} : {e.Quantity} : {e.Id}");
+            Log.Information("{@Where}: Sending order Price={@Price} : Quantity={@Quantity} : Id={@Id}", "Relay",e.Price,e.Quantity,e.Id);
             Task.Run(async()=> 
             { 
                 await _algorithmClient.WriteOrder(_algorithmStream, e);
@@ -76,7 +76,7 @@ namespace Relay.Model
 
         public void SubscribeForOrders()
         {
-            if (IsWorking && !IsStart)
+            if (!IsWorking && !IsStart)
             {
                 IsStart = true;
                 _tradeMarketClient.SubscribeForOrders(_tradeMarketStream);

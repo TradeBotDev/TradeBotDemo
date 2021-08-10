@@ -198,7 +198,7 @@ namespace Facade
                 try
                 {
                     if (context.CancellationToken.IsCancellationRequested) break;
-                    var response = clientRelay.DeleteOrder(new TradeBot.Relay.RelayService.v1.DeleteOrderRequest {});
+                    var response = clientRelay.DeleteOrder(new TradeBot.Relay.RelayService.v1.DeleteOrderRequest {},context.RequestHeaders);
                     Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
                     Log.Information("{@Where}: {@MethodName} \n args: response={@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
                     return Task.FromResult(new DeleteOrderResponse { Response=new TradeBot.Common.v1.DefaultResponse 
@@ -250,7 +250,14 @@ namespace Facade
                     try
                     {
                         if (context.CancellationToken.IsCancellationRequested) break;
-                        var response = clientRelay.UpdateServerConfig(new TradeBot.Relay.RelayService.v1.UpdateServerConfigRequest {Request=request.Request},context.RequestHeaders);
+                        var response = clientRelay.StopBot(new TradeBot.Relay.RelayService.v1.StopBotRequest
+                        {
+                            Request = new TradeBot.Common.v1.UpdateServerConfigRequest 
+                            { 
+                                Config = request.Request.Config, 
+                                Switch = request.Request.Switch 
+                            }
+                        }, context.RequestHeaders);
                         Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
                         Log.Information("{@Where}: {@MethodName} \n args: response={@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
                         return Task.FromResult(new StopBotResponse { });
