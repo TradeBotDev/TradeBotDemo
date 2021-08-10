@@ -8,7 +8,7 @@
     <h3>Введите данные карты</h3>
     <div class="form_errors_list" asp-validation-summary="All"></div>
     <p>Номер карты:</p>
-    <input class="form_input" asp-for="@Model.CardNumber" type="number" maxlength="16" />
+    <input class="form_input" asp-for="@Model.CardNumber" type="text" maxlength="16" />
     <p>Дата:</p>
     <input class="form_input" asp-for="@Model.Date" type="number" maxlength="4" />
     <p>CVV-код: </p>

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TradeBot.Account.AccountService.v1;
 using Website.Models;
 
 namespace Website.Controllers
@@ -23,9 +24,12 @@ namespace Website.Controllers
             if (!ModelState.IsValid)
                 return View();
 
+            var reply = Clients.LicenseClient.SetLicense(User.Identity.Name, ProductCode.Tradebot, model);
+            if (reply.Code == LicenseCode.Successful)
+                return Content(reply.Message);
+            else return View("~/Views/Shared/Error.cshtml", reply.Message);
 
-
-            return Content($"{model.CardNumber}, {model.Date}, {model.CVV}");
+            //return Content($"{model.CardNumber}, {model.Date}, {model.CVV}");
         }
     }
 }
