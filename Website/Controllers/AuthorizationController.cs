@@ -19,6 +19,9 @@ namespace Website.Controllers
         [HttpPost]
         public IActionResult Login(LoginModel model)
         {
+            if (!ModelState.IsValid)
+                return View();
+
             var reply = Clients.AccountServiceClient.Login(model);
             if (reply.Result == AccountActionCode.Successful)
             {
