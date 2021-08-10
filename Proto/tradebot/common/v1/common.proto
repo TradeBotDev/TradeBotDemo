@@ -13,6 +13,14 @@ enum ReplyCode{
 	REPLY_CODE_FAILURE = 2;
 }
 
+enum ChangesType{
+	CHANGES_TYPE_UNDEFIEND = 0; 
+	CHANGES_TYPE_PARTITIAL = 1;
+	CHANGES_TYPE_UPDATE = 2; 
+	CHANGES_TYPE_INSERT = 3;
+	CHANGES_TYPE_DELETE = 4; 
+}
+
 message DefaultResponse{
 	ReplyCode code = 1;
 	string message = 2;
