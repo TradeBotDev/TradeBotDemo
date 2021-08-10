@@ -1,11 +1,11 @@
-﻿using System;
-using Serilog;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using Former.Clients;
+using Serilog;
 using TradeBot.Common.v1;
 using TradeBot.TradeMarket.TradeMarketService.v1;
 
-namespace Former
+namespace Former.Model
 {
     public class Storage
     {
@@ -32,13 +32,13 @@ namespace Former
         public bool PlaceLocker;
         public bool FitPricesLocker;
 
-        private readonly Logger _logger; 
+        private readonly HistoryClient _historyClient; 
 
-        internal Storage(Logger logger)
+        internal Storage(HistoryClient historyClient)
         {
             MyOrders = new ConcurrentDictionary<string, Order>();
             CounterOrders = new ConcurrentDictionary<string, Order>();
-            _logger = logger;
+            _historyClient = historyClient;
         }
 
         /// <summary>
@@ -126,12 +126,12 @@ namespace Former
             {
                 AvailableBalance = availableBalance;
                 Log.Information("{@Where}: Balance updated. Available balance: {@AvailableBalance}, Total balance: {@TotalBalance}", "Former", availableBalance, totalBalance);
-                _logger.WriteToLog($"Balance available: {availableBalance}", LogLevel.Information, DateTimeOffset.Now);
+                //_historyClient
             }
             if (totalBalance > 0)
             {
                 TotalBalance = totalBalance;
-                _logger.WriteToLog($"Balance total: {totalBalance}", LogLevel.Information, DateTimeOffset.Now);
+                //_historyClient
             }
             return Task.CompletedTask;
         }

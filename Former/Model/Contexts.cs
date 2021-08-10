@@ -2,7 +2,7 @@
 using System.Linq;
 using TradeBot.Common.v1;
 
-namespace Former
+namespace Former.Model
 {
     public static class Contexts
     {

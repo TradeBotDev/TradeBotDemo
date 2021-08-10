@@ -1,9 +1,10 @@
 ﻿using System.Threading;
-using Grpc.Core;
 using System.Threading.Tasks;
+using Former.Clients;
+using Grpc.Core;
 using TradeBot.Common.v1;
 
-namespace Former
+namespace Former.Model
 {
     public class UserContext
     {
@@ -11,13 +12,12 @@ namespace Former
         public string SessionId => Meta.GetValue("sessionid");
         public string TradeMarket => Meta.GetValue("trademarket");
         public string Slot => Meta.GetValue("slot");
-        public Logger Logger { get; }
-        public CancellationToken Token;
         private Config _configuration;
         private readonly Storage _storage;
         private readonly TradeMarketClient _tradeMarketClient;
         private readonly Former _former;
         private readonly UpdateHandlers _updateHandlers;
+        private readonly HistoryClient _historyClient;
         
 
         public Metadata Meta { get; }
@@ -33,11 +33,11 @@ namespace Former
             };
             TradeMarketClient.Configure("https://localhost:5005", 10000);
 
-            Logger = new Logger();
+            _historyClient = new HistoryClient();
             _tradeMarketClient = new TradeMarketClient();
-            _storage = new Storage(Logger);
-            _former = new Former(_storage, _configuration, _tradeMarketClient, Meta, Logger);
-            _updateHandlers = new UpdateHandlers(_storage, _configuration, _tradeMarketClient, Meta, Logger);
+            _storage = new Storage(_historyClient);
+            _former = new Former(_storage, _configuration, _tradeMarketClient, Meta, _historyClient);
+            _updateHandlers = new UpdateHandlers(_storage, _configuration, _tradeMarketClient, Meta, _historyClient);
 
             SubscribeStorageToMarket();
         }

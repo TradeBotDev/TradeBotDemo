@@ -1,13 +1,13 @@
-﻿using Grpc.Core;
-using Grpc.Net.Client;
-using Serilog;
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Grpc.Core;
+using Grpc.Net.Client;
+using Serilog;
 using TradeBot.Common.v1;
 using TradeBot.TradeMarket.TradeMarketService.v1;
 
-namespace Former
+namespace Former.Clients
 {
     public class TradeMarketClient
     {

@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Former.Clients;
 using Grpc.Core;
 using Serilog;
 using TradeBot.Common.v1;
 
-namespace Former
+namespace Former.Model
 {
     public class UpdateHandlers
     {
@@ -13,16 +14,16 @@ namespace Former
         private readonly Config _configuration;
         private readonly TradeMarketClient _tradeMarketClient;
         private readonly Metadata _metadata;
-        private readonly Logger _logger; 
+        private readonly HistoryClient _historyClient; 
 
-        internal UpdateHandlers(Storage storage, Config configuration, TradeMarketClient tradeMarketClient, Metadata metadata, Logger logger)
+        internal UpdateHandlers(Storage storage, Config configuration, TradeMarketClient tradeMarketClient, Metadata metadata, HistoryClient historyClient)
         {
             _storage = storage;
             _storage.HandleUpdateEvent += CheckAndFitPrices;
             _configuration = configuration;
             _metadata = metadata;
             _tradeMarketClient = tradeMarketClient;
-            _logger = logger;
+            _historyClient = historyClient;
         }
 
         /// <summary>
