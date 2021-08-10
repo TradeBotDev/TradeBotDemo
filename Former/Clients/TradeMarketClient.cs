@@ -25,7 +25,7 @@ namespace Former.Clients
 
         private static int _retryDelay;
         private static string _connectionString;
-        private bool _isDisposeRequested;
+        private CancellationTokenSource _token;
 
         private readonly TradeMarketService.TradeMarketServiceClient _client;
 
@@ -37,7 +37,7 @@ namespace Former.Clients
 
         public TradeMarketClient()
         {
-            _client = new TradeMarketService.TradeMarketServiceClient(GrpcChannel.ForAddress(_connectionString));
+            _client = new TradeMarketService.TradeMarketServiceClient( GrpcChannel.ForAddress(_connectionString));
         }
 
         /// <summary>
@@ -54,6 +54,7 @@ namespace Former.Clients
                 }
                 catch (RpcException e)
                 {
+                    if (e.StatusCode == StatusCode.Cancelled) break;
                     Log.Error("{@Where}: Error {@ExceptionMessage}. Retrying...\r\n{@ExceptionStackTrace}", "Former", e.Message, e.StackTrace);
                     Thread.Sleep(_retryDelay);
                 }
@@ -66,10 +67,9 @@ namespace Former.Clients
         private async Task ObserveMarketPrices(Metadata meta)
         {
             using var call = _client.SubscribePrice(new SubscribePriceRequest(), meta);
-
             async Task ObserveMarketPricesFunc()
             {
-                while (await call.ResponseStream.MoveNext() && !_isDisposeRequested)
+                while (await call.ResponseStream.MoveNext(_token.Token))
                 {
                     await UpdateMarketPrices?.Invoke(call.ResponseStream.Current.BidPrice, call.ResponseStream.Current.AskPrice);
                 }
@@ -87,12 +87,11 @@ namespace Former.Clients
 
             async Task ObserveBalanceFunc()
             {
-                while (await call.ResponseStream.MoveNext() && !_isDisposeRequested)
+                while (await call.ResponseStream.MoveNext(_token.Token))
                 {
                     await UpdateBalance?.Invoke((int) call.ResponseStream.Current.Margin.AvailableMargin, (int)call.ResponseStream.Current.Margin.MarginBalance);
                 }
             }
-
             await ConnectionTester(ObserveBalanceFunc);
         }
 
@@ -105,7 +104,7 @@ namespace Former.Clients
 
             async Task ObserveMyOrdersFunc()
             {
-                while (await call.ResponseStream.MoveNext() && !_isDisposeRequested)
+                while (await call.ResponseStream.MoveNext(_token.Token))
                 {
                     await UpdateMyOrders?.Invoke(call.ResponseStream.Current.Changed, call.ResponseStream.Current.ChangesType);
                 }
@@ -123,8 +122,7 @@ namespace Former.Clients
 
             async Task ObservePositionFunc()
             {
-                var token = new CancellationTokenSource();
-                while (await call.ResponseStream.MoveNext() && !_isDisposeRequested)
+                while (await call.ResponseStream.MoveNext(_token.Token))
                 {
                     await UpdatePosition?.Invoke(call.ResponseStream.Current.CurrentQty);
                 }
@@ -190,7 +188,7 @@ namespace Former.Clients
 
         internal void StartObserving(Metadata meta)
         {
-            _isDisposeRequested = false;
+            _token = new CancellationTokenSource();
             _ = ObservePositions(meta);
             _ = ObserveBalance(meta);
             _ = ObserveMarketPrices(meta);
@@ -199,7 +197,7 @@ namespace Former.Clients
 
         internal void StopObserving()
         {
-            _isDisposeRequested = true;
+            _token.Cancel();
         }
 
     }

@@ -16,6 +16,7 @@ namespace Former.Services
                 var meta = context.RequestHeaders.ToDictionary(x => x.Key, x => x.Value);
                 var userContext = Contexts.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"], request.Request.Config);
                 if (request.Request.Switch) userContext.UnsubscribeStorage();
+                else userContext.SubscribeStorageToMarket();
             });
             await task;
             return new UpdateServerConfigResponse();
