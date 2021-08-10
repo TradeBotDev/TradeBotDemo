@@ -34,9 +34,9 @@ namespace Relay.Clients
                 try
                 {
                     if (context.CancellationToken.IsCancellationRequested) break;
-                    var response = _client.DeleteOrder(new TradeBot.Former.FormerService.v1.DeleteOrderRequest {});
-                    Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
-                    Log.Information("{@Where}: {@MethodName} \n args: response={@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
+                    var response = _client.DeleteOrder(new TradeBot.Former.FormerService.v1.DeleteOrderRequest {},context.RequestHeaders);
+                    Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Relay", new System.Diagnostics.StackFrame().GetMethod().Name, request);
+                    Log.Information("{@Where}: {@MethodName} \n args: response={@response}", "Relay", new System.Diagnostics.StackFrame().GetMethod().Name, response);
                     return Task.FromResult(new TradeBot.Relay.RelayService.v1.DeleteOrderResponse
                     {
                         Response = new TradeBot.Common.v1.DefaultResponse

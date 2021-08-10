@@ -61,7 +61,7 @@ namespace Relay.Model
 
         private void _tradeMarketClient_OrderRecievedEvent(object sender, TradeBot.Common.v1.Order e)
         {
-            Log.Information($"Sending order {e.Price} : {e.Quantity} : {e.Id}");
+            Log.Information("{@Where}: Sending order Price={@Price} : Quantity={@Quantity} : Id={@Id}", "Relay",e.Price,e.Quantity,e.Id);
             Task.Run(async()=> 
             { 
                 await _algorithmClient.WriteOrder(_algorithmStream, e);
