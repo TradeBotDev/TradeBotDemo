@@ -9,18 +9,16 @@ package tradebot.former.former_service.v1;
 service FormerService{
 
 	/*
-		подписка на ответ алгоритма
+		алгоритм отсылает решение формеру
 	*/
 	rpc SendAlgorithmDecision (SendAlgorithmDecisionRequest) returns (SendAlgorithmDecisionResponse);
-	/*
-		Подписка на логи нужного сервиса
-	*/
-	rpc SubscribeLogs(SubscribeLogsRequest) returns (stream SubscribeLogsResponse);
 	/*
 		Клиент говорит обновиться серверу
 	*/
 	rpc UpdateServerConfig (UpdateServerConfigRequest) returns (UpdateServerConfigResponse);
-
+	/*
+		Клиент говорит серверу снять ордер
+	*/
 	rpc DeleteOrder(DeleteOrderRequest) returns (DeleteOrderResponse);
 
 }message DeleteOrderRequest{
