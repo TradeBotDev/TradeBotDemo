@@ -1,12 +1,13 @@
 ﻿using System;
-using Google.Protobuf.WellKnownTypes;
-using Serilog;
 using System.Linq;
 using System.Threading.Tasks;
+using Former.Clients;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using Serilog;
 using TradeBot.Common.v1;
 
-namespace Former
+namespace Former.Model
 {
     public class Former
     {
@@ -14,16 +15,16 @@ namespace Former
         private readonly Config _configuration;
         private readonly TradeMarketClient _tradeMarketClient;
         private readonly Metadata _metadata;
-        private readonly Logger _logger; 
+        private readonly HistoryClient _historyClient;
 
-        public Former(Storage storage, Config configuration, TradeMarketClient tradeMarketClient, Metadata metadata, Logger logger)
+        internal Former(Storage storage, Config configuration, TradeMarketClient tradeMarketClient, Metadata metadata, HistoryClient historyClient)
         {
             _storage = storage;
             _storage.PlaceOrderEvent += PlaceCounterOrder;
             _configuration = configuration;
             _tradeMarketClient = tradeMarketClient;
             _metadata = metadata;
-            _logger = logger;
+            _historyClient = historyClient;
         }
 
         /// <summary>
@@ -51,7 +52,7 @@ namespace Former
             }
             Log.Information("{@Where}: Counter order {@Id} price: {@Price}, quantity: {@Quantity} placed {@ResponseCode} {@ResponseMessage}", "Former", oldOrder.Id, price, -quantity, placeResponse.Response.Code, placeResponse.Response.Code == ReplyCode.Succeed ? "" : placeResponse.Response.Message);
             Log.Information("{@Where}: Order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@ResponseCode} added to counter orders list {@ResponseMessage}", "Former", placeResponse.OrderId, price, -quantity, type, addResponse ? ReplyCode.Succeed : ReplyCode.Failure);
-            _logger.WriteToLog($"Former: Counter order {oldOrder.Id} price: {price}, quantity: {-quantity} placed {placeResponse.Response.Code} {(placeResponse.Response.Code == ReplyCode.Succeed ? "" : placeResponse.Response.Message)}", LogLevel.Information, DateTimeOffset.Now);
+            //_historyClient.
         }
 
         /// <summary>
@@ -117,7 +118,7 @@ namespace Former
                 Log.Information("{@Where}: Order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} added to my orders list {@ResponseCode}", "Former", response.OrderId, price, quantity, orderType, addResponse ? ReplyCode.Succeed : ReplyCode.Failure);
             }
             Log.Information("{@Where}: Order {@Id} price: {@Price}, quantity: {@Quantity} placed for {@Type} {@ResponseCode} {@ResponseMessage}", "Former", response.OrderId, price, quantity, orderType, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
-            _logger.WriteToLog($"Former: Order {response.OrderId} price: {price}, quantity: {quantity} placed for {orderType} {response.Response.Code.ToString()} {(response.Response.Code == ReplyCode.Failure ? response.Response.Message : "")}", LogLevel.Information, DateTimeOffset.Now);
+            //_historyClient
         }
 
         /// <summary>
@@ -126,6 +127,16 @@ namespace Former
         private double ConvertSatoshiToXBT(int satoshiValue)
         {
             return satoshiValue * 0.00000001;
+        }
+
+        internal async Task RemoveAllMyOrders()
+        {
+            foreach (var (key, _) in _storage.MyOrders)
+            {
+                var response = await _tradeMarketClient.DeleteOrder(key, _metadata);
+                if (response.Response.Code == ReplyCode.Succeed) _storage.MyOrders.TryRemove(key, out _);
+                else return;
+            }
         }
     }
 }
