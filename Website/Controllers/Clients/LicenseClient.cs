@@ -1,34 +1,34 @@
 ﻿using Grpc.Net.Client;
 using TradeBot.Account.AccountService.v1;
+using Website.Models;
 
 namespace Website.Controllers.Clients
 {
     public static class LicenseClient
     {
-        //private static License.LicenseClient client = new License.LicenseClient();
+        private static License.LicenseClient client = new(GrpcChannel.ForAddress("http://localhost:5000"));
 
-        //public static SetLicenseResponse SetLicense(string sessionId, ProductCode product)
-        //{
-        //    int accountId = AccountServiceClient.AccountData(sessionId).CurrentAccount.AccountId;
-        //    var request = new SetLicenseRequest
-        //    {
-        //        AccountId = accountId,
-        //        Product = product
-        //    };
+        public static SetLicenseResponse SetLicense(string sessionId, ProductCode product, CreditCardModel model)
+        {
+            var request = new SetLicenseRequest
+            {
+                SessionId = sessionId,
+                Product = product,
+                CardNumber = model.CardNumber,
+                Date = model.Date,
+                Cvv = model.CVV
+            };
+            return client.SetLicense(request);
+        }
 
-        //    return client.SetLicense(request);
-        //}
-
-        //public static CheckLicenseResponse CheckLicense(string sessionId, ProductCode product)
-        //{
-        //    int accountId = AccountServiceClient.AccountData(sessionId).CurrentAccount.AccountId;
-        //    var request = new CheckLicenseRequest
-        //    {
-        //        AccountId = accountId,
-        //        Product = product
-        //    };
-
-        //    return client.CheckLicense(request);
-        //}
+        public static CheckLicenseResponse CheckLicense(string sessionId, ProductCode product)
+        {
+            var request = new CheckLicenseRequest
+            {
+                SessionId = sessionId,
+                Product = product
+            };
+            return client.CheckLicense(request);
+        }
     }
 }

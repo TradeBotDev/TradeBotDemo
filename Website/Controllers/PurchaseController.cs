@@ -22,6 +22,9 @@ namespace Website.Controllers
         {
             if (!ModelState.IsValid)
                 return View();
+
+
+
             return Content($"{model.CardNumber}, {model.Date}, {model.CVV}");
         }
     }

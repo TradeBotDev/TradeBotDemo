@@ -16,6 +16,9 @@ service License {
 message SetLicenseRequest {
 	string session_id = 1;
 	ProductCode product = 2;
+	string card_number = 3;
+	int32 date = 4;
+	int32 cvv = 5;
 }
 
 // Ответ на запрос об установке лицензии.
