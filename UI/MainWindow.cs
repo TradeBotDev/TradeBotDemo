@@ -25,6 +25,7 @@ namespace UI
             InitializeComponent();
             InitIntervalMap();
             InitSensitivityMap();
+            this.FormClosing += MainWindow_FormClosing;
         }
 
         private void InitIntervalMap()
@@ -201,6 +202,10 @@ namespace UI
             StartButton.Visible = true;
             StopButton.Enabled = false;
             StopButton.Visible = false;
+            var stopBotResponse = await _client.UpdateServerConfigAsync(new UpdateServerConfigRequest { Request = new TradeBot.Common.v1.UpdateServerConfigRequest { Config = GetConfig(), Switch = true}},_meta);
+        }
+        private async void MainWindow_FormClosing(object sender, FormClosingEventArgs e) 
+        {
             var stopBotResponse = await _client.UpdateServerConfigAsync(new UpdateServerConfigRequest { Request = new TradeBot.Common.v1.UpdateServerConfigRequest { Config = GetConfig(), Switch = true}},_meta);
         }
     }

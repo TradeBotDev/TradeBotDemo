@@ -51,7 +51,7 @@ namespace Former.Clients
             }
         }
 
-        private async Task<PublishBalanceUpdateResponse> WriteBalance(double balance, Metadata meta)
+        internal async Task<PublishBalanceUpdateResponse> WriteBalance(double balance, Metadata meta)
         {
             PublishBalanceUpdateResponse response = null;
             async Task PublishBalanceUpdateFunc()
@@ -67,7 +67,7 @@ namespace Former.Clients
             return response;
         }
 
-        private async Task<PublishOrderUpdateResponse> WriteOrder(Order order, ChangesType changesType, Metadata meta)
+        internal async Task<PublishOrderUpdateResponse> WriteOrder(Order order, ChangesType changesType, Metadata meta)
         {
             PublishOrderUpdateResponse response = null;
 

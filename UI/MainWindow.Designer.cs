@@ -62,12 +62,12 @@ namespace UI
             this.ConfigVolumeOfContracts = new System.Windows.Forms.ComboBox();
             this.ConfigAlgorithmSensivity = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
+            this.StopButton = new System.Windows.Forms.Button();
             this.SignUpGroupBox = new System.Windows.Forms.GroupBox();
             this.SignInGroupBox = new System.Windows.Forms.GroupBox();
             this.EventConsole = new System.Windows.Forms.RichTextBox();
             this.LoggedGroupBox = new System.Windows.Forms.GroupBox();
             this.SignOutButton = new System.Windows.Forms.Button();
-            this.StopButton = new System.Windows.Forms.Button();
             this.MainMenuGroupBox.SuspendLayout();
             this.SignUpGroupBox.SuspendLayout();
             this.SignInGroupBox.SuspendLayout();
@@ -418,6 +418,18 @@ namespace UI
             this.label2.TabIndex = 12;
             this.label2.Text = "Algorithm sensivity";
             // 
+            // StopButton
+            // 
+            this.StopButton.Enabled = false;
+            this.StopButton.Location = new System.Drawing.Point(340, 243);
+            this.StopButton.Name = "StopButton";
+            this.StopButton.Size = new System.Drawing.Size(349, 61);
+            this.StopButton.TabIndex = 18;
+            this.StopButton.Text = "Stop bot";
+            this.StopButton.UseVisualStyleBackColor = true;
+            this.StopButton.Visible = false;
+            this.StopButton.Click += new System.EventHandler(this.StopButton_Click);
+            // 
             // SignUpGroupBox
             // 
             this.SignUpGroupBox.Controls.Add(this.RegistrationButton);
@@ -484,18 +496,6 @@ namespace UI
             this.SignOutButton.Text = "Sign Out";
             this.SignOutButton.UseVisualStyleBackColor = true;
             this.SignOutButton.Click += new System.EventHandler(this.SignOutButton_Click);
-            // 
-            // StopButton
-            // 
-            this.StopButton.Enabled = false;
-            this.StopButton.Location = new System.Drawing.Point(340, 243);
-            this.StopButton.Name = "StopButton";
-            this.StopButton.Size = new System.Drawing.Size(349, 61);
-            this.StopButton.TabIndex = 18;
-            this.StopButton.Text = "Stop bot";
-            this.StopButton.UseVisualStyleBackColor = true;
-            this.StopButton.Visible = false;
-            this.StopButton.Click += new System.EventHandler(this.StopButton_Click);
             // 
             // TradeBotUi
             // 
