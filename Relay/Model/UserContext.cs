@@ -34,7 +34,6 @@ namespace Relay.Model
             
             _algorithmStream = _algorithmClient.OpenStream(meta);
             _tradeMarketStream = _tradeMarketClient.OpenStream(meta);
-            _formerStream = _formerClient.OpenStream(meta);//мб нужно будет кидать мету
         }
         public IAsyncStreamReader<SubscribeOrdersResponse> ReConnect()
         {
@@ -73,24 +72,6 @@ namespace Relay.Model
             _ = _algorithmClient.UpdateConfig(update, Meta);
             _ = _formerClient.UpdateConfig(update, Meta);
         }
-        
-        public async Task RepeatLogsFormer(TradeBot.Relay.RelayService.v1.SubscribeLogsRequest request, IServerStreamWriter<TradeBot.Relay.RelayService.v1.SubscribeLogsResponse> responseStream)
-        {
-            await foreach (var item in _formerClient.SubscribeForLogs(_formerStream))
-            {
-                try {
-                    Log.Information("{@Where}: RepeatLogsFormer, response: {@response}","Relay" ,item.Response);
-                    await responseStream.WriteAsync(new TradeBot.Relay.RelayService.v1.SubscribeLogsResponse { Response = item.Response });
-                }
-                catch(Exception e)
-                {
-                    Log.Error(e.Message);
-                }
-            }
-
-        }
-
-
 
         public void SubscribeForOrders()
         {
