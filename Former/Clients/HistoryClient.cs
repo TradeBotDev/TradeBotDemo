@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Grpc.Net.Client;
 using Serilog;
+using TradeBot.Common.v1;
 using TradeBot.History.HistoryService.v1;
 
 namespace Former.Clients
@@ -48,7 +51,39 @@ namespace Former.Clients
             }
         }
 
+        private async Task<PublishBalanceUpdateResponse> WriteBalance(double balance, Metadata meta)
+        {
+            PublishBalanceUpdateResponse response = null;
+            async Task PublishBalanceUpdateFunc()
+            {
+                response = await _client.PublishBalanceUpdateAsync(new PublishBalanceUpdateRequest
+                {
+                    Balance = new Balance { Currency = "XBT", Value = balance.ToString(CultureInfo.InvariantCulture) },
+                    Sessionid = meta.GetValue("sessionid"), Time = new Timestamp { Seconds = DateTimeOffset.Now.ToUnixTimeSeconds() }
+                });
+            }
 
+            await ConnectionTester(PublishBalanceUpdateFunc);
+            return response;
+        }
+
+        private async Task<PublishOrderUpdateResponse> WriteOrder(Order order, ChangesType changesType, Metadata meta)
+        {
+            PublishOrderUpdateResponse response = null;
+
+            async Task PublishBalanceUpdateFunc()
+            {
+                response = await _client.PublishOrderUpdateAsync(new PublishOrderUpdateRequest()
+                {
+                    ChangesType = changesType, Order = order, Sessionid = meta.GetValue("sessionid"),
+                    Time = new Timestamp { Seconds = DateTimeOffset.Now.ToUnixTimeSeconds() }
+                });
+            }
+
+            await ConnectionTester(PublishBalanceUpdateFunc);
+            return response;
+
+        }
 
     }
 }

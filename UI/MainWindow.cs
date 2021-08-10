@@ -187,7 +187,7 @@ namespace UI
 
         private async void RemoveMyOrdersButton_Click(object sender, EventArgs e)
         {
-            var removeMyOrdersResponse = await _client.DeleteOrderAsync(new DeleteOrderRequest()); 
+            var removeMyOrdersResponse = await _client.DeleteOrderAsync(new DeleteOrderRequest(), _meta); 
         }
 
         private async void UpdateConfigButton_Click(object sender, EventArgs e)

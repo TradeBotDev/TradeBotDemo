@@ -131,9 +131,10 @@ namespace Former.Model
 
         internal async Task RemoveAllMyOrders()
         {
-            foreach (var (key, _) in _storage.MyOrders)
+            foreach (var (key, value) in _storage.MyOrders)
             {
                 var response = await _tradeMarketClient.DeleteOrder(key, _metadata);
+                Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed {@ResponseCode}", "Former", value.Id, value.Price, value.Quantity, value.Signature.Type, response.Response.Code == ReplyCode.Succeed ? ReplyCode.Succeed : ReplyCode.Failure);
                 if (response.Response.Code == ReplyCode.Succeed) _storage.MyOrders.TryRemove(key, out _);
                 else return;
             }
