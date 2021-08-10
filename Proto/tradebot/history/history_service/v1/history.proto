@@ -33,6 +33,7 @@ message PublishOrderUpdateRequest{
 	string sessionid = 2;
 	tradebot.common.v1.ChangesType changes_type = 3;
 	tradebot.common.v1.Order order = 4;
+	string message = 5;
 }
 
 message PublishOrderUpdateResponse{
@@ -58,4 +59,5 @@ message SubscribeOrderEventRespones{
 	string sessionid = 2;
 	tradebot.common.v1.ChangesType changes_type = 3;
 	tradebot.common.v1.Order order = 4;
+	string message = 5;
 }

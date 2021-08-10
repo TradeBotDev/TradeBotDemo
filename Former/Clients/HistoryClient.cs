@@ -44,7 +44,6 @@ namespace Former.Clients
                 }
                 catch (RpcException e)
                 {
-                    if (e.StatusCode == StatusCode.Cancelled) break;
                     Log.Error("{@Where}: Error {@ExceptionMessage}. Retrying...\r\n{@ExceptionStackTrace}", "Former", e.Message, e.StackTrace);
                     Thread.Sleep(_retryDelay);
                 }
@@ -67,7 +66,7 @@ namespace Former.Clients
             return response;
         }
 
-        internal async Task<PublishOrderUpdateResponse> WriteOrder(Order order, ChangesType changesType, Metadata meta)
+        internal async Task<PublishOrderUpdateResponse> WriteOrder(Order order, ChangesType changesType, Metadata meta, string message)
         {
             PublishOrderUpdateResponse response = null;
 
@@ -76,7 +75,8 @@ namespace Former.Clients
                 response = await _client.PublishOrderUpdateAsync(new PublishOrderUpdateRequest()
                 {
                     ChangesType = changesType, Order = order, Sessionid = meta.GetValue("sessionid"),
-                    Time = new Timestamp { Seconds = DateTimeOffset.Now.ToUnixTimeSeconds() }
+                    Time = new Timestamp { Seconds = DateTimeOffset.Now.ToUnixTimeSeconds() },
+                    Message = message
                 });
             }
 

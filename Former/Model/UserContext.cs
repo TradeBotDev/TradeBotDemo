@@ -32,12 +32,14 @@ namespace Former.Model
                 { "trademarket", tradeMarket },
                 { "slot", slot }
             };
+            _storage = new Storage();
+
             HistoryClient.Configure("http://localhost:5007", 10000);
             _historyClient = new HistoryClient();
 
             TradeMarketClient.Configure("https://localhost:5005", 10000);
             _tradeMarketClient = new TradeMarketClient();
-            _storage = new Storage(_historyClient);
+            
             _former = new Former(_storage, _configuration, _tradeMarketClient, Meta, _historyClient);
             _updateHandlers = new UpdateHandlers(_storage, _configuration, _tradeMarketClient, Meta, _historyClient);
         }
@@ -74,8 +76,6 @@ namespace Former.Model
             _storage.BuyMarketPrice = 0;
             _storage.FitPricesLocker = false;
             _storage.PlaceLocker = false;
-            _storage.SavedMarketBuyPrice = 0;
-            _storage.SavedMarketSellPrice = 0;
         }
 
         public async Task FormOrder(int decision)
