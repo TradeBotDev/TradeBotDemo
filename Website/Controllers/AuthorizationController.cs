@@ -61,7 +61,6 @@ namespace Website.Controllers
         public IActionResult Logout()
         {
             ViewBag.ReturnUrl = Request.Headers["Referer"].ToString();
-
             if (!User.Identity.IsAuthenticated)
                 return View("~/Views/Shared/Error.cshtml", "Вы уже вышли.");
             else return View();

@@ -1,10 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
 using Website.Models;
 
@@ -28,8 +23,6 @@ namespace Website.Controllers
             if (reply.Code == LicenseCode.Successful)
                 return Content(reply.Message);
             else return View("~/Views/Shared/Error.cshtml", reply.Message);
-
-            //return Content($"{model.CardNumber}, {model.Date}, {model.CVV}");
         }
     }
 }
