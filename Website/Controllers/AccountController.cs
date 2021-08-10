@@ -23,8 +23,6 @@ namespace Website.Controllers
                     Exchanges = accountData.CurrentAccount.Exchanges
                 };
 
-                ViewBag.Title = "Управление биржами";
-                ViewBag.SectionTitle = $"Управление биржами: {model.Email}";
                 return View(model);
             }
             else HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -47,8 +45,6 @@ namespace Website.Controllers
         [HttpGet]
         public IActionResult AddExchangeAccess()
         {
-            ViewBag.Title = "Добавить биржу";
-            ViewBag.SectionTitle = $"Добавить биржу";
             return View();
         }
 

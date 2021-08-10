@@ -15,8 +15,6 @@ namespace Website.Controllers
         [HttpGet]
         public IActionResult Buy()
         {
-            ViewBag.Title = "Оформление покупки";
-            ViewBag.SectionTitle = "Оформление покупки";
             return View();
         }
 
@@ -25,8 +23,6 @@ namespace Website.Controllers
             if (ModelState.IsValid) return Content($"{model.CardNumber}, {model.Date}, {model.CVV}");
             else
             {
-                ViewBag.Title = "Оформление покупки";
-                ViewBag.SectionTitle = "Оформление покупки";
                 return View();
             }
         }

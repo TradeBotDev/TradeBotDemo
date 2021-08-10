@@ -13,8 +13,6 @@ namespace Website.Controllers
         [HttpGet]
         public IActionResult Login()
         {
-            ViewBag.Title = "Вход";
-            //ViewBag.SectionTitle = "Вход";
             return View();
         }
 
@@ -35,8 +33,6 @@ namespace Website.Controllers
         [HttpGet]
         public IActionResult Register()
         {
-            ViewBag.Title = "Регистрация";
-            //ViewBag.SectionTitle = "Регистрация";
             return View();
         }
 
@@ -62,10 +58,7 @@ namespace Website.Controllers
 
             if (!User.Identity.IsAuthenticated)
                 return View("~/Views/Shared/Error.cshtml", "Вы уже вышли.");
-
-            ViewBag.Title = "Выход из аккаунта";
-            //ViewBag.SectionTitle = "Выход из аккаунта";
-            return View();
+            else return View();
         }
 
         [HttpPost]

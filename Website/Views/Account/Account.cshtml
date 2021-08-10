@@ -2,6 +2,9 @@
 @using TradeBot.Account.AccountService.v1;
 
 @{
+    ViewBag.Title = "Управление биржами";
+    ViewBag.SectionTitle = $"Управление биржами: {Model.Email}";
+
     <!--Если в аккаунте есть биржи, они последовательно выводятся на страницу-->
     if (Model.Exchanges.Count > 0)
         foreach (ExchangeAccessInfo exchange in Model.Exchanges)

@@ -6,8 +6,6 @@ namespace Website.Controllers
     {
         public IActionResult Index()
         {
-            ViewBag.Title = "Главная страница";
-            ViewBag.SectionTitle = "Представляем нашего бота";
             return View();
         }
     }
