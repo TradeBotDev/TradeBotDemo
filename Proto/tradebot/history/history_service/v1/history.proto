@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+option csharp_namespace = "TradeBot.History.HistoryService.v1";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "tradebot/common/v1/common.proto";
+package tradebot.history.history_service.v1;
+
+service HistoryService{
+	
+	rpc PublishBalanceUpdate(stream PublishBalanceUpdateRequest) returns (PublishBalanceUpdateResponse);
+
+	rpc PublishOrderUpdate(stream PublishOrderUpdateRequest) returns (PublishOrderUpdateResponse);
+
+	rpc SubscribeBalanceUpdate(SubscribeBalanceEventsRequest) returns (stream SubscribeBalanceEventsResponse);
+
+	rpc SubscribeOrderUpdate (SubscribeOrderEventRequest) returns (stream SubscribeOrderEventRespones);
+
+}
+
+message PublishBalanceUpdateRequest{
+	google.protobuf.Timestamp time = 1;
+	string sessionid = 2;
+	tradebot.common.v1.Balance balance = 3;
+}
+
+message PublishBalanceUpdateResponse{
+	google.protobuf.Empty empty = 1;
+}
+
+message PublishOrderUpdateRequest{
+	google.protobuf.Timestamp time = 1;
+	string sessionid = 2;
+	tradebot.common.v1.ChangesType changes_type = 3;
+	tradebot.common.v1.Order order = 4;
+}
+
+message PublishOrderUpdateResponse{
+	google.protobuf.Empty empty = 1;
+}
+
+message SubscribeBalanceEventsRequest {
+	google.protobuf.Empty empty = 1;
+}
+
+message SubscribeBalanceEventsResponse{
+	google.protobuf.Timestamp time = 1;
+	string sessionid = 2;
+	tradebot.common.v1.Balance balance = 3;
+}
+
+message SubscribeOrderEventRequest {
+	google.protobuf.Empty empty = 1;
+}
+
+message SubscribeOrderEventRespones{
+	google.protobuf.Timestamp time = 1;
+	string sessionid = 2;
+	tradebot.common.v1.ChangesType changes_type = 3;
+	tradebot.common.v1.Order order = 4;
+}

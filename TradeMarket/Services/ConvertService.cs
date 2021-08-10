@@ -2,14 +2,14 @@
 using Bitmex.Client.Websocket.Responses.Books;
 using Bitmex.Client.Websocket.Responses.Instruments;
 using Bitmex.Client.Websocket.Responses.Margins;
-using Bitmex.Client.Websocket.Responses.Orders;
 using Bitmex.Client.Websocket.Responses.Positions;
 using Bitmex.Client.Websocket.Responses.Wallets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ChangesType = TradeBot.TradeMarket.TradeMarketService.v1.ChangesType;
+using TradeBot.Common.v1;
+using Order = Bitmex.Client.Websocket.Responses.Orders.Order;
 
 namespace TradeMarket.Services
 {

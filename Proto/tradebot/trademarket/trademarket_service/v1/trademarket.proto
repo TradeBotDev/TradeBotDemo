@@ -80,7 +80,7 @@ message SubscribePriceResponse{
 	double bid_price = 1;
 	double ask_price = 2;
 	double fair_price = 3;
-	ChangesType changed_type = 4;
+	tradebot.common.v1.ChangesType changed_type = 4;
 }
 
 
@@ -94,14 +94,6 @@ message SubscribePositionResponse{
 
 message SubscribeMarginRequest{
 	google.protobuf.Empty empty = 1;
-}
-
-enum ChangesType{
-	CHANGES_TYPE_UNDEFIEND = 0; 
-	CHANGES_TYPE_PARTITIAL = 1;
-	CHANGES_TYPE_UPDATE = 2; 
-	CHANGES_TYPE_INSERT = 3;
-	CHANGES_TYPE_DELETE = 4; 
 }
 
 message Margin{
@@ -152,7 +144,7 @@ message Margin{
 }
 
 message SubscribeMarginResponse{
-	ChangesType changed_type = 1;
+	tradebot.common.v1.ChangesType changed_type = 1;
 	Margin margin = 2;
 }
 
@@ -198,7 +190,7 @@ message SubscribeMyOrdersRequest{
 message SubscribeMyOrdersResponse {
 	tradebot.common.v1.DefaultResponse response = 1;
 	tradebot.common.v1.Order changed = 2;
-	ChangesType changes_type = 3;
+	tradebot.common.v1.ChangesType changes_type = 3;
 }
 
 message SubscribeOrdersRequest{
@@ -208,7 +200,7 @@ message SubscribeOrdersRequest{
 
 message SubscribeOrdersResponse{
 	tradebot.common.v1.SubscribeOrdersResponse response = 1;
-	ChangesType changed_type = 2;
+	tradebot.common.v1.ChangesType changed_type = 2;
 
 }
 
