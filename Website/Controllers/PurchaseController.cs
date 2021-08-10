@@ -4,10 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Website.Models;
 
 namespace Website.Controllers
 {
-    [Authorize]
+    //[Authorize]
     public class PurchaseController : Controller
     {
         [HttpGet]
@@ -16,6 +17,11 @@ namespace Website.Controllers
             ViewBag.Title = "Оформление покупки";
             ViewBag.SectionTitle = "Оформление покупки";
             return View();
+        }
+
+        public IActionResult Buy(CreditCardModel model)
+        {
+            return Content(model.ToString());
         }
     }
 }

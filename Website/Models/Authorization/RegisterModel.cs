@@ -5,7 +5,7 @@ namespace Website.Models.Authorization
     public class RegisterModel
     {
         [Required(ErrorMessage = "Отсутствуют данные в поле Email")]
-        [DataType(DataType.EmailAddress)]
+        [EmailAddress]
         public string Email { get; set; }
 
         [Required(ErrorMessage = "Отсутствует данные в поле пароля")]
@@ -14,6 +14,7 @@ namespace Website.Models.Authorization
 
         [Required(ErrorMessage = "Отсутствует данные в поле подтверждения пароля")]
         [DataType(DataType.Password)]
+        [Compare("Password")]
         public string VerifyPassword { get; set; }
     }
 }
