@@ -9,7 +9,7 @@ using Website.Models;
 
 namespace Website.Controllers
 {
-    //[Authorize]
+    [Authorize]
     public class PurchaseController : Controller
     {
         [HttpGet]
@@ -20,11 +20,9 @@ namespace Website.Controllers
 
         public IActionResult Buy(CreditCardModel model)
         {
-            if (ModelState.IsValid) return Content($"{model.CardNumber}, {model.Date}, {model.CVV}");
-            else
-            {
+            if (!ModelState.IsValid)
                 return View();
-            }
+            return Content($"{model.CardNumber}, {model.Date}, {model.CVV}");
         }
     }
 }

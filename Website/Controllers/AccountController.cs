@@ -36,8 +36,7 @@ namespace Website.Controllers
             var reply = Clients.ExchangeAccessClient.DeleteExchangeAccess(User.Identity.Name, exchangeCode);
             if (reply.Result == ExchangeAccessActionCode.Successful)
                 return RedirectToAction("account", "account");
-            else if (reply.Result == ExchangeAccessActionCode.AccountNotFound)
-                HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            else HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
             return View("~/Views/Shared/Error.cshtml", reply.Message);
         }
@@ -51,12 +50,14 @@ namespace Website.Controllers
         [HttpPost]
         public IActionResult AddExchangeAccess(AddExchangeAccessModel model)
         {
+            if (!ModelState.IsValid)
+                return View();
+
             var reply = Clients.ExchangeAccessClient.AddExchangeAccess(User.Identity.Name, model);
 
             if (reply.Result == ExchangeAccessActionCode.Successful)
                 return RedirectToAction("account", "account");
-            else if (reply.Result == ExchangeAccessActionCode.AccountNotFound || reply.Result == ExchangeAccessActionCode.TimePassed)
-                HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            else HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
             return View("~/Views/Shared/Error.cshtml", reply.Message);
         }

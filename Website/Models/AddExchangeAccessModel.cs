@@ -5,13 +5,13 @@ namespace Website.Models
 {
     public class AddExchangeAccessModel
     {
-        [Required]
+        [Required(ErrorMessage = "Биржа не выбрана.")]
         public ExchangeAccessCode ExchangeCode { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Токен отсутствует.")]
         public string Token { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Секрет отсутствует.")]
         public string Secret { get; set; }
     }
 }

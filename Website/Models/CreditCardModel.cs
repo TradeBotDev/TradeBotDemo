@@ -1,21 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Website.Models
 {
     public class CreditCardModel
     {
-        [Required]
-        [CreditCard]
+        [Required(ErrorMessage = "Ввод номера карты является обязательным.")]
+        [CreditCard(ErrorMessage = "Введенный код не является номером кредитной карты.")]
         public string CardNumber { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Отсутствуют данные в поле ввода даты.")]
         public int Date { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Отсутствуют данные в поле ввода CVV.")]
         public int CVV { get; set; }
     }
 }

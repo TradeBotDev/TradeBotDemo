@@ -42,6 +42,9 @@ namespace Website.Controllers
         [HttpPost]
         public IActionResult Register(RegisterModel model)
         {
+            if (!ModelState.IsValid)
+                return View();
+
             var reply = Clients.AccountServiceClient.Register(model);
             if (reply.Result == AccountActionCode.Successful)
             {
@@ -71,7 +74,6 @@ namespace Website.Controllers
             {
                 var reply = Clients.AccountServiceClient.Logout(User.Identity.Name, model.SaveExchanges);
                 HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
                 if (reply.Result != AccountActionCode.Successful)
                     return View("~/Views/Shared/Error.cshtml", reply.Message);
             }
