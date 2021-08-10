@@ -46,13 +46,13 @@ namespace Relay.Model
         {
             if (!IsWorking)
             {
-                IsWorking = false;
+                IsWorking = true;
                 _tradeMarketClient.OrderRecievedEvent -= _tradeMarketClient_OrderRecievedEvent;
                 Log.Information("The bot is stopping...");
             }
             else
             {
-                IsWorking = true;
+                IsWorking = false;
                 _tradeMarketClient.OrderRecievedEvent += _tradeMarketClient_OrderRecievedEvent;
                 Log.Information("The bot is starting...");
             }
@@ -76,7 +76,7 @@ namespace Relay.Model
 
         public void SubscribeForOrders()
         {
-            if (IsWorking && !IsStart)
+            if (!IsWorking && !IsStart)
             {
                 IsStart = true;
                 _tradeMarketClient.SubscribeForOrders(_tradeMarketStream);

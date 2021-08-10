@@ -201,7 +201,7 @@ namespace UI
             StartButton.Visible = true;
             StopButton.Enabled = false;
             StopButton.Visible = false;
-            var stopBotResponse = await _client.UpdateServerConfigAsync(new UpdateServerConfigRequest { Request = new TradeBot.Common.v1.UpdateServerConfigRequest { Config = GetConfig(), Switch = true}},_meta);
+            var stopBotResponse = await _client.StopBotAsync(new StopBotRequest { Request=new TradeBot.Common.v1.UpdateServerConfigRequest {Config=GetConfig(),Switch=true } },_meta);
         }
     }
 }

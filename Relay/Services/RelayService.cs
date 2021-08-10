@@ -68,7 +68,7 @@ namespace Relay.Services
         public override async Task<StartBotResponse> StartBot(StartBotRequest request, ServerCallContext context)
         {
             var user = GetUserContext(context.RequestHeaders);
-            //user.StatusOfWork();
+            user.StatusOfWork();
             user.SubscribeForOrders();
             return await Task.FromResult(new StartBotResponse()
             {
