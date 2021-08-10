@@ -230,3 +230,12 @@ footer {
     font-weight: 700;
     font-size: 16px;
 }
+
+.form_errors_list {
+    margin: 14px;
+}
+
+.form_errors_list ul li {
+    color: red;
+    font-size: 14px;
+}
