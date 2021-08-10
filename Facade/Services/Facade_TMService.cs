@@ -250,7 +250,7 @@ namespace Facade
                     try
                     {
                         if (context.CancellationToken.IsCancellationRequested) break;
-                        var response = clientRelay.UpdateServerConfig(new TradeBot.Relay.RelayService.v1.UpdateServerConfigRequest {Request=request.Request});
+                        var response = clientRelay.UpdateServerConfig(new TradeBot.Relay.RelayService.v1.UpdateServerConfigRequest {Request=request.Request},context.RequestHeaders);
                         Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
                         Log.Information("{@Where}: {@MethodName} \n args: response={@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
                         return Task.FromResult(new StopBotResponse { });
@@ -264,7 +264,7 @@ namespace Facade
                 return Task.FromResult(new StopBotResponse { });
             }
         }
-        public override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request, ServerCallContext context)
+        public async override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request, ServerCallContext context)
         {
             while (true)
             {
@@ -272,13 +272,10 @@ namespace Facade
                 {
 
                     if (context.CancellationToken.IsCancellationRequested) break;
-                    var response = clientRelay.UpdateServerConfig(new TradeBot.Relay.RelayService.v1.UpdateServerConfigRequest() { Request = request.Request });
+                    var response = await clientRelay.UpdateServerConfigAsync(new TradeBot.Relay.RelayService.v1.UpdateServerConfigRequest() { Request = request.Request },context.RequestHeaders);
                     Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
                     Log.Information("{@Where}: {@MethodName} \n args: response: {@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
-                    return Task.FromResult(new UpdateServerConfigResponse
-                    {
-                        Response = response.Response
-                    });
+                    return new UpdateServerConfigResponse();
                 }
                 catch (RpcException e)
                 {
@@ -286,7 +283,7 @@ namespace Facade
                 }
             }
             Log.Information("{@Where}: Client disconnected", "Facade");
-            return Task.FromResult(new UpdateServerConfigResponse { });
+            return new UpdateServerConfigResponse();
         }
         #endregion
 
