@@ -18,8 +18,8 @@ namespace Website.Controllers
         {
             if (!ModelState.IsValid)
                 return View();
-
             var reply = Clients.LicenseClient.SetLicense(User.Identity.Name, ProductCode.Tradebot, model);
+
             if (reply.Code == LicenseCode.Successful)
                 return Content(reply.Message);
             else return View("~/Views/Shared/Error.cshtml", reply.Message);
