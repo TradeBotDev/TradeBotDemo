@@ -85,12 +85,17 @@ namespace Relay.Services
             await _formerClient.SendDeleteOrder(new DeleteOrderRequest {},context);
             return await Task.FromResult(new DeleteOrderResponse { });
         }
-
+        public async override Task<StopBotResponse> StopBot(StopBotRequest request, ServerCallContext context)
+        {
+            var user = GetUserContext(context.RequestHeaders);
+            user.UpdateConfig(new TradeBot.Common.v1.UpdateServerConfigRequest { Config = request.Request.Config, Switch = request.Request.Switch });
+            user.StatusOfWork();
+            return await Task.FromResult(new StopBotResponse { });
+        }
         public async override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request,
             ServerCallContext context)
         {
             var user = GetUserContext(context.RequestHeaders);
-            user.StatusOfWork();
             user.UpdateConfig(new TradeBot.Common.v1.UpdateServerConfigRequest { Config=request.Request.Config,Switch=request.Request.Switch });
             return await Task.FromResult(new UpdateServerConfigResponse());
         }
