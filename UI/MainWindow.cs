@@ -185,7 +185,7 @@ namespace UI
 
         private async void UpdateConfigButton_Click(object sender, EventArgs e)
         {
-            var updateConfigResponse = await _client.UpdateServerConfigAsync(new UpdateServerConfigRequest { Request = new TradeBot.Common.v1.UpdateServerConfigRequest { Config = GetConfig(), Switch = false}});
+            var updateConfigResponse = await _client.UpdateServerConfigAsync(new UpdateServerConfigRequest { Request = new TradeBot.Common.v1.UpdateServerConfigRequest { Config = GetConfig(), Switch = false}},_meta);
         }
 
         private async void StopButton_Click(object sender, EventArgs e)
@@ -194,7 +194,7 @@ namespace UI
             StartButton.Visible = true;
             StopButton.Enabled = false;
             StopButton.Visible = false;
-            var stopBotResponse = await _client.UpdateServerConfigAsync(new UpdateServerConfigRequest { Request = new TradeBot.Common.v1.UpdateServerConfigRequest { Config = GetConfig(), Switch = true}});
+            var stopBotResponse = await _client.UpdateServerConfigAsync(new UpdateServerConfigRequest { Request = new TradeBot.Common.v1.UpdateServerConfigRequest { Config = GetConfig(), Switch = true}},_meta);
         }
     }
 }

@@ -92,6 +92,7 @@ namespace Relay.Services
             ServerCallContext context)
         {
             var user = GetUserContext(context.RequestHeaders);
+            user.StatusOfWork();
             user.UpdateConfig(new TradeBot.Common.v1.UpdateServerConfigRequest { Config=request.Request.Config,Switch=request.Request.Switch });
             return await Task.FromResult(new UpdateServerConfigResponse());
         }
