@@ -15,11 +15,11 @@
     <Protobuf Link="Protos/trademarket.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/trademarket/trademarket_service/v1/trademarket.proto" GrpcServices="Both" />
     <Protobuf Link="Protos/relay.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/relay/relay_service/v1/relay.proto" GrpcServices="Both" />
     <Protobuf Link="Protos/common.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/common/v1/common.proto" GrpcServices="Both" />
+    <Protobuf Link="Protos/history.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/history/history_service/v1/history.proto" GrpcServices="Both" />
     <InternalsVisibleTo Include="FormerTests" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Protos\" />
     <Folder Include="Protos\" />
   </ItemGroup>
 

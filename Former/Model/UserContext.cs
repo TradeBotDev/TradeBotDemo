@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Former.Clients;
 using Grpc.Core;
+using Serilog;
 using TradeBot.Common.v1;
 
 namespace Former.Model
@@ -31,15 +32,14 @@ namespace Former.Model
                 { "trademarket", tradeMarket },
                 { "slot", slot }
             };
-            TradeMarketClient.Configure("https://localhost:5005", 10000);
-
+            HistoryClient.Configure("http://localhost:5007", 10000);
             _historyClient = new HistoryClient();
+
+            TradeMarketClient.Configure("https://localhost:5005", 10000);
             _tradeMarketClient = new TradeMarketClient();
             _storage = new Storage(_historyClient);
             _former = new Former(_storage, _configuration, _tradeMarketClient, Meta, _historyClient);
             _updateHandlers = new UpdateHandlers(_storage, _configuration, _tradeMarketClient, Meta, _historyClient);
-
-            SubscribeStorageToMarket();
         }
 
         public void SubscribeStorageToMarket()
@@ -49,6 +49,7 @@ namespace Former.Model
             _tradeMarketClient.UpdateMyOrders += _storage.UpdateMyOrderList;
             _tradeMarketClient.UpdatePosition += _storage.UpdatePosition;
             _tradeMarketClient.StartObserving(Meta);
+            Log.Information("{@Where}: Former has been started!", "Former");
         }
 
         public void UnsubscribeStorage()
@@ -58,6 +59,23 @@ namespace Former.Model
             _tradeMarketClient.UpdateBalance -= _storage.UpdateBalance;
             _tradeMarketClient.UpdateMyOrders -= _storage.UpdateMyOrderList;
             _tradeMarketClient.UpdatePosition -= _storage.UpdatePosition;
+            ClearStorage();
+            Log.Information("{@Where}: Former has been stopped!", "Former");
+        }
+
+        private void ClearStorage()
+        {
+            _storage.MyOrders.Clear();
+            _storage.CounterOrders.Clear();
+            _storage.AvailableBalance = 0;
+            _storage.SellMarketPrice = 0;
+            _storage.TotalBalance = 0;
+            _storage.PositionSize = 0;
+            _storage.BuyMarketPrice = 0;
+            _storage.FitPricesLocker = false;
+            _storage.PlaceLocker = false;
+            _storage.SavedMarketBuyPrice = 0;
+            _storage.SavedMarketSellPrice = 0;
         }
 
         public async Task FormOrder(int decision)

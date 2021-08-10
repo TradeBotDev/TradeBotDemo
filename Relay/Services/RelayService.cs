@@ -68,15 +68,15 @@ namespace Relay.Services
         public override async Task<StartBotResponse> StartBot(StartBotRequest request, ServerCallContext context)
         {
             var user = GetUserContext(context.RequestHeaders);
-            user.StatusOfWork();
-                user.SubscribeForOrders();
+            //user.StatusOfWork();
+            user.SubscribeForOrders();
             //user.UpdateConfig(new TradeBot.Common.v1.UpdateServerConfigRequest { Config=request.Config });
 
             return await Task.FromResult(new StartBotResponse()
             {
                 Response = new DefaultResponse()
                 {
-                    Message = "Command has been complited",
+                    Message = "Command has been completed",
                     Code = ReplyCode.Succeed
                 }
             });

@@ -8,9 +8,9 @@ package tradebot.history.history_service.v1;
 
 service HistoryService{
 	
-	rpc PublishBalanceUpdate(stream PublishBalanceUpdateRequest) returns (PublishBalanceUpdateResponse);
+	rpc PublishBalanceUpdate(PublishBalanceUpdateRequest) returns (PublishBalanceUpdateResponse);
 
-	rpc PublishOrderUpdate(stream PublishOrderUpdateRequest) returns (PublishOrderUpdateResponse);
+	rpc PublishOrderUpdate(PublishOrderUpdateRequest) returns (PublishOrderUpdateResponse);
 
 	rpc SubscribeBalanceUpdate(SubscribeBalanceEventsRequest) returns (stream SubscribeBalanceEventsResponse);
 
