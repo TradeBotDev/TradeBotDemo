@@ -19,46 +19,63 @@ namespace Facade
         #region TradeMarket
         public override async Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<SubscribeBalanceResponse> responseStream, ServerCallContext context)
         {
-            
-            while (true)
+            try
             {
-                try
+                var response = clientTM.SubscribeBalance(new TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceRequest { Request = request.Request });
+                if (!context.CancellationToken.IsCancellationRequested)
                 {
-                    var response = clientTM.SubscribeBalance(new TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceRequest { Request = request.Request });
-                    if (!context.CancellationToken.IsCancellationRequested)
+                    if (response.ResponseStream.Current != null)
                     {
-                        if (response.ResponseStream.Current != null)
-                        {
-                            System.Diagnostics.StackFrame frame = new System.Diagnostics.StackFrame();
-                            var method = frame.GetMethod();
-                            Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
-                            while (await response.ResponseStream.MoveNext())
-                            {
-                                Log.Information("{@Where}: {@MethodName} \n args: response={@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response.ResponseStream.Current.Response.Balance);
-
-                                await responseStream.WriteAsync(new TradeBot.Facade.FacadeService.v1.SubscribeBalanceResponse
-                                {
-                                    Money = response.ResponseStream.Current.Response.Balance
-                                });
-                            }
-
-                            break;
-                        }
-                        else
-                        {
-                            //Log.Information("Trying to reconnect")
-                        }
+                        await StreamReadWrite(request, responseStream, response);
                     }
                     else
                     {
-                        Log.Information("{@Where}: Client disconnected", "Facade");
-                        break;
+                        Log.Information("{@Where}: Response equals NULL", "Facade");
                     }
                 }
-                catch (RpcException e)
+                else
                 {
-                    Log.Error("{@Where}: Exception" + e.Message, "Facade");
+                    Log.Information("{@Where}: Client disconnected", "Facade");
                 }
+            }
+            catch (RpcException e)
+            {
+                Log.Error("{@Where}: Exception" + e.Message, "Facade");
+            }
+
+        }
+        private static async Task StreamReadWrite1<T>(IMessage<T> message,
+            IServerStreamWriter<T> responseStream,
+            AsyncServerStreamingCall<T> response,
+            ServerCallContext context,
+            string methodName) where T : IMessage<T>
+        {
+            try
+            {
+                while (await response.ResponseStream.MoveNext(context.CancellationToken))
+                {
+                    Log.Information("{@Where}: {@MethodName} \n args: response={@response}", "Facade", methodName, response.ResponseStream.Current);
+
+                    await responseStream.WriteAsync((T)message);
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Information("{@Where}: {@MethodName}-Exception: {@Exception}","Facade",methodName,e.Message);
+                throw;
+            }
+        }
+        private static async Task StreamReadWrite(SubscribeBalanceRequest request, IServerStreamWriter<SubscribeBalanceResponse> responseStream, AsyncServerStreamingCall<TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceResponse> response)
+        {
+            Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
+            while (await response.ResponseStream.MoveNext())
+            {
+                Log.Information("{@Where}: {@MethodName} \n args: response={@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response.ResponseStream.Current.Response.Balance);
+
+                await responseStream.WriteAsync(new TradeBot.Facade.FacadeService.v1.SubscribeBalanceResponse
+                {
+                    Money = response.ResponseStream.Current.Response.Balance
+                });
             }
         }
 
@@ -401,7 +418,7 @@ namespace Facade
 
                     var response = clientAccount.IsValidSession(new TradeBot.Account.AccountService.v1.SessionRequest { SessionId = request.SessionId });
                     Log.Information("{@Where}: {@MethodName} \n args: request: {@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
-                    Log.Information("{@Where}: {@MethodName} \n args: response: {@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
+                    
                     //return Task.FromResult(new SessionReply
                     //{
                     //    IsValid = response.IsValid,
@@ -417,6 +434,8 @@ namespace Facade
             Log.Information("{@Where}: Client disconnected", "Facade");
             return await Task.FromResult(new SessionReply { });
         }
+
+        
         public override Task<CurrentAccountReply> CurrentAccountData(SessionRequest request, ServerCallContext context)
         {
             while (true)
@@ -591,7 +610,19 @@ namespace Facade
 
         #endregion
 
-
+        private async Task<T> ReturnResponse<T>(IMessage<T> message, string methodName) where T : IMessage<T>
+        {
+            try
+            {
+                Log.Information("{@Where}: {@MethodName} \n args: response: {@response}", "Facade", methodName);
+                return await Task<T>.FromResult((T)message);
+            }
+            catch (Exception e)
+            {
+                Log.Error("{@Where}: {@MethodName}-Exception: {@Exception}","Facade",methodName,e);
+                throw;
+            }
+        }
     }
 
 }
