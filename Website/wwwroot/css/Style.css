@@ -34,6 +34,7 @@ article h1 {
     font-family: 'Roboto', sans-serif;
     font-weight: 700;
     font-size: 24px;
+    margin-bottom: 32px;
 }
 
 footer {
@@ -128,12 +129,12 @@ footer {
     cursor: pointer;
 }
 
-.exchange_add_button {
+.color_button {
     color: #fff;
     background: #167c80;
 }
 
-.exchange_add_button:hover {
+.color_button:hover {
     background: #209ca1;
     cursor: pointer;
 }
@@ -239,4 +240,15 @@ footer {
 .form_errors_list ul li {
     color: red;
     font-size: 14px;
+}
+
+.text_message a {
+    color: #167c80;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.text_message a:hover {
+    color: #209ca1;
+    cursor: pointer;
 }

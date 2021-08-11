@@ -5,11 +5,11 @@
     if (ViewBag.HaveLicense == null || !ViewBag.HaveLicense)
     {
         <form action="/purchase/buy">
-            <input type="submit" value="Купить" />
+            <input class="button color_button" type="submit" value="Купить" />
         </form>
     }
     else
     {
-        <p>Вы уже обладаете лицензией на данный продукт.</p>
+        <p class="text_message">Вы уже обладаете лицензией на данный продукт. <a href="/account">Перейти в аккаунт</a></p>
     }
 }
