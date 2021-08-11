@@ -1,9 +1,15 @@
-﻿@{ 
+﻿@{
     ViewBag.Title = "Главная страница";
     ViewBag.SectionTitle = "Представляем нашего бота";
-}
 
-<p>Всякий текст про Tradebot</p>
-<form action="/purchase/buy">
-    <input type="submit" value="Купить" />
-</form>
+    if (ViewBag.HaveLicense == null || !ViewBag.HaveLicense)
+    {
+        <form action="/purchase/buy">
+            <input type="submit" value="Купить" />
+        </form>
+    }
+    else
+    {
+        <p>Вы уже обладаете лицензией на данный продукт.</p>
+    }
+}

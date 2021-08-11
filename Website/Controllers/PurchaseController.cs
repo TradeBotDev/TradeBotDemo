@@ -11,15 +11,19 @@ namespace Website.Controllers
         [HttpGet]
         public IActionResult Buy()
         {
+            ViewBag.HaveLicense = Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot).HaveAccess;
             return View();
         }
 
         public IActionResult Buy(CreditCardModel model)
         {
-            if (!ModelState.IsValid)
-                return View();
-            var reply = Clients.LicenseClient.SetLicense(User.Identity.Name, ProductCode.Tradebot, model);
+            bool haveLicense = Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot).HaveAccess;
+            ViewBag.HaveLicense = haveLicense;
 
+            if (!ModelState.IsValid || haveLicense)
+                return View();
+
+            var reply = Clients.LicenseClient.SetLicense(User.Identity.Name, ProductCode.Tradebot, model);
             if (reply.Code == LicenseCode.Successful)
                 return Content(reply.Message);
             else return View("~/Views/Shared/Error.cshtml", reply.Message);

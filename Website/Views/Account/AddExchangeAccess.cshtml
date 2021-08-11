@@ -1,19 +1,26 @@
-﻿@{ 
+﻿@{
     ViewBag.Title = "Добавить биржу";
     ViewBag.SectionTitle = "Добавить биржу";
 }
 
-<!--Форма добавления биржи-->
-<form class="form" method="post">
-    <p>Выберите биржу:</p>
-    <select class="form_select" name="ExchangeCode">
-        <!--Пункты, которые содержат в себе код биржи (value)-->
-        <option value="1">Bitmex</option>
-    </select>
+@if (ViewBag.HaveLicense == null || !ViewBag.HaveLicense)
+{
+    <p>Вы должны обладать лицензией на продукт, чтобы иметь возможность добавлять новые биржи в аккаунт.</p>
+}
+else
+{
+    <!--Форма добавления биржи-->
+    <form class="form" method="post">
+        <p>Выберите биржу:</p>
+        <select class="form_select" name="ExchangeCode">
+            <!--Пункты, которые содержат в себе код биржи (value)-->
+            <option value="1">Bitmex</option>
+        </select>
 
-    <p>Токен:</p>
-    <input class="form_input" type="text" name="Token" />
-    <p>Секрет:</p>
-    <input class="form_input" type="text" name="Secret" />
-    <input class="button form_button" type="submit" value="Добавить" />
-</form>
+        <p>Токен:</p>
+        <input class="form_input" type="text" name="Token" />
+        <p>Секрет:</p>
+        <input class="form_input" type="text" name="Secret" />
+        <input class="button form_button" type="submit" value="Добавить" />
+    </form>
+}

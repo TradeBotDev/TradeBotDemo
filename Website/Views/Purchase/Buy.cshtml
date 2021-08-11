@@ -2,16 +2,20 @@
 @{
     ViewBag.Title = "Оформление покупки";
     ViewBag.SectionTitle = "Оформление покупки";
-}
 
-<form class="form" method="post">
-    <h3>Введите данные карты</h3>
-    <div class="form_errors_list" asp-validation-summary="All"></div>
-    <p>Номер карты:</p>
-    <input class="form_input" asp-for="@Model.CardNumber" type="text" maxlength="16" />
-    <p>Дата:</p>
-    <input class="form_input" asp-for="@Model.Date" type="number" maxlength="4" />
-    <p>CVV-код: </p>
-    <input class="form_input" asp-for="@Model.CVV" type="number" maxlength="3" />
-    <input class="button form_button" type="submit" value="Купить" />
-</form>
+    if (ViewBag.HaveLicense == null || !ViewBag.HaveLicense)
+    {
+        <form class="form" method="post">
+            <h3>Введите данные карты</h3>
+            <div class="form_errors_list" asp-validation-summary="All"></div>
+            <p>Номер карты:</p>
+            <input class="form_input" asp-for="@Model.CardNumber" type="text" maxlength="16" />
+            <p>Дата:</p>
+            <input class="form_input" asp-for="@Model.Date" type="number" maxlength="4" />
+            <p>CVV-код: </p>
+            <input class="form_input" asp-for="@Model.CVV" type="number" maxlength="3" />
+            <input class="button form_button" type="submit" value="Купить" />
+        </form>
+    }
+    else { <p>Вы уже обладаете лицензией на данный продукт.</p> }
+}

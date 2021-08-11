@@ -13,12 +13,14 @@ namespace Website.Controllers
         [HttpGet]
         public IActionResult Login()
         {
+            ViewBag.HaveLicense = Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot).HaveAccess;
             return View();
         }
 
         [HttpPost]
         public IActionResult Login(LoginModel model)
         {
+            ViewBag.HaveLicense = Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot).HaveAccess;
             if (!ModelState.IsValid)
                 return View();
 
@@ -36,12 +38,14 @@ namespace Website.Controllers
         [HttpGet]
         public IActionResult Register()
         {
+            ViewBag.HaveLicense = Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot).HaveAccess;
             return View();
         }
 
         [HttpPost]
         public IActionResult Register(RegisterModel model)
         {
+            ViewBag.HaveLicense = Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot).HaveAccess;
             if (!ModelState.IsValid)
                 return View();
 
@@ -60,6 +64,7 @@ namespace Website.Controllers
         [HttpGet]
         public IActionResult Logout()
         {
+            ViewBag.HaveLicense = Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot).HaveAccess;
             ViewBag.ReturnUrl = Request.Headers["Referer"].ToString();
             if (!User.Identity.IsAuthenticated)
                 return View("~/Views/Shared/Error.cshtml", "Вы уже вышли.");
@@ -69,6 +74,7 @@ namespace Website.Controllers
         [HttpPost]
         public IActionResult Logout(LogoutModel model)
         {
+            ViewBag.HaveLicense = Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot).HaveAccess;
             if (model.Button == "Выйти")
             {
                 var reply = Clients.AccountServiceClient.Logout(User.Identity.Name, model.SaveExchanges);

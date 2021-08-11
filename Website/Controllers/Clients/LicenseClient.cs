@@ -23,6 +23,7 @@ namespace Website.Controllers.Clients
 
         public static CheckLicenseResponse CheckLicense(string sessionId, ProductCode product)
         {
+            if (sessionId == null) sessionId = "";
             var request = new CheckLicenseRequest
             {
                 SessionId = sessionId,
