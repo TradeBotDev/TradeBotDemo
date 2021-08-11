@@ -11,7 +11,7 @@ namespace Facade
         //TODO вынести
         private TradeBot.Account.AccountService.v1.Account.AccountClient clientAccount = new TradeBot.Account.AccountService.v1.Account.AccountClient(GrpcChannel.ForAddress("https://localhost:5000"));
         private TradeBot.Account.AccountService.v1.ExchangeAccess.ExchangeAccessClient clientExchange = new TradeBot.Account.AccountService.v1.ExchangeAccess.ExchangeAccessClient(GrpcChannel.ForAddress("https://localhost:5000"));
-        private TradeBot.History.HistoryService.v1.HistoryService.HistoryServiceClient clientHistory = new TradeBot.History.HistoryService.v1.HistoryService.HistoryServiceClient(GrpcChannel.ForAddress("https//localhost:5008"));
+        private TradeBot.History.HistoryService.v1.HistoryService.HistoryServiceClient clientHistory = new TradeBot.History.HistoryService.v1.HistoryService.HistoryServiceClient(GrpcChannel.ForAddress("https://localhost:5007"));
         private TradeBot.Relay.RelayService.v1.RelayService.RelayServiceClient clientRelay = new TradeBot.Relay.RelayService.v1.RelayService.RelayServiceClient(GrpcChannel.ForAddress("https://localhost:5004"));
         private TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceClient clientTM = new TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceClient(GrpcChannel.ForAddress("https://localhost:5005"));
         private IAsyncStreamReader<TradeBot.Relay.RelayService.v1.SubscribeLogsResponse> stream;
@@ -594,12 +594,13 @@ namespace Facade
             try
             {
                 var response = clientHistory.SubscribeEvents(new TradeBot.History.HistoryService.v1.SubscribeEventsRequest { Sessionid = request.Sessionid }, context.RequestHeaders);
-
+                Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", nameof(SubscribeEvents), request.Sessionid);
                 while (await response.ResponseStream.MoveNext())
                 {
                     switch (response.ResponseStream.Current.EventTypeCase)
                     {
                         case TradeBot.History.HistoryService.v1.SubscribeEventsResponse.EventTypeOneofCase.Balance:
+                            Log.Information("{@Where}: {@MethodName} \n args: Balance={@response}", "Facade", nameof(SubscribeEvents), response.ResponseStream.Current.Balance.Balance);
                             await responseStream.WriteAsync(new SubscribeEventsResponse
                             {
                                 Balance = new PublishBalanceEvent
@@ -611,6 +612,8 @@ namespace Facade
                             });
                             break;
                         case TradeBot.History.HistoryService.v1.SubscribeEventsResponse.EventTypeOneofCase.Order:
+                            Log.Information("{@Where}: {@MethodName} \n args: Order={@response}", "Facade", nameof(SubscribeEvents), response.ResponseStream.Current.Order.Order);
+                            Log.Information("{@Where}: {@MethodName} \n args: Message={@response}", "Facade", nameof(SubscribeEvents), response.ResponseStream.Current.Order.Message);
                             await responseStream.WriteAsync(new SubscribeEventsResponse
                             {
                                 Order = new PublishOrderEvent
