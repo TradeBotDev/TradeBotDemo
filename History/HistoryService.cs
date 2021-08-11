@@ -45,7 +45,7 @@ namespace History
                     });
                     break;
                 case PublishEventRequest.EventTypeOneofCase.Order:
-                    OrderCollection.Add(new OrderUpdate()
+                    OrderCollection.Add(new OrderUpdate
                     {
                         SessionId = request.Order.Sessionid,
                         ChangesType = request.Order.ChangesType,
@@ -61,62 +61,62 @@ namespace History
             return new PublishEventResponse();
         }
 
+        private static void Handler(NotifyCollectionChangedEventArgs args, SubscribeEventsRequest request,
+            IAsyncStreamWriter<SubscribeEventsResponse> responseStream,
+            TaskCompletionSource<SubscribeEventsResponse> taskCompletionSource)
+        {
+            BalanceUpdate updateBalance;
+            OrderUpdate updateOrder;
+            try
+            {
+                Task.Run(async () =>
+                {
+                    if (args.NewItems[0].GetType().FullName.Contains("BalanceUpdate"))
+                    {
+                        updateBalance = (BalanceUpdate)args.NewItems[0];
+                        if (updateBalance.SessionId != request.Sessionid) return;
+                        await responseStream.WriteAsync(new SubscribeEventsResponse
+                        {
+                            Balance = new PublishBalanceEvent
+                            {
+                                Balance = updateBalance.Balance, 
+                                Sessionid = updateBalance.SessionId,
+                                Time = updateBalance.Time
+                            }
+                        });
+                    }
+                    if (args.NewItems[0].GetType().FullName.Contains("OrderUpdate"))
+                    {
+                        updateOrder = (OrderUpdate)args.NewItems[0];
+                        if (updateOrder.SessionId != request.Sessionid) return;
+                        await responseStream.WriteAsync(new SubscribeEventsResponse
+                        {
+                            Order = new PublishOrderEvent
+                            {
+                                ChangesType = updateOrder.ChangesType,
+                                Order = updateOrder.Order,
+                                Sessionid = updateOrder.SessionId,
+                                Time = updateOrder.Time,
+                                Message = updateOrder.Message
+                            }
+                        });
+                    }
+                }).Wait();
+            }
+            catch
+            {
+                taskCompletionSource.SetCanceled();
+            }
+        }
+
         public override async Task<SubscribeEventsResponse> SubscribeEvents(SubscribeEventsRequest request,
             IServerStreamWriter<SubscribeEventsResponse> responseStream, ServerCallContext context)
         {
             var taskCompletionSource = new TaskCompletionSource<SubscribeEventsResponse>();
 
-            BalanceCollection.CollectionChanged += (sender, args) =>
-            {
-                try
-                {
-                    var update = (BalanceUpdate)args.NewItems[0];
-                    if (update.SessionId == request.Sessionid)
-                    {
-                        Task.Run(async () =>
-                        {
-                            await responseStream.WriteAsync(new SubscribeEventsResponse
-                            {
-                                Balance = new PublishBalanceEvent
-                                { Balance = update.Balance, Sessionid = update.SessionId, Time = update.Time }
-                            });
-                        }).Wait();
-                    }
-                }
-                catch
-                {
-                    taskCompletionSource.SetCanceled();
-                }
-            };
+            BalanceCollection.CollectionChanged += (_, args) => Handler(args, request, responseStream, taskCompletionSource);
 
-            OrderCollection.CollectionChanged += (sender, args) =>
-            {
-                try
-                {
-                    var update = (OrderUpdate)args.NewItems[0];
-                    if (update.SessionId == request.Sessionid)
-                    {
-                        Task.Run(async () =>
-                        {
-                            await responseStream.WriteAsync(new SubscribeEventsResponse
-                            {
-                                Order = new PublishOrderEvent
-                                {
-                                    ChangesType = update.ChangesType,
-                                    Order = update.Order,
-                                    Sessionid = update.SessionId,
-                                    Time = update.Time,
-                                    Message = update.Message
-                                }
-                            });
-                        }).Wait();
-                    }
-                }
-                catch
-                {
-                    taskCompletionSource.SetCanceled();
-                }
-            };
+            OrderCollection.CollectionChanged += (_, args) => Handler(args, request, responseStream, taskCompletionSource);
 
             return await taskCompletionSource.Task;
         }
