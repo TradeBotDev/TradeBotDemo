@@ -26,7 +26,7 @@ namespace Facade
                 {
                     if (response.ResponseStream.Current != null)
                     {
-                        await StreamReadWrite(request, responseStream, response);
+                        await StreamReadWrite<SubscribeBalanceRequest>(request, responseStream, response, context, nameof(SubscribeBalance));
                     }
                     else
                     {
@@ -44,11 +44,11 @@ namespace Facade
             }
 
         }
-        private static async Task StreamReadWrite1<T>(IMessage<T> message,
-            IServerStreamWriter<T> responseStream,
-            AsyncServerStreamingCall<T> response,
+        private static async Task StreamReadWrite<TRequest,TResponse>(IMessage<TRequest> message,
+            IServerStreamWriter<TResponse> responseStream,
+            AsyncServerStreamingCall<TResponse> response,
             ServerCallContext context,
-            string methodName) where T : IMessage<T>
+            string methodName) where TRequest : IMessage<TRequest>
         {
             try
             {
@@ -65,7 +65,9 @@ namespace Facade
                 throw;
             }
         }
-        private static async Task StreamReadWrite(SubscribeBalanceRequest request, IServerStreamWriter<SubscribeBalanceResponse> responseStream, AsyncServerStreamingCall<TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceResponse> response)
+        private static async Task StreamReadWrite1(SubscribeBalanceRequest request,
+            IServerStreamWriter<SubscribeBalanceResponse> responseStream, 
+            AsyncServerStreamingCall<TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceResponse> response)
         {
             Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
             while (await response.ResponseStream.MoveNext())
