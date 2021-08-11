@@ -3,6 +3,8 @@
     "Former": {
       "commandName": "Project",
       "environmentVariables": {
+        "HistoryConnectionString": "https://localhost;5008",
+        "TradeMarketConnectionString": "https://localhost;5007",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": "true",
