@@ -12,29 +12,6 @@ namespace Relay.Clients
 {
     public class AlgorithmClient
     {
-        private bool _isOn = false;
-
-        public bool IsOn
-        {
-            get
-            {
-                return _isOn;
-            }
-            set
-            {
-                if (_isOn = value)
-                {
-                    //TradeMarketClientService.OrderRecievedEvent += TradeMarketClientService_OrderRecievedEvent;
-                }
-                else
-                {
-                    //TradeMarketClientService.OrderRecievedEvent -= TradeMarketClientService_OrderRecievedEvent;
-
-                }
-                
-            }
-        }
-
         private readonly AlgorithmService.AlgorithmServiceClient _client;
         
         public AlgorithmClient(Uri uri)

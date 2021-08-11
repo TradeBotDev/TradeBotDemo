@@ -1,6 +1,8 @@
+using Google.Protobuf;
 using Grpc.Core;
 using Grpc.Net.Client;
 using Serilog;
+using System;
 using System.Threading.Tasks;
 using TradeBot.Facade.FacadeService.v1;
 
@@ -282,7 +284,8 @@ namespace Facade
                     var response = await clientRelay.UpdateServerConfigAsync(new TradeBot.Relay.RelayService.v1.UpdateServerConfigRequest() { Request = request.Request },context.RequestHeaders);
                     Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
                     Log.Information("{@Where}: {@MethodName} \n args: response: {@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
-                    return new UpdateServerConfigResponse();
+                    //return new UpdateServerConfigResponse();
+                    return await ReturnResponse<UpdateServerConfigResponse>(new UpdateServerConfigResponse(),nameof(UpdateServerConfig));
                 }
                 catch (RpcException e)
                 {
@@ -295,7 +298,7 @@ namespace Facade
         #endregion
 
         #region Account
-        public override Task<LoginReply> Login(LoginRequest request, ServerCallContext context)
+        public async override Task<LoginReply> Login(LoginRequest request, ServerCallContext context)
         {
             while (true)
             {
@@ -310,13 +313,14 @@ namespace Facade
                         Password = request.Password
                     });
                     Log.Information("{@Where}: {@MethodName} \n args: request: {@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
-                    Log.Information("{@Where}: {@MethodName} \n args: response: {@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
-                    return Task.FromResult(new LoginReply
-                    {
-                        Message = response.Message,
-                        SessionId = response.SessionId,
-                        Result = (ActionCode)response.Result
-                    });
+                    //Log.Information("{@Where}: {@MethodName} \n args: response: {@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
+                    //return Task.FromResult(new LoginReply
+                    //{
+                    //    Message = response.Message,
+                    //    SessionId = response.SessionId,
+                    //    Result = (ActionCode)response.Result
+                    //});
+                    return await ReturnResponse<LoginReply>(new LoginReply {SessionId=response.SessionId,Message= response.Message,Result=(ActionCode)response.Result },nameof(Login));
                 }
                 catch (RpcException e)
                 {
@@ -324,7 +328,7 @@ namespace Facade
                 }
             }
             Log.Information("{@Where}: Client disconnected", "Facade");
-            return Task.FromResult(new LoginReply { });
+            return await Task.FromResult(new LoginReply { });
         }
 
         public override Task<LogoutReply> Logout(SessionRequest request, ServerCallContext context)
@@ -387,7 +391,7 @@ namespace Facade
             return Task.FromResult(new RegisterReply { });
         }
 
-        public override Task<SessionReply> IsValidSession(SessionRequest request, ServerCallContext context)
+        public async override Task<SessionReply> IsValidSession(SessionRequest request, ServerCallContext context)
         {
             while (true)
             {
@@ -398,11 +402,12 @@ namespace Facade
                     var response = clientAccount.IsValidSession(new TradeBot.Account.AccountService.v1.SessionRequest { SessionId = request.SessionId });
                     Log.Information("{@Where}: {@MethodName} \n args: request: {@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
                     Log.Information("{@Where}: {@MethodName} \n args: response: {@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
-                    return Task.FromResult(new SessionReply
-                    {
-                        IsValid = response.IsValid,
-                        Message = response.Message
-                    });
+                    //return Task.FromResult(new SessionReply
+                    //{
+                    //    IsValid = response.IsValid,
+                    //    Message = response.Message
+                    //});
+                    return await ReturnResponse<SessionReply>(new SessionReply { IsValid=response.IsValid,Message=response.Message},nameof(IsValidSession));
                 }
                 catch (RpcException e)
                 {
@@ -410,9 +415,8 @@ namespace Facade
                 }
             }
             Log.Information("{@Where}: Client disconnected", "Facade");
-            return Task.FromResult(new SessionReply { });
+            return await Task.FromResult(new SessionReply { });
         }
-
         public override Task<CurrentAccountReply> CurrentAccountData(SessionRequest request, ServerCallContext context)
         {
             while (true)

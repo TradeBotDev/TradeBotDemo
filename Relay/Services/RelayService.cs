@@ -47,7 +47,6 @@ namespace Relay.Services
 
         private UserContext GetUserContext(Metadata meta)
         {
-            //TODO Возможно он тут проверяет по ссылке. так что надо бы сделать Equals
             if (contexts.Keys.FirstOrDefault(x => x[2].Value == meta[2].Value) != null)
             {
                 return contexts.First(x => x.Value.Meta[2].Value == meta[2].Value).Value;
