@@ -1,9 +1,13 @@
 ﻿@{
     ViewBag.Title = "Главная страница";
-    ViewBag.SectionTitle = "Представляем нашего бота";
+    ViewBag.SectionTitle = "Представляем наш бот";
 
     if (ViewBag.HaveLicense == null || !ViewBag.HaveLicense)
     {
+        <p>Наш торговый бот TradeBot предназначен для автоматический торговли на
+            бирже. Имеет широкий спектр настроек алгоритма, поддерживает многопользовательность
+            и позволяет управлять биржами прямо на сайте.
+        </p>
         <form action="/purchase/buy">
             <input class="button color_button" type="submit" value="Купить" />
         </form>
