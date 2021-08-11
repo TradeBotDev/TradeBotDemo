@@ -9,15 +9,16 @@ namespace Facade
     public class FacadeTMService : TradeBot.Facade.FacadeService.v1.FacadeService.FacadeServiceBase
     {
         //TODO вынести
-        private TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceClient clientTM = new TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceClient(GrpcChannel.ForAddress("https://localhost:5005"));
-        private TradeBot.Relay.RelayService.v1.RelayService.RelayServiceClient clientRelay = new TradeBot.Relay.RelayService.v1.RelayService.RelayServiceClient(GrpcChannel.ForAddress("https://localhost:5004"));
         private TradeBot.Account.AccountService.v1.Account.AccountClient clientAccount = new TradeBot.Account.AccountService.v1.Account.AccountClient(GrpcChannel.ForAddress("https://localhost:5000"));
         private TradeBot.Account.AccountService.v1.ExchangeAccess.ExchangeAccessClient clientExchange = new TradeBot.Account.AccountService.v1.ExchangeAccess.ExchangeAccessClient(GrpcChannel.ForAddress("https://localhost:5000"));
+        private TradeBot.History.HistoryService.v1.HistoryService.HistoryServiceClient clientHistory = new TradeBot.History.HistoryService.v1.HistoryService.HistoryServiceClient(GrpcChannel.ForAddress("https//localhost:5008"));
+        private TradeBot.Relay.RelayService.v1.RelayService.RelayServiceClient clientRelay = new TradeBot.Relay.RelayService.v1.RelayService.RelayServiceClient(GrpcChannel.ForAddress("https://localhost:5004"));
+        private TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceClient clientTM = new TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceClient(GrpcChannel.ForAddress("https://localhost:5005"));
         private IAsyncStreamReader<TradeBot.Relay.RelayService.v1.SubscribeLogsResponse> stream;
         #region TradeMarket
         public override async Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<SubscribeBalanceResponse> responseStream, ServerCallContext context)
         {
-            
+
             while (true)
             {
                 try
@@ -198,14 +199,14 @@ namespace Facade
                 try
                 {
                     if (context.CancellationToken.IsCancellationRequested) break;
-                    var response = clientRelay.DeleteOrder(new TradeBot.Relay.RelayService.v1.DeleteOrderRequest {},context.RequestHeaders);
+                    var response = clientRelay.DeleteOrder(new TradeBot.Relay.RelayService.v1.DeleteOrderRequest { }, context.RequestHeaders);
                     Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
                     Log.Information("{@Where}: {@MethodName} \n args: response={@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
-                    return Task.FromResult(new DeleteOrderResponse { Response=new TradeBot.Common.v1.DefaultResponse 
-                    { 
-                        Code=response.Response.Code,
-                        Message=response.Response.Message
-                    } 
+                    return Task.FromResult(new DeleteOrderResponse { Response = new TradeBot.Common.v1.DefaultResponse
+                    {
+                        Code = response.Response.Code,
+                        Message = response.Response.Message
+                    }
                     });
                 }
                 catch (RpcException e)
@@ -225,7 +226,7 @@ namespace Facade
                     if (context.CancellationToken.IsCancellationRequested) break;
                     var response = clientRelay.StartBot(new TradeBot.Relay.RelayService.v1.StartBotRequest
                     {
-                        Config=request.Config
+                        Config = request.Config
                     }, context.RequestHeaders);
                     Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
                     Log.Information("{@Where}: {@MethodName} \n args: response={@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
@@ -252,10 +253,10 @@ namespace Facade
                         if (context.CancellationToken.IsCancellationRequested) break;
                         var response = clientRelay.StopBot(new TradeBot.Relay.RelayService.v1.StopBotRequest
                         {
-                            Request = new TradeBot.Common.v1.UpdateServerConfigRequest 
-                            { 
-                                Config = request.Request.Config, 
-                                Switch = request.Request.Switch 
+                            Request = new TradeBot.Common.v1.UpdateServerConfigRequest
+                            {
+                                Config = request.Request.Config,
+                                Switch = request.Request.Switch
                             }
                         }, context.RequestHeaders);
                         Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
@@ -279,7 +280,7 @@ namespace Facade
                 {
 
                     if (context.CancellationToken.IsCancellationRequested) break;
-                    var response = await clientRelay.UpdateServerConfigAsync(new TradeBot.Relay.RelayService.v1.UpdateServerConfigRequest() { Request = request.Request },context.RequestHeaders);
+                    var response = await clientRelay.UpdateServerConfigAsync(new TradeBot.Relay.RelayService.v1.UpdateServerConfigRequest() { Request = request.Request }, context.RequestHeaders);
                     Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
                     Log.Information("{@Where}: {@MethodName} \n args: response: {@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
                     return new UpdateServerConfigResponse();
@@ -587,7 +588,54 @@ namespace Facade
 
         #endregion
 
+        #region History
+        public async override Task SubscribeEvents(SubscribeEventsRequest request, IServerStreamWriter<SubscribeEventsResponse> responseStream, ServerCallContext context)
+        {
+            try
+            {
+                var response = clientHistory.SubscribeEvents(new TradeBot.History.HistoryService.v1.SubscribeEventsRequest { Sessionid = request.Sessionid }, context.RequestHeaders);
 
+                while (await response.ResponseStream.MoveNext())
+                {
+                    switch (response.ResponseStream.Current.EventTypeCase)
+                    {
+                        case TradeBot.History.HistoryService.v1.SubscribeEventsResponse.EventTypeOneofCase.Balance:
+                            await responseStream.WriteAsync(new SubscribeEventsResponse
+                            {
+                                Balance = new PublishBalanceEvent
+                                {
+                                    Sessionid = response.ResponseStream.Current.Balance.Sessionid,
+                                    Balance = response.ResponseStream.Current.Balance.Balance,
+                                    Time = response.ResponseStream.Current.Balance.Time
+                                }
+                            });
+                            break;
+                        case TradeBot.History.HistoryService.v1.SubscribeEventsResponse.EventTypeOneofCase.Order:
+                            await responseStream.WriteAsync(new SubscribeEventsResponse
+                            {
+                                Order = new PublishOrderEvent
+                                {
+                                    ChangesType = response.ResponseStream.Current.Order.ChangesType,
+                                    Message = response.ResponseStream.Current.Order.Message,
+                                    Sessionid = response.ResponseStream.Current.Order.Sessionid,
+                                    Order = response.ResponseStream.Current.Order.Order,
+                                    Time = response.ResponseStream.Current.Order.Time
+                                }
+                            });
+                            break;
+                        case TradeBot.History.HistoryService.v1.SubscribeEventsResponse.EventTypeOneofCase.None:
+                            Log.Information("{@Where}: {@MethodName} Get none", "Facade", nameof(SubscribeEvents));
+                            break;
+                    }
+                }
+            }
+            catch (System.Exception e)
+            {
+                Log.Error("{@Where}: {@MethodName}-Exception: {@Exception}","Facade",nameof(SubscribeEvents),e.Message);
+            }
+        }
     }
-
+    #endregion
 }
+
+
