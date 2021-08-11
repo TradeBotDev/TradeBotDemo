@@ -14,8 +14,8 @@ namespace FormerTests
         public void FormOrder_AvailBal240000AndBuyAndPosition100AndPrc260000_PlaceOrderNotCalled()
         {
             //Arrange
-            var HistoryClient = new HistoryClient();
-            var storage = new Storage(HistoryClient)
+            var historyClient = new HistoryClient();
+            var storage = new Storage()
             {
                 BuyMarketPrice = 38000,
                 AvailableBalance = 240000,
@@ -33,7 +33,7 @@ namespace FormerTests
 
             TradeMarketClient.Configure("https://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
-            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, HistoryClient);
+            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
             //Act
             var exception = Record.ExceptionAsync(async () => await former.FormOrder(1));
@@ -45,8 +45,8 @@ namespace FormerTests
         public void FormOrder_AvailBal1200000AndBuyAndPosition100AndPrc260000_PlaceOrderCalled()
         {
             //Arrange
-            var HistoryClient = new HistoryClient();
-            var storage = new Storage(HistoryClient)
+            var historyClient = new HistoryClient();
+            var storage = new Storage()
             {
                 BuyMarketPrice = 38000,
                 AvailableBalance = 1200000,
@@ -64,7 +64,7 @@ namespace FormerTests
 
             TradeMarketClient.Configure("https://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
-            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, HistoryClient);
+            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
             //Act
             var exception = Record.ExceptionAsync(async () => await former.FormOrder(1));
@@ -76,8 +76,8 @@ namespace FormerTests
         public void FormOrder_AvailBal240000AndSellAndPositionNegative100AndPrc260000_PlaceOrderNotCalled()
         {
             //Arrange
-            var HistoryClient = new HistoryClient();
-            var storage = new Storage(HistoryClient)
+            var historyClient = new HistoryClient();
+            var storage = new Storage()
             {
                 SellMarketPrice = 38000,
                 AvailableBalance = 240000,
@@ -93,7 +93,7 @@ namespace FormerTests
 
             TradeMarketClient.Configure("https://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
-            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, HistoryClient);
+            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
             //Act
             var exception = Record.ExceptionAsync(async () => await former.FormOrder(-1));
@@ -105,8 +105,8 @@ namespace FormerTests
         public void FormOrder_AvailBal1200000AndSellAndPositionNegative100AndPrc260000_PlaceOrderCalled()
         {
             //Arrange
-            var HistoryClient = new HistoryClient();
-            var storage = new Storage(HistoryClient)
+            var historyClient = new HistoryClient();
+            var storage = new Storage()
             {
                 SellMarketPrice = 38000,
                 AvailableBalance = 1200000,
@@ -123,7 +123,7 @@ namespace FormerTests
 
             TradeMarketClient.Configure("https://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
-            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, HistoryClient);
+            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
             //Act
             var exception = Record.ExceptionAsync(async () => await former.FormOrder(-1));
@@ -135,8 +135,8 @@ namespace FormerTests
         public void FormOrder_TotalBal1200000AndBuyAndPositionNegative100AndMyOrdersMargin1050000AndPrc260000_PlaceOrderNotCalled()
         {
             //Arrange
-            var HistoryClient = new HistoryClient();
-            var storage = new Storage(HistoryClient)
+            var historyClient = new HistoryClient();
+            var storage = new Storage()
             {
                 BuyMarketPrice = 38000,
                 AvailableBalance = 1200000,
@@ -159,7 +159,7 @@ namespace FormerTests
 
             TradeMarketClient.Configure("https://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
-            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, HistoryClient);
+            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
             //Act
             var exception = Record.ExceptionAsync(async () => await former.FormOrder(1));
@@ -171,8 +171,8 @@ namespace FormerTests
         public void FormOrder_TotalBal1200000AndBuyAndPositionNegative100AndCountersOrdersMargin1050000AndPrc260000_PlaceOrderNotCalled()
         {
             //Arrange
-            var HistoryClient = new HistoryClient();
-            var storage = new Storage(HistoryClient)
+            var historyClient = new HistoryClient();
+            var storage = new Storage()
             {
                 BuyMarketPrice = 38000,
                 AvailableBalance = 1200000,
@@ -195,7 +195,7 @@ namespace FormerTests
 
             TradeMarketClient.Configure("https://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
-            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, HistoryClient);
+            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
             //Act
             var exception = Record.ExceptionAsync(async () => await former.FormOrder(1));
@@ -207,8 +207,8 @@ namespace FormerTests
         public void FormOrder_TotalBal1200000AndBuyAndPositionNegative100AndCountersMyOrdersMargin520000AndPrc260000_PlaceOrderCalled()
         {
             //Arrange
-            var HistoryClient = new HistoryClient();
-            var storage = new Storage(HistoryClient)
+            var historyClient = new HistoryClient();
+            var storage = new Storage()
             {
                 BuyMarketPrice = 38000,
                 AvailableBalance = 1200000,
@@ -231,7 +231,7 @@ namespace FormerTests
 
             TradeMarketClient.Configure("https://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
-            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, HistoryClient);
+            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
             //Act
             var exception = Record.ExceptionAsync(async () => await former.FormOrder(1));
@@ -243,8 +243,8 @@ namespace FormerTests
         public void FormOrder_TotalBal1200000AndBuyAndPositionNegative100AndPrc1315789_PlaceOrderNotCalled()
         {
             //Arrange
-            var HistoryClient = new HistoryClient();
-            var storage = new Storage(HistoryClient)
+            var historyClient = new HistoryClient();
+            var storage = new Storage()
             {
                 BuyMarketPrice = 38000,
                 AvailableBalance = 1200000,
@@ -259,7 +259,7 @@ namespace FormerTests
 
             TradeMarketClient.Configure("https://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
-            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, HistoryClient);
+            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
             //Act
             var exception = Record.ExceptionAsync(async () => await former.FormOrder(1));
@@ -271,8 +271,8 @@ namespace FormerTests
         public void FormOrder_TotalBal1200000AndSellAndPosition100AndMyOrdersMargin1050000AndPrc260000_PlaceOrderNotCalled()
         {
             //Arrange
-            var HistoryClient = new HistoryClient();
-            var storage = new Storage(HistoryClient)
+            var historyClient = new HistoryClient();
+            var storage = new Storage()
             {
                 SellMarketPrice = 38000,
                 AvailableBalance = 1200000,
@@ -295,7 +295,7 @@ namespace FormerTests
 
             TradeMarketClient.Configure("https://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
-            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, HistoryClient);
+            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
             //Act
             var exception = Record.ExceptionAsync(async () => await former.FormOrder(-1));
@@ -307,8 +307,8 @@ namespace FormerTests
         public void FormOrder_TotalBal1200000AndSellAndPosition100AndCountersOrdersMargin1050000AndPrc260000_PlaceOrderNotCalled()
         {
             //Arrange
-            var HistoryClient = new HistoryClient();
-            var storage = new Storage(HistoryClient)
+            var historyClient = new HistoryClient();
+            var storage = new Storage()
             {
                 SellMarketPrice = 38000,
                 AvailableBalance = 1200000,
@@ -331,7 +331,7 @@ namespace FormerTests
 
             TradeMarketClient.Configure("https://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
-            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, HistoryClient);
+            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
             //Act
             var exception = Record.ExceptionAsync(async () => await former.FormOrder(-1));
@@ -343,8 +343,8 @@ namespace FormerTests
         public void FormOrder_TotalBal1200000AndSellAndPosition100AndCountersMyOrdersMargin520000AndPrc260000_PlaceOrderCalled()
         {
             //Arrange
-            var HistoryClient = new HistoryClient();
-            var storage = new Storage(HistoryClient)
+            var historyClient = new HistoryClient();
+            var storage = new Storage()
             {
                 SellMarketPrice = 38000,
                 AvailableBalance = 1200000,
@@ -367,7 +367,7 @@ namespace FormerTests
 
             TradeMarketClient.Configure("https://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
-            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, HistoryClient);
+            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
             //Act
             var exception = Record.ExceptionAsync(async () => await former.FormOrder(-1));
@@ -379,8 +379,8 @@ namespace FormerTests
         public void FormOrder_TotalBal1200000AndSellAndPosition100AndPrc1315789_PlaceOrderNotCalled()
         {
             //Arrange
-            var HistoryClient = new HistoryClient();
-            var storage = new Storage(HistoryClient)
+            var historyClient = new HistoryClient();
+            var storage = new Storage()
             {
                 SellMarketPrice = 38000,
                 AvailableBalance = 1200000,
@@ -395,7 +395,7 @@ namespace FormerTests
 
             TradeMarketClient.Configure("https://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
-            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, HistoryClient);
+            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
             //Act
             var exception = Record.ExceptionAsync(async () => await former.FormOrder(-1));

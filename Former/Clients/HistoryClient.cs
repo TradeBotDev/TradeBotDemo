@@ -15,7 +15,6 @@ namespace Former.Clients
     {
         private static int _retryDelay;
         private static string _connectionString;
-        private CancellationTokenSource _token;
 
         private readonly HistoryService.HistoryServiceClient _client;
 
@@ -50,15 +49,21 @@ namespace Former.Clients
             }
         }
 
-        internal async Task<PublishBalanceUpdateResponse> WriteBalance(double balance, Metadata meta)
+        internal async Task<PublishEventResponse> WriteBalance(double balance, Metadata meta)
         {
-            PublishBalanceUpdateResponse response = null;
+            PublishEventResponse response = null;
+
             async Task PublishBalanceUpdateFunc()
             {
-                response = await _client.PublishBalanceUpdateAsync(new PublishBalanceUpdateRequest
+                response = await _client.PublishEventAsync(new PublishEventRequest
                 {
-                    Balance = new Balance { Currency = "XBT", Value = balance.ToString(CultureInfo.InvariantCulture) },
-                    Sessionid = meta.GetValue("sessionid"), Time = new Timestamp { Seconds = DateTimeOffset.Now.ToUnixTimeSeconds() }
+                    Balance = new PublishBalanceEvent
+                    {
+                        Balance = new Balance
+                            { Currency = "XBT", Value = balance.ToString(CultureInfo.InvariantCulture) },
+                        Sessionid = meta.GetValue("sessionid"),
+                        Time = new Timestamp { Seconds = DateTimeOffset.Now.ToUnixTimeSeconds() }
+                    }
                 });
             }
 
@@ -66,23 +71,27 @@ namespace Former.Clients
             return response;
         }
 
-        internal async Task<PublishOrderUpdateResponse> WriteOrder(Order order, ChangesType changesType, Metadata meta, string message)
+        internal async Task<PublishEventResponse> WriteOrder(Order order, ChangesType changesType, Metadata meta,
+            string message)
         {
-            PublishOrderUpdateResponse response = null;
+            PublishEventResponse response = null;
 
             async Task PublishBalanceUpdateFunc()
             {
-                response = await _client.PublishOrderUpdateAsync(new PublishOrderUpdateRequest()
+                response = await _client.PublishEventAsync(new PublishEventRequest
                 {
-                    ChangesType = changesType, Order = order, Sessionid = meta.GetValue("sessionid"),
-                    Time = new Timestamp { Seconds = DateTimeOffset.Now.ToUnixTimeSeconds() },
-                    Message = message
+                    Order = new PublishOrderEvent
+                    {
+                        ChangesType = changesType, Order = order, Sessionid = meta.GetValue("sessionid"),
+                        Time = new Timestamp { Seconds = DateTimeOffset.Now.ToUnixTimeSeconds() },
+                        Message = message
+                    }
+
                 });
             }
 
             await ConnectionTester(PublishBalanceUpdateFunc);
             return response;
-
         }
 
     }

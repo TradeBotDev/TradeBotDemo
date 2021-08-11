@@ -8,56 +8,43 @@ package tradebot.history.history_service.v1;
 
 service HistoryService{
 	
-	rpc PublishBalanceUpdate(PublishBalanceUpdateRequest) returns (PublishBalanceUpdateResponse);
+	rpc PublishEvent(PublishEventRequest) returns (PublishEventResponse);
 
-	rpc PublishOrderUpdate(PublishOrderUpdateRequest) returns (PublishOrderUpdateResponse);
-
-	rpc SubscribeBalanceUpdate(SubscribeBalanceEventsRequest) returns (stream SubscribeBalanceEventsResponse);
-
-	rpc SubscribeOrderUpdate (SubscribeOrderEventRequest) returns (stream SubscribeOrderEventRespones);
+	rpc SubscribeEvents(SubscribeEventsRequest) returns (stream SubscribeEventsResponse);
 
 }
 
-message PublishBalanceUpdateRequest{
-	google.protobuf.Timestamp time = 1;
-	string sessionid = 2;
+message PublishEventRequest{
+	oneof event_type{
+		PublishBalanceEvent balance = 1;
+		PublishOrderEvent order = 2;
+	}
+}
+
+message PublishBalanceEvent{
+	string sessionid = 1;
+	google.protobuf.Timestamp time = 2;
 	tradebot.common.v1.Balance balance = 3;
 }
 
-message PublishBalanceUpdateResponse{
-	google.protobuf.Empty empty = 1;
-}
-
-message PublishOrderUpdateRequest{
-	google.protobuf.Timestamp time = 1;
-	string sessionid = 2;
-	tradebot.common.v1.ChangesType changes_type = 3;
+message PublishOrderEvent{
+	string sessionid = 1;
+	tradebot.common.v1.ChangesType changes_type = 2;
+	google.protobuf.Timestamp time = 3;
 	tradebot.common.v1.Order order = 4;
 	string message = 5;
 }
-
-message PublishOrderUpdateResponse{
+message PublishEventResponse{
 	google.protobuf.Empty empty = 1;
 }
 
-message SubscribeBalanceEventsRequest {
-	google.protobuf.Empty empty = 1;
+message SubscribeEventsRequest {
+	string sessionid = 1;
 }
 
-message SubscribeBalanceEventsResponse{
-	google.protobuf.Timestamp time = 1;
-	string sessionid = 2;
-	tradebot.common.v1.Balance balance = 3;
-}
-
-message SubscribeOrderEventRequest {
-	google.protobuf.Empty empty = 1;
-}
-
-message SubscribeOrderEventRespones{
-	google.protobuf.Timestamp time = 1;
-	string sessionid = 2;
-	tradebot.common.v1.ChangesType changes_type = 3;
-	tradebot.common.v1.Order order = 4;
-	string message = 5;
+message SubscribeEventsResponse{
+	oneof event_type{
+		PublishBalanceEvent balance = 1;
+		PublishOrderEvent order = 2;
+	}
 }
