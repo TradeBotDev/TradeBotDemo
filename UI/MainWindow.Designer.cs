@@ -56,18 +56,20 @@ namespace UI
             this.label9 = new System.Windows.Forms.Label();
             this.LogPassTextBox = new System.Windows.Forms.TextBox();
             this.MainMenuGroupBox = new System.Windows.Forms.GroupBox();
+            this.BalanceLabel = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
             this.UpdateConfigButton = new System.Windows.Forms.Button();
             this.RemoveMyOrdersButton = new System.Windows.Forms.Button();
             this.ConfigIntervalOfAnalysis = new System.Windows.Forms.ComboBox();
             this.ConfigVolumeOfContracts = new System.Windows.Forms.ComboBox();
             this.ConfigAlgorithmSensivity = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
+            this.StopButton = new System.Windows.Forms.Button();
             this.SignUpGroupBox = new System.Windows.Forms.GroupBox();
             this.SignInGroupBox = new System.Windows.Forms.GroupBox();
             this.EventConsole = new System.Windows.Forms.RichTextBox();
             this.LoggedGroupBox = new System.Windows.Forms.GroupBox();
             this.SignOutButton = new System.Windows.Forms.Button();
-            this.StopButton = new System.Windows.Forms.Button();
             this.MainMenuGroupBox.SuspendLayout();
             this.SignUpGroupBox.SuspendLayout();
             this.SignInGroupBox.SuspendLayout();
@@ -76,9 +78,9 @@ namespace UI
             // 
             // StartButton
             // 
-            this.StartButton.Location = new System.Drawing.Point(340, 244);
+            this.StartButton.Location = new System.Drawing.Point(480, 260);
             this.StartButton.Name = "StartButton";
-            this.StartButton.Size = new System.Drawing.Size(349, 60);
+            this.StartButton.Size = new System.Drawing.Size(209, 44);
             this.StartButton.TabIndex = 0;
             this.StartButton.Text = "Launch Bot";
             this.StartButton.UseVisualStyleBackColor = true;
@@ -307,6 +309,8 @@ namespace UI
             // 
             // MainMenuGroupBox
             // 
+            this.MainMenuGroupBox.Controls.Add(this.BalanceLabel);
+            this.MainMenuGroupBox.Controls.Add(this.label3);
             this.MainMenuGroupBox.Controls.Add(this.UpdateConfigButton);
             this.MainMenuGroupBox.Controls.Add(this.RemoveMyOrdersButton);
             this.MainMenuGroupBox.Controls.Add(this.ConfigIntervalOfAnalysis);
@@ -330,21 +334,38 @@ namespace UI
             this.MainMenuGroupBox.TabStop = false;
             this.MainMenuGroupBox.Text = "Main Menu";
             // 
+            // BalanceLabel
+            // 
+            this.BalanceLabel.AutoSize = true;
+            this.BalanceLabel.Location = new System.Drawing.Point(79, 282);
+            this.BalanceLabel.Name = "BalanceLabel";
+            this.BalanceLabel.Size = new System.Drawing.Size(0, 20);
+            this.BalanceLabel.TabIndex = 20;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(9, 281);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(64, 20);
+            this.label3.TabIndex = 19;
+            this.label3.Text = "Balance:";
+            // 
             // UpdateConfigButton
             // 
-            this.UpdateConfigButton.Location = new System.Drawing.Point(159, 243);
+            this.UpdateConfigButton.Location = new System.Drawing.Point(340, 203);
             this.UpdateConfigButton.Name = "UpdateConfigButton";
-            this.UpdateConfigButton.Size = new System.Drawing.Size(175, 59);
+            this.UpdateConfigButton.Size = new System.Drawing.Size(138, 55);
             this.UpdateConfigButton.TabIndex = 17;
-            this.UpdateConfigButton.Text = "Update config";
+            this.UpdateConfigButton.Text = "Update configuration";
             this.UpdateConfigButton.UseVisualStyleBackColor = true;
             this.UpdateConfigButton.Click += new System.EventHandler(this.UpdateConfigButton_Click);
             // 
             // RemoveMyOrdersButton
             // 
-            this.RemoveMyOrdersButton.Location = new System.Drawing.Point(9, 243);
+            this.RemoveMyOrdersButton.Location = new System.Drawing.Point(340, 260);
             this.RemoveMyOrdersButton.Name = "RemoveMyOrdersButton";
-            this.RemoveMyOrdersButton.Size = new System.Drawing.Size(144, 59);
+            this.RemoveMyOrdersButton.Size = new System.Drawing.Size(138, 44);
             this.RemoveMyOrdersButton.TabIndex = 16;
             this.RemoveMyOrdersButton.Text = "Cancel my orders";
             this.RemoveMyOrdersButton.UseVisualStyleBackColor = true;
@@ -401,8 +422,10 @@ namespace UI
             this.ConfigAlgorithmSensivity.FormattingEnabled = true;
             this.ConfigAlgorithmSensivity.Items.AddRange(new object[] {
             "Minimal",
+            "Low",
             "Medium",
-            "High"});
+            "High",
+            "Ultra"});
             this.ConfigAlgorithmSensivity.Location = new System.Drawing.Point(161, 203);
             this.ConfigAlgorithmSensivity.Name = "ConfigAlgorithmSensivity";
             this.ConfigAlgorithmSensivity.Size = new System.Drawing.Size(84, 28);
@@ -417,6 +440,18 @@ namespace UI
             this.label2.Size = new System.Drawing.Size(135, 20);
             this.label2.TabIndex = 12;
             this.label2.Text = "Algorithm sensivity";
+            // 
+            // StopButton
+            // 
+            this.StopButton.Enabled = false;
+            this.StopButton.Location = new System.Drawing.Point(480, 260);
+            this.StopButton.Name = "StopButton";
+            this.StopButton.Size = new System.Drawing.Size(209, 44);
+            this.StopButton.TabIndex = 18;
+            this.StopButton.Text = "Stop bot";
+            this.StopButton.UseVisualStyleBackColor = true;
+            this.StopButton.Visible = false;
+            this.StopButton.Click += new System.EventHandler(this.StopButton_Click);
             // 
             // SignUpGroupBox
             // 
@@ -456,6 +491,7 @@ namespace UI
             // 
             // EventConsole
             // 
+            this.EventConsole.BackColor = System.Drawing.Color.White;
             this.EventConsole.Location = new System.Drawing.Point(11, 335);
             this.EventConsole.Name = "EventConsole";
             this.EventConsole.ReadOnly = true;
@@ -484,18 +520,6 @@ namespace UI
             this.SignOutButton.Text = "Sign Out";
             this.SignOutButton.UseVisualStyleBackColor = true;
             this.SignOutButton.Click += new System.EventHandler(this.SignOutButton_Click);
-            // 
-            // StopButton
-            // 
-            this.StopButton.Enabled = false;
-            this.StopButton.Location = new System.Drawing.Point(340, 243);
-            this.StopButton.Name = "StopButton";
-            this.StopButton.Size = new System.Drawing.Size(349, 61);
-            this.StopButton.TabIndex = 18;
-            this.StopButton.Text = "Stop bot";
-            this.StopButton.UseVisualStyleBackColor = true;
-            this.StopButton.Visible = false;
-            this.StopButton.Click += new System.EventHandler(this.StopButton_Click);
             // 
             // TradeBotUi
             // 
@@ -565,6 +589,8 @@ namespace UI
         private System.Windows.Forms.Button RemoveMyOrdersButton;
         private System.Windows.Forms.Button UpdateConfigButton;
         private System.Windows.Forms.Button StopButton;
+        private System.Windows.Forms.Label BalanceLabel;
+        private System.Windows.Forms.Label label3;
     }
 }
 

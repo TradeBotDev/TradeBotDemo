@@ -73,7 +73,7 @@ namespace Relay.Services
             {
                 Response = new DefaultResponse()
                 {
-                    Message = "Command has been complited",
+                    Message = "Command has been completed",
                     Code = ReplyCode.Succeed
                 }
             });

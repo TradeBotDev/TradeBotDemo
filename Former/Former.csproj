@@ -2,11 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <UserSecretsId>f286fe9f-c12e-45f4-86cd-cd3ef1e156e0</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.38.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="5.0.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.14" />
     <PackageReference Include="Serilog" Version="2.10.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="4.0.0" />
     <PackageReference Include="Serilog.Sinks.Seq" Version="5.0.1" />
@@ -15,11 +18,11 @@
     <Protobuf Link="Protos/trademarket.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/trademarket/trademarket_service/v1/trademarket.proto" GrpcServices="Both" />
     <Protobuf Link="Protos/relay.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/relay/relay_service/v1/relay.proto" GrpcServices="Both" />
     <Protobuf Link="Protos/common.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/common/v1/common.proto" GrpcServices="Both" />
+    <Protobuf Link="Protos/history.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/history/history_service/v1/history.proto" GrpcServices="Both" />
     <InternalsVisibleTo Include="FormerTests" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Protos\" />
     <Folder Include="Protos\" />
   </ItemGroup>
 

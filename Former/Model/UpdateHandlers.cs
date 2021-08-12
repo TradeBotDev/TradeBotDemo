@@ -11,33 +11,48 @@ namespace Former.Model
     public class UpdateHandlers
     {
         private readonly Storage _storage;
-        private readonly Config _configuration;
+        private Config _configuration;
         private readonly TradeMarketClient _tradeMarketClient;
         private readonly Metadata _metadata;
         private readonly HistoryClient _historyClient; 
 
+        private double _savedMarketBuyPrice;
+        private double _savedMarketSellPrice;
+        private int _savedTotalBalance;
+
+
         internal UpdateHandlers(Storage storage, Config configuration, TradeMarketClient tradeMarketClient, Metadata metadata, HistoryClient historyClient)
         {
             _storage = storage;
-            _storage.HandleUpdateEvent += CheckAndFitPrices;
+            _storage.HandleUpdateEvent += CheckIfNeedHandle;
             _configuration = configuration;
             _metadata = metadata;
             _tradeMarketClient = tradeMarketClient;
             _historyClient = historyClient;
         }
 
+        internal void SetConfiguration(Config configuration)
+        {
+            _configuration = configuration;
+        }
+
         /// <summary>
         /// Проверяет, стоит ли перевыставлять ордера, и вызывает FitPrices, в том случае, если это необходимо
         /// </summary>
-        private async Task CheckAndFitPrices()
+        private async Task CheckIfNeedHandle()
         {
             //если рыночная цена изменилась, то необходимо проверить, не устарели ли цени в наших ордерах
-            if (Math.Abs(_storage.SellMarketPrice - _storage.SavedMarketSellPrice) > 0.4 || Math.Abs(_storage.SavedMarketBuyPrice - _storage.BuyMarketPrice) > 0.4)
+            if (Math.Abs(_storage.SellMarketPrice - _savedMarketSellPrice) > 0.4 || Math.Abs(_savedMarketBuyPrice - _storage.BuyMarketPrice) > 0.4)
             {
-                _storage.SavedMarketSellPrice = _storage.SellMarketPrice;
-                _storage.SavedMarketBuyPrice = _storage.BuyMarketPrice;
+                _savedMarketSellPrice = _storage.SellMarketPrice;
+                _savedMarketBuyPrice = _storage.BuyMarketPrice;
                 Log.Information("{@Where}: Buy market price: {@BuyMarketPrice}, Sell market price: {@SellMarketPrice}", "Former",_storage.BuyMarketPrice, _storage.SellMarketPrice);
                 if (!_storage.FitPricesLocker && ! _storage.MyOrders.IsEmpty) await FitPrices();
+            }
+            if (_savedTotalBalance != _storage.TotalBalance)
+            {
+                _savedTotalBalance= _storage.TotalBalance;
+                await _historyClient.WriteBalance(_storage.TotalBalance, _metadata);
             }
         }
 
@@ -82,8 +97,9 @@ namespace Former.Model
                 {
                     var removeResponse = _storage.RemoveOrder(key, _storage.MyOrders);
                     Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed cause cannot be amended {@ResponseCode} ", "Former", order.Id, order.Price, order.Quantity, order.Signature.Type, removeResponse ? ReplyCode.Succeed : ReplyCode.Failure);
-                }
+                } else return;
                 Log.Information("{@Where}: Order {@Id} amended with {@Price} {@ResponseCode} {@ResponseMessage}", "Former", key, fairPrice, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Succeed ? "" : response.Response.Message);
+                await _historyClient.WriteOrder(order, ChangesType.Update, _metadata, "Order amended");
             }
             _storage.FitPricesLocker = false;
         }

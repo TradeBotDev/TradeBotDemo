@@ -7,6 +7,7 @@ using Google.Protobuf.WellKnownTypes;
 using TradeBot.Common.v1;
 using TradeBot.Facade.FacadeService.v1;
 using UpdateServerConfigRequest = TradeBot.Facade.FacadeService.v1.UpdateServerConfigRequest;
+using static TradeBot.Facade.FacadeService.v1.SubscribeEventsResponse;
 
 namespace UI
 {
@@ -21,10 +22,45 @@ namespace UI
 
         public TradeBotUi()
         {
-            _client = new FacadeService.FacadeServiceClient(GrpcChannel.ForAddress("https://localhost:5002"));
+            _client = new FacadeService.FacadeServiceClient(GrpcChannel.ForAddress("http://localhost:5002"));
             InitializeComponent();
             InitIntervalMap();
             InitSensitivityMap();
+            FormClosing += MainWindow_FormClosing;
+            ConfigUpdatePriceRange.TextChanged += ConfigUpdatePriceRangeOnTextChanged;
+        }
+
+        private void ConfigUpdatePriceRangeOnTextChanged(object? sender, EventArgs e)
+        {
+            var str = ConfigUpdatePriceRange.Text;
+            if (ConfigUpdatePriceRange.Text.IndexOf(',') == ConfigUpdatePriceRange.Text.Length - 1) return;
+            if(!double.TryParse(ConfigUpdatePriceRange.Text, out var value)) return;
+
+            var floor = Math.Floor(value);
+
+            ConfigUpdatePriceRange.TextChanged -= ConfigUpdatePriceRangeOnTextChanged;
+            ConfigUpdatePriceRange.Text = (floor += (value - floor) < 0.5 ? 0.0 : 0.5).ToString();
+            ConfigUpdatePriceRange.TextChanged += ConfigUpdatePriceRangeOnTextChanged;
+        }
+
+        private async void SubscribeEvents(string sessionId)
+        {
+            var response = _client.SubscribeEvents(new SubscribeEventsRequest { Sessionid = sessionId });
+
+            while (await response.ResponseStream.MoveNext())
+            {
+                switch (response.ResponseStream.Current.EventTypeCase)
+                {
+                    case EventTypeOneofCase.Balance:
+                        BalanceLabel.Text = $"{double.Parse(response.ResponseStream.Current.Balance.Balance.Value)/100000000} {response.ResponseStream.Current.Balance.Balance.Currency}";
+                        break;
+                    case EventTypeOneofCase.Order:
+                        var incomingString = $"\r\n\n[{TimeZoneInfo.ConvertTime(response.ResponseStream.Current.Order.Time.ToDateTime(),TimeZoneInfo.Local):HH:mm:ss}]: {response.ResponseStream.Current.Order.Message}\r\n" +
+                                             $"Order {response.ResponseStream.Current.Order.Order.Id}, price: {response.ResponseStream.Current.Order.Order.Price}, quantity: {response.ResponseStream.Current.Order.Order.Quantity}, type: {response.ResponseStream.Current.Order.Order.Signature.Type}";
+                        EventConsole.Text += incomingString;
+                        break;
+                }
+            }
         }
 
         private void InitIntervalMap()
@@ -56,9 +92,11 @@ namespace UI
         {
             _sensitivityMap = new Dictionary<string, int>
             {
-                { "Minimal", 1 },
+                { "Minimal", 0 },
+                { "Low", 1 },
                 { "Medium", 2 },
-                { "High", 3 }
+                { "High", 3 },
+                { "Ultra", 4 }
             };
         }
 
@@ -76,7 +114,7 @@ namespace UI
                     Request = new TradeBot.Common.v1.UpdateServerConfigRequest
                         { Config = configuration, Switch = false }
                 }, _meta);
-
+            SubscribeEvents(_meta.GetValue("sessionid"));
 
             StartButton.Enabled = false;
             StartButton.Visible = false;
@@ -84,12 +122,12 @@ namespace UI
             StopButton.Visible = true;
 
             Console.WriteLine("Запустил бота с конфигом {0}", configuration);
+            EventConsole.Text += $"\r\n[{DateTime.Now:HH:mm:ss}]: Bot has been started!";
         }
 
         private Config GetConfig()
         {
-            _intervalMap.TryGetValue(ConfigIntervalOfAnalysisl.Text, out var interval);
-            _sensitivityMap.TryGetValue(ConfigAlgorithmSensivity.Text, out var sensitivity);
+            var str = _intervalMap[ConfigIntervalOfAnalysis.Text];
             var config = new Config
             {
                 AvaibleBalance = double.Parse(ConfigAvailableBalance.Text),
@@ -97,8 +135,8 @@ namespace UI
                 ContractValue = double.Parse(ConfigVolumeOfContracts.Text),
                 AlgorithmInfo = new AlgorithmInfo
                 {
-                    Interval = interval,
-                    Sensivity = sensitivity
+                    Interval = _intervalMap[ConfigIntervalOfAnalysis.Text],
+                    Sensivity = _sensitivityMap[ConfigAlgorithmSensivity.Text]
                 },
                 OrderUpdatePriceRange = double.Parse(ConfigUpdatePriceRange.Text),
             };
@@ -174,6 +212,7 @@ namespace UI
             LoggedGroupBox.Text = "Signed in as " + LogLogTextBox.Text;
             SignInGroupBox.Visible = false;
             SignInGroupBox.Enabled = false;
+            EventConsole.Text += $"\r\n[{DateTime.Now:HH:mm:ss}]: You are signed in as {LogLogTextBox.Text}";
         }
 
         private async void SignOutButton_Click(object sender, EventArgs e)
@@ -202,6 +241,12 @@ namespace UI
             StopButton.Enabled = false;
             StopButton.Visible = false;
             var stopBotResponse = await _client.StopBotAsync(new StopBotRequest { Request=new TradeBot.Common.v1.UpdateServerConfigRequest {Config=GetConfig(),Switch=true } },_meta);
+            EventConsole.Text += $"\r\n[{DateTime.Now:HH:mm:ss}]: Bot has been stopped!";
+        }
+
+        private async void MainWindow_FormClosing(object sender, FormClosingEventArgs e) 
+        {
+            var stopBotResponse = await _client.UpdateServerConfigAsync(new UpdateServerConfigRequest { Request = new TradeBot.Common.v1.UpdateServerConfigRequest { Config = GetConfig(), Switch = true}},_meta);
         }
     }
 }

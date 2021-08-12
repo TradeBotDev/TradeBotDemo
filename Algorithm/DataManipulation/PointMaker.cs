@@ -12,7 +12,17 @@ namespace Algorithm.DataManipulation
     //later will be decided by user
     public class PointMaker
     {
-        private static KeyValuePair<DateTime, double> MakePoint(List<Order> orders, DateTime timestamp)
+        private int _pointIntervalInMilliseconds = 1000;
+        public void SetPointInterval(int newInterval)
+        {
+            _pointIntervalInMilliseconds = newInterval;
+        }
+        private bool _isOrderedToStop = false;
+        public void Stop()
+        {
+            _isOrderedToStop = true;
+        }
+        private KeyValuePair<DateTime, double> MakePoint(List<Order> orders, DateTime timestamp)
         {
             double price = 0;
             int numberOfOrders = 0;
@@ -43,16 +53,17 @@ namespace Algorithm.DataManipulation
             return new KeyValuePair<DateTime, double>(timestamp, price);
         }
 
-        public void Launch(Publisher publisher, DataCollector dataCollector)
+        public void Launch(PointPublisher publisher, DataCollector dataCollector)
         {
-            while (true)
+            _isOrderedToStop = false;
+            while (!_isOrderedToStop)
             {
                 Log.Information("New iteration started");
-                Thread.Sleep(1000);
-                if (DataCollector.Orders.Count == 0)
+                Thread.Sleep(_pointIntervalInMilliseconds);
+                if (dataCollector.Orders.Count == 0)
                     continue;
 
-                var newOrders = DataCollector.Orders;
+                var newOrders = dataCollector.Orders;
                 var newPoint = MakePoint(new List<Order>(newOrders), DateTime.Now);
                 //if a point was made we notify everyone involved (algo and dataCollector) 
                 if (newPoint.Value != 0)

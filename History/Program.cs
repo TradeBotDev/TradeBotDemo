@@ -1,7 +1,6 @@
-using History.DataBase;
-using System;
-using System.Threading;
-using History.Cache;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
+using Serilog;
 
 namespace History
 {
@@ -9,11 +8,24 @@ namespace History
     {
         public static void Main(string[] args)
         {
-            DataContext postgres = new();
-            Console.ReadKey();
-            RedisReader rr = new();
-            rr.ShowKeys();
-            Console.ReadKey();
+            //DataContext postgres = new();
+            //Console.ReadKey();
+            //RedisReader rr = new();
+            //rr.ShowKeys();
+            //Console.ReadKey();
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.Console()
+                .WriteTo.Seq("http://localhost:5341")
+                .CreateLogger();
+            CreateHostBuilder(args).Build().Run();
         }
+
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
     }
 }
