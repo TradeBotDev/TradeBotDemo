@@ -18,8 +18,6 @@ namespace Algorithm.Services
             {
                 var order = requestStream.Current;
                 StorageOfAlgorithms.SendNewOrderToAllAlgos(order.Order);
-                //DataCollector.Orders.Add(order.Order);
-               // DataCollector.metaData = context.RequestHeaders;
             }
 
             return new AddOrderResponse();
@@ -29,6 +27,7 @@ namespace Algorithm.Services
             var user = context.RequestHeaders.GetValue("sessionid");
             var settings = request.Request;
             StorageOfAlgorithms.SendNewConfig(user, settings);
+            StorageOfAlgorithms.SendNewMeta(user, context.RequestHeaders);
             return Task.FromResult(new UpdateServerConfigResponse());
         }
     }

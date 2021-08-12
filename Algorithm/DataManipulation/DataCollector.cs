@@ -12,7 +12,6 @@ namespace Algorithm.DataManipulation
 {
     //DataCollector receives orders from the Relay service
     //it is basically a data storage to use instead of a DB 
-    //maybe TODO replace it w/ a DB 
     public class DataCollector
     {
         //all the orders coming from Relay
@@ -36,6 +35,14 @@ namespace Algorithm.DataManipulation
         public void AddNewOrder(Order order)
         {
             Orders.Add(order);
+        }
+
+        public void ClearAllData()
+        {
+            foreach (Order order in Orders)
+            {
+                Orders.Take();
+            }
         }
     }
 }

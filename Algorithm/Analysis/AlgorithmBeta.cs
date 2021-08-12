@@ -1,4 +1,5 @@
 ﻿using Algorithm.DataManipulation;
+using Grpc.Core;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -28,23 +29,27 @@ namespace Algorithm.Analysis
         //1 - low, 2 - medium, 3 - high
         private int _precision = 1;
 
-        private PointPublisher _publisher;
+        private PointPublisher _pointPublisher;
         private DataCollector _dc;
         private PointMaker _pm;
         private bool _isStopped = false;
+        private Metadata metadata;
+        //it feels wrong for algo to know anything about the user, but i don't know else to send a decision ¯\_(ツ)_/¯
+        private string _user;
         public bool GetState()
         {
             return _isStopped;
         }
 
         //when an algo is created it's immediately subscribed to new points 
-        public AlgorithmBeta()
+        public AlgorithmBeta(string user)
         {
-            _publisher = new();
-            _publisher.PointMadeEvent += NewPointAlert;
-            _dc = new(_publisher);
+            _user = user;
+            _pointPublisher = new();
+            _pointPublisher.PointMadeEvent += NewPointAlert;
+            _dc = new(_pointPublisher);
             _pm = new();
-            _pm.Launch(_publisher, _dc);
+            _pm.Launch(_pointPublisher, _dc);
             _storage = new Dictionary<DateTime, double>();
         }
 
@@ -98,7 +103,7 @@ namespace Algorithm.Analysis
             int trend = AnalyseTrend(subTrends, points);
             if (trend != 0)
             {
-                PriceSender.SendPrice(trend);
+                PriceSender.SendDecision(trend, _user);
             }
         }
         //this func needs points and subset averages and decides if it's time to buy
@@ -252,7 +257,7 @@ namespace Algorithm.Analysis
         private void Start()
         {
             _isStopped = false;
-            _pm.Launch(_publisher, _dc);
+            _pm.Launch(_pointPublisher, _dc);
         }
     } 
 }
