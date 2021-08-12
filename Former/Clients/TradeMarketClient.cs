@@ -28,6 +28,8 @@ namespace Former.Clients
         private static string _connectionString;
         private CancellationTokenSource _token;
 
+        private bool _deleteAllOrdersProcessing = false;
+
         private readonly TradeMarketService.TradeMarketServiceClient _client;
 
         public static void Configure(string connectionString, int retryDelay)
@@ -40,7 +42,7 @@ namespace Former.Clients
         {
             //AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
             //AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2Support", true);
-            _client = new TradeMarketService.TradeMarketServiceClient( GrpcChannel.ForAddress(_connectionString));
+            _client = new TradeMarketService.TradeMarketServiceClient(GrpcChannel.ForAddress(_connectionString));
         }
 
         /// <summary>
@@ -111,7 +113,7 @@ namespace Former.Clients
             {
                 while (await call.ResponseStream.MoveNext(_token.Token))
                 {
-                    await UpdateMyOrders?.Invoke(call.ResponseStream.Current.Changed, call.ResponseStream.Current.ChangesType);
+                    if (_deleteAllOrdersProcessing) await UpdateMyOrders?.Invoke(call.ResponseStream.Current.Changed, call.ResponseStream.Current.ChangesType);
                 }
             }
 
@@ -177,6 +179,7 @@ namespace Former.Clients
 
         internal async Task<DeleteOrderResponse> DeleteOrder(string id, Metadata metadata)
         {
+            _deleteAllOrdersProcessing = true;
             DeleteOrderResponse response = null;
 
             async Task DeleteOrderFunc()
@@ -188,6 +191,7 @@ namespace Former.Clients
             }
 
             await ConnectionTester(DeleteOrderFunc);
+            _deleteAllOrdersProcessing = false;
             return response;
         }
 

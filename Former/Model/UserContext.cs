@@ -14,19 +14,18 @@ namespace Former.Model
         public string SessionId => Meta.GetValue("sessionid");
         public string TradeMarket => Meta.GetValue("trademarket");
         public string Slot => Meta.GetValue("slot");
-        private Config _configuration;
         private readonly Storage _storage;
         private readonly TradeMarketClient _tradeMarketClient;
         private readonly Former _former;
         private readonly UpdateHandlers _updateHandlers;
         private readonly HistoryClient _historyClient;
+        private bool SubscribesAttached = false;
         
 
         public Metadata Meta { get; }
 
-        internal UserContext(string sessionId, string tradeMarket, string slot, Config configuration)
+        internal UserContext(string sessionId, string tradeMarket, string slot)
         {
-            _configuration = configuration;
             Meta = new Metadata
             {
                 { "sessionid", sessionId },
@@ -41,28 +40,34 @@ namespace Former.Model
             TradeMarketClient.Configure(Environment.GetEnvironmentVariable("TRADEMARKET_CONNECTION_STRING"), retryDelay);
             _tradeMarketClient = new TradeMarketClient();
             
-            _former = new Former(_storage, _configuration, _tradeMarketClient, Meta, _historyClient);
-            _updateHandlers = new UpdateHandlers(_storage, _configuration, _tradeMarketClient, Meta, _historyClient);
+            _former = new Former(_storage, null, _tradeMarketClient, Meta, _historyClient);
+            _updateHandlers = new UpdateHandlers(_storage, null, _tradeMarketClient, Meta, _historyClient);
+
+            SubscribeStorageToMarket();
         }
 
         public void SubscribeStorageToMarket()
         {
+            if (SubscribesAttached) return;
             _tradeMarketClient.UpdateMarketPrices += _storage.UpdateMarketPrices;
             _tradeMarketClient.UpdateBalance += _storage.UpdateBalance;
             _tradeMarketClient.UpdateMyOrders += _storage.UpdateMyOrderList;
             _tradeMarketClient.UpdatePosition += _storage.UpdatePosition;
             _tradeMarketClient.StartObserving(Meta);
+            SubscribesAttached = true;
             Log.Information("{@Where}: Former has been started!", "Former");
         }
 
         public void UnsubscribeStorage()
         {
+            if (!SubscribesAttached) return;
             _tradeMarketClient.StopObserving();
             _tradeMarketClient.UpdateMarketPrices -= _storage.UpdateMarketPrices;
             _tradeMarketClient.UpdateBalance -= _storage.UpdateBalance;
             _tradeMarketClient.UpdateMyOrders -= _storage.UpdateMyOrderList;
             _tradeMarketClient.UpdatePosition -= _storage.UpdatePosition;
             ClearStorage();
+            SubscribesAttached = false;
             Log.Information("{@Where}: Former has been stopped!", "Former");
         }
 
@@ -86,9 +91,13 @@ namespace Former.Model
 
         public async Task RemoveAllMyOrders()
         {
-            _tradeMarketClient.UpdateMyOrders -= _storage.UpdateMyOrderList;
             await _former.RemoveAllMyOrders();
-            _tradeMarketClient.UpdateMyOrders += _storage.UpdateMyOrderList;
+        }
+        
+        public void SetConfiguration(Config configuration)
+        {
+            _former.SetConfiguration(configuration);
+            _updateHandlers.SetConfiguration(configuration);
         }
     }
 }

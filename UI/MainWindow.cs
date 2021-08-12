@@ -34,20 +34,20 @@ namespace UI
             var response = _client.SubscribeEvents(new SubscribeEventsRequest { Sessionid = sessionId });
 
             while (await response.ResponseStream.MoveNext())
+            {
+                switch (response.ResponseStream.Current.EventTypeCase)
                 {
-                    switch (response.ResponseStream.Current.EventTypeCase)
-                    {
-                        case EventTypeOneofCase.Balance:
-                            BalanceLabel.Text = response.ResponseStream.Current.Balance.Balance.Value;
-                            break;
-                        case EventTypeOneofCase.Order:
-                            EventConsole.Text += response.ResponseStream.Current.Order.Message;
-                            EventConsole.Text += response.ResponseStream.Current.Order.Order;
-                            break;
-                    }
+                    case EventTypeOneofCase.Balance:
+                        BalanceLabel.Text = $"{double.Parse(response.ResponseStream.Current.Balance.Balance.Value)/100000000} {response.ResponseStream.Current.Balance.Balance.Currency}";
+                        break;
+                    case EventTypeOneofCase.Order:
+                        var incomingString = $"\r\n\n[{response.ResponseStream.Current.Order.Time.ToDateTime()}]: {response.ResponseStream.Current.Order.Message}\r\n" +
+                                             $"Order {response.ResponseStream.Current.Order.Order.Id}, price: {response.ResponseStream.Current.Order.Order.Price}, quantity: {response.ResponseStream.Current.Order.Order.Quantity}, type: {response.ResponseStream.Current.Order.Order.Signature.Type}";
+                        EventConsole.Text += incomingString;
+                        break;
                 }
+            }
         }
-
 
         private void InitIntervalMap()
         {
@@ -106,6 +106,7 @@ namespace UI
             StopButton.Visible = true;
 
             Console.WriteLine("Запустил бота с конфигом {0}", configuration);
+            EventConsole.Text += "\r\nBot has been started!";
         }
 
         private Config GetConfig()
@@ -196,6 +197,7 @@ namespace UI
             LoggedGroupBox.Text = "Signed in as " + LogLogTextBox.Text;
             SignInGroupBox.Visible = false;
             SignInGroupBox.Enabled = false;
+            EventConsole.Text += $"\r\nYou are signed in as {LogLogTextBox.Text}";
         }
 
         private async void SignOutButton_Click(object sender, EventArgs e)
@@ -224,6 +226,7 @@ namespace UI
             StopButton.Enabled = false;
             StopButton.Visible = false;
             var stopBotResponse = await _client.StopBotAsync(new StopBotRequest { Request=new TradeBot.Common.v1.UpdateServerConfigRequest {Config=GetConfig(),Switch=true } },_meta);
+            EventConsole.Text += "\r\nBot has been stopped!";
         }
 
         private async void MainWindow_FormClosing(object sender, FormClosingEventArgs e) 

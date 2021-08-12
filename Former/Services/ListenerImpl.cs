@@ -14,9 +14,10 @@ namespace Former.Services
             var task = Task.Run(() =>
             {
                 var meta = context.RequestHeaders.ToDictionary(x => x.Key, x => x.Value);
-                var userContext = Contexts.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"], request.Request.Config);
+                var userContext = Contexts.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"]);
                 if (request.Request.Switch) userContext.UnsubscribeStorage();
                 else userContext.SubscribeStorageToMarket();
+                userContext.SetConfiguration(request.Request.Config);
             });
             await task;
             return new UpdateServerConfigResponse();

@@ -11,7 +11,7 @@ namespace Former.Model
     public class UpdateHandlers
     {
         private readonly Storage _storage;
-        private readonly Config _configuration;
+        private Config _configuration;
         private readonly TradeMarketClient _tradeMarketClient;
         private readonly Metadata _metadata;
         private readonly HistoryClient _historyClient; 
@@ -29,6 +29,11 @@ namespace Former.Model
             _metadata = metadata;
             _tradeMarketClient = tradeMarketClient;
             _historyClient = historyClient;
+        }
+
+        internal void SetConfiguration(Config configuration)
+        {
+            _configuration = configuration;
         }
 
         /// <summary>
