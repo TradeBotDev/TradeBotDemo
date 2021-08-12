@@ -25,7 +25,7 @@ namespace Website.Controllers
 
             var reply = Clients.LicenseClient.SetLicense(User.Identity.Name, ProductCode.Tradebot, model);
             if (reply.Code == LicenseCode.Successful)
-                return Content(reply.Message);
+                return RedirectToAction("Account", "Account");
             else return View("~/Views/Shared/Error.cshtml", reply.Message);
         }
     }
