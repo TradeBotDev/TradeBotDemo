@@ -6,7 +6,7 @@ namespace Website.Controllers.Clients
 {
     public static class LicenseClient
     {
-        private static License.LicenseClient client = new(GrpcChannel.ForAddress("http://localhost:5000"));
+        private static License.LicenseClient client = new(GrpcChannel.ForAddress("http://host.docker.internal:5000"));
 
         public static SetLicenseResponse SetLicense(string sessionId, ProductCode product, CreditCardModel model)
         {

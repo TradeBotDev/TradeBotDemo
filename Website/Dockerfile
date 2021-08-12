@@ -1,6 +1,6 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
 # docker build -t website:latest -f . ..
-# docker run --rm -it -p 5008:443 -e ASPNETCORE_URLS="https://+;" --env-file=.env -v %USERPROFILE%\.aspnet\https:/https/ website
+# docker run --rm -it -p 5008:80 -e ASPNETCORE_URLS="http://+;" website
 
 FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS base
 WORKDIR /app
