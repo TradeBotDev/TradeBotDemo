@@ -594,12 +594,13 @@ namespace Facade
             try
             {
                 var response = clientHistory.SubscribeEvents(new TradeBot.History.HistoryService.v1.SubscribeEventsRequest { Sessionid = request.Sessionid }, context.RequestHeaders);
-
+                Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", nameof(SubscribeEvents), request.Sessionid);
                 while (await response.ResponseStream.MoveNext())
                 {
                     switch (response.ResponseStream.Current.EventTypeCase)
                     {
                         case TradeBot.History.HistoryService.v1.SubscribeEventsResponse.EventTypeOneofCase.Balance:
+                            Log.Information("{@Where}: {@MethodName} \n args: Balance={@response}", "Facade", nameof(SubscribeEvents), response.ResponseStream.Current.Balance.Balance);
                             await responseStream.WriteAsync(new SubscribeEventsResponse
                             {
                                 Balance = new PublishBalanceEvent
@@ -611,6 +612,8 @@ namespace Facade
                             });
                             break;
                         case TradeBot.History.HistoryService.v1.SubscribeEventsResponse.EventTypeOneofCase.Order:
+                            Log.Information("{@Where}: {@MethodName} \n args: Order={@response}", "Facade", nameof(SubscribeEvents), response.ResponseStream.Current.Order.Order);
+                            Log.Information("{@Where}: {@MethodName} \n args: Message={@response}", "Facade", nameof(SubscribeEvents), response.ResponseStream.Current.Order.Message);
                             await responseStream.WriteAsync(new SubscribeEventsResponse
                             {
                                 Order = new PublishOrderEvent
