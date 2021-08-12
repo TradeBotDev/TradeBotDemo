@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Former.Clients;
 using Grpc.Core;
@@ -34,10 +35,10 @@ namespace Former.Model
             };
             _storage = new Storage();
 
-            HistoryClient.Configure("http://localhost:5007", 10000);
+            HistoryClient.Configure(Environment.GetEnvironmentVariable("HISTORY_CONNECTION_STRING"), int.TryParse(Environment.GetEnvironmentVariable("RETRY_DELAY"), out var retryDelay) ? retryDelay : retryDelay = 10000);
             _historyClient = new HistoryClient();
 
-            TradeMarketClient.Configure("https://localhost:5005", 10000);
+            TradeMarketClient.Configure(Environment.GetEnvironmentVariable("TRADEMARKET_CONNECTION_STRING"), retryDelay);
             _tradeMarketClient = new TradeMarketClient();
             
             _former = new Former(_storage, _configuration, _tradeMarketClient, Meta, _historyClient);

@@ -47,7 +47,7 @@ namespace Former.Model
             if (_savedTotalBalance != _storage.TotalBalance)
             {
                 _savedTotalBalance= _storage.TotalBalance;
-                //await _historyClient.WriteBalance(_storage.TotalBalance, _metadata);
+                await _historyClient.WriteBalance(_storage.TotalBalance, _metadata);
             }
         }
 
@@ -94,7 +94,7 @@ namespace Former.Model
                     Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed cause cannot be amended {@ResponseCode} ", "Former", order.Id, order.Price, order.Quantity, order.Signature.Type, removeResponse ? ReplyCode.Succeed : ReplyCode.Failure);
                 } else return;
                 Log.Information("{@Where}: Order {@Id} amended with {@Price} {@ResponseCode} {@ResponseMessage}", "Former", key, fairPrice, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Succeed ? "" : response.Response.Message);
-                //await _historyClient.WriteOrder(order, ChangesType.Update, _metadata, "Order amended");
+                await _historyClient.WriteOrder(order, ChangesType.Update, _metadata, "Order amended");
             }
             _storage.FitPricesLocker = false;
         }

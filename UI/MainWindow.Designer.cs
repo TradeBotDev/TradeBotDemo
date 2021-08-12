@@ -68,6 +68,8 @@ namespace UI
             this.EventConsole = new System.Windows.Forms.RichTextBox();
             this.LoggedGroupBox = new System.Windows.Forms.GroupBox();
             this.SignOutButton = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.Label();
+            this.BalanceLabel = new System.Windows.Forms.Label();
             this.MainMenuGroupBox.SuspendLayout();
             this.SignUpGroupBox.SuspendLayout();
             this.SignInGroupBox.SuspendLayout();
@@ -307,6 +309,8 @@ namespace UI
             // 
             // MainMenuGroupBox
             // 
+            this.MainMenuGroupBox.Controls.Add(this.BalanceLabel);
+            this.MainMenuGroupBox.Controls.Add(this.label3);
             this.MainMenuGroupBox.Controls.Add(this.UpdateConfigButton);
             this.MainMenuGroupBox.Controls.Add(this.RemoveMyOrdersButton);
             this.MainMenuGroupBox.Controls.Add(this.ConfigIntervalOfAnalysis);
@@ -497,6 +501,24 @@ namespace UI
             this.SignOutButton.UseVisualStyleBackColor = true;
             this.SignOutButton.Click += new System.EventHandler(this.SignOutButton_Click);
             // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(339, 22);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(64, 20);
+            this.label3.TabIndex = 19;
+            this.label3.Text = "Balance:";
+            // 
+            // BalanceLabel
+            // 
+            this.BalanceLabel.AutoSize = true;
+            this.BalanceLabel.Location = new System.Drawing.Point(409, 22);
+            this.BalanceLabel.Name = "BalanceLabel";
+            this.BalanceLabel.Size = new System.Drawing.Size(33, 20);
+            this.BalanceLabel.TabIndex = 20;
+            this.BalanceLabel.Text = "////";
+            // 
             // TradeBotUi
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -565,6 +587,8 @@ namespace UI
         private System.Windows.Forms.Button RemoveMyOrdersButton;
         private System.Windows.Forms.Button UpdateConfigButton;
         private System.Windows.Forms.Button StopButton;
+        private System.Windows.Forms.Label BalanceLabel;
+        private System.Windows.Forms.Label label3;
     }
 }
 

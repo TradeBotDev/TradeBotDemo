@@ -11,7 +11,7 @@ namespace Algorithm.DataManipulation
     //all the values are hardcoded for now 
     public static class PriceSender
     {
-        private static readonly GrpcChannel Channel = GrpcChannel.ForAddress("https://localhost:5003");
+        private static readonly GrpcChannel Channel = GrpcChannel.ForAddress("http://localhost:5003");
         private static readonly FormerServiceClient Client = new FormerServiceClient(Channel);
         public static void SendPrice (int decision)
         {

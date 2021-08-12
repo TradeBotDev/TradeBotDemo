@@ -11,9 +11,9 @@ namespace Facade
         //TODO вынести
         private TradeBot.Account.AccountService.v1.Account.AccountClient clientAccount = new TradeBot.Account.AccountService.v1.Account.AccountClient(GrpcChannel.ForAddress("https://localhost:5000"));
         private TradeBot.Account.AccountService.v1.ExchangeAccess.ExchangeAccessClient clientExchange = new TradeBot.Account.AccountService.v1.ExchangeAccess.ExchangeAccessClient(GrpcChannel.ForAddress("https://localhost:5000"));
-        private TradeBot.History.HistoryService.v1.HistoryService.HistoryServiceClient clientHistory = new TradeBot.History.HistoryService.v1.HistoryService.HistoryServiceClient(GrpcChannel.ForAddress("https//localhost:5008"));
+        private TradeBot.History.HistoryService.v1.HistoryService.HistoryServiceClient clientHistory = new TradeBot.History.HistoryService.v1.HistoryService.HistoryServiceClient(GrpcChannel.ForAddress("https://localhost:5007"));
         private TradeBot.Relay.RelayService.v1.RelayService.RelayServiceClient clientRelay = new TradeBot.Relay.RelayService.v1.RelayService.RelayServiceClient(GrpcChannel.ForAddress("https://localhost:5004"));
-        private TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceClient clientTM = new TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceClient(GrpcChannel.ForAddress("https://localhost:5005"));
+        private TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceClient clientTM = new TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceClient(GrpcChannel.ForAddress("http://localhost:5005"));
         private IAsyncStreamReader<TradeBot.Relay.RelayService.v1.SubscribeLogsResponse> stream;
         #region TradeMarket
         public override async Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<SubscribeBalanceResponse> responseStream, ServerCallContext context)

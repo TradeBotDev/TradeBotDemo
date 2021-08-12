@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Grpc.Core;
@@ -37,6 +38,8 @@ namespace Former.Clients
 
         public TradeMarketClient()
         {
+            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2Support", true);
             _client = new TradeMarketService.TradeMarketServiceClient( GrpcChannel.ForAddress(_connectionString));
         }
 

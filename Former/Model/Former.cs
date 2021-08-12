@@ -61,16 +61,16 @@ namespace Former.Model
                 "{@Where}: Order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@ResponseCode} added to counter orders list {@ResponseMessage}",
                 "Former", placeResponse.OrderId, price, -quantity, type,
                 addResponse ? ReplyCode.Succeed : ReplyCode.Failure);
-            //if (Convert.ToInt32(quantity) == Convert.ToInt32(oldOrder.Quantity))
-            //{
-            //    await _historyClient.WriteOrder(oldOrder, ChangesType.Delete, _metadata, "Initial order filled");
-            //    await _historyClient.WriteOrder(oldOrder, ChangesType.Insert, _metadata, "Counter order placed");
-            //}
-            //else 
-            //{
-            //    await _historyClient.WriteOrder(newComingOrder, ChangesType.Update, _metadata, "Initial order partially filled");
-            //    await _historyClient.WriteOrder(newOrder, ChangesType.Insert, _metadata, "Counter order placed");
-            //}
+            if (Convert.ToInt32(quantity) == Convert.ToInt32(oldOrder.Quantity))
+            {
+                await _historyClient.WriteOrder(oldOrder, ChangesType.Delete, _metadata, "Initial order filled");
+                await _historyClient.WriteOrder(oldOrder, ChangesType.Insert, _metadata, "Counter order placed");
+            }
+            else
+            {
+                await _historyClient.WriteOrder(newComingOrder, ChangesType.Update, _metadata, "Initial order partially filled");
+                await _historyClient.WriteOrder(newOrder, ChangesType.Insert, _metadata, "Counter order placed");
+            }
         }
 
         /// <summary>
@@ -144,7 +144,7 @@ namespace Former.Model
                 "{@Where}: Order {@Id} price: {@Price}, quantity: {@Quantity} placed for {@Type} {@ResponseCode} {@ResponseMessage}",
                 "Former", response.OrderId, price, quantity, orderType, response.Response.Code.ToString(),
                 response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
-            //await _historyClient.WriteOrder(newOrder, ChangesType.Insert, _metadata, "Initial order placed");
+            await _historyClient.WriteOrder(newOrder, ChangesType.Insert, _metadata, "Initial order placed");
         }
 
         /// <summary>
@@ -164,7 +164,7 @@ namespace Former.Model
                 if (response.Response.Code == ReplyCode.Succeed)
                 {
                     _storage.MyOrders.TryRemove(key, out _);
-                    //await _historyClient.WriteOrder(value, ChangesType.Delete, _metadata, "Removed by user");
+                    await _historyClient.WriteOrder(value, ChangesType.Delete, _metadata, "Removed by user");
                 }
                 else return;
             }

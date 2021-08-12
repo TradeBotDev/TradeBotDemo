@@ -7,6 +7,7 @@ using Google.Protobuf.WellKnownTypes;
 using TradeBot.Common.v1;
 using TradeBot.Facade.FacadeService.v1;
 using UpdateServerConfigRequest = TradeBot.Facade.FacadeService.v1.UpdateServerConfigRequest;
+using static TradeBot.Facade.FacadeService.v1.SubscribeEventsResponse;
 
 namespace UI
 {
@@ -27,6 +28,26 @@ namespace UI
             InitSensitivityMap();
             this.FormClosing += MainWindow_FormClosing;
         }
+
+        private async void SubscribeEvents(string sessionId)
+        {
+            var response = _client.SubscribeEvents(new SubscribeEventsRequest { Sessionid = sessionId });
+
+            while (await response.ResponseStream.MoveNext())
+                {
+                    switch (response.ResponseStream.Current.EventTypeCase)
+                    {
+                        case EventTypeOneofCase.Balance:
+                            BalanceLabel.Text = response.ResponseStream.Current.Balance.Balance.Value;
+                            break;
+                        case EventTypeOneofCase.Order:
+                            EventConsole.Text += response.ResponseStream.Current.Order.Message;
+                            EventConsole.Text += response.ResponseStream.Current.Order.Order;
+                            break;
+                    }
+                }
+        }
+
 
         private void InitIntervalMap()
         {
@@ -77,7 +98,7 @@ namespace UI
                     Request = new TradeBot.Common.v1.UpdateServerConfigRequest
                         { Config = configuration, Switch = false }
                 }, _meta);
-
+            SubscribeEvents(_meta.GetValue("sessionid"));
 
             StartButton.Enabled = false;
             StartButton.Visible = false;
@@ -204,6 +225,7 @@ namespace UI
             StopButton.Visible = false;
             var stopBotResponse = await _client.StopBotAsync(new StopBotRequest { Request=new TradeBot.Common.v1.UpdateServerConfigRequest {Config=GetConfig(),Switch=true } },_meta);
         }
+
         private async void MainWindow_FormClosing(object sender, FormClosingEventArgs e) 
         {
             var stopBotResponse = await _client.UpdateServerConfigAsync(new UpdateServerConfigRequest { Request = new TradeBot.Common.v1.UpdateServerConfigRequest { Config = GetConfig(), Switch = true}},_meta);
