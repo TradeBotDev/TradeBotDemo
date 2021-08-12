@@ -23,7 +23,7 @@ namespace Relay.Model
         private IClientStreamWriter<AddOrderRequest> _algorithmStream;
         private IAsyncStreamReader<SubscribeOrdersResponse> _tradeMarketStream;
         private IAsyncStreamReader<TradeBot.Former.FormerService.v1.SubscribeLogsResponse> _formerStream;
-        private bool IsWorking = false;
+        private bool IsWorking = true;
 
         public UserContext(Metadata meta, FormerClient formerClient, AlgorithmClient algorithmClient, TradeMarketClient tradeMarketClient)
         {
@@ -34,7 +34,7 @@ namespace Relay.Model
             
             _algorithmStream = _algorithmClient.OpenStream(meta);
             _tradeMarketStream = _tradeMarketClient.OpenStream(meta);
-            _formerStream = _formerClient.OpenStream(meta);//мб нужно будет кидать мету
+
         }
         public IAsyncStreamReader<SubscribeOrdersResponse> ReConnect()
         {
@@ -44,15 +44,15 @@ namespace Relay.Model
 
         public void StatusOfWork()
         {
-            if (IsWorking)
+            if (!IsWorking)
             {
-                IsWorking = false;
+                IsWorking = true;
                 _tradeMarketClient.OrderRecievedEvent -= _tradeMarketClient_OrderRecievedEvent;
                 Log.Information("The bot is stopping...");
             }
             else
             {
-                IsWorking = true;
+                IsWorking = false;
                 _tradeMarketClient.OrderRecievedEvent += _tradeMarketClient_OrderRecievedEvent;
                 Log.Information("The bot is starting...");
             }
@@ -61,7 +61,7 @@ namespace Relay.Model
 
         private void _tradeMarketClient_OrderRecievedEvent(object sender, TradeBot.Common.v1.Order e)
         {
-            Log.Information($"Sending order {e.Price} : {e.Quantity} : {e.Id}");
+            Log.Information("{@Where}: Sending order Price={@Price} : Quantity={@Quantity} : Id={@Id}", "Relay",e.Price,e.Quantity,e.Id);
             Task.Run(async()=> 
             { 
                 await _algorithmClient.WriteOrder(_algorithmStream, e);
@@ -73,28 +73,10 @@ namespace Relay.Model
             _ = _algorithmClient.UpdateConfig(update, Meta);
             _ = _formerClient.UpdateConfig(update, Meta);
         }
-        
-        public async Task RepeatLogsFormer(TradeBot.Relay.RelayService.v1.SubscribeLogsRequest request, IServerStreamWriter<TradeBot.Relay.RelayService.v1.SubscribeLogsResponse> responseStream)
-        {
-            await foreach (var item in _formerClient.SubscribeForLogs(_formerStream))
-            {
-                try {
-                    Log.Information("{@Where}: RepeatLogsFormer, response: {@response}","Relay" ,item.Response);
-                    await responseStream.WriteAsync(new TradeBot.Relay.RelayService.v1.SubscribeLogsResponse { Response = item.Response });
-                }
-                catch(Exception e)
-                {
-                    Log.Error(e.Message);
-                }
-            }
-
-        }
-
-
 
         public void SubscribeForOrders()
         {
-            if (IsWorking && !IsStart)
+            if (!IsWorking && !IsStart)
             {
                 IsStart = true;
                 _tradeMarketClient.SubscribeForOrders(_tradeMarketStream);

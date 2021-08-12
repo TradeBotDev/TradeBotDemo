@@ -69,13 +69,12 @@ namespace Relay.Services
         {
             var user = GetUserContext(context.RequestHeaders);
             user.StatusOfWork();
-                user.SubscribeForOrders();
-            //user.UpdateConfig(new TradeBot.Common.v1.UpdateServerConfigRequest { Config=request.Config });
+            user.SubscribeForOrders();
             return await Task.FromResult(new StartBotResponse()
             {
                 Response = new DefaultResponse()
                 {
-                    Message = "Command has been complited",
+                    Message = "Command has been completed",
                     Code = ReplyCode.Succeed
                 }
             });
@@ -86,19 +85,19 @@ namespace Relay.Services
             await _formerClient.SendDeleteOrder(new DeleteOrderRequest {},context);
             return await Task.FromResult(new DeleteOrderResponse { });
         }
-
+        public async override Task<StopBotResponse> StopBot(StopBotRequest request, ServerCallContext context)
+        {
+            var user = GetUserContext(context.RequestHeaders);
+            user.UpdateConfig(new TradeBot.Common.v1.UpdateServerConfigRequest { Config = request.Request.Config, Switch = request.Request.Switch });
+            user.StatusOfWork();
+            return await Task.FromResult(new StopBotResponse { });
+        }
         public async override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request,
             ServerCallContext context)
         {
             var user = GetUserContext(context.RequestHeaders);
             user.UpdateConfig(new TradeBot.Common.v1.UpdateServerConfigRequest { Config=request.Request.Config,Switch=request.Request.Switch });
             return await Task.FromResult(new UpdateServerConfigResponse());
-        }
-
-        public async override Task SubscribeLogs(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
-        {
-            Log.Information("{@Where}: SubscribeLogs", "Relay");
-            await contexts.FirstOrDefault(x=>x.Key[2].Value==context.RequestHeaders[2].Value).Value.RepeatLogsFormer(request,responseStream);
         }
 
     }

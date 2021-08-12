@@ -1,13 +1,14 @@
-﻿using Grpc.Core;
-using Grpc.Net.Client;
-using Serilog;
-using System;
+﻿using System;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Grpc.Core;
+using Grpc.Net.Client;
+using Serilog;
 using TradeBot.Common.v1;
 using TradeBot.TradeMarket.TradeMarketService.v1;
 
-namespace Former
+namespace Former.Clients
 {
     public class TradeMarketClient
     {
@@ -25,7 +26,7 @@ namespace Former
 
         private static int _retryDelay;
         private static string _connectionString;
-        private bool _isDisposeRequested;
+        private CancellationTokenSource _token;
 
         private readonly TradeMarketService.TradeMarketServiceClient _client;
 
@@ -37,7 +38,9 @@ namespace Former
 
         public TradeMarketClient()
         {
-            _client = new TradeMarketService.TradeMarketServiceClient(GrpcChannel.ForAddress(_connectionString));
+            //AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            //AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2Support", true);
+            _client = new TradeMarketService.TradeMarketServiceClient( GrpcChannel.ForAddress(_connectionString));
         }
 
         /// <summary>
@@ -45,6 +48,7 @@ namespace Former
         /// </summary>
         private async Task ConnectionTester(Func<Task> func)
         {
+            var attempts = 0;
             while (true)
             {
                 try
@@ -54,8 +58,10 @@ namespace Former
                 }
                 catch (RpcException e)
                 {
+                    if (e.StatusCode == StatusCode.Cancelled || attempts > 3) break;
                     Log.Error("{@Where}: Error {@ExceptionMessage}. Retrying...\r\n{@ExceptionStackTrace}", "Former", e.Message, e.StackTrace);
                     Thread.Sleep(_retryDelay);
+                    attempts++;
                 }
             }
         }
@@ -66,10 +72,9 @@ namespace Former
         private async Task ObserveMarketPrices(Metadata meta)
         {
             using var call = _client.SubscribePrice(new SubscribePriceRequest(), meta);
-
             async Task ObserveMarketPricesFunc()
             {
-                while (await call.ResponseStream.MoveNext() && !_isDisposeRequested)
+                while (await call.ResponseStream.MoveNext(_token.Token))
                 {
                     await UpdateMarketPrices?.Invoke(call.ResponseStream.Current.BidPrice, call.ResponseStream.Current.AskPrice);
                 }
@@ -87,12 +92,11 @@ namespace Former
 
             async Task ObserveBalanceFunc()
             {
-                while (await call.ResponseStream.MoveNext() && !_isDisposeRequested)
+                while (await call.ResponseStream.MoveNext(_token.Token))
                 {
                     await UpdateBalance?.Invoke((int) call.ResponseStream.Current.Margin.AvailableMargin, (int)call.ResponseStream.Current.Margin.MarginBalance);
                 }
             }
-
             await ConnectionTester(ObserveBalanceFunc);
         }
 
@@ -105,7 +109,7 @@ namespace Former
 
             async Task ObserveMyOrdersFunc()
             {
-                while (await call.ResponseStream.MoveNext() && !_isDisposeRequested)
+                while (await call.ResponseStream.MoveNext(_token.Token))
                 {
                     await UpdateMyOrders?.Invoke(call.ResponseStream.Current.Changed, call.ResponseStream.Current.ChangesType);
                 }
@@ -123,8 +127,7 @@ namespace Former
 
             async Task ObservePositionFunc()
             {
-                var token = new CancellationTokenSource();
-                while (await call.ResponseStream.MoveNext() && !_isDisposeRequested)
+                while (await call.ResponseStream.MoveNext(_token.Token))
                 {
                     await UpdatePosition?.Invoke(call.ResponseStream.Current.CurrentQty);
                 }
@@ -156,7 +159,7 @@ namespace Former
         {
             AmmendOrderResponse response = null;
 
-            async Task PlaceOrdersFunc()
+            async Task AmendOrdersFunc()
             {
                 response = await _client.AmmendOrderAsync(new AmmendOrderRequest
                 {
@@ -168,21 +171,38 @@ namespace Former
                 }, metadata);
             }
 
-            await ConnectionTester(PlaceOrdersFunc);
+            await ConnectionTester(AmendOrdersFunc);
+            return response;
+        }
+
+        internal async Task<DeleteOrderResponse> DeleteOrder(string id, Metadata metadata)
+        {
+            DeleteOrderResponse response = null;
+
+            async Task DeleteOrderFunc()
+            {
+                response = await _client.DeleteOrderAsync(new DeleteOrderRequest
+                {
+                    OrderId = id
+                }, metadata);
+            }
+
+            await ConnectionTester(DeleteOrderFunc);
             return response;
         }
 
         internal void StartObserving(Metadata meta)
         {
-            _isDisposeRequested = false;
+            _token = new CancellationTokenSource();
             _ = ObservePositions(meta);
             _ = ObserveBalance(meta);
             _ = ObserveMarketPrices(meta);
             _ = ObserveMyOrders(meta);
         }
+
         internal void StopObserving()
         {
-            _isDisposeRequested = true;
+            _token.Cancel();
         }
 
     }

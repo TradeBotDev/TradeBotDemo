@@ -56,17 +56,20 @@ namespace UI
             this.label9 = new System.Windows.Forms.Label();
             this.LogPassTextBox = new System.Windows.Forms.TextBox();
             this.MainMenuGroupBox = new System.Windows.Forms.GroupBox();
+            this.UpdateConfigButton = new System.Windows.Forms.Button();
             this.RemoveMyOrdersButton = new System.Windows.Forms.Button();
             this.ConfigIntervalOfAnalysis = new System.Windows.Forms.ComboBox();
             this.ConfigVolumeOfContracts = new System.Windows.Forms.ComboBox();
             this.ConfigAlgorithmSensivity = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
+            this.StopButton = new System.Windows.Forms.Button();
             this.SignUpGroupBox = new System.Windows.Forms.GroupBox();
             this.SignInGroupBox = new System.Windows.Forms.GroupBox();
             this.EventConsole = new System.Windows.Forms.RichTextBox();
             this.LoggedGroupBox = new System.Windows.Forms.GroupBox();
             this.SignOutButton = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.Label();
+            this.BalanceLabel = new System.Windows.Forms.Label();
             this.MainMenuGroupBox.SuspendLayout();
             this.SignUpGroupBox.SuspendLayout();
             this.SignInGroupBox.SuspendLayout();
@@ -306,13 +309,14 @@ namespace UI
             // 
             // MainMenuGroupBox
             // 
-            this.MainMenuGroupBox.Controls.Add(this.button1);
+            this.MainMenuGroupBox.Controls.Add(this.BalanceLabel);
+            this.MainMenuGroupBox.Controls.Add(this.label3);
+            this.MainMenuGroupBox.Controls.Add(this.UpdateConfigButton);
             this.MainMenuGroupBox.Controls.Add(this.RemoveMyOrdersButton);
             this.MainMenuGroupBox.Controls.Add(this.ConfigIntervalOfAnalysis);
             this.MainMenuGroupBox.Controls.Add(this.ConfigVolumeOfContracts);
             this.MainMenuGroupBox.Controls.Add(this.ConfigAlgorithmSensivity);
             this.MainMenuGroupBox.Controls.Add(this.label2);
-            this.MainMenuGroupBox.Controls.Add(this.StartButton);
             this.MainMenuGroupBox.Controls.Add(this.label1);
             this.MainMenuGroupBox.Controls.Add(this.ConfigIntervalOfAnalysisl);
             this.MainMenuGroupBox.Controls.Add(this.ConfigUpdatePriceRange);
@@ -321,12 +325,24 @@ namespace UI
             this.MainMenuGroupBox.Controls.Add(this.ConfigUpdatePriceRangel);
             this.MainMenuGroupBox.Controls.Add(this.ConfigRequiredProfit);
             this.MainMenuGroupBox.Controls.Add(this.ConfigVolumeOfContractsl);
+            this.MainMenuGroupBox.Controls.Add(this.StartButton);
+            this.MainMenuGroupBox.Controls.Add(this.StopButton);
             this.MainMenuGroupBox.Location = new System.Drawing.Point(145, 10);
             this.MainMenuGroupBox.Name = "MainMenuGroupBox";
             this.MainMenuGroupBox.Size = new System.Drawing.Size(695, 310);
             this.MainMenuGroupBox.TabIndex = 20;
             this.MainMenuGroupBox.TabStop = false;
             this.MainMenuGroupBox.Text = "Main Menu";
+            // 
+            // UpdateConfigButton
+            // 
+            this.UpdateConfigButton.Location = new System.Drawing.Point(159, 243);
+            this.UpdateConfigButton.Name = "UpdateConfigButton";
+            this.UpdateConfigButton.Size = new System.Drawing.Size(175, 59);
+            this.UpdateConfigButton.TabIndex = 17;
+            this.UpdateConfigButton.Text = "Update config";
+            this.UpdateConfigButton.UseVisualStyleBackColor = true;
+            this.UpdateConfigButton.Click += new System.EventHandler(this.UpdateConfigButton_Click);
             // 
             // RemoveMyOrdersButton
             // 
@@ -406,6 +422,18 @@ namespace UI
             this.label2.TabIndex = 12;
             this.label2.Text = "Algorithm sensivity";
             // 
+            // StopButton
+            // 
+            this.StopButton.Enabled = false;
+            this.StopButton.Location = new System.Drawing.Point(340, 243);
+            this.StopButton.Name = "StopButton";
+            this.StopButton.Size = new System.Drawing.Size(349, 61);
+            this.StopButton.TabIndex = 18;
+            this.StopButton.Text = "Stop bot";
+            this.StopButton.UseVisualStyleBackColor = true;
+            this.StopButton.Visible = false;
+            this.StopButton.Click += new System.EventHandler(this.StopButton_Click);
+            // 
             // SignUpGroupBox
             // 
             this.SignUpGroupBox.Controls.Add(this.RegistrationButton);
@@ -473,14 +501,23 @@ namespace UI
             this.SignOutButton.UseVisualStyleBackColor = true;
             this.SignOutButton.Click += new System.EventHandler(this.SignOutButton_Click);
             // 
-            // button1
+            // label3
             // 
-            this.button1.Location = new System.Drawing.Point(159, 243);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(175, 59);
-            this.button1.TabIndex = 17;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(339, 22);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(64, 20);
+            this.label3.TabIndex = 19;
+            this.label3.Text = "Balance:";
+            // 
+            // BalanceLabel
+            // 
+            this.BalanceLabel.AutoSize = true;
+            this.BalanceLabel.Location = new System.Drawing.Point(409, 22);
+            this.BalanceLabel.Name = "BalanceLabel";
+            this.BalanceLabel.Size = new System.Drawing.Size(33, 20);
+            this.BalanceLabel.TabIndex = 20;
+            this.BalanceLabel.Text = "////";
             // 
             // TradeBotUi
             // 
@@ -548,7 +585,10 @@ namespace UI
         private System.Windows.Forms.ComboBox ConfigIntervalOfAnalysis;
         private System.Windows.Forms.ComboBox ConfigVolumeOfContracts;
         private System.Windows.Forms.Button RemoveMyOrdersButton;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button UpdateConfigButton;
+        private System.Windows.Forms.Button StopButton;
+        private System.Windows.Forms.Label BalanceLabel;
+        private System.Windows.Forms.Label label3;
     }
 }
 

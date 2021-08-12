@@ -7,6 +7,8 @@ package tradebot.relay.relay_service.v1;
 
 service RelayService{
 	rpc StartBot (StartBotRequest) returns (StartBotResponse);
+
+	rpc StopBot(StopBotRequest) returns (StopBotResponse);
 	/*
 		Клиент говорит обновиться серверу
 	*/
@@ -57,4 +59,10 @@ message StartBotRequest {
 
 message StartBotResponse {
 	tradebot.common.v1.DefaultResponse response = 1;
+}
+message StopBotRequest {
+	tradebot.common.v1.UpdateServerConfigRequest request =1;
+}
+message StopBotResponse{
+
 }

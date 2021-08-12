@@ -1,11 +1,12 @@
-﻿using Former.Services;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace Former
+using TradeBot.History.HistoryService.v1;
+
+namespace History
 {
     public class Startup
     {
@@ -14,6 +15,7 @@ namespace Former
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddGrpc();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -28,7 +30,7 @@ namespace Former
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<ListenerImpl>();
+                endpoints.MapGrpcService<History>();
 
                 endpoints.MapGet("/", async context =>
                 {
