@@ -5,7 +5,7 @@
       "environmentVariables": {
         "RETRY_DELAY": "10000",
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "HISTORY_CONNECTION_STRING": "https://localhost:5007",
+        "HISTORY_CONNECTION_STRING": "http://localhost:5007",
         "TRADEMARKET_CONNECTION_STRING": "http://localhost:5005"
       },
       "dotnetRunMessages": "true",

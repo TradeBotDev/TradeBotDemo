@@ -11,8 +11,8 @@ namespace Facade
         //TODO вынести
         private TradeBot.Account.AccountService.v1.Account.AccountClient clientAccount = new TradeBot.Account.AccountService.v1.Account.AccountClient(GrpcChannel.ForAddress("https://localhost:5000"));
         private TradeBot.Account.AccountService.v1.ExchangeAccess.ExchangeAccessClient clientExchange = new TradeBot.Account.AccountService.v1.ExchangeAccess.ExchangeAccessClient(GrpcChannel.ForAddress("https://localhost:5000"));
-        private TradeBot.History.HistoryService.v1.HistoryService.HistoryServiceClient clientHistory = new TradeBot.History.HistoryService.v1.HistoryService.HistoryServiceClient(GrpcChannel.ForAddress("https://localhost:5007"));
-        private TradeBot.Relay.RelayService.v1.RelayService.RelayServiceClient clientRelay = new TradeBot.Relay.RelayService.v1.RelayService.RelayServiceClient(GrpcChannel.ForAddress("https://localhost:5004"));
+        private TradeBot.History.HistoryService.v1.HistoryService.HistoryServiceClient clientHistory = new TradeBot.History.HistoryService.v1.HistoryService.HistoryServiceClient(GrpcChannel.ForAddress("http://localhost:5007"));
+        private TradeBot.Relay.RelayService.v1.RelayService.RelayServiceClient clientRelay = new TradeBot.Relay.RelayService.v1.RelayService.RelayServiceClient(GrpcChannel.ForAddress("http://localhost:5004"));
         private TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceClient clientTM = new TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceClient(GrpcChannel.ForAddress("http://localhost:5005"));
         private IAsyncStreamReader<TradeBot.Relay.RelayService.v1.SubscribeLogsResponse> stream;
         #region TradeMarket
@@ -202,12 +202,7 @@ namespace Facade
                     var response = clientRelay.DeleteOrder(new TradeBot.Relay.RelayService.v1.DeleteOrderRequest { }, context.RequestHeaders);
                     Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, request);
                     Log.Information("{@Where}: {@MethodName} \n args: response={@response}", "Facade", new System.Diagnostics.StackFrame().GetMethod().Name, response);
-                    return Task.FromResult(new DeleteOrderResponse { Response = new TradeBot.Common.v1.DefaultResponse
-                    {
-                        Code = response.Response.Code,
-                        Message = response.Response.Message
-                    }
-                    });
+                    return Task.FromResult(new DeleteOrderResponse());
                 }
                 catch (RpcException e)
                 {
