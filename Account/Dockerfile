@@ -1,4 +1,4 @@
-#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+# Команды для запуска:
 # docker build -t account:latest -f . ..
 # docker run --rm -it -p 5000:80 -e ASPNETCORE_URLS="http://+;" account
 
