@@ -13,7 +13,7 @@ namespace Facade
 {
     public class AutorisationClass
     {
-        private GrpcChannel _channel => GrpcChannel.ForAddress("https://localhost:5000");
+        private GrpcChannel _channel => GrpcChannel.ForAddress("http://localhost:5000");
         private GrpcChannel Channel { get => _channel; }
 
         private Auth _clientAccount => new Auth(Channel);
