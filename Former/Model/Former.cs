@@ -5,6 +5,7 @@ using Grpc.Core;
 using Serilog;
 using System.Linq;
 using System.Threading.Tasks;
+using Serilog.Configuration;
 using TradeBot.Common.v1;
 
 namespace Former.Model
@@ -12,7 +13,7 @@ namespace Former.Model
     public class Former
     {
         private readonly Storage _storage;
-        private readonly Config _configuration;
+        private Config _configuration;
         private readonly TradeMarketClient _tradeMarketClient;
         private readonly Metadata _metadata;
         private readonly HistoryClient _historyClient;
@@ -25,6 +26,11 @@ namespace Former.Model
             _tradeMarketClient = tradeMarketClient;
             _metadata = metadata;
             _historyClient = historyClient;
+        }
+
+        internal void SetConfiguration(Config configuration)
+        {
+            _configuration = configuration;
         }
 
         /// <summary>
@@ -169,5 +175,6 @@ namespace Former.Model
                 else return;
             }
         }
+
     }
 }

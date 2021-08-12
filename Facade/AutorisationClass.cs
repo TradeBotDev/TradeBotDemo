@@ -13,10 +13,10 @@ namespace Facade
 {
     public class AutorisationClass
     {
-        private GrpcChannel _channel => GrpcChannel.ForAddress("https://localhost:5000");
+        private GrpcChannel _channel => GrpcChannel.ForAddress("http://localhost:5000");
         private Auth _client => new TradeBot.Account.AccountService.v1.Account.AccountClient(_channel);
 
-        private TradeBot.Account.AccountService.v1.Account.AccountClient clientAccount = new TradeBot.Account.AccountService.v1.Account.AccountClient(GrpcChannel.ForAddress("https://localhost:5000"));
+        private TradeBot.Account.AccountService.v1.Account.AccountClient clientAccount = new TradeBot.Account.AccountService.v1.Account.AccountClient(GrpcChannel.ForAddress("http://localhost:5000"));
 
 
         public Task<Ref.LoginReply> LoginAuth(Ref.LoginRequest request, ServerCallContext context, Auth auth)
