@@ -4,6 +4,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using TradeBot.Common.v1;
 
@@ -14,6 +15,7 @@ namespace Algorithm.DataManipulation
         private static Dictionary<string, AlgorithmBeta> algorithms = new();
         private static OrderPublisher orderPublisher = new();
         private static Dictionary<string, Metadata> metaDict = new();
+        private static List<Thread> threadsWithAlgos = new();
 
         public static Metadata GetMetaByUser(string user)
         {
@@ -29,11 +31,11 @@ namespace Algorithm.DataManipulation
         }
         public static void SendNewConfig (string user, UpdateServerConfigRequest configRequest)
         {
-            Log.Information("GOT NEW CONFIG HERE, I WANT TO MAKE AN ALGO");
             if (!algorithms.ContainsKey(user))
             {
                 Log.Information("IM ABOUT TO CREATE AN ALGOOOOOOO");
-                CreateAlgorithm(configRequest.Config.AlgorithmInfo, user);
+                threadsWithAlgos.Add(new Thread(()=>CreateAlgorithm(configRequest.Config.AlgorithmInfo, user)));
+                threadsWithAlgos.Last().Start();
                 return;
             }
 
@@ -52,7 +54,6 @@ namespace Algorithm.DataManipulation
             if (result)
             {
                 Log.Information("{@Where}: Created a new algorithm for a user {@User}", "Algorithm", user);
-                Console.WriteLine("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
                 orderPublisher.OrderIncomingEvent += algorithms[user].NewOrderAlert;
                 algorithms[user].ChangeState();
             }

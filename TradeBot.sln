@@ -27,6 +27,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TradeMarket", "TradeMarket\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AlgorithmTest", "AlgorithmTest\AlgorithmTest.csproj", "{54367633-BDD3-4FEB-AFCC-5842B3920F66}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "History", "History\History.csproj", "{E0D57826-56AF-4115-BE01-D7990EC1D15B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +79,10 @@ Global
 		{54367633-BDD3-4FEB-AFCC-5842B3920F66}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{54367633-BDD3-4FEB-AFCC-5842B3920F66}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{54367633-BDD3-4FEB-AFCC-5842B3920F66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E0D57826-56AF-4115-BE01-D7990EC1D15B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0D57826-56AF-4115-BE01-D7990EC1D15B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0D57826-56AF-4115-BE01-D7990EC1D15B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0D57826-56AF-4115-BE01-D7990EC1D15B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

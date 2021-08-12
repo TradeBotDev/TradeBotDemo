@@ -172,8 +172,6 @@ namespace Algorithm.Analysis
             {
                 trend = -1;
             }
-
-
             ///End of testing func
 
             if (trend != 0)
