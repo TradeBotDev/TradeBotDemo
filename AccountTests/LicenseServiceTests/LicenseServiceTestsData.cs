@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
 
-namespace AccountTests.ExchangeAccessServiceTests
+namespace AccountTests.LicenseServiceTests
 {
     // Класс, содержащий все необходимые поля для тестирования сервиса ExchangeAccessService.
     public abstract class LicenseServiceTestsData
