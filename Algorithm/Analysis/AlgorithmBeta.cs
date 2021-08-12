@@ -1,8 +1,10 @@
 ﻿using Algorithm.DataManipulation;
+using Grpc.Core;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TradeBot.Common.v1;
 
 namespace Algorithm.Analysis
 {
@@ -20,15 +22,36 @@ namespace Algorithm.Analysis
         //these points are basically the average market prices at some specific points in time
         //we make a point every second if possible
         private readonly Dictionary<DateTime, double> _storage;
-        //user sets how long into the past the algo analyses
-        //each second = one point
-        private readonly int _durationInSeconds = 5;
 
-        //when an algo is created it's immediately subsribed to new points 
-        public AlgorithmBeta(Publisher publisher)
+        //hardcoded, not sure if this will need to change
+        private int _durationInPoints = 5;
+
+        //1 - low, 2 - medium, 3 - high
+        private int _precision = 1;
+
+        private PointPublisher _pointPublisher;
+        private DataCollector _dc;
+        private PointMaker _pm;
+        private bool _isStopped = true;
+        private Metadata metadata;
+        //it feels wrong for algo to know anything about the user, but i don't know else to send a decision ¯\_(ツ)_/¯
+        private string _user;
+        public bool GetState()
         {
-            publisher.PointMadeEvent += NewPointAlert;
+            return _isStopped;
+        }
+
+        //when an algo is created it's immediately subscribed to new points 
+        public AlgorithmBeta(string user)
+        {
+            Log.Information("IM AN ALGO, IM BEING CREATED RIGHT NOW");
+            _user = user;
+            _pointPublisher = new();
+            _pointPublisher.PointMadeEvent += NewPointAlert;
+            _dc = new(_pointPublisher);
+            _pm = new();
             _storage = new Dictionary<DateTime, double>();
+            Log.Information("Created an algo AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
         }
 
         //when a new point is made algo adds it to its storage and checks if it has enough to initiate analysis 
@@ -37,20 +60,25 @@ namespace Algorithm.Analysis
         {
             _storage.Add(point.Key, point.Value);
 
-            if (_storage.Count > _durationInSeconds)
+            if (_storage.Count > _durationInPoints)
             {
                 var toRemove = _storage.First();
                 _storage.Remove(toRemove.Key);
             }
-            if (_storage.Count == _durationInSeconds)
+            if (_storage.Count == _durationInPoints)
             {
                 PerformCalculations(_storage);
             }
         }
 
+        public void NewOrderAlert(Order order)
+        {
+            _dc.AddNewOrder(order);
+        }
+
         //this function gathers all the data and sends it for analysis
         //
-        private static void PerformCalculations(Dictionary<DateTime, double> points)
+        private void PerformCalculations(Dictionary<DateTime, double> points)
         {
             //subsets are used later in this func to help determine the general trend
             List<double> subSet = new();
@@ -76,11 +104,11 @@ namespace Algorithm.Analysis
             int trend = AnalyseTrend(subTrends, points);
             if (trend != 0)
             {
-                PriceSender.SendPrice(trend);
+                PriceSender.SendDecision(trend, _user);
             }
         }
         //this func needs points and subset averages and decides if it's time to buy
-        private static int AnalyseTrend(IReadOnlyCollection<double> subTrends, Dictionary<DateTime, double> points)
+        private int AnalyseTrend(IReadOnlyCollection<double> subTrends, Dictionary<DateTime, double> points)
         {
             Log.Information("Analysis...");
             bool downtrend = true;
@@ -96,18 +124,6 @@ namespace Algorithm.Analysis
                     break;
                 }
             }
-            if (downtrend)
-            {
-                Log.Information("Downward trend detected");
-                //if the latest price is higher (but not too much, not over 15%) we think the price might start rising
-                //the 15% is needed to avoid accidentally buying on a sudden spike 
-
-                if (subTrends.Last() <= points.Last().Value &&
-                    subTrends.Last() * 1.15 > points.Last().Value)
-                {
-                    return 1;
-                }
-            }
 
             for (int i = 1; i < subTrends.Count; i++)
             {
@@ -119,22 +135,147 @@ namespace Algorithm.Analysis
                 }
             }
 
-            if (uptrend)
-            {
-                Log.Information("Upward trend detected");
+            int trend = 0;
 
-                if (subTrends.Last() >= points.Last().Value &&
-                    subTrends.Last() < points.Last().Value * 1.15)
+            if (downtrend || uptrend)
+            {
+                if (downtrend)
+                {
+                    Log.Information("Downward trend detected");
+                }
+                else
+                {
+                    Log.Information("Upward trend detected");
+                }
+                switch (_precision)
+                {
+                    case 1: trend = AnalyseTrendWithLowPrecision(subTrends, points, uptrend);
+                        break;
+                    case 2: trend = AnalyseTrendWithMediumPrecision(subTrends, points, uptrend);
+                        break;
+                    case 3: trend = AnalyseTrendWithHighPrecision(subTrends, points, uptrend);
+                        break;
+                }
+            }
+
+            /////////////////////////////////////////////////////////////////////
+            ///Attention
+            ///Testing func 
+
+            if (points.Last().Value > points.ElementAt(points.Count - 1).Value &&
+                    points.ElementAt(points.Count - 2).Value > points.ElementAt(points.Count - 1).Value)
+            { 
+                trend = 1; 
+            }
+            if (points.Last().Value < points.ElementAt(points.Count - 1).Value &&
+                    points.ElementAt(points.Count - 2).Value < points.ElementAt(points.Count - 1).Value)
+            {
+                trend = -1;
+            }
+            ///End of testing func
+
+            if (trend != 0)
+            {
+                return trend;
+            }
+            return 0;
+        }
+
+        private static int AnalyseTrendWithLowPrecision(IReadOnlyCollection<double> subTrends, Dictionary<DateTime, double> prices, bool currentTrend)
+        {
+            if (currentTrend)
+            {
+                if (subTrends.Last() > prices.Last().Value)
                 {
                     return -1;
                 }
             }
+            else
+            {
+                if (subTrends.Last() < prices.Last().Value)
+                {
+                    return 1;
+                }
+            }
             return 0;
         }
+
+        private static int AnalyseTrendWithMediumPrecision(IReadOnlyCollection<double> subTrends, Dictionary<DateTime, double> prices, bool currentTrend)
+        {
+            if (currentTrend)
+            {
+                if (subTrends.Last() > prices.Last().Value &&
+                    prices.Last().Value < prices.ElementAt(prices.Count - 1).Value)
+                {
+                    return -1;
+                }
+            }
+            else
+            {
+                if (subTrends.Last() < prices.Last().Value &&
+                    prices.Last().Value > prices.ElementAt(prices.Count - 1).Value)
+                {
+                    return 1;
+                }
+            }
+            return 0;
+        }
+        private static int AnalyseTrendWithHighPrecision(IReadOnlyCollection<double> subTrends, Dictionary<DateTime, double> prices, bool currentTrend)
+        {
+            if (currentTrend)
+            {
+                if (subTrends.Last() > prices.Last().Value &&
+                    prices.Last().Value < prices.ElementAt(prices.Count - 1).Value &&
+                    prices.ElementAt(prices.Count - 2).Value < prices.ElementAt(prices.Count - 1).Value)
+                {
+                    return -1;
+                }
+            }
+            else
+            {
+                if (subTrends.Last() < prices.Last().Value &&
+                    prices.Last().Value > prices.ElementAt(prices.Count - 1).Value &&
+                    prices.ElementAt(prices.Count - 2).Value > prices.ElementAt(prices.Count - 1).Value)
+                {
+                    return 1;
+                }
+            }
+            return 0;
+        }
+
         //func to find average price
         private static double CalculateSMA(List<double> points)
         {
             return points.Sum() / points.Count;
         }
-    }
+
+        public void ChangeSetting(AlgorithmInfo settings)
+        {
+            _precision = settings.Sensivity;
+            _pm.SetPointInterval((int)settings.Interval.Seconds * 1000 / 5);
+            _dc.ClearAllData();
+        }
+        public void ChangeState()
+        {
+            if (_isStopped)
+            {
+                Start();
+            }
+            else
+            {
+                Stop();
+            }
+        }
+        private void Stop()
+        {
+            _isStopped = true;
+            _pm.Stop();
+        }
+
+        private void Start()
+        {
+            _isStopped = false;
+            _pm.Launch(_pointPublisher, _dc);
+        }
+    } 
 }
