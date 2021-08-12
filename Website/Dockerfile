@@ -1,6 +1,8 @@
 # Команды для запуска:
-# docker build -t website:latest -f . ..
-# docker run --rm -it -p 5008:80 -e ASPNETCORE_URLS="http://+;" website
+# Windows: docker build -t website:latest -f . ..
+# Windows: docker run --rm -it -p 5008:80 -e ASPNETCORE_URLS="http://+;" website
+# Linux: sudo docker build -t website:latest -f Dockerfile ..
+# Linux: sudo docker run --add-host=host.docker.internal:host-gateway --rm -it -p 5008:80 -e ASPNETCORE_URLS="http://+;" website
 
 FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS base
 WORKDIR /app

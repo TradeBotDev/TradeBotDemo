@@ -1,6 +1,8 @@
 # Команды для запуска:
-# docker build -t account:latest -f . ..
-# docker run --rm -it -p 5000:80 -e ASPNETCORE_URLS="http://+;" account
+# Windows: docker build -t account:latest -f . ..
+# Windows: docker run --rm -it -p 5000:80 -e ASPNETCORE_URLS="http://+;" account
+# Linux: sudo docker build -t account:latest -f Dockerfile ..
+# Linux: sudo docker run --rm -it -p 5000:80 -e ASPNETCORE_URLS="http://+;" account
 
 FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS base
 WORKDIR /app
