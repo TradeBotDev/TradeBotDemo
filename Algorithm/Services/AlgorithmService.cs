@@ -17,17 +17,18 @@ namespace Algorithm.Services
             while (await requestStream.MoveNext())
             {
                 var order = requestStream.Current;
-                DataCollector.Orders.Add(order.Order);
-                DataCollector.metaData = context.RequestHeaders;
+                StorageOfAlgorithms.
+                //DataCollector.Orders.Add(order.Order);
+               // DataCollector.metaData = context.RequestHeaders;
             }
 
             return new AddOrderResponse();
         }
-
-        //a config update placeholder 
         public override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request, ServerCallContext context)
         {
-            Log.Information("Config Updated");
+            var user = context.RequestHeaders.GetValue("sessionid");
+            var settings = request.Request;
+            StorageOfAlgorithms.SendNewConfig(user, settings);
             return Task.FromResult(new UpdateServerConfigResponse());
         }
     }

@@ -19,7 +19,7 @@ namespace Algorithm.Analysis
         private readonly Dictionary<DateTime, double> _storage;
 
         //when an algo is created it's immediately subsribed to new points 
-        public AlgorithmAlpha(Publisher publisher)
+        public AlgorithmAlpha(PointPublisher publisher)
         {
             publisher.PointMadeEvent += NewPointAlert;
             _storage = new Dictionary<DateTime, double>();

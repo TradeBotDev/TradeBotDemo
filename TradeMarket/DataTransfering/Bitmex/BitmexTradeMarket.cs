@@ -52,7 +52,7 @@ namespace TradeMarket.DataTransfering.Bitmex
 
 
 
-        public BitmexTradeMarket(string name/*,IConnectionMultiplexer multiplexer*/)
+        public BitmexTradeMarket(string name/*, IConnectionMultiplexer multiplexer*/)
         {
             //_multiplexer = multiplexer;
             Name = name;
