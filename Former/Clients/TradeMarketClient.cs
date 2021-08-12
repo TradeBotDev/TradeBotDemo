@@ -188,6 +188,7 @@ namespace Former.Clients
                 {
                     OrderId = id
                 }, metadata);
+                Log.Information("Deleting was {0} {1}", response.Response.Code, response.Response.Message);
             }
 
             await ConnectionTester(DeleteOrderFunc);

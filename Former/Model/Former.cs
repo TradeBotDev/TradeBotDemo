@@ -5,7 +5,6 @@ using Grpc.Core;
 using Serilog;
 using System.Linq;
 using System.Threading.Tasks;
-using Serilog.Configuration;
 using TradeBot.Common.v1;
 
 namespace Former.Model
@@ -165,14 +164,11 @@ namespace Former.Model
         {
             foreach (var (key, value) in _storage.MyOrders)
             {
+                _storage.MyOrders.TryRemove(key, out _);
                 var response = await _tradeMarketClient.DeleteOrder(key, _metadata);
+                if (response.Response.Code != ReplyCode.Succeed) return;
                 Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed {@ResponseCode}", "Former", value.Id, value.Price, value.Quantity, value.Signature.Type, response.Response.Code == ReplyCode.Succeed ? ReplyCode.Succeed : ReplyCode.Failure);
-                if (response.Response.Code == ReplyCode.Succeed)
-                {
-                    _storage.MyOrders.TryRemove(key, out _);
-                    await _historyClient.WriteOrder(value, ChangesType.Delete, _metadata, "Removed by user");
-                }
-                else return;
+                await _historyClient.WriteOrder(value, ChangesType.Delete, _metadata, "Removed by user");
             }
         }
 
