@@ -5,7 +5,6 @@ using Grpc.Core;
 using Serilog;
 using System.Linq;
 using System.Threading.Tasks;
-using Serilog.Configuration;
 using TradeBot.Common.v1;
 
 namespace Former.Model

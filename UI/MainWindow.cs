@@ -26,7 +26,21 @@ namespace UI
             InitializeComponent();
             InitIntervalMap();
             InitSensitivityMap();
-            this.FormClosing += MainWindow_FormClosing;
+            FormClosing += MainWindow_FormClosing;
+            ConfigUpdatePriceRange.TextChanged += ConfigUpdatePriceRangeOnTextChanged;
+        }
+
+        private void ConfigUpdatePriceRangeOnTextChanged(object? sender, EventArgs e)
+        {
+            var str = ConfigUpdatePriceRange.Text;
+            if (ConfigUpdatePriceRange.Text.IndexOf(',') == ConfigUpdatePriceRange.Text.Length - 1) return;
+            if(!double.TryParse(ConfigUpdatePriceRange.Text, out var value)) return;
+
+            var floor = Math.Floor(value);
+
+            ConfigUpdatePriceRange.TextChanged -= ConfigUpdatePriceRangeOnTextChanged;
+            ConfigUpdatePriceRange.Text = (floor += (value - floor) < 0.5 ? 0.0 : 0.5).ToString();
+            ConfigUpdatePriceRange.TextChanged += ConfigUpdatePriceRangeOnTextChanged;
         }
 
         private async void SubscribeEvents(string sessionId)
@@ -41,7 +55,7 @@ namespace UI
                         BalanceLabel.Text = $"{double.Parse(response.ResponseStream.Current.Balance.Balance.Value)/100000000} {response.ResponseStream.Current.Balance.Balance.Currency}";
                         break;
                     case EventTypeOneofCase.Order:
-                        var incomingString = $"\r\n\n[{response.ResponseStream.Current.Order.Time.ToDateTime()}]: {response.ResponseStream.Current.Order.Message}\r\n" +
+                        var incomingString = $"\r\n\n[{TimeZoneInfo.ConvertTime(response.ResponseStream.Current.Order.Time.ToDateTime(),TimeZoneInfo.Local):HH:mm:ss}]: {response.ResponseStream.Current.Order.Message}\r\n" +
                                              $"Order {response.ResponseStream.Current.Order.Order.Id}, price: {response.ResponseStream.Current.Order.Order.Price}, quantity: {response.ResponseStream.Current.Order.Order.Quantity}, type: {response.ResponseStream.Current.Order.Order.Signature.Type}";
                         EventConsole.Text += incomingString;
                         break;
@@ -106,7 +120,7 @@ namespace UI
             StopButton.Visible = true;
 
             Console.WriteLine("Запустил бота с конфигом {0}", configuration);
-            EventConsole.Text += "\r\nBot has been started!";
+            EventConsole.Text += $"\r\n[{DateTime.Now:HH:mm:ss}]: Bot has been started!";
         }
 
         private Config GetConfig()
@@ -197,7 +211,7 @@ namespace UI
             LoggedGroupBox.Text = "Signed in as " + LogLogTextBox.Text;
             SignInGroupBox.Visible = false;
             SignInGroupBox.Enabled = false;
-            EventConsole.Text += $"\r\nYou are signed in as {LogLogTextBox.Text}";
+            EventConsole.Text += $"\r\n[{DateTime.Now:HH:mm:ss}]: You are signed in as {LogLogTextBox.Text}";
         }
 
         private async void SignOutButton_Click(object sender, EventArgs e)
@@ -226,7 +240,7 @@ namespace UI
             StopButton.Enabled = false;
             StopButton.Visible = false;
             var stopBotResponse = await _client.StopBotAsync(new StopBotRequest { Request=new TradeBot.Common.v1.UpdateServerConfigRequest {Config=GetConfig(),Switch=true } },_meta);
-            EventConsole.Text += "\r\nBot has been stopped!";
+            EventConsole.Text += $"\r\n[{DateTime.Now:HH:mm:ss}]: Bot has been stopped!";
         }
 
         private async void MainWindow_FormClosing(object sender, FormClosingEventArgs e) 
