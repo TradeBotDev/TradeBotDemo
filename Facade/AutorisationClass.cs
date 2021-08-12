@@ -14,300 +14,168 @@ namespace Facade
     public class AutorisationClass
     {
         private GrpcChannel _channel => GrpcChannel.ForAddress("https://localhost:5000");
-        private Auth _client => new TradeBot.Account.AccountService.v1.Account.AccountClient(_channel);
+        private GrpcChannel Channel { get => _channel; }
 
-        private TradeBot.Account.AccountService.v1.Account.AccountClient clientAccount = new TradeBot.Account.AccountService.v1.Account.AccountClient(GrpcChannel.ForAddress("https://localhost:5000"));
+        private Auth _clientAccount => new Auth(Channel);
+        public Auth ClientAccount
 
-
-        public Task<Ref.LoginReply> LoginAuth(Ref.LoginRequest request, ServerCallContext context, Auth auth)
         {
-            while (true)
+            get => _clientAccount;
+        }
+
+        private Exch _clientExc => new Exch(Channel);
+        public Exch ClientExc
+
+        {
+            get => _clientExc;
+        }
+        //private TradeBot.Account.AccountService.v1.Account.AccountClient client = new Auth(GrpcChannel.ForAddress("https://localhost:5000"));
+        public async Task<Ref.LoginReply> Account_Login(Ref.LoginRequest request, string methodName)
+        {
+            TradeBot.Account.AccountService.v1.LoginReply response = null;
+            async Task<TradeBot.Account.AccountService.v1.LoginReply> task()
             {
-                try
+                response =await ClientAccount.LoginAsync(new TradeBot.Account.AccountService.v1.LoginRequest
                 {
-                    if (context.CancellationToken.IsCancellationRequested) break;
-
-                    var response = _client.Login(new TradeBot.Account.AccountService.v1.LoginRequest
-                    {
-                        Email = request.Email,
-                        SaveExchangesAfterLogout = request.SaveExchangesAfterLogout,
-                        Password = request.Password
-                    });
-                    Log.Information($"Function: Login \n args: request={request}");
-                    Log.Information($"Function: Login \n args: response={response}");
-                    return Task.FromResult(new Ref.LoginReply
-                    {
-                        Message = response.Message,
-                        SessionId = response.SessionId,
-                        Result = (Ref.ActionCode)response.Result
-                    });
-                }
-                catch (RpcException e)
-                {
-                    Log.Error("Exception:" + e.Message);
-                }
+                    Email = request.Email,
+                    SaveExchangesAfterLogout = request.SaveExchangesAfterLogout,
+                    Password = request.Password
+                });
+                return response;
             }
-            Log.Information("Client disconnected");
-            return Task.FromResult(new Ref.LoginReply { });
+            await Generalization.ConnectionTester(task, methodName, request);
+            return await Generalization.ReturnResponse(new Ref.LoginReply { SessionId = response.SessionId, Message = response.Message, Result = (Ref.ActionCode)response.Result }, methodName);
         }
-
-        public Task<Ref.LogoutReply> LogoutAuth(Ref.SessionRequest request, ServerCallContext context)
+        public async Task<Ref.LogoutReply> Account_Logout(Ref.SessionRequest request, ServerCallContext context, string methodName)
         {
-            while (true)
+            TradeBot.Account.AccountService.v1.LogoutReply response = null;
+            async Task<TradeBot.Account.AccountService.v1.LogoutReply> task()
             {
-                try
+                response = await ClientAccount.LogoutAsync(new TradeBot.Account.AccountService.v1.SessionRequest
                 {
-                    if (context.CancellationToken.IsCancellationRequested) break;
-
-                    var response = _client.Logout(new TradeBot.Account.AccountService.v1.SessionRequest { SessionId = request.SessionId });
-                    Log.Information($"Function: Logout \n args: request={request}");
-                    Log.Information($"Function: Logout \n args: response={response}");
-
-                    return Task.FromResult(new Ref.LogoutReply
-                    {
-                        Message = response.Message,
-                        Result = (Ref.ActionCode)response.Result
-                    });
-
-                }
-                catch (RpcException e)
-                {
-                    Log.Error("Exception:" + e.Message);
-                }
+                    SessionId = request.SessionId
+                }, context.RequestHeaders);
+                return response;
             }
-            Log.Information("Client disconnected");
-            return Task.FromResult(new Ref.LogoutReply { });
+            await Generalization.ConnectionTester(task, methodName, request);
+            return await Generalization.ReturnResponse(new TradeBot.Facade.FacadeService.v1.LogoutReply { Message = response.Message, Result = (Ref.ActionCode)response.Result }, methodName);
         }
-
-        public Task<Ref.RegisterReply> RegisterAuth(Ref.RegisterRequest request, ServerCallContext context)
+        public async Task<Ref.RegisterReply> Account_Register(Ref.RegisterRequest request, ServerCallContext context, string methodName)
         {
-            while (true)
+            TradeBot.Account.AccountService.v1.RegisterReply response = null;
+            async Task<TradeBot.Account.AccountService.v1.RegisterReply> task()
             {
-                try
+                response = await ClientAccount.RegisterAsync(new TradeBot.Account.AccountService.v1.RegisterRequest
                 {
-                    if (context.CancellationToken.IsCancellationRequested) break;
-
-                    var response = _client.Register(new TradeBot.Account.AccountService.v1.RegisterRequest
-                    {
-                        Email = request.Email,
-                        Password = request.Password,
-                        VerifyPassword = request.VerifyPassword
-                    });
-                    Log.Information($"Function: Register \n args: request={request}");
-                    Log.Information($"Function: Register \n args: response={response}");
-                    return Task.FromResult(new Ref.RegisterReply
-                    {
-                        Message = response.Message,
-                        Result = (Ref.ActionCode)response.Result
-
-                    });
-                }
-                catch (RpcException e)
-                {
-                    Log.Error("Exception:" + e.Message);
-                }
+                    Email = request.Email,
+                    Password = request.Password,
+                    VerifyPassword = request.VerifyPassword
+                }, context.RequestHeaders);
+                return response;
             }
-            Log.Information("Client disconnected");
-            return Task.FromResult(new Ref.RegisterReply { });
+            await Generalization.ConnectionTester(task, methodName, request);
+            return await Generalization.ReturnResponse(new TradeBot.Facade.FacadeService.v1.RegisterReply { Message = response.Message, Result = (Ref.ActionCode)response.Result }, methodName);
         }
-
-        public Task<Ref.SessionReply> IsValidSessionAuth(Ref.SessionRequest request, ServerCallContext context)
+        public async Task<Ref.CurrentAccountReply> Account_CurrentAccountData(Ref.SessionRequest request, ServerCallContext context, string methodName)
         {
-            while (true)
+            TradeBot.Account.AccountService.v1.CurrentAccountReply response = null;
+            async Task<TradeBot.Account.AccountService.v1.CurrentAccountReply> task()
             {
-                try
+                response = await ClientAccount.CurrentAccountDataAsync(new TradeBot.Account.AccountService.v1.SessionRequest
                 {
-                    if (context.CancellationToken.IsCancellationRequested) break;
-
-                    var response = _client.IsValidSession(new TradeBot.Account.AccountService.v1.SessionRequest { SessionId = request.SessionId });
-                    Log.Information($"Function: IsValidSession \n args: request={request}");
-                    Log.Information($"Function: IsValidSession \n args: response={response}");
-                    return Task.FromResult(new Ref.SessionReply
-                    {
-                        IsValid = response.IsValid,
-                        Message = response.Message
-                    });
-                }
-                catch (RpcException e)
-                {
-                    Log.Error("Exception:" + e.Message);
-                }
+                    SessionId = request.SessionId
+                }, context.RequestHeaders);
+                return response;
             }
-            Log.Information("Client disconnected");
-            return Task.FromResult(new Ref.SessionReply { });
-        }
+            await Generalization.ConnectionTester(task, methodName, request);
 
-        public Task<Ref.CurrentAccountReply> CurrentAccountDataAuth(Ref.SessionRequest request, ServerCallContext context)
-        {
-            while (true)
+            var accountResponse = new Ref.CurrentAccountReply()
             {
-                try
+                Message = response.Message,
+                Result = (Ref.ActionCode)response.Result,
+                CurrentAccount = new Ref.AccountInfo
                 {
-                    if (context.CancellationToken.IsCancellationRequested) break;
-
-                    var response = _client.CurrentAccountData(new TradeBot.Account.AccountService.v1.SessionRequest { SessionId = request.SessionId });
-                    Log.Information($"Function: CurrentAccountData \n args: request={request}");
-                    var accountResponse = new Ref.CurrentAccountReply()
-                    {
-                        Message = response.Message,
-                        Result = (Ref.ActionCode)response.Result,
-                        CurrentAccount = new Ref.AccountInfo
-                        {
-                            AccountId = response.CurrentAccount.AccountId,
-                            Email = response.CurrentAccount.Email
-                        }
-                    };
-                    foreach (var item in response.CurrentAccount.Exchanges)
-                    {
-                        accountResponse.CurrentAccount.Exchanges.Add(new Ref.ExchangeAccessInfo
-                        {
-                            Secret = item.Secret,
-                            Code = (Ref.ExchangeCode)item.Code,
-                            ExchangeAccessId = item.ExchangeAccessId,
-                            Name = item.Name,
-                            Token = item.Token
-                        });
-                    }
-                    Log.Information($"Function: CurrentAccountData \n args: response={response}");
-                    return Task.FromResult(accountResponse);
+                    AccountId = response.CurrentAccount.AccountId,
+                    Email = response.CurrentAccount.Email
                 }
-                catch (RpcException e)
+            };
+            foreach (var item in response.CurrentAccount.Exchanges)
+            {
+                accountResponse.CurrentAccount.Exchanges.Add(new Ref.ExchangeAccessInfo
                 {
-                    Log.Error("Exception:" + e.Message);
-                }
+                    Secret = item.Secret,
+                    Code = (Ref.ExchangeCode)item.Code,
+                    ExchangeAccessId = item.ExchangeAccessId,
+                    Name = item.Name,
+                    Token = item.Token
+                });
             }
-            Log.Information("Client disconnected");
-            return Task.FromResult(new Ref.CurrentAccountReply { });
+            return await Generalization.ReturnResponse(accountResponse, methodName);
         }
-
-        public Task<Ref.AddExchangeAccessReply> AddExchangeAccessAuth(Ref.AddExchangeAccessRequest request, ServerCallContext context)
+        public async Task<Ref.AddExchangeAccessReply> Account_AddExcengeAccess(Ref.AddExchangeAccessRequest request, ServerCallContext context, string methodName)
         {
-            //while (true)
-            //{
-            //    try
-            //    {
-            //        if (context.CancellationToken.IsCancellationRequested) break;
-
-            //        var response = Client.AddExchangeAccess(new TradeBot.Account.AccountService.v1.AddExchangeAccessRequest
-            //        {
-            //            Code = (TradeBot.Account.AccountService.v1.ExchangeCode)request.Code,
-            //            Secret = request.Secret,
-            //            ExchangeName = request.ExchangeName,
-            //            SessionId = request.SessionId,
-            //            Token = request.Token
-            //        });
-            //        Log.Information($"Function: AddExchangeAccess \n args: request={request}");
-            //        Log.Information($"Function: AddExchangeAccess \n args: response={response}");
-            //        return Task.FromResult(new Ref.AddExchangeAccessReply
-            //        {
-            //            Message = response.Message,
-            //            Result = (Ref.ActionCode)response.Result
-            //        });
-            //    }
-            //    catch (RpcException e)
-            //    {
-            //        Log.Error("Exception:" + e.Message);
-            //    }
-            //}
-            Log.Information("Remote function call...");
-            return Task.FromResult(new Ref.AddExchangeAccessReply { Message = "Remote function call..." });
+            TradeBot.Account.AccountService.v1.AddExchangeAccessReply response = null;
+            async Task<TradeBot.Account.AccountService.v1.AddExchangeAccessReply> task()
+            {
+                response = await ClientExc.AddExchangeAccessAsync(new TradeBot.Account.AccountService.v1.AddExchangeAccessRequest
+                {
+                    Secret = request.Secret,
+                    SessionId = request.SessionId,
+                    Code = (TradeBot.Account.AccountService.v1.ExchangeCode)request.Code,
+                    ExchangeName = request.ExchangeName,
+                    Token = request.Token
+                }, context.RequestHeaders);
+                return response;
+            }
+            await Generalization.ConnectionTester(task, methodName, request);
+            return await Generalization.ReturnResponse(new TradeBot.Facade.FacadeService.v1.AddExchangeAccessReply { Message = response.Message, Result = (Ref.ActionCode)response.Result }, methodName);
         }
-
-        public Task<Ref.AllExchangesBySessionReply> AllExchangesBySessionAuth(Ref.SessionRequest request, ServerCallContext context)
+        public async Task<Ref.AllExchangesBySessionReply> Account_AllExcangesBySession(Ref.SessionRequest request, ServerCallContext context, string methodName)
         {
-            //while (true)
-            //{
-            //    try
-            //    {
-            //        if (context.CancellationToken.IsCancellationRequested) break;
-            //        var response = Client.AllExchangesBySession(new TradeBot.Account.AccountService.v1.SessionRequest { SessionId = request.SessionId });
-            //        Log.Information($"Function: AllExchangesBySession \n args: request={request}");
-            //        var accountResponse = new AllExchangesBySessionReply()
-            //        {
-            //            Message = response.Message,
-            //            Result = (Ref.ActionCode)response.Result
-            //        };
-            //        foreach (var item in response.Exchanges)
-            //        {
-            //            accountResponse.Exchanges.Add(new Ref.ExchangeAccessInfo
-            //            {
-            //                Secret = item.Secret,
-            //                Code = (Ref.ExchangeCode)item.Code,
-            //                ExchangeAccessId = item.ExchangeAccessId,
-            //                Name = item.Name,
-            //                Token = item.Token
-            //            });
-            //        }
-            //        Log.Information($"Function: AllExchangesBySession \n args: response={response}");
-            //        return Task.FromResult(accountResponse);
-            //    }
-            //    catch (RpcException e)
-            //    {
-            //        Log.Error("Exception:" + e.Message);
-            //    }
-            //}
-            Log.Information("Client disconnected");
-            return Task.FromResult(new Ref.AllExchangesBySessionReply { Message = "Remote function call..." });
+            TradeBot.Account.AccountService.v1.AllExchangesBySessionReply response = null;
+            async Task<TradeBot.Account.AccountService.v1.AllExchangesBySessionReply> task()
+            {
+                response = await ClientExc.AllExchangesBySessionAsync(new TradeBot.Account.AccountService.v1.SessionRequest
+                {
+                    SessionId = request.SessionId
+                }, context.RequestHeaders);
+                return response;
+            }
+            await Generalization.ConnectionTester(task, methodName, request);
+            return await Generalization.ReturnResponse(new TradeBot.Facade.FacadeService.v1.AllExchangesBySessionReply { Message = response.Message, Result = (Ref.ActionCode)response.Result }, methodName);
         }
-
-        public Task<Ref.DeleteExchangeAccessReply> DeleteExchangeAccessAuth(Ref.DeleteExchangeAccessRequest request, ServerCallContext context)
+        public async Task<Ref.DeleteExchangeAccessReply> Account_DeleteChangesAccess(Ref.DeleteExchangeAccessRequest request, ServerCallContext context, string methodName)
         {
-            //while (true)
-            //{
-            //    try
-            //    {
-            //        if (context.CancellationToken.IsCancellationRequested) break;
-
-            //        var response = Client.DeleteExchangeAccess(new TradeBot.Account.AccountService.v1.DeleteExchangeAccessRequest { SessionId = request.SessionId, Code = (TradeBot.Account.AccountService.v1.ExchangeCode)request.Code });
-            //        Log.Information($"Function: DeleteExchangeAccess \n args: request={request}");
-            //        Log.Information($"Function: DeleteExchangeAccess \n args: response={response}");
-            //        return Task.FromResult(new Ref.DeleteExchangeAccessReply
-            //        {
-            //            Message = response.Message,
-            //            Result = (Ref.ActionCode)response.Result
-            //        });
-            //    }
-            //    catch (RpcException e)
-            //    {
-            //        Log.Error("Exception:" + e);
-            //    }
-            //}
-            return Task.FromResult(new Ref.DeleteExchangeAccessReply { Message = "Remote function call..." });
+            TradeBot.Account.AccountService.v1.DeleteExchangeAccessReply response = null;
+            async Task<TradeBot.Account.AccountService.v1.DeleteExchangeAccessReply> task()
+            {
+                response = await ClientExc.DeleteExchangeAccessAsync(new TradeBot.Account.AccountService.v1.DeleteExchangeAccessRequest
+                {
+                    SessionId = request.SessionId,
+                    Code = (TradeBot.Account.AccountService.v1.ExchangeCode)request.Code
+                }, context.RequestHeaders);
+                return response;
+            }
+            await Generalization.ConnectionTester(task, methodName, request);
+            return await Generalization.ReturnResponse(new TradeBot.Facade.FacadeService.v1.DeleteExchangeAccessReply { Message = response.Message, Result = (Ref.ActionCode)response.Result }, methodName);
         }
-
-        public Task<Ref.ExchangeBySessionReply> ExchangeBySessionAuth(Ref.ExchangeBySessionRequest request, ServerCallContext context)
+        public async Task<Ref.ExchangeBySessionReply> Account_ExchangeBySession(Ref.ExchangeBySessionRequest request, ServerCallContext context, string methodName)
         {
-            //while (true)
-            //{
-            //    try
-            //    {
-            //        if (context.CancellationToken.IsCancellationRequested) break;
-
-            //        var response = Client.ExchangeBySession(new TradeBot.Account.AccountService.v1.ExchangeBySessionRequest { SessionId = request.SessionId, Code = (TradeBot.Account.AccountService.v1.ExchangeCode)request.Code });
-            //        Log.Information($"Function: ExchangeBySession \n args: request={request}");
-            //        Log.Information($"Function: ExchangeBySession \n args: response={response}");
-            //        return Task.FromResult(new Ref.ExchangeBySessionReply
-            //        {
-            //            Message = response.Message,
-            //            Result = (Ref.ActionCode)response.Result,
-            //            Exchange = new Ref.ExchangeAccessInfo
-            //            {
-            //                Secret = response.Exchange.Secret,
-            //                Code = (Ref.ExchangeCode)response.Exchange.Code,
-            //                ExchangeAccessId = response.Exchange.ExchangeAccessId,
-            //                Name = response.Exchange.Name,
-            //                Token = response.Exchange.Token
-            //            }
-            //        });
-            //    }
-            //    catch (RpcException e)
-            //    {
-            //        Log.Error("Exception:" + e.Message);
-            //    }
-            //}
-            Log.Information("Remote function call...");
-            return Task.FromResult(new Ref.ExchangeBySessionReply { Message = "Remote function call..." });
-
+            TradeBot.Account.AccountService.v1.ExchangeBySessionReply response = null;
+            async Task<TradeBot.Account.AccountService.v1.ExchangeBySessionReply> task()
+            {
+                response = await ClientExc.ExchangeBySessionAsync(new TradeBot.Account.AccountService.v1.ExchangeBySessionRequest
+                {
+                    SessionId = request.SessionId,
+                    Code = (TradeBot.Account.AccountService.v1.ExchangeCode)request.Code
+                }, context.RequestHeaders);
+                return response;
+            }
+            await Generalization.ConnectionTester(task, methodName, request);
+            return await Generalization.ReturnResponse(new TradeBot.Facade.FacadeService.v1.ExchangeBySessionReply { Message = response.Message, Result = (Ref.ActionCode)response.Result }, methodName);
         }
+
+
+
     }
 }
