@@ -44,7 +44,7 @@ namespace Algorithm
     {
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            AlgorithmBeta algo = new();
+            //AlgorithmBeta algo = new();
         }
     }
 }

@@ -32,7 +32,7 @@ namespace Algorithm.Analysis
         private PointPublisher _pointPublisher;
         private DataCollector _dc;
         private PointMaker _pm;
-        private bool _isStopped = false;
+        private bool _isStopped = true;
         private Metadata metadata;
         //it feels wrong for algo to know anything about the user, but i don't know else to send a decision ¯\_(ツ)_/¯
         private string _user;
@@ -44,13 +44,14 @@ namespace Algorithm.Analysis
         //when an algo is created it's immediately subscribed to new points 
         public AlgorithmBeta(string user)
         {
+            Log.Information("IM AN ALGO, IM BEING CREATED RIGHT NOW");
             _user = user;
             _pointPublisher = new();
             _pointPublisher.PointMadeEvent += NewPointAlert;
             _dc = new(_pointPublisher);
             _pm = new();
-            _pm.Launch(_pointPublisher, _dc);
             _storage = new Dictionary<DateTime, double>();
+            Log.Information("Created an algo AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
         }
 
         //when a new point is made algo adds it to its storage and checks if it has enough to initiate analysis 
@@ -156,6 +157,25 @@ namespace Algorithm.Analysis
                         break;
                 }
             }
+
+            /////////////////////////////////////////////////////////////////////
+            ///Attention
+            ///Testing func 
+
+            if (points.Last().Value > points.ElementAt(points.Count - 1).Value &&
+                    points.ElementAt(points.Count - 2).Value > points.ElementAt(points.Count - 1).Value)
+            { 
+                trend = 1; 
+            }
+            if (points.Last().Value < points.ElementAt(points.Count - 1).Value &&
+                    points.ElementAt(points.Count - 2).Value < points.ElementAt(points.Count - 1).Value)
+            {
+                trend = -1;
+            }
+
+
+            ///End of testing func
+
             if (trend != 0)
             {
                 return trend;

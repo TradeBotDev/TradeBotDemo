@@ -22,7 +22,7 @@ namespace UI
 
         public TradeBotUi()
         {
-            _client = new FacadeService.FacadeServiceClient(GrpcChannel.ForAddress("https://localhost:5002"));
+            _client = new FacadeService.FacadeServiceClient(GrpcChannel.ForAddress("http://localhost:5002"));
             InitializeComponent();
             InitIntervalMap();
             InitSensitivityMap();

@@ -7,6 +7,7 @@ using TradeBot.Common.v1;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using Grpc.Core;
+using Serilog;
 
 namespace Algorithm.DataManipulation
 {
@@ -35,6 +36,7 @@ namespace Algorithm.DataManipulation
         public void AddNewOrder(Order order)
         {
             Orders.Add(order);
+            Log.Information("Order added to DC");
         }
 
         public void ClearAllData()
