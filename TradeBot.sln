@@ -23,6 +23,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AccountTests", "AccountTest
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Website", "Website\Website.csproj", "{31DF94DE-4ADF-494D-B94C-FAB6497EBFC4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebsiteTests", "WebsiteTests\WebsiteTests.csproj", "{BF043021-9CC2-44A1-AD59-1FE236CA244A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -65,12 +67,17 @@ Global
 		{31DF94DE-4ADF-494D-B94C-FAB6497EBFC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31DF94DE-4ADF-494D-B94C-FAB6497EBFC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31DF94DE-4ADF-494D-B94C-FAB6497EBFC4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF043021-9CC2-44A1-AD59-1FE236CA244A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF043021-9CC2-44A1-AD59-1FE236CA244A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF043021-9CC2-44A1-AD59-1FE236CA244A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF043021-9CC2-44A1-AD59-1FE236CA244A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{25F23785-A4F7-482D-9DCB-D3529CB062C2} = {AE34BEE1-15B3-4F82-8767-73A4E4E60A09}
+		{BF043021-9CC2-44A1-AD59-1FE236CA244A} = {AE34BEE1-15B3-4F82-8767-73A4E4E60A09}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E2027A17-FF96-418D-A05D-A2B4029A9C4E}
