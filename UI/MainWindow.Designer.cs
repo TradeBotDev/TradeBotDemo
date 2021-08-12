@@ -422,8 +422,10 @@ namespace UI
             this.ConfigAlgorithmSensivity.FormattingEnabled = true;
             this.ConfigAlgorithmSensivity.Items.AddRange(new object[] {
             "Minimal",
+            "Low",
             "Medium",
-            "High"});
+            "High",
+            "Ultra"});
             this.ConfigAlgorithmSensivity.Location = new System.Drawing.Point(161, 203);
             this.ConfigAlgorithmSensivity.Name = "ConfigAlgorithmSensivity";
             this.ConfigAlgorithmSensivity.Size = new System.Drawing.Size(84, 28);

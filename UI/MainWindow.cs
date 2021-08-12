@@ -92,9 +92,11 @@ namespace UI
         {
             _sensitivityMap = new Dictionary<string, int>
             {
-                { "Minimal", 1 },
+                { "Minimal", 0 },
+                { "Low", 1 },
                 { "Medium", 2 },
-                { "High", 3 }
+                { "High", 3 },
+                { "Ultra", 4 }
             };
         }
 
@@ -125,8 +127,7 @@ namespace UI
 
         private Config GetConfig()
         {
-            _intervalMap.TryGetValue(ConfigIntervalOfAnalysisl.Text, out var interval);
-            _sensitivityMap.TryGetValue(ConfigAlgorithmSensivity.Text, out var sensitivity);
+            var str = _intervalMap[ConfigIntervalOfAnalysis.Text];
             var config = new Config
             {
                 AvaibleBalance = double.Parse(ConfigAvailableBalance.Text),
@@ -134,8 +135,8 @@ namespace UI
                 ContractValue = double.Parse(ConfigVolumeOfContracts.Text),
                 AlgorithmInfo = new AlgorithmInfo
                 {
-                    Interval = interval,
-                    Sensivity = sensitivity
+                    Interval = _intervalMap[ConfigIntervalOfAnalysis.Text],
+                    Sensivity = _sensitivityMap[ConfigAlgorithmSensivity.Text]
                 },
                 OrderUpdatePriceRange = double.Parse(ConfigUpdatePriceRange.Text),
             };
