@@ -18,9 +18,9 @@ namespace Algorithm.DataManipulation
         //UNCOMMENT FOR WORKING VERSION
         private static readonly GrpcChannel Channel = GrpcChannel.ForAddress("https://localhost:5003");
         private static readonly FormerServiceClient Client = new FormerServiceClient(Channel);
-        public static void SendPrice (int decision)
+        public static void SendDecision (int decision, string user)
         {
-            var response = Client.SendAlgorithmDecision(new SendAlgorithmDecisionRequest() { Decision = decision }, DataCollector.metaData);
+            var response = Client.SendAlgorithmDecision(new SendAlgorithmDecisionRequest() { Decision = decision }, );
             Log.Information("Sent " + decision + "  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         }
     }

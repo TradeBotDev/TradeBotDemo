@@ -55,6 +55,7 @@ namespace Algorithm.DataManipulation
 
         public void Launch(PointPublisher publisher, DataCollector dataCollector)
         {
+            _isOrderedToStop = false;
             while (!_isOrderedToStop)
             {
                 Log.Information("New iteration started");

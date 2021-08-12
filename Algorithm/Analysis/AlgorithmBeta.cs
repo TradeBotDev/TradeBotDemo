@@ -26,25 +26,25 @@ namespace Algorithm.Analysis
         private int _durationInPoints = 5;
 
         //1 - low, 2 - medium, 3 - high
-        private int precision = 1;
+        private int _precision = 1;
 
-        private PointPublisher publisher;
-        private DataCollector dc;
-        private PointMaker pm;
-        private bool isStopped = false;
+        private PointPublisher _publisher;
+        private DataCollector _dc;
+        private PointMaker _pm;
+        private bool _isStopped = false;
         public bool GetState()
         {
-            return isStopped;
+            return _isStopped;
         }
 
         //when an algo is created it's immediately subscribed to new points 
         public AlgorithmBeta()
         {
-            publisher = new();
-            publisher.PointMadeEvent += NewPointAlert;
-            dc = new(publisher);
-            pm = new();
-            pm.Launch(publisher, dc);
+            _publisher = new();
+            _publisher.PointMadeEvent += NewPointAlert;
+            _dc = new(_publisher);
+            _pm = new();
+            _pm.Launch(_publisher, _dc);
             _storage = new Dictionary<DateTime, double>();
         }
 
@@ -65,9 +65,9 @@ namespace Algorithm.Analysis
             }
         }
 
-        private void NewOrderAlert(Order order)
+        public void NewOrderAlert(Order order)
         {
-            dc.AddNewOrder(order);
+            _dc.AddNewOrder(order);
         }
 
         //this function gathers all the data and sends it for analysis
@@ -141,7 +141,7 @@ namespace Algorithm.Analysis
                 {
                     Log.Information("Upward trend detected");
                 }
-                switch (precision)
+                switch (_precision)
                 {
                     case 1: trend = AnalyseTrendWithLowPrecision(subTrends, points, uptrend);
                         break;
@@ -228,12 +228,13 @@ namespace Algorithm.Analysis
 
         public void ChangeSetting(AlgorithmInfo settings)
         {
-            precision = settings.Sensivity;
-            
+            _precision = settings.Sensivity;
+            _pm.SetPointInterval((int)settings.Interval.Seconds * 1000 / 5);
+            _dc.ClearAllData();
         }
         public void ChangeState()
         {
-            if (isStopped)
+            if (_isStopped)
             {
                 Start();
             }
@@ -244,12 +245,14 @@ namespace Algorithm.Analysis
         }
         private void Stop()
         {
-
+            _isStopped = true;
+            _pm.Stop();
         }
 
         private void Start()
         {
-
+            _isStopped = false;
+            _pm.Launch(_publisher, _dc);
         }
     } 
 }
