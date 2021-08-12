@@ -38,8 +38,8 @@ namespace Former.Clients
 
         public TradeMarketClient()
         {
-            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2Support", true);
+            //AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            //AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2Support", true);
             _client = new TradeMarketService.TradeMarketServiceClient( GrpcChannel.ForAddress(_connectionString));
         }
 
@@ -48,6 +48,7 @@ namespace Former.Clients
         /// </summary>
         private async Task ConnectionTester(Func<Task> func)
         {
+            var attempts = 0;
             while (true)
             {
                 try
@@ -57,9 +58,10 @@ namespace Former.Clients
                 }
                 catch (RpcException e)
                 {
-                    if (e.StatusCode == StatusCode.Cancelled) break;
+                    if (e.StatusCode == StatusCode.Cancelled || attempts > 3) break;
                     Log.Error("{@Where}: Error {@ExceptionMessage}. Retrying...\r\n{@ExceptionStackTrace}", "Former", e.Message, e.StackTrace);
                     Thread.Sleep(_retryDelay);
+                    attempts++;
                 }
             }
         }
