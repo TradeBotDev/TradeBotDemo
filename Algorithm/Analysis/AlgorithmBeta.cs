@@ -158,22 +158,6 @@ namespace Algorithm.Analysis
                 }
             }
 
-            /////////////////////////////////////////////////////////////////////
-            ///Attention
-            ///Testing func 
-
-            if (points.Last().Value > points.ElementAt(points.Count - 1).Value &&
-                    points.ElementAt(points.Count - 2).Value > points.ElementAt(points.Count - 1).Value)
-            { 
-                trend = 1; 
-            }
-            if (points.Last().Value < points.ElementAt(points.Count - 1).Value &&
-                    points.ElementAt(points.Count - 2).Value < points.ElementAt(points.Count - 1).Value)
-            {
-                trend = -1;
-            }
-            ///End of testing func
-
             if (trend != 0)
             {
                 return trend;
@@ -254,6 +238,7 @@ namespace Algorithm.Analysis
             _precision = settings.Sensivity;
             _pm.SetPointInterval((int)settings.Interval.Seconds * 1000 / 5);
             _dc.ClearAllData();
+            Log.Information("Settings changed");
         }
         public void ChangeState()
         {
