@@ -1,4 +1,5 @@
 ﻿using Grpc.Net.Client;
+using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
 using Website.Models.Authorization;
 
@@ -8,27 +9,27 @@ namespace Website.Controllers.Clients
     {
         private static Account.AccountClient client = new(AccountServiceConnection.GetConnection());
 
-        public static LoginResponse Login(LoginModel model)
+        public static async Task<LoginResponse> Login(LoginModel model)
         {
             var request = new LoginRequest
             {
                 Email = model.Email,
                 Password = model.Password
             };
-            return client.Login(request);
+            return await client.LoginAsync(request);
         }
 
-        public static LogoutResponse Logout(string sessionId, bool saveExchangeAccesses)
+        public static async Task<LogoutResponse> Logout(string sessionId, bool saveExchangeAccesses)
         {
             var request = new LogoutRequest
             {
                 SessionId = sessionId,
                 SaveExchangeAccesses = saveExchangeAccesses
             };
-            return client.Logout(request);
+            return await client.LogoutAsync(request);
         }
 
-        public static RegisterResponse Register(RegisterModel model)
+        public static async Task<RegisterResponse> Register(RegisterModel model)
         {
             var request = new RegisterRequest
             {
@@ -36,25 +37,25 @@ namespace Website.Controllers.Clients
                 Password = model.Password,
                 VerifyPassword = model.VerifyPassword
             };
-            return client.Register(request);
+            return await client.RegisterAsync(request);
         }
 
-        public static IsValidSessionResponse IsValidSession(string sessionId)
+        public static async Task<IsValidSessionResponse> IsValidSession(string sessionId)
         {
             var request = new IsValidSessionRequest
             {
                 SessionId = sessionId
             };
-            return client.IsValidSession(request);
+            return await client.IsValidSessionAsync(request);
         }
 
-        public static AccountDataResponse AccountData(string sessionId)
+        public static async Task<AccountDataResponse> AccountData(string sessionId)
         {
             var request = new AccountDataRequest
             {
                 SessionId = sessionId
             };
-            return client.AccountData(request);
+            return await client.AccountDataAsync(request);
         }
     }
 }

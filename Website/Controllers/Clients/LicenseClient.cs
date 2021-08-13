@@ -1,4 +1,4 @@
-﻿using Grpc.Net.Client;
+﻿using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
 using Website.Models;
 
@@ -8,7 +8,7 @@ namespace Website.Controllers.Clients
     {
         private static License.LicenseClient client = new(AccountServiceConnection.GetConnection());
 
-        public static SetLicenseResponse SetLicense(string sessionId, ProductCode product, CreditCardModel model)
+        public static async Task<SetLicenseResponse> SetLicense(string sessionId, ProductCode product, CreditCardModel model)
         {
             var request = new SetLicenseRequest
             {
@@ -18,10 +18,10 @@ namespace Website.Controllers.Clients
                 Date = model.Date,
                 Cvv = model.CVV
             };
-            return client.SetLicense(request);
+            return await client.SetLicenseAsync(request);
         }
 
-        public static CheckLicenseResponse CheckLicense(string sessionId, ProductCode product)
+        public static async Task<CheckLicenseResponse> CheckLicense(string sessionId, ProductCode product)
         {
             if (sessionId == null) sessionId = "";
             var request = new CheckLicenseRequest
@@ -29,7 +29,7 @@ namespace Website.Controllers.Clients
                 SessionId = sessionId,
                 Product = product
             };
-            return client.CheckLicense(request);
+            return await client.CheckLicenseAsync(request);
         }
     }
 }

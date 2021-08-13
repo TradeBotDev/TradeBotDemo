@@ -14,18 +14,21 @@ namespace Website.Controllers
         [HttpGet]
         public async Task<IActionResult> Login()
         {
-            ViewBag.HaveLicense = Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot).HaveAccess;
+            var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
+            ViewBag.HaveLicense = haveLicense.HaveAccess;
             return View();
         }
 
         [HttpPost]
         public async Task<IActionResult> Login(LoginModel model)
         {
-            ViewBag.HaveLicense = Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot).HaveAccess;
+            var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
+            ViewBag.HaveLicense = haveLicense.HaveAccess;
+
             if (!ModelState.IsValid)
                 return View();
 
-            var reply = Clients.AccountServiceClient.Login(model);
+            var reply = await Clients.AccountServiceClient.Login(model);
             if (reply.Result == AccountActionCode.Successful)
             {
                 var claims = new List<Claim> { new Claim(ClaimTypes.Name, reply.SessionId) };
@@ -39,18 +42,21 @@ namespace Website.Controllers
         [HttpGet]
         public async Task<IActionResult> Register()
         {
-            ViewBag.HaveLicense = Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot).HaveAccess;
+            var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
+            ViewBag.HaveLicense = haveLicense.HaveAccess;
             return View();
         }
 
         [HttpPost]
         public async Task<IActionResult> Register(RegisterModel model)
         {
-            ViewBag.HaveLicense = Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot).HaveAccess;
+            var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
+            ViewBag.HaveLicense = haveLicense.HaveAccess;
+
             if (!ModelState.IsValid)
                 return View();
 
-            var reply = Clients.AccountServiceClient.Register(model);
+            var reply = await Clients.AccountServiceClient.Register(model);
             if (reply.Result == AccountActionCode.Successful)
             {
                 return await Login(new LoginModel
@@ -65,7 +71,8 @@ namespace Website.Controllers
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
-            ViewBag.HaveLicense = Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot).HaveAccess;
+            var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
+            ViewBag.HaveLicense = haveLicense.HaveAccess;
             ViewBag.ReturnUrl = Request.Headers["Referer"].ToString();
             if (!User.Identity.IsAuthenticated)
                 return View("~/Views/Shared/Error.cshtml", "Вы уже вышли.");
@@ -75,10 +82,11 @@ namespace Website.Controllers
         [HttpPost]
         public async Task<IActionResult> Logout(LogoutModel model)
         {
-            ViewBag.HaveLicense = Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot).HaveAccess;
+            var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
+            ViewBag.HaveLicense = haveLicense.HaveAccess;
             if (model.Button == "Выйти")
             {
-                var reply = Clients.AccountServiceClient.Logout(User.Identity.Name, model.SaveExchanges);
+                var reply = await Clients.AccountServiceClient.Logout(User.Identity.Name, model.SaveExchanges);
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 if (reply.Result != AccountActionCode.Successful)
                     return View("~/Views/Shared/Error.cshtml", reply.Message);

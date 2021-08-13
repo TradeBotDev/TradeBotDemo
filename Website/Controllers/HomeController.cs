@@ -8,7 +8,8 @@ namespace Website.Controllers
     {
         public async Task<IActionResult> Index()
         {
-            ViewBag.HaveLicense = Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot).HaveAccess;
+            var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
+            ViewBag.HaveLicense = haveLicense.HaveAccess;
             return View();
         }
     }

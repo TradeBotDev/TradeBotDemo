@@ -15,8 +15,9 @@ namespace Website.Controllers
         [HttpGet]
         public async Task<IActionResult> Account()
         {
-            ViewBag.HaveLicense = Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot).HaveAccess;
-            var accountData = Clients.AccountServiceClient.AccountData(User.Identity.Name);
+            var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
+            ViewBag.HaveLicense = haveLicense.HaveAccess;
+            var accountData = await Clients.AccountServiceClient.AccountData(User.Identity.Name);
             if (accountData.Result == AccountActionCode.Successful)
             {
                 var model = new AccountDataModel
@@ -35,8 +36,9 @@ namespace Website.Controllers
         [HttpPost]
         public async Task<IActionResult> Account(ExchangeAccessCode exchangeCode)
         {
-            ViewBag.HaveLicense = Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot).HaveAccess;
-            var reply = Clients.ExchangeAccessClient.DeleteExchangeAccess(User.Identity.Name, exchangeCode);
+            var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
+            ViewBag.HaveLicense = haveLicense.HaveAccess;
+            var reply = await Clients.ExchangeAccessClient.DeleteExchangeAccess(User.Identity.Name, exchangeCode);
             if (reply.Result == ExchangeAccessActionCode.Successful)
                 return RedirectToAction("account", "account");
             else await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -46,18 +48,20 @@ namespace Website.Controllers
         [HttpGet]
         public async Task<IActionResult> AddExchangeAccess()
         {
-            ViewBag.HaveLicense = Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot).HaveAccess;
+            var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
+            ViewBag.HaveLicense = haveLicense.HaveAccess;
             return View();
         }
 
         [HttpPost]
         public async Task<IActionResult> AddExchangeAccess(AddExchangeAccessModel model)
         {
-            ViewBag.HaveLicense = Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot).HaveAccess;
+            var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
+            ViewBag.HaveLicense = haveLicense.HaveAccess;
             if (!ModelState.IsValid)
                 return View();
 
-            var reply = Clients.ExchangeAccessClient.AddExchangeAccess(User.Identity.Name, model);
+            var reply = await Clients.ExchangeAccessClient.AddExchangeAccess(User.Identity.Name, model);
             if (reply.Result == ExchangeAccessActionCode.Successful)
                 return RedirectToAction("account", "account");
             else await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);

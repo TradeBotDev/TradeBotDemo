@@ -12,19 +12,20 @@ namespace Website.Controllers
         [HttpGet]
         public async Task<IActionResult> Buy()
         {
-            ViewBag.HaveLicense = Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot).HaveAccess;
+            var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
+            ViewBag.HaveLicense = haveLicense.HaveAccess;
             return View();
         }
 
         public async Task<IActionResult> Buy(CreditCardModel model)
         {
-            bool haveLicense = Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot).HaveAccess;
-            ViewBag.HaveLicense = haveLicense;
+            var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
+            ViewBag.HaveLicense = haveLicense.HaveAccess;
 
-            if (!ModelState.IsValid || haveLicense)
+            if (!ModelState.IsValid || haveLicense.HaveAccess)
                 return View();
 
-            var reply = Clients.LicenseClient.SetLicense(User.Identity.Name, ProductCode.Tradebot, model);
+            var reply = await Clients.LicenseClient.SetLicense(User.Identity.Name, ProductCode.Tradebot, model);
             if (reply.Code == LicenseCode.Successful)
                 return RedirectToAction("Account", "Account");
             else return View("~/Views/Shared/Error.cshtml", reply.Message);

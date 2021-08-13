@@ -1,4 +1,4 @@
-﻿using Grpc.Net.Client;
+﻿using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
 using Website.Models;
 
@@ -8,7 +8,7 @@ namespace Website.Controllers.Clients
     {
         private static ExchangeAccess.ExchangeAccessClient client = new(AccountServiceConnection.GetConnection());
 
-        public static AddExchangeAccessResponse AddExchangeAccess(string sessionId, AddExchangeAccessModel model)
+        public static async Task<AddExchangeAccessResponse> AddExchangeAccess(string sessionId, AddExchangeAccessModel model)
         {
             var request = new AddExchangeAccessRequest
             {
@@ -19,20 +19,20 @@ namespace Website.Controllers.Clients
                 Secret = model.Secret
             };
 
-            return client.AddExchangeAccess(request);
+            return await client.AddExchangeAccessAsync(request);
         }
 
-        public static AllExchangesBySessionResponse AllExchangesBySession(string sessionId)
+        public static async Task<AllExchangesBySessionResponse> AllExchangesBySession(string sessionId)
         {
             var request = new AllExchangesBySessionRequest
             {
                 SessionId = sessionId
             };
 
-            return client.AllExchangesBySession(request);
+            return await client.AllExchangesBySessionAsync(request);
         }
 
-        public static DeleteExchangeAccessResponse DeleteExchangeAccess(string sessionId, ExchangeAccessCode code)
+        public static async Task<DeleteExchangeAccessResponse> DeleteExchangeAccess(string sessionId, ExchangeAccessCode code)
         {
             var request = new DeleteExchangeAccessRequest
             {
@@ -40,10 +40,10 @@ namespace Website.Controllers.Clients
                 Code = code
             };
 
-            return client.DeleteExchangeAccess(request);
+            return await client.DeleteExchangeAccessAsync(request);
         }
 
-        public static ExchangeBySessionResponse ExchangeBySession(string sessionId, ExchangeAccessCode code)
+        public static async Task<ExchangeBySessionResponse> ExchangeBySession(string sessionId, ExchangeAccessCode code)
         {
             var request = new ExchangeBySessionRequest
             {
@@ -51,7 +51,7 @@ namespace Website.Controllers.Clients
                 Code = code
             };
 
-            return client.ExchangeBySession(request);
+            return await client.ExchangeBySessionAsync(request);
         }
     }
 }
