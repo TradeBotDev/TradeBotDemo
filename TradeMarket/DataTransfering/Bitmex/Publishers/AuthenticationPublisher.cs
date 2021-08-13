@@ -12,9 +12,12 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 {
     public class AuthenticationPublisher : BitmexPublisher<AuthenticationResponse, AuthenticationRequest, bool>
     {
-        internal static readonly Action<AuthenticationResponse, EventHandler<IPublisher<bool>.ChangedEventArgs>> _action = (response, e) =>
+        internal static readonly Action<AuthenticationResponse, EventHandler<IPublisher<bool>.ChangedEventArgs>> _action = async (response, e) =>
         {
-            e?.Invoke(nameof(AuthenticationPublisher), new(response.Success,BitmexAction.Undefined));
+           await Task.Run(() =>
+           {
+               e?.Invoke(typeof(AuthenticationPublisher), new(response.Success, BitmexAction.Undefined));
+           });
         };
 
         private IObservable<AuthenticationResponse> _stream;
@@ -32,10 +35,10 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         public async override Task Start()
         {
-            await SubcribeAsync(_apiKey, _apiSecret, _token);
+            await SubscribeAsync(_apiKey, _apiSecret, _token);
         }
 
-        public async Task SubcribeAsync(string apiKey, string apiSecret,  CancellationToken token)
+        public async Task SubscribeAsync(string apiKey, string apiSecret,  CancellationToken token)
         {
             await base.SubscribeAsync(new AuthenticationRequest(apiKey,apiSecret), _stream, token);
         }

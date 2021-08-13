@@ -12,12 +12,15 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 {
     public class InstrumentPublisher : BitmexPublisher<InstrumentResponse, InstrumentSubscribeRequest, Instrument>
     {
-        internal static readonly Action<InstrumentResponse, EventHandler<IPublisher<Instrument>.ChangedEventArgs>> _action = (response, e) =>
+        internal static readonly Action<InstrumentResponse, EventHandler<IPublisher<Instrument>.ChangedEventArgs>> _action = async (response, e) =>
         {
-            foreach (var data in response.Data)
-            {
-                e?.Invoke(nameof(UserOrderPublisher), new(data, response.Action));
-            }
+            await Task.Run(() =>
+           {
+               foreach (var data in response.Data)
+               {
+                   e?.Invoke(nameof(UserOrderPublisher), new(data, response.Action));
+               }
+           });
         };
 
         private IObservable<InstrumentResponse> _stream;
@@ -33,10 +36,10 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         public async override Task Start()
         {
-            await SubcribeAsync(_slot,_token);
+            await SubscribeAsync(_slot,_token);
         }
 
-        public async Task SubcribeAsync(string slot,CancellationToken token)
+        public async Task SubscribeAsync(string slot,CancellationToken token)
         {
             await base.SubscribeAsync(new InstrumentSubscribeRequest(slot),_stream, token);
 

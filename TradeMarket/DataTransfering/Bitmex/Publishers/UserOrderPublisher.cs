@@ -14,19 +14,22 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 {
     public class UserOrderPublisher : BitmexPublisher<OrderResponse,OrderSubscribeRequest,Order>
     {
-        internal static readonly Action<OrderResponse, EventHandler<IPublisher<Order>.ChangedEventArgs>> _action = (response, e) =>
+        internal static readonly Action<OrderResponse, EventHandler<IPublisher<Order>.ChangedEventArgs>> _action = async (response, e) =>
         {
-            foreach (var data in response.Data)
-            {
-                //при исполнении ордера с биржи прилетает не делит а апдейт
-                BitmexAction action = response.Action;
-                if(data.Price is null && data.OrderQty is null)
-                {
-                    action = BitmexAction.Delete;
-                }
-                Log.Information("{@Where} {@OrderId} {@OrderQuantity} @{OrderPrice} @{OrderAction}", "Trademarket", data.OrderId, data.OrderQty, data.Price, action);
-                e?.Invoke(nameof(UserOrderPublisher), new(data, action));
-            }
+            await Task.Run(() =>
+           {
+               foreach (var data in response.Data)
+               {
+                    //при исполнении ордера с биржи прилетает не делит а апдейт
+                    BitmexAction action = response.Action;
+                   if (data.Price is null && data.OrderQty is null)
+                   {
+                       action = BitmexAction.Delete;
+                   }
+                   //Log.Information("{@Where} {@OrderId} {@OrderQuantity} @{OrderPrice} @{OrderAction}", "Trademarket", data.OrderId, data.OrderQty, data.Price, action);
+                   e?.Invoke(typeof(UserOrderPublisher), new(data, action));
+               }
+           });
         };
 
         private IObservable<OrderResponse> _stream;
@@ -40,10 +43,10 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         public async override Task Start()
         {
-            await SubcribeAsync(_token);
+            await SubscribeAsync(_token);
         }
 
-        public async Task SubcribeAsync(CancellationToken token)
+        public async Task SubscribeAsync(CancellationToken token)
         {
             await base.SubscribeAsync(new OrderSubscribeRequest(), _stream, token);
         }

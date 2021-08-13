@@ -9,6 +9,7 @@ using Bitmex.Client.Websocket.Responses.Wallets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using TradeMarket.DataTransfering.Bitmex.Publishers;
 using TradeMarket.Model.Publishers;
@@ -19,40 +20,40 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
 {
     public class BitmexPublisherFactory : IPublisherFactory
     {
-        public IPublisher<bool> CreateAuthenticationPublisher(BitmexWebsocketClient client, UserContext context)
+        public IPublisher<bool> CreateAuthenticationPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token)
         {
-            return new AuthenticationPublisher(context.WSClient, context.WSClient.Streams.AuthenticationStream, context.Key,context.Secret,new System.Threading.CancellationToken());
+            return new AuthenticationPublisher(client, client.Streams.AuthenticationStream, context.Key,context.Secret,token);
         }
 
-        public IPublisher<BookLevel> CreateBook25Publisher(BitmexWebsocketClient client, UserContext context)
+        public IPublisher<BookLevel> CreateBook25Publisher(BitmexWebsocketClient client, IContext context, CancellationToken token)
         {
             //TODO добавить мультиплексер
-            return new BookPublisher(client, client.Streams.Book25Stream,null,new Book25SubscribeRequest(context.SlotName), new System.Threading.CancellationToken());
+            return new BookPublisher(client, client.Streams.Book25Stream,null,new Book25SubscribeRequest(context.Signature.SlotName), token);
         }
 
-        public IPublisher<Instrument> CreateInstrumentPublisher(BitmexWebsocketClient client, UserContext context)
+        public IPublisher<Instrument> CreateInstrumentPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token)
         {
-            return new InstrumentPublisher(client, client.Streams.InstrumentStream,context.SlotName ,new System.Threading.CancellationToken());
+            return new InstrumentPublisher(client, client.Streams.InstrumentStream,context.Signature.SlotName ,token);
         }
 
-        public IPublisher<Margin> CreateUserMarginPublisher(BitmexWebsocketClient client,UserContext context)
+        public IPublisher<Margin> CreateUserMarginPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token)
         {
-            return new UserMarginPublisher(context.WSClient, context.WSClient.Streams.MarginStream, new System.Threading.CancellationToken());
+            return new UserMarginPublisher(client, client.Streams.MarginStream, token);
         }
 
-        public IPublisher<Order> CreateUserOrderPublisher(BitmexWebsocketClient client,UserContext context)
+        public IPublisher<Order> CreateUserOrderPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token)
         {
-            return new UserOrderPublisher(context.WSClient, context.WSClient.Streams.OrderStream, new System.Threading.CancellationToken());
+            return new UserOrderPublisher(client, client.Streams.OrderStream, token);
         }
 
-        public IPublisher<Position> CreateUserPositionPublisher(BitmexWebsocketClient client,UserContext context)
+        public IPublisher<Position> CreateUserPositionPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token)
         {
-            return new UserPositionPublisher(context.WSClient, context.WSClient.Streams.PositionStream, new System.Threading.CancellationToken());
+            return new UserPositionPublisher(client, client.Streams.PositionStream, token);
         }
 
-        public IPublisher<Wallet> CreateWalletPublisher(BitmexWebsocketClient client, UserContext context)
+        public IPublisher<Wallet> CreateWalletPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token)
         {
-            return new UserWalletPublisher(context.WSClient, context.WSClient.Streams.WalletStream, new System.Threading.CancellationToken());
+            return new UserWalletPublisher(client, client.Streams.WalletStream, token);
         }
     }
 }

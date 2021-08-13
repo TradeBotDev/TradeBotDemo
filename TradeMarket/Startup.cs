@@ -16,6 +16,7 @@ using TradeMarket.DataTransfering;
 using TradeMarket.Model;
 using TradeMarket.Model.TradeMarkets;
 using TradeMarket.Model.UserContexts;
+using TradeMarket.Model.UserContexts.Builders;
 using TradeMarket.Services;
 
 namespace TradeMarket
@@ -36,7 +37,8 @@ namespace TradeMarket
             services.AddSingleton(new AccountClient(new ExchangeAccess.ExchangeAccessClient(GrpcChannel.ForAddress(Configuration.GetConnectionString("AccountService")))));
             services.AddSingleton<IConnectionMultiplexer>(options => ConnectionMultiplexer.Connect(Configuration.GetConnectionString("Redis")));
             services.AddSingleton<TradeMarketFactory>();
-            services.AddSingleton<UserContextDirector>();
+            services.AddSingleton<ContextDirector>();
+            services.AddSingleton<CommonContextBuilder>();
             services.AddSingleton<UserContextBuilder>();
         }
 

@@ -14,6 +14,7 @@ using Bitmex.Client.Websocket.Responses.Instruments;
 using TradeMarket.Model.Publishers;
 using TradeMarket.Model.UserContexts;
 using TradeMarket.DataTransfering.Bitmex.Rest.Responses;
+using System.Threading;
 
 namespace TradeMarket.DataTransfering.Bitmex.Model
 {
@@ -22,108 +23,121 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
         public BitmexTradeMarket() : base() { }
 
         public BitmexTradeMarket(string name, IPublisherFactory factory) : base(name, factory) { }
-      
-        #region SubscribeRequests
-       
 
-        public async override Task SubscribeToInstruments(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler, UserContext context)
+        #region Subscribe Requests
+
+        #region Common 
+        public async override Task SubscribeToInstruments(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler, IContext context, CancellationToken token)
         {
             if (InstrumentPublisher is null)
             {
-                InstrumentPublisher = await CreatePublisher(handler, context, PublisherFactory.CreateInstrumentPublisher);
+                InstrumentPublisher = await CreatePublisher(CommonWSClient,handler, context, token, PublisherFactory.CreateInstrumentPublisher);
             }
             await InstrumentPublisher.Start();
         }
 
+        public async override Task SubscribeToBook25(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, IContext context, CancellationToken token)
+        {
+            if (Book25Publisher is null)
+            {
+                Book25Publisher = await CreatePublisher(CommonWSClient, handler, context, token, PublisherFactory.CreateBook25Publisher);
+            }
+            await Book25Publisher.Start();
+        }
+        #endregion
 
-        public async override Task SubscribeToUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, UserContext context)
+        #region User
+
+        public async override Task SubscribeToUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, UserContext context, CancellationToken token)
         {
             if (PositionPublisher.ContainsKey(context) == false)
             {
-                PositionPublisher[context] = await CreatePublisher(handler, context, PublisherFactory.CreateUserPositionPublisher);
+                PositionPublisher[context] = await CreatePublisher(context.WSClient,handler, context, token, PublisherFactory.CreateUserPositionPublisher);
             }
             await PositionPublisher[context].Start();
         }
 
 
-        public async override Task SubscribeToUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, UserContext context)
+        public async override Task SubscribeToUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, UserContext context, CancellationToken token)
         {
             if (MarginPublisher.ContainsKey(context) == false)
             {
-                MarginPublisher[context] = await CreatePublisher(handler, context, PublisherFactory.CreateUserMarginPublisher);
+                MarginPublisher[context] = await CreatePublisher(context.WSClient,handler, context, token, PublisherFactory.CreateUserMarginPublisher);
             }
             await MarginPublisher[context].Start();
         }
 
-        public async override Task SubscribeToBook25(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, UserContext context)
-        {
-            if(Book25Publisher is null)
-            {
-                Book25Publisher = await CreatePublisher(handler, context, PublisherFactory.CreateBook25Publisher);
-            }
-            await Book25Publisher.Start();
-        }
+        
 
-        public async override Task SubscribeToUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, UserContext context)
+        public async override Task SubscribeToUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, UserContext context, CancellationToken token)
         {
             if (OrderPublisher.ContainsKey(context) == false)
             {
-                OrderPublisher[context] = await CreatePublisher(handler, context, PublisherFactory.CreateUserOrderPublisher);
+                OrderPublisher[context] = await CreatePublisher(context.WSClient,handler, context, token, PublisherFactory.CreateUserOrderPublisher);
             }
             await OrderPublisher[context].Start();
         }
 
-        public async override Task SubscribeToBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, UserContext context)
+        public async override Task SubscribeToBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, UserContext context, CancellationToken token)
         {
             if (WalletPublishers.ContainsKey(context) == false)
             {
-                WalletPublishers[context] = await CreatePublisher(handler, context, PublisherFactory.CreateWalletPublisher);
+                WalletPublishers[context] = await CreatePublisher(context.WSClient,handler, context, token, PublisherFactory.CreateWalletPublisher);
             }
             await WalletPublishers[context].Start();
         }
         #endregion
 
+        #endregion
+
+        #region UnSubscribe Requests
+        public async override Task UnSubscribeFromInstruments(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler)
+        {
+            await UnsubscribeFrom(InstrumentPublisher, handler);
+        }
+
+        public async override Task UnSubscribeFromBook25(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler)
+        {
+            await UnsubscribeFrom(Book25Publisher, handler);
+        }
+
+        public async override Task UnSubscribeFromUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, UserContext context)
+        {
+            await UnsubscribeFrom(PositionPublisher, context, handler);
+        }
+
+        public async override Task UnSubscribeFromUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, UserContext context)
+        {
+            await UnsubscribeFrom(MarginPublisher, context, handler);
+        }
+
+        public async override Task UnSubscribeFromUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, UserContext context)
+        {
+            await UnsubscribeFrom(OrderPublisher, context, handler);
+        }
+
+        public async override Task UnSubscribeFromBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, UserContext context)
+        {
+            await UnsubscribeFrom(WalletPublishers, context, handler);
+        }
+
+
+
+        #endregion
+
+
         #region RestRequests
 
-        public Task<DefaultResponse> ResponseFromOrder(BitmexResfulResponse<Order> response)
+       
+
+        public async override Task<BitmexResfulResponse<Order>> AmmendOrder(string id, double? price, long? Quantity, long? LeavesQuantity, IContext context,CancellationToken token)
         {
-            if (response.Error is not null)
-            {
-                return Task.FromResult(new DefaultResponse()
-                {
-                    Code = ReplyCode.Failure,
-                    Message = response.Error.Message
-                });
-            }
-            if (!string.IsNullOrEmpty(response.Message.OrdRejReason))
-            {
-                return Task.FromResult(new DefaultResponse()
-                {
-                    Code = ReplyCode.Failure,
-                    Message = response.Message.OrdRejReason
-                });
-            }
-            return null;
+            return await CommonRestClient.SendAsync(new AmmendOrderRequest(context.Key, context.Secret, new() { Id = id, LeavesQuantity = LeavesQuantity, Price = price, Quantity = Quantity }), token);
         }
 
-        public async override Task<DefaultResponse> AmmendOrder(string id, double? price, long? Quantity, long? LeavesQuantity, UserContext context)
+        public async override Task<BitmexResfulResponse<Order>> DeleteOrder(string id, IContext context,CancellationToken token)
         {
-            var response = await CommonRestClient.SendAsync(new AmmendOrderRequest(context.Key, context.Secret, new() {Id = id, LeavesQuantity = LeavesQuantity, Price = price, Quantity = Quantity }), new System.Threading.CancellationToken());
-            
-            return await ResponseFromOrder(response) ?? new DefaultResponse()
-            {
-                Code = ReplyCode.Succeed,
-                Message = $"Order {response.Message.OrderId} Ammended"
-            };
-        }
-        public async override Task<DefaultResponse> DeleteOrder(string id, UserContext context)
-        {
-            var response = await CommonRestClient.SendAsync(new DeleteOrderRequest(context.Key, context.Secret, id), new System.Threading.CancellationToken());
-            return await ResponseFromOrder(response) ?? new DefaultResponse()
-            {
-                Code = ReplyCode.Succeed,
-                Message = $"Order {response.Message.OrderId} was deleted"
-            };
+            return await CommonRestClient.SendAsync(new DeleteOrderRequest(context.Key, context.Secret, id), token);
         }
 
         //TODO перенести в конвертер
@@ -142,43 +156,33 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
             }
         }
 
-        public async override Task<TradeBot.TradeMarket.TradeMarketService.v1.PlaceOrderResponse> PlaceOrder(double quontity, double price, UserContext context)
+        public async override Task<BitmexResfulResponse<Order>> PlaceOrder(double quontity, double price, IContext context,CancellationToken token)
         {
-            var response = await CommonRestClient.SendAsync(new PlaceOrderRequest(context.Key, context.Secret, new Order
+            return await CommonRestClient.SendAsync(new PlaceOrderRequest(context.Key, context.Secret, new Order
             {
-                Symbol = context.SlotName,
+                Symbol = context.Signature.SlotName,
                 OrdType = "Limit",
                 Price = RoundToHalfOrZero(price),
                 OrderQty = (long?)quontity
-            }), new System.Threading.CancellationToken());
-            return new()
-            {
-                OrderId = response.Message.OrderId,
-                Response = await ResponseFromOrder(response) ?? new DefaultResponse()
-                {
-                    Code = ReplyCode.Succeed,
-                    Message = $"Order Placed"
-                }
-            };
+            }), token);
+           
         }
         #endregion
 
-        public async override Task<DefaultResponse> AutheticateUser(UserContext context)
+        public async override Task<bool> AutheticateUser(UserContext context, CancellationToken token)
         {
             bool answer = false;
             EventHandler<IPublisher<bool>.ChangedEventArgs> handler = (sender, args) => { answer = args.Changed; };
             if (AuthenticationPublisher.ContainsKey(context) == false)
             {
-                AuthenticationPublisher[context] = await CreatePublisher(handler, context, PublisherFactory.CreateAuthenticationPublisher);
+                AuthenticationPublisher[context] = await CreatePublisher(context.WSClient,handler, context, token, PublisherFactory.CreateAuthenticationPublisher);
             }
             //TODO нужно ожидать пока придет ответ от биржи
 
             await AuthenticationPublisher[context].Start();
-            return new DefaultResponse
-            {
-                Code = answer ? ReplyCode.Succeed : ReplyCode.Failure,
-                Message = ""
-            };
+            return answer;
         }
+        
     }
 }
+

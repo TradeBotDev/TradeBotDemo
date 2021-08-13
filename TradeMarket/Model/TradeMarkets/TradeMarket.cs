@@ -8,12 +8,14 @@ using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using TradeBot.Common.v1;
 using TradeBot.TradeMarket.TradeMarketService.v1;
 using TradeMarket.DataTransfering;
 using TradeMarket.DataTransfering.Bitmex;
 using TradeMarket.DataTransfering.Bitmex.Rest.Client;
+using TradeMarket.DataTransfering.Bitmex.Rest.Responses;
 using TradeMarket.Model;
 using TradeMarket.Model.Publishers;
 using TradeMarket.Model.UserContexts;
@@ -51,42 +53,76 @@ namespace TradeMarket.Model.TradeMarkets
         #endregion
 
         #region Users Publishers
-        public async Task<IPublisher<T>> CreatePublisher<T>(EventHandler<IPublisher<T>.ChangedEventArgs> handler, UserContext context, IPublisherFactory.Create<T> create)
+        public async Task<IPublisher<T>> CreatePublisher<T>(BitmexWebsocketClient client,EventHandler<IPublisher<T>.ChangedEventArgs> handler, IContext context,CancellationToken token, IPublisherFactory.Create<T> create)
         {
             return await Task.Run(() =>
             {
-                var publisher = create(CommonWSClient, context);
+                var publisher = create(client, context,token);
                 publisher.Changed += handler;
                 return publisher;
             });
         }
-        public Dictionary<UserContext, IPublisher<Wallet>> WalletPublishers { get; internal set; } = new Dictionary<UserContext, IPublisher<Wallet>>();
-        public Dictionary<UserContext, IPublisher<Position>> PositionPublisher { get; internal set; } = new Dictionary<UserContext, IPublisher<Position>>();
-        public Dictionary<UserContext, IPublisher<Order>> OrderPublisher { get; internal set; } = new Dictionary<UserContext, IPublisher<Order>>();
-        public Dictionary<UserContext, IPublisher<Margin>> MarginPublisher { get; internal set; } = new Dictionary<UserContext, IPublisher<Margin>>();
-        public Dictionary<UserContext, IPublisher<bool>> AuthenticationPublisher { get; internal set; } = new Dictionary<UserContext, IPublisher<bool>>();
+        public Dictionary<IContext, IPublisher<Wallet>> WalletPublishers { get; internal set; } = new Dictionary<IContext, IPublisher<Wallet>>();
+        public Dictionary<IContext, IPublisher<Position>> PositionPublisher { get; internal set; } = new Dictionary<IContext, IPublisher<Position>>();
+        public Dictionary<IContext, IPublisher<Order>> OrderPublisher { get; internal set; } = new Dictionary<IContext, IPublisher<Order>>();
+        public Dictionary<IContext, IPublisher<Margin>> MarginPublisher { get; internal set; } = new Dictionary<IContext, IPublisher<Margin>>();
+        public Dictionary<IContext, IPublisher<bool>> AuthenticationPublisher { get; internal set; } = new Dictionary<IContext, IPublisher<bool>>();
         #endregion
 
         #region Subscribe Methods
-        
-        public abstract Task SubscribeToInstruments(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler, UserContext context);
-        public abstract Task SubscribeToUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, UserContext context);
-        public abstract Task SubscribeToUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, UserContext context);
-        public abstract Task SubscribeToBook25(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, UserContext context);
-        public abstract Task SubscribeToUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, UserContext context);
-        public abstract Task SubscribeToBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, UserContext context);
+        #region Common Subscriptions
+        public abstract Task SubscribeToBook25(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, IContext context, CancellationToken token);
+        public abstract Task SubscribeToInstruments(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler, IContext context, CancellationToken token);
+        #endregion
+        #region User Subscriptions
+        public abstract Task SubscribeToUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, UserContext context, CancellationToken token);
+        public abstract Task SubscribeToUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, UserContext context, CancellationToken token);
+        public abstract Task SubscribeToUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, UserContext context, CancellationToken token);
+        public abstract Task SubscribeToBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, UserContext context, CancellationToken token);
+        #endregion
+        #endregion
 
+        #region Unsubscribe Methods
+        public async Task UnsubscribeFrom<T>(IPublisher<T> publisher, EventHandler<IPublisher<T>.ChangedEventArgs> handler)
+        {
+            await Task.Run(() =>
+           {
+               if (publisher is not null)
+               {
+                   publisher.Changed -= handler;
+               }
+           });
+        }
+        public async Task UnsubscribeFrom<T>(Dictionary<IContext, IPublisher<T>> publisher,IContext context , EventHandler<IPublisher<T>.ChangedEventArgs> handler)
+        {
+            await Task.Run(async () =>
+            {
+                var contextPublisher = publisher.ContainsKey(context) ? publisher[context] : null;
+                await UnsubscribeFrom(contextPublisher, handler);
+            });
+        }
+
+        #region Common Subscriptions
+        public abstract Task UnSubscribeFromBook25(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler);
+        public abstract Task UnSubscribeFromInstruments(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler);
+        #endregion
+        #region User Subscriptions
+        public abstract Task UnSubscribeFromUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler,UserContext context);
+        public abstract Task UnSubscribeFromUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, UserContext context);
+        public abstract Task UnSubscribeFromUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, UserContext context);
+        public abstract Task UnSubscribeFromBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, UserContext context);
+        #endregion
         #endregion
 
         #region Commands
 
-        public abstract Task<DefaultResponse> AutheticateUser(UserContext context);
+        public abstract Task<bool> AutheticateUser(UserContext context, CancellationToken token);
 
-        public abstract Task<PlaceOrderResponse> PlaceOrder(double quontity, double price,UserContext context);
+        public abstract Task<BitmexResfulResponse<Order>> PlaceOrder(double quontity, double price,IContext context, CancellationToken token);
 
-        public abstract Task<DefaultResponse> DeleteOrder(string id, UserContext context);
+        public abstract Task<BitmexResfulResponse<Order>> DeleteOrder(string id, IContext context, CancellationToken token);
 
-        public abstract Task<DefaultResponse> AmmendOrder(string id,double? price,long? Quantity,long? LeavesQuantity, UserContext context);
+        public abstract Task<BitmexResfulResponse<Order>> AmmendOrder(string id,double? price,long? Quantity,long? LeavesQuantity, IContext context, CancellationToken token);
         
         #endregion
 

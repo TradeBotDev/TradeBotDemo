@@ -10,71 +10,76 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using TradeBot.Common.v1;
 using TradeBot.TradeMarket.TradeMarketService.v1;
 using TradeMarket.Clients;
 using TradeMarket.DataTransfering;
 using TradeMarket.DataTransfering.Bitmex.Rest.Client;
+using TradeMarket.DataTransfering.Bitmex.Rest.Responses;
 using TradeMarket.Model.Publishers;
 using Margin = Bitmex.Client.Websocket.Responses.Margins.Margin;
 using Order = Bitmex.Client.Websocket.Responses.Orders.Order;
 
 namespace TradeMarket.Model.UserContexts
 {
-    public class UserContext : IEquatable<UserContext>
+    public class UserContext : ContextBase
     {
         #region Dynamic Part
-        public String SessionId { get; internal set; }
-        public String SlotName { get; internal set; }
-
-        public String Key { get; internal set; }
-        public String Secret { get; internal set; }
 
         public Model.TradeMarkets.TradeMarket TradeMarket { get; set; }
 
-        public event EventHandler<IPublisher<BookLevel>.ChangedEventArgs> Book25;
+        //Я ушел от ивентов потому что с ними невозможно передать токен отмены
+        //пока закометировал чтобы лишний раз не переписывать
+        /* 
         public event EventHandler<IPublisher<BookLevel>.ChangedEventArgs> Book;
         public event EventHandler<IPublisher<Order>.ChangedEventArgs> UserOrders;
         public event EventHandler<IPublisher<Wallet>.ChangedEventArgs> UserBalance;
         public event EventHandler<IPublisher<Margin>.ChangedEventArgs> UserMargin;
         public event EventHandler<IPublisher<Position>.ChangedEventArgs> UserPosition;
-        public event EventHandler<IPublisher<Instrument>.ChangedEventArgs> InstrumentUpdate;
+        */
 
+        public async Task SubscribeToUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, CancellationToken token)
+        {
+            await TradeMarket.SubscribeToUserPositions(handler, this, token);
+        }
+        public async Task SubscribeToUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, CancellationToken token)
+        {
+            await TradeMarket.SubscribeToUserMargin(handler, this, token);
+        }
+        public async Task SubscribeToUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, CancellationToken token)
+        {
+            await TradeMarket.SubscribeToUserOrders(handler, this, token);
+        }
+        public async Task SubscribeToBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, CancellationToken token)
+        {
+            await TradeMarket.SubscribeToBalance(handler, this, token);
+        }
 
+ 
 
-        //TODO тут должен быть кэш из редиса
+        public async Task UnSubscribeFromUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler)
+        {
+            await TradeMarket.UnSubscribeFromUserPositions(handler, this);
+        }
+        public async Task UnSubscribeFromUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler)
+        {
+            await TradeMarket.UnSubscribeFromUserMargin(handler, this);
+        }
+        public async Task UnSubscribeFromUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler)
+        {
+            await TradeMarket.UnSubscribeFromUserOrders(handler, this);
+        }
+        public async Task UnSubscribeFromBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler)
+        {
+            await TradeMarket.UnSubscribeFromBalance(handler, this);
+        }
 
         //Клиенты для доступа к личной информации пользователя на бирже
         internal BitmexWebsocketClient WSClient { get; set; }
-        internal BitmexRestfulClient RestClient { get; set; }
 
-
-        public void AssignKeySecret(string key,string secret)
-        {
-            Key = key;
-            Secret = secret;
-        }
-
-        /// <summary>
-        /// Метод инициализации контекста. 
-        /// </summary>
-        public void init()
-        {
-
-            AutheticateUser();
-
-            //инициализация подписок
-            TradeMarket.SubscribeToBalance((sender, el) => {UserBalance?.Invoke(sender, el); }, this);
-            //TradeMarket.SubscribeToBook((sender, el) => {Book?.Invoke(sender, el); }, this);
-            TradeMarket.SubscribeToBook25((sender, el) => Book25?.Invoke(sender, el), this);
-            TradeMarket.SubscribeToUserOrders((sender, el) => UserOrders?.Invoke(sender, el), this);
-            TradeMarket.SubscribeToUserMargin((sender, el) => UserMargin?.Invoke(sender, el), this);
-            TradeMarket.SubscribeToUserPositions((sender, el) => UserPosition?.Invoke(sender, el), this);
-            TradeMarket.SubscribeToInstruments((sender, el) => InstrumentUpdate?.Invoke(sender, el), this);
-        }
-
-        public UserContext()
+        public UserContext():base()
         {
 
         }
@@ -82,66 +87,30 @@ namespace TradeMarket.Model.UserContexts
         /// <summary>
         /// После создание нового объекта необходима инициализация некоторых полей и ивентов через метод init()
         /// </summary>
-        internal UserContext(string sessionId, string slotName, Model.TradeMarkets.TradeMarket tradeMarket)
+        internal UserContext(string sessionId, string slotName, Model.TradeMarkets.TradeMarket tradeMarket) 
+            : base(new ContextSignature(slotName,tradeMarket.Name,sessionId))
         {
-
-            SessionId = sessionId;
-            SlotName = slotName;
-
             TradeMarket = tradeMarket;
         }
 
-        public async Task<PlaceOrderResponse> PlaceOrder(double quontity, double price)
+        public async Task<BitmexResfulResponse<Order>> PlaceOrder(double quontity, double price,CancellationToken token)
         {
-            return await TradeMarket.PlaceOrder(quontity, price, this);
+            return await TradeMarket.PlaceOrder(quontity, price, this,token);
         }
 
-        public async Task<DefaultResponse> DeleteOrder(string id)
+        public async Task<BitmexResfulResponse<Order>> DeleteOrder(string id, CancellationToken token)
         {
-            return await TradeMarket.DeleteOrder(id, this);
+            return await TradeMarket.DeleteOrder(id, this,token);
         }
 
-        public async Task<DefaultResponse> AmmendOrder(string id, double? price, long? Quantity, long? LeavesQuantity)
+        public async Task<BitmexResfulResponse<Order>> AmmendOrder(string id, double? price, long? Quantity, long? LeavesQuantity, CancellationToken token)
         {
-            return await TradeMarket.AmmendOrder(id, price, Quantity, LeavesQuantity, this);
+            return await TradeMarket.AmmendOrder(id, price, Quantity, LeavesQuantity, this,token);
         }
 
-        public async Task<DefaultResponse> AutheticateUser()
+        public async Task<bool> AutheticateUser(CancellationToken token)
         {
-            return await TradeMarket.AutheticateUser(this);
-        }
-
-        public bool IsEquevalentTo(string sessionId, string slotName, string tradeMarketName)
-        {
-            return this.SessionId == sessionId && this.SlotName == slotName && this.TradeMarket.Name == tradeMarketName;
-        }
-
-        public override bool Equals(object obj)
-        {
-            return Equals(obj as UserContext);
-        }
-
-        public bool Equals(UserContext other)
-        {
-            return other != null &&
-                   SessionId == other.SessionId &&
-                   SlotName == other.SlotName &&
-                   TradeMarket.Name == other.TradeMarket.Name;
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(SessionId, SlotName, TradeMarket.Name);
-        }
-
-        public static bool operator ==(UserContext left, UserContext right)
-        {
-            return EqualityComparer<UserContext>.Default.Equals(left, right);
-        }
-
-        public static bool operator !=(UserContext left, UserContext right)
-        {
-            return !(left == right);
+            return await TradeMarket.AutheticateUser(this,token);
         }
 
         #endregion

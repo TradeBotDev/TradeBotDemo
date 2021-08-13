@@ -12,12 +12,15 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 {
     public class UserPositionPublisher : BitmexPublisher<PositionResponse,PositionSubscribeRequest,Position>
     {
-        internal static readonly Action<PositionResponse, EventHandler<IPublisher<Position>.ChangedEventArgs>> _action = (response, e) =>
+        internal static readonly Action<PositionResponse, EventHandler<IPublisher<Position>.ChangedEventArgs>> _action = async (response, e) =>
         {
-            foreach (var data in response.Data)
-            {
-                e?.Invoke(nameof(UserOrderPublisher), new(data, response.Action));
-            }
+           await Task.Run(() =>
+           {
+               foreach (var data in response.Data)
+               {
+                   e?.Invoke(nameof(UserOrderPublisher), new(data, response.Action));
+               }
+           });
         };
 
         private IObservable<PositionResponse> _stream;
@@ -36,10 +39,10 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         public async override Task Start()
         {
-            await SubcribeAsync(_token);
+            await SubscribeAsync(_token);
         }
 
-        public async Task SubcribeAsync(CancellationToken token)
+        public async Task SubscribeAsync(CancellationToken token)
         {
             await base.SubscribeAsync(new PositionSubscribeRequest(), _stream, token);
 

@@ -12,12 +12,15 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 {
     public class UserMarginPublisher : BitmexPublisher<MarginResponse,MarginSubscribeRequest, Margin>
     {
-        internal static readonly Action<MarginResponse, EventHandler<IPublisher<Margin>.ChangedEventArgs>> _action = (response, e) =>
+        internal static readonly Action<MarginResponse, EventHandler<IPublisher<Margin>.ChangedEventArgs>> _action = async (response, e) =>
         {
-            foreach (var data in response.Data)
+            await Task.Run(() =>
             {
-                e?.Invoke(nameof(UserOrderPublisher), new(data, response.Action));
-            }
+                foreach (var data in response.Data)
+                {
+                    e?.Invoke(nameof(UserOrderPublisher), new(data, response.Action));
+                }
+            });
         };
 
         private IObservable<MarginResponse> _stream;
@@ -31,10 +34,10 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         public async override Task Start()
         {
-            await SubcribeAsync(_token);
+            await SubscribeAsync(_token);
         }
 
-        public async Task SubcribeAsync(CancellationToken token)
+        public async Task SubscribeAsync(CancellationToken token)
         {
             await base.SubscribeAsync(new MarginSubscribeRequest(), _stream, token);
 

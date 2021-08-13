@@ -5,11 +5,21 @@ using System.Linq;
 using System.Threading.Tasks;
 using TradeMarket.DataTransfering.Bitmex.Rest.Client;
 using TradeMarket.Model.TradeMarkets;
-namespace TradeMarket.Model.UserContexts
+namespace TradeMarket.Model.UserContexts.Builders
 {
     public class UserContextBuilder
     {
         protected UserContext context;
+
+        public UserContext Result
+        {
+            get
+            {
+                UserContext result = context;
+                Reset();
+                return result;
+            }
+        }
 
         public UserContextBuilder()
         {
@@ -18,20 +28,22 @@ namespace TradeMarket.Model.UserContexts
 
         public UserContextBuilder AddUniqueInformation(string sessionId,string slotName)
         {
-            context.SessionId = sessionId;
-            context.SlotName = slotName;
+            context.Signature.SessionId = sessionId;
+            context.Signature.SlotName = slotName;
             return this;
         }
 
         public UserContextBuilder AddTradeMarket(TradeMarkets.TradeMarket tradeMarket)
         {
             context.TradeMarket = tradeMarket;
+            context.Signature.TradeMarketName = tradeMarket.Name;
             return this;
         }
 
         public UserContextBuilder AddKeySecret(string key,string secret)
         {
-            context.AssignKeySecret(key, secret);
+            context.Key = key;
+            context.Secret = secret;
             return this;
         }
 
@@ -41,15 +53,10 @@ namespace TradeMarket.Model.UserContexts
             return this;
         }
 
-        public UserContextBuilder AddRestfulClient(BitmexRestfulClient restClient)
-        {
-            context.RestClient = restClient;
-            return this;
-        }
-
         public UserContextBuilder InitUser()
         {
-            context.init();
+            //TODO тут явно что-то не так ...
+            context.AutheticateUser(new System.Threading.CancellationToken());
             return this;
         }
 
@@ -57,12 +64,6 @@ namespace TradeMarket.Model.UserContexts
         public void Reset()
         {
             context = new UserContext();
-        }
-        public UserContext GetResult()
-        {
-            UserContext result = context;
-            Reset();
-            return result;
         }
     }
 }

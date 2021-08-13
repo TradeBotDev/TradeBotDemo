@@ -19,6 +19,7 @@ namespace TradeMarket
                .MinimumLevel.Debug()
                .WriteTo.Console()
                .WriteTo.Seq("http://localhost:5341")
+               .Enrich.WithProperty("ServiceName", System.AppDomain.CurrentDomain.FriendlyName)
                .CreateLogger();
             CreateHostBuilder(args).Build().Run();
         }

@@ -19,27 +19,30 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         private readonly SubscribeRequestBase _bookSubscribeRequest;
         private readonly CancellationToken _token;
 
-        private async static void _OnBookUpdated(BookResponse response, EventHandler<IPublisher<BookLevel>.ChangedEventArgs> e)
+        private static Action<BookResponse, EventHandler<IPublisher<BookLevel>.ChangedEventArgs>> _OnBookUpdated = async (response, e) =>
         {
-            foreach (var data in response.Data)
+            await Task.Run(async () =>
             {
-                e?.Invoke(nameof(BookPublisher), new(data, response.Action));
-                //await _client.Send($"Bitmex_{data.Symbol}_{data.Id}", data, "Bitmex_Book25");
-            }
-        }
+                foreach (var data in response.Data)
+                {
+                    e?.Invoke(typeof(BookPublisher), new(data, response.Action));
+                    await _redisClient.Send($"Bitmex_{data.Symbol}_{data.Id}", data, "Bitmex_Book25");
+                }
+            });
+        };
 
-        private static RedisClient _client;
+        private static RedisClient _redisClient;
 
         public BookPublisher(BitmexWebsocketClient client,IObservable<BookResponse> stream,IConnectionMultiplexer multiplexer, SubscribeRequestBase bookSubscribeRequest, CancellationToken token) 
             : base(client, _OnBookUpdated)
         {
-            //_client = new RedisClient(multiplexer);
+            _redisClient = new RedisClient(multiplexer);
             _stream = stream;
             this._bookSubscribeRequest = bookSubscribeRequest;
             this._token = token;
         }
 
-        public async Task SubscribeAsync(SubscribeRequestBase bookSubscribeRequest,CancellationToken token) 
+        protected async Task SubscribeAsync(SubscribeRequestBase bookSubscribeRequest,CancellationToken token) 
         {
             await base.SubscribeAsync(bookSubscribeRequest, _stream, token);
         }
