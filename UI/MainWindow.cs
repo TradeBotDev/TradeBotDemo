@@ -2,12 +2,12 @@
 using Grpc.Net.Client;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 using Google.Protobuf.WellKnownTypes;
 using TradeBot.Common.v1;
 using TradeBot.Facade.FacadeService.v1;
 using UpdateServerConfigRequest = TradeBot.Facade.FacadeService.v1.UpdateServerConfigRequest;
-using static TradeBot.Facade.FacadeService.v1.SubscribeEventsResponse;
 
 namespace UI
 {
@@ -59,6 +59,85 @@ namespace UI
             ConfigUpdatePriceRange.TextChanged += ConfigUpdatePriceRangeOnTextChanged;
         }
 
+        private void NewEventProcess(AsyncServerStreamingCall<SubscribeEventsResponse> response)
+        {
+            switch (response.ResponseStream.Current.Order.ChangesType)
+            {
+                case ChangesType.Partitial:
+                {
+                    if (response.ResponseStream.Current.Order.Order.Signature.Status == OrderStatus.Open)
+                    {
+                        ActiveOrdersDataGridView.Rows.Add("XBTUSD", response.ResponseStream.Current.Order.Order.Quantity,
+                            response.ResponseStream.Current.Order.Order.Price,
+                            response.ResponseStream.Current.Order.Order.Signature.Type,
+                            response.ResponseStream.Current.Order.Time, response.ResponseStream.Current.Order.Order.Id);
+                    }
+
+                    if (response.ResponseStream.Current.Order.Order.Signature.Status == OrderStatus.Closed)
+                    {
+                        FilledOrdersDataGridView.Rows.Add("XBTUSD", response.ResponseStream.Current.Order.Order.Quantity,
+                            response.ResponseStream.Current.Order.Order.Price,
+                            response.ResponseStream.Current.Order.Order.Signature.Type,
+                            response.ResponseStream.Current.Order.Time, response.ResponseStream.Current.Order.Order.Id);
+                    }
+
+                    break;
+                }
+                case ChangesType.Insert:
+                {
+                    ActiveOrdersDataGridView.Rows.Add("XBTUSD", response.ResponseStream.Current.Order.Order.Quantity,
+                        response.ResponseStream.Current.Order.Order.Price,
+                        response.ResponseStream.Current.Order.Order.Signature.Type,
+                        response.ResponseStream.Current.Order.Time, response.ResponseStream.Current.Order.Order.Id);
+                    var incomingString =
+                        $"[{TimeZoneInfo.ConvertTime(response.ResponseStream.Current.Order.Time.ToDateTime(), TimeZoneInfo.Local):HH:mm:ss}]: {response.ResponseStream.Current.Order.Message}\r\n" +
+                        $"Order {response.ResponseStream.Current.Order.Order.Id}, price: {response.ResponseStream.Current.Order.Order.Price}, quantity: {response.ResponseStream.Current.Order.Order.Quantity}, type: {response.ResponseStream.Current.Order.Order.Signature.Type}\r\n";
+                    EventConsole.Text += incomingString;
+                    break;
+                }
+                case ChangesType.Update:
+                {
+                    for (var i = 0; i < ActiveOrdersDataGridView.Rows.Count; i++)
+                    {
+                        if (string.Equals(ActiveOrdersDataGridView[i, 5].Value as string,
+                            response.ResponseStream.Current.Order.Order.Id))
+                        {
+                            ActiveOrdersDataGridView.Rows.RemoveAt(i);
+                            ActiveOrdersDataGridView.Rows.Insert(i, "XBTUSD",
+                                response.ResponseStream.Current.Order.Order.Quantity,
+                                response.ResponseStream.Current.Order.Order.Price,
+                                response.ResponseStream.Current.Order.Order.Signature.Type,
+                                response.ResponseStream.Current.Order.Time, response.ResponseStream.Current.Order.Order.Id);
+                            i--;
+                        }
+                    }
+
+                    break;
+                }
+                case ChangesType.Delete:
+                {
+                    FilledOrdersDataGridView.Rows.Add("XBTUSD", response.ResponseStream.Current.Order.Order.Quantity,
+                        response.ResponseStream.Current.Order.Order.Price,
+                        response.ResponseStream.Current.Order.Order.Signature.Type,
+                        response.ResponseStream.Current.Order.Time, response.ResponseStream.Current.Order.Order.Id);
+                    for (var i = 0; i < ActiveOrdersDataGridView.Rows.Count; i++)
+                    {
+                        if (string.Equals(ActiveOrdersDataGridView[i, 5].Value as string,
+                            response.ResponseStream.Current.Order.Order.Id))
+                        {
+                            ActiveOrdersDataGridView.Rows.RemoveAt(i);
+                            i--;
+                        }
+                    }
+                    var incomingString =
+                        $"[{TimeZoneInfo.ConvertTime(response.ResponseStream.Current.Order.Time.ToDateTime(), TimeZoneInfo.Local):HH:mm:ss}]: {response.ResponseStream.Current.Order.Message}\r\n" +
+                        $"Order {response.ResponseStream.Current.Order.Order.Id}, price: {response.ResponseStream.Current.Order.Order.Price}, quantity: {response.ResponseStream.Current.Order.Order.Quantity}, type: {response.ResponseStream.Current.Order.Order.Signature.Type}\r\n";
+                    EventConsole.Text += incomingString;
+                    break;
+                }
+            }
+        }
+
         private async void SubscribeEvents(string sessionId)
         {
             var response = _client.SubscribeEvents(new SubscribeEventsRequest { Sessionid = sessionId });
@@ -67,13 +146,11 @@ namespace UI
             {
                 switch (response.ResponseStream.Current.EventTypeCase)
                 {
-                    case EventTypeOneofCase.Balance:
+                    case SubscribeEventsResponse.EventTypeOneofCase.Balance:
                         BalanceLabel.Text = $"{double.Parse(response.ResponseStream.Current.Balance.Balance.Value)/100000000} {response.ResponseStream.Current.Balance.Balance.Currency}";
                         break;
-                    case EventTypeOneofCase.Order:
-                        var incomingString = $"[{TimeZoneInfo.ConvertTime(response.ResponseStream.Current.Order.Time.ToDateTime(),TimeZoneInfo.Local):HH:mm:ss}]: {response.ResponseStream.Current.Order.Message}\r\n" +
-                                             $"Order {response.ResponseStream.Current.Order.Order.Id}, price: {response.ResponseStream.Current.Order.Order.Price}, quantity: {response.ResponseStream.Current.Order.Order.Quantity}, type: {response.ResponseStream.Current.Order.Order.Signature.Type}\r\n";
-                        EventConsole.Text += incomingString;
+                    case SubscribeEventsResponse.EventTypeOneofCase.Order:
+                        NewEventProcess(response);
                         break;
                 }
             }
