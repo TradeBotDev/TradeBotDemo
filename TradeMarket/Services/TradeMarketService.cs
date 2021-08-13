@@ -35,17 +35,26 @@ namespace TradeMarket.Services
             this.director = director;
         }
 
-        public override Task<AuthenticateTokenResponse> AuthenticateToken(AuthenticateTokenRequest request, ServerCallContext context)
-        {
-            return Task.FromResult(new AuthenticateTokenResponse
-            {
-                Response = new TradeBot.Common.v1.DefaultResponse
-                {
-                    Code = TradeBot.Common.v1.ReplyCode.Succeed,
-                    Message = $"Token {request.Token} was authtarized"
-                }
+        public async Task<UserContext> TryGetUserContextFromMetadataAsync(Metadata meta)
+        {   
+            return await Task.Run(async () => {
+                var sessionId = meta.Get("sessionid").Value;
+                var slot = meta.Get("slot").Value;
+                var trademarket = meta.Get("trademarket").Value;
 
-            });
+                return await director.GetUserContextAsync(sessionId, slot, trademarket);
+            }); 
+        }
+        
+        public async Task<Metadata> AddInfoToMetadataAsync(UserContext user,Metadata meta)
+        {
+           return await Task.Run(() =>
+           {
+               meta.Add("sessionid", user.SessionId);
+               meta.Add("slot", user.SlotName);
+               meta.Add("trademarket", user.TradeMarket.Name);
+               return meta;
+           });
         }
 
         public async override Task<PlaceOrderResponse> PlaceOrder(PlaceOrderRequest request, ServerCallContext context)
