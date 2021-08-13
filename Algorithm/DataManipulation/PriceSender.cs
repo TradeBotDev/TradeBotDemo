@@ -11,12 +11,12 @@ namespace Algorithm.DataManipulation
     //all the values are hardcoded for now 
     public static class PriceSender
     {
-        private static readonly GrpcChannel Channel = GrpcChannel.ForAddress("https://localhost:5003");
+        private static readonly GrpcChannel Channel = GrpcChannel.ForAddress(Environment.GetEnvironmentVariable("FORMER_CONNECTION_STRING"));
         private static readonly FormerServiceClient Client = new FormerServiceClient(Channel);
-        public static void SendPrice (double price)
+        public static void SendDecision (int decision, string user)
         {
-            var response = Client.SendPurchasePrice(new SendPurchasePriceRequest { PurchasePrice = price }, DataCollector.metaData);
-            Log.Information("Sent " + price + "  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            var response = Client.SendAlgorithmDecision(new SendAlgorithmDecisionRequest() { Decision = decision }, StorageOfAlgorithms.GetMetaByUser(user));
+            Log.Information("Sent " + decision + "  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         }
     }
 }

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using System;
 
 namespace Former
 {
@@ -13,6 +14,7 @@ namespace Former
                 .WriteTo.Console()
                 .WriteTo.Seq("http://localhost:5341")
                 .CreateLogger();
+            AppDomain.CurrentDomain.UnhandledException += (o,e) => Log.Logger.Fatal(e.ExceptionObject as Exception, "Unhandled exceprion");
             CreateHostBuilder(args).Build().Run();
         }
 

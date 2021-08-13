@@ -47,11 +47,11 @@ namespace Relay.Clients
             return _client.AddOrder(meta).RequestStream;
         }
 
-        public void WriteOrder(IClientStreamWriter<AddOrderRequest> stream,Order order)
+        public async Task WriteOrder(IClientStreamWriter<AddOrderRequest> stream,Order order)
         {
             try
             {
-               stream.WriteAsync(new AddOrderRequest()
+               await stream.WriteAsync(new AddOrderRequest()
                {
                    Order = order
                });
@@ -63,13 +63,14 @@ namespace Relay.Clients
             }
         }
 
-        public async Task UpdateConfig(Config config,Metadata meta)
+        public async Task UpdateConfig(TradeBot.Common.v1.UpdateServerConfigRequest update ,Metadata meta)
         {
             await _client.UpdateServerConfigAsync(new UpdateServerConfigRequest()
             {
                 Request = new TradeBot.Common.v1.UpdateServerConfigRequest()
                 {
-                    Config = config
+                    Config = update.Config,
+                    Switch =update.Switch
                 }
             },meta);
         }

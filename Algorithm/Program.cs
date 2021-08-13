@@ -42,15 +42,9 @@ namespace Algorithm
 
     public class Worker : BackgroundService
     {
-
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            //await PriceSender.SendPrice();
-            Publisher publisher = new();
-            DataCollector dc = new(publisher);
-            var pm = new PointMaker();
-            AlgorithmAlpha algo = new(publisher);
-            pm.Launch(publisher, dc);
+            //AlgorithmBeta algo = new();
         }
     }
 }

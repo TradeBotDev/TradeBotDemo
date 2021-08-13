@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+option csharp_namespace = "TradeBot.History.HistoryService.v1";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "tradebot/common/v1/common.proto";
+package tradebot.history.history_service.v1;
+
+service HistoryService{
+	
+	rpc PublishEvent(PublishEventRequest) returns (PublishEventResponse);
+
+	rpc SubscribeEvents(SubscribeEventsRequest) returns (stream SubscribeEventsResponse);
+
+}
+
+message PublishEventRequest{
+	oneof event_type{
+		PublishBalanceEvent balance = 1;
+		PublishOrderEvent order = 2;
+	}
+}
+
+message PublishBalanceEvent{
+	string sessionid = 1;
+	google.protobuf.Timestamp time = 2;
+	tradebot.common.v1.Balance balance = 3;
+}
+
+message PublishOrderEvent{
+	string sessionid = 1;
+	tradebot.common.v1.ChangesType changes_type = 2;
+	google.protobuf.Timestamp time = 3;
+	tradebot.common.v1.Order order = 4;
+	string message = 5;
+}
+message PublishEventResponse{
+	google.protobuf.Empty empty = 1;
+}
+
+message SubscribeEventsRequest {
+	string sessionid = 1;
+}
+
+message SubscribeEventsResponse{
+	oneof event_type{
+		PublishBalanceEvent balance = 1;
+		PublishOrderEvent order = 2;
+	}
+}

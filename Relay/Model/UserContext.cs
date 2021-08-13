@@ -17,11 +17,13 @@ namespace Relay.Model
         public AlgorithmClient _algorithmClient { get; internal set; }
         public TradeMarketClient _tradeMarketClient { get; internal set; }
 
-        public Metadata Meta{ get; internal set; }
+        private bool IsStart = false;
+        public Metadata Meta { get; internal set; }
 
         private IClientStreamWriter<AddOrderRequest> _algorithmStream;
         private IAsyncStreamReader<SubscribeOrdersResponse> _tradeMarketStream;
-
+        private IAsyncStreamReader<TradeBot.Former.FormerService.v1.SubscribeLogsResponse> _formerStream;
+        private bool IsWorking = true;
 
         public UserContext(Metadata meta, FormerClient formerClient, AlgorithmClient algorithmClient, TradeMarketClient tradeMarketClient)
         {
@@ -29,37 +31,55 @@ namespace Relay.Model
             _formerClient = formerClient;
             _algorithmClient = algorithmClient;
             _tradeMarketClient = tradeMarketClient;
-
+            
             _algorithmStream = _algorithmClient.OpenStream(meta);
             _tradeMarketStream = _tradeMarketClient.OpenStream(meta);
 
-            _tradeMarketClient.OrderRecievedEvent += _tradeMarketClient_OrderRecievedEvent;
         }
+        public IAsyncStreamReader<SubscribeOrdersResponse> ReConnect()
+        {
+            _tradeMarketStream = _tradeMarketClient.OpenStream(Meta);
+            return _tradeMarketStream;
+        }
+
+        public void StatusOfWork()
+        {
+            if (!IsWorking)
+            {
+                IsWorking = true;
+                _tradeMarketClient.OrderRecievedEvent -= _tradeMarketClient_OrderRecievedEvent;
+                Log.Information("The bot is stopping...");
+            }
+            else
+            {
+                IsWorking = false;
+                _tradeMarketClient.OrderRecievedEvent += _tradeMarketClient_OrderRecievedEvent;
+                Log.Information("The bot is starting...");
+            }
+        }
+
 
         private void _tradeMarketClient_OrderRecievedEvent(object sender, TradeBot.Common.v1.Order e)
         {
-            Log.Information($"Sending order {e.Price} : {e.Quantity} : {e.Id}");
-            _algorithmClient.WriteOrder(_algorithmStream,e);
+            Log.Information("{@Where}: Sending order Price={@Price} : Quantity={@Quantity} : Id={@Id}", "Relay",e.Price,e.Quantity,e.Id);
+            Task.Run(async()=> 
+            { 
+                await _algorithmClient.WriteOrder(_algorithmStream, e);
+            }).Wait();
         }
 
-        public void UpdateConfig(Config config)
+        public void UpdateConfig(TradeBot.Common.v1.UpdateServerConfigRequest update)
         {
-            _ = _algorithmClient.UpdateConfig(config, Meta);
-            _ = _formerClient.UpdateConfig(config, Meta);
+            _ = _algorithmClient.UpdateConfig(update, Meta);
+            _ = _formerClient.UpdateConfig(update, Meta);
         }
 
         public async Task SubscribeForOrders()
         {
-            try
+            if (!IsWorking && !IsStart)
             {
-               await _tradeMarketClient.SubscribeForOrders(_tradeMarketStream);
-
-            }
-            catch(Exception e)
-            {
-                Log.Error("Connecting with TM was interrupt with message {@Error}", e.Message);
-                _tradeMarketStream = _tradeMarketClient.OpenStream(Meta);
-                await SubscribeForOrders();
+                IsStart = true;
+                _tradeMarketClient.SubscribeForOrders(_tradeMarketStream);
             }
         }
 

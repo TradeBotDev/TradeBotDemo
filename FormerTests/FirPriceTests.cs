@@ -4,17 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
-using Moq;
 
 namespace FormerTests
 {
-    public class FormerTest
+    public class FirPriceTests
     {
         [Fact]
-        public void SomeAssertions() 
+        public void RangeStepAccurateEnough()
         {
-            var lol = new Mock<Former.TradeMarketClient>();
-        }
 
+        }
     }
 }

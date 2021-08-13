@@ -24,7 +24,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             foreach (var data in response.Data)
             {
                 e?.Invoke(nameof(BookPublisher), new(data, response.Action));
-               // await _client.Send($"Bitmex_{data.Symbol}_{data.Id}", data, "Bitmex_Book25");
+                //await _client.Send($"Bitmex_{data.Symbol}_{data.Id}", data, "Bitmex_Book25");
             }
         }
 
@@ -33,7 +33,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         public BookPublisher(BitmexWebsocketClient client,IObservable<BookResponse> stream,IConnectionMultiplexer multiplexer, SubscribeRequestBase bookSubscribeRequest, CancellationToken token) 
             : base(client, _OnBookUpdated)
         {
-            _client = new RedisClient(multiplexer);
+            //_client = new RedisClient(multiplexer);
             _stream = stream;
             this._bookSubscribeRequest = bookSubscribeRequest;
             this._token = token;
