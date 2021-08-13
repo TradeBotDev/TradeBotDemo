@@ -24,7 +24,6 @@ namespace Algorithm.DataManipulation
         {
             if (!algorithms.ContainsKey(metadata))
             {
-                Log.Information("IM ABOUT TO CREATE AN ALGOOOOOOO");
                 threadsWithAlgos.Add(new Thread(()=>CreateAlgorithm(configRequest.Config.AlgorithmInfo, metadata)));
                 threadsWithAlgos.Last().Start();
                 return;
@@ -40,11 +39,10 @@ namespace Algorithm.DataManipulation
         }
         private static void CreateAlgorithm(AlgorithmInfo setting, Metadata metadata)
         {
-            Log.Information("IM LITERALLY CREATING A NEW ALGO RIGHT NOW");
+            Log.Information("{@Where}: Initiated algorithm creation for user {@User}", "Algorithm", metadata.GetValue("sessionid"));
             bool result = algorithms.TryAdd(metadata, new AlgorithmBeta(metadata));
             if (result)
-            {
-                Log.Information("{@Where}: Created a new algorithm", "Algorithm");
+            {    
                 orderPublisher.OrderIncomingEvent += algorithms[metadata].NewOrderAlert;
                 algorithms[metadata].ChangeSetting(setting);
                 algorithms[metadata].ChangeState();

@@ -44,14 +44,13 @@ namespace Algorithm.Analysis
         //when an algo is created it's immediately subscribed to new points 
         public AlgorithmBeta(Metadata metadata)
         {
-            Log.Information("IM AN ALGO, IM BEING CREATED RIGHT NOW");
             _metadata = metadata;
             _pointPublisher = new();
             _pointPublisher.PointMadeEvent += NewPointAlert;
             _dc = new(_pointPublisher);
             _pm = new();
             _storage = new Dictionary<DateTime, double>();
-            Log.Information("Created an algo AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+            Log.Information("{@Where}: Algorithm for user {@User} has been created", "Algorithm", metadata.GetValue("sessionid"));
         }
 
         //when a new point is made algo adds it to its storage and checks if it has enough to initiate analysis 
@@ -113,8 +112,6 @@ namespace Algorithm.Analysis
         //this func needs points and subset averages and decides if it's time to buy
         private int MakeADecision(IReadOnlyCollection<double> subTrends, Dictionary<DateTime, double> points)
         {
-            Log.Information("Analysis...");
-
             if (_precision == 0)
             {
                 return AnalyseTrendWithMinimalPrecision(points);
@@ -150,11 +147,11 @@ namespace Algorithm.Analysis
             {
                 if (downtrend)
                 {
-                    Log.Information("Downward trend detected");
+                    Log.Information("{@Where}:Downward trend detected", "Algorithm");
                 }
                 else
                 {
-                    Log.Information("Upward trend detected");
+                    Log.Information("{@Where}:Upward trend detected", "Algorithm");
                 }
                 switch (_precision)
                 {
@@ -168,7 +165,7 @@ namespace Algorithm.Analysis
                         trend = AnalyseTrendWithHighPrecision(subTrends, points, uptrend);
                         break;
                     default:
-                        trend = AnalyseTrendWithLowPrecision(subTrends, points, uptrend);
+                        trend = AnalyseTrendWithHighPrecision(subTrends, points, uptrend);
                         break;
                 }
             }
@@ -269,7 +266,7 @@ namespace Algorithm.Analysis
             _precision = settings.Sensivity;
             _pm.SetPointInterval((int)settings.Interval.Seconds * 1000 / 5);
             _dc.ClearAllData();
-            Log.Information("Settings changed");
+            Log.Information("{@Where}:Settings changed", "Algorithm");
         }
         public void ChangeState()
         {
@@ -286,12 +283,14 @@ namespace Algorithm.Analysis
         {
             _isStopped = true;
             _pm.Stop();
+            Log.Information("{@Where}:Algorithm has been stopped", "Algorithm");
         }
 
         private void Start()
         {
             _isStopped = false;
             _pm.Launch(_pointPublisher, _dc);
+            Log.Information("{@Where}:Algorithm has been launched", "Algorithm");
         }
     }
 }
