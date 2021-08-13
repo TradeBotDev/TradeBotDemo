@@ -14,7 +14,7 @@ namespace AccountGRPC
     public class ExchangeAccessService : ExchangeAccess.ExchangeAccessBase
     {
         // Добавить биржу для конкретного пользователя.
-        public override Task<AddExchangeAccessResponse> AddExchangeAccess(AddExchangeAccessRequest request, ServerCallContext context)
+        public override async Task<AddExchangeAccessResponse> AddExchangeAccess(AddExchangeAccessRequest request, ServerCallContext context)
         {
             Log.Information($"AddExchangeAccess получил запрос: " +
                 $"SessionId - {request.SessionId}, " +
@@ -28,15 +28,15 @@ namespace AccountGRPC
                 // Проверка на существование входа в аккаунт. Если аккаунт среди вошедших не найден, отправляется
                 // сообщение об ошибке.
                 if (!database.LoggedAccounts.Any(login => login.SessionId == request.SessionId))
-                    return Task.FromResult(AddExchangeAccessReplies.AccountNotFound());
+                    return await Task.FromResult(AddExchangeAccessReplies.AccountNotFound());
                 else if (LoggedAccountsManagement.TimeOutAction(request.SessionId))
-                    return Task.FromResult(AddExchangeAccessReplies.TimePassed());
+                    return await Task.FromResult(AddExchangeAccessReplies.TimePassed());
 
                 // Валидация полученных данных. В случае, если валидация не прошла успешно, возвращается сообщение об ошибке.
                 var validationResult = Validate.AddExchangeAccessFields(request);
                 if (!validationResult.Successful)
                 {
-                    return Task.FromResult(new AddExchangeAccessResponse
+                    return await Task.FromResult(new AddExchangeAccessResponse
                     {
                         Result = ExchangeAccessActionCode.Failed,
                         Message = validationResult.Message
@@ -55,7 +55,7 @@ namespace AccountGRPC
 
                 // В случае, если данные доступа к бирже уже существуют, возвращается сообщение об этом.
                 if (isExists)
-                    return Task.FromResult(AddExchangeAccessReplies.ExchangeAccessExists());
+                    return await Task.FromResult(AddExchangeAccessReplies.ExchangeAccessExists());
 
                 // Добавление в текущий аккаунт нового доступа к бирже.
                 loginInfo.Account.ExchangeAccesses.Add(new Models.ExchangeAccess
@@ -68,11 +68,11 @@ namespace AccountGRPC
                 });
                 database.SaveChanges();
             }
-            return Task.FromResult(AddExchangeAccessReplies.SuccessfulAddition());
+            return await Task.FromResult(AddExchangeAccessReplies.SuccessfulAddition());
         }
 
         // Получение данных всех бирж пользователя.
-        public override Task<AllExchangesBySessionResponse> AllExchangesBySession(AllExchangesBySessionRequest request, ServerCallContext context)
+        public override async Task<AllExchangesBySessionResponse> AllExchangesBySession(AllExchangesBySessionRequest request, ServerCallContext context)
         {
             Log.Information($"AllExchangesBySession получил запрос: SessionId - {request.SessionId}.");
             using (var database = new Models.AccountContext())
@@ -84,9 +84,9 @@ namespace AccountGRPC
 
                 // В случае, если аккаунт не найден среди вошедших, возвращается сообщение об ошибке.
                 if (login.Count() == 0)
-                    return Task.FromResult(AllExchangesBySessionReplies.AccountNotFound());
+                    return await Task.FromResult(AllExchangesBySessionReplies.AccountNotFound());
                 else if (LoggedAccountsManagement.TimeOutAction(request.SessionId))
-                    return Task.FromResult(AllExchangesBySessionReplies.TimePassed());
+                    return await Task.FromResult(AllExchangesBySessionReplies.TimePassed());
 
                 // Поиск информации о доступе пользователя к бирже.
                 var exchangeAccesses = database.ExchangeAccesses
@@ -95,16 +95,16 @@ namespace AccountGRPC
 
                 // Ошибка в случае, если биржи не найдены.
                 if (exchangeAccesses.Count() == 0)
-                    return Task.FromResult(AllExchangesBySessionReplies.ExchangesNotFound());
+                    return await Task.FromResult(AllExchangesBySessionReplies.ExchangesNotFound());
 
                 // Формирование ответа со всей необходимой информацией о добавленных биржах.
                 var reply = AllExchangesBySessionReplies.SuccessfulGetting(exchangeAccesses);
-                return Task.FromResult(reply);
+                return await Task.FromResult(reply);
             }
         }
 
         // Удалить биржу из аккаунта пользователя.
-        public override Task<DeleteExchangeAccessResponse> DeleteExchangeAccess(DeleteExchangeAccessRequest request, ServerCallContext context)
+        public override async Task<DeleteExchangeAccessResponse> DeleteExchangeAccess(DeleteExchangeAccessRequest request, ServerCallContext context)
         {
             Log.Information($"DeleteExchangeAccess получил запрос: SessionId - {request.SessionId}, Code - {request.Code}.");
 
@@ -113,9 +113,9 @@ namespace AccountGRPC
                 // Если среди вошедших аккаунтов не был найден нужный, отправляется сообщение о том, что аккаунт
                 // не был найден.
                 if (!database.LoggedAccounts.Any(login => login.SessionId == request.SessionId))
-                    return Task.FromResult(DeleteExchangeAccessReplies.AccountNotFound());
+                    return await Task.FromResult(DeleteExchangeAccessReplies.AccountNotFound());
                 else if (LoggedAccountsManagement.TimeOutAction(request.SessionId))
-                    return Task.FromResult(DeleteExchangeAccessReplies.TimePassed());
+                    return await Task.FromResult(DeleteExchangeAccessReplies.TimePassed());
 
 
                 // Если аккаунт был найден, производится получение его данных по Id сессии.
@@ -130,17 +130,17 @@ namespace AccountGRPC
 
                 // В случае, если такой записи не обнаружено, сервис отвечает ошибкой.
                 if (exchangeAccess.Count() == 0)
-                    return Task.FromResult(DeleteExchangeAccessReplies.ExchangeNotFound());
+                    return await Task.FromResult(DeleteExchangeAccessReplies.ExchangeNotFound());
 
                 // Если такая запись существует, производится ее удаление.
                 database.ExchangeAccesses.Remove(exchangeAccess.First());
                 database.SaveChanges();
             }
-            return Task.FromResult(DeleteExchangeAccessReplies.SuccessfulDeleting());
+            return await Task.FromResult(DeleteExchangeAccessReplies.SuccessfulDeleting());
         }
 
         // Получение данных конкретной биржи пользователя.
-        public override Task<ExchangeBySessionResponse> ExchangeBySession(ExchangeBySessionRequest request, ServerCallContext context)
+        public override async Task<ExchangeBySessionResponse> ExchangeBySession(ExchangeBySessionRequest request, ServerCallContext context)
         {
             Log.Information($"ExchangeBySession получил запрос: SessionId - {request.SessionId}, Code - {request.Code}.");
             using (var database = new Models.AccountContext())
@@ -152,9 +152,9 @@ namespace AccountGRPC
 
                 // В случае, если аккаунт не найден среди вошедших, возвращается сообщение об ошибке.
                 if (login.Count() == 0)
-                    return Task.FromResult(ExchangeBySessionReplies.AccountNotFound());
+                    return await Task.FromResult(ExchangeBySessionReplies.AccountNotFound());
                 else if (LoggedAccountsManagement.TimeOutAction(request.SessionId))
-                    return Task.FromResult(ExchangeBySessionReplies.TimePassed());
+                    return await Task.FromResult(ExchangeBySessionReplies.TimePassed());
 
                 // Поиск информации о доступе пользователя к бирже.
                 var exchangeAccesses = database.ExchangeAccesses
@@ -164,11 +164,11 @@ namespace AccountGRPC
 
                 // Если такой биржи не было найдено, возвращается сообщение об ошибке.
                 if (exchangeAccesses.Count() == 0)
-                    return Task.FromResult(ExchangeBySessionReplies.ExchangeNotFound());
+                    return await Task.FromResult(ExchangeBySessionReplies.ExchangeNotFound());
 
                 // В случае успешного получения доступа к бирже она возвращается в качестве ответа.
                 var exchangeAccess = exchangeAccesses.First();
-                return Task.FromResult(ExchangeBySessionReplies.SuccessfulGettingExchangeAccess(exchangeAccess));
+                return await Task.FromResult(ExchangeBySessionReplies.SuccessfulGettingExchangeAccess(exchangeAccess));
             }
         }
     }

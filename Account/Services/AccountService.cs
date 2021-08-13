@@ -90,14 +90,14 @@ namespace AccountGRPC
         }
 
         // Метод выхода из аккаунта
-        public override Task<LogoutResponse> Logout(LogoutRequest request, ServerCallContext context)
+        public override async Task<LogoutResponse> Logout(LogoutRequest request, ServerCallContext context)
         {
             Log.Information($"Logout получил запрос: SessionId - {request.SessionId},  SaveExchangeAccesses - {request.SaveExchangeAccesses}.");
             using (var database = new Models.AccountContext())
             {
                 // В случае, если аккаунт не был найден среди вошедших, появляется сообщение об ошибке.
                 if (!database.LoggedAccounts.Any(login => login.SessionId == request.SessionId))
-                    return Task.FromResult(LogoutReplies.AccountNotFound());
+                    return await Task.FromResult(LogoutReplies.AccountNotFound());
 
                 // Получение информации о входе вместе с данными о пользователе.
                 var loginInfo = database.LoggedAccounts
@@ -119,11 +119,11 @@ namespace AccountGRPC
             }
             // В случае успешного удаления аккаунта из списка, в который пользователь зашел,
             // сервер отвечает, что выход был успешно завершен.
-            return Task.FromResult(LogoutReplies.SuccessfulLogout());
+            return await Task.FromResult(LogoutReplies.SuccessfulLogout());
         }
 
         // Метод регистрации аккаунта по запросу клиента.
-        public override Task<RegisterResponse> Register(RegisterRequest request, ServerCallContext context)
+        public override async Task<RegisterResponse> Register(RegisterRequest request, ServerCallContext context)
         {
             Log.Information($"Register получил запрос: Email - {request.Email}, Password - {request.Password}, VerifyPassword - {request.VerifyPassword}.");
 
@@ -134,7 +134,7 @@ namespace AccountGRPC
             // возвращается сообщение об одной из ошибок в запросе.
             if (!validationResult.Successful)
             {
-                return Task.FromResult(new RegisterResponse
+                return await Task.FromResult(new RegisterResponse
                 {
                     Result = AccountActionCode.Failed,
                     Message = validationResult.Message
@@ -150,7 +150,7 @@ namespace AccountGRPC
                 // В случае наличия аккаунтов с таким же Email-адресом, как в запросе, возвращается
                 // ответ сервера с ошибкой, сообщающей об этом.
                 if (accountsWithThisEmail.Count() > 0)
-                    return Task.FromResult(RegisterReplies.AccountExists());
+                    return await Task.FromResult(RegisterReplies.AccountExists());
 
                 // В случае отсутствия пользователей с тем же Email-адресом, добавление в базу данных
                 // нового пользователя с данными из базы данных.
@@ -161,12 +161,12 @@ namespace AccountGRPC
                 });
                 // Сохранение изменений базы данных и возвращение ответа.
                 database.SaveChanges();
-                return Task.FromResult(RegisterReplies.SuccessfulRegister());
+                return await Task.FromResult(RegisterReplies.SuccessfulRegister());
             }
         }
 
         // Метод проверки валидности текущей сессии.
-        public override Task<IsValidSessionResponse> IsValidSession(IsValidSessionRequest request, ServerCallContext context)
+        public override async Task<IsValidSessionResponse> IsValidSession(IsValidSessionRequest request, ServerCallContext context)
         {
             Log.Information($"IsValidSession получил запрос: SessionId - {request.SessionId}.");
             using (var database = new Models.AccountContext())
@@ -176,14 +176,14 @@ namespace AccountGRPC
                 var account = database.LoggedAccounts.Where(account => account.SessionId == request.SessionId);
 
                 if (account.Count() >= 0 && !LoggedAccountsManagement.TimeOutAction(request.SessionId))
-                    return Task.FromResult(IsValidSessionReplies.IsValid());
+                    return await Task.FromResult(IsValidSessionReplies.IsValid());
                 // Если нет - сессия невалидна.
-                else return Task.FromResult(IsValidSessionReplies.IsNotValid());
+                else return await Task.FromResult(IsValidSessionReplies.IsNotValid());
             }
         }
 
         // Метод получения информации о текущем пользователе по Id сессии.
-        public override Task<AccountDataResponse> AccountData(AccountDataRequest request, ServerCallContext context)
+        public override async Task<AccountDataResponse> AccountData(AccountDataRequest request, ServerCallContext context)
         {
             Log.Information($"AccountData получил запрос: SessionId - {request.SessionId}.");
             using (var database = new Models.AccountContext())
@@ -192,9 +192,9 @@ namespace AccountGRPC
 
                 // Производится проверка на то, является ли текущий пользователь вошедшим (по Id сессии).
                 if (checkAccount.Count() == 0)
-                    return Task.FromResult(AccountDataReplies.AccountNotFound());
+                    return await Task.FromResult(AccountDataReplies.AccountNotFound());
                 else if (LoggedAccountsManagement.TimeOutAction(request.SessionId))
-                    return Task.FromResult(AccountDataReplies.TimePassed());
+                    return await Task.FromResult(AccountDataReplies.TimePassed());
 
                 // Если текущий пользователь вошедший, то сервер возвращает данные этого пользователя.
                 else
@@ -207,7 +207,7 @@ namespace AccountGRPC
 
                     // Формирование ответа.
                     var reply = AccountDataReplies.SuccessfulGettingAccountData(login);
-                    return Task.FromResult(reply);
+                    return await Task.FromResult(reply);
                 }
             }
         }
