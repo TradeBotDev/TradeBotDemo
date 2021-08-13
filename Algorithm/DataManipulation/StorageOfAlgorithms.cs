@@ -16,9 +16,9 @@ namespace Algorithm.DataManipulation
         private static OrderPublisher orderPublisher = new();
         private static List<Thread> threadsWithAlgos = new();
 
-        public static void SendNewOrderToAllAlgos(Order order)
+        public static void SendNewOrderToAllAlgos(Order order, Metadata metadata)
         {
-            orderPublisher.Publish(order);
+            orderPublisher.Publish(order, metadata);
         }
         public static void SendNewConfig (Metadata metadata, UpdateServerConfigRequest configRequest)
         {

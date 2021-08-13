@@ -71,9 +71,12 @@ namespace Algorithm.Analysis
             }
         }
 
-        public void NewOrderAlert(Order order)
+        public void NewOrderAlert(Order order, Metadata metadata)
         {
-            _dc.AddNewOrder(order);
+            if (metadata.GetValue("slot") == _metadata.GetValue("slot"))
+            {
+                _dc.AddNewOrder(order);
+            }
         }
 
         //this function gathers all the data and sends it for analysis
@@ -180,15 +183,15 @@ namespace Algorithm.Analysis
         private static int AnalyseTrendWithMinimalPrecision(Dictionary<DateTime, double> prices)
         {
             int trend = 0;
-            if (prices.ElementAt(prices.Count - 3).Value < prices.ElementAt(prices.Count - 2).Value
-                && prices.ElementAt(prices.Count - 2).Value < prices.ElementAt(prices.Count - 1).Value
-                && prices.ElementAt(prices.Count - 1).Value > prices.Last().Value)
+            if (prices.ElementAt(prices.Count - 4).Value < prices.ElementAt(prices.Count - 3).Value
+                && prices.ElementAt(prices.Count - 3).Value < prices.ElementAt(prices.Count - 2).Value
+                && prices.ElementAt(prices.Count - 2).Value > prices.Last().Value)
             {
                 trend = 1;
             }
-            if (prices.ElementAt(prices.Count - 3).Value > prices.ElementAt(prices.Count - 2).Value
-                && prices.ElementAt(prices.Count - 2).Value > prices.ElementAt(prices.Count - 1).Value
-                && prices.ElementAt(prices.Count - 1).Value < prices.Last().Value)
+            if (prices.ElementAt(prices.Count - 4).Value > prices.ElementAt(prices.Count - 3).Value
+                && prices.ElementAt(prices.Count - 3).Value > prices.ElementAt(prices.Count - 2).Value
+                && prices.ElementAt(prices.Count - 2).Value < prices.Last().Value)
             {
                 trend = -1;
             }
@@ -218,7 +221,7 @@ namespace Algorithm.Analysis
             if (currentTrend)
             {
                 if (subTrends.Last() > prices.Last().Value &&
-                    prices.Last().Value < prices.ElementAt(prices.Count - 1).Value)
+                    prices.Last().Value < prices.ElementAt(prices.Count - 2).Value)
                 {
                     return -1;
                 }
@@ -226,7 +229,7 @@ namespace Algorithm.Analysis
             else
             {
                 if (subTrends.Last() < prices.Last().Value &&
-                    prices.Last().Value > prices.ElementAt(prices.Count - 1).Value)
+                    prices.Last().Value > prices.ElementAt(prices.Count - 2).Value)
                 {
                     return 1;
                 }
@@ -238,8 +241,8 @@ namespace Algorithm.Analysis
             if (currentTrend)
             {
                 if (subTrends.Last() > prices.Last().Value &&
-                    prices.Last().Value < prices.ElementAt(prices.Count - 1).Value &&
-                    prices.ElementAt(prices.Count - 2).Value < prices.ElementAt(prices.Count - 1).Value)
+                    prices.Last().Value < prices.ElementAt(prices.Count - 2).Value &&
+                    prices.ElementAt(prices.Count - 3).Value < prices.ElementAt(prices.Count - 2).Value)
                 {
                     return -1;
                 }
@@ -247,8 +250,8 @@ namespace Algorithm.Analysis
             else
             {
                 if (subTrends.Last() < prices.Last().Value &&
-                    prices.Last().Value > prices.ElementAt(prices.Count - 1).Value &&
-                    prices.ElementAt(prices.Count - 2).Value > prices.ElementAt(prices.Count - 1).Value)
+                    prices.Last().Value > prices.ElementAt(prices.Count - 2).Value &&
+                    prices.ElementAt(prices.Count - 3).Value > prices.ElementAt(prices.Count - 2).Value)
                 {
                     return 1;
                 }
