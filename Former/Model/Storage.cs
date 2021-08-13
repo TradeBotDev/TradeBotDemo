@@ -61,13 +61,7 @@ namespace Former.Model
                     var updateMyOrderResponse = UpdateOrder(newComingOrder, MyOrders);
                     Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} updated {@ResponseCode}", "Former", myOldOrder.Id, myOldOrder.Price, myOldOrder.Quantity, myOldOrder.Signature.Type, updateMyOrderResponse ? ReplyCode.Succeed : ReplyCode.Failure);
                     LockPlacingOrders(true);
-                    if (newComingOrder.Quantity != 0)
-                    {
-                        if (PlaceOrderEvent is not null)
-                        {
-                            await PlaceOrderEvent?.Invoke(myOldOrder, newComingOrder);
-                        }
-                    }
+                    if (newComingOrder.Quantity != 0) await PlaceOrderEvent?.Invoke(myOldOrder, newComingOrder);
                     LockPlacingOrders(false);
                     break;
                 case ChangesType.Update when itsCounterOrder:
@@ -78,7 +72,7 @@ namespace Former.Model
                     var removeMyOrderResponse = RemoveOrder(id, MyOrders);
                     Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed {@ResponseCode}", "Former", myOldOrder.Id, myOldOrder.Price, myOldOrder.Quantity, myOldOrder.Signature.Type, removeMyOrderResponse ? ReplyCode.Succeed : ReplyCode.Failure);
                     LockPlacingOrders(true);
-                    if (PlaceOrderEvent is not null) await PlaceOrderEvent?.Invoke(myOldOrder, newComingOrder);
+                    await PlaceOrderEvent?.Invoke(myOldOrder, newComingOrder);
                     LockPlacingOrders(false);
                     break;
                 case ChangesType.Delete when itsCounterOrder:
@@ -117,7 +111,7 @@ namespace Former.Model
             if (availableBalance > 0)
             {
                 AvailableBalance = availableBalance;
-                Log.Information("{@Where}: Balance updated. Available balance: {@AvailableBalance}, Total balance: {@TotalBalance}", "Former", availableBalance, totalBalance);
+                Log.Information("{@Where}: Balance updated. Available balance: {@AvailableBalance}, Total balance: {@TotalBalance}", "Former", AvailableBalance, TotalBalance);
             }
             if (totalBalance > 0)
             {

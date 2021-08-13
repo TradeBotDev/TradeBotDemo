@@ -69,7 +69,7 @@ namespace Former.Model
             if (Convert.ToInt32(quantity) == Convert.ToInt32(oldOrder.Quantity))
             {
                 await _historyClient.WriteOrder(oldOrder, ChangesType.Delete, _metadata, "Initial order filled");
-                await _historyClient.WriteOrder(oldOrder, ChangesType.Insert, _metadata, "Counter order placed");
+                await _historyClient.WriteOrder(newOrder, ChangesType.Insert, _metadata, "Counter order placed");
             }
             else
             {

@@ -180,15 +180,15 @@ namespace Algorithm.Analysis
         private static int AnalyseTrendWithMinimalPrecision(Dictionary<DateTime, double> prices)
         {
             int trend = 0;
-            if (prices.ElementAt(prices.Count - 3).Value < prices.ElementAt(prices.Count - 2).Value
-                && prices.ElementAt(prices.Count - 2).Value < prices.ElementAt(prices.Count - 1).Value
-                && prices.ElementAt(prices.Count - 1).Value > prices.Last().Value)
+            if (/*prices.ElementAt(prices.Count - 3).Value < prices.ElementAt(prices.Count - 2).Value*/
+                /*&& */prices.ElementAt(prices.Count - 3).Value < prices.ElementAt(prices.Count - 2).Value
+                && prices.ElementAt(prices.Count - 2).Value > prices.Last().Value)
             {
                 trend = 1;
             }
-            if (prices.ElementAt(prices.Count - 3).Value > prices.ElementAt(prices.Count - 2).Value
-                && prices.ElementAt(prices.Count - 2).Value > prices.ElementAt(prices.Count - 1).Value
-                && prices.ElementAt(prices.Count - 1).Value < prices.Last().Value)
+            if (/*prices.ElementAt(prices.Count - 3).Value > prices.ElementAt(prices.Count - 2).Value*/
+                /*&& */prices.ElementAt(prices.Count - 3).Value > prices.ElementAt(prices.Count - 2).Value
+                && prices.ElementAt(prices.Count - 2).Value < prices.Last().Value)
             {
                 trend = -1;
             }
