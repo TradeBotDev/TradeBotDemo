@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
 using Website.Models;
 
@@ -9,13 +10,13 @@ namespace Website.Controllers
     public class PurchaseController : Controller
     {
         [HttpGet]
-        public IActionResult Buy()
+        public async Task<IActionResult> Buy()
         {
             ViewBag.HaveLicense = Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot).HaveAccess;
             return View();
         }
 
-        public IActionResult Buy(CreditCardModel model)
+        public async Task<IActionResult> Buy(CreditCardModel model)
         {
             bool haveLicense = Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot).HaveAccess;
             ViewBag.HaveLicense = haveLicense;
