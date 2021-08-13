@@ -12,50 +12,42 @@ namespace Algorithm.DataManipulation
 {
     public static class StorageOfAlgorithms
     {
-        private static Dictionary<string, AlgorithmBeta> algorithms = new();
+        private static Dictionary<Metadata, AlgorithmBeta> algorithms = new();
         private static OrderPublisher orderPublisher = new();
-        private static Dictionary<string, Metadata> metaDict = new();
         private static List<Thread> threadsWithAlgos = new();
 
-        public static Metadata GetMetaByUser(string user)
-        {
-            return metaDict[user];
-        }
-        public static void SendNewMeta(string user, Metadata meta)
-        {
-            metaDict.TryAdd(user, meta);
-        }
         public static void SendNewOrderToAllAlgos(Order order)
         {
             orderPublisher.Publish(order);
         }
-        public static void SendNewConfig (string user, UpdateServerConfigRequest configRequest)
+        public static void SendNewConfig (Metadata metadata, UpdateServerConfigRequest configRequest)
         {
-            if (!algorithms.ContainsKey(user))
+            if (!algorithms.ContainsKey(metadata))
             {
                 Log.Information("IM ABOUT TO CREATE AN ALGOOOOOOO");
-                threadsWithAlgos.Add(new Thread(()=>CreateAlgorithm(configRequest.Config.AlgorithmInfo, user)));
+                threadsWithAlgos.Add(new Thread(()=>CreateAlgorithm(configRequest.Config.AlgorithmInfo, metadata)));
                 threadsWithAlgos.Last().Start();
                 return;
             }
 
-            if (algorithms[user].GetState()!=configRequest.Switch)
+            if (algorithms[metadata].GetState()!=configRequest.Switch)
             {
-                algorithms[user].ChangeState();
+                algorithms[metadata].ChangeState();
                 return;
             }
 
-            algorithms[user].ChangeSetting(configRequest.Config.AlgorithmInfo);
+            algorithms[metadata].ChangeSetting(configRequest.Config.AlgorithmInfo);
         }
-        private static void CreateAlgorithm(AlgorithmInfo setting, string user)
+        private static void CreateAlgorithm(AlgorithmInfo setting, Metadata metadata)
         {
             Log.Information("IM LITERALLY CREATING A NEW ALGO RIGHT NOW");
-            bool result = algorithms.TryAdd(user, new AlgorithmBeta(user));
+            bool result = algorithms.TryAdd(metadata, new AlgorithmBeta(metadata));
             if (result)
             {
-                Log.Information("{@Where}: Created a new algorithm for a user {@User}", "Algorithm", user);
-                orderPublisher.OrderIncomingEvent += algorithms[user].NewOrderAlert;
-                algorithms[user].ChangeState();
+                Log.Information("{@Where}: Created a new algorithm", "Algorithm");
+                orderPublisher.OrderIncomingEvent += algorithms[metadata].NewOrderAlert;
+                algorithms[metadata].ChangeSetting(setting);
+                algorithms[metadata].ChangeState();
             }
         }
     }

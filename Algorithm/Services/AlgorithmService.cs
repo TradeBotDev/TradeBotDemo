@@ -25,10 +25,8 @@ namespace Algorithm.Services
         public override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request, ServerCallContext context)
         {
             Log.Information("SERVER CONFIG UPDATE");
-            var user = context.RequestHeaders.GetValue("sessionid");
             var settings = request.Request;
-            StorageOfAlgorithms.SendNewMeta(user, context.RequestHeaders);
-            StorageOfAlgorithms.SendNewConfig(user, settings);
+            StorageOfAlgorithms.SendNewConfig(context.RequestHeaders, settings);
             Log.Information("SENT NEW CONFIG TO ALGO MAKER");
             return Task.FromResult(new UpdateServerConfigResponse());
         }
