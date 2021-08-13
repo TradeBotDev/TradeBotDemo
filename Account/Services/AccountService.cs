@@ -26,7 +26,7 @@ namespace AccountGRPC
         }
 
         // Метод входа в аккаунт по запросу клиента.
-        public override Task<LoginResponse> Login(LoginRequest request, ServerCallContext context)
+        public override async Task<LoginResponse> Login(LoginRequest request, ServerCallContext context)
         {
             Log.Information($"Login получил запрос: Email - {request.Email}, Password - {request.Password}.");
 
@@ -37,7 +37,7 @@ namespace AccountGRPC
             // возвращается сообщение об одной из ошибок в запросе.
             if (!validationResult.Successful)
             {
-                return Task.FromResult(new LoginResponse
+                return await Task.FromResult(new LoginResponse
                 {
                     SessionId = "none",
                     Result = AccountActionCode.Failed,
@@ -55,7 +55,7 @@ namespace AccountGRPC
                 // Проверка на наличие зарегистрированных аккаунтов с данными из запроса, и в
                 // случае их отсутствия отправляет ответ с сообщением об ошибке.
                 if (accounts.Count() == 0)
-                    return Task.FromResult(LoginReplies.AccountNotFound());
+                    return await Task.FromResult(LoginReplies.AccountNotFound());
 
                 // Проверка на то, есть ли сессия с пользователем, который пытается войти в аккаунт, и
                 // в случае, если он вошел, возвращается его Id сессии
@@ -67,7 +67,7 @@ namespace AccountGRPC
                     existingLogin.First().LoginDate = DateTime.Now;
                     database.SaveChanges();
 
-                    return Task.FromResult(LoginReplies.AlreadySignedIn(newSessionId));
+                    return await Task.FromResult(LoginReplies.AlreadySignedIn(newSessionId));
                 }
 
                 // В случае наличия зарегистрированного аккаунта с данными из запроса генерируется
@@ -85,7 +85,7 @@ namespace AccountGRPC
                 database.SaveChanges();
 
                 // Ответ сервера об успешном входе в аккаунт.
-                return Task.FromResult(LoginReplies.SuccessfulLogin(sessionId));
+                return await Task.FromResult(LoginReplies.SuccessfulLogin(sessionId));
             }
         }
 
