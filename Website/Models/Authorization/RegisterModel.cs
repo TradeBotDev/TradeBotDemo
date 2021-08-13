@@ -14,7 +14,7 @@ namespace Website.Models.Authorization
 
         [Required(ErrorMessage = "Отсутствует данные в поле подтверждения пароля.")]
         [DataType(DataType.Password)]
-        [Compare("Password")]
+        [Compare("Password", ErrorMessage = "Пароли не совпадают.")]
         public string VerifyPassword { get; set; }
     }
 }
