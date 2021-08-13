@@ -2,12 +2,12 @@
 using Grpc.Net.Client;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 using Google.Protobuf.WellKnownTypes;
 using TradeBot.Common.v1;
 using TradeBot.Facade.FacadeService.v1;
 using UpdateServerConfigRequest = TradeBot.Facade.FacadeService.v1.UpdateServerConfigRequest;
-using static TradeBot.Facade.FacadeService.v1.SubscribeEventsResponse;
 
 namespace UI
 {
@@ -28,6 +28,22 @@ namespace UI
             InitSensitivityMap();
             FormClosing += MainWindow_FormClosing;
             ConfigUpdatePriceRange.TextChanged += ConfigUpdatePriceRangeOnTextChanged;
+            dataGridView1.CellContentClick += dataGridViewSites_CellContentClick;
+            dataGridView1.EditingControlShowing += DataGridView1OnEditingControlShowing;
+        }
+
+        private void DataGridView1OnEditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
+        {
+            if (e.Control is ComboBox combo)
+            {
+                combo.SelectedIndexChanged -= ComboBox_SelectedIndexChanged;
+                combo.SelectedIndexChanged += ComboBox_SelectedIndexChanged;
+            }
+        }
+
+        private void ComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (((ComboBox)sender).Text == "None") dataGridView1.Rows.RemoveAt(dataGridView1.CurrentCell.RowIndex);
         }
 
         private void ConfigUpdatePriceRangeOnTextChanged(object? sender, EventArgs e)
@@ -43,6 +59,85 @@ namespace UI
             ConfigUpdatePriceRange.TextChanged += ConfigUpdatePriceRangeOnTextChanged;
         }
 
+        private void NewEventProcess(AsyncServerStreamingCall<SubscribeEventsResponse> response)
+        {
+            switch (response.ResponseStream.Current.Order.ChangesType)
+            {
+                case ChangesType.Partitial:
+                {
+                    if (response.ResponseStream.Current.Order.Order.Signature.Status == OrderStatus.Open)
+                    {
+                        ActiveOrdersDataGridView.Rows.Add("XBTUSD", response.ResponseStream.Current.Order.Order.Quantity,
+                            response.ResponseStream.Current.Order.Order.Price,
+                            response.ResponseStream.Current.Order.Order.Signature.Type,
+                            response.ResponseStream.Current.Order.Time, response.ResponseStream.Current.Order.Order.Id);
+                    }
+
+                    if (response.ResponseStream.Current.Order.Order.Signature.Status == OrderStatus.Closed)
+                    {
+                        FilledOrdersDataGridView.Rows.Add("XBTUSD", response.ResponseStream.Current.Order.Order.Quantity,
+                            response.ResponseStream.Current.Order.Order.Price,
+                            response.ResponseStream.Current.Order.Order.Signature.Type,
+                            response.ResponseStream.Current.Order.Time, response.ResponseStream.Current.Order.Order.Id);
+                    }
+
+                    break;
+                }
+                case ChangesType.Insert:
+                {
+                    ActiveOrdersDataGridView.Rows.Add("XBTUSD", response.ResponseStream.Current.Order.Order.Quantity,
+                        response.ResponseStream.Current.Order.Order.Price,
+                        response.ResponseStream.Current.Order.Order.Signature.Type,
+                        response.ResponseStream.Current.Order.Time, response.ResponseStream.Current.Order.Order.Id);
+                    var incomingString =
+                        $"[{TimeZoneInfo.ConvertTime(response.ResponseStream.Current.Order.Time.ToDateTime(), TimeZoneInfo.Local):HH:mm:ss}]: {response.ResponseStream.Current.Order.Message}\r\n" +
+                        $"Order {response.ResponseStream.Current.Order.Order.Id}, price: {response.ResponseStream.Current.Order.Order.Price}, quantity: {response.ResponseStream.Current.Order.Order.Quantity}, type: {response.ResponseStream.Current.Order.Order.Signature.Type}\r\n";
+                    EventConsole.Text += incomingString;
+                    break;
+                }
+                case ChangesType.Update:
+                {
+                    for (var i = 0; i < ActiveOrdersDataGridView.Rows.Count; i++)
+                    {
+                        if (string.Equals(ActiveOrdersDataGridView[i, 5].Value as string,
+                            response.ResponseStream.Current.Order.Order.Id))
+                        {
+                            ActiveOrdersDataGridView.Rows.RemoveAt(i);
+                            ActiveOrdersDataGridView.Rows.Insert(i, "XBTUSD",
+                                response.ResponseStream.Current.Order.Order.Quantity,
+                                response.ResponseStream.Current.Order.Order.Price,
+                                response.ResponseStream.Current.Order.Order.Signature.Type,
+                                response.ResponseStream.Current.Order.Time, response.ResponseStream.Current.Order.Order.Id);
+                            i--;
+                        }
+                    }
+
+                    break;
+                }
+                case ChangesType.Delete:
+                {
+                    FilledOrdersDataGridView.Rows.Add("XBTUSD", response.ResponseStream.Current.Order.Order.Quantity,
+                        response.ResponseStream.Current.Order.Order.Price,
+                        response.ResponseStream.Current.Order.Order.Signature.Type,
+                        response.ResponseStream.Current.Order.Time, response.ResponseStream.Current.Order.Order.Id);
+                    for (var i = 0; i < ActiveOrdersDataGridView.Rows.Count; i++)
+                    {
+                        if (string.Equals(ActiveOrdersDataGridView[i, 5].Value as string,
+                            response.ResponseStream.Current.Order.Order.Id))
+                        {
+                            ActiveOrdersDataGridView.Rows.RemoveAt(i);
+                            i--;
+                        }
+                    }
+                    var incomingString =
+                        $"[{TimeZoneInfo.ConvertTime(response.ResponseStream.Current.Order.Time.ToDateTime(), TimeZoneInfo.Local):HH:mm:ss}]: {response.ResponseStream.Current.Order.Message}\r\n" +
+                        $"Order {response.ResponseStream.Current.Order.Order.Id}, price: {response.ResponseStream.Current.Order.Order.Price}, quantity: {response.ResponseStream.Current.Order.Order.Quantity}, type: {response.ResponseStream.Current.Order.Order.Signature.Type}\r\n";
+                    EventConsole.Text += incomingString;
+                    break;
+                }
+            }
+        }
+
         private async void SubscribeEvents(string sessionId)
         {
             var response = _client.SubscribeEvents(new SubscribeEventsRequest { Sessionid = sessionId });
@@ -51,13 +146,11 @@ namespace UI
             {
                 switch (response.ResponseStream.Current.EventTypeCase)
                 {
-                    case EventTypeOneofCase.Balance:
+                    case SubscribeEventsResponse.EventTypeOneofCase.Balance:
                         BalanceLabel.Text = $"{double.Parse(response.ResponseStream.Current.Balance.Balance.Value)/100000000} {response.ResponseStream.Current.Balance.Balance.Currency}";
                         break;
-                    case EventTypeOneofCase.Order:
-                        var incomingString = $"\r\n\n[{TimeZoneInfo.ConvertTime(response.ResponseStream.Current.Order.Time.ToDateTime(),TimeZoneInfo.Local):HH:mm:ss}]: {response.ResponseStream.Current.Order.Message}\r\n" +
-                                             $"Order {response.ResponseStream.Current.Order.Order.Id}, price: {response.ResponseStream.Current.Order.Order.Price}, quantity: {response.ResponseStream.Current.Order.Order.Quantity}, type: {response.ResponseStream.Current.Order.Order.Signature.Type}";
-                        EventConsole.Text += incomingString;
+                    case SubscribeEventsResponse.EventTypeOneofCase.Order:
+                        NewEventProcess(response);
                         break;
                 }
             }
@@ -100,10 +193,10 @@ namespace UI
             };
         }
 
-        private async void StartButton_Click(object sender, EventArgs e)
+        private async void Start(string slotName)
         {
             var configuration = GetConfig();
-
+            _meta[1] = new Metadata.Entry("slot", slotName);
             var startBotResponse = await _client.StartBotAsync(new SwitchBotRequest
             {
                 Config = configuration
@@ -115,19 +208,12 @@ namespace UI
                         { Config = configuration, Switch = false }
                 }, _meta);
             SubscribeEvents(_meta.GetValue("sessionid"));
-
-            StartButton.Enabled = false;
-            StartButton.Visible = false;
-            StopButton.Enabled = true;
-            StopButton.Visible = true;
-
             Console.WriteLine("Запустил бота с конфигом {0}", configuration);
-            EventConsole.Text += $"\r\n[{DateTime.Now:HH:mm:ss}]: Bot has been started!";
+            EventConsole.Text += $"[{DateTime.Now:HH:mm:ss}]: Bot has been started!\r\n";
         }
 
         private Config GetConfig()
         {
-            var str = _intervalMap[ConfigIntervalOfAnalysis.Text];
             var config = new Config
             {
                 AvaibleBalance = double.Parse(ConfigAvailableBalance.Text),
@@ -212,7 +298,7 @@ namespace UI
             LoggedGroupBox.Text = "Signed in as " + LogLogTextBox.Text;
             SignInGroupBox.Visible = false;
             SignInGroupBox.Enabled = false;
-            EventConsole.Text += $"\r\n[{DateTime.Now:HH:mm:ss}]: You are signed in as {LogLogTextBox.Text}";
+            EventConsole.Text += $"[{DateTime.Now:HH:mm:ss}]: You are signed in as {LogLogTextBox.Text}\r\n";
         }
 
         private async void SignOutButton_Click(object sender, EventArgs e)
@@ -234,19 +320,45 @@ namespace UI
             var updateConfigResponse = await _client.UpdateServerConfigAsync(new UpdateServerConfigRequest { Request = new TradeBot.Common.v1.UpdateServerConfigRequest { Config = GetConfig(), Switch = false}},_meta);
         }
 
-        private async void StopButton_Click(object sender, EventArgs e)
+        private async void Stop(string slotName)
         {
-            StartButton.Enabled = true;
-            StartButton.Visible = true;
-            StopButton.Enabled = false;
-            StopButton.Visible = false;
+            _meta[1] = new Metadata.Entry("slot", slotName);
             var stopBotResponse = await _client.StopBotAsync(new StopBotRequest { Request=new TradeBot.Common.v1.UpdateServerConfigRequest {Config=GetConfig(),Switch=true } },_meta);
-            EventConsole.Text += $"\r\n[{DateTime.Now:HH:mm:ss}]: Bot has been stopped!";
+            var removeMyOrdersResponse = await _client.DeleteOrderAsync(new DeleteOrderRequest(),_meta); 
+            EventConsole.Text += $"[{DateTime.Now:HH:mm:ss}]: Bot has been stopped!\r\n";
         }
 
         private async void MainWindow_FormClosing(object sender, FormClosingEventArgs e) 
         {
             var stopBotResponse = await _client.UpdateServerConfigAsync(new UpdateServerConfigRequest { Request = new TradeBot.Common.v1.UpdateServerConfigRequest { Config = GetConfig(), Switch = true}},_meta);
+        }
+        private void dataGridViewSites_CellContentClick(object sender, 
+            DataGridViewCellEventArgs e)
+        {
+            if (Convert.ToBoolean(dataGridView1.Rows[e.RowIndex].Cells[1].EditedFormattedValue))
+                Start(dataGridView1.Rows[e.RowIndex].Cells[0].EditedFormattedValue.ToString());
+            else Stop(dataGridView1.Rows[e.RowIndex].Cells[0].EditedFormattedValue.ToString());
+
+        }
+
+        private void AddRowButton_Click(object sender, EventArgs e)
+        {
+            if (dataGridView1.Rows.Count < 7) dataGridView1.Rows.Add();
+        }
+
+        private void RemoveRowButton_Click(object sender, EventArgs e)
+        {
+            dataGridView1.Rows.RemoveAt(dataGridView1.Rows.Count - 1);
+        }
+
+        private void TradeBotUi_Load(object sender, EventArgs e)
+        {
+            dataGridView1.Rows.Add();
+        }
+
+        private void GraphicsButton_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

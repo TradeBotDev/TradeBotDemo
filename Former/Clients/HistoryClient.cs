@@ -84,7 +84,7 @@ namespace Former.Clients
                     {
                         ChangesType = changesType, Order = order, Sessionid = meta.GetValue("sessionid"),
                         Time = new Timestamp { Seconds = DateTimeOffset.Now.ToUnixTimeSeconds() },
-                        Message = message
+                        Message = message, SlotName = meta.GetValue("slot")
                     }
 
                 });

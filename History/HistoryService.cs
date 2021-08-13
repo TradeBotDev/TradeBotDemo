@@ -24,6 +24,7 @@ namespace History
             public Order Order;
             public string Message;
             public ChangesType ChangesType;
+            public string SlotName;
         }
 
         private static readonly ObservableCollection<BalanceUpdate> BalanceCollection = new();
@@ -51,7 +52,8 @@ namespace History
                         ChangesType = request.Order.ChangesType,
                         Order = request.Order.Order,
                         Message = request.Order.Message,
-                        Time = request.Order.Time
+                        Time = request.Order.Time,
+                        SlotName = request.Order.SlotName
                     });
                     break;
                 default:
@@ -97,7 +99,8 @@ namespace History
                                 Order = updateOrder.Order,
                                 Sessionid = updateOrder.SessionId,
                                 Time = updateOrder.Time,
-                                Message = updateOrder.Message
+                                Message = updateOrder.Message,
+                                SlotName = updateOrder.SlotName
                             }
                         });
                     }
