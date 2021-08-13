@@ -6,7 +6,7 @@ namespace Website.Controllers.Clients
 {
     public static class AccountServiceClient
     {
-        private static Account.AccountClient client = new(GrpcChannel.ForAddress("http://host.docker.internal:5000"));
+        private static Account.AccountClient client = new(AccountServiceConnection.GetConnection());
 
         public static LoginResponse Login(LoginModel model)
         {

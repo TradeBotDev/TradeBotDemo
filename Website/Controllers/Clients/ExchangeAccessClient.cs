@@ -6,7 +6,7 @@ namespace Website.Controllers.Clients
 {
     public class ExchangeAccessClient
     {
-        private static ExchangeAccess.ExchangeAccessClient client = new(GrpcChannel.ForAddress("http://host.docker.internal:5000"));
+        private static ExchangeAccess.ExchangeAccessClient client = new(AccountServiceConnection.GetConnection());
 
         public static AddExchangeAccessResponse AddExchangeAccess(string sessionId, AddExchangeAccessModel model)
         {
