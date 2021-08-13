@@ -18,7 +18,6 @@ namespace WebsiteTests
         [InlineData("/Authorization/Login")]
         [InlineData("/Authorization/Register")]
         [InlineData("/Authorization/Logout")]
-        [InlineData("/Home/Index")]
         [InlineData("/Purchase/Buy")]
         public async Task Get_EndpointsReturnSuccessAndCorrectContentType(string url)
         {
