@@ -25,5 +25,21 @@ namespace AccountTests.LicenseServiceTests
 
             Assert.Equal(LicenseCode.NoAccess, reply.Result.Code);
         }
+
+        [Fact]
+        public void SetLicenseToExistingAccount()
+        {
+            var reply = GenerateLogin("set_lic_to_ex").ContinueWith(login =>
+                licenseService.SetLicense(new SetLicenseRequest
+                {
+                    SessionId = login.Result.Result.SessionId,
+                    CardNumber = "1234123412341234",
+                    Product = ProductCode.Tradebot,
+                    Date = 1234,
+                    Cvv = 123
+                }, null));
+
+            Assert.Equal(LicenseCode.Successful, reply.Result.Result.Code);
+        }
     }
 }
