@@ -29,7 +29,11 @@ namespace UI
         /// </summary>
         private void InitializeComponent()
         {
-            this.StartButton = new System.Windows.Forms.Button();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
             this.ConfigAvailableBalance = new System.Windows.Forms.TextBox();
             this.ConfigRequiredProfit = new System.Windows.Forms.TextBox();
             this.ConfigUpdatePriceRange = new System.Windows.Forms.TextBox();
@@ -56,6 +60,12 @@ namespace UI
             this.label9 = new System.Windows.Forms.Label();
             this.LogPassTextBox = new System.Windows.Forms.TextBox();
             this.MainMenuGroupBox = new System.Windows.Forms.GroupBox();
+            this.ShowFilledOrderButton = new System.Windows.Forms.Button();
+            this.RemoveRowButton = new System.Windows.Forms.Button();
+            this.AddRowButton = new System.Windows.Forms.Button();
+            this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.Slot = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.Launch = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.BalanceLabel = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.UpdateConfigButton = new System.Windows.Forms.Button();
@@ -64,27 +74,23 @@ namespace UI
             this.ConfigVolumeOfContracts = new System.Windows.Forms.ComboBox();
             this.ConfigAlgorithmSensivity = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.StopButton = new System.Windows.Forms.Button();
             this.SignUpGroupBox = new System.Windows.Forms.GroupBox();
             this.SignInGroupBox = new System.Windows.Forms.GroupBox();
-            this.EventConsole = new System.Windows.Forms.RichTextBox();
             this.LoggedGroupBox = new System.Windows.Forms.GroupBox();
             this.SignOutButton = new System.Windows.Forms.Button();
+            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.LogsPage = new System.Windows.Forms.TabPage();
+            this.EventConsole = new System.Windows.Forms.RichTextBox();
+            this.GraphicsPage = new System.Windows.Forms.TabPage();
+            this.FilledOrdersPage = new System.Windows.Forms.TabPage();
             this.MainMenuGroupBox.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SignUpGroupBox.SuspendLayout();
             this.SignInGroupBox.SuspendLayout();
             this.LoggedGroupBox.SuspendLayout();
+            this.tabControl1.SuspendLayout();
+            this.LogsPage.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // StartButton
-            // 
-            this.StartButton.Location = new System.Drawing.Point(480, 260);
-            this.StartButton.Name = "StartButton";
-            this.StartButton.Size = new System.Drawing.Size(209, 44);
-            this.StartButton.TabIndex = 0;
-            this.StartButton.Text = "Launch Bot";
-            this.StartButton.UseVisualStyleBackColor = true;
-            this.StartButton.Click += new System.EventHandler(this.StartButton_Click);
             // 
             // ConfigAvailableBalance
             // 
@@ -113,7 +119,7 @@ namespace UI
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(9, 42);
+            this.label1.Location = new System.Drawing.Point(9, 43);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(127, 20);
             this.label1.TabIndex = 7;
@@ -122,7 +128,7 @@ namespace UI
             // ConfigRequiredProfitl
             // 
             this.ConfigRequiredProfitl.AutoSize = true;
-            this.ConfigRequiredProfitl.Location = new System.Drawing.Point(9, 74);
+            this.ConfigRequiredProfitl.Location = new System.Drawing.Point(9, 76);
             this.ConfigRequiredProfitl.Name = "ConfigRequiredProfitl";
             this.ConfigRequiredProfitl.Size = new System.Drawing.Size(110, 20);
             this.ConfigRequiredProfitl.TabIndex = 8;
@@ -131,7 +137,7 @@ namespace UI
             // ConfigVolumeOfContractsl
             // 
             this.ConfigVolumeOfContractsl.AutoSize = true;
-            this.ConfigVolumeOfContractsl.Location = new System.Drawing.Point(9, 106);
+            this.ConfigVolumeOfContractsl.Location = new System.Drawing.Point(9, 108);
             this.ConfigVolumeOfContractsl.Name = "ConfigVolumeOfContractsl";
             this.ConfigVolumeOfContractsl.Size = new System.Drawing.Size(141, 20);
             this.ConfigVolumeOfContractsl.TabIndex = 9;
@@ -140,7 +146,7 @@ namespace UI
             // ConfigUpdatePriceRangel
             // 
             this.ConfigUpdatePriceRangel.AutoSize = true;
-            this.ConfigUpdatePriceRangel.Location = new System.Drawing.Point(9, 141);
+            this.ConfigUpdatePriceRangel.Location = new System.Drawing.Point(9, 140);
             this.ConfigUpdatePriceRangel.Name = "ConfigUpdatePriceRangel";
             this.ConfigUpdatePriceRangel.Size = new System.Drawing.Size(137, 20);
             this.ConfigUpdatePriceRangel.TabIndex = 10;
@@ -149,7 +155,7 @@ namespace UI
             // ConfigIntervalOfAnalysisl
             // 
             this.ConfigIntervalOfAnalysisl.AutoSize = true;
-            this.ConfigIntervalOfAnalysisl.Location = new System.Drawing.Point(9, 174);
+            this.ConfigIntervalOfAnalysisl.Location = new System.Drawing.Point(9, 172);
             this.ConfigIntervalOfAnalysisl.Name = "ConfigIntervalOfAnalysisl";
             this.ConfigIntervalOfAnalysisl.Size = new System.Drawing.Size(131, 20);
             this.ConfigIntervalOfAnalysisl.TabIndex = 11;
@@ -159,7 +165,7 @@ namespace UI
             // 
             this.ShowRegistrationPanel.Location = new System.Drawing.Point(11, 12);
             this.ShowRegistrationPanel.Name = "ShowRegistrationPanel";
-            this.ShowRegistrationPanel.Size = new System.Drawing.Size(117, 61);
+            this.ShowRegistrationPanel.Size = new System.Drawing.Size(141, 61);
             this.ShowRegistrationPanel.TabIndex = 14;
             this.ShowRegistrationPanel.Text = "Sign Up";
             this.ShowRegistrationPanel.UseVisualStyleBackColor = true;
@@ -169,7 +175,7 @@ namespace UI
             // 
             this.ShowLoginPanel.Location = new System.Drawing.Point(11, 79);
             this.ShowLoginPanel.Name = "ShowLoginPanel";
-            this.ShowLoginPanel.Size = new System.Drawing.Size(117, 61);
+            this.ShowLoginPanel.Size = new System.Drawing.Size(141, 61);
             this.ShowLoginPanel.TabIndex = 15;
             this.ShowLoginPanel.Text = "Sign In";
             this.ShowLoginPanel.UseVisualStyleBackColor = true;
@@ -179,7 +185,7 @@ namespace UI
             // 
             this.ShowMainMenu.Location = new System.Drawing.Point(11, 147);
             this.ShowMainMenu.Name = "ShowMainMenu";
-            this.ShowMainMenu.Size = new System.Drawing.Size(117, 61);
+            this.ShowMainMenu.Size = new System.Drawing.Size(141, 61);
             this.ShowMainMenu.TabIndex = 16;
             this.ShowMainMenu.Text = "Main Menu";
             this.ShowMainMenu.UseVisualStyleBackColor = true;
@@ -309,6 +315,10 @@ namespace UI
             // 
             // MainMenuGroupBox
             // 
+            this.MainMenuGroupBox.Controls.Add(this.ShowFilledOrderButton);
+            this.MainMenuGroupBox.Controls.Add(this.RemoveRowButton);
+            this.MainMenuGroupBox.Controls.Add(this.AddRowButton);
+            this.MainMenuGroupBox.Controls.Add(this.dataGridView1);
             this.MainMenuGroupBox.Controls.Add(this.BalanceLabel);
             this.MainMenuGroupBox.Controls.Add(this.label3);
             this.MainMenuGroupBox.Controls.Add(this.UpdateConfigButton);
@@ -325,14 +335,119 @@ namespace UI
             this.MainMenuGroupBox.Controls.Add(this.ConfigUpdatePriceRangel);
             this.MainMenuGroupBox.Controls.Add(this.ConfigRequiredProfit);
             this.MainMenuGroupBox.Controls.Add(this.ConfigVolumeOfContractsl);
-            this.MainMenuGroupBox.Controls.Add(this.StartButton);
-            this.MainMenuGroupBox.Controls.Add(this.StopButton);
-            this.MainMenuGroupBox.Location = new System.Drawing.Point(145, 10);
+            this.MainMenuGroupBox.Location = new System.Drawing.Point(186, 12);
             this.MainMenuGroupBox.Name = "MainMenuGroupBox";
             this.MainMenuGroupBox.Size = new System.Drawing.Size(695, 310);
             this.MainMenuGroupBox.TabIndex = 20;
             this.MainMenuGroupBox.TabStop = false;
             this.MainMenuGroupBox.Text = "Main Menu";
+            // 
+            // ShowFilledOrderButton
+            // 
+            this.ShowFilledOrderButton.Location = new System.Drawing.Point(248, 149);
+            this.ShowFilledOrderButton.Name = "ShowFilledOrderButton";
+            this.ShowFilledOrderButton.Size = new System.Drawing.Size(111, 54);
+            this.ShowFilledOrderButton.TabIndex = 24;
+            this.ShowFilledOrderButton.Text = "Show filled orders";
+            this.ShowFilledOrderButton.UseVisualStyleBackColor = true;
+            // 
+            // RemoveRowButton
+            // 
+            this.RemoveRowButton.Location = new System.Drawing.Point(465, 40);
+            this.RemoveRowButton.Name = "RemoveRowButton";
+            this.RemoveRowButton.Size = new System.Drawing.Size(103, 29);
+            this.RemoveRowButton.TabIndex = 23;
+            this.RemoveRowButton.Text = "-";
+            this.RemoveRowButton.UseVisualStyleBackColor = true;
+            this.RemoveRowButton.Click += new System.EventHandler(this.RemoveRowButton_Click);
+            // 
+            // AddRowButton
+            // 
+            this.AddRowButton.Location = new System.Drawing.Point(360, 40);
+            this.AddRowButton.Name = "AddRowButton";
+            this.AddRowButton.Size = new System.Drawing.Size(105, 29);
+            this.AddRowButton.TabIndex = 22;
+            this.AddRowButton.Text = "+";
+            this.AddRowButton.UseVisualStyleBackColor = true;
+            this.AddRowButton.Click += new System.EventHandler(this.AddRowButton_Click);
+            // 
+            // dataGridView1
+            // 
+            this.dataGridView1.AllowUserToAddRows = false;
+            this.dataGridView1.AllowUserToDeleteRows = false;
+            this.dataGridView1.AllowUserToResizeColumns = false;
+            this.dataGridView1.AllowUserToResizeRows = false;
+            this.dataGridView1.BackgroundColor = System.Drawing.Color.White;
+            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle6.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridView1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle6;
+            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.Slot,
+            this.Launch});
+            dataGridViewCellStyle9.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle9.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle9.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle9.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle9.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle9.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle9.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridView1.DefaultCellStyle = dataGridViewCellStyle9;
+            this.dataGridView1.GridColor = System.Drawing.SystemColors.Control;
+            this.dataGridView1.Location = new System.Drawing.Point(361, 70);
+            this.dataGridView1.Name = "dataGridView1";
+            this.dataGridView1.RowHeadersVisible = false;
+            this.dataGridView1.RowHeadersWidth = 51;
+            dataGridViewCellStyle10.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle10.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle10.SelectionBackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle10.SelectionForeColor = System.Drawing.SystemColors.WindowText;
+            this.dataGridView1.RowsDefaultCellStyle = dataGridViewCellStyle10;
+            this.dataGridView1.RowTemplate.Height = 29;
+            this.dataGridView1.ScrollBars = System.Windows.Forms.ScrollBars.None;
+            this.dataGridView1.Size = new System.Drawing.Size(207, 162);
+            this.dataGridView1.TabIndex = 21;
+            // 
+            // Slot
+            // 
+            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle7.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle7.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle7.SelectionBackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.WindowText;
+            this.Slot.DefaultCellStyle = dataGridViewCellStyle7;
+            this.Slot.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.ComboBox;
+            this.Slot.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.Slot.HeaderText = "Slot name";
+            this.Slot.Items.AddRange(new object[] {
+            "None",
+            "XBTUSD",
+            "ETHUSD",
+            "DOGEUSD"});
+            this.Slot.MinimumWidth = 6;
+            this.Slot.Name = "Slot";
+            this.Slot.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.Slot.Width = 173;
+            // 
+            // Launch
+            // 
+            dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle8.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle8.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle8.NullValue = false;
+            dataGridViewCellStyle8.SelectionBackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle8.SelectionForeColor = System.Drawing.SystemColors.WindowText;
+            this.Launch.DefaultCellStyle = dataGridViewCellStyle8;
+            this.Launch.HeaderText = "";
+            this.Launch.MinimumWidth = 6;
+            this.Launch.Name = "Launch";
+            this.Launch.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.Launch.Width = 30;
             // 
             // BalanceLabel
             // 
@@ -353,9 +468,9 @@ namespace UI
             // 
             // UpdateConfigButton
             // 
-            this.UpdateConfigButton.Location = new System.Drawing.Point(340, 203);
+            this.UpdateConfigButton.Location = new System.Drawing.Point(248, 39);
             this.UpdateConfigButton.Name = "UpdateConfigButton";
-            this.UpdateConfigButton.Size = new System.Drawing.Size(138, 55);
+            this.UpdateConfigButton.Size = new System.Drawing.Size(111, 55);
             this.UpdateConfigButton.TabIndex = 17;
             this.UpdateConfigButton.Text = "Update configuration";
             this.UpdateConfigButton.UseVisualStyleBackColor = true;
@@ -363,9 +478,9 @@ namespace UI
             // 
             // RemoveMyOrdersButton
             // 
-            this.RemoveMyOrdersButton.Location = new System.Drawing.Point(340, 260);
+            this.RemoveMyOrdersButton.Location = new System.Drawing.Point(248, 94);
             this.RemoveMyOrdersButton.Name = "RemoveMyOrdersButton";
-            this.RemoveMyOrdersButton.Size = new System.Drawing.Size(138, 44);
+            this.RemoveMyOrdersButton.Size = new System.Drawing.Size(111, 55);
             this.RemoveMyOrdersButton.TabIndex = 16;
             this.RemoveMyOrdersButton.Text = "Cancel my orders";
             this.RemoveMyOrdersButton.UseVisualStyleBackColor = true;
@@ -435,23 +550,11 @@ namespace UI
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(9, 204);
+            this.label2.Location = new System.Drawing.Point(9, 207);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(135, 20);
             this.label2.TabIndex = 12;
             this.label2.Text = "Algorithm sensivity";
-            // 
-            // StopButton
-            // 
-            this.StopButton.Enabled = false;
-            this.StopButton.Location = new System.Drawing.Point(480, 260);
-            this.StopButton.Name = "StopButton";
-            this.StopButton.Size = new System.Drawing.Size(209, 44);
-            this.StopButton.TabIndex = 18;
-            this.StopButton.Text = "Stop bot";
-            this.StopButton.UseVisualStyleBackColor = true;
-            this.StopButton.Visible = false;
-            this.StopButton.Click += new System.EventHandler(this.StopButton_Click);
             // 
             // SignUpGroupBox
             // 
@@ -465,7 +568,7 @@ namespace UI
             this.SignUpGroupBox.Controls.Add(this.ConfigTokenl);
             this.SignUpGroupBox.Controls.Add(this.RegKey);
             this.SignUpGroupBox.Enabled = false;
-            this.SignUpGroupBox.Location = new System.Drawing.Point(145, 10);
+            this.SignUpGroupBox.Location = new System.Drawing.Point(192, 12);
             this.SignUpGroupBox.Name = "SignUpGroupBox";
             this.SignUpGroupBox.Size = new System.Drawing.Size(695, 310);
             this.SignUpGroupBox.TabIndex = 21;
@@ -481,7 +584,7 @@ namespace UI
             this.SignInGroupBox.Controls.Add(this.label8);
             this.SignInGroupBox.Controls.Add(this.label9);
             this.SignInGroupBox.Enabled = false;
-            this.SignInGroupBox.Location = new System.Drawing.Point(145, 10);
+            this.SignInGroupBox.Location = new System.Drawing.Point(192, 12);
             this.SignInGroupBox.Name = "SignInGroupBox";
             this.SignInGroupBox.Size = new System.Drawing.Size(695, 310);
             this.SignInGroupBox.TabIndex = 22;
@@ -489,21 +592,11 @@ namespace UI
             this.SignInGroupBox.Text = "Sign In";
             this.SignInGroupBox.Visible = false;
             // 
-            // EventConsole
-            // 
-            this.EventConsole.BackColor = System.Drawing.Color.White;
-            this.EventConsole.Location = new System.Drawing.Point(11, 335);
-            this.EventConsole.Name = "EventConsole";
-            this.EventConsole.ReadOnly = true;
-            this.EventConsole.Size = new System.Drawing.Size(835, 408);
-            this.EventConsole.TabIndex = 23;
-            this.EventConsole.Text = "";
-            // 
             // LoggedGroupBox
             // 
             this.LoggedGroupBox.Controls.Add(this.SignOutButton);
             this.LoggedGroupBox.Enabled = false;
-            this.LoggedGroupBox.Location = new System.Drawing.Point(145, 12);
+            this.LoggedGroupBox.Location = new System.Drawing.Point(192, 14);
             this.LoggedGroupBox.Name = "LoggedGroupBox";
             this.LoggedGroupBox.Size = new System.Drawing.Size(695, 308);
             this.LoggedGroupBox.TabIndex = 24;
@@ -521,12 +614,63 @@ namespace UI
             this.SignOutButton.UseVisualStyleBackColor = true;
             this.SignOutButton.Click += new System.EventHandler(this.SignOutButton_Click);
             // 
+            // tabControl1
+            // 
+            this.tabControl1.Controls.Add(this.LogsPage);
+            this.tabControl1.Controls.Add(this.GraphicsPage);
+            this.tabControl1.Controls.Add(this.FilledOrdersPage);
+            this.tabControl1.Location = new System.Drawing.Point(14, 335);
+            this.tabControl1.Name = "tabControl1";
+            this.tabControl1.SelectedIndex = 0;
+            this.tabControl1.Size = new System.Drawing.Size(1041, 645);
+            this.tabControl1.TabIndex = 26;
+            // 
+            // LogsPage
+            // 
+            this.LogsPage.Controls.Add(this.EventConsole);
+            this.LogsPage.Location = new System.Drawing.Point(4, 29);
+            this.LogsPage.Name = "LogsPage";
+            this.LogsPage.Padding = new System.Windows.Forms.Padding(3);
+            this.LogsPage.Size = new System.Drawing.Size(1033, 612);
+            this.LogsPage.TabIndex = 0;
+            this.LogsPage.Text = "Logs";
+            this.LogsPage.UseVisualStyleBackColor = true;
+            // 
+            // EventConsole
+            // 
+            this.EventConsole.BackColor = System.Drawing.Color.White;
+            this.EventConsole.Location = new System.Drawing.Point(0, 0);
+            this.EventConsole.Name = "EventConsole";
+            this.EventConsole.ReadOnly = true;
+            this.EventConsole.Size = new System.Drawing.Size(1033, 611);
+            this.EventConsole.TabIndex = 24;
+            this.EventConsole.Text = "";
+            // 
+            // GraphicsPage
+            // 
+            this.GraphicsPage.Location = new System.Drawing.Point(4, 29);
+            this.GraphicsPage.Name = "GraphicsPage";
+            this.GraphicsPage.Padding = new System.Windows.Forms.Padding(3);
+            this.GraphicsPage.Size = new System.Drawing.Size(1033, 612);
+            this.GraphicsPage.TabIndex = 1;
+            this.GraphicsPage.Text = "Graphics";
+            this.GraphicsPage.UseVisualStyleBackColor = true;
+            // 
+            // FilledOrdersPage
+            // 
+            this.FilledOrdersPage.Location = new System.Drawing.Point(4, 29);
+            this.FilledOrdersPage.Name = "FilledOrdersPage";
+            this.FilledOrdersPage.Size = new System.Drawing.Size(1033, 612);
+            this.FilledOrdersPage.TabIndex = 2;
+            this.FilledOrdersPage.Text = "Filled Orders";
+            this.FilledOrdersPage.UseVisualStyleBackColor = true;
+            // 
             // TradeBotUi
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(858, 755);
-            this.Controls.Add(this.EventConsole);
+            this.ClientSize = new System.Drawing.Size(1067, 986);
+            this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.ShowMainMenu);
             this.Controls.Add(this.ShowLoginPanel);
             this.Controls.Add(this.ShowRegistrationPanel);
@@ -537,20 +681,22 @@ namespace UI
             this.Name = "TradeBotUi";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "TradeBot";
+            this.Load += new System.EventHandler(this.TradeBotUi_Load);
             this.MainMenuGroupBox.ResumeLayout(false);
             this.MainMenuGroupBox.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.SignUpGroupBox.ResumeLayout(false);
             this.SignUpGroupBox.PerformLayout();
             this.SignInGroupBox.ResumeLayout(false);
             this.SignInGroupBox.PerformLayout();
             this.LoggedGroupBox.ResumeLayout(false);
+            this.tabControl1.ResumeLayout(false);
+            this.LogsPage.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         #endregion
-
-        private System.Windows.Forms.Button StartButton;
         private System.Windows.Forms.TextBox ConfigAvailableBalance;
         private System.Windows.Forms.TextBox ConfigRequiredProfit;
         private System.Windows.Forms.TextBox ConfigUpdatePriceRange;
@@ -579,7 +725,6 @@ namespace UI
         private System.Windows.Forms.GroupBox MainMenuGroupBox;
         private System.Windows.Forms.GroupBox SignUpGroupBox;
         private System.Windows.Forms.GroupBox SignInGroupBox;
-        private System.Windows.Forms.RichTextBox EventConsole;
         private System.Windows.Forms.GroupBox LoggedGroupBox;
         private System.Windows.Forms.Button SignOutButton;
         private System.Windows.Forms.ComboBox ConfigAlgorithmSensivity;
@@ -588,9 +733,19 @@ namespace UI
         private System.Windows.Forms.ComboBox ConfigVolumeOfContracts;
         private System.Windows.Forms.Button RemoveMyOrdersButton;
         private System.Windows.Forms.Button UpdateConfigButton;
-        private System.Windows.Forms.Button StopButton;
         private System.Windows.Forms.Label BalanceLabel;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.DataGridView dataGridView1;
+        private System.Windows.Forms.Button RemoveRowButton;
+        private System.Windows.Forms.Button AddRowButton;
+        private System.Windows.Forms.DataGridViewComboBoxColumn Slot;
+        private System.Windows.Forms.DataGridViewCheckBoxColumn Launch;
+        private System.Windows.Forms.Button ShowFilledOrderButton;
+        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabPage LogsPage;
+        private System.Windows.Forms.TabPage GraphicsPage;
+        private System.Windows.Forms.RichTextBox EventConsole;
+        private System.Windows.Forms.TabPage FilledOrdersPage;
     }
 }
 
