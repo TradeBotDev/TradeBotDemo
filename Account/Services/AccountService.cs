@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using Grpc.Core;
-using Grpc.Net.Client;
 using Serilog;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,15 +15,6 @@ namespace AccountGRPC
 {
     public class AccountService : Account.AccountBase
     {
-        private IConfigurationRoot config;
-
-        public AccountService()
-        {
-            config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", optional: false)
-                .Build();
-        }
-
         // Метод входа в аккаунт по запросу клиента.
         public override async Task<LoginResponse> Login(LoginRequest request, ServerCallContext context)
         {

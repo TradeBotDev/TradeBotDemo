@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="accounts.db-shm" />
     <None Remove="accounts.db-wal" />
   </ItemGroup>
 
