@@ -12,6 +12,7 @@ namespace Website
     {
         public Startup(IConfiguration configuration)
         {
+            // Добавление нового логгера, который будет выводить всю информацию в консоль.
             Configuration = configuration;
             Log.Logger = new LoggerConfiguration()
                 .Enrich.FromLogContext()
