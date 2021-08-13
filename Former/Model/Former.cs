@@ -51,7 +51,7 @@ namespace Former.Model
                 {
                     Id = placeResponse.OrderId,
                     Price = price,
-                    Quantity = quantity,
+                    Quantity = -quantity,
                     Signature = new OrderSignature { Status = OrderStatus.Open, Type = type },
                     LastUpdateDate = new Timestamp()
                 };
