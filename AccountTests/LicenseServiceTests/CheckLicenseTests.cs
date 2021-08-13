@@ -22,5 +22,18 @@ namespace AccountTests.LicenseServiceTests
 
             Assert.Equal(LicenseCode.NoAccess, reply.Result.Code);
         }
+
+        [Fact]
+        public void CheckNotExistingLicense()
+        {
+            var reply = GenerateLogin("not_ex_license").ContinueWith(login =>
+                licenseService.CheckLicense(new CheckLicenseRequest
+                {
+                    SessionId = login.Result.Result.SessionId,
+                    Product = ProductCode.Tradebot
+                }, null));
+
+            Assert.Equal(LicenseCode.NoAccess, reply.Result.Result.Code);
+        }
     }
 }
