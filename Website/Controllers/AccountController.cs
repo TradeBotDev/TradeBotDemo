@@ -8,7 +8,7 @@ using Website.Models;
 
 namespace Website.Controllers
 {
-    // Все страницы в данном контроллере требуют авторизации для того, чтобы к ним был доступ.
+    // Все страницы в данном контроллере требуют авторизации для доступа к ним.
     [Authorize]
     public class AccountController : Controller
     {
