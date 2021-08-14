@@ -31,7 +31,7 @@ namespace UI
                         Request = new TradeBot.Common.v1.UpdateServerConfigRequest
                             { Config = configuration, Switch = false }
                     }, _meta);
-                await SubscribeEvents();
+                SubscribeEvents();
                 return new DefaultResponse { Code = ReplyCode.Succeed, Message = ""};
             }
             catch

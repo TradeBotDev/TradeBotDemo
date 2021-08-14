@@ -3,8 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using TradeBot.Common.v1;
 using TradeBot.Facade.FacadeService.v1;
 
@@ -28,6 +32,16 @@ namespace UI
             public string Id;
             public string Message;
         }
+        public class ConfigurationJson
+        {
+            public string AlgorithmSensitivity;
+            public string AlgorithmInterval;
+            public string AvailableBalance;
+            public string RequiredProfit;
+            public string VolumeOfContracts;
+            public string UpdatePriceRange;
+            public List<string> activeSlots;
+        }
 
         private bool _loggedIn;
 
@@ -41,6 +55,7 @@ namespace UI
             _sensitivityMap = InitSensitivityMap();
             _listOfAllSlots = InitListOfAllSlots();
             _listOfActiveSlots = new List<string>();
+            ApplyConfiguration(ReadConfiguration());
             FormClosing += MainWindow_FormClosing;
             ConfigUpdatePriceRange.TextChanged += ConfigUpdatePriceRangeOnTextChanged;
             ActiveSlotsDataGridView.CellContentClick += DataGridView1_CellContentClick;
@@ -48,26 +63,66 @@ namespace UI
             SlotsComboBox.SelectedIndex = 0;
             foreach (var control in MainMenuGroupBox.Controls)
             {
-                if (control.GetType().FullName.Contains("TextBox"))
+                var fullName = control.GetType().FullName;
+                if (fullName != null && fullName.Contains("TextBox"))
                     ((TextBox)control).Validating += OnValidatingTextBox;
             }
         }
 
-        private void OnValidatingTextBox(object sender, CancelEventArgs e)
+        private ConfigurationJson InitConfigurationJson()
         {
-            if (!double.TryParse(((TextBox)sender).Text, out var result))
+            return new ConfigurationJson
             {
-                e.Cancel = true;
-                ErrorProvider.SetError((TextBox)sender, "A number is required!");
-            }
-            else if (string.IsNullOrEmpty(((TextBox)sender).Text))
-            {
-                e.Cancel = true;
-                ErrorProvider.SetError(((TextBox)sender), "The field must not be empty!");
-            }
-            else ErrorProvider.Clear();
+                AlgorithmSensitivity = ConfigAlgorithmSensivity.Text,
+                AlgorithmInterval = ConfigIntervalOfAnalysis.Text,
+                AvailableBalance = ConfigAvailableBalance.Text,
+                RequiredProfit = ConfigRequiredProfit.Text,
+                VolumeOfContracts = ConfigVolumeOfContracts.Text,
+                UpdatePriceRange = ConfigUpdatePriceRange.Text,
+                activeSlots = new List<string>(_listOfActiveSlots)
+            };
         }
 
+        private void SaveConfiguration(ConfigurationJson configuration)
+        {
+            var serializer = new JsonSerializer();
+            if (File.Exists("configuration.save")) File.Delete("configuration.save");
+            var sw = new StreamWriter("configuration.save");
+            var writer = new JsonTextWriter(sw);
+            serializer.Serialize(writer, configuration);
+            writer.Close();
+            sw.Close();
+        }
+
+        private ConfigurationJson ReadConfiguration()
+        {
+            JObject obj = null;
+            if (File.Exists("configuration.save"))
+            {
+                var serializer = new JsonSerializer();
+                var sr = new StreamReader("configuration.save");
+                JsonReader jsonReader = new JsonTextReader(sr);
+                obj = serializer.Deserialize(jsonReader) as JObject;
+                jsonReader.Close();
+                sr.Close();
+            }
+            return (ConfigurationJson)obj?.ToObject(typeof(ConfigurationJson));
+        }
+
+        private void ApplyConfiguration(ConfigurationJson configuration)
+        {
+            ConfigAvailableBalance.Text = configuration.AvailableBalance;
+            ConfigRequiredProfit.Text = configuration.RequiredProfit;
+            ConfigAlgorithmSensivity.Text = configuration.AlgorithmSensitivity;
+            ConfigIntervalOfAnalysis.Text = configuration.AlgorithmInterval;
+            ConfigUpdatePriceRange.Text = configuration.UpdatePriceRange;
+            ConfigVolumeOfContractsl.Text = configuration.VolumeOfContracts;
+            foreach (var activeSlot in configuration.activeSlots)
+            {
+                AddToActiveSlots(activeSlot);
+            }
+
+        }
 
         private static List<string> InitListOfAllSlots()
         {
@@ -235,6 +290,7 @@ namespace UI
 
         private async void Start(string slotName)
         {
+            SaveConfiguration(InitConfigurationJson());
             await _facadeClient.StartBot(slotName, GetConfig());
             WriteMessageToEventConsole("Bot has been started!");
         }
@@ -280,6 +336,22 @@ namespace UI
         }
 
         #region EventHandlers
+        
+        private void OnValidatingTextBox(object sender, CancelEventArgs e)
+        {
+            if (!double.TryParse(((TextBox)sender).Text, out _))
+            {
+                e.Cancel = true;
+                ErrorProvider.SetError((TextBox)sender, "A number is required!");
+            }
+            else if (string.IsNullOrEmpty(((TextBox)sender).Text))
+            {
+                e.Cancel = true;
+                ErrorProvider.SetError(((TextBox)sender), "The field must not be empty!");
+            }
+            else ErrorProvider.Clear();
+        }
+
         private void ConfigUpdatePriceRangeOnTextChanged(object sender, EventArgs e)
         {
             ConfigUpdatePriceRange.TextChanged -= ConfigUpdatePriceRangeOnTextChanged;
@@ -299,17 +371,17 @@ namespace UI
             if (e.ColumnIndex is -1 or 0) return;
 
             if (!CheckIfLogged()) return;
-            var ch1 = (DataGridViewCheckBoxCell)ActiveSlotsDataGridView.Rows[ActiveSlotsDataGridView.CurrentRow.Index].Cells[1];
-            ch1.Value ??= false;
-            if (Convert.ToBoolean(ch1.Value))
+            var cellCheckBox = (DataGridViewCheckBoxCell)ActiveSlotsDataGridView.Rows[ActiveSlotsDataGridView.CurrentRow.Index].Cells[1];
+            cellCheckBox.Value ??= false;
+            if (Convert.ToBoolean(cellCheckBox.Value))
             {
                 Stop(ActiveSlotsDataGridView.Rows[ActiveSlotsDataGridView.CurrentRow.Index].Cells[0].EditedFormattedValue.ToString());
-                ch1.Value = false;
+                cellCheckBox.Value = false;
             }
             else
             {
                 Start(ActiveSlotsDataGridView.Rows[ActiveSlotsDataGridView.CurrentRow.Index].Cells[0].EditedFormattedValue.ToString());
-                ch1.Value = true;
+                cellCheckBox.Value = true;
             }
         }
 
@@ -364,7 +436,7 @@ namespace UI
         }
 
         private async void LoginButton_Click(object sender, EventArgs e)
-        {
+        { 
             if (!CheckConnection(await _facadeClient.SigningIn(LogLogTextBox.Text, LogPassTextBox.Text, RegKey.Text, RegToken.Text))) return;
             LoggedGroupBox.Visible = true;
             LoggedGroupBox.Enabled = true;
@@ -396,11 +468,13 @@ namespace UI
         private async void UpdateConfigButton_Click(object sender, EventArgs e)
         {
             if (!CheckIfLogged()) return;
+            SaveConfiguration(InitConfigurationJson());
             CheckConnection(await _facadeClient.UpdateConfig(GetConfig()));
         }
 
         private async void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
+            SaveConfiguration(InitConfigurationJson());
             for (var i = 0; i < ActiveSlotsDataGridView.Rows.Count; i++)
             {
                 if (Convert.ToBoolean(ActiveSlotsDataGridView.Rows[i].Cells[1].EditedFormattedValue))
@@ -425,7 +499,5 @@ namespace UI
         }
 
         #endregion
-
-
     }
 }
