@@ -29,13 +29,14 @@ namespace UI
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
             this.ConfigAvailableBalance = new System.Windows.Forms.TextBox();
             this.ConfigRequiredProfit = new System.Windows.Forms.TextBox();
             this.ConfigUpdatePriceRange = new System.Windows.Forms.TextBox();
@@ -63,10 +64,11 @@ namespace UI
             this.LogPassTextBox = new System.Windows.Forms.TextBox();
             this.MainMenuGroupBox = new System.Windows.Forms.GroupBox();
             this.SlotsComboBox = new System.Windows.Forms.ComboBox();
-            this.ShowFilledOrderButton = new System.Windows.Forms.Button();
             this.RemoveRowButton = new System.Windows.Forms.Button();
             this.AddRowButton = new System.Windows.Forms.Button();
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.ActiveSlotsDataGridView = new System.Windows.Forms.DataGridView();
+            this.Slot = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Launch = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.BalanceLabel = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.UpdateConfigButton = new System.Windows.Forms.Button();
@@ -78,6 +80,7 @@ namespace UI
             this.SignUpGroupBox = new System.Windows.Forms.GroupBox();
             this.SignInGroupBox = new System.Windows.Forms.GroupBox();
             this.LoggedGroupBox = new System.Windows.Forms.GroupBox();
+            this.label7 = new System.Windows.Forms.Label();
             this.SignOutButton = new System.Windows.Forms.Button();
             this.FilledOrdersDataGridView = new System.Windows.Forms.DataGridView();
             this.SlotName = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -104,10 +107,9 @@ namespace UI
             this.OrderID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Quantity = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Slot = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Launch = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.ErrorProvider = new System.Windows.Forms.ErrorProvider(this.components);
             this.MainMenuGroupBox.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ActiveSlotsDataGridView)).BeginInit();
             this.SignUpGroupBox.SuspendLayout();
             this.SignInGroupBox.SuspendLayout();
             this.LoggedGroupBox.SuspendLayout();
@@ -119,11 +121,14 @@ namespace UI
             this.FilledOrdersPage.SuspendLayout();
             this.ActiveOrdersPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ActiveOrdersDataGridView)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ErrorProvider)).BeginInit();
             this.SuspendLayout();
             // 
             // ConfigAvailableBalance
             // 
+            this.ConfigAvailableBalance.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ConfigAvailableBalance.Location = new System.Drawing.Point(161, 40);
+            this.ConfigAvailableBalance.Margin = new System.Windows.Forms.Padding(5);
             this.ConfigAvailableBalance.Name = "ConfigAvailableBalance";
             this.ConfigAvailableBalance.Size = new System.Drawing.Size(84, 27);
             this.ConfigAvailableBalance.TabIndex = 1;
@@ -131,7 +136,9 @@ namespace UI
             // 
             // ConfigRequiredProfit
             // 
-            this.ConfigRequiredProfit.Location = new System.Drawing.Point(161, 73);
+            this.ConfigRequiredProfit.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ConfigRequiredProfit.Location = new System.Drawing.Point(161, 71);
+            this.ConfigRequiredProfit.Margin = new System.Windows.Forms.Padding(5);
             this.ConfigRequiredProfit.Name = "ConfigRequiredProfit";
             this.ConfigRequiredProfit.Size = new System.Drawing.Size(84, 27);
             this.ConfigRequiredProfit.TabIndex = 2;
@@ -139,7 +146,9 @@ namespace UI
             // 
             // ConfigUpdatePriceRange
             // 
-            this.ConfigUpdatePriceRange.Location = new System.Drawing.Point(161, 138);
+            this.ConfigUpdatePriceRange.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ConfigUpdatePriceRange.Location = new System.Drawing.Point(161, 134);
+            this.ConfigUpdatePriceRange.Margin = new System.Windows.Forms.Padding(5);
             this.ConfigUpdatePriceRange.Name = "ConfigUpdatePriceRange";
             this.ConfigUpdatePriceRange.Size = new System.Drawing.Size(84, 27);
             this.ConfigUpdatePriceRange.TabIndex = 4;
@@ -147,6 +156,7 @@ namespace UI
             // 
             // label1
             // 
+            this.label1.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(9, 43);
             this.label1.Name = "label1";
@@ -156,8 +166,9 @@ namespace UI
             // 
             // ConfigRequiredProfitl
             // 
+            this.ConfigRequiredProfitl.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ConfigRequiredProfitl.AutoSize = true;
-            this.ConfigRequiredProfitl.Location = new System.Drawing.Point(9, 76);
+            this.ConfigRequiredProfitl.Location = new System.Drawing.Point(9, 74);
             this.ConfigRequiredProfitl.Name = "ConfigRequiredProfitl";
             this.ConfigRequiredProfitl.Size = new System.Drawing.Size(110, 20);
             this.ConfigRequiredProfitl.TabIndex = 8;
@@ -165,8 +176,9 @@ namespace UI
             // 
             // ConfigVolumeOfContractsl
             // 
+            this.ConfigVolumeOfContractsl.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ConfigVolumeOfContractsl.AutoSize = true;
-            this.ConfigVolumeOfContractsl.Location = new System.Drawing.Point(9, 108);
+            this.ConfigVolumeOfContractsl.Location = new System.Drawing.Point(9, 104);
             this.ConfigVolumeOfContractsl.Name = "ConfigVolumeOfContractsl";
             this.ConfigVolumeOfContractsl.Size = new System.Drawing.Size(141, 20);
             this.ConfigVolumeOfContractsl.TabIndex = 9;
@@ -174,8 +186,9 @@ namespace UI
             // 
             // ConfigUpdatePriceRangel
             // 
+            this.ConfigUpdatePriceRangel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ConfigUpdatePriceRangel.AutoSize = true;
-            this.ConfigUpdatePriceRangel.Location = new System.Drawing.Point(9, 140);
+            this.ConfigUpdatePriceRangel.Location = new System.Drawing.Point(9, 136);
             this.ConfigUpdatePriceRangel.Name = "ConfigUpdatePriceRangel";
             this.ConfigUpdatePriceRangel.Size = new System.Drawing.Size(137, 20);
             this.ConfigUpdatePriceRangel.TabIndex = 10;
@@ -183,8 +196,9 @@ namespace UI
             // 
             // ConfigIntervalOfAnalysisl
             // 
+            this.ConfigIntervalOfAnalysisl.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ConfigIntervalOfAnalysisl.AutoSize = true;
-            this.ConfigIntervalOfAnalysisl.Location = new System.Drawing.Point(9, 172);
+            this.ConfigIntervalOfAnalysisl.Location = new System.Drawing.Point(9, 168);
             this.ConfigIntervalOfAnalysisl.Name = "ConfigIntervalOfAnalysisl";
             this.ConfigIntervalOfAnalysisl.Size = new System.Drawing.Size(131, 20);
             this.ConfigIntervalOfAnalysisl.TabIndex = 11;
@@ -198,7 +212,7 @@ namespace UI
             this.ShowRegistrationPanel.TabIndex = 14;
             this.ShowRegistrationPanel.Text = "Sign Up";
             this.ShowRegistrationPanel.UseVisualStyleBackColor = true;
-            this.ShowRegistrationPanel.Click += new System.EventHandler(this.ShowRegistrationPanel_Click);
+            this.ShowRegistrationPanel.Click += new System.EventHandler(this.ShowSignUpPanel_Click);
             // 
             // ShowLoginPanel
             // 
@@ -208,7 +222,7 @@ namespace UI
             this.ShowLoginPanel.TabIndex = 15;
             this.ShowLoginPanel.Text = "Sign In";
             this.ShowLoginPanel.UseVisualStyleBackColor = true;
-            this.ShowLoginPanel.Click += new System.EventHandler(this.ShowLoginPanel_Click);
+            this.ShowLoginPanel.Click += new System.EventHandler(this.ShowSignInPanel_Click);
             // 
             // ShowMainMenu
             // 
@@ -344,11 +358,12 @@ namespace UI
             // 
             // MainMenuGroupBox
             // 
+            this.MainMenuGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.MainMenuGroupBox.Controls.Add(this.SlotsComboBox);
-            this.MainMenuGroupBox.Controls.Add(this.ShowFilledOrderButton);
             this.MainMenuGroupBox.Controls.Add(this.RemoveRowButton);
             this.MainMenuGroupBox.Controls.Add(this.AddRowButton);
-            this.MainMenuGroupBox.Controls.Add(this.dataGridView1);
+            this.MainMenuGroupBox.Controls.Add(this.ActiveSlotsDataGridView);
             this.MainMenuGroupBox.Controls.Add(this.BalanceLabel);
             this.MainMenuGroupBox.Controls.Add(this.label3);
             this.MainMenuGroupBox.Controls.Add(this.UpdateConfigButton);
@@ -374,29 +389,21 @@ namespace UI
             // 
             // SlotsComboBox
             // 
+            this.SlotsComboBox.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.SlotsComboBox.FormattingEnabled = true;
             this.SlotsComboBox.Items.AddRange(new object[] {
             "XBTUSD",
             "ETHUSD",
             "DOGEUSD"});
-            this.SlotsComboBox.Location = new System.Drawing.Point(362, 204);
+            this.SlotsComboBox.Location = new System.Drawing.Point(470, 275);
             this.SlotsComboBox.Name = "SlotsComboBox";
             this.SlotsComboBox.Size = new System.Drawing.Size(86, 28);
             this.SlotsComboBox.TabIndex = 25;
-            this.SlotsComboBox.Text = "XBTUSD";
-            // 
-            // ShowFilledOrderButton
-            // 
-            this.ShowFilledOrderButton.Location = new System.Drawing.Point(248, 149);
-            this.ShowFilledOrderButton.Name = "ShowFilledOrderButton";
-            this.ShowFilledOrderButton.Size = new System.Drawing.Size(111, 54);
-            this.ShowFilledOrderButton.TabIndex = 24;
-            this.ShowFilledOrderButton.Text = "Show filled orders";
-            this.ShowFilledOrderButton.UseVisualStyleBackColor = true;
             // 
             // RemoveRowButton
             // 
-            this.RemoveRowButton.Location = new System.Drawing.Point(517, 203);
+            this.RemoveRowButton.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.RemoveRowButton.Location = new System.Drawing.Point(625, 274);
             this.RemoveRowButton.Name = "RemoveRowButton";
             this.RemoveRowButton.Size = new System.Drawing.Size(70, 30);
             this.RemoveRowButton.TabIndex = 23;
@@ -406,7 +413,8 @@ namespace UI
             // 
             // AddRowButton
             // 
-            this.AddRowButton.Location = new System.Drawing.Point(449, 203);
+            this.AddRowButton.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.AddRowButton.Location = new System.Drawing.Point(557, 274);
             this.AddRowButton.Name = "AddRowButton";
             this.AddRowButton.Size = new System.Drawing.Size(68, 30);
             this.AddRowButton.TabIndex = 22;
@@ -414,13 +422,14 @@ namespace UI
             this.AddRowButton.UseVisualStyleBackColor = true;
             this.AddRowButton.Click += new System.EventHandler(this.AddRowButton_Click);
             // 
-            // dataGridView1
+            // ActiveSlotsDataGridView
             // 
-            this.dataGridView1.AllowUserToAddRows = false;
-            this.dataGridView1.AllowUserToDeleteRows = false;
-            this.dataGridView1.AllowUserToResizeColumns = false;
-            this.dataGridView1.AllowUserToResizeRows = false;
-            this.dataGridView1.BackgroundColor = System.Drawing.Color.White;
+            this.ActiveSlotsDataGridView.AllowUserToAddRows = false;
+            this.ActiveSlotsDataGridView.AllowUserToDeleteRows = false;
+            this.ActiveSlotsDataGridView.AllowUserToResizeColumns = false;
+            this.ActiveSlotsDataGridView.AllowUserToResizeRows = false;
+            this.ActiveSlotsDataGridView.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ActiveSlotsDataGridView.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
             dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
@@ -428,9 +437,9 @@ namespace UI
             dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.Control;
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridView1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.ActiveSlotsDataGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            this.ActiveSlotsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.ActiveSlotsDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Slot,
             this.Launch});
             dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
@@ -440,25 +449,59 @@ namespace UI
             dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridView1.DefaultCellStyle = dataGridViewCellStyle4;
-            this.dataGridView1.GridColor = System.Drawing.SystemColors.Control;
-            this.dataGridView1.Location = new System.Drawing.Point(362, 40);
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.RowHeadersVisible = false;
-            this.dataGridView1.RowHeadersWidth = 51;
+            this.ActiveSlotsDataGridView.DefaultCellStyle = dataGridViewCellStyle4;
+            this.ActiveSlotsDataGridView.GridColor = System.Drawing.SystemColors.Control;
+            this.ActiveSlotsDataGridView.Location = new System.Drawing.Point(470, 40);
+            this.ActiveSlotsDataGridView.Name = "ActiveSlotsDataGridView";
+            this.ActiveSlotsDataGridView.ReadOnly = true;
+            this.ActiveSlotsDataGridView.RowHeadersVisible = false;
+            this.ActiveSlotsDataGridView.RowHeadersWidth = 51;
             dataGridViewCellStyle5.BackColor = System.Drawing.Color.White;
             dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle5.SelectionBackColor = System.Drawing.Color.White;
             dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.WindowText;
-            this.dataGridView1.RowsDefaultCellStyle = dataGridViewCellStyle5;
-            this.dataGridView1.RowTemplate.Height = 29;
-            this.dataGridView1.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.dataGridView1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridView1.Size = new System.Drawing.Size(225, 162);
-            this.dataGridView1.TabIndex = 21;
+            this.ActiveSlotsDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle5;
+            this.ActiveSlotsDataGridView.RowTemplate.Height = 29;
+            this.ActiveSlotsDataGridView.ScrollBars = System.Windows.Forms.ScrollBars.None;
+            this.ActiveSlotsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
+            this.ActiveSlotsDataGridView.Size = new System.Drawing.Size(225, 232);
+            this.ActiveSlotsDataGridView.TabIndex = 21;
+            // 
+            // Slot
+            // 
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle2.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.WindowText;
+            this.Slot.DefaultCellStyle = dataGridViewCellStyle2;
+            this.Slot.HeaderText = "Slot name";
+            this.Slot.MinimumWidth = 6;
+            this.Slot.Name = "Slot";
+            this.Slot.ReadOnly = true;
+            this.Slot.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.Slot.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.Slot.Width = 140;
+            // 
+            // Launch
+            // 
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle3.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle3.NullValue = false;
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.WindowText;
+            this.Launch.DefaultCellStyle = dataGridViewCellStyle3;
+            this.Launch.HeaderText = "Launch";
+            this.Launch.MinimumWidth = 6;
+            this.Launch.Name = "Launch";
+            this.Launch.ReadOnly = true;
+            this.Launch.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.Launch.Width = 80;
             // 
             // BalanceLabel
             // 
+            this.BalanceLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.BalanceLabel.AutoSize = true;
             this.BalanceLabel.Location = new System.Drawing.Point(79, 282);
             this.BalanceLabel.Name = "BalanceLabel";
@@ -467,6 +510,7 @@ namespace UI
             // 
             // label3
             // 
+            this.label3.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(9, 281);
             this.label3.Name = "label3";
@@ -476,6 +520,7 @@ namespace UI
             // 
             // UpdateConfigButton
             // 
+            this.UpdateConfigButton.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.UpdateConfigButton.Location = new System.Drawing.Point(248, 39);
             this.UpdateConfigButton.Name = "UpdateConfigButton";
             this.UpdateConfigButton.Size = new System.Drawing.Size(111, 55);
@@ -486,7 +531,8 @@ namespace UI
             // 
             // RemoveMyOrdersButton
             // 
-            this.RemoveMyOrdersButton.Location = new System.Drawing.Point(248, 94);
+            this.RemoveMyOrdersButton.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.RemoveMyOrdersButton.Location = new System.Drawing.Point(358, 39);
             this.RemoveMyOrdersButton.Name = "RemoveMyOrdersButton";
             this.RemoveMyOrdersButton.Size = new System.Drawing.Size(111, 55);
             this.RemoveMyOrdersButton.TabIndex = 16;
@@ -496,6 +542,7 @@ namespace UI
             // 
             // ConfigIntervalOfAnalysis
             // 
+            this.ConfigIntervalOfAnalysis.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ConfigIntervalOfAnalysis.DisplayMember = "0";
             this.ConfigIntervalOfAnalysis.FormattingEnabled = true;
             this.ConfigIntervalOfAnalysis.Items.AddRange(new object[] {
@@ -517,7 +564,8 @@ namespace UI
             "1w",
             "2w",
             "1mon"});
-            this.ConfigIntervalOfAnalysis.Location = new System.Drawing.Point(161, 169);
+            this.ConfigIntervalOfAnalysis.Location = new System.Drawing.Point(161, 165);
+            this.ConfigIntervalOfAnalysis.Margin = new System.Windows.Forms.Padding(5);
             this.ConfigIntervalOfAnalysis.Name = "ConfigIntervalOfAnalysis";
             this.ConfigIntervalOfAnalysis.Size = new System.Drawing.Size(84, 28);
             this.ConfigIntervalOfAnalysis.TabIndex = 15;
@@ -525,6 +573,7 @@ namespace UI
             // 
             // ConfigVolumeOfContracts
             // 
+            this.ConfigVolumeOfContracts.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ConfigVolumeOfContracts.DisplayMember = "(none)";
             this.ConfigVolumeOfContracts.FormattingEnabled = true;
             this.ConfigVolumeOfContracts.Items.AddRange(new object[] {
@@ -533,7 +582,8 @@ namespace UI
             "300",
             "400",
             "500"});
-            this.ConfigVolumeOfContracts.Location = new System.Drawing.Point(161, 106);
+            this.ConfigVolumeOfContracts.Location = new System.Drawing.Point(161, 102);
+            this.ConfigVolumeOfContracts.Margin = new System.Windows.Forms.Padding(5);
             this.ConfigVolumeOfContracts.Name = "ConfigVolumeOfContracts";
             this.ConfigVolumeOfContracts.Size = new System.Drawing.Size(84, 28);
             this.ConfigVolumeOfContracts.TabIndex = 14;
@@ -541,6 +591,7 @@ namespace UI
             // 
             // ConfigAlgorithmSensivity
             // 
+            this.ConfigAlgorithmSensivity.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ConfigAlgorithmSensivity.DisplayMember = "0";
             this.ConfigAlgorithmSensivity.FormattingEnabled = true;
             this.ConfigAlgorithmSensivity.Items.AddRange(new object[] {
@@ -549,7 +600,8 @@ namespace UI
             "Medium",
             "High",
             "Ultra"});
-            this.ConfigAlgorithmSensivity.Location = new System.Drawing.Point(161, 203);
+            this.ConfigAlgorithmSensivity.Location = new System.Drawing.Point(161, 197);
+            this.ConfigAlgorithmSensivity.Margin = new System.Windows.Forms.Padding(5);
             this.ConfigAlgorithmSensivity.Name = "ConfigAlgorithmSensivity";
             this.ConfigAlgorithmSensivity.Size = new System.Drawing.Size(84, 28);
             this.ConfigAlgorithmSensivity.TabIndex = 13;
@@ -557,8 +609,9 @@ namespace UI
             // 
             // label2
             // 
+            this.label2.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(9, 207);
+            this.label2.Location = new System.Drawing.Point(9, 201);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(135, 20);
             this.label2.TabIndex = 12;
@@ -566,6 +619,8 @@ namespace UI
             // 
             // SignUpGroupBox
             // 
+            this.SignUpGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.SignUpGroupBox.Controls.Add(this.RegistrationButton);
             this.SignUpGroupBox.Controls.Add(this.label6);
             this.SignUpGroupBox.Controls.Add(this.RegLog);
@@ -586,6 +641,8 @@ namespace UI
             // 
             // SignInGroupBox
             // 
+            this.SignInGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.SignInGroupBox.Controls.Add(this.LoginButton);
             this.SignInGroupBox.Controls.Add(this.LogLogTextBox);
             this.SignInGroupBox.Controls.Add(this.LogPassTextBox);
@@ -602,15 +659,27 @@ namespace UI
             // 
             // LoggedGroupBox
             // 
+            this.LoggedGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.LoggedGroupBox.Controls.Add(this.label7);
             this.LoggedGroupBox.Controls.Add(this.SignOutButton);
             this.LoggedGroupBox.Enabled = false;
             this.LoggedGroupBox.Location = new System.Drawing.Point(175, 10);
             this.LoggedGroupBox.Name = "LoggedGroupBox";
-            this.LoggedGroupBox.Size = new System.Drawing.Size(695, 305);
+            this.LoggedGroupBox.Size = new System.Drawing.Size(695, 304);
             this.LoggedGroupBox.TabIndex = 24;
             this.LoggedGroupBox.TabStop = false;
-            this.LoggedGroupBox.Text = "Signed in as ///";
+            this.LoggedGroupBox.Text = "Signed in as ";
             this.LoggedGroupBox.Visible = false;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(37, 51);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(50, 20);
+            this.label7.TabIndex = 1;
+            this.label7.Text = "label7";
             // 
             // SignOutButton
             // 
@@ -629,6 +698,7 @@ namespace UI
             this.FilledOrdersDataGridView.AllowUserToResizeColumns = false;
             this.FilledOrdersDataGridView.AllowUserToResizeRows = false;
             this.FilledOrdersDataGridView.BackgroundColor = System.Drawing.SystemColors.Control;
+            this.FilledOrdersDataGridView.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.FilledOrdersDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.FilledOrdersDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.SlotName,
@@ -637,6 +707,7 @@ namespace UI
             this.dataGridViewTextBoxColumn7,
             this.Time,
             this.dataGridViewTextBoxColumn8});
+            this.FilledOrdersDataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.FilledOrdersDataGridView.GridColor = System.Drawing.SystemColors.Control;
             this.FilledOrdersDataGridView.Location = new System.Drawing.Point(0, 0);
             this.FilledOrdersDataGridView.Name = "FilledOrdersDataGridView";
@@ -648,7 +719,7 @@ namespace UI
             dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.WindowText;
             this.FilledOrdersDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle6;
             this.FilledOrdersDataGridView.RowTemplate.Height = 29;
-            this.FilledOrdersDataGridView.Size = new System.Drawing.Size(1030, 609);
+            this.FilledOrdersDataGridView.Size = new System.Drawing.Size(1033, 445);
             this.FilledOrdersDataGridView.TabIndex = 0;
             // 
             // SlotName
@@ -695,14 +766,17 @@ namespace UI
             // 
             // Tabs
             // 
+            this.Tabs.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.Tabs.Controls.Add(this.LogsPage);
             this.Tabs.Controls.Add(this.GraphicsPage);
             this.Tabs.Controls.Add(this.FilledOrdersPage);
             this.Tabs.Controls.Add(this.ActiveOrdersPage);
-            this.Tabs.Location = new System.Drawing.Point(14, 335);
+            this.Tabs.Location = new System.Drawing.Point(14, 363);
             this.Tabs.Name = "Tabs";
             this.Tabs.SelectedIndex = 0;
-            this.Tabs.Size = new System.Drawing.Size(1041, 645);
+            this.Tabs.Size = new System.Drawing.Size(1041, 478);
             this.Tabs.TabIndex = 26;
             // 
             // LogsPage
@@ -711,7 +785,7 @@ namespace UI
             this.LogsPage.Location = new System.Drawing.Point(4, 29);
             this.LogsPage.Name = "LogsPage";
             this.LogsPage.Padding = new System.Windows.Forms.Padding(3);
-            this.LogsPage.Size = new System.Drawing.Size(1033, 612);
+            this.LogsPage.Size = new System.Drawing.Size(1033, 445);
             this.LogsPage.TabIndex = 0;
             this.LogsPage.Text = "Logs";
             this.LogsPage.UseVisualStyleBackColor = true;
@@ -719,10 +793,12 @@ namespace UI
             // EventConsole
             // 
             this.EventConsole.BackColor = System.Drawing.Color.White;
-            this.EventConsole.Location = new System.Drawing.Point(0, 0);
+            this.EventConsole.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.EventConsole.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.EventConsole.Location = new System.Drawing.Point(3, 3);
             this.EventConsole.Name = "EventConsole";
             this.EventConsole.ReadOnly = true;
-            this.EventConsole.Size = new System.Drawing.Size(1033, 611);
+            this.EventConsole.Size = new System.Drawing.Size(1027, 439);
             this.EventConsole.TabIndex = 24;
             this.EventConsole.Text = "";
             // 
@@ -732,7 +808,7 @@ namespace UI
             this.GraphicsPage.Location = new System.Drawing.Point(4, 29);
             this.GraphicsPage.Name = "GraphicsPage";
             this.GraphicsPage.Padding = new System.Windows.Forms.Padding(3);
-            this.GraphicsPage.Size = new System.Drawing.Size(1033, 612);
+            this.GraphicsPage.Size = new System.Drawing.Size(1033, 445);
             this.GraphicsPage.TabIndex = 1;
             this.GraphicsPage.Text = "Graphics";
             this.GraphicsPage.UseVisualStyleBackColor = true;
@@ -741,10 +817,11 @@ namespace UI
             // 
             this.tabControl1.Controls.Add(this.BalanceGraphPage);
             this.tabControl1.Controls.Add(this.ClosedOrdersPage);
-            this.tabControl1.Location = new System.Drawing.Point(1, 0);
+            this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl1.Location = new System.Drawing.Point(3, 3);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1032, 612);
+            this.tabControl1.Size = new System.Drawing.Size(1027, 439);
             this.tabControl1.TabIndex = 0;
             // 
             // BalanceGraphPage
@@ -752,7 +829,7 @@ namespace UI
             this.BalanceGraphPage.Location = new System.Drawing.Point(4, 29);
             this.BalanceGraphPage.Name = "BalanceGraphPage";
             this.BalanceGraphPage.Padding = new System.Windows.Forms.Padding(3);
-            this.BalanceGraphPage.Size = new System.Drawing.Size(1024, 579);
+            this.BalanceGraphPage.Size = new System.Drawing.Size(1019, 406);
             this.BalanceGraphPage.TabIndex = 0;
             this.BalanceGraphPage.Text = "Balance Graph";
             this.BalanceGraphPage.UseVisualStyleBackColor = true;
@@ -762,7 +839,7 @@ namespace UI
             this.ClosedOrdersPage.Location = new System.Drawing.Point(4, 29);
             this.ClosedOrdersPage.Name = "ClosedOrdersPage";
             this.ClosedOrdersPage.Padding = new System.Windows.Forms.Padding(3);
-            this.ClosedOrdersPage.Size = new System.Drawing.Size(1024, 579);
+            this.ClosedOrdersPage.Size = new System.Drawing.Size(1019, 406);
             this.ClosedOrdersPage.TabIndex = 1;
             this.ClosedOrdersPage.Text = "Closed Orders Graph";
             this.ClosedOrdersPage.UseVisualStyleBackColor = true;
@@ -772,7 +849,7 @@ namespace UI
             this.FilledOrdersPage.Controls.Add(this.FilledOrdersDataGridView);
             this.FilledOrdersPage.Location = new System.Drawing.Point(4, 29);
             this.FilledOrdersPage.Name = "FilledOrdersPage";
-            this.FilledOrdersPage.Size = new System.Drawing.Size(1033, 612);
+            this.FilledOrdersPage.Size = new System.Drawing.Size(1033, 445);
             this.FilledOrdersPage.TabIndex = 2;
             this.FilledOrdersPage.Text = "Filled Orders";
             this.FilledOrdersPage.UseVisualStyleBackColor = true;
@@ -782,7 +859,7 @@ namespace UI
             this.ActiveOrdersPage.Controls.Add(this.ActiveOrdersDataGridView);
             this.ActiveOrdersPage.Location = new System.Drawing.Point(4, 29);
             this.ActiveOrdersPage.Name = "ActiveOrdersPage";
-            this.ActiveOrdersPage.Size = new System.Drawing.Size(1033, 612);
+            this.ActiveOrdersPage.Size = new System.Drawing.Size(1033, 445);
             this.ActiveOrdersPage.TabIndex = 3;
             this.ActiveOrdersPage.Text = "Active Orders";
             this.ActiveOrdersPage.UseVisualStyleBackColor = true;
@@ -794,6 +871,7 @@ namespace UI
             this.ActiveOrdersDataGridView.AllowUserToResizeColumns = false;
             this.ActiveOrdersDataGridView.AllowUserToResizeRows = false;
             this.ActiveOrdersDataGridView.BackgroundColor = System.Drawing.SystemColors.Control;
+            this.ActiveOrdersDataGridView.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.ActiveOrdersDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.ActiveOrdersDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.dataGridViewTextBoxColumn3,
@@ -802,6 +880,7 @@ namespace UI
             this.Type,
             this.dataGridViewTextBoxColumn6,
             this.OrderID});
+            this.ActiveOrdersDataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ActiveOrdersDataGridView.GridColor = System.Drawing.SystemColors.Control;
             this.ActiveOrdersDataGridView.Location = new System.Drawing.Point(0, 0);
             this.ActiveOrdersDataGridView.Name = "ActiveOrdersDataGridView";
@@ -813,7 +892,7 @@ namespace UI
             dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.WindowText;
             this.ActiveOrdersDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle7;
             this.ActiveOrdersDataGridView.RowTemplate.Height = 29;
-            this.ActiveOrdersDataGridView.Size = new System.Drawing.Size(1030, 609);
+            this.ActiveOrdersDataGridView.Size = new System.Drawing.Size(1033, 445);
             this.ActiveOrdersDataGridView.TabIndex = 1;
             // 
             // dataGridViewTextBoxColumn3
@@ -874,47 +953,21 @@ namespace UI
             this.Quantity.ReadOnly = true;
             this.Quantity.Width = 125;
             // 
-            // Slot
+            // ErrorProvider
             // 
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle2.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.WindowText;
-            this.Slot.DefaultCellStyle = dataGridViewCellStyle2;
-            this.Slot.HeaderText = "Slot name";
-            this.Slot.MinimumWidth = 6;
-            this.Slot.Name = "Slot";
-            this.Slot.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.Slot.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.Slot.Width = 140;
-            // 
-            // Launch
-            // 
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle3.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle3.NullValue = false;
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.WindowText;
-            this.Launch.DefaultCellStyle = dataGridViewCellStyle3;
-            this.Launch.HeaderText = "Launch";
-            this.Launch.MinimumWidth = 6;
-            this.Launch.Name = "Launch";
-            this.Launch.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.Launch.Width = 80;
+            this.ErrorProvider.ContainerControl = this;
             // 
             // TradeBotUi
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1067, 986);
+            this.ClientSize = new System.Drawing.Size(1067, 853);
             this.Controls.Add(this.ShowMainMenu);
             this.Controls.Add(this.ShowLoginPanel);
-            this.Controls.Add(this.MainMenuGroupBox);
             this.Controls.Add(this.ShowRegistrationPanel);
-            this.Controls.Add(this.LoggedGroupBox);
             this.Controls.Add(this.Tabs);
+            this.Controls.Add(this.MainMenuGroupBox);
+            this.Controls.Add(this.LoggedGroupBox);
             this.Controls.Add(this.SignUpGroupBox);
             this.Controls.Add(this.SignInGroupBox);
             this.Name = "TradeBotUi";
@@ -923,12 +976,13 @@ namespace UI
             this.Load += new System.EventHandler(this.TradeBotUi_Load);
             this.MainMenuGroupBox.ResumeLayout(false);
             this.MainMenuGroupBox.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ActiveSlotsDataGridView)).EndInit();
             this.SignUpGroupBox.ResumeLayout(false);
             this.SignUpGroupBox.PerformLayout();
             this.SignInGroupBox.ResumeLayout(false);
             this.SignInGroupBox.PerformLayout();
             this.LoggedGroupBox.ResumeLayout(false);
+            this.LoggedGroupBox.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.FilledOrdersDataGridView)).EndInit();
             this.Tabs.ResumeLayout(false);
             this.LogsPage.ResumeLayout(false);
@@ -937,6 +991,7 @@ namespace UI
             this.FilledOrdersPage.ResumeLayout(false);
             this.ActiveOrdersPage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.ActiveOrdersDataGridView)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ErrorProvider)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -980,10 +1035,9 @@ namespace UI
         private System.Windows.Forms.Button UpdateConfigButton;
         private System.Windows.Forms.Label BalanceLabel;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.DataGridView dataGridView1;
+        private System.Windows.Forms.DataGridView ActiveSlotsDataGridView;
         private System.Windows.Forms.Button RemoveRowButton;
         private System.Windows.Forms.Button AddRowButton;
-        private System.Windows.Forms.Button ShowFilledOrderButton;
         private System.Windows.Forms.TabControl Tabs;
         private System.Windows.Forms.TabPage LogsPage;
         private System.Windows.Forms.TabPage GraphicsPage;
@@ -1010,8 +1064,10 @@ namespace UI
         private System.Windows.Forms.TabPage BalanceGraphPage;
         private System.Windows.Forms.TabPage ClosedOrdersPage;
         private System.Windows.Forms.ComboBox SlotsComboBox;
+        private System.Windows.Forms.Label label7;
         private System.Windows.Forms.DataGridViewTextBoxColumn Slot;
         private System.Windows.Forms.DataGridViewCheckBoxColumn Launch;
+        private System.Windows.Forms.ErrorProvider ErrorProvider;
     }
 }
 
