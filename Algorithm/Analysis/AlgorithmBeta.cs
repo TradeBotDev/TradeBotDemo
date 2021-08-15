@@ -33,19 +33,19 @@ namespace Algorithm.Analysis
         private DataCollector _dc;
         private PointMaker _pm;
         private bool _isStopped = true;
-        private Metadata metadata;
-        //it feels wrong for algo to know anything about the user, but i don't know else to send a decision ¯\_(ツ)_/¯
-        private string _user;
+
+        private Metadata _metadata;
+
         public bool GetState()
         {
             return _isStopped;
         }
 
         //when an algo is created it's immediately subscribed to new points 
-        public AlgorithmBeta(string user)
+        public AlgorithmBeta(Metadata metadata)
         {
             Log.Information("IM AN ALGO, IM BEING CREATED RIGHT NOW");
-            _user = user;
+            _metadata = metadata;
             _pointPublisher = new();
             _pointPublisher.PointMadeEvent += NewPointAlert;
             _dc = new(_pointPublisher);
@@ -101,16 +101,22 @@ namespace Algorithm.Analysis
                 subTrends.Add(CalculateSMA(subSet));
             }
             //after all the data is prepared the actual analysis takes place
-            int trend = AnalyseTrend(subTrends, points);
+            int trend = MakeADecision(subTrends, points);
             if (trend != 0)
             {
-                PriceSender.SendDecision(trend, _user);
+                PriceSender.SendDecision(trend, _metadata);
             }
         }
         //this func needs points and subset averages and decides if it's time to buy
-        private int AnalyseTrend(IReadOnlyCollection<double> subTrends, Dictionary<DateTime, double> points)
+        private int MakeADecision(IReadOnlyCollection<double> subTrends, Dictionary<DateTime, double> points)
         {
             Log.Information("Analysis...");
+
+            if (_precision == 0)
+            {
+                return AnalyseTrendWithMinimalPrecision(points);
+            }
+
             bool downtrend = true;
             bool uptrend = true;
 
@@ -149,11 +155,17 @@ namespace Algorithm.Analysis
                 }
                 switch (_precision)
                 {
-                    case 1: trend = AnalyseTrendWithLowPrecision(subTrends, points, uptrend);
+                    case 1:
+                        trend = AnalyseTrendWithLowPrecision(subTrends, points, uptrend);
                         break;
-                    case 2: trend = AnalyseTrendWithMediumPrecision(subTrends, points, uptrend);
+                    case 2:
+                        trend = AnalyseTrendWithMediumPrecision(subTrends, points, uptrend);
                         break;
-                    case 3: trend = AnalyseTrendWithHighPrecision(subTrends, points, uptrend);
+                    case 3:
+                        trend = AnalyseTrendWithHighPrecision(subTrends, points, uptrend);
+                        break;
+                    default:
+                        trend = AnalyseTrendWithLowPrecision(subTrends, points, uptrend);
                         break;
                 }
             }
@@ -165,6 +177,23 @@ namespace Algorithm.Analysis
             return 0;
         }
 
+        private static int AnalyseTrendWithMinimalPrecision(Dictionary<DateTime, double> prices)
+        {
+            int trend = 0;
+            if (prices.ElementAt(prices.Count - 3).Value < prices.ElementAt(prices.Count - 2).Value
+                && prices.ElementAt(prices.Count - 3).Value < prices.ElementAt(prices.Count - 2).Value
+                && prices.ElementAt(prices.Count - 2).Value > prices.Last().Value)
+            {
+                trend = 1;
+            }
+            if (prices.ElementAt(prices.Count - 3).Value > prices.ElementAt(prices.Count - 2).Value
+                && prices.ElementAt(prices.Count - 3).Value > prices.ElementAt(prices.Count - 2).Value
+                && prices.ElementAt(prices.Count - 2).Value < prices.Last().Value)
+            {
+                trend = -1;
+            }
+            return trend;
+        }
         private static int AnalyseTrendWithLowPrecision(IReadOnlyCollection<double> subTrends, Dictionary<DateTime, double> prices, bool currentTrend)
         {
             if (currentTrend)
@@ -226,7 +255,6 @@ namespace Algorithm.Analysis
             }
             return 0;
         }
-
         //func to find average price
         private static double CalculateSMA(List<double> points)
         {
@@ -262,5 +290,5 @@ namespace Algorithm.Analysis
             _isStopped = false;
             _pm.Launch(_pointPublisher, _dc);
         }
-    } 
+    }
 }

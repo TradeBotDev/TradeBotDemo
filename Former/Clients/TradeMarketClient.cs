@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Grpc.Core;
@@ -27,8 +26,6 @@ namespace Former.Clients
         private static int _retryDelay;
         private static string _connectionString;
         private CancellationTokenSource _token;
-
-        private bool _deleteAllOrdersProcessing = false;
 
         private readonly TradeMarketService.TradeMarketServiceClient _client;
 
@@ -113,7 +110,7 @@ namespace Former.Clients
             {
                 while (await call.ResponseStream.MoveNext(_token.Token))
                 {
-                    if (_deleteAllOrdersProcessing) await UpdateMyOrders?.Invoke(call.ResponseStream.Current.Changed, call.ResponseStream.Current.ChangesType);
+                    await UpdateMyOrders?.Invoke(call.ResponseStream.Current.Changed, call.ResponseStream.Current.ChangesType);
                 }
             }
 
@@ -179,7 +176,6 @@ namespace Former.Clients
 
         internal async Task<DeleteOrderResponse> DeleteOrder(string id, Metadata metadata)
         {
-            _deleteAllOrdersProcessing = true;
             DeleteOrderResponse response = null;
 
             async Task DeleteOrderFunc()
@@ -192,7 +188,6 @@ namespace Former.Clients
             }
 
             await ConnectionTester(DeleteOrderFunc);
-            _deleteAllOrdersProcessing = false;
             return response;
         }
 

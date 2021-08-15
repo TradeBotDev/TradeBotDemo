@@ -3,6 +3,7 @@
     "Algorithm": {
       "commandName": "Project",
       "environmentVariables": {
+        "FORMER_CONNECTION_STRING": "http://localhost:5003",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": "true",
