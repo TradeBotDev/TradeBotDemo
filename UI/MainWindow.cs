@@ -73,21 +73,6 @@ namespace UI
                 if (fullName != null && fullName.Contains("TextBox"))
                     ((TextBox)control).Validating += OnValidatingTextBox;
             }
-
-            Tabs.DrawMode = TabDrawMode.OwnerDrawFixed;
-            Tabs.DrawItem += tabControl_DrawItem;
-            Tabs.Appearance = TabAppearance.Normal;
-        }
-
-        private void tabControl_DrawItem(object sender, DrawItemEventArgs e)
-        { 
-            TabPage page = Tabs.TabPages[e.Index];
-            e.Graphics.FillRectangle(new SolidBrush(page.BackColor), e.Bounds);
-
-            Rectangle paddedBounds = e.Bounds;
-            int yOffset = (e.State == DrawItemState.Selected) ? -2 : 1;
-            paddedBounds.Offset(1, yOffset);
-            TextRenderer.DrawText(e.Graphics, page.Text, e.Font, paddedBounds, page.ForeColor);
         }
 
         private ConfigurationJson InitConfigurationJson()
@@ -530,13 +515,6 @@ namespace UI
 
         #endregion
 
-        private void Tabs_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        #endregion
-
         #region DrawGraphs
         private void UpdateList(string b,Timestamp time,ref PointPairList list,ZedGraph.ZedGraphControl graphControl, DateTime ld)
         {
@@ -598,7 +576,7 @@ namespace UI
 
             zedGraph.Invalidate();
         }
-        
+
         #endregion
     }
 }
