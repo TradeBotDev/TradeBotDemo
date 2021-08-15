@@ -88,12 +88,12 @@ namespace UI
             }
         }
 
-        public async Task<DefaultResponse> StopBot(string slotName)
+        public async Task<DefaultResponse> StopBot(string slotName, Config configuration)
         {
             _meta[1] = new Metadata.Entry("slot", slotName);
             try
             {
-                await _client.StopBotAsync(new StopBotRequest { Request = new TradeBot.Common.v1.UpdateServerConfigRequest { Config = new Config(), Switch = true } }, _meta);
+                await _client.StopBotAsync(new StopBotRequest { Request = new TradeBot.Common.v1.UpdateServerConfigRequest { Config = configuration, Switch = true } }, _meta);
                 await _client.DeleteOrderAsync(new DeleteOrderRequest(), _meta);
                 return new DefaultResponse { Code = ReplyCode.Succeed, Message = ""};
             }

@@ -973,7 +973,6 @@ namespace UI
             this.Name = "TradeBotUi";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "TradeBot";
-            this.Load += new System.EventHandler(this.TradeBotUi_Load);
             this.MainMenuGroupBox.ResumeLayout(false);
             this.MainMenuGroupBox.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ActiveSlotsDataGridView)).EndInit();

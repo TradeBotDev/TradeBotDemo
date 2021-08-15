@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -67,6 +68,21 @@ namespace UI
                 if (fullName != null && fullName.Contains("TextBox"))
                     ((TextBox)control).Validating += OnValidatingTextBox;
             }
+
+            Tabs.DrawMode = TabDrawMode.OwnerDrawFixed;
+            Tabs.DrawItem += tabControl_DrawItem;
+            Tabs.Appearance = TabAppearance.Normal;
+        }
+
+        private void tabControl_DrawItem(object sender, DrawItemEventArgs e)
+        { 
+            TabPage page = Tabs.TabPages[e.Index];
+            e.Graphics.FillRectangle(new SolidBrush(page.BackColor), e.Bounds);
+
+            Rectangle paddedBounds = e.Bounds;
+            int yOffset = (e.State == DrawItemState.Selected) ? -2 : 1;
+            paddedBounds.Offset(1, yOffset);
+            TextRenderer.DrawText(e.Graphics, page.Text, e.Font, paddedBounds, page.ForeColor);
         }
 
         private ConfigurationJson InitConfigurationJson()
@@ -116,7 +132,7 @@ namespace UI
             ConfigAlgorithmSensivity.Text = configuration.AlgorithmSensitivity;
             ConfigIntervalOfAnalysis.Text = configuration.AlgorithmInterval;
             ConfigUpdatePriceRange.Text = configuration.UpdatePriceRange;
-            ConfigVolumeOfContractsl.Text = configuration.VolumeOfContracts;
+            ConfigVolumeOfContracts.Text = configuration.VolumeOfContracts;
             foreach (var activeSlot in configuration.activeSlots)
             {
                 AddToActiveSlots(activeSlot);
@@ -297,7 +313,7 @@ namespace UI
 
         private async void Stop(string slotName)
         {
-            CheckConnection(await _facadeClient.StopBot(slotName));
+            CheckConnection(await _facadeClient.StopBot(slotName,GetConfig()));
             WriteMessageToEventConsole("Bot has been stopped!");
         }
 
@@ -478,7 +494,7 @@ namespace UI
             for (var i = 0; i < ActiveSlotsDataGridView.Rows.Count; i++)
             {
                 if (Convert.ToBoolean(ActiveSlotsDataGridView.Rows[i].Cells[1].EditedFormattedValue))
-                    await _facadeClient.StopBot(ActiveSlotsDataGridView.Rows[i].Cells[0].EditedFormattedValue.ToString());
+                    await _facadeClient.StopBot(ActiveSlotsDataGridView.Rows[i].Cells[0].EditedFormattedValue.ToString(), GetConfig());
             }
         }
 
@@ -493,11 +509,11 @@ namespace UI
             RemoveFromActiveSlots(ActiveSlotsDataGridView.Rows[^1].Cells[0].Value.ToString());
         }
 
-        private void TradeBotUi_Load(object sender, EventArgs e)
-        {
-            AddToActiveSlots(SlotsComboBox.Text);
-        }
-
         #endregion
+
+        private void Tabs_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }
