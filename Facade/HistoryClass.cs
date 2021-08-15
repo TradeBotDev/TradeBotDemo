@@ -11,7 +11,7 @@ namespace Facade
 {
     public class HistoryClass
     {
-        private GrpcChannel _channel => GrpcChannel.ForAddress("http://localhost:5007");
+        private GrpcChannel _channel => GrpcChannel.ForAddress(Environment.GetEnvironmentVariable("HISTORY_CONNECTION_STRING"));
         public GrpcChannel Channel { get => _channel; }
 
         private  History _client => new History(Channel);

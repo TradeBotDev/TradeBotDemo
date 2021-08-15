@@ -13,7 +13,7 @@ namespace Facade
 {
     public class AutorisationClass
     {
-        private GrpcChannel _channel => GrpcChannel.ForAddress("http://localhost:5000");
+        private GrpcChannel _channel => GrpcChannel.ForAddress(Environment.GetEnvironmentVariable("ACCOUNT_CONNECTION_STRING"));
         private GrpcChannel Channel { get => _channel; }
 
         private Auth _clientAccount => new Auth(Channel);
@@ -29,7 +29,6 @@ namespace Facade
         {
             get => _clientExc;
         }
-        //private TradeBot.Account.AccountService.v1.Account.AccountClient client = new Auth(GrpcChannel.ForAddress("https://localhost:5000"));
         public async Task<Ref.LoginReply> Account_Login(Ref.LoginRequest request, string methodName)
         {
             TradeBot.Account.AccountService.v1.LoginReply response = null;

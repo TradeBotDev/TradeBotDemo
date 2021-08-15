@@ -13,7 +13,7 @@ namespace Facade
 {
     public class TradeMarketClass
     {
-        private GrpcChannel _channel => GrpcChannel.ForAddress("http://localhost:5005");
+        private GrpcChannel _channel => GrpcChannel.ForAddress(Environment.GetEnvironmentVariable("TRADEMARKET_CONNECTION_STRING"));
         public GrpcChannel Channel { get => _channel; }
 
         private TMClient _client => new TMClient(Channel);

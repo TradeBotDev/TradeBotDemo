@@ -14,7 +14,7 @@ namespace Relay.Clients
     {
         private readonly AlgorithmService.AlgorithmServiceClient _client;
         
-        public AlgorithmClient(Uri uri)
+        public AlgorithmClient(string uri)
         {
            _client = new AlgorithmService.AlgorithmServiceClient(GrpcChannel.ForAddress(uri));
         }

@@ -23,9 +23,9 @@ namespace Relay
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddGrpc();
-            services.AddSingleton<AlgorithmClient>( new AlgorithmClient(new Uri("http://localhost:5006")));
-            services.AddSingleton<TradeMarketClient>(new TradeMarketClient(new Uri("http://localhost:5005")));
-            services.AddSingleton<FormerClient>(new FormerClient(new Uri("http://localhost:5003")));
+            services.AddSingleton<AlgorithmClient>( new AlgorithmClient(Environment.GetEnvironmentVariable("ALGORITHM_CONNECTION_STRING")));
+            services.AddSingleton<TradeMarketClient>(new TradeMarketClient(Environment.GetEnvironmentVariable("TRADEMARKET_CONNECTION_STRING")));
+            services.AddSingleton<FormerClient>(new FormerClient(Environment.GetEnvironmentVariable("FORMER_CONNECTION_STRING")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
