@@ -38,10 +38,11 @@ namespace Former.Model
         private async Task PlaceCounterOrder(Order oldOrder, Order newComingOrder)
         {
             var quantity = oldOrder.Quantity - newComingOrder.Quantity;
-            var price = oldOrder.Signature.Type == OrderType.Buy
+            var type = oldOrder.Signature.Type == OrderType.Buy ? OrderType.Sell : OrderType.Buy;
+            var price = type == OrderType.Buy
                 ? oldOrder.Price + oldOrder.Price * _configuration.RequiredProfit
                 : oldOrder.Price - oldOrder.Price * _configuration.RequiredProfit;
-            var type = oldOrder.Signature.Type == OrderType.Buy ? OrderType.Sell : OrderType.Buy;
+            
             var addResponse = false;
             Order newOrder = null;
             var placeResponse = await _tradeMarketClient.PlaceOrder(price, -quantity, _metadata);
@@ -70,7 +71,7 @@ namespace Former.Model
             if (Convert.ToInt32(quantity) == Convert.ToInt32(oldOrder.Quantity))
             {
                 await _historyClient.WriteOrder(oldOrder, ChangesType.Delete, _metadata, "Initial order filled");
-                await _historyClient.WriteOrder(oldOrder, ChangesType.Insert, _metadata, "Counter order placed");
+                await _historyClient.WriteOrder(newOrder, ChangesType.Insert, _metadata, "Counter order placed");
             }
             else
             {
@@ -95,7 +96,7 @@ namespace Former.Model
             {
                 var marginOfMySellOrders = _storage.MyOrders.Where(x => x.Value.Signature.Type == OrderType.Sell).Sum(x => x.Value.Quantity / x.Value.Price);
                 var marginOfCounterSellOrders = _storage.CounterOrders.Where(x => x.Value.Signature.Type == OrderType.Sell).Sum(x => x.Value.Quantity / x.Value.Price);
-                marginOfAlreadyPlacedSellOrders = marginOfMySellOrders + marginOfCounterSellOrders;
+                marginOfAlreadyPlacedSellOrders = Math.Abs(marginOfMySellOrders + marginOfCounterSellOrders);
 
                 var marginOfMyBuyOrders = _storage.MyOrders.Where(x => x.Value.Signature.Type == OrderType.Buy).Sum(x => x.Value.Quantity / x.Value.Price);
                 var marginOfCounterBuyOrders = _storage.CounterOrders.Where(x => x.Value.Signature.Type == OrderType.Buy).Sum(x => x.Value.Quantity / x.Value.Price);
@@ -107,7 +108,7 @@ namespace Former.Model
                 case > 0 when availableBalanceWithConfigurationReduction < orderCost:
                     Log.Debug("{@Where}: Cannot place {@Type} order. Insufficient available balance.", "Former", type);
                     return false;
-                case <= 0 when totalBalanceWithConfigurationReduction + marginOfAlreadyPlacedSellOrders - marginOfAlreadyPlacedBuyOrders < orderCost:
+                case <= 0 when totalBalanceWithConfigurationReduction - marginOfAlreadyPlacedSellOrders - marginOfAlreadyPlacedBuyOrders < orderCost:
                     Log.Debug("{@Where}: Cannot place {@Type} order. Insufficient total balance.", "Former", type);
                     return false;
                 default:

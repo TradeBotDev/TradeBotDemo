@@ -62,16 +62,16 @@ namespace UI
             this.Type = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.OrderID = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ConfigAvailableBalance = new System.Windows.Forms.TextBox();
-            this.ConfigRequiredProfit = new System.Windows.Forms.TextBox();
-            this.ConfigUpdatePriceRange = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
+            this.ConfigAvailableBalanceTxb = new System.Windows.Forms.TextBox();
+            this.ConfigRequiredProfitTxb = new System.Windows.Forms.TextBox();
+            this.ConfigUpdatePriceRangeTxb = new System.Windows.Forms.TextBox();
+            this.ConfigAvailableBalanceLbl = new System.Windows.Forms.Label();
             this.ConfigRequiredProfitl = new System.Windows.Forms.Label();
-            this.ConfigVolumeOfContractsl = new System.Windows.Forms.Label();
-            this.ConfigUpdatePriceRangel = new System.Windows.Forms.Label();
-            this.ConfigIntervalOfAnalysisl = new System.Windows.Forms.Label();
-            this.ShowRegistrationPanel = new System.Windows.Forms.Button();
-            this.ShowLoginPanel = new System.Windows.Forms.Button();
+            this.ConfigVolumeOfContractslbl = new System.Windows.Forms.Label();
+            this.ConfigUpdatePriceRangelbl = new System.Windows.Forms.Label();
+            this.ConfigIntervalOfAnalysislbl = new System.Windows.Forms.Label();
+            this.ShowSignUpPanel = new System.Windows.Forms.Button();
+            this.ShowSignInPanel = new System.Windows.Forms.Button();
             this.ShowMainMenu = new System.Windows.Forms.Button();
             this.RegistrationButton = new System.Windows.Forms.Button();
             this.label6 = new System.Windows.Forms.Label();
@@ -97,13 +97,13 @@ namespace UI
             this.panel3 = new System.Windows.Forms.Panel();
             this.UpdateConfigButton = new System.Windows.Forms.Button();
             this.RemoveMyOrdersButton = new System.Windows.Forms.Button();
-            this.label10 = new System.Windows.Forms.Label();
+            this.ConfigRequiredProfitLbl = new System.Windows.Forms.Label();
             this.BalanceLabel = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.ConfigIntervalOfAnalysis = new System.Windows.Forms.ComboBox();
-            this.ConfigVolumeOfContracts = new System.Windows.Forms.ComboBox();
-            this.ConfigAlgorithmSensivity = new System.Windows.Forms.ComboBox();
-            this.label2 = new System.Windows.Forms.Label();
+            this.BalanceNameLbl = new System.Windows.Forms.Label();
+            this.ConfigIntervalOfAnalysisTxb = new System.Windows.Forms.ComboBox();
+            this.ConfigVolumeOfContractsTxb = new System.Windows.Forms.ComboBox();
+            this.ConfigAlgorithmSensivityTxb = new System.Windows.Forms.ComboBox();
+            this.ConfigAlgorithmSensLbl = new System.Windows.Forms.Label();
             this.SignUpGroupBox = new System.Windows.Forms.GroupBox();
             this.panel4 = new System.Windows.Forms.Panel();
             this.SignInGroupBox = new System.Windows.Forms.GroupBox();
@@ -115,8 +115,8 @@ namespace UI
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Quantity = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ErrorProvider = new System.Windows.Forms.ErrorProvider(this.components);
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.panel2 = new System.Windows.Forms.Panel();
+            this.LeftPanel = new System.Windows.Forms.Panel();
+            this.RightPanel = new System.Windows.Forms.Panel();
             this.Tabs.SuspendLayout();
             this.LogsPage.SuspendLayout();
             this.GraphicsPage.SuspendLayout();
@@ -136,7 +136,7 @@ namespace UI
             this.panel5.SuspendLayout();
             this.LoggedGroupBox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ErrorProvider)).BeginInit();
-            this.panel1.SuspendLayout();
+            this.LeftPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // zedGraph
@@ -153,7 +153,7 @@ namespace UI
             this.zedGraph.ScrollMinX = 0D;
             this.zedGraph.ScrollMinY = 0D;
             this.zedGraph.ScrollMinY2 = 0D;
-            this.zedGraph.Size = new System.Drawing.Size(1039, 412);
+            this.zedGraph.Size = new System.Drawing.Size(1039, 411);
             this.zedGraph.TabIndex = 0;
             this.zedGraph.UseExtendedPrintDialog = true;
             // 
@@ -171,7 +171,7 @@ namespace UI
             this.zedGraph_1.ScrollMinX = 0D;
             this.zedGraph_1.ScrollMinY = 0D;
             this.zedGraph_1.ScrollMinY2 = 0D;
-            this.zedGraph_1.Size = new System.Drawing.Size(1039, 412);
+            this.zedGraph_1.Size = new System.Drawing.Size(1039, 411);
             this.zedGraph_1.TabIndex = 0;
             this.zedGraph_1.UseExtendedPrintDialog = true;
             // 
@@ -189,7 +189,7 @@ namespace UI
             this.Tabs.Multiline = true;
             this.Tabs.Name = "Tabs";
             this.Tabs.SelectedIndex = 0;
-            this.Tabs.Size = new System.Drawing.Size(1067, 486);
+            this.Tabs.Size = new System.Drawing.Size(1067, 485);
             this.Tabs.TabIndex = 26;
             // 
             // LogsPage
@@ -199,7 +199,7 @@ namespace UI
             this.LogsPage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.LogsPage.Name = "LogsPage";
             this.LogsPage.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.LogsPage.Size = new System.Drawing.Size(1059, 453);
+            this.LogsPage.Size = new System.Drawing.Size(1059, 452);
             this.LogsPage.TabIndex = 0;
             this.LogsPage.Text = "Logs";
             this.LogsPage.UseVisualStyleBackColor = true;
@@ -213,7 +213,7 @@ namespace UI
             this.EventConsole.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.EventConsole.Name = "EventConsole";
             this.EventConsole.ReadOnly = true;
-            this.EventConsole.Size = new System.Drawing.Size(1053, 449);
+            this.EventConsole.Size = new System.Drawing.Size(1053, 448);
             this.EventConsole.TabIndex = 24;
             this.EventConsole.Text = "";
             // 
@@ -224,7 +224,7 @@ namespace UI
             this.GraphicsPage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.GraphicsPage.Name = "GraphicsPage";
             this.GraphicsPage.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.GraphicsPage.Size = new System.Drawing.Size(1059, 453);
+            this.GraphicsPage.Size = new System.Drawing.Size(1059, 452);
             this.GraphicsPage.TabIndex = 1;
             this.GraphicsPage.Text = "Graphics";
             this.GraphicsPage.UseVisualStyleBackColor = true;
@@ -238,7 +238,7 @@ namespace UI
             this.tabControl1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1053, 449);
+            this.tabControl1.Size = new System.Drawing.Size(1053, 448);
             this.tabControl1.TabIndex = 0;
             // 
             // BalanceGraphPage
@@ -248,7 +248,7 @@ namespace UI
             this.BalanceGraphPage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.BalanceGraphPage.Name = "BalanceGraphPage";
             this.BalanceGraphPage.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.BalanceGraphPage.Size = new System.Drawing.Size(1045, 416);
+            this.BalanceGraphPage.Size = new System.Drawing.Size(1045, 415);
             this.BalanceGraphPage.TabIndex = 0;
             this.BalanceGraphPage.Text = "Balance Graph";
             this.BalanceGraphPage.UseVisualStyleBackColor = true;
@@ -260,7 +260,7 @@ namespace UI
             this.ClosedOrdersPage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ClosedOrdersPage.Name = "ClosedOrdersPage";
             this.ClosedOrdersPage.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.ClosedOrdersPage.Size = new System.Drawing.Size(1045, 416);
+            this.ClosedOrdersPage.Size = new System.Drawing.Size(1045, 415);
             this.ClosedOrdersPage.TabIndex = 1;
             this.ClosedOrdersPage.Text = "Closed Orders Graph";
             this.ClosedOrdersPage.UseVisualStyleBackColor = true;
@@ -271,7 +271,7 @@ namespace UI
             this.FilledOrdersPage.Location = new System.Drawing.Point(4, 29);
             this.FilledOrdersPage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.FilledOrdersPage.Name = "FilledOrdersPage";
-            this.FilledOrdersPage.Size = new System.Drawing.Size(1059, 453);
+            this.FilledOrdersPage.Size = new System.Drawing.Size(1059, 452);
             this.FilledOrdersPage.TabIndex = 2;
             this.FilledOrdersPage.Text = "Filled Orders";
             this.FilledOrdersPage.UseVisualStyleBackColor = true;
@@ -305,7 +305,7 @@ namespace UI
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.WindowText;
             this.FilledOrdersDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle1;
             this.FilledOrdersDataGridView.RowTemplate.Height = 29;
-            this.FilledOrdersDataGridView.Size = new System.Drawing.Size(1059, 453);
+            this.FilledOrdersDataGridView.Size = new System.Drawing.Size(1060, 450);
             this.FilledOrdersDataGridView.TabIndex = 0;
             // 
             // SlotName
@@ -314,7 +314,7 @@ namespace UI
             this.SlotName.MinimumWidth = 6;
             this.SlotName.Name = "SlotName";
             this.SlotName.ReadOnly = true;
-            this.SlotName.Width = 170;
+            this.SlotName.Width = 176;
             // 
             // dataGridViewTextBoxColumn2
             // 
@@ -322,7 +322,7 @@ namespace UI
             this.dataGridViewTextBoxColumn2.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
             this.dataGridViewTextBoxColumn2.ReadOnly = true;
-            this.dataGridViewTextBoxColumn2.Width = 170;
+            this.dataGridViewTextBoxColumn2.Width = 176;
             // 
             // ExecutePrice
             // 
@@ -330,7 +330,7 @@ namespace UI
             this.ExecutePrice.MinimumWidth = 6;
             this.ExecutePrice.Name = "ExecutePrice";
             this.ExecutePrice.ReadOnly = true;
-            this.ExecutePrice.Width = 170;
+            this.ExecutePrice.Width = 176;
             // 
             // dataGridViewTextBoxColumn7
             // 
@@ -338,7 +338,7 @@ namespace UI
             this.dataGridViewTextBoxColumn7.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
             this.dataGridViewTextBoxColumn7.ReadOnly = true;
-            this.dataGridViewTextBoxColumn7.Width = 170;
+            this.dataGridViewTextBoxColumn7.Width = 176;
             // 
             // Time
             // 
@@ -346,7 +346,7 @@ namespace UI
             this.Time.MinimumWidth = 6;
             this.Time.Name = "Time";
             this.Time.ReadOnly = true;
-            this.Time.Width = 170;
+            this.Time.Width = 176;
             // 
             // dataGridViewTextBoxColumn8
             // 
@@ -354,7 +354,7 @@ namespace UI
             this.dataGridViewTextBoxColumn8.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn8.Name = "dataGridViewTextBoxColumn8";
             this.dataGridViewTextBoxColumn8.ReadOnly = true;
-            this.dataGridViewTextBoxColumn8.Width = 170;
+            this.dataGridViewTextBoxColumn8.Width = 176;
             // 
             // ActiveOrdersPage
             // 
@@ -362,7 +362,7 @@ namespace UI
             this.ActiveOrdersPage.Location = new System.Drawing.Point(4, 29);
             this.ActiveOrdersPage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ActiveOrdersPage.Name = "ActiveOrdersPage";
-            this.ActiveOrdersPage.Size = new System.Drawing.Size(1059, 453);
+            this.ActiveOrdersPage.Size = new System.Drawing.Size(1059, 452);
             this.ActiveOrdersPage.TabIndex = 3;
             this.ActiveOrdersPage.Text = "Active Orders";
             this.ActiveOrdersPage.UseVisualStyleBackColor = true;
@@ -405,7 +405,7 @@ namespace UI
             this.dataGridViewTextBoxColumn3.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
             this.dataGridViewTextBoxColumn3.ReadOnly = true;
-            this.dataGridViewTextBoxColumn3.Width = 170;
+            this.dataGridViewTextBoxColumn3.Width = 176;
             // 
             // dataGridViewTextBoxColumn4
             // 
@@ -413,7 +413,7 @@ namespace UI
             this.dataGridViewTextBoxColumn4.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
             this.dataGridViewTextBoxColumn4.ReadOnly = true;
-            this.dataGridViewTextBoxColumn4.Width = 170;
+            this.dataGridViewTextBoxColumn4.Width = 176;
             // 
             // dataGridViewTextBoxColumn5
             // 
@@ -421,7 +421,7 @@ namespace UI
             this.dataGridViewTextBoxColumn5.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
             this.dataGridViewTextBoxColumn5.ReadOnly = true;
-            this.dataGridViewTextBoxColumn5.Width = 170;
+            this.dataGridViewTextBoxColumn5.Width = 176;
             // 
             // Type
             // 
@@ -429,7 +429,7 @@ namespace UI
             this.Type.MinimumWidth = 6;
             this.Type.Name = "Type";
             this.Type.ReadOnly = true;
-            this.Type.Width = 170;
+            this.Type.Width = 176;
             // 
             // dataGridViewTextBoxColumn6
             // 
@@ -437,7 +437,7 @@ namespace UI
             this.dataGridViewTextBoxColumn6.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
             this.dataGridViewTextBoxColumn6.ReadOnly = true;
-            this.dataGridViewTextBoxColumn6.Width = 170;
+            this.dataGridViewTextBoxColumn6.Width = 176;
             // 
             // OrderID
             // 
@@ -445,49 +445,49 @@ namespace UI
             this.OrderID.MinimumWidth = 6;
             this.OrderID.Name = "OrderID";
             this.OrderID.ReadOnly = true;
-            this.OrderID.Width = 170;
+            this.OrderID.Width = 176;
             // 
-            // ConfigAvailableBalance
+            // ConfigAvailableBalanceTxb
             // 
-            this.ConfigAvailableBalance.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.ConfigAvailableBalance.Location = new System.Drawing.Point(185, 120);
-            this.ConfigAvailableBalance.Margin = new System.Windows.Forms.Padding(4);
-            this.ConfigAvailableBalance.Name = "ConfigAvailableBalance";
-            this.ConfigAvailableBalance.Size = new System.Drawing.Size(90, 26);
-            this.ConfigAvailableBalance.TabIndex = 1;
-            this.ConfigAvailableBalance.Text = "0,5";
+            this.ConfigAvailableBalanceTxb.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ConfigAvailableBalanceTxb.Location = new System.Drawing.Point(185, 120);
+            this.ConfigAvailableBalanceTxb.Margin = new System.Windows.Forms.Padding(4);
+            this.ConfigAvailableBalanceTxb.Name = "ConfigAvailableBalanceTxb";
+            this.ConfigAvailableBalanceTxb.Size = new System.Drawing.Size(90, 26);
+            this.ConfigAvailableBalanceTxb.TabIndex = 1;
+            this.ConfigAvailableBalanceTxb.Text = "0,5";
             // 
-            // ConfigRequiredProfit
+            // ConfigRequiredProfitTxb
             // 
-            this.ConfigRequiredProfit.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.ConfigRequiredProfit.Location = new System.Drawing.Point(185, 181);
-            this.ConfigRequiredProfit.Margin = new System.Windows.Forms.Padding(4);
-            this.ConfigRequiredProfit.Name = "ConfigRequiredProfit";
-            this.ConfigRequiredProfit.Size = new System.Drawing.Size(90, 26);
-            this.ConfigRequiredProfit.TabIndex = 2;
-            this.ConfigRequiredProfit.Text = "0,005";
+            this.ConfigRequiredProfitTxb.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ConfigRequiredProfitTxb.Location = new System.Drawing.Point(185, 181);
+            this.ConfigRequiredProfitTxb.Margin = new System.Windows.Forms.Padding(4);
+            this.ConfigRequiredProfitTxb.Name = "ConfigRequiredProfitTxb";
+            this.ConfigRequiredProfitTxb.Size = new System.Drawing.Size(90, 26);
+            this.ConfigRequiredProfitTxb.TabIndex = 2;
+            this.ConfigRequiredProfitTxb.Text = "0,005";
             // 
-            // ConfigUpdatePriceRange
+            // ConfigUpdatePriceRangeTxb
             // 
-            this.ConfigUpdatePriceRange.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.ConfigUpdatePriceRange.Location = new System.Drawing.Point(185, 59);
-            this.ConfigUpdatePriceRange.Margin = new System.Windows.Forms.Padding(4);
-            this.ConfigUpdatePriceRange.Name = "ConfigUpdatePriceRange";
-            this.ConfigUpdatePriceRange.Size = new System.Drawing.Size(90, 26);
-            this.ConfigUpdatePriceRange.TabIndex = 4;
-            this.ConfigUpdatePriceRange.Text = "50";
+            this.ConfigUpdatePriceRangeTxb.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ConfigUpdatePriceRangeTxb.Location = new System.Drawing.Point(185, 59);
+            this.ConfigUpdatePriceRangeTxb.Margin = new System.Windows.Forms.Padding(4);
+            this.ConfigUpdatePriceRangeTxb.Name = "ConfigUpdatePriceRangeTxb";
+            this.ConfigUpdatePriceRangeTxb.Size = new System.Drawing.Size(90, 26);
+            this.ConfigUpdatePriceRangeTxb.TabIndex = 4;
+            this.ConfigUpdatePriceRangeTxb.Text = "50";
             // 
-            // label1
+            // ConfigAvailableBalanceLbl
             // 
-            this.label1.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(20, 116);
-            this.label1.Margin = new System.Windows.Forms.Padding(3);
-            this.label1.Name = "label1";
-            this.label1.Padding = new System.Windows.Forms.Padding(5);
-            this.label1.Size = new System.Drawing.Size(155, 30);
-            this.label1.TabIndex = 7;
-            this.label1.Text = "Available balance";
+            this.ConfigAvailableBalanceLbl.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ConfigAvailableBalanceLbl.AutoSize = true;
+            this.ConfigAvailableBalanceLbl.Location = new System.Drawing.Point(20, 116);
+            this.ConfigAvailableBalanceLbl.Margin = new System.Windows.Forms.Padding(3);
+            this.ConfigAvailableBalanceLbl.Name = "ConfigAvailableBalanceLbl";
+            this.ConfigAvailableBalanceLbl.Padding = new System.Windows.Forms.Padding(5);
+            this.ConfigAvailableBalanceLbl.Size = new System.Drawing.Size(155, 30);
+            this.ConfigAvailableBalanceLbl.TabIndex = 7;
+            this.ConfigAvailableBalanceLbl.Text = "Available balance";
             // 
             // ConfigRequiredProfitl
             // 
@@ -499,71 +499,71 @@ namespace UI
             this.ConfigRequiredProfitl.TabIndex = 8;
             this.ConfigRequiredProfitl.Text = "Required profit";
             // 
-            // ConfigVolumeOfContractsl
+            // ConfigVolumeOfContractslbl
             // 
-            this.ConfigVolumeOfContractsl.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.ConfigVolumeOfContractsl.AutoSize = true;
-            this.ConfigVolumeOfContractsl.Location = new System.Drawing.Point(7, 26);
-            this.ConfigVolumeOfContractsl.Margin = new System.Windows.Forms.Padding(3);
-            this.ConfigVolumeOfContractsl.Name = "ConfigVolumeOfContractsl";
-            this.ConfigVolumeOfContractsl.Padding = new System.Windows.Forms.Padding(5);
-            this.ConfigVolumeOfContractsl.Size = new System.Drawing.Size(168, 30);
-            this.ConfigVolumeOfContractsl.TabIndex = 9;
-            this.ConfigVolumeOfContractsl.Text = "Volume of contracts";
+            this.ConfigVolumeOfContractslbl.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ConfigVolumeOfContractslbl.AutoSize = true;
+            this.ConfigVolumeOfContractslbl.Location = new System.Drawing.Point(7, 26);
+            this.ConfigVolumeOfContractslbl.Margin = new System.Windows.Forms.Padding(3);
+            this.ConfigVolumeOfContractslbl.Name = "ConfigVolumeOfContractslbl";
+            this.ConfigVolumeOfContractslbl.Padding = new System.Windows.Forms.Padding(5);
+            this.ConfigVolumeOfContractslbl.Size = new System.Drawing.Size(168, 30);
+            this.ConfigVolumeOfContractslbl.TabIndex = 9;
+            this.ConfigVolumeOfContractslbl.Text = "Volume of contracts";
             // 
-            // ConfigUpdatePriceRangel
+            // ConfigUpdatePriceRangelbl
             // 
-            this.ConfigUpdatePriceRangel.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.ConfigUpdatePriceRangel.AutoSize = true;
-            this.ConfigUpdatePriceRangel.Location = new System.Drawing.Point(10, 55);
-            this.ConfigUpdatePriceRangel.Margin = new System.Windows.Forms.Padding(3);
-            this.ConfigUpdatePriceRangel.Name = "ConfigUpdatePriceRangel";
-            this.ConfigUpdatePriceRangel.Padding = new System.Windows.Forms.Padding(5);
-            this.ConfigUpdatePriceRangel.Size = new System.Drawing.Size(165, 30);
-            this.ConfigUpdatePriceRangel.TabIndex = 10;
-            this.ConfigUpdatePriceRangel.Text = "Update price range";
+            this.ConfigUpdatePriceRangelbl.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ConfigUpdatePriceRangelbl.AutoSize = true;
+            this.ConfigUpdatePriceRangelbl.Location = new System.Drawing.Point(10, 55);
+            this.ConfigUpdatePriceRangelbl.Margin = new System.Windows.Forms.Padding(3);
+            this.ConfigUpdatePriceRangelbl.Name = "ConfigUpdatePriceRangelbl";
+            this.ConfigUpdatePriceRangelbl.Padding = new System.Windows.Forms.Padding(5);
+            this.ConfigUpdatePriceRangelbl.Size = new System.Drawing.Size(165, 30);
+            this.ConfigUpdatePriceRangelbl.TabIndex = 10;
+            this.ConfigUpdatePriceRangelbl.Text = "Update price range";
             // 
-            // ConfigIntervalOfAnalysisl
+            // ConfigIntervalOfAnalysislbl
             // 
-            this.ConfigIntervalOfAnalysisl.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.ConfigIntervalOfAnalysisl.AutoSize = true;
-            this.ConfigIntervalOfAnalysisl.Location = new System.Drawing.Point(21, 87);
-            this.ConfigIntervalOfAnalysisl.Margin = new System.Windows.Forms.Padding(3);
-            this.ConfigIntervalOfAnalysisl.Name = "ConfigIntervalOfAnalysisl";
-            this.ConfigIntervalOfAnalysisl.Padding = new System.Windows.Forms.Padding(5);
-            this.ConfigIntervalOfAnalysisl.Size = new System.Drawing.Size(154, 30);
-            this.ConfigIntervalOfAnalysisl.TabIndex = 11;
-            this.ConfigIntervalOfAnalysisl.Text = "Interval of analysis";
+            this.ConfigIntervalOfAnalysislbl.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ConfigIntervalOfAnalysislbl.AutoSize = true;
+            this.ConfigIntervalOfAnalysislbl.Location = new System.Drawing.Point(21, 87);
+            this.ConfigIntervalOfAnalysislbl.Margin = new System.Windows.Forms.Padding(3);
+            this.ConfigIntervalOfAnalysislbl.Name = "ConfigIntervalOfAnalysislbl";
+            this.ConfigIntervalOfAnalysislbl.Padding = new System.Windows.Forms.Padding(5);
+            this.ConfigIntervalOfAnalysislbl.Size = new System.Drawing.Size(154, 30);
+            this.ConfigIntervalOfAnalysislbl.TabIndex = 11;
+            this.ConfigIntervalOfAnalysislbl.Text = "Interval of analysis";
             // 
-            // ShowRegistrationPanel
+            // ShowSignUpPanel
             // 
-            this.ShowRegistrationPanel.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.ShowRegistrationPanel.FlatAppearance.BorderSize = 0;
-            this.ShowRegistrationPanel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.ShowRegistrationPanel.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.ShowRegistrationPanel.Location = new System.Drawing.Point(0, 60);
-            this.ShowRegistrationPanel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.ShowRegistrationPanel.Name = "ShowRegistrationPanel";
-            this.ShowRegistrationPanel.Size = new System.Drawing.Size(142, 60);
-            this.ShowRegistrationPanel.TabIndex = 14;
-            this.ShowRegistrationPanel.Text = "Sign Up";
-            this.ShowRegistrationPanel.UseVisualStyleBackColor = true;
-            this.ShowRegistrationPanel.Click += new System.EventHandler(this.ShowSignUpPanel_Click);
+            this.ShowSignUpPanel.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ShowSignUpPanel.FlatAppearance.BorderSize = 0;
+            this.ShowSignUpPanel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.ShowSignUpPanel.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.ShowSignUpPanel.Location = new System.Drawing.Point(3, 2);
+            this.ShowSignUpPanel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.ShowSignUpPanel.Name = "ShowSignUpPanel";
+            this.ShowSignUpPanel.Size = new System.Drawing.Size(142, 60);
+            this.ShowSignUpPanel.TabIndex = 14;
+            this.ShowSignUpPanel.Text = "Sign Up";
+            this.ShowSignUpPanel.UseVisualStyleBackColor = true;
+            this.ShowSignUpPanel.Click += new System.EventHandler(this.ShowSignUpPanel_Click);
             // 
-            // ShowLoginPanel
+            // ShowSignInPanel
             // 
-            this.ShowLoginPanel.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.ShowLoginPanel.FlatAppearance.BorderSize = 0;
-            this.ShowLoginPanel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.ShowLoginPanel.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.ShowLoginPanel.Location = new System.Drawing.Point(0, 0);
-            this.ShowLoginPanel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.ShowLoginPanel.Name = "ShowLoginPanel";
-            this.ShowLoginPanel.Size = new System.Drawing.Size(142, 60);
-            this.ShowLoginPanel.TabIndex = 15;
-            this.ShowLoginPanel.Text = "Sign In";
-            this.ShowLoginPanel.UseVisualStyleBackColor = true;
-            this.ShowLoginPanel.Click += new System.EventHandler(this.ShowSignInPanel_Click);
+            this.ShowSignInPanel.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ShowSignInPanel.FlatAppearance.BorderSize = 0;
+            this.ShowSignInPanel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.ShowSignInPanel.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.ShowSignInPanel.Location = new System.Drawing.Point(3, 59);
+            this.ShowSignInPanel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.ShowSignInPanel.Name = "ShowSignInPanel";
+            this.ShowSignInPanel.Size = new System.Drawing.Size(142, 60);
+            this.ShowSignInPanel.TabIndex = 15;
+            this.ShowSignInPanel.Text = "Sign In";
+            this.ShowSignInPanel.UseVisualStyleBackColor = true;
+            this.ShowSignInPanel.Click += new System.EventHandler(this.ShowSignInPanel_Click);
             // 
             // ShowMainMenu
             // 
@@ -571,7 +571,7 @@ namespace UI
             this.ShowMainMenu.FlatAppearance.BorderSize = 0;
             this.ShowMainMenu.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.ShowMainMenu.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.ShowMainMenu.Location = new System.Drawing.Point(0, 120);
+            this.ShowMainMenu.Location = new System.Drawing.Point(3, 120);
             this.ShowMainMenu.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ShowMainMenu.Name = "ShowMainMenu";
             this.ShowMainMenu.Size = new System.Drawing.Size(142, 60);
@@ -748,21 +748,21 @@ namespace UI
             this.MainMenuGroupBox.Controls.Add(this.SlotsComboBox);
             this.MainMenuGroupBox.Controls.Add(this.ActiveSlotsDataGridView);
             this.MainMenuGroupBox.Controls.Add(this.panel3);
-            this.MainMenuGroupBox.Controls.Add(this.label10);
+            this.MainMenuGroupBox.Controls.Add(this.ConfigRequiredProfitLbl);
             this.MainMenuGroupBox.Controls.Add(this.BalanceLabel);
-            this.MainMenuGroupBox.Controls.Add(this.label3);
-            this.MainMenuGroupBox.Controls.Add(this.ConfigIntervalOfAnalysis);
-            this.MainMenuGroupBox.Controls.Add(this.ConfigVolumeOfContracts);
-            this.MainMenuGroupBox.Controls.Add(this.ConfigAlgorithmSensivity);
-            this.MainMenuGroupBox.Controls.Add(this.label2);
-            this.MainMenuGroupBox.Controls.Add(this.label1);
-            this.MainMenuGroupBox.Controls.Add(this.ConfigIntervalOfAnalysisl);
-            this.MainMenuGroupBox.Controls.Add(this.ConfigUpdatePriceRange);
-            this.MainMenuGroupBox.Controls.Add(this.ConfigAvailableBalance);
+            this.MainMenuGroupBox.Controls.Add(this.BalanceNameLbl);
+            this.MainMenuGroupBox.Controls.Add(this.ConfigIntervalOfAnalysisTxb);
+            this.MainMenuGroupBox.Controls.Add(this.ConfigVolumeOfContractsTxb);
+            this.MainMenuGroupBox.Controls.Add(this.ConfigAlgorithmSensivityTxb);
+            this.MainMenuGroupBox.Controls.Add(this.ConfigAlgorithmSensLbl);
+            this.MainMenuGroupBox.Controls.Add(this.ConfigAvailableBalanceLbl);
+            this.MainMenuGroupBox.Controls.Add(this.ConfigIntervalOfAnalysislbl);
+            this.MainMenuGroupBox.Controls.Add(this.ConfigUpdatePriceRangeTxb);
+            this.MainMenuGroupBox.Controls.Add(this.ConfigAvailableBalanceTxb);
             this.MainMenuGroupBox.Controls.Add(this.ConfigRequiredProfitl);
-            this.MainMenuGroupBox.Controls.Add(this.ConfigUpdatePriceRangel);
-            this.MainMenuGroupBox.Controls.Add(this.ConfigRequiredProfit);
-            this.MainMenuGroupBox.Controls.Add(this.ConfigVolumeOfContractsl);
+            this.MainMenuGroupBox.Controls.Add(this.ConfigUpdatePriceRangelbl);
+            this.MainMenuGroupBox.Controls.Add(this.ConfigRequiredProfitTxb);
+            this.MainMenuGroupBox.Controls.Add(this.ConfigVolumeOfContractslbl);
             this.MainMenuGroupBox.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.MainMenuGroupBox.Location = new System.Drawing.Point(153, 0);
             this.MainMenuGroupBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -840,7 +840,7 @@ namespace UI
             dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             this.ActiveSlotsDataGridView.DefaultCellStyle = dataGridViewCellStyle6;
             this.ActiveSlotsDataGridView.GridColor = System.Drawing.SystemColors.Control;
-            this.ActiveSlotsDataGridView.Location = new System.Drawing.Point(537, 18);
+            this.ActiveSlotsDataGridView.Location = new System.Drawing.Point(537, 12);
             this.ActiveSlotsDataGridView.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ActiveSlotsDataGridView.Name = "ActiveSlotsDataGridView";
             this.ActiveSlotsDataGridView.ReadOnly = true;
@@ -854,7 +854,7 @@ namespace UI
             this.ActiveSlotsDataGridView.RowTemplate.Height = 29;
             this.ActiveSlotsDataGridView.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.ActiveSlotsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
-            this.ActiveSlotsDataGridView.Size = new System.Drawing.Size(220, 278);
+            this.ActiveSlotsDataGridView.Size = new System.Drawing.Size(220, 284);
             this.ActiveSlotsDataGridView.TabIndex = 21;
             // 
             // Slot
@@ -895,19 +895,19 @@ namespace UI
             this.panel3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel3.Controls.Add(this.UpdateConfigButton);
             this.panel3.Controls.Add(this.RemoveMyOrdersButton);
-            this.panel3.Location = new System.Drawing.Point(368, 18);
+            this.panel3.Location = new System.Drawing.Point(354, 12);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(172, 304);
+            this.panel3.Size = new System.Drawing.Size(186, 310);
             this.panel3.TabIndex = 27;
             // 
             // UpdateConfigButton
             // 
             this.UpdateConfigButton.FlatAppearance.BorderSize = 0;
             this.UpdateConfigButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.UpdateConfigButton.Location = new System.Drawing.Point(-1, 54);
+            this.UpdateConfigButton.Location = new System.Drawing.Point(-1, 47);
             this.UpdateConfigButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.UpdateConfigButton.Name = "UpdateConfigButton";
-            this.UpdateConfigButton.Size = new System.Drawing.Size(173, 54);
+            this.UpdateConfigButton.Size = new System.Drawing.Size(182, 42);
             this.UpdateConfigButton.TabIndex = 17;
             this.UpdateConfigButton.Text = "Update configuration";
             this.UpdateConfigButton.UseVisualStyleBackColor = true;
@@ -920,49 +920,47 @@ namespace UI
             this.RemoveMyOrdersButton.Location = new System.Drawing.Point(-1, 0);
             this.RemoveMyOrdersButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.RemoveMyOrdersButton.Name = "RemoveMyOrdersButton";
-            this.RemoveMyOrdersButton.Size = new System.Drawing.Size(173, 54);
+            this.RemoveMyOrdersButton.Size = new System.Drawing.Size(182, 43);
             this.RemoveMyOrdersButton.TabIndex = 16;
-            this.RemoveMyOrdersButton.Text = "Cancel my orders";
+            this.RemoveMyOrdersButton.Text = "Remove my orders";
             this.RemoveMyOrdersButton.UseVisualStyleBackColor = true;
             this.RemoveMyOrdersButton.Click += new System.EventHandler(this.RemoveMyOrdersButton_Click);
             // 
-            // label10
+            // ConfigRequiredProfitLbl
             // 
-            this.label10.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(49, 180);
-            this.label10.Margin = new System.Windows.Forms.Padding(3);
-            this.label10.Name = "label10";
-            this.label10.Padding = new System.Windows.Forms.Padding(5);
-            this.label10.Size = new System.Drawing.Size(126, 30);
-            this.label10.TabIndex = 26;
-            this.label10.Text = "Required Profit";
+            this.ConfigRequiredProfitLbl.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ConfigRequiredProfitLbl.AutoSize = true;
+            this.ConfigRequiredProfitLbl.Location = new System.Drawing.Point(49, 180);
+            this.ConfigRequiredProfitLbl.Margin = new System.Windows.Forms.Padding(3);
+            this.ConfigRequiredProfitLbl.Name = "ConfigRequiredProfitLbl";
+            this.ConfigRequiredProfitLbl.Padding = new System.Windows.Forms.Padding(5);
+            this.ConfigRequiredProfitLbl.Size = new System.Drawing.Size(126, 30);
+            this.ConfigRequiredProfitLbl.TabIndex = 26;
+            this.ConfigRequiredProfitLbl.Text = "Required Profit";
             // 
             // BalanceLabel
             // 
-            this.BalanceLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.BalanceLabel.AutoSize = true;
+            this.BalanceLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.BalanceLabel.Location = new System.Drawing.Point(85, 294);
             this.BalanceLabel.Name = "BalanceLabel";
             this.BalanceLabel.Size = new System.Drawing.Size(0, 20);
             this.BalanceLabel.TabIndex = 20;
             // 
-            // label3
+            // BalanceNameLbl
             // 
-            this.label3.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(7, 294);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(74, 20);
-            this.label3.TabIndex = 19;
-            this.label3.Text = "Balance:";
+            this.BalanceNameLbl.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.BalanceNameLbl.Location = new System.Drawing.Point(7, 294);
+            this.BalanceNameLbl.Name = "BalanceNameLbl";
+            this.BalanceNameLbl.Size = new System.Drawing.Size(74, 20);
+            this.BalanceNameLbl.TabIndex = 19;
+            this.BalanceNameLbl.Text = "Balance:";
             // 
-            // ConfigIntervalOfAnalysis
+            // ConfigIntervalOfAnalysisTxb
             // 
-            this.ConfigIntervalOfAnalysis.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.ConfigIntervalOfAnalysis.DisplayMember = "0";
-            this.ConfigIntervalOfAnalysis.FormattingEnabled = true;
-            this.ConfigIntervalOfAnalysis.Items.AddRange(new object[] {
+            this.ConfigIntervalOfAnalysisTxb.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ConfigIntervalOfAnalysisTxb.DisplayMember = "0";
+            this.ConfigIntervalOfAnalysisTxb.FormattingEnabled = true;
+            this.ConfigIntervalOfAnalysisTxb.Items.AddRange(new object[] {
             "5s",
             "30s",
             "1m",
@@ -981,60 +979,60 @@ namespace UI
             "1w",
             "2w",
             "1mon"});
-            this.ConfigIntervalOfAnalysis.Location = new System.Drawing.Point(185, 89);
-            this.ConfigIntervalOfAnalysis.Margin = new System.Windows.Forms.Padding(4);
-            this.ConfigIntervalOfAnalysis.Name = "ConfigIntervalOfAnalysis";
-            this.ConfigIntervalOfAnalysis.Size = new System.Drawing.Size(90, 28);
-            this.ConfigIntervalOfAnalysis.TabIndex = 15;
-            this.ConfigIntervalOfAnalysis.Text = "5s";
+            this.ConfigIntervalOfAnalysisTxb.Location = new System.Drawing.Point(185, 89);
+            this.ConfigIntervalOfAnalysisTxb.Margin = new System.Windows.Forms.Padding(4);
+            this.ConfigIntervalOfAnalysisTxb.Name = "ConfigIntervalOfAnalysisTxb";
+            this.ConfigIntervalOfAnalysisTxb.Size = new System.Drawing.Size(90, 28);
+            this.ConfigIntervalOfAnalysisTxb.TabIndex = 15;
+            this.ConfigIntervalOfAnalysisTxb.Text = "5s";
             // 
-            // ConfigVolumeOfContracts
+            // ConfigVolumeOfContractsTxb
             // 
-            this.ConfigVolumeOfContracts.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.ConfigVolumeOfContracts.DisplayMember = "(none)";
-            this.ConfigVolumeOfContracts.FormattingEnabled = true;
-            this.ConfigVolumeOfContracts.Items.AddRange(new object[] {
+            this.ConfigVolumeOfContractsTxb.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ConfigVolumeOfContractsTxb.DisplayMember = "(none)";
+            this.ConfigVolumeOfContractsTxb.FormattingEnabled = true;
+            this.ConfigVolumeOfContractsTxb.Items.AddRange(new object[] {
             "100",
             "200",
             "300",
             "400",
             "500"});
-            this.ConfigVolumeOfContracts.Location = new System.Drawing.Point(185, 28);
-            this.ConfigVolumeOfContracts.Margin = new System.Windows.Forms.Padding(4);
-            this.ConfigVolumeOfContracts.Name = "ConfigVolumeOfContracts";
-            this.ConfigVolumeOfContracts.Size = new System.Drawing.Size(90, 28);
-            this.ConfigVolumeOfContracts.TabIndex = 14;
-            this.ConfigVolumeOfContracts.Text = "100";
+            this.ConfigVolumeOfContractsTxb.Location = new System.Drawing.Point(185, 28);
+            this.ConfigVolumeOfContractsTxb.Margin = new System.Windows.Forms.Padding(4);
+            this.ConfigVolumeOfContractsTxb.Name = "ConfigVolumeOfContractsTxb";
+            this.ConfigVolumeOfContractsTxb.Size = new System.Drawing.Size(90, 28);
+            this.ConfigVolumeOfContractsTxb.TabIndex = 14;
+            this.ConfigVolumeOfContractsTxb.Text = "100";
             // 
-            // ConfigAlgorithmSensivity
+            // ConfigAlgorithmSensivityTxb
             // 
-            this.ConfigAlgorithmSensivity.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.ConfigAlgorithmSensivity.DisplayMember = "0";
-            this.ConfigAlgorithmSensivity.FormattingEnabled = true;
-            this.ConfigAlgorithmSensivity.Items.AddRange(new object[] {
+            this.ConfigAlgorithmSensivityTxb.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ConfigAlgorithmSensivityTxb.DisplayMember = "0";
+            this.ConfigAlgorithmSensivityTxb.FormattingEnabled = true;
+            this.ConfigAlgorithmSensivityTxb.Items.AddRange(new object[] {
             "Minimal",
             "Low",
             "Medium",
             "High",
             "Ultra"});
-            this.ConfigAlgorithmSensivity.Location = new System.Drawing.Point(185, 150);
-            this.ConfigAlgorithmSensivity.Margin = new System.Windows.Forms.Padding(4);
-            this.ConfigAlgorithmSensivity.Name = "ConfigAlgorithmSensivity";
-            this.ConfigAlgorithmSensivity.Size = new System.Drawing.Size(90, 28);
-            this.ConfigAlgorithmSensivity.TabIndex = 13;
-            this.ConfigAlgorithmSensivity.Text = "Minimal";
+            this.ConfigAlgorithmSensivityTxb.Location = new System.Drawing.Point(185, 150);
+            this.ConfigAlgorithmSensivityTxb.Margin = new System.Windows.Forms.Padding(4);
+            this.ConfigAlgorithmSensivityTxb.Name = "ConfigAlgorithmSensivityTxb";
+            this.ConfigAlgorithmSensivityTxb.Size = new System.Drawing.Size(90, 28);
+            this.ConfigAlgorithmSensivityTxb.TabIndex = 13;
+            this.ConfigAlgorithmSensivityTxb.Text = "Minimal";
             // 
-            // label2
+            // ConfigAlgorithmSensLbl
             // 
-            this.label2.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(23, 148);
-            this.label2.Margin = new System.Windows.Forms.Padding(3);
-            this.label2.Name = "label2";
-            this.label2.Padding = new System.Windows.Forms.Padding(5);
-            this.label2.Size = new System.Drawing.Size(152, 30);
-            this.label2.TabIndex = 12;
-            this.label2.Text = "Algorithm sensivity";
+            this.ConfigAlgorithmSensLbl.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ConfigAlgorithmSensLbl.AutoSize = true;
+            this.ConfigAlgorithmSensLbl.Location = new System.Drawing.Point(23, 148);
+            this.ConfigAlgorithmSensLbl.Margin = new System.Windows.Forms.Padding(3);
+            this.ConfigAlgorithmSensLbl.Name = "ConfigAlgorithmSensLbl";
+            this.ConfigAlgorithmSensLbl.Padding = new System.Windows.Forms.Padding(5);
+            this.ConfigAlgorithmSensLbl.Size = new System.Drawing.Size(152, 30);
+            this.ConfigAlgorithmSensLbl.TabIndex = 12;
+            this.ConfigAlgorithmSensLbl.Text = "Algorithm sensivity";
             // 
             // SignUpGroupBox
             // 
@@ -1064,9 +1062,9 @@ namespace UI
             this.panel4.Controls.Add(this.label5);
             this.panel4.Controls.Add(this.label4);
             this.panel4.Controls.Add(this.RegPass);
-            this.panel4.Location = new System.Drawing.Point(216, 15);
+            this.panel4.Location = new System.Drawing.Point(232, 15);
             this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(538, 303);
+            this.panel4.Size = new System.Drawing.Size(522, 303);
             this.panel4.TabIndex = 27;
             // 
             // SignInGroupBox
@@ -1093,9 +1091,9 @@ namespace UI
             this.panel5.Controls.Add(this.label9);
             this.panel5.Controls.Add(this.LogPassTextBox);
             this.panel5.Controls.Add(this.label8);
-            this.panel5.Location = new System.Drawing.Point(216, 15);
+            this.panel5.Location = new System.Drawing.Point(232, 15);
             this.panel5.Name = "panel5";
-            this.panel5.Size = new System.Drawing.Size(538, 303);
+            this.panel5.Size = new System.Drawing.Size(522, 303);
             this.panel5.TabIndex = 36;
             // 
             // LoggedGroupBox
@@ -1108,7 +1106,7 @@ namespace UI
             this.LoggedGroupBox.Enabled = false;
             this.LoggedGroupBox.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.LoggedGroupBox.Location = new System.Drawing.Point(153, 0);
-            this.LoggedGroupBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.LoggedGroupBox.Margin = new System.Windows.Forms.Padding(3, 2, 0, 2);
             this.LoggedGroupBox.Name = "LoggedGroupBox";
             this.LoggedGroupBox.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.LoggedGroupBox.Size = new System.Drawing.Size(760, 325);
@@ -1137,10 +1135,11 @@ namespace UI
             // 
             // SignOutButton
             // 
-            this.SignOutButton.Location = new System.Drawing.Point(232, 253);
+            this.SignOutButton.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.SignOutButton.Location = new System.Drawing.Point(230, 253);
             this.SignOutButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.SignOutButton.Name = "SignOutButton";
-            this.SignOutButton.Size = new System.Drawing.Size(240, 60);
+            this.SignOutButton.Size = new System.Drawing.Size(228, 60);
             this.SignOutButton.TabIndex = 0;
             this.SignOutButton.Text = "Sign Out";
             this.SignOutButton.UseVisualStyleBackColor = true;
@@ -1166,23 +1165,24 @@ namespace UI
             // 
             this.ErrorProvider.ContainerControl = this;
             // 
-            // panel1
+            // LeftPanel
             // 
-            this.panel1.Controls.Add(this.ShowMainMenu);
-            this.panel1.Controls.Add(this.ShowRegistrationPanel);
-            this.panel1.Controls.Add(this.ShowLoginPanel);
-            this.panel1.Location = new System.Drawing.Point(0, 0);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(145, 367);
-            this.panel1.TabIndex = 27;
+            this.LeftPanel.Controls.Add(this.ShowMainMenu);
+            this.LeftPanel.Controls.Add(this.ShowSignUpPanel);
+            this.LeftPanel.Controls.Add(this.ShowSignInPanel);
+            this.LeftPanel.Location = new System.Drawing.Point(0, 0);
+            this.LeftPanel.Margin = new System.Windows.Forms.Padding(0);
+            this.LeftPanel.Name = "LeftPanel";
+            this.LeftPanel.Size = new System.Drawing.Size(150, 367);
+            this.LeftPanel.TabIndex = 27;
             // 
-            // panel2
+            // RightPanel
             // 
-            this.panel2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.panel2.Location = new System.Drawing.Point(917, 0);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(150, 367);
-            this.panel2.TabIndex = 28;
+            this.RightPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.RightPanel.Location = new System.Drawing.Point(917, 0);
+            this.RightPanel.Name = "RightPanel";
+            this.RightPanel.Size = new System.Drawing.Size(150, 367);
+            this.RightPanel.TabIndex = 28;
             // 
             // TradeBotUi
             // 
@@ -1190,12 +1190,12 @@ namespace UI
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1067, 853);
             this.Controls.Add(this.Tabs);
-            this.Controls.Add(this.LoggedGroupBox);
-            this.Controls.Add(this.panel2);
-            this.Controls.Add(this.panel1);
+            this.Controls.Add(this.RightPanel);
+            this.Controls.Add(this.LeftPanel);
             this.Controls.Add(this.MainMenuGroupBox);
             this.Controls.Add(this.SignUpGroupBox);
             this.Controls.Add(this.SignInGroupBox);
+            this.Controls.Add(this.LoggedGroupBox);
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "TradeBotUi";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -1225,7 +1225,7 @@ namespace UI
             this.LoggedGroupBox.ResumeLayout(false);
             this.LoggedGroupBox.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ErrorProvider)).EndInit();
-            this.panel1.ResumeLayout(false);
+            this.LeftPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -1233,16 +1233,16 @@ namespace UI
         #endregion
         private ZedGraph.ZedGraphControl zedGraph;
         private ZedGraph.ZedGraphControl zedGraph_1;
-        private System.Windows.Forms.TextBox ConfigAvailableBalance;
-        private System.Windows.Forms.TextBox ConfigRequiredProfit;
-        private System.Windows.Forms.TextBox ConfigUpdatePriceRange;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox ConfigAvailableBalanceTxb;
+        private System.Windows.Forms.TextBox ConfigRequiredProfitTxb;
+        private System.Windows.Forms.TextBox ConfigUpdatePriceRangeTxb;
+        private System.Windows.Forms.Label ConfigAvailableBalanceLbl;
         private System.Windows.Forms.Label ConfigRequiredProfitl;
-        private System.Windows.Forms.Label ConfigVolumeOfContractsl;
-        private System.Windows.Forms.Label ConfigUpdatePriceRangel;
-        private System.Windows.Forms.Label ConfigIntervalOfAnalysisl;
-        private System.Windows.Forms.Button ShowRegistrationPanel;
-        private System.Windows.Forms.Button ShowLoginPanel;
+        private System.Windows.Forms.Label ConfigVolumeOfContractslbl;
+        private System.Windows.Forms.Label ConfigUpdatePriceRangelbl;
+        private System.Windows.Forms.Label ConfigIntervalOfAnalysislbl;
+        private System.Windows.Forms.Button ShowSignUpPanel;
+        private System.Windows.Forms.Button ShowSignInPanel;
         private System.Windows.Forms.Button ShowMainMenu;
         private System.Windows.Forms.Label ConfigTokenl;
         private System.Windows.Forms.TextBox RegKey;
@@ -1263,14 +1263,14 @@ namespace UI
         private System.Windows.Forms.GroupBox SignInGroupBox;
         private System.Windows.Forms.GroupBox LoggedGroupBox;
         private System.Windows.Forms.Button SignOutButton;
-        private System.Windows.Forms.ComboBox ConfigAlgorithmSensivity;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.ComboBox ConfigIntervalOfAnalysis;
-        private System.Windows.Forms.ComboBox ConfigVolumeOfContracts;
+        private System.Windows.Forms.ComboBox ConfigAlgorithmSensivityTxb;
+        private System.Windows.Forms.Label ConfigAlgorithmSensLbl;
+        private System.Windows.Forms.ComboBox ConfigIntervalOfAnalysisTxb;
+        private System.Windows.Forms.ComboBox ConfigVolumeOfContractsTxb;
         private System.Windows.Forms.Button RemoveMyOrdersButton;
         private System.Windows.Forms.Button UpdateConfigButton;
         private System.Windows.Forms.Label BalanceLabel;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label BalanceNameLbl;
         private System.Windows.Forms.DataGridView ActiveSlotsDataGridView;
         private System.Windows.Forms.Button RemoveRowButton;
         private System.Windows.Forms.Button AddRowButton;
@@ -1284,6 +1284,21 @@ namespace UI
         private System.Windows.Forms.DataGridViewTextBoxColumn Quantity;
         private System.Windows.Forms.TabPage ActiveOrdersPage;
         private System.Windows.Forms.DataGridView ActiveOrdersDataGridView;
+        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabPage BalanceGraphPage;
+        private System.Windows.Forms.TabPage ClosedOrdersPage;
+        private System.Windows.Forms.ComboBox SlotsComboBox;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Slot;
+        private System.Windows.Forms.DataGridViewCheckBoxColumn Launch;
+        private System.Windows.Forms.ErrorProvider ErrorProvider;
+        private System.Windows.Forms.Label ConfigRequiredProfitLbl;
+        private System.Windows.Forms.Panel LeftPanel;
+        private System.Windows.Forms.Panel RightPanel;
+        private System.Windows.Forms.Panel panel3;
+        private System.Windows.Forms.Panel panel4;
+        private System.Windows.Forms.Panel panel5;
+        private System.Windows.Forms.Label LicenseNumberLbl;
         private System.Windows.Forms.DataGridViewTextBoxColumn SlotName;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
         private System.Windows.Forms.DataGridViewTextBoxColumn ExecutePrice;
@@ -1296,21 +1311,6 @@ namespace UI
         private System.Windows.Forms.DataGridViewTextBoxColumn Type;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn6;
         private System.Windows.Forms.DataGridViewTextBoxColumn OrderID;
-        private System.Windows.Forms.TabControl tabControl1;
-        private System.Windows.Forms.TabPage BalanceGraphPage;
-        private System.Windows.Forms.TabPage ClosedOrdersPage;
-        private System.Windows.Forms.ComboBox SlotsComboBox;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Slot;
-        private System.Windows.Forms.DataGridViewCheckBoxColumn Launch;
-        private System.Windows.Forms.ErrorProvider ErrorProvider;
-        private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.Panel panel2;
-        private System.Windows.Forms.Panel panel3;
-        private System.Windows.Forms.Panel panel4;
-        private System.Windows.Forms.Panel panel5;
-        private System.Windows.Forms.Label LicenseNumberLbl;
     }
 }
 

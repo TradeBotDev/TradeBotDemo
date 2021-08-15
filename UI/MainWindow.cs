@@ -63,7 +63,7 @@ namespace UI
             _listOfActiveSlots = new List<string>();
             ApplyConfiguration(ReadConfiguration());
             FormClosing += MainWindow_FormClosing;
-            ConfigUpdatePriceRange.TextChanged += ConfigUpdatePriceRangeOnTextChanged;
+            ConfigUpdatePriceRangeTxb.TextChanged += ConfigUpdatePriceRangeOnTextChanged;
             ActiveSlotsDataGridView.CellContentClick += DataGridView1_CellContentClick;
             SlotsComboBox.DataSource = _listOfAllSlots;
             SlotsComboBox.SelectedIndex = 0;
@@ -79,12 +79,12 @@ namespace UI
         {
             return new ConfigurationJson
             {
-                AlgorithmSensitivity = ConfigAlgorithmSensivity.Text,
-                AlgorithmInterval = ConfigIntervalOfAnalysis.Text,
-                AvailableBalance = ConfigAvailableBalance.Text,
-                RequiredProfit = ConfigRequiredProfit.Text,
-                VolumeOfContracts = ConfigVolumeOfContracts.Text,
-                UpdatePriceRange = ConfigUpdatePriceRange.Text,
+                AlgorithmSensitivity = ConfigAlgorithmSensivityTxb.Text,
+                AlgorithmInterval = ConfigIntervalOfAnalysisTxb.Text,
+                AvailableBalance = ConfigAvailableBalanceTxb.Text,
+                RequiredProfit = ConfigRequiredProfitTxb.Text,
+                VolumeOfContracts = ConfigVolumeOfContractsTxb.Text,
+                UpdatePriceRange = ConfigUpdatePriceRangeTxb.Text,
                 activeSlots = new List<string>(_listOfActiveSlots)
             };
         }
@@ -117,12 +117,12 @@ namespace UI
 
         private void ApplyConfiguration(ConfigurationJson configuration)
         {
-            ConfigAvailableBalance.Text = configuration.AvailableBalance;
-            ConfigRequiredProfit.Text = configuration.RequiredProfit;
-            ConfigAlgorithmSensivity.Text = configuration.AlgorithmSensitivity;
-            ConfigIntervalOfAnalysis.Text = configuration.AlgorithmInterval;
-            ConfigUpdatePriceRange.Text = configuration.UpdatePriceRange;
-            ConfigVolumeOfContracts.Text = configuration.VolumeOfContracts;
+            ConfigAvailableBalanceTxb.Text = configuration.AvailableBalance;
+            ConfigRequiredProfitTxb.Text = configuration.RequiredProfit;
+            ConfigAlgorithmSensivityTxb.Text = configuration.AlgorithmSensitivity;
+            ConfigIntervalOfAnalysisTxb.Text = configuration.AlgorithmInterval;
+            ConfigUpdatePriceRangeTxb.Text = configuration.UpdatePriceRange;
+            ConfigVolumeOfContractsTxb.Text = configuration.VolumeOfContracts;
             foreach (var activeSlot in configuration.activeSlots)
             {
                 AddToActiveSlots(activeSlot);
@@ -314,15 +314,15 @@ namespace UI
         {
             return new Config
             {
-                AvaibleBalance = double.Parse(ConfigAvailableBalance.Text),
-                RequiredProfit = double.Parse(ConfigRequiredProfit.Text),
-                ContractValue = double.Parse(ConfigVolumeOfContracts.Text),
+                AvaibleBalance = double.Parse(ConfigAvailableBalanceTxb.Text),
+                RequiredProfit = double.Parse(ConfigRequiredProfitTxb.Text),
+                ContractValue = double.Parse(ConfigVolumeOfContractsTxb.Text),
                 AlgorithmInfo = new AlgorithmInfo
                 {
-                    Interval = _intervalMap[ConfigIntervalOfAnalysis.Text],
-                    Sensivity = _sensitivityMap[ConfigAlgorithmSensivity.Text]
+                    Interval = _intervalMap[ConfigIntervalOfAnalysisTxb.Text],
+                    Sensivity = _sensitivityMap[ConfigAlgorithmSensivityTxb.Text]
                 },
-                OrderUpdatePriceRange = double.Parse(ConfigUpdatePriceRange.Text),
+                OrderUpdatePriceRange = double.Parse(ConfigUpdatePriceRangeTxb.Text),
             };
         }
 
@@ -363,15 +363,15 @@ namespace UI
 
         private void ConfigUpdatePriceRangeOnTextChanged(object sender, EventArgs e)
         {
-            ConfigUpdatePriceRange.TextChanged -= ConfigUpdatePriceRangeOnTextChanged;
-            if (ConfigUpdatePriceRange.Text.IndexOf(',') == ConfigUpdatePriceRange.Text.Length - 1) return;
-            if (!double.TryParse(ConfigUpdatePriceRange.Text, out var value)) return;
+            ConfigUpdatePriceRangeTxb.TextChanged -= ConfigUpdatePriceRangeOnTextChanged;
+            if (ConfigUpdatePriceRangeTxb.Text.IndexOf(',') == ConfigUpdatePriceRangeTxb.Text.Length - 1) return;
+            if (!double.TryParse(ConfigUpdatePriceRangeTxb.Text, out var value)) return;
 
             var floor = Math.Floor(value);
 
             
-            ConfigUpdatePriceRange.Text = (floor + (value - floor < 0.5 ? 0.0 : 0.5)).ToString(CultureInfo.InvariantCulture);
-            ConfigUpdatePriceRange.TextChanged += ConfigUpdatePriceRangeOnTextChanged;
+            ConfigUpdatePriceRangeTxb.Text = (floor + (value - floor < 0.5 ? 0.0 : 0.5)).ToString(CultureInfo.InvariantCulture);
+            ConfigUpdatePriceRangeTxb.TextChanged += ConfigUpdatePriceRangeOnTextChanged;
         }
 
         private void DataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -384,8 +384,13 @@ namespace UI
             cellCheckBox.Value ??= false;
             if (Convert.ToBoolean(cellCheckBox.Value))
             {
-                Stop(ActiveSlotsDataGridView.Rows[ActiveSlotsDataGridView.CurrentRow.Index].Cells[0].EditedFormattedValue.ToString());
-                cellCheckBox.Value = false;
+                if (MessageBox.Show(@"Are you sure you want to stop work?", @"Stop work",
+                    MessageBoxButtons.YesNo) == DialogResult.Yes)
+                {
+                    Stop(ActiveSlotsDataGridView.Rows[ActiveSlotsDataGridView.CurrentRow.Index].Cells[0]
+                        .EditedFormattedValue.ToString());
+                    cellCheckBox.Value = false;
+                }
             }
             else
             {
@@ -449,7 +454,7 @@ namespace UI
             if (!CheckConnection(await _facadeClient.SigningIn(LogLogTextBox.Text, LogPassTextBox.Text, RegKey.Text, RegToken.Text))) return;
             LoggedGroupBox.Visible = true;
             LoggedGroupBox.Enabled = true;
-            ShowRegistrationPanel.Enabled = false;
+            ShowSignUpPanel.Enabled = false;
             LoggedGroupBox.Text = "Signed in as " + LogLogTextBox.Text;
             SignInGroupBox.Visible = false;
             SignInGroupBox.Enabled = false;
@@ -462,7 +467,7 @@ namespace UI
             if (!CheckConnection(await _facadeClient.SigningOut())) return;
             SignInGroupBox.Visible = true;
             SignInGroupBox.Enabled = true;
-            ShowRegistrationPanel.Enabled = true;
+            ShowSignUpPanel.Enabled = true;
             LoggedGroupBox.Visible = false;
             LoggedGroupBox.Enabled = false;
             _loggedIn = false;
@@ -471,24 +476,36 @@ namespace UI
         private async void RemoveMyOrdersButton_Click(object sender, EventArgs e)
         {
             if (!CheckIfLogged()) return;
-            CheckConnection(await _facadeClient.RemoveMyOrders());
+            if (MessageBox.Show(@"Are you sure you want to remove your orders?", @"Remove orders", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                CheckConnection(await _facadeClient.RemoveMyOrders());
         }
 
         private async void UpdateConfigButton_Click(object sender, EventArgs e)
         {
             if (!CheckIfLogged()) return;
-            SaveConfiguration(InitConfigurationJson());
-            CheckConnection(await _facadeClient.UpdateConfig(GetConfig()));
+            if (MessageBox.Show(@"Are you sure you want to update the configuration?", @"Update configuration",
+                MessageBoxButtons.YesNo) == DialogResult.Yes)
+            {
+                SaveConfiguration(InitConfigurationJson());
+                CheckConnection(await _facadeClient.UpdateConfig(GetConfig()));
+            }
         }
 
         private async void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
-            SaveConfiguration(InitConfigurationJson());
-            for (var i = 0; i < ActiveSlotsDataGridView.Rows.Count; i++)
+            if (MessageBox.Show(@"Are you sure you want to close this window? Algorithm progress will be reset.",
+                @"Close window",
+                MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
-                if (Convert.ToBoolean(ActiveSlotsDataGridView.Rows[i].Cells[1].EditedFormattedValue))
-                    await _facadeClient.StopBot(ActiveSlotsDataGridView.Rows[i].Cells[0].EditedFormattedValue.ToString(), GetConfig());
+                SaveConfiguration(InitConfigurationJson());
+                for (var i = 0; i < ActiveSlotsDataGridView.Rows.Count; i++)
+                {
+                    if (Convert.ToBoolean(ActiveSlotsDataGridView.Rows[i].Cells[1].EditedFormattedValue))
+                        await _facadeClient.StopBot(
+                            ActiveSlotsDataGridView.Rows[i].Cells[0].EditedFormattedValue.ToString(), GetConfig());
+                }
             }
+            else e.Cancel = true;
         }
 
         private void AddRowButton_Click(object sender, EventArgs e)
