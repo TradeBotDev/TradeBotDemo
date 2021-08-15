@@ -40,8 +40,8 @@ namespace Former.Model
             var quantity = oldOrder.Quantity - newComingOrder.Quantity;
             var type = oldOrder.Signature.Type == OrderType.Buy ? OrderType.Sell : OrderType.Buy;
             var price = type == OrderType.Buy
-                ? oldOrder.Price + oldOrder.Price * _configuration.RequiredProfit
-                : oldOrder.Price - oldOrder.Price * _configuration.RequiredProfit;
+                ? oldOrder.Price - oldOrder.Price * _configuration.RequiredProfit
+                : oldOrder.Price + oldOrder.Price * _configuration.RequiredProfit;
             
             var addResponse = false;
             Order newOrder = null;
