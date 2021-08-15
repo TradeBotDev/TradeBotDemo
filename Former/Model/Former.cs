@@ -86,34 +86,11 @@ namespace Former.Model
         private bool CheckPossibilityPlacingOrder(OrderType type)
         {
             var orderCost = _configuration.ContractValue / (type == OrderType.Sell ? _storage.SellMarketPrice : _storage.BuyMarketPrice);
-            var availableBalanceWithConfigurationReduction = ConvertSatoshiToXBT(_storage.AvailableBalance) * _configuration.AvaibleBalance;
-            var totalBalanceWithConfigurationReduction = ConvertSatoshiToXBT(_storage.TotalBalance) * _configuration.AvaibleBalance;
-
-            double marginOfAlreadyPlacedSellOrders = 0;
-            double marginOfAlreadyPlacedBuyOrders = 0;
-
-            if (!_storage.MyOrders.IsEmpty || !_storage.CounterOrders.IsEmpty)
-            {
-                var marginOfMySellOrders = _storage.MyOrders.Where(x => x.Value.Signature.Type == OrderType.Sell).Sum(x => x.Value.Quantity / x.Value.Price);
-                var marginOfCounterSellOrders = _storage.CounterOrders.Where(x => x.Value.Signature.Type == OrderType.Sell).Sum(x => x.Value.Quantity / x.Value.Price);
-                marginOfAlreadyPlacedSellOrders = Math.Abs(marginOfMySellOrders + marginOfCounterSellOrders);
-
-                var marginOfMyBuyOrders = _storage.MyOrders.Where(x => x.Value.Signature.Type == OrderType.Buy).Sum(x => x.Value.Quantity / x.Value.Price);
-                var marginOfCounterBuyOrders = _storage.CounterOrders.Where(x => x.Value.Signature.Type == OrderType.Buy).Sum(x => x.Value.Quantity / x.Value.Price);
-                marginOfAlreadyPlacedBuyOrders = marginOfMyBuyOrders + marginOfCounterBuyOrders;
-            }
-
-            switch (type == OrderType.Sell ? -_storage.PositionSize : _storage.PositionSize)
-            {
-                case > 0 when availableBalanceWithConfigurationReduction < orderCost:
-                    Log.Debug("{@Where}: Cannot place {@Type} order. Insufficient available balance.", "Former", type);
-                    return false;
-                case <= 0 when totalBalanceWithConfigurationReduction - marginOfAlreadyPlacedSellOrders - marginOfAlreadyPlacedBuyOrders < orderCost:
-                    Log.Debug("{@Where}: Cannot place {@Type} order. Insufficient total balance.", "Former", type);
-                    return false;
-                default:
-                    return true;
-            }
+            var totalBalance = ConvertSatoshiToXBT(_storage.TotalBalance);
+            var availableBalance = ConvertSatoshiToXBT(_storage.AvailableBalance);
+            if (-totalBalance * (_configuration.AvaibleBalance - 1) + availableBalance > orderCost) return true;
+            Log.Debug("{@Where}: Cannot place {@Type} order. Insufficient balance.", "Former", type);
+            return false;
         }
 
         /// <summary>
