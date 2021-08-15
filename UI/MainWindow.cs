@@ -127,17 +127,6 @@ namespace UI
             {
                 AddToActiveSlots(activeSlot);
             }
-            //ConfigAvailableBalance.Text = configuration.AvailableBalance;
-            //ConfigRequiredProfit.Text = configuration.RequiredProfit;
-            //ConfigAlgorithmSensivity.Text = configuration.AlgorithmSensitivity;
-            //ConfigIntervalOfAnalysis.Text = configuration.AlgorithmInterval;
-            //ConfigUpdatePriceRange.Text = configuration.UpdatePriceRange;
-            //ConfigVolumeOfContractsl.Text = configuration.VolumeOfContracts;
-            //foreach (var activeSlot in configuration.activeSlots)
-            //{
-            //    AddToActiveSlots(activeSlot);
-            //}
-
         }
 
         private static List<string> InitListOfAllSlots()

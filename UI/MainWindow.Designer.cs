@@ -109,6 +109,7 @@ namespace UI
             this.SignInGroupBox = new System.Windows.Forms.GroupBox();
             this.panel5 = new System.Windows.Forms.Panel();
             this.LoggedGroupBox = new System.Windows.Forms.GroupBox();
+            this.LicenseNumberLbl = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.SignOutButton = new System.Windows.Forms.Button();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -116,7 +117,6 @@ namespace UI
             this.ErrorProvider = new System.Windows.Forms.ErrorProvider(this.components);
             this.panel1 = new System.Windows.Forms.Panel();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.LicenseNumberLbl = new System.Windows.Forms.Label();
             this.Tabs.SuspendLayout();
             this.LogsPage.SuspendLayout();
             this.GraphicsPage.SuspendLayout();
@@ -292,11 +292,11 @@ namespace UI
             this.dataGridViewTextBoxColumn7,
             this.Time,
             this.dataGridViewTextBoxColumn8});
-            this.FilledOrdersDataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.FilledOrdersDataGridView.GridColor = System.Drawing.SystemColors.Control;
             this.FilledOrdersDataGridView.Location = new System.Drawing.Point(0, 0);
             this.FilledOrdersDataGridView.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.FilledOrdersDataGridView.Name = "FilledOrdersDataGridView";
+            this.FilledOrdersDataGridView.ReadOnly = true;
             this.FilledOrdersDataGridView.RowHeadersVisible = false;
             this.FilledOrdersDataGridView.RowHeadersWidth = 51;
             dataGridViewCellStyle1.BackColor = System.Drawing.Color.White;
@@ -313,6 +313,7 @@ namespace UI
             this.SlotName.HeaderText = "Slot name";
             this.SlotName.MinimumWidth = 6;
             this.SlotName.Name = "SlotName";
+            this.SlotName.ReadOnly = true;
             this.SlotName.Width = 170;
             // 
             // dataGridViewTextBoxColumn2
@@ -320,6 +321,7 @@ namespace UI
             this.dataGridViewTextBoxColumn2.HeaderText = "Quantity";
             this.dataGridViewTextBoxColumn2.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
+            this.dataGridViewTextBoxColumn2.ReadOnly = true;
             this.dataGridViewTextBoxColumn2.Width = 170;
             // 
             // ExecutePrice
@@ -327,6 +329,7 @@ namespace UI
             this.ExecutePrice.HeaderText = "Execute Price";
             this.ExecutePrice.MinimumWidth = 6;
             this.ExecutePrice.Name = "ExecutePrice";
+            this.ExecutePrice.ReadOnly = true;
             this.ExecutePrice.Width = 170;
             // 
             // dataGridViewTextBoxColumn7
@@ -334,6 +337,7 @@ namespace UI
             this.dataGridViewTextBoxColumn7.HeaderText = "Type";
             this.dataGridViewTextBoxColumn7.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
+            this.dataGridViewTextBoxColumn7.ReadOnly = true;
             this.dataGridViewTextBoxColumn7.Width = 170;
             // 
             // Time
@@ -341,6 +345,7 @@ namespace UI
             this.Time.HeaderText = "Time";
             this.Time.MinimumWidth = 6;
             this.Time.Name = "Time";
+            this.Time.ReadOnly = true;
             this.Time.Width = 170;
             // 
             // dataGridViewTextBoxColumn8
@@ -348,6 +353,7 @@ namespace UI
             this.dataGridViewTextBoxColumn8.HeaderText = "ID";
             this.dataGridViewTextBoxColumn8.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn8.Name = "dataGridViewTextBoxColumn8";
+            this.dataGridViewTextBoxColumn8.ReadOnly = true;
             this.dataGridViewTextBoxColumn8.Width = 170;
             // 
             // ActiveOrdersPage
@@ -377,11 +383,11 @@ namespace UI
             this.Type,
             this.dataGridViewTextBoxColumn6,
             this.OrderID});
-            this.ActiveOrdersDataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ActiveOrdersDataGridView.GridColor = System.Drawing.SystemColors.Control;
             this.ActiveOrdersDataGridView.Location = new System.Drawing.Point(0, 0);
             this.ActiveOrdersDataGridView.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ActiveOrdersDataGridView.Name = "ActiveOrdersDataGridView";
+            this.ActiveOrdersDataGridView.ReadOnly = true;
             this.ActiveOrdersDataGridView.RowHeadersVisible = false;
             this.ActiveOrdersDataGridView.RowHeadersWidth = 51;
             dataGridViewCellStyle2.BackColor = System.Drawing.Color.White;
@@ -398,6 +404,7 @@ namespace UI
             this.dataGridViewTextBoxColumn3.HeaderText = "Slot name";
             this.dataGridViewTextBoxColumn3.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
+            this.dataGridViewTextBoxColumn3.ReadOnly = true;
             this.dataGridViewTextBoxColumn3.Width = 170;
             // 
             // dataGridViewTextBoxColumn4
@@ -405,6 +412,7 @@ namespace UI
             this.dataGridViewTextBoxColumn4.HeaderText = "Quantity";
             this.dataGridViewTextBoxColumn4.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
+            this.dataGridViewTextBoxColumn4.ReadOnly = true;
             this.dataGridViewTextBoxColumn4.Width = 170;
             // 
             // dataGridViewTextBoxColumn5
@@ -412,6 +420,7 @@ namespace UI
             this.dataGridViewTextBoxColumn5.HeaderText = "Execute Price";
             this.dataGridViewTextBoxColumn5.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
+            this.dataGridViewTextBoxColumn5.ReadOnly = true;
             this.dataGridViewTextBoxColumn5.Width = 170;
             // 
             // Type
@@ -419,6 +428,7 @@ namespace UI
             this.Type.HeaderText = "Type";
             this.Type.MinimumWidth = 6;
             this.Type.Name = "Type";
+            this.Type.ReadOnly = true;
             this.Type.Width = 170;
             // 
             // dataGridViewTextBoxColumn6
@@ -426,6 +436,7 @@ namespace UI
             this.dataGridViewTextBoxColumn6.HeaderText = "Time";
             this.dataGridViewTextBoxColumn6.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
+            this.dataGridViewTextBoxColumn6.ReadOnly = true;
             this.dataGridViewTextBoxColumn6.Width = 170;
             // 
             // OrderID
@@ -433,6 +444,7 @@ namespace UI
             this.OrderID.HeaderText = "ID";
             this.OrderID.MinimumWidth = 6;
             this.OrderID.Name = "OrderID";
+            this.OrderID.ReadOnly = true;
             this.OrderID.Width = 170;
             // 
             // ConfigAvailableBalance
@@ -1105,6 +1117,15 @@ namespace UI
             this.LoggedGroupBox.Text = "Signed in as ";
             this.LoggedGroupBox.Visible = false;
             // 
+            // LicenseNumberLbl
+            // 
+            this.LicenseNumberLbl.AutoSize = true;
+            this.LicenseNumberLbl.Location = new System.Drawing.Point(154, 55);
+            this.LicenseNumberLbl.Name = "LicenseNumberLbl";
+            this.LicenseNumberLbl.Size = new System.Drawing.Size(49, 20);
+            this.LicenseNumberLbl.TabIndex = 2;
+            this.LicenseNumberLbl.Text = "53523";
+            // 
             // label7
             // 
             this.label7.AutoSize = true;
@@ -1162,15 +1183,6 @@ namespace UI
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(150, 367);
             this.panel2.TabIndex = 28;
-            // 
-            // LicenseNumberLbl
-            // 
-            this.LicenseNumberLbl.AutoSize = true;
-            this.LicenseNumberLbl.Location = new System.Drawing.Point(154, 55);
-            this.LicenseNumberLbl.Name = "LicenseNumberLbl";
-            this.LicenseNumberLbl.Size = new System.Drawing.Size(49, 20);
-            this.LicenseNumberLbl.TabIndex = 2;
-            this.LicenseNumberLbl.Text = "53523";
             // 
             // TradeBotUi
             // 

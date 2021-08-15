@@ -50,7 +50,8 @@ namespace Facade
                                 Message = response.ResponseStream.Current.Order.Message,
                                 Sessionid = response.ResponseStream.Current.Order.Sessionid,
                                 Order = response.ResponseStream.Current.Order.Order,
-                                Time = response.ResponseStream.Current.Order.Time
+                                Time = response.ResponseStream.Current.Order.Time,
+                                SlotName = response.ResponseStream.Current.Order.SlotName
                             }
                         });
                         break;
