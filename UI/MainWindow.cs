@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using TradeBot.Common.v1;
 using TradeBot.Facade.FacadeService.v1;
+using ZedGraph;
 
 namespace UI
 {
@@ -22,6 +23,10 @@ namespace UI
         private readonly Dictionary<string, Duration> _intervalMap;
         private readonly Dictionary<string, int> _sensitivityMap;
         private readonly FacadeClient _facadeClient;
+        private PointPairList _balanceList = new PointPairList();
+        private PointPairList _orderList = new PointPairList();
+        private DateTime lastDateBalance = new DateTime();
+        private DateTime lastDateOrder = new DateTime();
         private struct IncomingMessage
         {
             public string SlotName;
@@ -137,6 +142,16 @@ namespace UI
             {
                 AddToActiveSlots(activeSlot);
             }
+            //ConfigAvailableBalance.Text = configuration.AvailableBalance;
+            //ConfigRequiredProfit.Text = configuration.RequiredProfit;
+            //ConfigAlgorithmSensivity.Text = configuration.AlgorithmSensitivity;
+            //ConfigIntervalOfAnalysis.Text = configuration.AlgorithmInterval;
+            //ConfigUpdatePriceRange.Text = configuration.UpdatePriceRange;
+            //ConfigVolumeOfContractsl.Text = configuration.VolumeOfContracts;
+            //foreach (var activeSlot in configuration.activeSlots)
+            //{
+            //    AddToActiveSlots(activeSlot);
+            //}
 
         }
 
@@ -275,15 +290,18 @@ namespace UI
             {
                 case ChangesType.Partitial:
                     AddOrderToTable(incomingMessage.Status == OrderStatus.Open ? ActiveOrdersDataGridView : FilledOrdersDataGridView, incomingMessage);
+                    UpdateList(orderEvent.Order.Price.ToString(),orderEvent.Time,ref _orderList,zedGraph_1,lastDateOrder);
                     break;
 
                 case ChangesType.Insert:
                     AddOrderToTable(ActiveOrdersDataGridView, incomingMessage);
                     WriteMessageToEventConsole(incomingMessage);
+                    UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1,lastDateOrder);
                     break;
 
                 case ChangesType.Update:
                     UpdateTable(ActiveOrdersDataGridView, incomingMessage);
+                    UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1, lastDateOrder);
                     break;
 
                 case ChangesType.Delete:
@@ -302,6 +320,7 @@ namespace UI
         private void HandleBalanceUpdate(PublishBalanceEvent balanceUpdate)
         {
             BalanceLabel.Text = $"{double.Parse(balanceUpdate.Balance.Value) / 100000000} {balanceUpdate.Balance.Currency}";
+            UpdateList(balanceUpdate.Balance.Value, balanceUpdate.Time,ref _balanceList, zedGraph,lastDateBalance);
         }
 
         private async void Start(string slotName)
@@ -515,5 +534,71 @@ namespace UI
         {
 
         }
+
+        #endregion
+
+        #region DrawGraphs
+        private void UpdateList(string b,Timestamp time,ref PointPairList list,ZedGraph.ZedGraphControl graphControl, DateTime ld)
+        {
+            DateTime tm = TimeZoneInfo.ConvertTime(time.ToDateTime(), TimeZoneInfo.Local);//.ToString("HH:mm:ss dd.MM.yyyy");
+            if (double.TryParse(b,out double value))
+            {
+                if (ld.Day == tm.Day)
+                {
+                    list.RemoveAt(list.Count-1);
+                }
+                list.Add(new XDate(tm),value);
+                ld = tm;
+                if(list.Count>40)
+                {
+                    list.RemoveAt(0);
+                }
+                if (graphControl == zedGraph)
+                {
+                    lastDateBalance = tm;
+                }
+                else
+                {
+                    lastDateOrder = tm;
+                }
+            }
+            DrawGraph(graphControl,list);
+        }
+        private void DrawGraph(ZedGraph.ZedGraphControl graphControl,PointPairList list)
+        {
+            GraphPane pane = graphControl.GraphPane;
+
+            pane.CurveList.Clear();
+
+            //DateTime startDate = new DateTime(2021, 07, 0);
+
+            //int daysCount = 40;
+
+            //Random rnd = new Random();
+
+            //for (int i = 0; i < daysCount; i++)
+            //{
+            //    DateTime currentDate = startDate.AddDays(i);
+            //
+            //    
+            //    list.Add(new XDate(currentDate), yValue);
+            //}
+
+            LineItem myCurve = pane.AddCurve("", list, System.Drawing.Color.Blue, SymbolType.Circle);
+
+            pane.XAxis.Type = AxisType.Date;
+
+            pane.YAxis.Scale.Min = list.Last().Y-100;
+            pane.YAxis.Scale.Max = list.Last().Y+100;
+
+            pane.XAxis.Scale.Min = new XDate(list.Last().X-1);
+            pane.XAxis.Scale.Max = new XDate(list.Last().X+1);
+
+            zedGraph.AxisChange();
+
+            zedGraph.Invalidate();
+        }
+        
+        #endregion
     }
 }

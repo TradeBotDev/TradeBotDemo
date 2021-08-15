@@ -17,7 +17,7 @@ namespace Relay.Clients
     {
         private TradeMarketService.TradeMarketServiceClient _client;
 
-        public TradeMarketClient(Uri uri)
+        public TradeMarketClient(string uri)
         {
             _client = new TradeMarketService.TradeMarketServiceClient(GrpcChannel.ForAddress(uri));
         }

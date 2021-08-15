@@ -12,8 +12,8 @@ namespace Facade
 {
     public class RelayClass
     {
-        public GrpcChannel _channel => GrpcChannel.ForAddress("http://localhost:5004");
-        public GrpcChannel Channel { get => _channel; }
+        private GrpcChannel _channel => GrpcChannel.ForAddress("http://localhost:5004");
+        private GrpcChannel Channel { get => _channel; }
 
         private Rel _client => new Rel(Channel);
         public Rel Client
@@ -21,95 +21,63 @@ namespace Facade
             get => _client;
         }
 
-        public async Task SubscribeLogsRel(Ref.SubscribeLogsRequest request, IServerStreamWriter<Ref.SubscribeLogsResponse> responseStream, ServerCallContext context)
+        public async Task Relay_SubscribeLogs(Ref.SubscribeLogsRequest request, IServerStreamWriter<Ref.SubscribeLogsResponse> responseStream, ServerCallContext context, string methodName)
         {
-            while (true)
-            {
-                try
-                {
-                    var response = Client.SubscribeLogs(new TradeBot.Relay.RelayService.v1.SubscribeLogsRequest { Request = request.R });
-                    if (!context.CancellationToken.IsCancellationRequested)
-                    {
-                        if (response.ResponseStream.Current != null)
-                        {
-                            Log.Information($"Function: SubscribeLogsRelay \n args: request={request}");
-                            while (await response.ResponseStream.MoveNext())
-                            {
-                                Log.Information($"Function: SubscribeLogsRelay \n args: response={response.ResponseStream.Current.Response}");
-                                await responseStream.WriteAsync(new Ref.SubscribeLogsResponse
-                                {
-                                    Response = response.ResponseStream.Current.Response
-                                });
-                            }
-                            break;
-                        }
-                        else
-                        {
-                            //Log.Information("Trying to reconnect")
-                        }
-                    }
-                    else
-                    {
-                        Log.Information("Client disconnected");
-                        break;
-                    }
-                }
-                catch (RpcException e)
-                {
-                    Log.Error("Exception" + e);
-                }
-            }
+            var response = Client.SubscribeLogs(new TradeBot.Relay.RelayService.v1.SubscribeLogsRequest { Request = request.R }, context.RequestHeaders);
+            await Generalization.StreamReadWrite(request, responseStream, response, context, methodName);
         }
-
-        public Task<Ref.SwitchBotResponse> SwitchBotRel(Ref.SwitchBotRequest request, ServerCallContext context)
+        public async Task<Ref.DeleteOrderResponse> Relay_DeleteOrder(ServerCallContext context, string methodName)
         {
-            while (true)
+            TradeBot.Relay.RelayService.v1.DeleteOrderResponse response = null;
+            async Task<TradeBot.Relay.RelayService.v1.DeleteOrderResponse> task()
             {
-                try
-                {
-                    if (context.CancellationToken.IsCancellationRequested) break;
-                    var response = Client.StartBot(new TradeBot.Relay.RelayService.v1.StartBotRequest
-                    {
-                        Config = request.Config
-                    }, context.RequestHeaders);
-                    Log.Information($"Function: SwitchBot \n args: request={request}");
-                    Log.Information($"Function: SwitchBot \n args: response={response}");
-                    return Task.FromResult(new Ref.SwitchBotResponse
-                    {
-                        Response = response.Response
-                    });
-                }
-                catch (RpcException e)
-                {
-                    Log.Error("Exception:" + e.Message);
-                }
+                response = await Client.DeleteOrderAsync(new TradeBot.Relay.RelayService.v1.DeleteOrderRequest { }, context.RequestHeaders);
+                return response;
             }
-            Log.Information("Client disconnected");
-            return Task.FromResult(new Ref.SwitchBotResponse { });
+            await Generalization.ConnectionTester<TradeBot.Relay.RelayService.v1.DeleteOrderRequest>(task, methodName);
+            return await Generalization.ReturnResponse(new TradeBot.Facade.FacadeService.v1.DeleteOrderResponse { Response = response.Response }, methodName);
         }
-
-        public Task<Ref.UpdateServerConfigResponse> UpdateServerConfigRel(Ref.UpdateServerConfigRequest request, ServerCallContext context)
+        public async Task<Ref.SwitchBotResponse> Relay_StartBot(Ref.SwitchBotRequest request, ServerCallContext context, string methodName)
         {
-            while (true)
+            TradeBot.Relay.RelayService.v1.StartBotResponse response = null;
+            async Task<TradeBot.Relay.RelayService.v1.StartBotResponse> task()
             {
-                try
+                response = await Client.StartBotAsync(new TradeBot.Relay.RelayService.v1.StartBotRequest
                 {
-                    if (context.CancellationToken.IsCancellationRequested) break;
-                    var response = Client.UpdateServerConfig(new TradeBot.Relay.RelayService.v1.UpdateServerConfigRequest() { Request = request.Request });
-                    Log.Information($"Function: UpdateServerConfig \n args: request={request}");
-                    Log.Information($"Function: UpdateServerConfig \n args: response={response}");
-                    return Task.FromResult(new Ref.UpdateServerConfigResponse
-                    {
-                        Response = response.Response
-                    });
-                }
-                catch (RpcException e)
-                {
-                    Log.Error("Exception:" + e.Message);
-                }
+                    Config = request.Config
+                }, context.RequestHeaders);
+                return response;
             }
-            Log.Information("Client disconnected");
-            return Task.FromResult(new Ref.UpdateServerConfigResponse { });
+            await Generalization.ConnectionTester(task, methodName, request);
+            return await Generalization.ReturnResponse(new Ref.SwitchBotResponse { Response = response.Response }, methodName);
+        }
+        public async Task<Ref.StopBotResponse> Relay_stopBot(Ref.StopBotRequest request, ServerCallContext context,string methodName)
+        {
+            TradeBot.Relay.RelayService.v1.StopBotResponse response = null;
+            async Task<TradeBot.Relay.RelayService.v1.StopBotResponse> task()
+            {
+                response = await Client.StopBotAsync(new TradeBot.Relay.RelayService.v1.StopBotRequest
+                {
+                    Request = request.Request
+                }, context.RequestHeaders);
+                return response;
+            }
+            await Generalization.ConnectionTester(task, methodName, request);
+            return await Generalization.ReturnResponse(new Ref.StopBotResponse { }, methodName);
+        }
+        public async Task<Ref.UpdateServerConfigResponse> Relay_UpdateServerConfig(Ref.UpdateServerConfigRequest request, ServerCallContext context, string methodName)
+        {
+            TradeBot.Relay.RelayService.v1.UpdateServerConfigResponse response = null;
+            async Task<TradeBot.Relay.RelayService.v1.UpdateServerConfigResponse> task()
+            {
+                response = await Client.UpdateServerConfigAsync(new TradeBot.Relay.RelayService.v1.UpdateServerConfigRequest
+                {
+                    Request = request.Request
+                }, context.RequestHeaders);
+                return response;
+            }
+            await Generalization.ConnectionTester(task, methodName, request);
+            return await Generalization.ReturnResponse(new TradeBot.Facade.FacadeService.v1.UpdateServerConfigResponse { Response = response.Response }, methodName);
         }
 
     }

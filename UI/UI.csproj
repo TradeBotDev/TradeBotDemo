@@ -19,6 +19,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Serilog" Version="2.10.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="4.0.0" />
+    <PackageReference Include="ZedGraph" Version="5.1.7" />
   </ItemGroup>
 
 </Project>
