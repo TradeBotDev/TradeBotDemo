@@ -12,7 +12,7 @@ namespace Facade
 {
     public class RelayClass
     {
-        private GrpcChannel _channel => GrpcChannel.ForAddress(Environment.GetEnvironmentVariable("RELAY_CONNECTION_STRING"));
+        private GrpcChannel _channel => GrpcChannel.ForAddress("http://localhost:5004");
         private GrpcChannel Channel { get => _channel; }
 
         private Rel _client => new Rel(Channel);
