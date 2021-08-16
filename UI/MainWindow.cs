@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
@@ -117,6 +118,7 @@ namespace UI
 
         private void ApplyConfiguration(ConfigurationJson configuration)
         {
+            if (configuration is null) return;
             ConfigAvailableBalanceTxb.Text = configuration.AvailableBalance;
             ConfigRequiredProfitTxb.Text = configuration.RequiredProfit;
             ConfigAlgorithmSensivityTxb.Text = configuration.AlgorithmSensitivity;
@@ -586,5 +588,18 @@ namespace UI
         }
 
         #endregion
+
+        private void LinkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            LinkLabel1.LinkVisited = true;
+            System.Diagnostics.Process.Start("http://www.microsoft.com");
+        }
+
+        private void LinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            LinkLabel.LinkVisited = true;
+            ProcessStartInfo sInfo = new ProcessStartInfo("https://www.google.com");
+            Process.Start(sInfo);
+        }
     }
 }
