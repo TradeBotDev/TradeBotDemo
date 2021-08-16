@@ -1,20 +1,18 @@
-﻿namespace AccountGRPC.Models
+﻿using System;
+
+namespace AccountGRPC.Models
 {
-    // Объект вошедшего аккаунта.
+    // Описание таблицы с вошедшими аккаунтами.
     public class LoggedAccount
     {
+        public int LoggedAccountId { get; set; }
+        
+        public string SessionId { get; set; }
+
+        public DateTime LoginDate { get; set; }
+
         public int AccountId { get; set; }
-
-        // Отвечает за сохранение данных о биржах в базе данных после выхода. True - сохранять, False - уничтожать данные.
-        public bool SaveExchangesAfterLogout { get; set; }
-
-        // Этот конструктор необходим для десериализации.
-        public LoggedAccount() { }
-
-        public LoggedAccount(Account account, bool saveExchangesAfterLogout)
-        {
-            this.AccountId = account.AccountId;
-            this.SaveExchangesAfterLogout = saveExchangesAfterLogout;
-        }
+        
+        public Account Account { get; set; }
     }
 }

@@ -1,0 +1,52 @@
+﻿<!doctype html>
+<html>
+    <head>
+        <!--Невидимые на странице подключения и прочее-->
+        <title>@ViewBag.Title | Tradebot</title>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" type="text/css" href="~/css/style.css"/>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <!--Шапка сайта с горизонтальным меню.-->
+        <header class="header">
+            <h1>Tradebot</h1>
+            <ul>
+                <li><a href="/">Главная страница</a></li>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <!--Производится проверка вошедшего пользователя на то, обладает ли он лицензией.
+                    Если он не обдалает ей, появляется кнопка покупки.-->
+                    if (ViewBag.HaveLicense == null || !ViewBag.HaveLicense)
+                    {
+                        <li><a href="/purchase/buy">Купить</a></li>
+                    }
+                    <!--Если пользователь аутентифицирован, ему показываются кнопки аккаунта и выхода-->
+                    <li><a href="/account">Управление биржами</a></li>
+                    <li><a href="/authorization/logout">Выйти</a></li>
+                }
+                else
+                {
+                    <!--Иначе ему показываются кнопки покупки, входа и регистрации-->
+                    <li><a href="/purchase/buy">Купить</a></li>
+                    <li><a href="/authorization/login">Войти</a></li>
+                    <li><a href="/authorization/register">Регистрация</a></li>
+                }
+            </ul>
+        </header>
+        <!--Главной блок с контентов внутри страницы-->
+        <article>
+            <!--Отображение установленного в контроллере заголока-->
+            <h1>@ViewBag.SectionTitle</h1>
+            <!--Отображение контента внутри страницы-->
+            @RenderBody()
+        </article>
+        <!--Подвал сайта-->
+        <footer>
+            <p>Tradebot 2021</p>
+        </footer>
+        <script src="_framework/blazor.server.js"></script>
+    </body>
+</html>

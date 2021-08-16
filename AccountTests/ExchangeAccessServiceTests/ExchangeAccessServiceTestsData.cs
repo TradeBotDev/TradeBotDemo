@@ -14,7 +14,7 @@ namespace AccountTests.ExchangeAccessServiceTests
         public ExchangeAccessService exchangeAccessService = new();
 
         // Метод, создающий временный аккаунт в процессе тестирования.
-        public Task<Task<LoginReply>> GenerateLogin(string prefix)
+        public Task<Task<LoginResponse>> GenerateLogin(string prefix)
         {
             // Запрос для регистрации.
             var registerRequest = new RegisterRequest

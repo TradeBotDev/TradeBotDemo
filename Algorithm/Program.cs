@@ -14,7 +14,6 @@ namespace Algorithm
     {
         public static void Main(string[] args)
         {
-
             var configuration = new ConfigurationBuilder()
                 .Build();
 
@@ -23,9 +22,8 @@ namespace Algorithm
                 .WriteTo.Seq("http://localhost:5341")
                 .CreateLogger();
 
-            Log.Information("Algorithm started");
-
             CreateHostBuilder(args).Build().Run();
+            Log.Information("{@Where}: Algorithm service has started", "Algorithm");
         }
 
 
@@ -44,7 +42,7 @@ namespace Algorithm
     {
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            //AlgorithmBeta algo = new();
+
         }
     }
 }

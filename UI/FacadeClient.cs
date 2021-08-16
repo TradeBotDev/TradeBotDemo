@@ -129,8 +129,7 @@ namespace UI
                 var logResponse = await _client.LoginAsync(new LoginRequest
                 {
                     Email = login,
-                    Password = password,
-                    SaveExchangesAfterLogout = true
+                    Password = password
                 });
             
                 var sessionId = logResponse.SessionId;

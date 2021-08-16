@@ -5,38 +5,50 @@ namespace AccountGRPC.AccountMessages
 {
     public static class AddExchangeAccessReplies
     {
-        public static AddExchangeAccessReply SuccessfulAddition()
+        public static AddExchangeAccessResponse SuccessfulAddition()
         {
             const string Message = "Добавление биржи в аккаунт пользователя завершено.";
             Log.Information(Message);
 
-            return new AddExchangeAccessReply
+            return new AddExchangeAccessResponse
             {
-                Result = ActionCode.Successful,
+                Result = ExchangeAccessActionCode.Successful,
                 Message = Message
             };
         }
 
-        public static AddExchangeAccessReply AccountNotFound()
+        public static AddExchangeAccessResponse AccountNotFound()
         {
             const string Message = "Произошла ошибка добавления биржи: пользователь не существует.";
             Log.Information(Message);
 
-            return new AddExchangeAccessReply
+            return new AddExchangeAccessResponse
             {
-                Result = ActionCode.AccountNotFound,
+                Result = ExchangeAccessActionCode.AccountNotFound,
                 Message = Message
             };
         }
 
-        public static AddExchangeAccessReply ExchangeAccessExists()
+        public static AddExchangeAccessResponse TimePassed()
+        {
+            const string Message = "Произошла ошибка добавления биржи: время сессии вышло.";
+            Log.Information(Message);
+
+            return new AddExchangeAccessResponse
+            {
+                Result = ExchangeAccessActionCode.AccountNotFound,
+                Message = Message
+            };
+        }
+
+        public static AddExchangeAccessResponse ExchangeAccessExists()
         {
             const string Message = "Произошла ошибка добавления биржи: биржа уже существует.";
             Log.Information(Message);
 
-            return new AddExchangeAccessReply
+            return new AddExchangeAccessResponse
             {
-                Result = ActionCode.ExchangeExists,
+                Result = ExchangeAccessActionCode.IsExists,
                 Message = Message
             };
         }

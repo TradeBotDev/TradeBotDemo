@@ -2,17 +2,17 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using TradeBot.Common.v1;
 using TradeBot.Facade.FacadeService.v1;
 using ZedGraph;
+using System.Web;
 
 namespace UI
 {
@@ -73,6 +73,22 @@ namespace UI
                 if (fullName != null && fullName.Contains("TextBox"))
                     ((TextBox)control).Validating += OnValidatingTextBox;
             }
+            foreach (var control in SignUpPanel.Controls)
+            {
+                var fullName = control.GetType().FullName;
+                if (fullName != null && fullName.Contains("TextBox"))
+                    ((TextBox)control).Validating += OnValidating;
+            }
+        }
+
+        private void OnValidating(object sender, CancelEventArgs e)
+        {
+            if (string.IsNullOrEmpty(((TextBox)sender).Text))
+            {
+                e.Cancel = true;
+                ErrorProviderMainForm.SetError(((TextBox)sender), "The field must not be empty!");
+            }
+            else ErrorProviderMainForm.Clear();
         }
 
         private ConfigurationJson InitConfigurationJson()
@@ -117,6 +133,7 @@ namespace UI
 
         private void ApplyConfiguration(ConfigurationJson configuration)
         {
+            if (configuration is null) return;
             ConfigAvailableBalanceTxb.Text = configuration.AvailableBalance;
             ConfigRequiredProfitTxb.Text = configuration.RequiredProfit;
             ConfigAlgorithmSensivityTxb.Text = configuration.AlgorithmSensitivity;
@@ -351,14 +368,14 @@ namespace UI
             if (!double.TryParse(((TextBox)sender).Text, out _))
             {
                 e.Cancel = true;
-                ErrorProvider.SetError((TextBox)sender, "A number is required!");
+                ErrorProviderMainForm.SetError((TextBox)sender, "A number is required!");
             }
             else if (string.IsNullOrEmpty(((TextBox)sender).Text))
             {
                 e.Cancel = true;
-                ErrorProvider.SetError(((TextBox)sender), "The field must not be empty!");
+                ErrorProviderMainForm.SetError(((TextBox)sender), "The field must not be empty!");
             }
-            else ErrorProvider.Clear();
+            else ErrorProviderMainForm.Clear();
         }
 
         private void ConfigUpdatePriceRangeOnTextChanged(object sender, EventArgs e)
@@ -368,7 +385,6 @@ namespace UI
             if (!double.TryParse(ConfigUpdatePriceRangeTxb.Text, out var value)) return;
 
             var floor = Math.Floor(value);
-
             
             ConfigUpdatePriceRangeTxb.Text = (floor + (value - floor < 0.5 ? 0.0 : 0.5)).ToString(CultureInfo.InvariantCulture);
             ConfigUpdatePriceRangeTxb.TextChanged += ConfigUpdatePriceRangeOnTextChanged;
@@ -446,6 +462,11 @@ namespace UI
 
         private async void RegistrationButton_Click(object sender, EventArgs e)
         {
+            if (!ValidateChildren(ValidationConstraints.Enabled))
+            {
+                MessageBox.Show(@"Wrong login or password!", @"Correct the fields");
+                return;
+            }
             CheckConnection(await _facadeClient.RegisterAccount(RegLog.Text, RegPass.Text, RegPass.Text));
         }
 
@@ -586,5 +607,26 @@ namespace UI
         }
 
         #endregion
+
+        private void LinkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "http://23.88.34.174:5008/" };
+            Process.Start(parameter);
+            LinkLabel1.LinkVisited = true;
+        }
+
+        private void LinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "http://23.88.34.174:5008/" };
+            Process.Start(parameter);
+            LinkLabel1.LinkVisited = true;
+        }
+
+        private void linkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "https://testnet.bitmex.com/app/trade/XBTUSD" };
+            Process.Start(parameter);
+            LinkLabel1.LinkVisited = true;
+        }
     }
 }

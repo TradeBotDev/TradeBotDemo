@@ -11,9 +11,6 @@ namespace AccountTests.AccountServiceTests
         [Fact]
         public void LogoutFromLoggedAccount()
         {
-            // Очистка списка вошедших аккаунтов для того, чтобы не было конфликтов.
-            State.loggedIn = new();
-
             var registerRequest = new RegisterRequest()
             {
                 Email = "logoutAfterLogin@pochta.test",
@@ -31,21 +28,29 @@ namespace AccountTests.AccountServiceTests
             var reply = service.Register(registerRequest, null).
                 ContinueWith(login => service.Login(loginRequest, null)).
                 ContinueWith(logout => service.Logout(
-                    new SessionRequest { SessionId = logout.Result.Result.SessionId }, null));
+                    new LogoutRequest
+                    {
+                        SessionId = logout.Result.Result.SessionId,
+                        SaveExchangeAccesses = false
+                    }, null));
 
             // Ожидается, что в результате будет успешный выход из аккаунта.
-            Assert.Equal(ActionCode.Successful, reply.Result.Result.Result);
+            Assert.Equal(AccountActionCode.Successful, reply.Result.Result.Result);
         }
 
         // Тестирование выхода из несуществующего аккаунта.
         [Fact]
         public void LogoutFromNotLoggedAccount()
         {
-            var request = new SessionRequest { SessionId = "non_existing_sessionId" };
+            var request = new LogoutRequest
+            {
+                SessionId = "non_existing_sessionId",
+                SaveExchangeAccesses = false
+            };
             var reply = service.Logout(request, null);
             
             // Ожадиается, что придет сообщение о том, что пользователь уже вышел из данного аккаунта.
-            Assert.Equal(ActionCode.AccountNotFound, reply.Result.Result);
+            Assert.Equal(AccountActionCode.IsNotFound, reply.Result.Result);
         }
     }
 }

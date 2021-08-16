@@ -4,7 +4,7 @@
       "commandName": "Project",
       "environmentVariables": {
         "ACCOUNT_CONNECTION_STRING": "http://localhost:5000",
-        "RELAY_CONNECTION_STRING": "http:/localhost:5004",
+        "RELAY_CONNECTION_STRING": "http://localhost:5004",
         "ASPNETCORE_ENVIRONMENT": "Development",
         "HISTORY_CONNECTION_STRING": "http://localhost:5007",
         "TRADEMARKET_CONNECTION_STRING": "http://localhost:5005"

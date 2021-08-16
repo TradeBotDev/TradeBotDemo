@@ -3,7 +3,6 @@ using Former.Clients;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Serilog;
-using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Common.v1;
 
@@ -44,11 +43,10 @@ namespace Former.Model
                 : oldOrder.Price + oldOrder.Price * _configuration.RequiredProfit;
             
             var addResponse = false;
-            Order newOrder = null;
             var placeResponse = await _tradeMarketClient.PlaceOrder(price, -quantity, _metadata);
             if (placeResponse.Response.Code == ReplyCode.Succeed)
             {
-                newOrder = new Order
+                var newOrder = new Order
                 {
                     Id = placeResponse.OrderId,
                     Price = price,
@@ -58,6 +56,16 @@ namespace Former.Model
                     LastUpdateDate = new Timestamp()
                 };
                 addResponse = _storage.AddOrder(placeResponse.OrderId, newOrder, _storage.CounterOrders);
+                if (Convert.ToInt32(quantity) == Convert.ToInt32(oldOrder.Quantity))
+                {
+                    await _historyClient.WriteOrder(oldOrder, ChangesType.Delete, _metadata, "Initial order filled");
+                    await _historyClient.WriteOrder(newOrder, ChangesType.Insert, _metadata, "Counter order placed");
+                }
+                else
+                {
+                    await _historyClient.WriteOrder(newComingOrder, ChangesType.Update, _metadata, "Initial order partially filled");
+                    await _historyClient.WriteOrder(newOrder, ChangesType.Insert, _metadata, "Counter order placed");
+                }
             }
 
             Log.Information(
@@ -68,16 +76,6 @@ namespace Former.Model
                 "{@Where}: Order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@ResponseCode} added to counter orders list {@ResponseMessage}",
                 "Former", placeResponse.OrderId, price, -quantity, type,
                 addResponse ? ReplyCode.Succeed : ReplyCode.Failure);
-            if (Convert.ToInt32(quantity) == Convert.ToInt32(oldOrder.Quantity))
-            {
-                await _historyClient.WriteOrder(oldOrder, ChangesType.Delete, _metadata, "Initial order filled");
-                await _historyClient.WriteOrder(newOrder, ChangesType.Insert, _metadata, "Counter order placed");
-            }
-            else
-            {
-                await _historyClient.WriteOrder(newComingOrder, ChangesType.Update, _metadata, "Initial order partially filled");
-                await _historyClient.WriteOrder(newOrder, ChangesType.Insert, _metadata, "Counter order placed");
-            }
         }
 
         /// <summary>
@@ -97,7 +95,7 @@ namespace Former.Model
             var orderCost = _configuration.ContractValue / (type == OrderType.Sell ? _storage.SellMarketPrice : _storage.BuyMarketPrice);
             var totalBalance = ConvertSatoshiToXBT(_storage.TotalBalance);
             var availableBalance = ConvertSatoshiToXBT(_storage.AvailableBalance);
-            if (-totalBalance * (_configuration.AvaibleBalance - 1) + availableBalance > orderCost) return true;
+            if (totalBalance * (_configuration.AvaibleBalance - 1) + availableBalance > orderCost) return true;
             Log.Debug("{@Where}: Cannot place {@Type} order. Insufficient balance.", "Former", type);
             return false;
         }
@@ -111,14 +109,13 @@ namespace Former.Model
             var orderType = decision > 0 ? OrderType.Buy : OrderType.Sell;
             if (!CheckPossibilityPlacingOrder(orderType)) return;
 
-            Order newOrder = null;
             var quantity = orderType == OrderType.Buy ? _configuration.ContractValue : -_configuration.ContractValue;
             var price = orderType == OrderType.Buy ? _storage.BuyMarketPrice : _storage.SellMarketPrice;
 
             var response = await _tradeMarketClient.PlaceOrder(price, quantity, _metadata);
             if (response.Response.Code == ReplyCode.Succeed)
             {
-                newOrder = new Order
+                var newOrder = new Order
                 {
                     Id = response.OrderId,
                     Price = price,
@@ -131,13 +128,13 @@ namespace Former.Model
                     "{@Where}: Order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} added to my orders list {@ResponseCode}",
                     "Former", response.OrderId, price, quantity, orderType,
                     addResponse ? ReplyCode.Succeed : ReplyCode.Failure);
+                await _historyClient.WriteOrder(newOrder, ChangesType.Insert, _metadata, "Initial order placed");
             }
 
             Log.Information(
                 "{@Where}: Order {@Id} price: {@Price}, quantity: {@Quantity} placed for {@Type} {@ResponseCode} {@ResponseMessage}",
                 "Former", response.OrderId, price, quantity, orderType, response.Response.Code.ToString(),
                 response.Response.Code == ReplyCode.Failure ? response.Response.Message : "");
-            await _historyClient.WriteOrder(newOrder, ChangesType.Insert, _metadata, "Initial order placed");
         }
 
         /// <summary>
@@ -154,9 +151,13 @@ namespace Former.Model
             {
                 _storage.MyOrders.TryRemove(key, out _);
                 var response = await _tradeMarketClient.DeleteOrder(key, _metadata);
-                if (response.Response.Code != ReplyCode.Succeed) return;
+                if (response.Response.Code != ReplyCode.Succeed)
+                {
+                    await _historyClient.WriteOrder(value, ChangesType.Delete, _metadata, "Removed by user");
+                    return;
+                }
                 Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed {@ResponseCode}", "Former", value.Id, value.Price, value.Quantity, value.Signature.Type, response.Response.Code == ReplyCode.Succeed ? ReplyCode.Succeed : ReplyCode.Failure);
-                await _historyClient.WriteOrder(value, ChangesType.Delete, _metadata, "Removed by user");
+                
             }
         }
 

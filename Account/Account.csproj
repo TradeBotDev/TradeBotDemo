@@ -1,21 +1,27 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="accounts.db-shm" />
     <None Remove="accounts.db-wal" />
   </ItemGroup>
 
   <ItemGroup>
     <Protobuf Link="Protos/account.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/account/account_service/v1/account.proto" GrpcServices="Both" ProtoCompile="true" />
     <Protobuf Link="Protos/exchangeaccess.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/account/account_service/v1/exchangeaccess.proto" GrpcServices="Both" ProtoCompile="true" />
+    <Protobuf Link="Protos/license.proto" ProtoRoot="../Proto" Include="../Proto/tradebot/account/account_service/v1/license.proto" GrpcServices="Both" ProtoCompile="true" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.34.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.14" />
+    <PackageReference Include="Serilog.AspNetCore" Version="4.1.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="4.0.0" />
     <PackageReference Include="Serilog.Sinks.Seq" Version="5.0.1" />
     <PackageReference Include="System.Text.Json" Version="5.0.2" />

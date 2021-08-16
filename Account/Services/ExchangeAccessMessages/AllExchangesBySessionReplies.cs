@@ -1,19 +1,19 @@
-﻿using Serilog;
-using System.Linq;
+﻿using System.Linq;
+using Serilog;
 using TradeBot.Account.AccountService.v1;
 
 namespace AccountGRPC.AccountMessages
 {
     public static class AllExchangesBySessionReplies
     {
-        public static AllExchangesBySessionReply SuccessfulGetting(IQueryable<Models.ExchangeAccess> exchangesFromAccount)
+        public static AllExchangesBySessionResponse SuccessfulGetting(IQueryable<Models.ExchangeAccess> exchangesFromAccount)
         {
             const string Message = "Получение информации о биржах завершено успешно.";
             Log.Information(Message);
 
-            AllExchangesBySessionReply reply = new AllExchangesBySessionReply
+            AllExchangesBySessionResponse reply = new AllExchangesBySessionResponse
             {
-                Result = ActionCode.Successful,
+                Result = ExchangeAccessActionCode.Successful,
                 Message = Message
             };
 
@@ -31,26 +31,38 @@ namespace AccountGRPC.AccountMessages
             return reply;
         }
 
-        public static AllExchangesBySessionReply AccountNotFound()
+        public static AllExchangesBySessionResponse AccountNotFound()
         {
             const string Message = "Произошла ошибка получение данных бирж: пользователь не существует.";
             Log.Information(Message);
 
-            return new AllExchangesBySessionReply
+            return new AllExchangesBySessionResponse
             {
-                Result = ActionCode.AccountNotFound,
+                Result = ExchangeAccessActionCode.AccountNotFound,
                 Message = Message
             };
         }
 
-        public static AllExchangesBySessionReply ExchangesNotFound()
+        public static AllExchangesBySessionResponse TimePassed()
+        {
+            const string Message = "Произошла ошибка получение данных бирж: время сессии вышло.";
+            Log.Information(Message);
+
+            return new AllExchangesBySessionResponse
+            {
+                Result = ExchangeAccessActionCode.AccountNotFound,
+                Message = Message
+            };
+        }
+
+        public static AllExchangesBySessionResponse ExchangesNotFound()
         {
             const string Message = "Ошибка при получении бирж: данные не найдены.";
             Log.Information(Message);
 
-            return new AllExchangesBySessionReply
+            return new AllExchangesBySessionResponse
             {
-                Result = ActionCode.ExchangeNotFound,
+                Result = ExchangeAccessActionCode.IsNotFound,
                 Message = Message
             };
         }

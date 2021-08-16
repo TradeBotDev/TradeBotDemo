@@ -1,6 +1,8 @@
 ﻿using System.Threading.Tasks;
+using Former.Clients;
 using Former.Model;
 using Google.Protobuf.WellKnownTypes;
+using Grpc.Core;
 using TradeBot.Common.v1;
 using Xunit;
 
@@ -11,8 +13,9 @@ namespace FormerTests
         [Fact]
         public async Task UpdateMarketPrices_Bid10AndAskNegative1_Bid10AndAsk0returned()
         {
+            var historyClient = new HistoryClient();
             //Arrange
-            var storage = new Storage()
+            var storage = new Storage(historyClient, new Metadata())
             {
                 BuyMarketPrice = 0,
                 SellMarketPrice = 0
@@ -29,7 +32,8 @@ namespace FormerTests
         public async Task UpdateMarketPrices_BidNegative1AndAsk0_Bid0andAsk10returned()
         {
             //Arrange
-            var storage = new Storage()
+            var historyClient = new HistoryClient();
+            var storage = new Storage(historyClient, new Metadata())
             {
                 BuyMarketPrice = 0,
                 SellMarketPrice = 0
@@ -46,7 +50,8 @@ namespace FormerTests
         public async Task UpdateMarketPrices_Bid10AndAsk10_Bid10andAsk10returned()
         {
             //Arrange
-            var storage = new Storage
+            var historyClient = new HistoryClient();
+            var storage = new Storage(historyClient, new Metadata())
             {
                 BuyMarketPrice = 0,
                 SellMarketPrice = 0
@@ -63,7 +68,8 @@ namespace FormerTests
         public async Task UpdateMyOrderList_Order_100QtyBuy_AndPartial_AddedToCounterOrdersWith100Qty()
         {
             //Arrange
-            var storage = new Storage();
+            var historyClient = new HistoryClient();
+            var storage = new Storage(historyClient, new Metadata());
 
             var newComingOrder = new Order
             {
@@ -82,7 +88,8 @@ namespace FormerTests
         public async Task UpdateMyOrderList_Order_100QtySell_AndPartial_AddedToCounterOrdersWithNegative100Qty()
         {
             //Arrange
-            var storage = new Storage();
+            var historyClient = new HistoryClient();
+            var storage = new Storage(historyClient, new Metadata());
             var newComingOrder = new Order
             {
                 Quantity = 100, Id = "1", Signature = new OrderSignature{ Status = OrderStatus.Open, Type = OrderType.Sell}, LastUpdateDate = new Timestamp(), Price = 0
@@ -100,7 +107,8 @@ namespace FormerTests
         public async Task UpdateMyOrderList_Order_200Qty0PrcSell_AndUpdated_Qty200Prc38000InMyOrders()
         {
             //Arrange
-            var storage = new Storage();
+            var historyClient = new HistoryClient();
+            var storage = new Storage(historyClient, new Metadata());
 
             var oldOrder = new Order { Quantity = 400, Id = "1", Signature = new OrderSignature { Status = OrderStatus.Open, Type = OrderType.Sell}, LastUpdateDate = new Timestamp(), Price = 38000};
 
@@ -125,7 +133,8 @@ namespace FormerTests
         public async Task UpdateMyOrderList_Order_200Qty0PrcBuy_AndUpdated_Qty200Prc38000InCounterOrders()
         {
             //Arrange
-            var storage = new Storage();
+            var historyClient = new HistoryClient();
+            var storage = new Storage(historyClient, new Metadata());
 
             var oldOrder = new Order { Quantity = 400, Id = "1", Signature = new OrderSignature { Status = OrderStatus.Open, Type = OrderType.Buy}, LastUpdateDate = new Timestamp(), Price = 38000};
 
@@ -150,7 +159,8 @@ namespace FormerTests
         public async Task UpdateMyOrderList_Order_0Qty37000PrcBuy_AndUpdated_Qty400Prc37000InMyOrders()
         {
             //Arrange
-            var storage = new Storage();
+            var historyClient = new HistoryClient();
+            var storage = new Storage(historyClient, new Metadata());
 
             var oldOrder = new Order { Quantity = 400, Id = "1", Signature = new OrderSignature { Status = OrderStatus.Open, Type = OrderType.Buy}, LastUpdateDate = new Timestamp(), Price = 38000};
 
@@ -175,7 +185,8 @@ namespace FormerTests
         public async Task UpdateMyOrderList_Order_0Qty37000PrcSell_AndUpdated_Qty400Prc37000InCounterOrders()
         {
             //Arrange
-            var storage = new Storage();
+            var historyClient = new HistoryClient();
+            var storage = new Storage(historyClient, new Metadata());
 
             var oldOrder = new Order { Quantity = 400, Id = "1", Signature = new OrderSignature { Status = OrderStatus.Open, Type = OrderType.Sell}, LastUpdateDate = new Timestamp(), Price = 38000};
 
@@ -200,7 +211,8 @@ namespace FormerTests
         public async Task UpdateMyOrderList_Order_0Qty0PrcSell_AndDeleted_MyOrderCount0()
         {
             //Arrange
-            var storage = new Storage();
+            var historyClient = new HistoryClient();
+            var storage = new Storage(historyClient, new Metadata());
 
             var oldOrder = new Order { Quantity = 400, Id = "1", Signature = new OrderSignature { Status = OrderStatus.Open, Type = OrderType.Sell}, LastUpdateDate = new Timestamp(), Price = 38000};
 
@@ -223,7 +235,8 @@ namespace FormerTests
         public async Task UpdateMyOrderList_Order_0Qty0PrcBuy_AndDeleted_CounterOrderCount0()
         {
             //Arrange
-            var storage = new Storage();
+            var historyClient = new HistoryClient();
+            var storage = new Storage(historyClient, new Metadata());
 
             var oldOrder = new Order { Quantity = 400, Id = "1", Signature = new OrderSignature { Status = OrderStatus.Open, Type = OrderType.Buy}, LastUpdateDate = new Timestamp(), Price = 38000};
 
@@ -246,7 +259,8 @@ namespace FormerTests
         public void UpdatePosition_QtyNegative400_QtyNegative400returned()
         {
             //Arrange
-            var storage = new Storage()
+            var historyClient = new HistoryClient();
+            var storage = new Storage(historyClient, new Metadata())
             {
                 PositionSize = 0
             };
@@ -261,7 +275,8 @@ namespace FormerTests
         public void UpdatePosition_Qty400_400returned()
         {
             //Arrange
-            var storage = new Storage()
+            var historyClient = new HistoryClient();
+            var storage = new Storage(historyClient, new Metadata())
             {
                 PositionSize = 0
             };
@@ -276,7 +291,8 @@ namespace FormerTests
         public void UpdateBalance_Available0AndTotal400_Available400AndTotal400returned()
         {
             //Arrange
-            var storage = new Storage()
+            var historyClient = new HistoryClient();
+            var storage = new Storage(historyClient, new Metadata())
             {
                 AvailableBalance = 400,
                 TotalBalance = 100
@@ -291,9 +307,9 @@ namespace FormerTests
         }
         [Fact]
         public void UpdateBalance_Available400AndTotal0_Available400AndTotal400returned()
-        {
+        {var historyClient = new HistoryClient();
             //Arrange
-            var storage = new Storage()
+            var storage = new Storage(historyClient, new Metadata())
             {
                 AvailableBalance = 100,
                 TotalBalance = 400
@@ -308,9 +324,9 @@ namespace FormerTests
         }
         [Fact]
         public void UpdateBalance_AvailableNegative400AndTotalNegative400_Available100AndTotal100returned()
-        {
+        {var historyClient = new HistoryClient();
             //Arrange
-            var storage = new Storage()
+            var storage = new Storage(historyClient, new Metadata())
             {
                 AvailableBalance = 100,
                 TotalBalance = 100
@@ -327,7 +343,8 @@ namespace FormerTests
         public void RemoveOrder_Id1_MyOrdersCount0()
         {
             //Arrange
-            var storage = new Storage();
+            var historyClient = new HistoryClient();
+            var storage = new Storage(historyClient, new Metadata());
             storage.MyOrders.TryAdd("1",new Order{ Id = "1", Price = 0, Quantity =0, Signature = new OrderSignature(), LastUpdateDate = new Timestamp()});
 
             //Act
@@ -341,7 +358,8 @@ namespace FormerTests
         public void RemoveOrder_Id1_CounterOrdersCount0()
         {
             //Arrange
-            var storage = new Storage();
+            var historyClient = new HistoryClient();
+            var storage = new Storage(historyClient, new Metadata());
             storage.CounterOrders.TryAdd("1",new Order{ Id = "1", Price = 0, Quantity =0, Signature = new OrderSignature(), LastUpdateDate = new Timestamp()});
 
             //Act
@@ -355,7 +373,8 @@ namespace FormerTests
         public void UpdateOrder_Qty0Prc37000_Qty100Prc37000InMyOrders()
         {
             //Arrange
-            var storage = new Storage();
+            var historyClient = new HistoryClient();
+            var storage = new Storage(historyClient, new Metadata());
             storage.MyOrders.TryAdd("1",new Order{ Id = "1", Price = 38000, Quantity = 100, Signature = new OrderSignature(), LastUpdateDate = new Timestamp()});
             var newComingOrder = new Order
             {
@@ -375,7 +394,8 @@ namespace FormerTests
         public void UpdateOrder_Qty0Prc37000_Qty100Prc37000InCounterOrders()
         {
             //Arrange
-            var storage = new Storage();
+            var historyClient = new HistoryClient();
+            var storage = new Storage(historyClient, new Metadata());
             storage.CounterOrders.TryAdd("1",new Order{ Id = "1", Price = 38000, Quantity = 100, Signature = new OrderSignature(), LastUpdateDate = new Timestamp()});
             var newComingOrder = new Order
             {
@@ -395,7 +415,8 @@ namespace FormerTests
         public void UpdateOrder_Qty400Prc0_Qty400Prc38000InCounterOrders()
         {
             //Arrange
-            var storage = new Storage();
+            var historyClient = new HistoryClient();
+            var storage = new Storage(historyClient, new Metadata());
             storage.CounterOrders.TryAdd("1",new Order{ Id = "1", Price = 38000, Quantity = 100, Signature = new OrderSignature(), LastUpdateDate = new Timestamp()});
             var newComingOrder = new Order
             {
@@ -415,7 +436,8 @@ namespace FormerTests
         public void UpdateOrder_Qty400Prc0_Qty400Prc38000InMyOrders()
         {
             //Arrange
-            var storage = new Storage();
+            var historyClient = new HistoryClient();
+            var storage = new Storage(historyClient, new Metadata());
             storage.MyOrders.TryAdd("1",new Order{ Id = "1", Price = 38000, Quantity = 100, Signature = new OrderSignature(), LastUpdateDate = new Timestamp()});
             var newComingOrder = new Order
             {
@@ -435,7 +457,8 @@ namespace FormerTests
         public void UpdateOrder_Id2_updateCounterOrderReturnedFalse()
         {
             //Arrange
-            var storage = new Storage();
+            var historyClient = new HistoryClient();
+            var storage = new Storage(historyClient, new Metadata());
             storage.CounterOrders.TryAdd("1",new Order{ Id = "1", Price = 0, Quantity = 0, Signature = new OrderSignature(), LastUpdateDate = new Timestamp()});
 
             var newComingOrder = new Order
@@ -452,7 +475,8 @@ namespace FormerTests
         public void UpdateOrder_Id2_updateMyOrderReturnedFalse()
         {
             //Arrange
-            var storage = new Storage();
+            var historyClient = new HistoryClient();
+            var storage = new Storage(historyClient, new Metadata());
             storage.MyOrders.TryAdd("1",new Order{ Id = "1", Price = 0, Quantity = 0, Signature = new OrderSignature(), LastUpdateDate = new Timestamp()});
 
             var newComingOrder = new Order
@@ -469,7 +493,8 @@ namespace FormerTests
         public void AddOrder_Order_addToMyOrdersReturnedTrue()
         {
             //Arrange
-            var storage = new Storage();
+            var historyClient = new HistoryClient();
+            var storage = new Storage(historyClient, new Metadata());
             
             var newComingOrder = new Order
             {
@@ -485,7 +510,8 @@ namespace FormerTests
         public void AddOrder_Order_addToCounterOrdersOrdersReturnedTrue()
         {
             //Arrange
-            var storage = new Storage();
+            var historyClient = new HistoryClient();
+            var storage = new Storage(historyClient, new Metadata());
             
             var newComingOrder = new Order
             {

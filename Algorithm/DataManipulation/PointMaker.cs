@@ -42,12 +42,12 @@ namespace Algorithm.DataManipulation
             if (numberOfOrders != 0)
             {
                 price /= numberOfOrders;
-                Log.Information("Made a point: " + timestamp.TimeOfDay + "    " + price);
+                Log.Information("{@Where}: Made a point: " + timestamp.TimeOfDay + "    " + price, "Algorithm");
             }
             else
             {
                 price = 0;
-                Log.Information("No new orders were recieved");
+                Log.Information("{@Where}: No new orders were recieved", "Algorithm");
             }
 
             return new KeyValuePair<DateTime, double>(timestamp, price);
@@ -58,7 +58,6 @@ namespace Algorithm.DataManipulation
             _isOrderedToStop = false;
             while (!_isOrderedToStop)
             {
-                Log.Information("New iteration started");
                 Thread.Sleep(_pointIntervalInMilliseconds);
                 if (dataCollector.Orders.Count == 0)
                     continue;
