@@ -87,7 +87,7 @@ namespace Former.Model
             var orderCost = _configuration.ContractValue / (type == OrderType.Sell ? _storage.SellMarketPrice : _storage.BuyMarketPrice);
             var totalBalance = ConvertSatoshiToXBT(_storage.TotalBalance);
             var availableBalance = ConvertSatoshiToXBT(_storage.AvailableBalance);
-            if (-totalBalance * (_configuration.AvaibleBalance - 1) + availableBalance > orderCost) return true;
+            if (totalBalance * (_configuration.AvaibleBalance - 1) + availableBalance > orderCost) return true;
             Log.Debug("{@Where}: Cannot place {@Type} order. Insufficient balance.", "Former", type);
             return false;
         }
