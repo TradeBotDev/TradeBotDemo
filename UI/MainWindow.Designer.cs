@@ -109,6 +109,8 @@ namespace UI
             this.SignInGroupBox = new System.Windows.Forms.GroupBox();
             this.panel5 = new System.Windows.Forms.Panel();
             this.LoggedGroupBox = new System.Windows.Forms.GroupBox();
+            this.SessionIDLbl = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
             this.LicenseNumberLbl = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.SignOutButton = new System.Windows.Forms.Button();
@@ -1100,6 +1102,8 @@ namespace UI
             // 
             this.LoggedGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.LoggedGroupBox.Controls.Add(this.SessionIDLbl);
+            this.LoggedGroupBox.Controls.Add(this.label1);
             this.LoggedGroupBox.Controls.Add(this.LicenseNumberLbl);
             this.LoggedGroupBox.Controls.Add(this.label7);
             this.LoggedGroupBox.Controls.Add(this.SignOutButton);
@@ -1115,10 +1119,28 @@ namespace UI
             this.LoggedGroupBox.Text = "Signed in as ";
             this.LoggedGroupBox.Visible = false;
             // 
+            // SessionIDLbl
+            // 
+            this.SessionIDLbl.AutoSize = true;
+            this.SessionIDLbl.Location = new System.Drawing.Point(295, 108);
+            this.SessionIDLbl.Name = "SessionIDLbl";
+            this.SessionIDLbl.Size = new System.Drawing.Size(53, 20);
+            this.SessionIDLbl.TabIndex = 4;
+            this.SessionIDLbl.Text = "label2";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(208, 108);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(88, 20);
+            this.label1.TabIndex = 3;
+            this.label1.Text = "Session ID: ";
+            // 
             // LicenseNumberLbl
             // 
             this.LicenseNumberLbl.AutoSize = true;
-            this.LicenseNumberLbl.Location = new System.Drawing.Point(154, 55);
+            this.LicenseNumberLbl.Location = new System.Drawing.Point(295, 160);
             this.LicenseNumberLbl.Name = "LicenseNumberLbl";
             this.LicenseNumberLbl.Size = new System.Drawing.Size(49, 20);
             this.LicenseNumberLbl.TabIndex = 2;
@@ -1127,7 +1149,7 @@ namespace UI
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(20, 55);
+            this.label7.Location = new System.Drawing.Point(168, 160);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(128, 20);
             this.label7.TabIndex = 1;
@@ -1136,7 +1158,7 @@ namespace UI
             // SignOutButton
             // 
             this.SignOutButton.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.SignOutButton.Location = new System.Drawing.Point(230, 253);
+            this.SignOutButton.Location = new System.Drawing.Point(238, 254);
             this.SignOutButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.SignOutButton.Name = "SignOutButton";
             this.SignOutButton.Size = new System.Drawing.Size(228, 60);
@@ -1192,10 +1214,10 @@ namespace UI
             this.Controls.Add(this.Tabs);
             this.Controls.Add(this.RightPanel);
             this.Controls.Add(this.LeftPanel);
+            this.Controls.Add(this.LoggedGroupBox);
             this.Controls.Add(this.MainMenuGroupBox);
             this.Controls.Add(this.SignUpGroupBox);
             this.Controls.Add(this.SignInGroupBox);
-            this.Controls.Add(this.LoggedGroupBox);
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "TradeBotUi";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -1311,6 +1333,8 @@ namespace UI
         private System.Windows.Forms.DataGridViewTextBoxColumn Type;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn6;
         private System.Windows.Forms.DataGridViewTextBoxColumn OrderID;
+        private System.Windows.Forms.Label SessionIDLbl;
+        private System.Windows.Forms.Label label1;
     }
 }
 

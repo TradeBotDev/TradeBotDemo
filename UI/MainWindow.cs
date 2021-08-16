@@ -450,12 +450,14 @@ namespace UI
         }
 
         private async void LoginButton_Click(object sender, EventArgs e)
-        { 
-            if (!CheckConnection(await _facadeClient.SigningIn(LogLogTextBox.Text, LogPassTextBox.Text, RegKey.Text, RegToken.Text))) return;
+        {
+            DefaultResponse sessionId;
+            if (!CheckConnection(sessionId = await _facadeClient.SigningIn(LogLogTextBox.Text, LogPassTextBox.Text, RegKey.Text, RegToken.Text))) return;
+            SessionIDLbl.Text = sessionId.Message;
             LoggedGroupBox.Visible = true;
             LoggedGroupBox.Enabled = true;
             ShowSignUpPanel.Enabled = false;
-            LoggedGroupBox.Text = "Signed in as " + LogLogTextBox.Text;
+            LoggedGroupBox.Text = $"Signed in as {LogLogTextBox.Text}";
             SignInGroupBox.Visible = false;
             SignInGroupBox.Enabled = false;
             _loggedIn = true;

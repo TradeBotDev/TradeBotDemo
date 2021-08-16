@@ -149,7 +149,7 @@ namespace UI
                     Code = ExchangeCode.Bitmex,
                     ExchangeName = "BitMEX"
                 });
-                return new DefaultResponse { Code = ReplyCode.Succeed, Message = ""};
+                return new DefaultResponse { Code = ReplyCode.Succeed, Message = sessionId};
             }
             catch
             {
