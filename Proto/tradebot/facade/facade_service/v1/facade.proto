@@ -89,6 +89,7 @@ message PublishOrderEvent{
 	google.protobuf.Timestamp time = 3;
 	tradebot.common.v1.Order order = 4;
 	string message = 5;
+	string slot_name = 6;
 }
 message DeleteOrderRequest{
 	google.protobuf.Empty empty = 1;

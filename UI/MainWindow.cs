@@ -1,71 +1,168 @@
-﻿using Grpc.Core;
-using Grpc.Net.Client;
+﻿using Google.Protobuf.WellKnownTypes;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Windows.Forms;
-using Google.Protobuf.WellKnownTypes;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using TradeBot.Common.v1;
 using TradeBot.Facade.FacadeService.v1;
-using UpdateServerConfigRequest = TradeBot.Facade.FacadeService.v1.UpdateServerConfigRequest;
-using static TradeBot.Facade.FacadeService.v1.SubscribeEventsResponse;
+using ZedGraph;
+using System.Web;
 
 namespace UI
 {
     public partial class TradeBotUi : Form
     {
-        private readonly FacadeService.FacadeServiceClient _client;
-        private Metadata _meta;
-        private string _sessionId;
+        private readonly List<string> _listOfAllSlots;
+        private readonly List<string> _listOfActiveSlots;
+        private readonly Dictionary<string, Duration> _intervalMap;
+        private readonly Dictionary<string, int> _sensitivityMap;
+        private readonly FacadeClient _facadeClient;
+        private PointPairList _balanceList = new PointPairList();
+        private PointPairList _orderList = new PointPairList();
+        private DateTime lastDateBalance = new DateTime();
+        private DateTime lastDateOrder = new DateTime();
+        private struct IncomingMessage
+        {
+            public string SlotName;
+            public double Qty;
+            public double Price;
+            public OrderType Type;
+            public OrderStatus Status;
+            public string Time;
+            public string Id;
+            public string Message;
+        }
+        public class ConfigurationJson
+        {
+            public string AlgorithmSensitivity;
+            public string AlgorithmInterval;
+            public string AvailableBalance;
+            public string RequiredProfit;
+            public string VolumeOfContracts;
+            public string UpdatePriceRange;
+            public List<string> activeSlots;
+        }
 
-        private Dictionary<string, Duration> _intervalMap;
-        private Dictionary<string, int> _sensitivityMap;
+        private bool _loggedIn;
 
         public TradeBotUi()
         {
-            _client = new FacadeService.FacadeServiceClient(GrpcChannel.ForAddress("http://localhost:5002"));
             InitializeComponent();
-            InitIntervalMap();
-            InitSensitivityMap();
+            _facadeClient = new FacadeClient();
+            _facadeClient.HandleBalanceUpdate += HandleBalanceUpdate;
+            _facadeClient.HandleOrderUpdate += HandleOrderUpdate;
+            _intervalMap = InitIntervalMap();
+            _sensitivityMap = InitSensitivityMap();
+            _listOfAllSlots = InitListOfAllSlots();
+            _listOfActiveSlots = new List<string>();
+            ApplyConfiguration(ReadConfiguration());
             FormClosing += MainWindow_FormClosing;
-            ConfigUpdatePriceRange.TextChanged += ConfigUpdatePriceRangeOnTextChanged;
-        }
-
-        private void ConfigUpdatePriceRangeOnTextChanged(object? sender, EventArgs e)
-        {
-            var str = ConfigUpdatePriceRange.Text;
-            if (ConfigUpdatePriceRange.Text.IndexOf(',') == ConfigUpdatePriceRange.Text.Length - 1) return;
-            if(!double.TryParse(ConfigUpdatePriceRange.Text, out var value)) return;
-
-            var floor = Math.Floor(value);
-
-            ConfigUpdatePriceRange.TextChanged -= ConfigUpdatePriceRangeOnTextChanged;
-            ConfigUpdatePriceRange.Text = (floor += (value - floor) < 0.5 ? 0.0 : 0.5).ToString();
-            ConfigUpdatePriceRange.TextChanged += ConfigUpdatePriceRangeOnTextChanged;
-        }
-
-        private async void SubscribeEvents(string sessionId)
-        {
-            var response = _client.SubscribeEvents(new SubscribeEventsRequest { Sessionid = sessionId });
-
-            while (await response.ResponseStream.MoveNext())
+            ConfigUpdatePriceRangeTxb.TextChanged += ConfigUpdatePriceRangeOnTextChanged;
+            ActiveSlotsDataGridView.CellContentClick += DataGridView1_CellContentClick;
+            SlotsComboBox.DataSource = _listOfAllSlots;
+            SlotsComboBox.SelectedIndex = 0;
+            foreach (var control in MainMenuGroupBox.Controls)
             {
-                switch (response.ResponseStream.Current.EventTypeCase)
-                {
-                    case EventTypeOneofCase.Balance:
-                        BalanceLabel.Text = $"{double.Parse(response.ResponseStream.Current.Balance.Balance.Value)/100000000} {response.ResponseStream.Current.Balance.Balance.Currency}";
-                        break;
-                    case EventTypeOneofCase.Order:
-                        var incomingString = $"\r\n\n[{TimeZoneInfo.ConvertTime(response.ResponseStream.Current.Order.Time.ToDateTime(),TimeZoneInfo.Local):HH:mm:ss}]: {response.ResponseStream.Current.Order.Message}\r\n" +
-                                             $"Order {response.ResponseStream.Current.Order.Order.Id}, price: {response.ResponseStream.Current.Order.Order.Price}, quantity: {response.ResponseStream.Current.Order.Order.Quantity}, type: {response.ResponseStream.Current.Order.Order.Signature.Type}";
-                        EventConsole.Text += incomingString;
-                        break;
-                }
+                var fullName = control.GetType().FullName;
+                if (fullName != null && fullName.Contains("TextBox"))
+                    ((TextBox)control).Validating += OnValidatingTextBox;
+            }
+            foreach (var control in SignUpPanel.Controls)
+            {
+                var fullName = control.GetType().FullName;
+                if (fullName != null && fullName.Contains("TextBox"))
+                    ((TextBox)control).Validating += OnValidating;
             }
         }
 
-        private void InitIntervalMap()
+        private void OnValidating(object sender, CancelEventArgs e)
         {
-            _intervalMap = new Dictionary<string, Duration>
+            if (string.IsNullOrEmpty(((TextBox)sender).Text))
+            {
+                e.Cancel = true;
+                ErrorProviderMainForm.SetError(((TextBox)sender), "The field must not be empty!");
+            }
+            else ErrorProviderMainForm.Clear();
+        }
+
+        private ConfigurationJson InitConfigurationJson()
+        {
+            return new ConfigurationJson
+            {
+                AlgorithmSensitivity = ConfigAlgorithmSensivityTxb.Text,
+                AlgorithmInterval = ConfigIntervalOfAnalysisTxb.Text,
+                AvailableBalance = ConfigAvailableBalanceTxb.Text,
+                RequiredProfit = ConfigRequiredProfitTxb.Text,
+                VolumeOfContracts = ConfigVolumeOfContractsTxb.Text,
+                UpdatePriceRange = ConfigUpdatePriceRangeTxb.Text,
+                activeSlots = new List<string>(_listOfActiveSlots)
+            };
+        }
+
+        private void SaveConfiguration(ConfigurationJson configuration)
+        {
+            var serializer = new JsonSerializer();
+            if (File.Exists("configuration.save")) File.Delete("configuration.save");
+            var sw = new StreamWriter("configuration.save");
+            var writer = new JsonTextWriter(sw);
+            serializer.Serialize(writer, configuration);
+            writer.Close();
+            sw.Close();
+        }
+
+        private ConfigurationJson ReadConfiguration()
+        {
+            JObject obj = null;
+            if (File.Exists("configuration.save"))
+            {
+                var serializer = new JsonSerializer();
+                var sr = new StreamReader("configuration.save");
+                JsonReader jsonReader = new JsonTextReader(sr);
+                obj = serializer.Deserialize(jsonReader) as JObject;
+                jsonReader.Close();
+                sr.Close();
+            }
+            return (ConfigurationJson)obj?.ToObject(typeof(ConfigurationJson));
+        }
+
+        private void ApplyConfiguration(ConfigurationJson configuration)
+        {
+            if (configuration is null) return;
+            ConfigAvailableBalanceTxb.Text = configuration.AvailableBalance;
+            ConfigRequiredProfitTxb.Text = configuration.RequiredProfit;
+            ConfigAlgorithmSensivityTxb.Text = configuration.AlgorithmSensitivity;
+            ConfigIntervalOfAnalysisTxb.Text = configuration.AlgorithmInterval;
+            ConfigUpdatePriceRangeTxb.Text = configuration.UpdatePriceRange;
+            ConfigVolumeOfContractsTxb.Text = configuration.VolumeOfContracts;
+            foreach (var activeSlot in configuration.activeSlots)
+            {
+                AddToActiveSlots(activeSlot);
+            }
+        }
+
+        private static List<string> InitListOfAllSlots()
+        {
+            return new List<string>
+            {
+                "XBTUSD",
+                "ETHUSD",
+                "DOGEUSD",
+                "LTCUSD",
+                "ADAUSDT",
+                "XRPUSD",
+                "SOLUSDT"
+            };
+        }
+
+        private static Dictionary<string, Duration> InitIntervalMap()
+        {
+            return new Dictionary<string, Duration>
             {
                 { "5s", Duration.FromTimeSpan(new TimeSpan(0, 0, 0, 5)) },
                 { "30s", Duration.FromTimeSpan(new TimeSpan(0, 0, 0, 30)) },
@@ -88,9 +185,9 @@ namespace UI
             };
         }
 
-        private void InitSensitivityMap()
+        private static Dictionary<string, int> InitSensitivityMap()
         {
-            _sensitivityMap = new Dictionary<string, int>
+            return new Dictionary<string, int>
             {
                 { "Minimal", 0 },
                 { "Low", 1 },
@@ -100,50 +197,225 @@ namespace UI
             };
         }
 
-        private async void StartButton_Click(object sender, EventArgs e)
+        private static bool CheckConnection(DefaultResponse response)
         {
-            var configuration = GetConfig();
+            if (response.Code == ReplyCode.Succeed) return true;
+            MessageBox.Show(@"There is no connection to the services", @"Connection lost");
+            return false;
+        }
 
-            var startBotResponse = await _client.StartBotAsync(new SwitchBotRequest
+        private bool CheckIfLogged()
+        {
+            if (!ValidateChildren(ValidationConstraints.Enabled))
             {
-                Config = configuration
-            }, _meta);
-            var updateConfigResponse = await _client.UpdateServerConfigAsync(
-                new UpdateServerConfigRequest
+                MessageBox.Show(@"Wrong configuration!", @"Correct the fields");
+                return false;
+            }
+            if (!_loggedIn)
+            {
+                MessageBox.Show(@"You are not signed in!", @"Signed in is required");
+                return false;
+            }
+            return true;
+        }
+
+        private void AddOrderToTable(DataGridView table, IncomingMessage message)
+        {
+            table.Rows.Add(message.SlotName, message.Qty, message.Price, message.Type, message.Time, message.Id);
+        }
+
+        private void InsertOrderToTable(int index, DataGridView table, IncomingMessage message)
+        {
+            table.Rows.Insert(index, message.SlotName, message.Qty, message.Price, message.Type, message.Time, message.Id);
+        }
+
+        private void UpdateTable(DataGridView table, IncomingMessage incomingMessage)
+        {
+            for (var i = 0; i < table.Rows.Count; i++)
+            {
+                if (string.Equals(table.Rows[i].Cells[5].Value as string, incomingMessage.Id))
                 {
-                    Request = new TradeBot.Common.v1.UpdateServerConfigRequest
-                        { Config = configuration, Switch = false }
-                }, _meta);
-            SubscribeEvents(_meta.GetValue("sessionid"));
+                    table.Rows.RemoveAt(i);
+                    InsertOrderToTable(i, table, incomingMessage);
+                }
+            }
+        }
 
-            StartButton.Enabled = false;
-            StartButton.Visible = false;
-            StopButton.Enabled = true;
-            StopButton.Visible = true;
+        private void DeleteFromTable(DataGridView table, string id)
+        {
+            for (var i = 0; i < table.Rows.Count; i++)
+            {
+                if (string.Equals(table.Rows[i].Cells[5].Value as string, id))
+                    table.Rows.RemoveAt(i);
+            }
+        }
 
-            Console.WriteLine("Запустил бота с конфигом {0}", configuration);
-            EventConsole.Text += $"\r\n[{DateTime.Now:HH:mm:ss}]: Bot has been started!";
+        private void WriteMessageToEventConsole(IncomingMessage message)
+        {
+            if (!string.IsNullOrEmpty(message.Message))
+            {
+                var incomingString = $"[{message.Time}] {message.Message}\r\n" + $"Order {message.Id}, price: {message.Price}, quantity: {message.Qty}, type: {message.Type}\r\n\r\n";
+                EventConsole.Text += incomingString;
+            }
+        }
+
+        private void WriteMessageToEventConsole(string message)
+        {
+            if (!string.IsNullOrEmpty(message)) EventConsole.Text += $"[{DateTime.Now:HH:mm:ss}] {message}\r\n\r\n";
+        }
+
+        private void HandleOrderUpdate(PublishOrderEvent orderEvent)
+        {
+            var incomingMessage = new IncomingMessage
+            {
+                SlotName = orderEvent.SlotName,
+                Qty = orderEvent.Order.Quantity,
+                Price = orderEvent.Order.Price,
+                Type = orderEvent.Order.Signature.Type,
+                Status = orderEvent.Order.Signature.Status,
+                Time = TimeZoneInfo.ConvertTime(orderEvent.Time.ToDateTime(), TimeZoneInfo.Local).ToString("HH:mm:ss dd.MM.yyyy"),
+                Id = orderEvent.Order.Id,
+                Message = orderEvent.Message
+            };
+            switch (orderEvent.ChangesType)
+            {
+                case ChangesType.Partitial:
+                    AddOrderToTable(incomingMessage.Status == OrderStatus.Open ? ActiveOrdersDataGridView : FilledOrdersDataGridView, incomingMessage);
+                    UpdateList(orderEvent.Order.Price.ToString(),orderEvent.Time,ref _orderList,zedGraph_1,lastDateOrder);
+                    break;
+
+                case ChangesType.Insert:
+                    AddOrderToTable(ActiveOrdersDataGridView, incomingMessage);
+                    WriteMessageToEventConsole(incomingMessage);
+                    UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1,lastDateOrder);
+                    break;
+
+                case ChangesType.Update:
+                    UpdateTable(ActiveOrdersDataGridView, incomingMessage);
+                    UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1, lastDateOrder);
+                    break;
+
+                case ChangesType.Delete:
+                    AddOrderToTable(FilledOrdersDataGridView, incomingMessage);
+                    DeleteFromTable(ActiveOrdersDataGridView, incomingMessage.Id);
+                    WriteMessageToEventConsole(incomingMessage);
+                    break;
+
+                case ChangesType.Undefiend:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private void HandleBalanceUpdate(PublishBalanceEvent balanceUpdate)
+        {
+            BalanceLabel.Text = $"{double.Parse(balanceUpdate.Balance.Value) / 100000000} {balanceUpdate.Balance.Currency}";
+            UpdateList(balanceUpdate.Balance.Value, balanceUpdate.Time,ref _balanceList, zedGraph,lastDateBalance);
+        }
+
+        private async void Start(string slotName)
+        {
+            SaveConfiguration(InitConfigurationJson());
+            await _facadeClient.StartBot(slotName, GetConfig());
+            WriteMessageToEventConsole("Bot has been started!");
+        }
+
+        private async void Stop(string slotName)
+        {
+            CheckConnection(await _facadeClient.StopBot(slotName,GetConfig()));
+            WriteMessageToEventConsole("Bot has been stopped!");
         }
 
         private Config GetConfig()
         {
-            var str = _intervalMap[ConfigIntervalOfAnalysis.Text];
-            var config = new Config
+            return new Config
             {
-                AvaibleBalance = double.Parse(ConfigAvailableBalance.Text),
-                RequiredProfit = double.Parse(ConfigRequiredProfit.Text),
-                ContractValue = double.Parse(ConfigVolumeOfContracts.Text),
+                AvaibleBalance = double.Parse(ConfigAvailableBalanceTxb.Text),
+                RequiredProfit = double.Parse(ConfigRequiredProfitTxb.Text),
+                ContractValue = double.Parse(ConfigVolumeOfContractsTxb.Text),
                 AlgorithmInfo = new AlgorithmInfo
                 {
-                    Interval = _intervalMap[ConfigIntervalOfAnalysis.Text],
-                    Sensivity = _sensitivityMap[ConfigAlgorithmSensivity.Text]
+                    Interval = _intervalMap[ConfigIntervalOfAnalysisTxb.Text],
+                    Sensivity = _sensitivityMap[ConfigAlgorithmSensivityTxb.Text]
                 },
-                OrderUpdatePriceRange = double.Parse(ConfigUpdatePriceRange.Text),
+                OrderUpdatePriceRange = double.Parse(ConfigUpdatePriceRangeTxb.Text),
             };
-            return config;
         }
 
-        private void ShowRegistrationPanel_Click(object sender, EventArgs e)
+        private void AddToActiveSlots(string comboboxElem)
+        {
+            ActiveSlotsDataGridView.Rows.Add(comboboxElem);
+            _listOfAllSlots.Remove(comboboxElem);
+            _listOfActiveSlots.Add(comboboxElem);
+            SlotsComboBox.DataSource = _listOfAllSlots.Except(_listOfActiveSlots).ToList();
+            SlotsComboBox.SelectedIndex = 0;
+        }
+
+        private void RemoveFromActiveSlots(string comboboxElem)
+        {
+            _listOfAllSlots.Insert(0, comboboxElem);
+            _listOfActiveSlots.Remove(comboboxElem);
+            SlotsComboBox.DataSource = _listOfAllSlots.Except(_listOfActiveSlots).ToList();
+            SlotsComboBox.SelectedIndex = 0;
+            ActiveSlotsDataGridView.Rows.RemoveAt(ActiveSlotsDataGridView.Rows.Count - 1);
+        }
+
+        #region EventHandlers
+        
+        private void OnValidatingTextBox(object sender, CancelEventArgs e)
+        {
+            if (!double.TryParse(((TextBox)sender).Text, out _))
+            {
+                e.Cancel = true;
+                ErrorProviderMainForm.SetError((TextBox)sender, "A number is required!");
+            }
+            else if (string.IsNullOrEmpty(((TextBox)sender).Text))
+            {
+                e.Cancel = true;
+                ErrorProviderMainForm.SetError(((TextBox)sender), "The field must not be empty!");
+            }
+            else ErrorProviderMainForm.Clear();
+        }
+
+        private void ConfigUpdatePriceRangeOnTextChanged(object sender, EventArgs e)
+        {
+            ConfigUpdatePriceRangeTxb.TextChanged -= ConfigUpdatePriceRangeOnTextChanged;
+            if (ConfigUpdatePriceRangeTxb.Text.IndexOf(',') == ConfigUpdatePriceRangeTxb.Text.Length - 1) return;
+            if (!double.TryParse(ConfigUpdatePriceRangeTxb.Text, out var value)) return;
+
+            var floor = Math.Floor(value);
+            
+            ConfigUpdatePriceRangeTxb.Text = (floor + (value - floor < 0.5 ? 0.0 : 0.5)).ToString(CultureInfo.InvariantCulture);
+            ConfigUpdatePriceRangeTxb.TextChanged += ConfigUpdatePriceRangeOnTextChanged;
+        }
+
+        private void DataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex == -1) return;
+            if (e.ColumnIndex is -1 or 0) return;
+
+            if (!CheckIfLogged()) return;
+            var cellCheckBox = (DataGridViewCheckBoxCell)ActiveSlotsDataGridView.Rows[ActiveSlotsDataGridView.CurrentRow.Index].Cells[1];
+            cellCheckBox.Value ??= false;
+            if (Convert.ToBoolean(cellCheckBox.Value))
+            {
+                if (MessageBox.Show(@"Are you sure you want to stop work?", @"Stop work",
+                    MessageBoxButtons.YesNo) == DialogResult.Yes)
+                {
+                    Stop(ActiveSlotsDataGridView.Rows[ActiveSlotsDataGridView.CurrentRow.Index].Cells[0]
+                        .EditedFormattedValue.ToString());
+                    cellCheckBox.Value = false;
+                }
+            }
+            else
+            {
+                Start(ActiveSlotsDataGridView.Rows[ActiveSlotsDataGridView.CurrentRow.Index].Cells[0].EditedFormattedValue.ToString());
+                cellCheckBox.Value = true;
+            }
+        }
+
+        private void ShowSignUpPanel_Click(object sender, EventArgs e)
         {
             SignUpGroupBox.Visible = true;
             SignUpGroupBox.Enabled = true;
@@ -153,14 +425,27 @@ namespace UI
             MainMenuGroupBox.Enabled = false;
         }
 
-        private void ShowLoginPanel_Click(object sender, EventArgs e)
+        private void ShowSignInPanel_Click(object sender, EventArgs e)
         {
-            SignUpGroupBox.Visible = false;
-            SignUpGroupBox.Enabled = false;
-            SignInGroupBox.Visible = true;
-            SignInGroupBox.Enabled = true;
-            MainMenuGroupBox.Visible = false;
-            MainMenuGroupBox.Enabled = false;
+            if (_loggedIn)
+            {
+                LoggedGroupBox.Visible = true;
+                LoggedGroupBox.Enabled = true;
+                SignUpGroupBox.Visible = false;
+                SignUpGroupBox.Enabled = false;
+                MainMenuGroupBox.Visible = false;
+                MainMenuGroupBox.Enabled = false;
+            }
+            else
+            {
+                SignUpGroupBox.Visible = false;
+                SignUpGroupBox.Enabled = false;
+                SignInGroupBox.Visible = true;
+                SignInGroupBox.Enabled = true;
+                MainMenuGroupBox.Visible = false;
+                MainMenuGroupBox.Enabled = false;
+            }
+
         }
 
         private void ShowMainMenu_Click(object sender, EventArgs e)
@@ -171,82 +456,177 @@ namespace UI
             SignInGroupBox.Enabled = false;
             MainMenuGroupBox.Visible = true;
             MainMenuGroupBox.Enabled = true;
-        }
-
-        private async void RegistrationButton_Click(object sender, EventArgs e)
-        {
-            var regResponse = await _client.RegisterAsync(new RegisterRequest
-            {
-                Email = RegLog.Text,
-                Password = RegPass.Text,
-                VerifyPassword = RegPass.Text
-            });
-        }
-
-        private async void LoginButton_Click(object sender, EventArgs e)
-        {
-            var logResponse = await _client.LoginAsync(new LoginRequest
-            {
-                Email = LogLogTextBox.Text,
-                Password = LogPassTextBox.Text,
-                SaveExchangesAfterLogout = true
-            });
-            _sessionId = logResponse.SessionId;
-            _meta = new Metadata
-            {
-                { "sessionid", logResponse.SessionId },
-                { "slot", "XBTUSD" },
-                { "trademarket", "bitmex" }
-            };
-
-            var exchangeResponse = _client.AddExchangeAccess(new AddExchangeAccessRequest
-            {
-                SessionId = logResponse.SessionId,
-                Token = RegKey.Text,
-                Secret = RegToken.Text,
-                Code = ExchangeCode.Bitmex,
-                ExchangeName = "BitMEX"
-            });
-            LoggedGroupBox.Visible = true;
-            LoggedGroupBox.Enabled = true;
-            LoggedGroupBox.Text = "Signed in as " + LogLogTextBox.Text;
-            SignInGroupBox.Visible = false;
-            SignInGroupBox.Enabled = false;
-            EventConsole.Text += $"\r\n[{DateTime.Now:HH:mm:ss}]: You are signed in as {LogLogTextBox.Text}";
-        }
-
-        private async void SignOutButton_Click(object sender, EventArgs e)
-        {
-            var logOutResponse = await _client.LogoutAsync( new SessionRequest() { SessionId = _sessionId});
-            SignInGroupBox.Visible = true;
-            SignInGroupBox.Enabled = true;
             LoggedGroupBox.Visible = false;
             LoggedGroupBox.Enabled = false;
         }
 
+        private async void RegistrationButton_Click(object sender, EventArgs e)
+        {
+            if (!ValidateChildren(ValidationConstraints.Enabled))
+            {
+                MessageBox.Show(@"Wrong login or password!", @"Correct the fields");
+                return;
+            }
+            CheckConnection(await _facadeClient.RegisterAccount(RegLog.Text, RegPass.Text, RegPass.Text));
+        }
+
+        private async void LoginButton_Click(object sender, EventArgs e)
+        {
+            DefaultResponse sessionId;
+            if (!CheckConnection(sessionId = await _facadeClient.SigningIn(LogLogTextBox.Text, LogPassTextBox.Text, RegKey.Text, RegToken.Text))) return;
+            SessionIDLbl.Text = sessionId.Message;
+            LoggedGroupBox.Visible = true;
+            LoggedGroupBox.Enabled = true;
+            ShowSignUpPanel.Enabled = false;
+            LoggedGroupBox.Text = $"Signed in as {LogLogTextBox.Text}";
+            SignInGroupBox.Visible = false;
+            SignInGroupBox.Enabled = false;
+            _loggedIn = true;
+            WriteMessageToEventConsole($"You are signed in as {LogLogTextBox.Text}");
+        }
+
+        private async void SignOutButton_Click(object sender, EventArgs e)
+        {
+            if (!CheckConnection(await _facadeClient.SigningOut())) return;
+            SignInGroupBox.Visible = true;
+            SignInGroupBox.Enabled = true;
+            ShowSignUpPanel.Enabled = true;
+            LoggedGroupBox.Visible = false;
+            LoggedGroupBox.Enabled = false;
+            _loggedIn = false;
+        }
+
         private async void RemoveMyOrdersButton_Click(object sender, EventArgs e)
         {
-            var removeMyOrdersResponse = await _client.DeleteOrderAsync(new DeleteOrderRequest(),_meta); 
+            if (!CheckIfLogged()) return;
+            if (MessageBox.Show(@"Are you sure you want to remove your orders?", @"Remove orders", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                CheckConnection(await _facadeClient.RemoveMyOrders());
         }
 
         private async void UpdateConfigButton_Click(object sender, EventArgs e)
         {
-            var updateConfigResponse = await _client.UpdateServerConfigAsync(new UpdateServerConfigRequest { Request = new TradeBot.Common.v1.UpdateServerConfigRequest { Config = GetConfig(), Switch = false}},_meta);
+            if (!CheckIfLogged()) return;
+            if (MessageBox.Show(@"Are you sure you want to update the configuration?", @"Update configuration",
+                MessageBoxButtons.YesNo) == DialogResult.Yes)
+            {
+                SaveConfiguration(InitConfigurationJson());
+                CheckConnection(await _facadeClient.UpdateConfig(GetConfig()));
+            }
         }
 
-        private async void StopButton_Click(object sender, EventArgs e)
+        private async void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
-            StartButton.Enabled = true;
-            StartButton.Visible = true;
-            StopButton.Enabled = false;
-            StopButton.Visible = false;
-            var stopBotResponse = await _client.StopBotAsync(new StopBotRequest { Request=new TradeBot.Common.v1.UpdateServerConfigRequest {Config=GetConfig(),Switch=true } },_meta);
-            EventConsole.Text += $"\r\n[{DateTime.Now:HH:mm:ss}]: Bot has been stopped!";
+            if (MessageBox.Show(@"Are you sure you want to close this window? Algorithm progress will be reset.",
+                @"Close window",
+                MessageBoxButtons.YesNo) == DialogResult.Yes)
+            {
+                SaveConfiguration(InitConfigurationJson());
+                for (var i = 0; i < ActiveSlotsDataGridView.Rows.Count; i++)
+                {
+                    if (Convert.ToBoolean(ActiveSlotsDataGridView.Rows[i].Cells[1].EditedFormattedValue))
+                        await _facadeClient.StopBot(
+                            ActiveSlotsDataGridView.Rows[i].Cells[0].EditedFormattedValue.ToString(), GetConfig());
+                }
+            }
+            else e.Cancel = true;
         }
 
-        private async void MainWindow_FormClosing(object sender, FormClosingEventArgs e) 
+        private void AddRowButton_Click(object sender, EventArgs e)
         {
-            var stopBotResponse = await _client.UpdateServerConfigAsync(new UpdateServerConfigRequest { Request = new TradeBot.Common.v1.UpdateServerConfigRequest { Config = GetConfig(), Switch = true}},_meta);
+            if (ActiveSlotsDataGridView.Rows.Count >= 7 || _listOfAllSlots.Count == 1) return;
+            AddToActiveSlots(SlotsComboBox.Text);
+        }
+
+        private void RemoveRowButton_Click(object sender, EventArgs e)
+        {
+            RemoveFromActiveSlots(ActiveSlotsDataGridView.Rows[^1].Cells[0].Value.ToString());
+        }
+
+        #endregion
+
+        #region DrawGraphs
+        private void UpdateList(string b,Timestamp time,ref PointPairList list,ZedGraph.ZedGraphControl graphControl, DateTime ld)
+        {
+            DateTime tm = TimeZoneInfo.ConvertTime(time.ToDateTime(), TimeZoneInfo.Local);//.ToString("HH:mm:ss dd.MM.yyyy");
+            if (double.TryParse(b,out double value))
+            {
+                if (ld.Day == tm.Day)
+                {
+                    list.RemoveAt(list.Count-1);
+                }
+                list.Add(new XDate(tm),value);
+                ld = tm;
+                if(list.Count>40)
+                {
+                    list.RemoveAt(0);
+                }
+                if (graphControl == zedGraph)
+                {
+                    lastDateBalance = tm;
+                }
+                else
+                {
+                    lastDateOrder = tm;
+                }
+            }
+            DrawGraph(graphControl,list);
+        }
+        private void DrawGraph(ZedGraph.ZedGraphControl graphControl,PointPairList list)
+        {
+            GraphPane pane = graphControl.GraphPane;
+
+            pane.CurveList.Clear();
+
+            //DateTime startDate = new DateTime(2021, 07, 0);
+
+            //int daysCount = 40;
+
+            //Random rnd = new Random();
+
+            //for (int i = 0; i < daysCount; i++)
+            //{
+            //    DateTime currentDate = startDate.AddDays(i);
+            //
+            //    
+            //    list.Add(new XDate(currentDate), yValue);
+            //}
+
+            LineItem myCurve = pane.AddCurve("", list, System.Drawing.Color.Blue, SymbolType.Circle);
+
+            pane.XAxis.Type = AxisType.Date;
+
+            pane.YAxis.Scale.Min = list.Last().Y-100;
+            pane.YAxis.Scale.Max = list.Last().Y+100;
+
+            pane.XAxis.Scale.Min = new XDate(list.Last().X-1);
+            pane.XAxis.Scale.Max = new XDate(list.Last().X+1);
+
+            zedGraph.AxisChange();
+
+            zedGraph.Invalidate();
+        }
+
+        #endregion
+
+        private void LinkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "http://23.88.34.174:5008/" };
+            Process.Start(parameter);
+            LinkLabel1.LinkVisited = true;
+        }
+
+        private void LinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "http://23.88.34.174:5008/" };
+            Process.Start(parameter);
+            LinkLabel1.LinkVisited = true;
+        }
+
+        private void linkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "https://testnet.bitmex.com/app/trade/XBTUSD" };
+            Process.Start(parameter);
+            LinkLabel1.LinkVisited = true;
         }
     }
 }

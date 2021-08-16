@@ -1,0 +1,15 @@
+# docker-compose up 
+version: "3.8"
+
+services:
+  web:
+    image: former
+    ports:
+      - 5003:80
+    volumes:
+      - .%USERPROFILE%\.aspnet\https:/https/
+    environment:
+      HISTORY_CONNECTION_STRING: "http://host.docker.internal:5007"
+      TRADEMARKET_CONNECTION_STRING: "http://host.docker.internal:5005"
+      RETRY_DELAY: "10000"
+    

@@ -12,51 +12,78 @@ namespace Algorithm.DataManipulation
 {
     public static class StorageOfAlgorithms
     {
-        private static Dictionary<string, AlgorithmBeta> algorithms = new();
+        private static Dictionary<Metadata, AlgorithmBeta> algorithms = new();
         private static OrderPublisher orderPublisher = new();
-        private static Dictionary<string, Metadata> metaDict = new();
         private static List<Thread> threadsWithAlgos = new();
 
-        public static Metadata GetMetaByUser(string user)
+        public static void SendNewOrderToAllAlgos(Order order, Metadata metadata)
         {
-            return metaDict[user];
+            orderPublisher.Publish(order, metadata);
         }
-        public static void SendNewMeta(string user, Metadata meta)
+        public static void SendNewConfig (Metadata metadata, UpdateServerConfigRequest configRequest)
         {
-            metaDict.TryAdd(user, meta);
-        }
-        public static void SendNewOrderToAllAlgos(Order order)
-        {
-            orderPublisher.Publish(order);
-        }
-        public static void SendNewConfig (string user, UpdateServerConfigRequest configRequest)
-        {
-            if (!algorithms.ContainsKey(user))
+            if (!MetaExists(metadata))
             {
-                Log.Information("IM ABOUT TO CREATE AN ALGOOOOOOO");
-                threadsWithAlgos.Add(new Thread(()=>CreateAlgorithm(configRequest.Config.AlgorithmInfo, user)));
+                threadsWithAlgos.Add(new Thread(()=>CreateAlgorithm(configRequest.Config.AlgorithmInfo, metadata)));
                 threadsWithAlgos.Last().Start();
                 return;
             }
 
-            if (algorithms[user].GetState()!=configRequest.Switch)
+            if (GetAlgoByMeta(metadata).GetState()!=configRequest.Switch)
             {
-                algorithms[user].ChangeState();
+                algorithms[metadata].ChangeState();
                 return;
             }
 
-            algorithms[user].ChangeSetting(configRequest.Config.AlgorithmInfo);
+            GetAlgoByMeta(metadata).ChangeSetting(configRequest.Config.AlgorithmInfo);
         }
-        private static void CreateAlgorithm(AlgorithmInfo setting, string user)
+        private static void CreateAlgorithm(AlgorithmInfo setting, Metadata metadata)
         {
-            Log.Information("IM LITERALLY CREATING A NEW ALGO RIGHT NOW");
-            bool result = algorithms.TryAdd(user, new AlgorithmBeta(user));
+            Log.Information("{@Where}: Initiated algorithm creation for user {@User}", "Algorithm", metadata.GetValue("sessionid"));
+            bool result = algorithms.TryAdd(metadata, new AlgorithmBeta(metadata));
             if (result)
-            {
-                Log.Information("{@Where}: Created a new algorithm for a user {@User}", "Algorithm", user);
-                orderPublisher.OrderIncomingEvent += algorithms[user].NewOrderAlert;
-                algorithms[user].ChangeState();
+            {    
+                orderPublisher.OrderIncomingEvent += algorithms[metadata].NewOrderAlert;
+                algorithms[metadata].ChangeSetting(setting);
+                algorithms[metadata].ChangeState();
             }
+        }
+
+        private static bool MetaExists(Metadata metadata)
+        {
+            foreach (KeyValuePair<Metadata, AlgorithmBeta> existingAlgo in algorithms)
+            {
+                if (CompareMetas(metadata, existingAlgo.Key))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static AlgorithmBeta GetAlgoByMeta(Metadata metadata)
+        {
+            foreach (KeyValuePair<Metadata, AlgorithmBeta> existingAlgo in algorithms)
+            {
+                if (CompareMetas(metadata, existingAlgo.Key))
+                {
+                    return existingAlgo.Value;
+                }
+            }
+            throw new Exception("Algo not found");
+        }
+
+        private static bool CompareMetas(Metadata firstMeta, Metadata secondMeta)
+        {
+            if (firstMeta.GetValue("sessionid") == secondMeta.GetValue("sessionid")
+                    && firstMeta.GetValue("slot") == secondMeta.GetValue("slot")
+                    && firstMeta.GetValue("trademarket") == secondMeta.GetValue("trademarket")
+                    && firstMeta.GetValue("user-agent") == secondMeta.GetValue("user-agent")
+                    && firstMeta.GetValue("traceparent") == secondMeta.GetValue("traceparent"))
+            {
+                return true;
+            }
+            return false;
         }
     }
 }
