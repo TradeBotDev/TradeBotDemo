@@ -3,7 +3,6 @@ using Former.Clients;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Serilog;
-using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Common.v1;
 
@@ -101,14 +100,13 @@ namespace Former.Model
             var orderType = decision > 0 ? OrderType.Buy : OrderType.Sell;
             if (!CheckPossibilityPlacingOrder(orderType)) return;
 
-            Order newOrder = null;
             var quantity = orderType == OrderType.Buy ? _configuration.ContractValue : -_configuration.ContractValue;
             var price = orderType == OrderType.Buy ? _storage.BuyMarketPrice : _storage.SellMarketPrice;
 
             var response = await _tradeMarketClient.PlaceOrder(price, quantity, _metadata);
             if (response.Response.Code == ReplyCode.Succeed)
             {
-                newOrder = new Order
+                var newOrder = new Order
                 {
                     Id = response.OrderId,
                     Price = price,

@@ -21,7 +21,7 @@ namespace Algorithm.Analysis
         //incoming into Algorithm service are all the orders from TM, so in order to simplify this data for calculations we transform orders into "point"
         //these points are basically the average market prices at some specific points in time
         //we make a point every second if possible
-        private readonly Dictionary<DateTime, double> _storage;
+        private SortedDictionary<DateTime, double> _storage;
 
         //hardcoded, not sure if this will need to change
         private int _durationInPoints = 5;
@@ -49,7 +49,7 @@ namespace Algorithm.Analysis
             _pointPublisher.PointMadeEvent += NewPointAlert;
             _dc = new(_pointPublisher);
             _pm = new();
-            _storage = new Dictionary<DateTime, double>();
+            _storage = new SortedDictionary<DateTime, double>();
             Log.Information("{@Where}: Algorithm for user {@User} has been created", "Algorithm", metadata.GetValue("sessionid"));
         }
 
@@ -80,7 +80,7 @@ namespace Algorithm.Analysis
 
         //this function gathers all the data and sends it for analysis
         //
-        private void PerformCalculations(Dictionary<DateTime, double> points)
+        private void PerformCalculations(SortedDictionary<DateTime, double> points)
         {
             //subsets are used later in this func to help determine the general trend
             List<double> subSet = new();
@@ -110,8 +110,9 @@ namespace Algorithm.Analysis
             }
         }
         //this func needs points and subset averages and decides if it's time to buy
-        private int MakeADecision(IReadOnlyCollection<double> subTrends, Dictionary<DateTime, double> points)
+        private int MakeADecision(IReadOnlyCollection<double> subTrends, SortedDictionary<DateTime, double> points)
         {
+            Log.Information("{@Where}:Analysing the following points: " + string.Join(Environment.NewLine, points), "Algorithm");
             if (_precision == 0)
             {
                 return AnalyseTrendWithMinimalPrecision(points);
@@ -177,23 +178,25 @@ namespace Algorithm.Analysis
             return 0;
         }
 
-        private static int AnalyseTrendWithMinimalPrecision(Dictionary<DateTime, double> prices)
+        private static int AnalyseTrendWithMinimalPrecision(SortedDictionary<DateTime, double> prices)
         {
             if (prices.ElementAt(prices.Count - 4).Value < prices.ElementAt(prices.Count - 3).Value
                 && prices.ElementAt(prices.Count - 3).Value < prices.ElementAt(prices.Count - 2).Value
                 && prices.ElementAt(prices.Count - 2).Value > prices.Last().Value)
             {
+                Log.Information("{@Where}:Upward trend in minimal precision", "Algorithm");
                 return 1;
             }
             if (prices.ElementAt(prices.Count - 4).Value > prices.ElementAt(prices.Count - 3).Value
                 && prices.ElementAt(prices.Count - 3).Value > prices.ElementAt(prices.Count - 2).Value
                 && prices.ElementAt(prices.Count - 2).Value < prices.Last().Value)
             {
+                Log.Information("{@Where}:Downward trend in minimal precision", "Algorithm");
                 return -1;
             }
             return 0;
         }
-        private static int AnalyseTrendWithLowPrecision(IReadOnlyCollection<double> subTrends, Dictionary<DateTime, double> prices, bool currentTrend)
+        private static int AnalyseTrendWithLowPrecision(IReadOnlyCollection<double> subTrends, SortedDictionary<DateTime, double> prices, bool currentTrend)
         {
             if (currentTrend)
             {
@@ -212,7 +215,7 @@ namespace Algorithm.Analysis
             return 0;
         }
 
-        private static int AnalyseTrendWithMediumPrecision(IReadOnlyCollection<double> subTrends, Dictionary<DateTime, double> prices, bool currentTrend)
+        private static int AnalyseTrendWithMediumPrecision(IReadOnlyCollection<double> subTrends, SortedDictionary<DateTime, double> prices, bool currentTrend)
         {
             if (currentTrend)
             {
@@ -232,7 +235,7 @@ namespace Algorithm.Analysis
             }
             return 0;
         }
-        private static int AnalyseTrendWithHighPrecision(IReadOnlyCollection<double> subTrends, Dictionary<DateTime, double> prices, bool currentTrend)
+        private static int AnalyseTrendWithHighPrecision(IReadOnlyCollection<double> subTrends, SortedDictionary<DateTime, double> prices, bool currentTrend)
         {
             if (currentTrend)
             {
@@ -281,15 +284,15 @@ namespace Algorithm.Analysis
         private void Stop()
         {
             _isStopped = true;
-            _pm.Stop();
             Log.Information("{@Where}:Algorithm has been stopped", "Algorithm");
+            _pm.Stop();
         }
 
         private void Start()
         {
             _isStopped = false;
-            _pm.Launch(_pointPublisher, _dc);
             Log.Information("{@Where}:Algorithm has been launched", "Algorithm");
+            _pm.Launch(_pointPublisher, _dc);
         }
     }
 }
