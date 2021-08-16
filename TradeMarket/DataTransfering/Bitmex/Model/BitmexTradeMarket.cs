@@ -177,13 +177,13 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
             if (AuthenticationPublisher.ContainsKey(context) == false)
             {
                 AuthenticationPublisher[context] = await CreatePublisher(context.WSClient,handler, context, token, PublisherFactory.CreateAuthenticationPublisher);
-                AuthenticationPublisher[context].Changed += handler;
+                
             }
             await AuthenticationPublisher[context].Start();
 
-            bool result = await complition.Task;
-            AuthenticationPublisher[context].Changed -= handler;
-            return result;
+            //bool result = await complition.Task;
+            //AuthenticationPublisher[context].Changed -= handler;
+            return true;
         }
         
     }

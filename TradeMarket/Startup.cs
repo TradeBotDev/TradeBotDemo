@@ -1,4 +1,7 @@
-﻿using Grpc.Net.Client;
+﻿using Bitmex.Client.Websocket;
+using Bitmex.Client.Websocket.Client;
+using Bitmex.Client.Websocket.Websockets;
+using Grpc.Net.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -13,6 +16,7 @@ using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
 using TradeMarket.Clients;
 using TradeMarket.DataTransfering;
+using TradeMarket.DataTransfering.Bitmex.Rest.Client;
 using TradeMarket.Model;
 using TradeMarket.Model.TradeMarkets;
 using TradeMarket.Model.UserContexts;
@@ -40,6 +44,9 @@ namespace TradeMarket
             services.AddSingleton<ContextDirector>();
             services.AddSingleton<CommonContextBuilder>();
             services.AddSingleton<UserContextBuilder>();
+            services.AddSingleton<ContextBuilder>();
+            services.AddSingleton<BitmexWebsocketClient>(new BitmexWebsocketClient(new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketTestnetUrl)));
+            services.AddSingleton(new BitmexRestfulClient(BitmexRestufllLink.Testnet));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

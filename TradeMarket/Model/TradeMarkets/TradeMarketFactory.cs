@@ -15,12 +15,16 @@ namespace TradeMarket.Model.TradeMarkets
 {
     public class TradeMarketFactory
     {
+        private BitmexWebsocketClient _wsClient;
+        private BitmexRestfulClient _restClient;
         private IConnectionMultiplexer _multiplexer;
 
         private IDictionary<string, TradeMarket> _tradeMarkets;
 
-        public TradeMarketFactory(IConnectionMultiplexer multiplexer)
+        public TradeMarketFactory(IConnectionMultiplexer multiplexer,BitmexWebsocketClient wsClient,BitmexRestfulClient restClient)
         {
+            _wsClient = wsClient;
+            _restClient = restClient;
             _multiplexer = multiplexer;
             _tradeMarkets = new Dictionary<string, TradeMarket>(new List<KeyValuePair<string, TradeMarket>>());
             _tradeMarkets.Add("bitmex", BuildBitmexTradeMarket());
@@ -29,11 +33,11 @@ namespace TradeMarket.Model.TradeMarkets
         
         public TradeMarket BuildBitmexTradeMarket()
         {
-            var publisherVactory = new BitmexPublisherFactory();
+            var publisherFactory = new BitmexPublisherFactory(_multiplexer);
             return new BitmexTradeMarketBuilder()
-                .AddCommonClient(new BitmexWebsocketClient(new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketTestnetUrl)))
-                .AddCommonClient(new BitmexRestfulClient(BitmexRestufllLink.Testnet))
-                .AddPublisherFactory(publisherVactory)
+                .AddCommonClient(_wsClient)
+                .AddCommonClient(_restClient)
+                .AddPublisherFactory(publisherFactory)
                 .AddName("bitmex")
                 .Result;
         }

@@ -10,6 +10,7 @@ using Bitmex.Client.Websocket.Requests;
 using Bitmex.Client.Websocket.Responses;
 using Bitmex.Client.Websocket.Responses.Orders;
 using Bitmex.Client.Websocket.Websockets;
+using Serilog;
 using TradeMarket.Model.Publishers;
 
 namespace TradeMarket.DataTransfering.Bitmex.Publishers
@@ -36,6 +37,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         private void responseAction(TResponse response)
         {
+            Log.Information("Get Info From Bitmex {@Message}", response);
             _onNext.Invoke(response, Changed);
         }
 
@@ -44,8 +46,8 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
            await Task.Run(() =>
            {
                //тут не нужно ловить OperationCanceledException. BitmexWebsocketClient все разруливает сам
-               _client.Send(request);
                stream.Subscribe(responseAction, token);
+               _client.Send(request);
            });
         }
 

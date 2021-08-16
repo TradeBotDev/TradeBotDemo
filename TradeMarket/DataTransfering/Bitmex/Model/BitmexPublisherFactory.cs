@@ -6,6 +6,7 @@ using Bitmex.Client.Websocket.Responses.Margins;
 using Bitmex.Client.Websocket.Responses.Orders;
 using Bitmex.Client.Websocket.Responses.Positions;
 using Bitmex.Client.Websocket.Responses.Wallets;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,11 +16,19 @@ using TradeMarket.DataTransfering.Bitmex.Publishers;
 using TradeMarket.Model.Publishers;
 using TradeMarket.Model.TradeMarkets;
 using TradeMarket.Model.UserContexts;
+using Order = Bitmex.Client.Websocket.Responses.Orders.Order;
 
 namespace TradeMarket.DataTransfering.Bitmex.Model
 {
     public class BitmexPublisherFactory : IPublisherFactory
     {
+        private IConnectionMultiplexer _multiplexer;
+
+        public BitmexPublisherFactory(IConnectionMultiplexer multiplexer)
+        {
+            _multiplexer = multiplexer;
+        }
+
         public IPublisher<bool> CreateAuthenticationPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token)
         {
             return new AuthenticationPublisher(client, client.Streams.AuthenticationStream, context.Key,context.Secret,token);
@@ -28,7 +37,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
         public IPublisher<BookLevel> CreateBook25Publisher(BitmexWebsocketClient client, IContext context, CancellationToken token)
         {
             //TODO добавить мультиплексер
-            return new BookPublisher(client, client.Streams.Book25Stream,null,new Book25SubscribeRequest(context.Signature.SlotName), token);
+            return new BookPublisher(client, client.Streams.Book25Stream,_multiplexer,new Book25SubscribeRequest(context.Signature.SlotName), token);
         }
 
         public IPublisher<Instrument> CreateInstrumentPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token)

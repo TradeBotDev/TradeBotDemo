@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TradeMarket.Model.UserContexts
 {
-    public class ContextBase : IContext
+    public class ContextBase : IContext ,ICloneable
     {
         public ContextSignature Signature { get; set; }
 
@@ -14,7 +14,7 @@ namespace TradeMarket.Model.UserContexts
 
         public string Secret { get; set; } = null;
 
-        public ContextBase(IContext other)
+        public ContextBase(IContext other) :this()
         {
             Signature.SessionId = other.Signature.SessionId;
             Signature.SlotName = other.Signature.SlotName;
@@ -23,9 +23,9 @@ namespace TradeMarket.Model.UserContexts
             Secret = other.Secret;
         }
 
-        public ContextBase()
+        public ContextBase() : this(new ContextSignature())
         {
-            Signature = null;
+
         }
         public ContextBase(ContextSignature signature)
         {
@@ -61,6 +61,11 @@ namespace TradeMarket.Model.UserContexts
         public bool Equals(IContext other)
         {
             return EqualityComparer<ContextSignature>.Default.Equals(Signature, other.Signature);
+        }
+
+        public object Clone()
+        {
+            return new ContextBase(this);
         }
     }
 }

@@ -7,12 +7,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using TradeMarket.Clients;
 using TradeMarket.DataTransfering;
+using TradeMarket.DataTransfering.Bitmex.Model;
 using TradeMarket.DataTransfering.Bitmex.Rest.Client;
 using TradeMarket.DataTransfering.Bitmex.Rest.Requests;
 using TradeMarket.DataTransfering.Bitmex.Rest.Requests.Ammend;
 using TradeMarket.DataTransfering.Bitmex.Rest.Requests.Place;
 using TradeMarket.DataTransfering.Bitmex.Rest.Requests.Wallets;
 using TradeMarket.Model;
+using TradeMarket.Model.UserContexts;
 
 namespace TradeMarket
 {
@@ -32,8 +34,6 @@ namespace TradeMarket
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             AccountClient._accountClient = _account;
-            //await _multiplexer.GetSubscriber().SubscribeAsync("Bitmex_Book25", (channel, value) => { Log.Information("{@value}", value.ToString()); });
-
             while (!stoppingToken.IsCancellationRequested)
             {
                 

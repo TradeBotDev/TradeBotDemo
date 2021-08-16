@@ -1,6 +1,7 @@
 ﻿using Bitmex.Client.Websocket.Client;
 using Bitmex.Client.Websocket.Requests;
 using Bitmex.Client.Websocket.Responses.Books;
+using Serilog;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -26,6 +27,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
                 foreach (var data in response.Data)
                 {
                     e?.Invoke(typeof(BookPublisher), new(data, response.Action));
+                    Log.Information("Get {@Info}", data);
                     await _redisClient.Send($"Bitmex_{data.Symbol}_{data.Id}", data, "Bitmex_Book25");
                 }
             });

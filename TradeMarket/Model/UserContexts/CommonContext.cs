@@ -13,10 +13,6 @@ namespace TradeMarket.Model.UserContexts
     {
         public TradeMarket.Model.TradeMarkets.TradeMarket TradeMarket { get; internal set; }
 
-        //вот эти ивенты нужны ли вообще ?
-        public event EventHandler<IPublisher<BookLevel>.ChangedEventArgs> Book25;
-        public event EventHandler<IPublisher<Instrument>.ChangedEventArgs> InstrumentUpdate;
-
         public async Task SubscribeToBook25UpdatesAsync(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, CancellationToken token)
         {
             await TradeMarket.SubscribeToBook25(handler, this, token);

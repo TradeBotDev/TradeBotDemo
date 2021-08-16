@@ -1,6 +1,7 @@
 ﻿using Bitmex.Client.Websocket.Client;
 using Bitmex.Client.Websocket.Requests;
 using Bitmex.Client.Websocket.Responses;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         {
            await Task.Run(() =>
            {
+               Log.Information("Recieved Auth Response with code : {@Code} for operation {@op}", response.Success,response.Op);
                e?.Invoke(typeof(AuthenticationPublisher), new(response.Success, BitmexAction.Undefined));
            });
         };
@@ -43,6 +45,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         public async Task SubscribeAsync(string apiKey, string apiSecret,  CancellationToken token)
         {
+            Log.Information("Sending Auth Request for @{key} : {@secret}", apiKey, apiSecret);
             await base.SubscribeAsync(new AuthenticationRequest(apiKey,apiSecret), _stream, token);
         }
     }

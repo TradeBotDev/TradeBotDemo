@@ -7,9 +7,12 @@ namespace TradeMarket.Model.UserContexts
 {
     public class ContextSignature
     {
-        public string SlotName { get; set; }
-        public string TradeMarketName { get; set; }
-        public string SessionId { get; set; }
+        public string SlotName = "";
+        public string TradeMarketName = "";
+        public string SessionId = "";
+
+        public ContextSignature() : this(null, null, null) { }
+
 
         public ContextSignature(string slotName, string tradeMarketName, string sessionId)
         {

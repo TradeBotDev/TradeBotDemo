@@ -26,7 +26,6 @@ namespace TradeMarket.Services
 
         private readonly TradeMarketFactory _tradeMarketFactory;
 
-
         public TradeMarketService(ContextDirector director)
         {
             this._director = director;
@@ -83,7 +82,7 @@ namespace TradeMarket.Services
         {
             return await Task.Run(() =>
             {
-                responseMeta.Add("sessionid",requestMeta.GetValue("sessionId"));
+                responseMeta.Add("sessionid",requestMeta.GetValue("sessionid"));
                 responseMeta.Add("slot", requestMeta.GetValue("slot"));
                 responseMeta.Add("trademarket", requestMeta.GetValue("trademarket"));
                 return responseMeta;
@@ -142,14 +141,15 @@ namespace TradeMarket.Services
                 //Добавляем заголовки ответа по контексту пользователя user из запроса
                 await MoveInfoToMetadataAsync(context.RequestHeaders, context.ResponseTrailers);
 
-                await subscribe(handler, context.CancellationToken);
+                await subscribe(handler, /*context.CancellationToken*/new CancellationToken());
                 //ожидаем пока клиенты отменят подписку
-                await AwaitCancellation(context.CancellationToken);
+                await AwaitCancellation(/*context.CancellationToken*/ new CancellationToken());
             }
             catch (Exception e)
             {
                 //записываем ошибку в логер
                 Log.Logger.Error(e.Message);
+                Log.Logger.Error(e.StackTrace);
                 //ставим статус "Отмена" в заголовке ответа
                 context.Status = Status.DefaultCancelled;
             }
@@ -317,8 +317,7 @@ namespace TradeMarket.Services
             }
 
             var common = await GetCommonContextAsync(context.RequestHeaders);
-            await SubscribeToUserTopic<SubscribeOrdersRequest, SubscribeOrdersResponse, BookLevel>(common.SubscribeToBook25UpdatesAsync, common.UnSubscribeFromBook25UpdatesAsync, WriteToStreamAsync, request, responseStream, context);
-
+            SubscribeToUserTopic<SubscribeOrdersRequest, SubscribeOrdersResponse, BookLevel>(common.SubscribeToBook25UpdatesAsync, common.UnSubscribeFromBook25UpdatesAsync, WriteToStreamAsync, request, responseStream, context);
         }
 
         /// <summary>

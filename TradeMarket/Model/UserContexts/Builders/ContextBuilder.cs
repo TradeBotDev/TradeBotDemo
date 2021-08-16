@@ -5,16 +5,28 @@ using System.Threading.Tasks;
 
 namespace TradeMarket.Model.UserContexts.Builders
 {
-    public abstract class ContextBuilder
+    public class ContextBuilder
     {
-        internal ContextBase Context;
+        private ContextBase _context;
+        internal ContextBase Context { 
+            get
+            {
+                var result = _context.Clone() as ContextBase;
+                _context = new ContextBase();
+                return result;
+            }
+            set
+            {
+                _context = value;
+            }
+        }
 
         public ContextBuilder() { Context = new ContextBase(); }
 
         public ContextBuilder AddUniqueInformation(string slotName, string sessionId)
         {
-            Context.Signature.SessionId = sessionId;
-            Context.Signature.SlotName = slotName;
+            _context.Signature.SessionId = sessionId;
+            _context.Signature.SlotName = slotName;
             return this;
         }
     }
