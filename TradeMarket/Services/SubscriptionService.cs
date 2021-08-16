@@ -15,17 +15,17 @@ namespace TradeMarket.Services
     /// </summary>
     ///
     //TODO LocalClass такое себе название !
-    public class SubscriptionService<SubscribeRequest, SubscribeReply,LocalClass, Service>
-        where SubscribeRequest : Google.Protobuf.IMessage<SubscribeRequest>
-        where SubscribeReply : Google.Protobuf.IMessage<SubscribeReply>
+    public class SubscriptionService<TSubscribeRequest, TSubscribeReply,TLocalClass, TService>
+        where TSubscribeRequest : Google.Protobuf.IMessage<TSubscribeRequest>
+        where TSubscribeReply : Google.Protobuf.IMessage<TSubscribeReply>
     {
-        private Subscriber<LocalClass> _subscriber;
+        private EventHandler<TLocalClass> _subscriber;
 
-        private ILogger<Service> _logger;
+        private readonly ILogger<TService> _logger;
 
-        public static Converter<LocalClass, SubscribeReply> _converter;
+        private static Converter<TLocalClass, TSubscribeReply> _converter;
 
-        public SubscriptionService(Subscriber<LocalClass> subscriber, ILogger<Service> logger, Converter<LocalClass, SubscribeReply> converter)
+        public SubscriptionService(EventHandler<TLocalClass> subscriber, ILogger<TService> logger, Converter<TLocalClass, TSubscribeReply> converter)
         {
             _logger = logger;
             _subscriber = subscriber;
@@ -33,17 +33,19 @@ namespace TradeMarket.Services
 
         }
 
-        public async Task Subscribe(SubscribeRequest request, IServerStreamWriter<SubscribeReply> responseStream, ServerCallContext context)
+        public async Task Subscribe(TSubscribeRequest request, IServerStreamWriter<TSubscribeReply> responseStream, ServerCallContext context)
         {
-            _subscriber.Changed += async (sender, args) =>
+            _subscriber += async (sender, args) =>
             {
-                await WriteStreamAsync(responseStream, _converter(args.Changed));
+/*                _logger.LogInformation($"Recieved Order {args.Changed} ");
+*/              
+                await WriteStreamAsync(responseStream, _converter(args));
             };
             await AwaitCancellation(context.CancellationToken);
 
         }
 
-        public async Task WriteStreamAsync(IServerStreamWriter<SubscribeReply> stream, SubscribeReply reply)
+        public async Task WriteStreamAsync(IServerStreamWriter<TSubscribeReply> stream, TSubscribeReply reply)
         {
             try
             {
@@ -52,7 +54,7 @@ namespace TradeMarket.Services
             catch (Exception exception)
             {
                 //TODO что делать когда разорвется соеденение ?
-                _logger.LogWarning("Connection was interrupted by network servicies.");
+                _logger.LogWarning("Connection was interrupted by network services.");
             }
         }
 

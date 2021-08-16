@@ -12,17 +12,17 @@ service TradeMarketService {
 	/*
 		Покупает ордер по указанному ид и возвращает результат покупики (получилось / не получилось)
 	*/
-	rpc CloseOrder(CloseOrderRequest) returns (CloseOrderResponse);
-
-	/*
-		Запрос на размещение ордера
-	*/
-	rpc PlaceOrder(PlaceOrderRequest) returns (PlaceOrderResponse);
+	rpc PlaceOrder (PlaceOrderRequest) returns (PlaceOrderResponse);
 
 	/*
 		Подписывается на ордера выбранного типа
 	*/
 	rpc SubscribeOrders(SubscribeOrdersRequest) returns (stream SubscribeOrdersResponse);
+
+	/*
+		подписка на изменения размещенных ордеров
+	*/
+	rpc SubscribeMyOrders(SubscribeMyOrdersRequest) returns (stream SubscribeMyOrdersResponse);
 
 	/*
 		Подписка на изменение баланса пользователя (ЕДИНСТВЕННОГО)
@@ -44,6 +44,153 @@ service TradeMarketService {
 	*/
 	rpc SubscribeLogs(SubscribeLogsRequest) returns (stream SubscribeLogsResponse);
 
+
+	/*
+		Обновление параметров ордера по ид
+	*/
+	rpc AmmendOrder(AmmendOrderRequest) returns (AmmendOrderResponse);
+
+	/*
+		удаление ордера по ид
+	*/
+	rpc DeleteOrder(DeleteOrderRequest) returns (DeleteOrderResponse);
+
+	/*
+		Подписка на изменения полного баланса пользователя
+	*/
+	rpc SubscribeMargin(SubscribeMarginRequest) returns (stream SubscribeMarginResponse);
+
+	/*
+		Подписка на обновление позиций
+	*/
+	rpc SubscribePosition(SubscribePositionRequest) returns (stream SubscribePositionResponse);
+
+	/*
+		Подписка на изменение цен в стаканах
+	*/
+	rpc SubscribePrice(SubscribePriceRequest) returns (stream SubscribePriceResponse);
+
+}
+
+message SubscribePriceRequest{
+
+}
+
+message SubscribePriceResponse{
+	double bid_price = 1;
+	double ask_price = 2;
+	double fair_price = 3;
+	tradebot.common.v1.ChangesType changed_type = 4;
+}
+
+
+message SubscribePositionRequest{
+	google.protobuf.Empty empty = 1;
+}
+
+message SubscribePositionResponse{
+	int64 current_qty = 1;
+}
+
+message SubscribeMarginRequest{
+	google.protobuf.Empty empty = 1;
+}
+
+message Margin{
+	 /*int64 account = 1;
+     string currency = 2;
+     int64 risk_limit = 3;
+     string prev_state = 4;
+     string state = 5;
+     string action = 6;
+     int64 amount = 7;
+     int64 pending_credit = 8;
+     int64 pending_debit = 9;
+     int64 confirmed_debit = 10;
+     int64 prev_realised_pnl = 11;
+     int64 prev_unrealised_pnl = 12;
+     int64 gross_comm = 13;
+     int64 gross_open_cost = 14;
+     int64 gross_open_premium = 15;
+     int64 gross_exec_cost = 16;
+     int64 gross_mark_value = 17;
+     int64 risk_value = 18;
+         int64 taxable_margin = 19;
+         int64 init_margin = 20;
+         int64 maint_margin = 21;
+         int64 session_margin = 22;
+         int64 target_excess_margin = 23;
+         int64 var_margin = 24;
+		 */
+         int64 realised_pnl = 25;
+		 /*
+         int64 unrealised_pnl = 26;
+         int64 indicative_tax = 27;
+         int64 unrealised_profit = 28;
+         int64 synthetic_margin = 29;
+         int64 wallet_balance = 30;*/
+         int64 margin_balance = 31;
+		 /*
+         int64 margin_balance_pcnt = 32;
+         int64 margin_leverage = 33;
+         int64 margin_used_pcnt = 34;
+         int64 excess_margin = 35;
+         int64 excess_margin_pcnt = 36;*/
+         int64 available_margin = 37;
+        /* int64 withdrawable_margin = 38;
+         google.protobuf.Timestamp timestamp = 39;
+         int64 gross_last_value = 40;
+         double commission = 41;*/
+}
+
+message SubscribeMarginResponse{
+	tradebot.common.v1.ChangesType changed_type = 1;
+	Margin margin = 2;
+}
+
+
+message DeleteOrderRequest{
+	string order_id = 1;
+}
+
+message DeleteOrderResponse{
+	tradebot.common.v1.DefaultResponse response = 1;
+}
+
+
+enum QuantityType{
+	QUANTITY_TYPE_UNSPECIFIED = 0;
+	QUANTITY_TYPE_LEAVES = 1;	
+	QUANTITY_TYPE_DEFAULT = 2;
+	QUANTITY_TYPE_NONE = 3;	
+}
+
+enum PriceType{
+	PRICE_TYPE_UNSPECIFIED = 0;
+	PRICE_TYPE_DEFAULT = 1;
+	PRICE_TYPE_NONE = 2;
+}
+
+message AmmendOrderRequest{
+	string id = 1;
+	double new_price = 2;
+	int32 new_quantity = 3;
+	QuantityType quantity_type = 4;
+	PriceType price_type = 5;
+}
+
+message AmmendOrderResponse{
+	tradebot.common.v1.DefaultResponse response = 1;
+}
+
+message SubscribeMyOrdersRequest{
+	google.protobuf.Empty empty = 1;
+}
+
+message SubscribeMyOrdersResponse {
+	tradebot.common.v1.DefaultResponse response = 1;
+	tradebot.common.v1.Order changed = 2;
+	tradebot.common.v1.ChangesType changes_type = 3;
 }
 
 message SubscribeOrdersRequest{
@@ -53,6 +200,7 @@ message SubscribeOrdersRequest{
 
 message SubscribeOrdersResponse{
 	tradebot.common.v1.SubscribeOrdersResponse response = 1;
+	tradebot.common.v1.ChangesType changed_type = 2;
 
 }
 
@@ -66,6 +214,7 @@ message SubscribeLogsResponse{
 
 message SubscribeBalanceRequest{
 	tradebot.common.v1.SubscribeBalanceRequest request = 1;
+	string slot_name = 2;
 }
 
 message SubscribeBalanceResponse{
@@ -76,16 +225,12 @@ message PlaceOrderRequest{
 	double price = 1;
 	double value = 2;
 }
+
 message PlaceOrderResponse{
 	tradebot.common.v1.DefaultResponse response = 1;
-}
-message CloseOrderRequest{
-	string id = 1;
+	string order_id = 2;
 }
 
-message CloseOrderResponse{
-	tradebot.common.v1.DefaultResponse response = 1;
-}
 message SlotsRequest{
 	//TODO Тут должно быть обращение к конкретной бирже, но она пока одна
 	google.protobuf.Empty empty = 1;

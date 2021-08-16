@@ -8,19 +8,25 @@ package tradebot.relay.relay_service.v1;
 service RelayService{
 	rpc StartBot (StartBotRequest) returns (StartBotResponse);
 
+	rpc StopBot(StopBotRequest) returns (StopBotResponse);
 	/*
 		Клиент говорит обновиться серверу
 	*/
 	rpc UpdateServerConfig (UpdateServerConfigRequest) returns (UpdateServerConfigResponse);
-
 	/*
 		Подписка на логи нужного сервиса
 	*/
-	//TODO в каждом сервисе нужно написать 
 	rpc SubscribeLogs(SubscribeLogsRequest) returns (stream SubscribeLogsResponse);
-
+	
+	rpc DeleteOrder(DeleteOrderRequest) returns (DeleteOrderResponse);
+}
+message DeleteOrderRequest{
+	google.protobuf.Empty empty = 1;
 }
 
+message DeleteOrderResponse{
+	tradebot.common.v1.DefaultResponse response = 1;
+}
 message SubscribeLogsRequest{
 	tradebot.common.v1.SubscribeLogsRequest request = 1;
 }
@@ -53,4 +59,10 @@ message StartBotRequest {
 
 message StartBotResponse {
 	tradebot.common.v1.DefaultResponse response = 1;
+}
+message StopBotRequest {
+	tradebot.common.v1.UpdateServerConfigRequest request =1;
+}
+message StopBotResponse{
+
 }

@@ -4,7 +4,6 @@ import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 
 import "tradebot/common/v1/common.proto";
-
 package tradebot.facade.facade_service.v1;
 
 service FacadeService{
@@ -32,19 +31,232 @@ service FacadeService{
 		Подписка на логи нужного сервиса
 	*/
 	//TODO в каждом сервисе нужно написать 
-	rpc SubscribeLogs(SubscribeLogsRequest) returns (stream SubscribeLogsResponse);
+	rpc SubscribeLogsTM(SubscribeLogsRequest) returns (stream SubscribeLogsResponse);
 
 	/*
-		Старт бота
+		Подписка на логи релэя
 	*/
-	rpc StartBotRPC (StartBotRequest) returns (StartBotResponse);
+	rpc SubscribeLogsRelay(SubscribeLogsRequest) returns (stream SubscribeLogsResponse);
+
+	rpc StartBot (SwitchBotRequest) returns (SwitchBotResponse);
+
+	rpc StopBot (StopBotRequest) returns (StopBotResponse);
+
+	rpc DeleteOrder(DeleteOrderRequest) returns (DeleteOrderResponse);
+	
+	// Метод входа в аккаунт
+	rpc Login (LoginRequest) returns (LoginReply);
+	// Метод выхода из аккаунта
+	rpc Logout (SessionRequest) returns (LogoutReply);
+	// Метод регистрации аккаунта
+	rpc Register (RegisterRequest) returns (RegisterReply);
+	// Проверка текущего пользователя на валидность по Id сессии
+	rpc IsValidSession (SessionRequest) returns (SessionReply);
+	// Получение данных текущего пользователя
+	rpc CurrentAccountData (SessionRequest) returns (CurrentAccountReply);
+	// Добавление новой биржи для текущего пользователя
+	rpc AddExchangeAccess(AddExchangeAccessRequest) returns (AddExchangeAccessReply);
+	// Получение массива бирж текущего пользователя
+	rpc AllExchangesBySession (SessionRequest) returns (AllExchangesBySessionReply);
+	// Удаление информации о доступе к бирже по id в базе данных (пока что)
+	rpc DeleteExchangeAccess (DeleteExchangeAccessRequest) returns (DeleteExchangeAccessReply);
+	// Получение информации о доступе текущего пользователя к бирже
+	rpc ExchangeBySession (ExchangeBySessionRequest) returns (ExchangeBySessionReply);
+
+	rpc SubscribeEvents(SubscribeEventsRequest) returns (stream SubscribeEventsResponse);
+
 }
-message StartBotRequest {
+message SubscribeEventsRequest {
+	string sessionid = 1;
+}
+
+message SubscribeEventsResponse{
+	oneof event_type{
+		PublishBalanceEvent balance = 1;
+		PublishOrderEvent order = 2;
+	}
+}
+
+message PublishBalanceEvent{
+	string sessionid = 1;
+	google.protobuf.Timestamp time = 2;
+	tradebot.common.v1.Balance balance = 3;
+}
+
+message PublishOrderEvent{
+	string sessionid = 1;
+	tradebot.common.v1.ChangesType changes_type = 2;
+	google.protobuf.Timestamp time = 3;
+	tradebot.common.v1.Order order = 4;
+	string message = 5;
+	string slot_name = 6;
+}
+message DeleteOrderRequest{
+	google.protobuf.Empty empty = 1;
+}
+
+message StopBotRequest{
+	tradebot.common.v1.UpdateServerConfigRequest request = 1;
+}
+
+message StopBotResponse{}
+
+message DeleteOrderResponse{
+	tradebot.common.v1.DefaultResponse response = 1;
+}
+// Данные для входа в аккаунт.
+message LoginRequest {
+	string email = 1;
+	bool save_exchanges_after_logout = 2;
+	string password = 3;
+}
+
+// Ответ на запрос о входе в аккаунт.
+message LoginReply {
+	ActionCode result = 1;
+	string message = 2;
+	string session_id = 3;
+}
+
+// Ответ на запрос о выходе из аккаунта
+message LogoutReply {
+	ActionCode result = 1;
+	string message = 2;
+}
+
+// Данные для регистрации аккаунта.
+message RegisterRequest {
+	string email = 1;
+	string firstname = 2;
+	string lastname = 3;
+	string phone_number = 4;
+	string password = 5;
+	string verify_password = 6;
+}
+
+// Ответ на запрос о регистрации аккаунта.
+message RegisterReply {
+	ActionCode result = 1;
+	string message = 2;
+}
+
+// Запрос на передачу сессии.
+message SessionRequest {
+	string session_id = 1;
+}
+
+// Результат проверки сессии на валидность.
+message SessionReply {
+	bool is_valid = 1;
+	string message = 2;
+}
+
+// Получение данных текущего пользователя.
+message CurrentAccountReply {
+	ActionCode result = 1;
+	string message = 2;
+	AccountInfo current_account = 3;
+}
+
+//Информация о пользователе, необходимая для отображения в UI
+message AccountInfo {
+	int32 account_id = 1;
+	string firstname = 2;
+	string lastname = 3;
+	string email = 4;
+	string phone_number = 5;
+	repeated ExchangeAccessInfo exchanges = 6;
+}
+
+// Информация о данных для доступа к бирже.
+message ExchangeAccessInfo {
+	int32 exchange_access_id = 1;
+	ExchangeCode code = 2;
+	string name = 3;
+	string token = 4;
+	string secret = 5;
+}
+
+// Коды всех бирж.
+enum ExchangeCode {
+	EXCHANGE_CODE_BITMEX = 0;
+}
+
+// Коды результата выполнения входа или регистрации.
+enum ActionCode {
+	/*
+	* 0 - успешное выполнение,
+	* 1 - пользователь не найден,
+	* 2 - пользователь уже существует,
+	* 3 - имеется пустое поле ввода,
+	* 4 - пароли не совпадают,
+	* 5 - поле не является электронной почтой,
+	* 6 - биржа не найдена,
+	* 7 - биржа уже существует.
+	*/
+	ACTION_CODE_SUCCESSFUL = 0;
+	ACTION_CODE_ACCOUNT_NOT_FOUND = 1;
+	ACTION_CODE_ACCOUNT_EXISTS = 2;
+	ACTION_CODE_EMPTY_FIELD = 3;
+	ACTION_CODE_PASSWORD_MISMATCH = 4;
+	ACTION_CODE_IS_NOT_EMAIL = 5;
+	ACTION_CODE_EXCHANGE_NOT_FOUND = 6;
+	ACTION_CODE_EXCHANGE_EXISTS = 7;
+}
+// Запрос на добавление биржи для текущего пользователя.
+message AddExchangeAccessRequest {
+	string session_id = 1;
+	ExchangeCode code = 2;
+	string exchange_name = 3;
+	string token = 4;
+	string secret = 5;
+}
+
+// Ответ на добавление биржи для текущего пользователя.
+message AddExchangeAccessReply {
+	ActionCode result = 1;
+	string message = 2;
+}
+
+// Получение всех добавленных бирж текущего пользователя.
+message AllExchangesBySessionReply {
+	ActionCode result = 1;
+	string message = 2;
+	repeated ExchangeAccessInfo exchanges = 3;
+}
+
+// Запрос на удаление записи о конкретной бирже для текущего пользователя.
+message DeleteExchangeAccessRequest {
+	string session_id = 1;
+	ExchangeCode code = 2;
+}
+
+// Ответ на запрос об удалении записи о бирже для текущего пользователя.
+message DeleteExchangeAccessReply {
+	ActionCode result = 1;
+	string message = 2;
+}
+
+// Запрос на получение информации о доступе пользователя к конкретной бирже.
+message ExchangeBySessionRequest {
+	string session_id = 1;
+	ExchangeCode code = 2;
+}
+
+// Ответ на запрос с получением информации о доступе пользователя к конкретной бирже.
+message ExchangeBySessionReply {
+	ActionCode result = 1;
+	string message = 2;
+	ExchangeAccessInfo exchange = 3;
+}
+
+message SwitchBotRequest {
 	tradebot.common.v1.Config config = 1;
 }
 
-message StartBotResponse {
+message SwitchBotResponse {
 	tradebot.common.v1.DefaultResponse response = 1;
+	tradebot.common.v1.DefaultResponse message = 2;
 }
 
 message SubscribeLogsRequest{
@@ -53,6 +265,7 @@ message SubscribeLogsRequest{
 
 message SubscribeLogsResponse{
 	tradebot.common.v1.SubscribeLogsResponse response = 1;
+	tradebot.common.v1.DefaultResponse message = 2;
 }
 
 message UpdateServerConfigRequest{
@@ -61,14 +274,17 @@ message UpdateServerConfigRequest{
 
 message UpdateServerConfigResponse{
 	tradebot.common.v1.UpdateServerConfigResponse response = 1;
+	tradebot.common.v1.DefaultResponse message = 2;
 }
 
 message SubscribeBalanceRequest{
 	tradebot.common.v1.SubscribeBalanceRequest request = 1;
+	string slot_name = 2;
 }
 
 message SubscribeBalanceResponse{
-	tradebot.common.v1.SubscribeBalanceResponse response = 1;
+	//old version - tradebot.common.v1.SubscribeBalanceResponse response = 1;
+	optional tradebot.common.v1.Balance Money = 1;
 }
 
 message SlotsRequest{
@@ -77,6 +293,7 @@ message SlotsRequest{
 }
 message SlotsResponse{
 	string slot_name = 1;
+	tradebot.common.v1.DefaultResponse message = 2;
 }
 
 message AuthenticateTokenRequest{
@@ -85,4 +302,5 @@ message AuthenticateTokenRequest{
 
 message AuthenticateTokenResponse{
 	tradebot.common.v1.DefaultResponse response = 1;
+	tradebot.common.v1.DefaultResponse message = 2;
 }

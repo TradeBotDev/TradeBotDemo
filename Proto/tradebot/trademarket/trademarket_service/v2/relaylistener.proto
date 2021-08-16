@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+option csharp_namespace = "TradeBot.TradeMarket.TradeMarketService.v2";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+import "tradebot/common/v1/common.proto";
+package tradebot.trademarket.trademarket_service.v2;
+
+service RelayListener {
+	/*
+		Подписывается на ордера выбранного типа
+	*/
+	rpc SubscribeOrders(SubscribeOrdersRequest) returns (stream SubscribeOrdersResponse);
+
+	/*
+		Подписка на логи нужного сервиса
+	*/
+	rpc SubscribeLogs(SubscribeLogsRequest) returns (stream SubscribeLogsResponse);
+}
+
+message SubscribeOrdersRequest{
+	tradebot.common.v1.SubscribeOrdersRequest request = 1;
+	
+}
+
+message SubscribeOrdersResponse{
+	tradebot.common.v1.SubscribeOrdersResponse response = 1;
+
+}
+
+message SubscribeLogsRequest{
+	tradebot.common.v1.SubscribeLogsRequest request = 1;
+}
+
+message SubscribeLogsResponse{
+	tradebot.common.v1.SubscribeLogsResponse response = 1;
+}

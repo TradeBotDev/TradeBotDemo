@@ -1,10 +1,11 @@
-using Grpc.Net.Client;
+using Algorithm.Analysis;
+using Algorithm.DataManipulation;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using Serilog;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Algorithm
@@ -13,14 +14,35 @@ namespace Algorithm
     {
         public static void Main(string[] args)
         {
-            DataCollector.SendPurchasePrice();
+            var configuration = new ConfigurationBuilder()
+                .Build();
+
+            Log.Logger = new LoggerConfiguration().MinimumLevel.Debug()
+                .WriteTo.Console()
+                .WriteTo.Seq("http://localhost:5341")
+                .CreateLogger();
+
             CreateHostBuilder(args).Build().Run();
+            Log.Information("{@Where}: Algorithm service has started", "Algorithm");
         }
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
+
+
+       public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+            .UseSerilog()
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+                }).ConfigureServices(services => {
+                    services.AddHostedService<Worker>();
                 });
+    }
+
+    public class Worker : BackgroundService
+    {
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+
+        }
     }
 }

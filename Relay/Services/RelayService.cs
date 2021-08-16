@@ -11,48 +11,93 @@ using SubscribeLogsRequest = TradeBot.Relay.RelayService.v1.SubscribeLogsRequest
 using SubscribeLogsResponse = TradeBot.Relay.RelayService.v1.SubscribeLogsResponse;
 using UpdateServerConfigRequest = TradeBot.Relay.RelayService.v1.UpdateServerConfigRequest;
 using UpdateServerConfigResponse = TradeBot.Relay.RelayService.v1.UpdateServerConfigResponse;
+using System.Diagnostics.CodeAnalysis;
+using Serilog;
 
 namespace Relay.Services
 {
     public class RelayService : TradeBot.Relay.RelayService.v1.RelayService.RelayServiceBase
     {
-        private AlgorithmClientService _algorithmClient = null;
-        private TradeMarketClientService _tradeMarketClient = null;
+        private static AlgorithmClient _algorithmClient = null;
+        private static TradeMarketClient _tradeMarketClient = null;
+        private static FormerClient _formerClient=null;//добавил null
 
-        public RelayService(AlgorithmClientService algorithm,TradeMarketClientService tradeMarket)
+        private static IDictionary<Metadata, UserContext> contexts = new Dictionary<Metadata, UserContext>(new MetaComparer());
+
+        private class MetaComparer : IEqualityComparer<Metadata>
         {
+            public bool Equals(Metadata x, Metadata y)
+            {
+                if (x.Get("sessionid") is null || x.Get("slot") is null || x.Get("trademarket") is null)
+                {
+                    return false;
+                }
+                if (y.Get("sessionid") is null || y.Get("slot") is null || y.Get("trademarket") is null)
+                {
+                    return false;
+                }
+                return x.Get("sessionid") == y.Get("sessionid") && x.Get("slot") == y.Get("slot") && x.Get("trademarket") == y.Get("trademarket");
+            }
+
+            public int GetHashCode([DisallowNull] Metadata obj)
+            {
+                return obj.GetHashCode();
+            }
+        }
+
+        private UserContext GetUserContext(Metadata meta)
+        {
+            if (contexts.Keys.FirstOrDefault(x => x[2].Value == meta[2].Value) != null)
+            {
+                return contexts.First(x => x.Value.Meta[2].Value == meta[2].Value).Value;
+            }
+            UserContext newContext = new(meta, _formerClient, _algorithmClient, _tradeMarketClient);
+            contexts.Add(meta, newContext);
+            return newContext;
+        }
+
+        public RelayService(AlgorithmClient algorithm, TradeMarketClient tradeMarket, FormerClient former)
+        {
+            Log.Information("new RelayService");
             _algorithmClient = algorithm;
             _tradeMarketClient = tradeMarket;
+            _formerClient = former;
         }
 
         public override async Task<StartBotResponse> StartBot(StartBotRequest request, ServerCallContext context)
         {
-            _algorithmClient.IsOn = true;
-            var readOrderTask = _tradeMarketClient.ReadOrders();
+            var user = GetUserContext(context.RequestHeaders);
+            user.StatusOfWork();
+            user.SubscribeForOrders();
             return await Task.FromResult(new StartBotResponse()
             {
                 Response = new DefaultResponse()
                 {
-                    Message = "Bot has been started",
+                    Message = "Command has been completed",
                     Code = ReplyCode.Succeed
                 }
             });
         }
 
+        public async override Task<DeleteOrderResponse> DeleteOrder(DeleteOrderRequest request, ServerCallContext context)
+        {
+            await _formerClient.SendDeleteOrder(new DeleteOrderRequest {},context);
+            return await Task.FromResult(new DeleteOrderResponse { });
+        }
+        public async override Task<StopBotResponse> StopBot(StopBotRequest request, ServerCallContext context)
+        {
+            var user = GetUserContext(context.RequestHeaders);
+            user.UpdateConfig(new TradeBot.Common.v1.UpdateServerConfigRequest { Config = request.Request.Config, Switch = request.Request.Switch });
+            user.StatusOfWork();
+            return await Task.FromResult(new StopBotResponse { });
+        }
         public async override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request,
             ServerCallContext context)
         {
-            await _algorithmClient.UpdateConfig(request.Request.Config);
+            var user = GetUserContext(context.RequestHeaders);
+            user.UpdateConfig(new TradeBot.Common.v1.UpdateServerConfigRequest { Config=request.Request.Config,Switch=request.Request.Switch });
             return await Task.FromResult(new UpdateServerConfigResponse());
         }
 
-        public override Task SubscribeLogs(SubscribeLogsRequest request, IServerStreamWriter<SubscribeLogsResponse> responseStream, ServerCallContext context)
-        {
-            return base.SubscribeLogs(request, responseStream, context);
-        }
-        //public async override Task SubscribeOrders(TradeBot.Relay.RelayService.v1.SubscribeOrdersRequest request, IServerStreamWriter<TradeBot.Relay.RelayService.v1.SubscribeOrdersResponse> responseStream, ServerCallContext context)
-        //{
-           
-        //}
     }
 }
