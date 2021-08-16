@@ -3,6 +3,7 @@
     <head>
         <!--Невидимые на странице подключения и прочее-->
         <title>@ViewBag.Title | Tradebot</title>
+        <meta charset="utf-8" />
         <link rel="stylesheet" type="text/css" href="~/css/style.css"/>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,7 +18,7 @@
                 @if (User.Identity.IsAuthenticated)
                 {
                     <!--Производится проверка вошедшего пользователя на то, обладает ли он лицензией.
-                        Если он не обдалает ей, появляется кнопка покупки.-->
+                    Если он не обдалает ей, появляется кнопка покупки.-->
                     if (ViewBag.HaveLicense == null || !ViewBag.HaveLicense)
                     {
                         <li><a href="/purchase/buy">Купить</a></li>
@@ -47,5 +48,7 @@
         <footer>
             <p>Tradebot 2021</p>
         </footer>
+        <script crossorigin="anonymous" src="https://cdnjs.cloudflare.com/ajax/libs/react/16.11.0/umd/react.development.js"></script>
+        <script crossorigin="anonymous" src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.11.0/umd/react-dom.development.js"></script>
     </body>
 </html>

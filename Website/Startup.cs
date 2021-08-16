@@ -1,9 +1,13 @@
+using JavaScriptEngineSwitcher.ChakraCore;
+using JavaScriptEngineSwitcher.Extensions.MsDependencyInjection;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using React.AspNet;
 using Serilog;
 
 namespace Website
@@ -29,11 +33,14 @@ namespace Website
         {
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
             {
-                options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/authorization/login");
-                options.LogoutPath = new Microsoft.AspNetCore.Http.PathString("/authorization/logout");
+                options.LoginPath = new PathString("/authorization/login");
+                options.LogoutPath = new PathString("/authorization/logout");
             });
-
             services.AddControllersWithViews();
+
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddReact();
+            services.AddJsEngineSwitcher(options => options.DefaultEngineName = ChakraCoreJsEngine.EngineName).AddChakraCore();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -50,6 +57,7 @@ namespace Website
                 app.UseHsts();
             }
 
+            app.UseReact(config => { });
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
