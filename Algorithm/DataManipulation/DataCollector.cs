@@ -36,7 +36,6 @@ namespace Algorithm.DataManipulation
         public void AddNewOrder(Order order)
         {
             Orders.Add(order);
-            Log.Information("Order added to DC");
         }
 
         public void ClearAllData()

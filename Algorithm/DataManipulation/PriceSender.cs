@@ -16,8 +16,8 @@ namespace Algorithm.DataManipulation
         private static readonly FormerServiceClient Client = new FormerServiceClient(Channel);
         public static void SendDecision (int decision, Metadata metadata)
         {
-            var response = Client.SendAlgorithmDecision(new SendAlgorithmDecisionRequest() { Decision = decision }, metadata);
-            Log.Information("Sent " + decision + "  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            var response = Client.SendAlgorithmDecision(new SendAlgorithmDecisionRequest { Decision = decision }, metadata);
+            Log.Information("{@Where}:Sent " + decision, "Algorithm");
         }
     }
 }
