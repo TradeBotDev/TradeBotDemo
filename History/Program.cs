@@ -21,8 +21,9 @@ namespace History
             //CreateHostBuilder(args).Build().Run();
 
             DataContext db = new();
-            db.Add(new BalanceChange { Balance = new Balance(), SessionId = "meow", Time = DateTime.Now });
+            //db.Add(new BalanceChange { Balance = new Balance(), SessionId = "meow", Time = DateTime.Now });
             Console.WriteLine("did it");
+            Console.ReadKey();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

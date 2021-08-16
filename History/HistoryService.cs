@@ -1,6 +1,7 @@
 ﻿using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using History.DataBase;
+using History.DataBase.Data_Models;
 using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -12,21 +13,8 @@ namespace History
 {
     public class History : HistoryService.HistoryServiceBase
     {
-        private struct BalanceUpdate
-        {
-            public string SessionId;
-            public Timestamp Time;
-            public Balance Balance;
-        }
-        private struct OrderUpdate
-        {
-            public string SessionId;
-            public Timestamp Time;
-            public Order Order;
-            public string Message;
-            public ChangesType ChangesType;
-            public string SlotName;
-        }
+        private static readonly ObservableCollection<BalanceChange> BalanceCollection = new();
+        private static readonly ObservableCollection<OrderChange> OrderCollection = new();
 
         public override async Task<PublishEventResponse> PublishEvent(PublishEventRequest request, ServerCallContext context)
         {
@@ -39,17 +27,17 @@ namespace History
                     {
                         SessionId = request.Balance.Sessionid,
                         Time = request.Balance.Time.ToDateTime(),
-                        Balance = request.Balance.Balance
-                    });
+                        Balance = Converter.ToBalanceWrapper(request.Balance.Balance)
+                    }); ;
                     break;
                 case PublishEventRequest.EventTypeOneofCase.Order:
-                    OrderCollection.Add(new OrderUpdate
+                    OrderCollection.Add(new OrderChange
                     {
                         SessionId = request.Order.Sessionid,
-                        ChangesType = request.Order.ChangesType,
-                        Order = request.Order.Order,
+                        ChangesType = (DataBase.ChangesType)request.Order.ChangesType,
+                        Order = Converter.ToOrderWrapper(request.Order.Order),
                         Message = request.Order.Message,
-                        Time = request.Order.Time,
+                        Time = request.Order.Time.ToDateTime(),
                         SlotName = request.Order.SlotName
                     });
                     break;
@@ -63,38 +51,38 @@ namespace History
             IAsyncStreamWriter<SubscribeEventsResponse> responseStream,
             TaskCompletionSource<SubscribeEventsResponse> taskCompletionSource)
         {
-            BalanceUpdate updateBalance;
-            OrderUpdate updateOrder;
+            BalanceChange updateBalance;
+            OrderChange updateOrder;
             try
             {
                 Task.Run(async () =>
                 {
                     if (args.NewItems[0].GetType().FullName.Contains("BalanceUpdate"))
                     {
-                        updateBalance = (BalanceUpdate)args.NewItems[0];
+                        updateBalance = (BalanceChange)args.NewItems[0];
                         if (updateBalance.SessionId != request.Sessionid) return;
                         await responseStream.WriteAsync(new SubscribeEventsResponse
                         {
                             Balance = new PublishBalanceEvent
                             {
-                                Balance = updateBalance.Balance, 
+                                Balance = Converter.ToBalance(updateBalance.Balance),
                                 Sessionid = updateBalance.SessionId,
-                                Time = updateBalance.Time
+                                Time = Timestamp.FromDateTime(updateBalance.Time)
                             }
-                        });
+                        }); ;
                     }
                     if (args.NewItems[0].GetType().FullName.Contains("OrderUpdate"))
                     {
-                        updateOrder = (OrderUpdate)args.NewItems[0];
+                        updateOrder = (OrderChange)args.NewItems[0];
                         if (updateOrder.SessionId != request.Sessionid) return;
                         await responseStream.WriteAsync(new SubscribeEventsResponse
                         {
                             Order = new PublishOrderEvent
                             {
-                                ChangesType = updateOrder.ChangesType,
-                                Order = updateOrder.Order,
+                                ChangesType = (TradeBot.Common.v1.ChangesType)updateOrder.ChangesType,
+                                Order = Converter.ToOrder(updateOrder.Order),
                                 Sessionid = updateOrder.SessionId,
-                                Time = updateOrder.Time,
+                                Time = Timestamp.FromDateTime(updateOrder.Time),
                                 Message = updateOrder.Message,
                                 SlotName = updateOrder.SlotName
                             }
