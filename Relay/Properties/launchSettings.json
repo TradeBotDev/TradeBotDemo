@@ -1,13 +1,20 @@
-﻿{
+{
   "profiles": {
     "Relay": {
       "commandName": "Project",
-      "dotnetRunMessages": "true",
-      "launchBrowser": false,
-      "applicationUrl": "http://localhost:5004",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+        "ALGORITHM_CONNECTION_STRING": "http://localhost:5006",
+        "FORMER_CONNECTION_STRING": "http://localhost:5003",
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "TRADEMARKET_CONNECTION_STRING": "http://localhost:5005"
+      },
+      "dotnetRunMessages": "true",
+      "applicationUrl": "http://localhost:5004"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "publishAllPorts": true
     }
   }
 }
