@@ -284,15 +284,15 @@ namespace Algorithm.Analysis
         private void Stop()
         {
             _isStopped = true;
-            _pm.Stop();
             Log.Information("{@Where}:Algorithm has been stopped", "Algorithm");
+            _pm.Stop();
         }
 
         private void Start()
         {
             _isStopped = false;
-            _pm.Launch(_pointPublisher, _dc);
             Log.Information("{@Where}:Algorithm has been launched", "Algorithm");
+            _pm.Launch(_pointPublisher, _dc);
         }
     }
 }
