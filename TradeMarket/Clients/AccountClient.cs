@@ -46,11 +46,11 @@ namespace TradeMarket.Clients
 
             var reply =  _client.ExchangeBySession(new()
             {
-                Code = ExchangeCode.Bitmex,
+                Code = ExchangeAccessCode.Bitmex,
                 SessionId = sessionId
             });
             Log.Logger.Information($"Fetching complete with result : {reply.Result}");
-            if(reply.Result != ActionCode.Successful)
+            if(reply.Result != ExchangeAccessActionCode.Successful)
             {
                 //Если по переданному sessionId нет данных
                 throw new KeyNotFoundException($"sessionId : {sessionId} has no data in AccountService");
