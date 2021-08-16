@@ -10,11 +10,11 @@ services:
     volumes:
       - .%USERPROFILE%\.aspnet\https:/https/
     environment:
-      ACCOUNT_CONNECTION_STRING: "http://localhost:5000"
-      RELAY_CONNECTION_STRING: "http://localhost:5004"
+      ACCOUNT_CONNECTION_STRING: "http://host.docker.internal:5000"
+      RELAY_CONNECTION_STRING: "http://host.docker.internal:5004"
       ASPNETCORE_ENVIRONMENT: "Development"
-      HISTORY_CONNECTION_STRING: "http://localhost:5007"
-      TRADEMARKET_CONNECTION_STRING: "http://localhost:5005"
+      HISTORY_CONNECTION_STRING: "http://host.docker.internal:5007"
+      TRADEMARKET_CONNECTION_STRING: "http://host.docker.internal:5005"
   relay:
     image: relay
     container_name: relaycontainer
@@ -23,10 +23,10 @@ services:
     volumes:
       - .%USERPROFILE%\.aspnet\https:/https/
     environment:
-      ALGORITHM_CONNECTION_STRING: "http://localhost:5006"
-      FORMER_CONNECTION_STRING: "http://localhost:5003"
+      ALGORITHM_CONNECTION_STRING: "http://host.docker.internal:5006"
+      FORMER_CONNECTION_STRING: "http://host.docker.internal:5003"
       ASPNETCORE_ENVIRONMENT: "Development"
-      TRADEMARKET_CONNECTION_STRING: "http://localhost:5005"
+      TRADEMARKET_CONNECTION_STRING: "http://host.docker.internal:5005"
   algorithm:
     image: algorithm
     container_name: algorithmcontainer
@@ -35,7 +35,7 @@ services:
     volumes:
       - .%USERPROFILE%\.aspnet\https:/https/
     environment:
-      FORMER_CONNECTION_STRING: "http://localhost:5003"
+      FORMER_CONNECTION_STRING: "http://host.docker.internal:5003"
       ASPNETCORE_ENVIRONMENT: "Development"
   history:
     image: history
