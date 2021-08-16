@@ -598,7 +598,7 @@ namespace UI
         private void LinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             LinkLabel.LinkVisited = true;
-            ProcessStartInfo sInfo = new ProcessStartInfo("https://www.google.com");
+            var sInfo = new ProcessStartInfo("https://www.google.com");
             Process.Start(sInfo);
         }
     }
