@@ -2,6 +2,13 @@
 version: "3.9"
 
 services:
+  account:
+    image: account
+    container_name: accountcontainer
+    ports:
+      - 5000:80
+    volumes:
+      - .%USERPROFILE%\.aspnet\https:/https/
   facade:
     image: facade
     container_name: facadecontainer
