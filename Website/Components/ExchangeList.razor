@@ -1,4 +1,5 @@
 ﻿@using TradeBot.Account.AccountService.v1;
+@using Website.Controllers.Clients;
 
 @if (AccountData.Exchanges.Count > 0)
 {
@@ -24,13 +25,13 @@ else { <p>Биржи отсутствуют.</p> }
 
     private async void DeleteExchange(ExchangeAccessCode code)
     {
-        await Website.Controllers.Clients.ExchangeAccessClient.DeleteExchangeAccess(SessionId, code);
+        await ExchangeAccessClient.DeleteExchangeAccess(SessionId, code);
         RefreshExchanges();
     }
 
     private async void RefreshExchanges()
     {
-        var exchanges = await Website.Controllers.Clients.ExchangeAccessClient.AllExchangesBySession(SessionId);
+        var exchanges = await ExchangeAccessClient.AllExchangesBySession(SessionId);
         AccountData.Exchanges = exchanges.Exchanges;
         await InvokeAsync(StateHasChanged);
     }
