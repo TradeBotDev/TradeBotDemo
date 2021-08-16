@@ -85,6 +85,15 @@ namespace Former.Model
         /// </summary>
         private bool CheckPossibilityPlacingOrder(OrderType type)
         {
+
+            if (_storage.MyOrders.Count(x => x.Value.Signature.Type == OrderType.Buy) > 0 ||
+                _storage.CounterOrders.Count(x => x.Value.Signature.Type == OrderType.Buy) > 0 &&
+                type == OrderType.Sell)
+                return false;
+            if (_storage.MyOrders.Count(x => x.Value.Signature.Type == OrderType.Sell) > 0 ||
+                _storage.CounterOrders.Count(x => x.Value.Signature.Type == OrderType.Sell) > 0 &&
+                type == OrderType.Buy)
+                return false;
             var orderCost = _configuration.ContractValue / (type == OrderType.Sell ? _storage.SellMarketPrice : _storage.BuyMarketPrice);
             var totalBalance = ConvertSatoshiToXBT(_storage.TotalBalance);
             var availableBalance = ConvertSatoshiToXBT(_storage.AvailableBalance);
