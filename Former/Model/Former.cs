@@ -3,7 +3,6 @@ using Former.Clients;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Serilog;
-using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Common.v1;
 
