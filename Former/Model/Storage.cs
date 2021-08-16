@@ -1,5 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using Former.Clients;
+using Grpc.Core;
 using Serilog;
 using TradeBot.Common.v1;
 
@@ -27,8 +29,13 @@ namespace Former.Model
         public bool PlaceLocker;
         public bool FitPricesLocker;
 
-        internal Storage()
+        private HistoryClient _historyClient;
+        private Metadata _metadata;
+
+        internal Storage(HistoryClient historyClient, Metadata metadata)
         {
+            _historyClient = historyClient;
+            _metadata = metadata;
             MyOrders = new ConcurrentDictionary<string, Order>();
             CounterOrders = new ConcurrentDictionary<string, Order>();
         }
@@ -56,6 +63,7 @@ namespace Former.Model
             {
                 case ChangesType.Partitial:
                     AddOrder(id, InitPartialOrder(newComingOrder), CounterOrders);
+                    await _historyClient.WriteOrder(newComingOrder, ChangesType.Partitial, _metadata, "Counter order initialized");
                     return;
                 case ChangesType.Update when itsMyOrder:
                     var updateMyOrderResponse = UpdateOrder(newComingOrder, MyOrders);
@@ -77,6 +85,7 @@ namespace Former.Model
                     break;
                 case ChangesType.Delete when itsCounterOrder:
                     var removeCounterOrderResponse = RemoveOrder(id, CounterOrders);
+                    await _historyClient.WriteOrder(newComingOrder, ChangesType.Delete, _metadata, "Counter order filled");
                     Log.Information("{@Where}: Counter order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed {@ResponseCode}", "Former", counterOldOrder.Id, counterOldOrder.Price, counterOldOrder.Quantity, counterOldOrder.Signature.Type, removeCounterOrderResponse ? ReplyCode.Succeed : ReplyCode.Failure);
                     break;
                 //вновь пришедший ордер не помещается в список моих ордеров здесь, потому что это делается только по событию из алгоритма, во избежание

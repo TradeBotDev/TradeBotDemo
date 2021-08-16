@@ -19,7 +19,7 @@ namespace Former.Model
         private readonly Former _former;
         private readonly UpdateHandlers _updateHandlers;
         private readonly HistoryClient _historyClient;
-        private bool SubscribesAttached = false;
+        private bool _subscribesAttached;
         
 
         public Metadata Meta { get; }
@@ -32,14 +32,13 @@ namespace Former.Model
                 { "trademarket", tradeMarket },
                 { "slot", slot }
             };
-            _storage = new Storage();
-
             HistoryClient.Configure(Environment.GetEnvironmentVariable("HISTORY_CONNECTION_STRING"), int.TryParse(Environment.GetEnvironmentVariable("RETRY_DELAY"), out var retryDelay) ? retryDelay : retryDelay = 10000);
             _historyClient = new HistoryClient();
 
             TradeMarketClient.Configure(Environment.GetEnvironmentVariable("TRADEMARKET_CONNECTION_STRING"), retryDelay);
             _tradeMarketClient = new TradeMarketClient();
-            
+
+            _storage = new Storage(_historyClient, Meta);
             _former = new Former(_storage, null, _tradeMarketClient, Meta, _historyClient);
             _updateHandlers = new UpdateHandlers(_storage, null, _tradeMarketClient, Meta, _historyClient);
 
@@ -48,26 +47,26 @@ namespace Former.Model
 
         public void SubscribeStorageToMarket()
         {
-            if (SubscribesAttached) return;
+            if (_subscribesAttached) return;
             _tradeMarketClient.UpdateMarketPrices += _storage.UpdateMarketPrices;
             _tradeMarketClient.UpdateBalance += _storage.UpdateBalance;
             _tradeMarketClient.UpdateMyOrders += _storage.UpdateMyOrderList;
             _tradeMarketClient.UpdatePosition += _storage.UpdatePosition;
             _tradeMarketClient.StartObserving(Meta);
-            SubscribesAttached = true;
+            _subscribesAttached = true;
             Log.Information("{@Where}: Former has been started!", "Former");
         }
 
         public void UnsubscribeStorage()
         {
-            if (!SubscribesAttached) return;
+            if (!_subscribesAttached) return;
             _tradeMarketClient.StopObserving();
             _tradeMarketClient.UpdateMarketPrices -= _storage.UpdateMarketPrices;
             _tradeMarketClient.UpdateBalance -= _storage.UpdateBalance;
             _tradeMarketClient.UpdateMyOrders -= _storage.UpdateMyOrderList;
             _tradeMarketClient.UpdatePosition -= _storage.UpdatePosition;
             ClearStorage();
-            SubscribesAttached = false;
+            _subscribesAttached = false;
             Log.Information("{@Where}: Former has been stopped!", "Former");
         }
 

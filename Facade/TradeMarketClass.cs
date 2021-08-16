@@ -13,7 +13,7 @@ namespace Facade
 {
     public class TradeMarketClass
     {
-        private GrpcChannel _channel => GrpcChannel.ForAddress("http://localhost:5005");
+        private GrpcChannel _channel => GrpcChannel.ForAddress(Environment.GetEnvironmentVariable("TRADEMARKET_CONNECTION_STRING"));
         public GrpcChannel Channel { get => _channel; }
 
         private TMClient _client => new TMClient(Channel);
@@ -22,155 +22,33 @@ namespace Facade
             get => _client;
         }
 
-        public async Task SubscribeBalanceTradeMarket(Ref.SubscribeBalanceRequest request, IServerStreamWriter<Ref.SubscribeBalanceResponse> responseStream, ServerCallContext context)
+        public async Task TM_SubscribeBalance(Ref.SubscribeBalanceRequest request, IServerStreamWriter<Ref.SubscribeBalanceResponse> responseStream, ServerCallContext context, string methodName)
         {
-            while (true)
-            {
-                try
-                {
-                    var response = Client.SubscribeBalance(new TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceRequest { Request = request.Request });
-                    if (!context.CancellationToken.IsCancellationRequested)
-                    {
-                        if (response.ResponseStream.Current != null)
-                        {
-                            Log.Information($"Function: SubscribeBalance \n args: request={request}");
-                            while (await response.ResponseStream.MoveNext())
-                            {
-                                Log.Information($"Function: SubscribeBalance \n args: response={response.ResponseStream.Current.Response.Balance}");
-                                await responseStream.WriteAsync(new TradeBot.Facade.FacadeService.v1.SubscribeBalanceResponse
-                                {
-                                    Money = response.ResponseStream.Current.Response.Balance
-                                });
-                            }
-
-                            break;
-                        }
-                        else
-                        {
-                            //Log.Information("Trying to reconnect")
-                        }
-                    }
-                    else
-                    {
-                        Log.Information("Client disconnected");
-                        break;
-                    }
-                }
-                catch (RpcException e)
-                {
-                    Log.Error("Exception" + e.Message);
-                }
-            }
+            var response = Client.SubscribeBalance(new TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceRequest { Request = request.Request });
+            await Generalization.StreamReadWrite(request, responseStream, response, context, methodName);
         }
 
-        public async Task SlotsTradeMarket(Ref.SlotsRequest request, IServerStreamWriter<Ref.SlotsResponse> responseStream, ServerCallContext context)
+        public async Task TM_Slots(Ref.SlotsRequest request, IServerStreamWriter<Ref.SlotsResponse> responseStream, ServerCallContext context,string methodName)
         {
-            while (true)
-            {
-                try
-                {
-                    var response = Client.Slots(new TradeBot.TradeMarket.TradeMarketService.v1.SlotsRequest { });
-                    if (!context.CancellationToken.IsCancellationRequested)
-                    {
-                        if (response.ResponseStream.Current != null)
-                        {
-                            Log.Information($"Function: Slots \n args: request={request}");
-                            while (await response.ResponseStream.MoveNext())
-                            {
-                                Log.Information($"Function: Slots \n args: response={response.ResponseStream.Current.SlotName}");
-
-                                await responseStream.WriteAsync(new TradeBot.Facade.FacadeService.v1.SlotsResponse
-                                {
-                                    SlotName = response.ResponseStream.Current.SlotName
-                                });
-                            }
-                            break;
-                        }
-                        else
-                        {
-                            //Log.Information("Trying to reconnect")
-                        }
-                    }
-                    else
-                    {
-                        Log.Information("Client disconnected");
-                        break;
-                    }
-                }
-                catch (RpcException e)
-                {
-                    Log.Error("Exception" + e.Message);
-                }
-            }
+            var response = Client.Slots(new TradeBot.TradeMarket.TradeMarketService.v1.SlotsRequest { });
+            await Generalization.StreamReadWrite(request, responseStream, response, context, methodName);
+        }
+        public async Task TM_SubscribeLogsTM(Ref.SubscribeLogsRequest request, IServerStreamWriter<Ref.SubscribeLogsResponse> responseStream, ServerCallContext context, string methodName)
+        {
+            var response = Client.SubscribeLogs(new TradeBot.TradeMarket.TradeMarketService.v1.SubscribeLogsRequest { Request = request.R });
+            await Generalization.StreamReadWrite(request, responseStream, response, context, methodName);
         }
 
-        public async Task SubscribeLogsTradeMarket(Ref.SubscribeLogsRequest request, IServerStreamWriter<Ref.SubscribeLogsResponse> responseStream, ServerCallContext context)
+        public async Task<Ref.AuthenticateTokenResponse> TM_AuthenticateToken(Ref.AuthenticateTokenRequest request, string methodName)
         {
-            while (true)
+            TradeBot.TradeMarket.TradeMarketService.v1.AuthenticateTokenResponse response = null;
+            async Task<TradeBot.TradeMarket.TradeMarketService.v1.AuthenticateTokenResponse> task()
             {
-                try
-                {
-                    var response = Client.SubscribeLogs(new TradeBot.TradeMarket.TradeMarketService.v1.SubscribeLogsRequest { Request = request.R });
-                    if (!context.CancellationToken.IsCancellationRequested)
-                    {
-                        if (response.ResponseStream.Current != null)
-                        {
-                            Log.Information($"Function: SubscribeLogsTM \n args: request={request}");
-                            while (await response.ResponseStream.MoveNext())
-                            {
-                                Log.Information($"Function: SubscribeBalance \n args: response={response.ResponseStream.Current.Response}");
-                                await responseStream.WriteAsync(new Ref.SubscribeLogsResponse
-                                {
-                                    Response = response.ResponseStream.Current.Response
-                                });
-                            }
-                            break;
-                        }
-                        else
-                        {
-                            //Log.Information("Trying to reconnect")
-                        }
-                    }
-                    else
-                    {
-                        Log.Information("Client disconnected");
-                        break;
-                    }
-                }
-                catch (RpcException e)
-                {
-                    Log.Error("Exception" + e.Message);
-                }
+                response = await Client.AuthenticateTokenAsync(new TradeBot.TradeMarket.TradeMarketService.v1.AuthenticateTokenRequest { Token = request.Token });
+                return response;
             }
-        }
-
-        public Task<Ref.AuthenticateTokenResponse> AuthenticationTokenTradeMarket(Ref.AuthenticateTokenRequest request, ServerCallContext context)
-        {
-            while (true)
-            {
-                try
-                {
-                    if (context.CancellationToken.IsCancellationRequested) break;
-                    var response = Client.AuthenticateToken(new TradeBot.TradeMarket.TradeMarketService.v1.AuthenticateTokenRequest { Token = request.Token });
-                    Log.Information($"Function: AuthenticateToken \n args: request={request}");
-                    Log.Information($"Function: AuthenticateToken \n args: response={response}");
-                    return Task.FromResult(new Ref.AuthenticateTokenResponse { Response = response.Response });
-                }
-                catch (RpcException e)
-                {
-                    Log.Information("Exception:" + e.Message);
-                }
-            }
-            return Task.FromResult(new Ref.AuthenticateTokenResponse { });
-        }
-    }
-    public static class MyExtension
-    {
-        public static AsyncServerStreamingCall<RequestAndResponse.SubscribeBalanceResponse> SubscribeBalance(this TMClient cl, RequestAndResponse.SubscribeBalanceRequest request)
-        {
-            var response = cl.SubscribeBalance(new RequestAndResponse.SubscribeBalanceRequest { Request = request.Request, SlotName = request.SlotName });
-            //if (response =)
-            return response;
+            await Generalization.ConnectionTester(task, methodName, request);
+            return await Generalization.ReturnResponse(new Ref.AuthenticateTokenResponse { Response = response.Response }, methodName);
         }
     }
 }

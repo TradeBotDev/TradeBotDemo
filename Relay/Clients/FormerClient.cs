@@ -14,7 +14,7 @@ namespace Relay.Clients
     public class FormerClient
     {
         private readonly FormerService.FormerServiceClient _client;
-        public FormerClient(Uri uri)
+        public FormerClient(string uri)
         {
             _client = new FormerService.FormerServiceClient(GrpcChannel.ForAddress(uri));
         }
