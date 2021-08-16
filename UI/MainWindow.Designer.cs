@@ -105,7 +105,9 @@ namespace UI
             this.ConfigAlgorithmSensivityTxb = new System.Windows.Forms.ComboBox();
             this.ConfigAlgorithmSensLbl = new System.Windows.Forms.Label();
             this.SignUpGroupBox = new System.Windows.Forms.GroupBox();
-            this.panel4 = new System.Windows.Forms.Panel();
+            this.SignUpPanel = new System.Windows.Forms.Panel();
+            this.label10 = new System.Windows.Forms.Label();
+            this.linkLabel2 = new System.Windows.Forms.LinkLabel();
             this.label2 = new System.Windows.Forms.Label();
             this.LinkLabel = new System.Windows.Forms.LinkLabel();
             this.SignInGroupBox = new System.Windows.Forms.GroupBox();
@@ -120,11 +122,10 @@ namespace UI
             this.SignOutButton = new System.Windows.Forms.Button();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Quantity = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ErrorProvider = new System.Windows.Forms.ErrorProvider(this.components);
+            this.ErrorProviderMainForm = new System.Windows.Forms.ErrorProvider(this.components);
             this.LeftPanel = new System.Windows.Forms.Panel();
             this.RightPanel = new System.Windows.Forms.Panel();
-            this.linkLabel2 = new System.Windows.Forms.LinkLabel();
-            this.label10 = new System.Windows.Forms.Label();
+            this.ErrorProviderSignUp = new System.Windows.Forms.ErrorProvider(this.components);
             this.Tabs.SuspendLayout();
             this.LogsPage.SuspendLayout();
             this.GraphicsPage.SuspendLayout();
@@ -139,12 +140,13 @@ namespace UI
             ((System.ComponentModel.ISupportInitialize)(this.ActiveSlotsDataGridView)).BeginInit();
             this.panel3.SuspendLayout();
             this.SignUpGroupBox.SuspendLayout();
-            this.panel4.SuspendLayout();
+            this.SignUpPanel.SuspendLayout();
             this.SignInGroupBox.SuspendLayout();
             this.panel5.SuspendLayout();
             this.LoggedGroupBox.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.ErrorProvider)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ErrorProviderMainForm)).BeginInit();
             this.LeftPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.ErrorProviderSignUp)).BeginInit();
             this.SuspendLayout();
             // 
             // zedGraph
@@ -1046,7 +1048,7 @@ namespace UI
             // 
             this.SignUpGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.SignUpGroupBox.Controls.Add(this.panel4);
+            this.SignUpGroupBox.Controls.Add(this.SignUpPanel);
             this.SignUpGroupBox.Enabled = false;
             this.SignUpGroupBox.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.SignUpGroupBox.Location = new System.Drawing.Point(153, 0);
@@ -1059,25 +1061,45 @@ namespace UI
             this.SignUpGroupBox.Text = "Sign Up";
             this.SignUpGroupBox.Visible = false;
             // 
-            // panel4
+            // SignUpPanel
             // 
-            this.panel4.Controls.Add(this.label10);
-            this.panel4.Controls.Add(this.linkLabel2);
-            this.panel4.Controls.Add(this.label2);
-            this.panel4.Controls.Add(this.LinkLabel);
-            this.panel4.Controls.Add(this.RegistrationButton);
-            this.panel4.Controls.Add(this.RegLog);
-            this.panel4.Controls.Add(this.RegKey);
-            this.panel4.Controls.Add(this.label6);
-            this.panel4.Controls.Add(this.ConfigTokenl);
-            this.panel4.Controls.Add(this.RegToken);
-            this.panel4.Controls.Add(this.label5);
-            this.panel4.Controls.Add(this.label4);
-            this.panel4.Controls.Add(this.RegPass);
-            this.panel4.Location = new System.Drawing.Point(232, 15);
-            this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(522, 303);
-            this.panel4.TabIndex = 27;
+            this.SignUpPanel.Controls.Add(this.label10);
+            this.SignUpPanel.Controls.Add(this.linkLabel2);
+            this.SignUpPanel.Controls.Add(this.label2);
+            this.SignUpPanel.Controls.Add(this.LinkLabel);
+            this.SignUpPanel.Controls.Add(this.RegistrationButton);
+            this.SignUpPanel.Controls.Add(this.RegLog);
+            this.SignUpPanel.Controls.Add(this.RegKey);
+            this.SignUpPanel.Controls.Add(this.label6);
+            this.SignUpPanel.Controls.Add(this.ConfigTokenl);
+            this.SignUpPanel.Controls.Add(this.RegToken);
+            this.SignUpPanel.Controls.Add(this.label5);
+            this.SignUpPanel.Controls.Add(this.label4);
+            this.SignUpPanel.Controls.Add(this.RegPass);
+            this.SignUpPanel.Location = new System.Drawing.Point(232, 15);
+            this.SignUpPanel.Name = "SignUpPanel";
+            this.SignUpPanel.Size = new System.Drawing.Size(522, 303);
+            this.SignUpPanel.TabIndex = 27;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(364, 237);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(121, 20);
+            this.label10.TabIndex = 30;
+            this.label10.Text = "Bitmex address:";
+            // 
+            // linkLabel2
+            // 
+            this.linkLabel2.AutoSize = true;
+            this.linkLabel2.Location = new System.Drawing.Point(366, 261);
+            this.linkLabel2.Name = "linkLabel2";
+            this.linkLabel2.Size = new System.Drawing.Size(58, 20);
+            this.linkLabel2.TabIndex = 29;
+            this.linkLabel2.TabStop = true;
+            this.linkLabel2.Text = "BitMEX";
+            this.linkLabel2.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel2_LinkClicked);
             // 
             // label2
             // 
@@ -1235,9 +1257,9 @@ namespace UI
             this.Quantity.ReadOnly = true;
             this.Quantity.Width = 125;
             // 
-            // ErrorProvider
+            // ErrorProviderMainForm
             // 
-            this.ErrorProvider.ContainerControl = this;
+            this.ErrorProviderMainForm.ContainerControl = this;
             // 
             // LeftPanel
             // 
@@ -1258,25 +1280,9 @@ namespace UI
             this.RightPanel.Size = new System.Drawing.Size(150, 367);
             this.RightPanel.TabIndex = 28;
             // 
-            // linkLabel2
+            // ErrorProviderSignUp
             // 
-            this.linkLabel2.AutoSize = true;
-            this.linkLabel2.Location = new System.Drawing.Point(366, 261);
-            this.linkLabel2.Name = "linkLabel2";
-            this.linkLabel2.Size = new System.Drawing.Size(58, 20);
-            this.linkLabel2.TabIndex = 29;
-            this.linkLabel2.TabStop = true;
-            this.linkLabel2.Text = "BitMEX";
-            this.linkLabel2.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel2_LinkClicked);
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(364, 237);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(121, 20);
-            this.label10.TabIndex = 30;
-            this.label10.Text = "Bitmex address:";
+            this.ErrorProviderSignUp.ContainerControl = this;
             // 
             // TradeBotUi
             // 
@@ -1286,10 +1292,10 @@ namespace UI
             this.Controls.Add(this.Tabs);
             this.Controls.Add(this.RightPanel);
             this.Controls.Add(this.LeftPanel);
-            this.Controls.Add(this.LoggedGroupBox);
-            this.Controls.Add(this.MainMenuGroupBox);
             this.Controls.Add(this.SignUpGroupBox);
             this.Controls.Add(this.SignInGroupBox);
+            this.Controls.Add(this.LoggedGroupBox);
+            this.Controls.Add(this.MainMenuGroupBox);
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "TradeBotUi";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -1311,15 +1317,16 @@ namespace UI
             ((System.ComponentModel.ISupportInitialize)(this.ActiveSlotsDataGridView)).EndInit();
             this.panel3.ResumeLayout(false);
             this.SignUpGroupBox.ResumeLayout(false);
-            this.panel4.ResumeLayout(false);
-            this.panel4.PerformLayout();
+            this.SignUpPanel.ResumeLayout(false);
+            this.SignUpPanel.PerformLayout();
             this.SignInGroupBox.ResumeLayout(false);
             this.panel5.ResumeLayout(false);
             this.panel5.PerformLayout();
             this.LoggedGroupBox.ResumeLayout(false);
             this.LoggedGroupBox.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.ErrorProvider)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ErrorProviderMainForm)).EndInit();
             this.LeftPanel.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.ErrorProviderSignUp)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -1385,12 +1392,12 @@ namespace UI
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.DataGridViewTextBoxColumn Slot;
         private System.Windows.Forms.DataGridViewCheckBoxColumn Launch;
-        private System.Windows.Forms.ErrorProvider ErrorProvider;
+        private System.Windows.Forms.ErrorProvider ErrorProviderMainForm;
         private System.Windows.Forms.Label ConfigRequiredProfitLbl;
         private System.Windows.Forms.Panel LeftPanel;
         private System.Windows.Forms.Panel RightPanel;
         private System.Windows.Forms.Panel panel3;
-        private System.Windows.Forms.Panel panel4;
+        private System.Windows.Forms.Panel SignUpPanel;
         private System.Windows.Forms.Panel panel5;
         private System.Windows.Forms.Label LicenseNumberLbl;
         private System.Windows.Forms.DataGridViewTextBoxColumn SlotName;
@@ -1413,6 +1420,7 @@ namespace UI
         private System.Windows.Forms.LinkLabel LinkLabel1;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.LinkLabel linkLabel2;
+        private System.Windows.Forms.ErrorProvider ErrorProviderSignUp;
     }
 }
 
