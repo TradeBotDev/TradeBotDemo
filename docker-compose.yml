@@ -23,7 +23,7 @@ services:
     volumes:
       - .%USERPROFILE%\.aspnet\https:/https/
     environment:
-      ALGORITHM_CONNECTION_STRING": "http://localhost:5006"
+      ALGORITHM_CONNECTION_STRING: "http://localhost:5006"
       FORMER_CONNECTION_STRING: "http://localhost:5003"
       ASPNETCORE_ENVIRONMENT: "Development"
       TRADEMARKET_CONNECTION_STRING: "http://localhost:5005"
