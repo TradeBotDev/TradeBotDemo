@@ -17,17 +17,17 @@ namespace Algorithm.Services
             while (await requestStream.MoveNext())
             {
                 var order = requestStream.Current;
-                DataCollector.Orders.Add(order.Order);
-                DataCollector.metaData = context.RequestHeaders;
+                StorageOfAlgorithms.SendNewOrderToAllAlgos(order.Order);
             }
 
             return new AddOrderResponse();
         }
-
-        //a config update placeholder 
         public override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request, ServerCallContext context)
         {
-            Log.Information("Config Updated");
+            Log.Information("SERVER CONFIG UPDATE");
+            var settings = request.Request;
+            StorageOfAlgorithms.SendNewConfig(context.RequestHeaders, settings);
+            Log.Information("SENT NEW CONFIG TO ALGO MAKER");
             return Task.FromResult(new UpdateServerConfigResponse());
         }
     }

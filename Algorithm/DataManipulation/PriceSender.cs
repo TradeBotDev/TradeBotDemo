@@ -1,4 +1,5 @@
-﻿using Grpc.Net.Client;
+﻿using Grpc.Core;
+using Grpc.Net.Client;
 using Serilog;
 using System;
 using TradeBot.Former.FormerService.v1;
@@ -11,11 +12,11 @@ namespace Algorithm.DataManipulation
     //all the values are hardcoded for now 
     public static class PriceSender
     {
-        private static readonly GrpcChannel Channel = GrpcChannel.ForAddress("https://localhost:5003");
+        private static readonly GrpcChannel Channel = GrpcChannel.ForAddress(Environment.GetEnvironmentVariable("FORMER_CONNECTION_STRING"));
         private static readonly FormerServiceClient Client = new FormerServiceClient(Channel);
-        public static void SendPrice (int decision)
+        public static void SendDecision (int decision, Metadata metadata)
         {
-            var response = Client.SendAlgorithmDecision(new SendAlgorithmDecisionRequest() { Decision = decision }, DataCollector.metaData);
+            var response = Client.SendAlgorithmDecision(new SendAlgorithmDecisionRequest() { Decision = decision }, metadata);
             Log.Information("Sent " + decision + "  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         }
     }

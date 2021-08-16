@@ -3,16 +3,30 @@ using Grpc.Core;
 using History.DataBase;
 using System;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Threading.Tasks;
+using TradeBot.Common.v1;
 using TradeBot.History.HistoryService.v1;
 
 namespace History
 {
     public class History : HistoryService.HistoryServiceBase
     {
-        private static readonly ObservableCollection<BalanceChange> BalanceCollection = new();
-        private static readonly ObservableCollection<OrderChange> OrderCollection = new();
-        private static DataContext db = new();
+        private struct BalanceUpdate
+        {
+            public string SessionId;
+            public Timestamp Time;
+            public Balance Balance;
+        }
+        private struct OrderUpdate
+        {
+            public string SessionId;
+            public Timestamp Time;
+            public Order Order;
+            public string Message;
+            public ChangesType ChangesType;
+            public string SlotName;
+        }
 
         public override async Task<PublishEventResponse> PublishEvent(PublishEventRequest request, ServerCallContext context)
         {
@@ -29,14 +43,15 @@ namespace History
                     });
                     break;
                 case PublishEventRequest.EventTypeOneofCase.Order:
-                    OrderCollection.Add(new OrderChange()
+                    OrderCollection.Add(new OrderUpdate
                     {
                         SessionId = request.Order.Sessionid,
                         ChangesType = request.Order.ChangesType,
                         Order = request.Order.Order,
                         Message = request.Order.Message,
-                        Time = request.Order.Time.ToDateTime()
-                    }); ;
+                        Time = request.Order.Time,
+                        SlotName = request.Order.SlotName
+                    });
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -44,62 +59,63 @@ namespace History
             return new PublishEventResponse();
         }
 
+        private static void Handler(NotifyCollectionChangedEventArgs args, SubscribeEventsRequest request,
+            IAsyncStreamWriter<SubscribeEventsResponse> responseStream,
+            TaskCompletionSource<SubscribeEventsResponse> taskCompletionSource)
+        {
+            BalanceUpdate updateBalance;
+            OrderUpdate updateOrder;
+            try
+            {
+                Task.Run(async () =>
+                {
+                    if (args.NewItems[0].GetType().FullName.Contains("BalanceUpdate"))
+                    {
+                        updateBalance = (BalanceUpdate)args.NewItems[0];
+                        if (updateBalance.SessionId != request.Sessionid) return;
+                        await responseStream.WriteAsync(new SubscribeEventsResponse
+                        {
+                            Balance = new PublishBalanceEvent
+                            {
+                                Balance = updateBalance.Balance, 
+                                Sessionid = updateBalance.SessionId,
+                                Time = updateBalance.Time
+                            }
+                        });
+                    }
+                    if (args.NewItems[0].GetType().FullName.Contains("OrderUpdate"))
+                    {
+                        updateOrder = (OrderUpdate)args.NewItems[0];
+                        if (updateOrder.SessionId != request.Sessionid) return;
+                        await responseStream.WriteAsync(new SubscribeEventsResponse
+                        {
+                            Order = new PublishOrderEvent
+                            {
+                                ChangesType = updateOrder.ChangesType,
+                                Order = updateOrder.Order,
+                                Sessionid = updateOrder.SessionId,
+                                Time = updateOrder.Time,
+                                Message = updateOrder.Message,
+                                SlotName = updateOrder.SlotName
+                            }
+                        });
+                    }
+                }).Wait();
+            }
+            catch
+            {
+                taskCompletionSource.SetCanceled();
+            }
+        }
+
         public override async Task<SubscribeEventsResponse> SubscribeEvents(SubscribeEventsRequest request,
             IServerStreamWriter<SubscribeEventsResponse> responseStream, ServerCallContext context)
         {
             var taskCompletionSource = new TaskCompletionSource<SubscribeEventsResponse>();
 
-            BalanceCollection.CollectionChanged += (sender, args) =>
-            {
-                try
-                {
-                    var update = (BalanceChange)args.NewItems[0];
-                    if (update.SessionId == request.Sessionid)
-                    {
-                        Task.Run(async () =>
-                        {
-                            await responseStream.WriteAsync(new SubscribeEventsResponse
-                            {
-                                Balance = new PublishBalanceEvent
-                                { Balance = update.Balance, Sessionid = update.SessionId, Time = Timestamp.FromDateTime(update.Time) }
-                            });
-                        }).Wait();
-                    }
-                }
-                catch
-                {
-                    taskCompletionSource.SetCanceled();
-                }
-            };
+            BalanceCollection.CollectionChanged += (_, args) => Handler(args, request, responseStream, taskCompletionSource);
 
-            OrderCollection.CollectionChanged += (sender, args) =>
-            {
-                try
-                {
-                    var update = (OrderChange)args.NewItems[0];
-                    if (update.SessionId == request.Sessionid)
-                    {
-                        Task.Run(async () =>
-                        {
-                            await responseStream.WriteAsync(new SubscribeEventsResponse
-                            {
-                                Order = new PublishOrderEvent
-                                {
-                                    ChangesType = update.ChangesType,
-                                    Order = update.Order,
-                                    Sessionid = update.SessionId,
-                                    Time = Timestamp.FromDateTime(update.Time),
-                                    Message = update.Message
-                                }
-                            });
-                        }).Wait();
-                    }
-                }
-                catch
-                {
-                    taskCompletionSource.SetCanceled();
-                }
-            };
+            OrderCollection.CollectionChanged += (_, args) => Handler(args, request, responseStream, taskCompletionSource);
 
             return await taskCompletionSource.Task;
         }

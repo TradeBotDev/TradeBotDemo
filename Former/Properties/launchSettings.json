@@ -1,13 +1,21 @@
-﻿{
+{
   "profiles": {
     "Former": {
       "commandName": "Project",
-      "dotnetRunMessages": "true",
-      "launchBrowser": false,
-      "applicationUrl": "https://localhost:5003",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+        "RETRY_DELAY": "10000",
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "HISTORY_CONNECTION_STRING": "http://localhost:5007",
+        "TRADEMARKET_CONNECTION_STRING": "http://localhost:5005"
+      },
+      "dotnetRunMessages": "true",
+      "applicationUrl": "http://localhost:5003"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "publishAllPorts": true,
+      "useSSL": true
     }
   }
 }

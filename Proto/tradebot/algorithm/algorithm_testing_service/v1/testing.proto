@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+option csharp_namespace = "TradeBot.Algorithm.AlgorithmTestingService.v1";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "tradebot/common/v1/common.proto";
+package tradebot.algorithm.algorithm_testing_service.v1;
+
+service TestingService{
+	//algo sends trend like this
+	rpc SendPurchasePrice (SendPurchasePriceRequest) returns (SendPurchasePriceResponse);
+}
+
+message SendPurchasePriceRequest
+{
+	double purchase_price = 1;
+}
+
+message SendPurchasePriceResponse
+{
+	google.protobuf.Empty empty = 1;
+}
+
+//this is how tester sends orders to algo
+message AddOrderRequest {
+	tradebot.common.v1.Order order = 1;
+}
+
+message AddOrderResponse {
+	google.protobuf.Empty empty = 1;
+}

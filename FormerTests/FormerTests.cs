@@ -31,7 +31,7 @@ namespace FormerTests
                 OrderUpdatePriceRange = 1
             };
 
-            TradeMarketClient.Configure("https://localhost:5005", 10000);
+            TradeMarketClient.Configure("http://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
             var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
@@ -62,7 +62,7 @@ namespace FormerTests
                 OrderUpdatePriceRange = 1
             };
 
-            TradeMarketClient.Configure("https://localhost:5005", 10000);
+            TradeMarketClient.Configure("http://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
             var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
@@ -91,7 +91,7 @@ namespace FormerTests
                 ContractValue = 100
             };
 
-            TradeMarketClient.Configure("https://localhost:5005", 10000);
+            TradeMarketClient.Configure("http://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
             var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
@@ -121,7 +121,7 @@ namespace FormerTests
                 ContractValue = 100
             };
 
-            TradeMarketClient.Configure("https://localhost:5005", 10000);
+            TradeMarketClient.Configure("http://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
             var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
@@ -157,7 +157,7 @@ namespace FormerTests
                 ContractValue = 100
             };
 
-            TradeMarketClient.Configure("https://localhost:5005", 10000);
+            TradeMarketClient.Configure("http://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
             var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
@@ -193,7 +193,7 @@ namespace FormerTests
                 ContractValue = 100
             };
 
-            TradeMarketClient.Configure("https://localhost:5005", 10000);
+            TradeMarketClient.Configure("http://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
             var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
@@ -229,7 +229,7 @@ namespace FormerTests
                 ContractValue = 100
             };
 
-            TradeMarketClient.Configure("https://localhost:5005", 10000);
+            TradeMarketClient.Configure("http://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
             var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
@@ -257,7 +257,7 @@ namespace FormerTests
                 ContractValue = 500
             };
 
-            TradeMarketClient.Configure("https://localhost:5005", 10000);
+            TradeMarketClient.Configure("http://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
             var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
@@ -293,7 +293,7 @@ namespace FormerTests
                 ContractValue = 100
             };
 
-            TradeMarketClient.Configure("https://localhost:5005", 10000);
+            TradeMarketClient.Configure("http://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
             var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
@@ -329,7 +329,7 @@ namespace FormerTests
                 ContractValue = 100
             };
 
-            TradeMarketClient.Configure("https://localhost:5005", 10000);
+            TradeMarketClient.Configure("http://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
             var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
@@ -365,7 +365,7 @@ namespace FormerTests
                 ContractValue = 100
             };
 
-            TradeMarketClient.Configure("https://localhost:5005", 10000);
+            TradeMarketClient.Configure("http://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
             var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
@@ -393,7 +393,7 @@ namespace FormerTests
                 ContractValue = 500
             };
 
-            TradeMarketClient.Configure("https://localhost:5005", 10000);
+            TradeMarketClient.Configure("http://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
             var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 

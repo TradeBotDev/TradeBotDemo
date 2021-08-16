@@ -7,20 +7,18 @@ using TradeBot.Common.v1;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using Grpc.Core;
+using Serilog;
 
 namespace Algorithm.DataManipulation
 {
     //DataCollector receives orders from the Relay service
     //it is basically a data storage to use instead of a DB 
-    //maybe TODO replace it w/ a DB 
     public class DataCollector
     {
         //all the orders coming from Relay
-        public static BlockingCollection<Order> Orders;
-        //metadata coming w/ orders (only needed to be relayed to Former for now)
-        public static Grpc.Core.Metadata metaData;
+        public BlockingCollection<Order> Orders;
 
-        public DataCollector(Publisher publisher)
+        public DataCollector(PointPublisher publisher)
         {
             Orders = new BlockingCollection<Order>();
             //if PointMaker had taken the orders and made a point we can clear the storage
@@ -33,6 +31,20 @@ namespace Algorithm.DataManipulation
                 {
                     Orders.Take();
                 }
+        }
+
+        public void AddNewOrder(Order order)
+        {
+            Orders.Add(order);
+            Log.Information("Order added to DC");
+        }
+
+        public void ClearAllData()
+        {
+            foreach (Order order in Orders)
+            {
+                Orders.Take();
+            }
         }
     }
 }
