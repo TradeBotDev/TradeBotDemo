@@ -1,0 +1,21 @@
+﻿@model Website.Models.AccountDataModel
+@using TradeBot.Account.AccountService.v1;
+@using Website.Components;
+
+@{
+    <!--Установка заголовков страницы.-->
+    ViewBag.Title = "Управление биржами";
+    ViewBag.SectionTitle = $"Управление биржами: {Model.Email}";
+
+    <!--Если пользователь не имеет лицензию или о ней нет информации, появляется сообщение о необходимости покупки лицензии.-->
+    if (ViewBag.HaveLicense == null || !ViewBag.HaveLicense) {
+        <p class="text_message">Вы должны обладать лицензией на продукт, чтобы иметь возможность добавлять новые биржи в аккаунт. <a href="/purchase/buy">Купить</a></p>
+    }
+    else {
+        <component type="typeof(ExchangeList)" render-mode="ServerPrerendered" param-AccountData="Model"/>
+        <!--Кнопка, перенаправляющая на форму добавления биржи-->
+        <form action="account/addexchangeaccess">
+            <input class="button color_button" type="submit" value="Добавить новую биржу" />
+        </form>
+    }
+}

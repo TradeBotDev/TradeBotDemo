@@ -22,8 +22,7 @@ namespace AccountTests.AccountServiceTests
             var loginRequest = new LoginRequest()
             {
                 Email = registerRequest.Email,
-                Password = "password",
-                SaveExchangesAfterLogout = false
+                Password = "password"
             };
             // Регистрация тестового аккаунта для того, чтобы потом в него можно было войти, а также
             // вход в аккаунт.
@@ -38,7 +37,7 @@ namespace AccountTests.AccountServiceTests
             }
 
             // Ожидается, что вход в аккаунт будет успешным.
-            Assert.Equal(ActionCode.Successful, reply.Result.Result);
+            Assert.Equal(AccountActionCode.Successful, reply.Result.Result);
         }
 
         // Тестирование входа в несуществующий аккаунт.
@@ -49,21 +48,17 @@ namespace AccountTests.AccountServiceTests
             var request = new LoginRequest()
             {
                 Email = $"login_to_non_existing_user@pochta.ru",
-                Password = "password",
-                SaveExchangesAfterLogout = false
+                Password = "password"
             };
             var reply = service.Login(request, null);
             //Ожидается, что аккаунт не будет найден.
-            Assert.Equal(ActionCode.AccountNotFound, reply.Result.Result);
+            Assert.Equal(AccountActionCode.IsNotFound, reply.Result.Result);
         }
 
         // Тестирование входа в уже вошедший аккаунт.
         [Fact]
         public void DoubleLogin()
         {
-            // Очистка списка вошедших аккаунтов для того, чтобы не было конфликтов.
-            State.loggedIn = new();
-
             var registerRequest = new RegisterRequest
             {
                 Email = $"double_login_user@pochta.test",
@@ -74,8 +69,7 @@ namespace AccountTests.AccountServiceTests
             var loginRequest = new LoginRequest()
             {
                 Email = registerRequest.Email,
-                Password = registerRequest.Password,
-                SaveExchangesAfterLogout = true
+                Password = registerRequest.Password
             };
 
             // Последовательная регистрация, вход в аккаунт и вход в тот же самый аккаунт (т.е. попытка входа
@@ -86,7 +80,7 @@ namespace AccountTests.AccountServiceTests
 
             // Ожидается, что в результате придет сообщение о том, что пользователь уже вошел, однако вход будет
             // считаться успешным и выдастся уже существующий id сессии.
-            Assert.Equal(ActionCode.Successful, reply.Result.Result.Result);
+            Assert.Equal(AccountActionCode.Successful, reply.Result.Result.Result);
         }
     }
 }

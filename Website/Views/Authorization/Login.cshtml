@@ -1,0 +1,14 @@
+﻿@model Website.Models.Authorization.LoginModel
+<!--Установка заголовка страницы-->
+@{ ViewBag.Title = "Вход"; }
+
+<!--Форма входа в аккаунт-->
+<form class="form" method="post">
+    <h3>Вход в аккаунт</h3>
+    <div class="form_errors_list" asp-validation-summary="All"></div>
+    <p>Email</p>
+    <input class="form_input" asp-for="@Model.Email" type="email" />
+    <p>Пароль:</p>
+    <input class="form_input" asp-for="@Model.Password" type="password" />
+    <input class="button form_button" type="submit" value="Войти" />
+</form>

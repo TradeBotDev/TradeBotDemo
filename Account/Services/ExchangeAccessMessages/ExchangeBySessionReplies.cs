@@ -5,40 +5,53 @@ namespace AccountGRPC.AccountMessages
 {
     public static class ExchangeBySessionReplies
     {
-        public static ExchangeBySessionReply AccountNotFound()
+        public static ExchangeBySessionResponse AccountNotFound()
         {
             const string Message = "Произошла ошибка: пользователь не найден.";
             Log.Information(Message);
 
-            return new ExchangeBySessionReply
+            return new ExchangeBySessionResponse
             {
-                Result = ActionCode.AccountNotFound,
+                Result = ExchangeAccessActionCode.AccountNotFound,
                 Message = Message,
                 Exchange = null
             };
         }
 
-        public static ExchangeBySessionReply ExchangeNotFound()
+        public static ExchangeBySessionResponse TimePassed()
+        {
+            const string Message = "Произошла ошибка: время сессии вышло.";
+            Log.Information(Message);
+
+            return new ExchangeBySessionResponse
+            {
+                Result = ExchangeAccessActionCode.AccountNotFound,
+                Message = Message,
+                Exchange = null
+            };
+        }
+
+        public static ExchangeBySessionResponse ExchangeNotFound()
         {
             const string Message = "Произошла ошибка: биржа не найдена.";
             Log.Information(Message);
 
-            return new ExchangeBySessionReply
+            return new ExchangeBySessionResponse
             {
-                Result = ActionCode.ExchangeNotFound,
+                Result = ExchangeAccessActionCode.IsNotFound,
                 Message = Message,
                 Exchange = null
             };
         }
 
-        public static ExchangeBySessionReply SuccessfulGettingExchangeAccess(Models.ExchangeAccess exchangeAccess)
+        public static ExchangeBySessionResponse SuccessfulGettingExchangeAccess(Models.ExchangeAccess exchangeAccess)
         {
             const string Message = "Успешное получение информации о доступе пользователя бирже.";
             Log.Information(Message);
 
-            return new ExchangeBySessionReply
+            return new ExchangeBySessionResponse
             {
-                Result = ActionCode.Successful,
+                Result = ExchangeAccessActionCode.Successful,
                 Message = Message,
                 Exchange = new ExchangeAccessInfo
                 {

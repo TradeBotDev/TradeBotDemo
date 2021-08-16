@@ -1,0 +1,13 @@
+﻿@{
+    @model String
+    <!--Установка заголовков страницы-->
+    ViewBag.Title = "Произошла ошибка";
+    ViewBag.SectionTitle = "Произошла ошибка";
+    <!--Вывод сообщения об ошибке-->
+    @Model
+}
+
+<!--Кнопка возврата на главную страницу-->
+<form action="/" method="post">
+    <input class="button color_button" type="submit" value="На главную страницу" />
+</form>

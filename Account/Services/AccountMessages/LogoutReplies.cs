@@ -5,26 +5,26 @@ namespace AccountGRPC.AccountMessages
 {
     public static class LogoutReplies
     {
-        public static LogoutReply SuccessfulLogout()
+        public static LogoutResponse SuccessfulLogout()
         {
             const string Message = "Произведен выход из аккаунта.";
             Log.Information(Message);
 
-            return new LogoutReply
+            return new LogoutResponse
             {
-                Result = ActionCode.Successful,
+                Result = AccountActionCode.Successful,
                 Message = Message
             };
         }
 
-        public static LogoutReply AccountNotFound()
+        public static LogoutResponse AccountNotFound()
         {
             const string Message = "Ошибка при выходе из аккаунта: вы уже вышли из аккаунта";
             Log.Information(Message);
 
-            return new LogoutReply
+            return new LogoutResponse
             {
-                Result = ActionCode.AccountNotFound,
+                Result = AccountActionCode.IsNotFound,
                 Message = Message
             };
         }

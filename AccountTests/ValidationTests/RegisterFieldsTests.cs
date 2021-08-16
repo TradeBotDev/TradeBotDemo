@@ -7,12 +7,25 @@ namespace AccountTests.ValidationTests
     [Collection("AccountTests")]
     public class RegisterFieldsTests
     {
+        // Тест проверки на успешный исход валидации при правильно введенных полях.
+        [Fact]
+        public void CorrectRegisterFieldsTest()
+        {
+            var reply = Validate.RegisterFields(new RegisterRequest
+            {
+                Email = "pochta@mail.test",
+                Password = "password",
+                VerifyPassword = "password"
+            });
+
+            Assert.True(reply.Successful);
+        }
+
         // Тест проверки на то, какой результат вернет валидация, если есть пустые поля.
         [Theory]
-        [InlineData("text", "password", "password", false)]
-        [InlineData("text", "", "password", true)]
-        [InlineData("", "", "", true)]
-        public void EmptyRegisterFieldsTest(string email, string password, string verifyPassword, bool isEmpty)
+        [InlineData("pochta@mail.test", "", "password")]
+        [InlineData("", "", "")]
+        public void EmptyRegisterFieldsTest(string email, string password, string verifyPassword)
         {
             // Валидация сразу же формируемого запроса.
             var reply = Validate.RegisterFields(new RegisterRequest {
@@ -20,15 +33,14 @@ namespace AccountTests.ValidationTests
                 Password = password,
                 VerifyPassword = verifyPassword
             });
-            // Если указано, что входные параметры являются пустыми, ожидается, что результатом валидации будет EmptyField.
-            if (isEmpty) Assert.Equal(ActionCode.EmptyField, reply.Code);
-            // Иначе ожидается, что результатом валидации будет любой другой ответ кроме EmptyField.
-            else Assert.NotEqual(ActionCode.EmptyField, reply.Code);
+
+            // Ожидается, что результатом валидации будет false.
+            Assert.False(reply.Successful);
         }
 
         // Тест проверки на то, являются ли введенные данные в поле Email электронной почтой.
         [Theory]
-        [InlineData("pochta@mail.ru", true)]
+        [InlineData("pochta@mail.test", true)]
         [InlineData("a@a.a", true)]
         [InlineData("text", false)]
         public void NotEmailInRegisterTest(string email, bool isEmail)
@@ -41,9 +53,9 @@ namespace AccountTests.ValidationTests
             );
             // В случае, если указано, что это именно электронная почта, ожидается, что результатом валидации
             // не будет IsNotEmail (не электронная почта).
-            if (isEmail) Assert.NotEqual(ActionCode.IsNotEmail, reply.Code);
+            if (isEmail) Assert.True(reply.Successful);
             // В ином случае ожидается ответ, что данные не являются электронной почтой.
-            else Assert.Equal(ActionCode.IsNotEmail, reply.Code);
+            else Assert.False(reply.Successful);
         }
 
         // Тест проверки на то, совпадают ли введенные пароли в запросе.
@@ -60,9 +72,9 @@ namespace AccountTests.ValidationTests
             );
             // В случае, если пароли совпадают, ожидается любой ответ, кроме PasswordMismatch (пароли не совпадают).
             if (password == verifyPassword)
-                Assert.NotEqual(ActionCode.PasswordMismatch, reply.Code);
+                Assert.True(reply.Successful);
             // В ином случае ожидается ответ PasswordMismatch (пароли не совпадают).
-            else Assert.Equal(ActionCode.PasswordMismatch, reply.Code);
+            else Assert.False(reply.Successful);
         }
     }
 }

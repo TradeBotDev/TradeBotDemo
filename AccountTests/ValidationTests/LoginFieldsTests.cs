@@ -7,6 +7,15 @@ namespace AccountTests.ValidationTests
     [Collection("AccountTests")]
     public class LoginFieldsTests
     {
+        // Тест проверки на успешный исход валидации при правильно введенных полях.
+        [Fact]
+        public void CorrectLoginFieldsTest()
+        {
+            var reply = Validate.LoginFields(new LoginRequest { Email = "pochta@mail.test", Password = "password" });
+            // Ожидается, что ответом будет true.
+            Assert.True(reply.Successful);
+        }
+
         // Тест проверки на то, какой результат вернет валидация, если есть пустые поля.
         [Theory]
         [InlineData("", "")]
@@ -16,8 +25,8 @@ namespace AccountTests.ValidationTests
         {
             // Валидация сразу же формируемого запроса.
             var reply = Validate.LoginFields(new LoginRequest { Email = email, Password = password } );
-            // Ожидается, что Code будет равен EmptyField.
-            Assert.Equal(ActionCode.EmptyField, reply.Code);
+            // Ожидается, что ответом будет false.
+            Assert.False(reply.Successful);
         }
 
         // Тест проверки на то, являются ли введенные данные в поле Email электронной почтой.
@@ -29,11 +38,13 @@ namespace AccountTests.ValidationTests
         {
             // Валидация сразу же формируемого запроса.
             var reply = Validate.LoginFields(new LoginRequest { Email = email, Password = "password"} );
+
             // В случае, если указано, что это именно электронная почта, ожидается, что результатом валидации
-            // не будет IsNotEmail (не электронная почта).
-            if (isEmail) Assert.NotEqual(ActionCode.IsNotEmail, reply.Code);
+            // не будет false (не электронная почта).
+            if (isEmail) Assert.True(reply.Successful);
+
             // В ином случае ожидается ответ, что данные не являются электронной почтой.
-            else Assert.Equal(ActionCode.IsNotEmail, reply.Code);
+            else Assert.False(reply.Successful);
         }
     }
 }

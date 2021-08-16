@@ -12,8 +12,6 @@ namespace AccountTests.ExchangeAccessServiceTests
         [Fact]
         public void AddExchangeToExistingAccountTest()
         {
-            // Очистка списка вошедших аккаунтов для того, чтобы не было конфликтов.
-            State.loggedIn = new();
             string sessionId = "none";
 
             // Локальный метод, который сгенерирует запрос с Id сессии, полученным при входе, а также
@@ -23,11 +21,11 @@ namespace AccountTests.ExchangeAccessServiceTests
                 sessionId = _sessionId;
                 return new AddExchangeAccessRequest
                 {
-                    Code = ExchangeCode.Bitmex,
+                    SessionId = _sessionId,
+                    Code = ExchangeAccessCode.Bitmex,
                     ExchangeName = "Bitmex",
-                    Secret = "test_secret",
                     Token = "test_token",
-                    SessionId = _sessionId
+                    Secret = "test_secret"
                 };
             }
 
@@ -35,11 +33,11 @@ namespace AccountTests.ExchangeAccessServiceTests
             {
                 // Генерация нового пользователя и вход в него.
                 var reply = GenerateLogin("ex_to_acc")
-                .ContinueWith(loginReply => exchangeAccessService.AddExchangeAccess(
-                    GenerateRequest(loginReply.Result.Result.SessionId), null));
+                    .ContinueWith(loginReply => exchangeAccessService.AddExchangeAccess(
+                        GenerateRequest(loginReply.Result.Result.SessionId), null));
 
                 // Ожидается, что добавление новой информации о доступе к бирже будет успешно завершено.
-                Assert.Equal(ActionCode.Successful, reply.Result.Result.Result);
+                Assert.Equal(ExchangeAccessActionCode.Successful, reply.Result.Result.Result);
 
                 // Очистка данных.
                 var accounts = database.Accounts.Where(account => account.Email == "ex_to_acc_generated_user@pochta.ru").First();
@@ -57,7 +55,7 @@ namespace AccountTests.ExchangeAccessServiceTests
             // Запрос с заведомо несуществующим Id сессии.
             var request = new AddExchangeAccessRequest
             {
-                Code = ExchangeCode.Bitmex,
+                Code = ExchangeAccessCode.Bitmex,
                 ExchangeName = "Bitmex",
                 Secret = "test_secret",
                 Token = "test_token",
@@ -66,7 +64,7 @@ namespace AccountTests.ExchangeAccessServiceTests
             var reply = exchangeAccessService.AddExchangeAccess(request, null);
 
             // Ожидается, что появится сообщение об ошибке, что аккаунт не был найденен.
-            Assert.Equal(ActionCode.AccountNotFound, reply.Result.Result);
+            Assert.Equal(ExchangeAccessActionCode.AccountNotFound, reply.Result.Result);
         }
     }
 }

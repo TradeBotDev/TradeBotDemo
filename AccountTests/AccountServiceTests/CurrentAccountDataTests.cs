@@ -11,9 +11,6 @@ namespace AccountTests.AccountServiceTests
         [Fact]
         public void DataFromExistingAccount()
         {
-            // Очистка списка вошедших аккаунтов для того, чтобы не было конфликтов.
-            State.loggedIn = new();
-
             var registerRequest = new RegisterRequest
             {
                 Email = $"existing_user@pochta.test",
@@ -25,17 +22,16 @@ namespace AccountTests.AccountServiceTests
             {
                 Email = registerRequest.Email,
                 Password = registerRequest.Password,
-                SaveExchangesAfterLogout = false
             };
 
             // Последовательная регистрация аккаунта, вход и получение его данных.
             var reply = service.Register(registerRequest, null)
             .ContinueWith(login => service.Login(loginRequest, null))
-            .ContinueWith(login => service.CurrentAccountData(
-                new SessionRequest { SessionId = login.Result.Result.SessionId }, null));
+            .ContinueWith(login => service.AccountData(
+                new AccountDataRequest { SessionId = login.Result.Result.SessionId }, null));
 
             // Ожидается, что получение данных аккаунта будет успешно завершено.
-            Assert.Equal(ActionCode.Successful, reply.Result.Result.Result);
+            Assert.Equal(AccountActionCode.Successful, reply.Result.Result.Result);
         }
 
         // Тестирование получения данных из несуществующего аккаунта.
@@ -43,11 +39,11 @@ namespace AccountTests.AccountServiceTests
         public void DataFromNonExistingAccount()
         {
             // Намеренное отправление несуществующего id сессии в метод CurrentAccountData.
-            var request = new SessionRequest { SessionId = "non_existing_session_id" };
-            var reply = service.CurrentAccountData(request, null);
+            var request = new AccountDataRequest { SessionId = "non_existing_session_id" };
+            var reply = service.AccountData(request, null);
 
             // Ожидается, что в качествет ответа придет сообщение о том, что аккаунт не был найден.
-            Assert.Equal(ActionCode.AccountNotFound, reply.Result.Result);
+            Assert.Equal(AccountActionCode.IsNotFound, reply.Result.Result);
         }
     }
 }

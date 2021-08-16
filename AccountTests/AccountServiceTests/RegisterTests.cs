@@ -27,7 +27,7 @@ namespace AccountTests.AccountServiceTests
             }
 
             // Ожидается, что регистрация будет завершена успешно.
-            Assert.Equal(ActionCode.Successful, reply.Result.Result);
+            Assert.Equal(AccountActionCode.Successful, reply.Result.Result);
         }
         
         // Тестирование на работу попытки регистрации существующего аккаунта.
@@ -52,7 +52,7 @@ namespace AccountTests.AccountServiceTests
             }
 
             // Ожидается, что придет сообщение о том, что такой аккаунт уже зарегистрирован.
-            Assert.Equal(ActionCode.AccountExists, reply.Result.Result);
+            Assert.Equal(AccountActionCode.IsExists, reply.Result.Result);
         }
     }
 }
