@@ -3,17 +3,16 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using TradeBot.Common.v1;
 using TradeBot.Facade.FacadeService.v1;
 using ZedGraph;
+using System.Web;
 
 namespace UI
 {
@@ -591,15 +590,23 @@ namespace UI
 
         private void LinkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
+            var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "http://23.88.34.174:5008/" };
+            Process.Start(parameter);
             LinkLabel1.LinkVisited = true;
-            System.Diagnostics.Process.Start("http://www.microsoft.com");
         }
 
         private void LinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            LinkLabel.LinkVisited = true;
-            var sInfo = new ProcessStartInfo("https://www.google.com");
-            Process.Start(sInfo);
+            var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "http://23.88.34.174:5008/" };
+            Process.Start(parameter);
+            LinkLabel1.LinkVisited = true;
+        }
+
+        private void linkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "https://testnet.bitmex.com/app/trade/XBTUSD" };
+            Process.Start(parameter);
+            LinkLabel1.LinkVisited = true;
         }
     }
 }

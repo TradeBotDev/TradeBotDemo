@@ -30,13 +30,13 @@ namespace UI
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle29 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle30 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle31 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle34 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle35 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle32 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle33 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             this.zedGraph = new ZedGraph.ZedGraphControl();
             this.zedGraph_1 = new ZedGraph.ZedGraphControl();
             this.Tabs = new System.Windows.Forms.TabControl();
@@ -123,6 +123,8 @@ namespace UI
             this.ErrorProvider = new System.Windows.Forms.ErrorProvider(this.components);
             this.LeftPanel = new System.Windows.Forms.Panel();
             this.RightPanel = new System.Windows.Forms.Panel();
+            this.linkLabel2 = new System.Windows.Forms.LinkLabel();
+            this.label10 = new System.Windows.Forms.Label();
             this.Tabs.SuspendLayout();
             this.LogsPage.SuspendLayout();
             this.GraphicsPage.SuspendLayout();
@@ -305,11 +307,11 @@ namespace UI
             this.FilledOrdersDataGridView.ReadOnly = true;
             this.FilledOrdersDataGridView.RowHeadersVisible = false;
             this.FilledOrdersDataGridView.RowHeadersWidth = 51;
-            dataGridViewCellStyle29.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle29.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle29.SelectionBackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle29.SelectionForeColor = System.Drawing.SystemColors.WindowText;
-            this.FilledOrdersDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle29;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.WindowText;
+            this.FilledOrdersDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle1;
             this.FilledOrdersDataGridView.RowTemplate.Height = 29;
             this.FilledOrdersDataGridView.Size = new System.Drawing.Size(1060, 450);
             this.FilledOrdersDataGridView.TabIndex = 0;
@@ -396,11 +398,11 @@ namespace UI
             this.ActiveOrdersDataGridView.ReadOnly = true;
             this.ActiveOrdersDataGridView.RowHeadersVisible = false;
             this.ActiveOrdersDataGridView.RowHeadersWidth = 51;
-            dataGridViewCellStyle30.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle30.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle30.SelectionBackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle30.SelectionForeColor = System.Drawing.SystemColors.WindowText;
-            this.ActiveOrdersDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle30;
+            dataGridViewCellStyle2.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.WindowText;
+            this.ActiveOrdersDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle2;
             this.ActiveOrdersDataGridView.RowTemplate.Height = 29;
             this.ActiveOrdersDataGridView.Size = new System.Drawing.Size(1059, 453);
             this.ActiveOrdersDataGridView.TabIndex = 1;
@@ -825,26 +827,26 @@ namespace UI
             this.ActiveSlotsDataGridView.AllowUserToResizeRows = false;
             this.ActiveSlotsDataGridView.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.ActiveSlotsDataGridView.BackgroundColor = System.Drawing.Color.White;
-            dataGridViewCellStyle31.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle31.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle31.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            dataGridViewCellStyle31.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle31.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle31.SelectionForeColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle31.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.ActiveSlotsDataGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle31;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.ActiveSlotsDataGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
             this.ActiveSlotsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.ActiveSlotsDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Slot,
             this.Launch});
-            dataGridViewCellStyle34.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle34.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle34.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            dataGridViewCellStyle34.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle34.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle34.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle34.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.ActiveSlotsDataGridView.DefaultCellStyle = dataGridViewCellStyle34;
+            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle6.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.ActiveSlotsDataGridView.DefaultCellStyle = dataGridViewCellStyle6;
             this.ActiveSlotsDataGridView.GridColor = System.Drawing.SystemColors.Control;
             this.ActiveSlotsDataGridView.Location = new System.Drawing.Point(537, 12);
             this.ActiveSlotsDataGridView.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -852,11 +854,11 @@ namespace UI
             this.ActiveSlotsDataGridView.ReadOnly = true;
             this.ActiveSlotsDataGridView.RowHeadersVisible = false;
             this.ActiveSlotsDataGridView.RowHeadersWidth = 51;
-            dataGridViewCellStyle35.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle35.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle35.SelectionBackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle35.SelectionForeColor = System.Drawing.SystemColors.WindowText;
-            this.ActiveSlotsDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle35;
+            dataGridViewCellStyle7.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle7.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle7.SelectionBackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.WindowText;
+            this.ActiveSlotsDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle7;
             this.ActiveSlotsDataGridView.RowTemplate.Height = 29;
             this.ActiveSlotsDataGridView.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.ActiveSlotsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
@@ -865,12 +867,12 @@ namespace UI
             // 
             // Slot
             // 
-            dataGridViewCellStyle32.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle32.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle32.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle32.SelectionBackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle32.SelectionForeColor = System.Drawing.SystemColors.WindowText;
-            this.Slot.DefaultCellStyle = dataGridViewCellStyle32;
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle4.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.WindowText;
+            this.Slot.DefaultCellStyle = dataGridViewCellStyle4;
             this.Slot.HeaderText = "Slot name";
             this.Slot.MinimumWidth = 6;
             this.Slot.Name = "Slot";
@@ -881,13 +883,13 @@ namespace UI
             // 
             // Launch
             // 
-            dataGridViewCellStyle33.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle33.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle33.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle33.NullValue = false;
-            dataGridViewCellStyle33.SelectionBackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle33.SelectionForeColor = System.Drawing.SystemColors.WindowText;
-            this.Launch.DefaultCellStyle = dataGridViewCellStyle33;
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle5.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle5.NullValue = false;
+            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.WindowText;
+            this.Launch.DefaultCellStyle = dataGridViewCellStyle5;
             this.Launch.HeaderText = "Launch";
             this.Launch.MinimumWidth = 6;
             this.Launch.Name = "Launch";
@@ -1059,6 +1061,8 @@ namespace UI
             // 
             // panel4
             // 
+            this.panel4.Controls.Add(this.label10);
+            this.panel4.Controls.Add(this.linkLabel2);
             this.panel4.Controls.Add(this.label2);
             this.panel4.Controls.Add(this.LinkLabel);
             this.panel4.Controls.Add(this.RegistrationButton);
@@ -1087,7 +1091,7 @@ namespace UI
             // LinkLabel
             // 
             this.LinkLabel.AutoSize = true;
-            this.LinkLabel.Location = new System.Drawing.Point(264, 261);
+            this.LinkLabel.Location = new System.Drawing.Point(266, 261);
             this.LinkLabel.Name = "LinkLabel";
             this.LinkLabel.Size = new System.Drawing.Size(73, 20);
             this.LinkLabel.TabIndex = 27;
@@ -1254,6 +1258,26 @@ namespace UI
             this.RightPanel.Size = new System.Drawing.Size(150, 367);
             this.RightPanel.TabIndex = 28;
             // 
+            // linkLabel2
+            // 
+            this.linkLabel2.AutoSize = true;
+            this.linkLabel2.Location = new System.Drawing.Point(366, 261);
+            this.linkLabel2.Name = "linkLabel2";
+            this.linkLabel2.Size = new System.Drawing.Size(58, 20);
+            this.linkLabel2.TabIndex = 29;
+            this.linkLabel2.TabStop = true;
+            this.linkLabel2.Text = "BitMEX";
+            this.linkLabel2.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel2_LinkClicked);
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(364, 237);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(121, 20);
+            this.label10.TabIndex = 30;
+            this.label10.Text = "Bitmex address:";
+            // 
             // TradeBotUi
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -1387,6 +1411,8 @@ namespace UI
         private System.Windows.Forms.LinkLabel LinkLabel;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.LinkLabel LinkLabel1;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.LinkLabel linkLabel2;
     }
 }
 
