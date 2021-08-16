@@ -27,10 +27,10 @@ namespace TradeMarket.DataTransfering.Bitmex.Rest.Responses
 
         }
 
-        public static BitmexResfulResponse<MessageType> Create(HttpResponseMessage response)
+        public async static Task<BitmexResfulResponse<MessageType>> Create(HttpResponseMessage response)
         {
             var result = new BitmexResfulResponse<MessageType>();
-            result._ReadContent(response.Content);
+            await result._ReadContent(response.Content);
             result._TryParse();
             result.Code = response.StatusCode;
             return result;
@@ -39,13 +39,13 @@ namespace TradeMarket.DataTransfering.Bitmex.Rest.Responses
 
         private void _TryParse()
         {
+            var serializerSettings = new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            };
             if (IsResponseError())
             {
-                Error = JsonConvert.DeserializeObject<BitmexResfulResponse<MessageType>>(_responseContent,
-                    new JsonSerializerSettings
-                    {
-                        NullValueHandling = NullValueHandling.Ignore
-                    }).Error;
+                Error = JsonConvert.DeserializeObject<BitmexResfulResponse<MessageType>>(_responseContent,serializerSettings).Error;
                 return;
             }
             //HTML прилетает только если превышен тикрейт
@@ -57,24 +57,36 @@ namespace TradeMarket.DataTransfering.Bitmex.Rest.Responses
                 };
                 return;
             }
-            Message = JsonConvert.DeserializeObject<MessageType>(_responseContent, new JsonSerializerSettings
-            {
-                NullValueHandling = NullValueHandling.Ignore
-            });
+            Message = JsonConvert.DeserializeObject<MessageType>(_responseContent,serializerSettings);
 
         }
 
         private bool IsResponseError()
         {
-            return _responseContent.Contains("\"error\"");
+            return ContainsProperty(_responseContent,"error");
+        }
+
+        /// <summary>
+        /// Проверяет содержится ли <paramref name="value"/> в <paramref name="response"/>. Если <paramref name="value"/> пусто или null то оно содержится 
+        /// </summary>
+        private static bool ContainsValue(string response,string value)
+        {
+            return string.IsNullOrEmpty(value) || response.Contains($"\"{value}\"");
+        }
+
+        /// <summary>
+        /// Проверяет содержится ли <paramref name="property"/> в <paramref name="response"/>. Если <paramref name="value"/> пусто или null то оно содержится 
+        private static bool ContainsProperty(string response,string property)
+        {
+            return string.IsNullOrEmpty(property) || response.Contains($"\"{property}\":");
         }
 
         private bool IsResponseHTML()
         {
-            return _responseContent.Contains("<HTML>");
+            return ContainsValue(_responseContent,"<HTML>");
         }
 
-        private async void _ReadContent(HttpContent content)
+        private async Task _ReadContent(HttpContent content)
         {
             _responseContent = await content.ReadAsStringAsync();
         }

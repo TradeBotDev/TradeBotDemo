@@ -35,6 +35,8 @@ namespace TradeMarket.Model.UserContexts
             await TradeMarket.UnSubscribeFromInstruments(handler);
         }
 
+        public CommonContext(IContext context) : base(context) { }
+
         public CommonContext() : base() { }
 
         public CommonContext(TradeMarket.Model.TradeMarkets.TradeMarket tradeMarket,string slotName) 
@@ -42,6 +44,8 @@ namespace TradeMarket.Model.UserContexts
         {
             TradeMarket = tradeMarket;
         }
+
+
 
         
     }

@@ -30,16 +30,6 @@ namespace TradeMarket.Model.UserContexts
 
         public Model.TradeMarkets.TradeMarket TradeMarket { get; set; }
 
-        //Я ушел от ивентов потому что с ними невозможно передать токен отмены
-        //пока закометировал чтобы лишний раз не переписывать
-        /* 
-        public event EventHandler<IPublisher<BookLevel>.ChangedEventArgs> Book;
-        public event EventHandler<IPublisher<Order>.ChangedEventArgs> UserOrders;
-        public event EventHandler<IPublisher<Wallet>.ChangedEventArgs> UserBalance;
-        public event EventHandler<IPublisher<Margin>.ChangedEventArgs> UserMargin;
-        public event EventHandler<IPublisher<Position>.ChangedEventArgs> UserPosition;
-        */
-
         public async Task SubscribeToUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, CancellationToken token)
         {
             await TradeMarket.SubscribeToUserPositions(handler, this, token);
@@ -79,14 +69,16 @@ namespace TradeMarket.Model.UserContexts
         //Клиенты для доступа к личной информации пользователя на бирже
         internal BitmexWebsocketClient WSClient { get; set; }
 
+        public UserContext(IContext context): base(context)
+        {
+
+        }
+
         public UserContext():base()
         {
 
         }
 
-        /// <summary>
-        /// После создание нового объекта необходима инициализация некоторых полей и ивентов через метод init()
-        /// </summary>
         internal UserContext(string sessionId, string slotName, Model.TradeMarkets.TradeMarket tradeMarket) 
             : base(new ContextSignature(slotName,tradeMarket.Name,sessionId))
         {
@@ -115,7 +107,7 @@ namespace TradeMarket.Model.UserContexts
 
         #endregion
 
-        
+
     }
 }
 

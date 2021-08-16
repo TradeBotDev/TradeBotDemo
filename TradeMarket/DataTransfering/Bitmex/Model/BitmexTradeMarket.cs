@@ -171,16 +171,19 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
 
         public async override Task<bool> AutheticateUser(UserContext context, CancellationToken token)
         {
-            bool answer = false;
-            EventHandler<IPublisher<bool>.ChangedEventArgs> handler = (sender, args) => { answer = args.Changed; };
+            var complition = new TaskCompletionSource<bool>();
+            EventHandler<IPublisher<bool>.ChangedEventArgs> handler = (sender, args) => complition.SetResult(args.Changed);
+            
             if (AuthenticationPublisher.ContainsKey(context) == false)
             {
                 AuthenticationPublisher[context] = await CreatePublisher(context.WSClient,handler, context, token, PublisherFactory.CreateAuthenticationPublisher);
+                AuthenticationPublisher[context].Changed += handler;
             }
-            //TODO нужно ожидать пока придет ответ от биржи
-
             await AuthenticationPublisher[context].Start();
-            return answer;
+
+            bool result = await complition.Task;
+            AuthenticationPublisher[context].Changed -= handler;
+            return result;
         }
         
     }

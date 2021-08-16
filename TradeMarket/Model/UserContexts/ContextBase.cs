@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TradeMarket.Model.UserContexts
 {
-    public abstract class ContextBase : IContext
+    public class ContextBase : IContext
     {
         public ContextSignature Signature { get; set; }
 
@@ -14,6 +14,14 @@ namespace TradeMarket.Model.UserContexts
 
         public string Secret { get; set; } = null;
 
+        public ContextBase(IContext other)
+        {
+            Signature.SessionId = other.Signature.SessionId;
+            Signature.SlotName = other.Signature.SlotName;
+            Signature.TradeMarketName = other.Signature.TradeMarketName;
+            Key = other.Key;
+            Secret = other.Secret;
+        }
 
         public ContextBase()
         {

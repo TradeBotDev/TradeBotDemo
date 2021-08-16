@@ -5,43 +5,27 @@ using System.Threading.Tasks;
 
 namespace TradeMarket.Model.UserContexts.Builders
 {
-    public class CommonContextBuilder
+    public class CommonContextBuilder 
     {
-        protected CommonContext context;
-
+        private CommonContext Context;
         public CommonContext Result
         {
             get
             {
-                CommonContext result = context;
-                Reset();
+                CommonContext result = Context;
                 return result;
             }
         }
 
-        public CommonContextBuilder()
-        {
-            context = new CommonContext();
-        }
-
-        public CommonContextBuilder AddUniqueInformation(string slotName)
-        {
-            context.Signature.SessionId = null;
-            context.Signature.SlotName = slotName;
-            return this;
+        public CommonContextBuilder(ContextBuilder builder){
+            Context = new CommonContext(builder.Context);
         }
 
         public CommonContextBuilder AddTradeMarket(TradeMarkets.TradeMarket tradeMarket)
         {
-            context.TradeMarket = tradeMarket;
-            context.Signature.TradeMarketName = tradeMarket.Name;
+            Context.TradeMarket = tradeMarket;
+            Context.Signature.TradeMarketName = tradeMarket.Name;
             return this;
-        }
-
-
-        public void Reset()
-        {
-            context = new CommonContext();
         }
     }
 }

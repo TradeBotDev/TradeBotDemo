@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using TradeMarket.DataTransfering.Bitmex.Rest.Client;
 using TradeMarket.Model.TradeMarkets;
@@ -9,61 +10,54 @@ namespace TradeMarket.Model.UserContexts.Builders
 {
     public class UserContextBuilder
     {
-        protected UserContext context;
-
+        private UserContext Context;
         public UserContext Result
         {
             get
             {
-                UserContext result = context;
+                UserContext result = Context;
                 Reset();
                 return result;
             }
         }
 
-        public UserContextBuilder()
+        public UserContextBuilder(ContextBuilder builder)
         {
-            context = new UserContext();
-        }
-
-        public UserContextBuilder AddUniqueInformation(string sessionId,string slotName)
-        {
-            context.Signature.SessionId = sessionId;
-            context.Signature.SlotName = slotName;
-            return this;
+            Context = new UserContext(builder.Context);
         }
 
         public UserContextBuilder AddTradeMarket(TradeMarkets.TradeMarket tradeMarket)
         {
-            context.TradeMarket = tradeMarket;
-            context.Signature.TradeMarketName = tradeMarket.Name;
+            Context.TradeMarket = tradeMarket;
+            Context.Signature.TradeMarketName = tradeMarket.Name;
             return this;
         }
 
         public UserContextBuilder AddKeySecret(string key,string secret)
         {
-            context.Key = key;
-            context.Secret = secret;
+            Context.Key = key;
+            Context.Secret = secret;
             return this;
         }
 
         public UserContextBuilder AddWebSocketClient(BitmexWebsocketClient wsClient)
         {
-            context.WSClient = wsClient;
+            Context.WSClient = wsClient;
             return this;
         }
 
-        public UserContextBuilder InitUser()
+        public async Task<UserContext> InitUser(CancellationToken token)
         {
-            //TODO тут явно что-то не так ...
-            context.AutheticateUser(new System.Threading.CancellationToken());
-            return this;
+            if(await Context.AutheticateUser(token) == false)
+            {
+                throw new WrongKeySecretException($"{Context.Signature.SessionId} contains not real key secret");
+            }
+            return Result;
         }
-
 
         public void Reset()
         {
-            context = new UserContext();
+            Context = new UserContext();
         }
     }
 }

@@ -17,6 +17,18 @@ namespace TradeMarket.Services
     public static class ConvertService
     {
         #region Service to Responses Converters
+
+        public static TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceResponse ConvertBalance(Wallet wallet, BitmexAction action)
+        {
+            return new()
+            {
+                Response = new()
+                {
+                    Balance = ConvertBalanceFromWallet(wallet)
+                }
+            };
+        }
+
         public static TradeBot.TradeMarket.TradeMarketService.v1.SubscribeMarginResponse ConvertMargin(Margin margin,BitmexAction action)
         {
             return new()
@@ -162,7 +174,7 @@ namespace TradeMarket.Services
             return TradeBot.Common.v1.OrderStatus.Unspecified;
         }
 
-        public static TradeBot.Common.v1.Balance ConvertBalance(Wallet wallet)
+        public static TradeBot.Common.v1.Balance ConvertBalanceFromWallet(Wallet wallet)
         {
             return new()
             {

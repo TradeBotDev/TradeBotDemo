@@ -21,7 +21,6 @@ namespace TradeMarket.Model.TradeMarkets
 
         public ITradeMarketBuilder AddConnectionMultiplexer(IConnectionMultiplexer multiplexer);
 
-
         public void Reset();
 
         public TradeMarket Result { get; }

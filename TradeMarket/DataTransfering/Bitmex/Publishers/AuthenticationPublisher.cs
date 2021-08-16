@@ -20,14 +20,17 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
            });
         };
 
+
+
         private IObservable<AuthenticationResponse> _stream;
         private readonly string _apiKey;
         private readonly string _apiSecret;
         private readonly CancellationToken _token;
 
-        public AuthenticationPublisher(BitmexWebsocketClient client, IObservable<AuthenticationResponse> orderStream, string apiKey, string apiSecret, CancellationToken token) : base(client, _action)
+        public AuthenticationPublisher(BitmexWebsocketClient client, IObservable<AuthenticationResponse> stream, string apiKey, string apiSecret, CancellationToken token) 
+            : base(client, _action)
         {
-            _stream = orderStream;
+            _stream = stream;
             this._apiKey = apiKey;
             this._apiSecret = apiSecret;
             this._token = token;

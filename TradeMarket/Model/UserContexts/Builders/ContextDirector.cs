@@ -15,49 +15,55 @@ namespace TradeMarket.Model.UserContexts.Builders
 {
     public class ContextDirector
     {
-        private UserContextBuilder _userContextBuilder;
-        private readonly CommonContextBuilder _commonContextBuilder;
+        private readonly ContextBuilder _builder;
         private readonly AccountClient _accountClient;
         private readonly TradeMarketFactory _tradeMarketFactory;
 
-        private readonly BitmexWebsocketClient _wsClient;
+        private readonly BitmexWebsocketClient _commonWSClient;
 
         private readonly BitmexRestfulClient _restClient;
 
-        public ContextDirector(UserContextBuilder userContextBuilder,CommonContextBuilder commonContextBuilder, AccountClient accountClient, TradeMarketFactory tradeMarketFactory)
+        public ContextDirector(ContextBuilder builder, AccountClient accountClient, TradeMarketFactory tradeMarketFactory)
         {
-            _userContextBuilder = userContextBuilder;
-            _commonContextBuilder = commonContextBuilder;
+            _builder = builder;
             _accountClient = accountClient;
             _tradeMarketFactory = tradeMarketFactory;
             //TODO убрать хардкод как-нибудь
             //TODO Сделать получение клиентов по конкретной бирже.Больше директоров !!!!!
 
-            _wsClient = new BitmexWebsocketClient(new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketTestnetUrl));
+            _commonWSClient = GetNewBitmexWebSocketClient();
             _restClient = new BitmexRestfulClient(BitmexRestufllLink.Testnet);
         }
 
-        internal async Task<UserContext> BuildUserContextAsync(string sessionId, string slotName, string tradeMarketName)
+        public BitmexWebsocketClient GetNewBitmexWebSocketClient()
         {
-            var keySecretPair = await _accountClient.GetUserInfoAsync(sessionId);
-            return await Task.FromResult(
-                _userContextBuilder
-                .AddUniqueInformation(sessionId, slotName)
+            return new BitmexWebsocketClient(new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketTestnetUrl));
+        }
+
+        internal async Task<UserContext> BuildUserContextAsync(string sessionId, string slotName, string tradeMarketName,CancellationToken token)
+        {
+            return await Task.Run(async () =>
+            {
+                _builder.AddUniqueInformation(sessionId, slotName);
+                var keySecretPair = await _accountClient.GetUserInfoAsync(sessionId);
+                var userContextBuilder = new UserContextBuilder(_builder);
+                userContextBuilder
                 .AddKeySecret(keySecretPair.Key, keySecretPair.Secret)
-                .AddWebSocketClient(_wsClient)
-                .AddTradeMarket(_tradeMarketFactory.GetTradeMarket(tradeMarketName))
-                .InitUser()
-                .Result
-                );
+                .AddWebSocketClient(GetNewBitmexWebSocketClient())
+                .AddTradeMarket(_tradeMarketFactory.GetTradeMarket(tradeMarketName));
+                return await userContextBuilder.InitUser(token);
+            });
         }
 
         internal async Task<CommonContext> BuildCommonContextAsync(string slotName,string tradeMarketName)
         {
-            return await Task.FromResult(
-                _commonContextBuilder
-                .AddUniqueInformation(slotName)
-                .AddTradeMarket(_tradeMarketFactory.GetTradeMarket(tradeMarketName))
-                .Result);
+            return await Task.Run(() =>
+            {
+                _builder.AddUniqueInformation(slotName, null);
+                return new CommonContextBuilder(_builder)
+                   .AddTradeMarket(_tradeMarketFactory.GetTradeMarket(tradeMarketName))
+                   .Result;
+            });
         }
 
         #region UserContext
@@ -67,7 +73,7 @@ namespace TradeMarket.Model.UserContexts.Builders
         private List<UserContext> RegisteredUserContexts = new List<UserContext>();
         private readonly SemaphoreSlim _userContextSemaphore = new SemaphoreSlim(1);
 
-        public async Task<UserContext> GetUserContextAsync(string sessionId, string slotName, string tradeMarketName)
+        public async Task<UserContext> GetUserContextAsync(string sessionId, string slotName, string tradeMarketName,CancellationToken token)
         {
             UserContext userContext = null;
             await _userContextSemaphore.WaitAsync();
@@ -79,7 +85,7 @@ namespace TradeMarket.Model.UserContexts.Builders
                 if (userContext is  null)
                 {
                     Log.Logger.Information("Creating new UserContext {@sessionId} : {@slotName} : {@tradeMarketName}", sessionId, slotName, tradeMarketName);
-                    userContext = await BuildUserContextAsync(sessionId, slotName, tradeMarketName);
+                    userContext = await BuildUserContextAsync(sessionId, slotName, tradeMarketName,token);
                     RegisteredUserContexts.Add(userContext);
                 }
             }
