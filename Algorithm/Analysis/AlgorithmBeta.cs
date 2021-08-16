@@ -179,20 +179,19 @@ namespace Algorithm.Analysis
 
         private static int AnalyseTrendWithMinimalPrecision(Dictionary<DateTime, double> prices)
         {
-            int trend = 0;
             if (prices.ElementAt(prices.Count - 4).Value < prices.ElementAt(prices.Count - 3).Value
                 && prices.ElementAt(prices.Count - 3).Value < prices.ElementAt(prices.Count - 2).Value
                 && prices.ElementAt(prices.Count - 2).Value > prices.Last().Value)
             {
-                trend = 1;
+                return 1;
             }
             if (prices.ElementAt(prices.Count - 4).Value > prices.ElementAt(prices.Count - 3).Value
                 && prices.ElementAt(prices.Count - 3).Value > prices.ElementAt(prices.Count - 2).Value
                 && prices.ElementAt(prices.Count - 2).Value < prices.Last().Value)
             {
-                trend = -1;
+                return -1;
             }
-            return trend;
+            return 0;
         }
         private static int AnalyseTrendWithLowPrecision(IReadOnlyCollection<double> subTrends, Dictionary<DateTime, double> prices, bool currentTrend)
         {
