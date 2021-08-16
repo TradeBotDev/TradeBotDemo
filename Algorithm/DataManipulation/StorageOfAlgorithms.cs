@@ -53,11 +53,7 @@ namespace Algorithm.DataManipulation
         {
             foreach (KeyValuePair<Metadata, AlgorithmBeta> existingAlgo in algorithms)
             {
-                if (metadata.GetValue("sessionid") == existingAlgo.Key.GetValue("sessionid")
-                    && metadata.GetValue("slot") == existingAlgo.Key.GetValue("slot")
-                    && metadata.GetValue("trademarket") == existingAlgo.Key.GetValue("trademarket")
-                    && metadata.GetValue("user-agent") == existingAlgo.Key.GetValue("user-agent")
-                    && metadata.GetValue("traceparent") == existingAlgo.Key.GetValue("traceparent"))
+                if (CompareMetas(metadata, existingAlgo.Key))
                 {
                     return true;
                 }
@@ -69,16 +65,25 @@ namespace Algorithm.DataManipulation
         {
             foreach (KeyValuePair<Metadata, AlgorithmBeta> existingAlgo in algorithms)
             {
-                if (metadata.GetValue("sessionid") == existingAlgo.Key.GetValue("sessionid")
-                    && metadata.GetValue("slot") == existingAlgo.Key.GetValue("slot")
-                    && metadata.GetValue("trademarket") == existingAlgo.Key.GetValue("trademarket")
-                    && metadata.GetValue("user-agent") == existingAlgo.Key.GetValue("user-agent")
-                    && metadata.GetValue("traceparent") == existingAlgo.Key.GetValue("traceparent"))
+                if (CompareMetas(metadata, existingAlgo.Key))
                 {
                     return existingAlgo.Value;
                 }
             }
             throw new Exception("Algo not found");
+        }
+
+        private static bool CompareMetas(Metadata firstMeta, Metadata secondMeta)
+        {
+            if (firstMeta.GetValue("sessionid") == secondMeta.GetValue("sessionid")
+                    && firstMeta.GetValue("slot") == secondMeta.GetValue("slot")
+                    && firstMeta.GetValue("trademarket") == secondMeta.GetValue("trademarket")
+                    && firstMeta.GetValue("user-agent") == secondMeta.GetValue("user-agent")
+                    && firstMeta.GetValue("traceparent") == secondMeta.GetValue("traceparent"))
+            {
+                return true;
+            }
+            return false;
         }
     }
 }
