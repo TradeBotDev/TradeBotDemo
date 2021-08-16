@@ -15,7 +15,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage()
+            var storage = new Storage(historyClient, new Metadata())
             {
                 BuyMarketPrice = 38000,
                 AvailableBalance = 240000,
@@ -46,7 +46,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage()
+            var storage = new Storage(historyClient, new Metadata())
             {
                 BuyMarketPrice = 38000,
                 AvailableBalance = 1200000,
@@ -77,7 +77,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage()
+            var storage = new Storage(historyClient, new Metadata())
             {
                 SellMarketPrice = 38000,
                 AvailableBalance = 240000,
@@ -106,7 +106,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage()
+            var storage = new Storage(historyClient, new Metadata())
             {
                 SellMarketPrice = 38000,
                 AvailableBalance = 1200000,
@@ -136,7 +136,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage()
+            var storage = new Storage(historyClient, new Metadata())
             {
                 BuyMarketPrice = 38000,
                 AvailableBalance = 1200000,
@@ -172,7 +172,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage()
+            var storage = new Storage(historyClient, new Metadata())
             {
                 BuyMarketPrice = 38000,
                 AvailableBalance = 1200000,
@@ -208,7 +208,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage()
+            var storage = new Storage(historyClient, new Metadata())
             {
                 BuyMarketPrice = 38000,
                 AvailableBalance = 1200000,
@@ -244,7 +244,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage()
+            var storage = new Storage(historyClient, new Metadata())
             {
                 BuyMarketPrice = 38000,
                 AvailableBalance = 1200000,
@@ -272,7 +272,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage()
+            var storage = new Storage(historyClient, new Metadata())
             {
                 SellMarketPrice = 38000,
                 AvailableBalance = 1200000,
@@ -308,7 +308,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage()
+            var storage = new Storage(historyClient, new Metadata())
             {
                 SellMarketPrice = 38000,
                 AvailableBalance = 1200000,
@@ -344,7 +344,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage()
+            var storage = new Storage(historyClient, new Metadata())
             {
                 SellMarketPrice = 38000,
                 AvailableBalance = 1200000,
@@ -380,7 +380,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage()
+            var storage = new Storage(historyClient, new Metadata())
             {
                 SellMarketPrice = 38000,
                 AvailableBalance = 1200000,
