@@ -23,7 +23,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AccountTests", "AccountTest
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Website", "Website\Website.csproj", "{31DF94DE-4ADF-494D-B94C-FAB6497EBFC4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebsiteTests", "WebsiteTests\WebsiteTests.csproj", "{BF043021-9CC2-44A1-AD59-1FE236CA244A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebsiteTests", "WebsiteTests\WebsiteTests.csproj", "{BF043021-9CC2-44A1-AD59-1FE236CA244A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

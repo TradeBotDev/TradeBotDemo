@@ -1,0 +1,21 @@
+﻿<div class="exchange_cards_container">
+    @foreach (var exchange in AccountData.Exchanges)
+    {
+        <div class="exchange_card">
+            <div>
+                <h2>@exchange.Name</h2>
+                <p>Токен: @exchange.Token</p>
+                <p>Секрет: @exchange.Secret</p>
+            </div>
+            <form method="post">
+                <input class="button exchange_card_delete_button" type="submit" name="DeleteButton" value="УДАЛИТЬ" />
+                <!--Скрытый элемент, содержаний в себе код биржи.-->
+                <input type="hidden" name="exchangeCode" value="@((int)exchange.Code)" />
+            </form>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public Models.AccountDataModel AccountData { get; set; }
+}
