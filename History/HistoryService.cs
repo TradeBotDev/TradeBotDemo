@@ -1,34 +1,18 @@
 ﻿using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using History.DataBase;
 using System;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.Threading.Tasks;
-using TradeBot.Common.v1;
 using TradeBot.History.HistoryService.v1;
 
 namespace History
 {
     public class History : HistoryService.HistoryServiceBase
     {
-        private struct BalanceUpdate
-        {
-            public string SessionId;
-            public Timestamp Time;
-            public Balance Balance;
-        }
-        private struct OrderUpdate
-        {
-            public string SessionId;
-            public Timestamp Time;
-            public Order Order;
-            public string Message;
-            public ChangesType ChangesType;
-        }
-
-        private static readonly ObservableCollection<BalanceUpdate> BalanceCollection = new();
-        private static readonly ObservableCollection<OrderUpdate> OrderCollection = new();
-
+        private static readonly ObservableCollection<BalanceChange> BalanceCollection = new();
+        private static readonly ObservableCollection<OrderChange> OrderCollection = new();
+        private static DataContext db = new();
 
         public override async Task<PublishEventResponse> PublishEvent(PublishEventRequest request, ServerCallContext context)
         {
@@ -37,27 +21,26 @@ namespace History
                 case PublishEventRequest.EventTypeOneofCase.None:
                     break;
                 case PublishEventRequest.EventTypeOneofCase.Balance:
-                    BalanceCollection.Add(new BalanceUpdate
+                    BalanceCollection.Add(new BalanceChange
                     {
                         SessionId = request.Balance.Sessionid,
-                        Time = request.Balance.Time,
+                        Time = request.Balance.Time.ToDateTime(),
                         Balance = request.Balance.Balance
                     });
                     break;
                 case PublishEventRequest.EventTypeOneofCase.Order:
-                    OrderCollection.Add(new OrderUpdate()
+                    OrderCollection.Add(new OrderChange()
                     {
                         SessionId = request.Order.Sessionid,
                         ChangesType = request.Order.ChangesType,
                         Order = request.Order.Order,
                         Message = request.Order.Message,
-                        Time = request.Order.Time
-                    });
+                        Time = request.Order.Time.ToDateTime()
+                    }); ;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
             return new PublishEventResponse();
         }
 
@@ -70,7 +53,7 @@ namespace History
             {
                 try
                 {
-                    var update = (BalanceUpdate)args.NewItems[0];
+                    var update = (BalanceChange)args.NewItems[0];
                     if (update.SessionId == request.Sessionid)
                     {
                         Task.Run(async () =>
@@ -78,7 +61,7 @@ namespace History
                             await responseStream.WriteAsync(new SubscribeEventsResponse
                             {
                                 Balance = new PublishBalanceEvent
-                                { Balance = update.Balance, Sessionid = update.SessionId, Time = update.Time }
+                                { Balance = update.Balance, Sessionid = update.SessionId, Time = Timestamp.FromDateTime(update.Time) }
                             });
                         }).Wait();
                     }
@@ -93,7 +76,7 @@ namespace History
             {
                 try
                 {
-                    var update = (OrderUpdate)args.NewItems[0];
+                    var update = (OrderChange)args.NewItems[0];
                     if (update.SessionId == request.Sessionid)
                     {
                         Task.Run(async () =>
@@ -105,7 +88,7 @@ namespace History
                                     ChangesType = update.ChangesType,
                                     Order = update.Order,
                                     Sessionid = update.SessionId,
-                                    Time = update.Time,
+                                    Time = Timestamp.FromDateTime(update.Time),
                                     Message = update.Message
                                 }
                             });

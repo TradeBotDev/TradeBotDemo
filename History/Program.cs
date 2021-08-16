@@ -1,6 +1,9 @@
+using History.DataBase;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using System;
+using TradeBot.Common.v1;
 
 namespace History
 {
@@ -10,15 +13,16 @@ namespace History
         {
             //DataContext postgres = new();
             //Console.ReadKey();
-            //RedisReader rr = new();
-            //rr.ShowKeys();
-            //Console.ReadKey();
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .WriteTo.Console()
-                .WriteTo.Seq("http://localhost:5341")
-                .CreateLogger();
-            CreateHostBuilder(args).Build().Run();
+            //Log.Logger = new LoggerConfiguration()
+            //    .MinimumLevel.Debug()
+            //    .WriteTo.Console()
+            //    .WriteTo.Seq("http://localhost:5341")
+            //    .CreateLogger();
+            //CreateHostBuilder(args).Build().Run();
+
+            DataContext db = new();
+            db.Add(new BalanceChange { Balance = new Balance(), SessionId = "meow", Time = DateTime.Now });
+            Console.WriteLine("did it");
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
