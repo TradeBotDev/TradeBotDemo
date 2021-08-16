@@ -22,20 +22,20 @@ namespace Algorithm.DataManipulation
         }
         public static void SendNewConfig (Metadata metadata, UpdateServerConfigRequest configRequest)
         {
-            if (!algorithms.ContainsKey(metadata))
+            if (!MetaExists(metadata))
             {
                 threadsWithAlgos.Add(new Thread(()=>CreateAlgorithm(configRequest.Config.AlgorithmInfo, metadata)));
                 threadsWithAlgos.Last().Start();
                 return;
             }
 
-            if (algorithms[metadata].GetState()!=configRequest.Switch)
+            if (GetAlgoByMeta(metadata).GetState()!=configRequest.Switch)
             {
                 algorithms[metadata].ChangeState();
                 return;
             }
 
-            algorithms[metadata].ChangeSetting(configRequest.Config.AlgorithmInfo);
+            GetAlgoByMeta(metadata).ChangeSetting(configRequest.Config.AlgorithmInfo);
         }
         private static void CreateAlgorithm(AlgorithmInfo setting, Metadata metadata)
         {
@@ -47,6 +47,38 @@ namespace Algorithm.DataManipulation
                 algorithms[metadata].ChangeSetting(setting);
                 algorithms[metadata].ChangeState();
             }
+        }
+
+        private static bool MetaExists(Metadata metadata)
+        {
+            foreach (KeyValuePair<Metadata, AlgorithmBeta> existingAlgo in algorithms)
+            {
+                if (metadata.GetValue("sessionid") == existingAlgo.Key.GetValue("sessionid")
+                    && metadata.GetValue("slot") == existingAlgo.Key.GetValue("slot")
+                    && metadata.GetValue("trademarket") == existingAlgo.Key.GetValue("trademarket")
+                    && metadata.GetValue("user-agent") == existingAlgo.Key.GetValue("user-agent")
+                    && metadata.GetValue("traceparent") == existingAlgo.Key.GetValue("traceparent"))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static AlgorithmBeta GetAlgoByMeta(Metadata metadata)
+        {
+            foreach (KeyValuePair<Metadata, AlgorithmBeta> existingAlgo in algorithms)
+            {
+                if (metadata.GetValue("sessionid") == existingAlgo.Key.GetValue("sessionid")
+                    && metadata.GetValue("slot") == existingAlgo.Key.GetValue("slot")
+                    && metadata.GetValue("trademarket") == existingAlgo.Key.GetValue("trademarket")
+                    && metadata.GetValue("user-agent") == existingAlgo.Key.GetValue("user-agent")
+                    && metadata.GetValue("traceparent") == existingAlgo.Key.GetValue("traceparent"))
+                {
+                    return existingAlgo.Value;
+                }
+            }
+            throw new Exception("Algo not found");
         }
     }
 }
