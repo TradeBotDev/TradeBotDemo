@@ -64,28 +64,30 @@ namespace TradeMarket.Services
         /// <summary>
         /// Метод заполняет заголовки для ответов по предоставленному контексту пользователя 
         /// </summary>
-        public async Task<Metadata> AddInfoToMetadataAsync(IContext user, Metadata meta)
+        public async Task<Metadata> AddInfoToMetadataAsync(IContext user)
         {
             return await Task.Run(() =>
             {
-                meta.Add("sessionid", user.Signature.SessionId);
-                meta.Add("slot", user.Signature.SlotName);
-                meta.Add("trademarket", user.Signature.TradeMarketName);
-                return meta;
+                Metadata res = new Metadata();
+                res.Add("sessionid", user.Signature.SessionId);
+                res.Add("slot", user.Signature.SlotName);
+                res.Add("trademarket", user.Signature.TradeMarketName);
+                return res;
             });
         }
 
         /// <summary>
         /// Переносит данные о пользователе из запроса в ответ
         /// </summary>
-        public async Task<Metadata> MoveInfoToMetadataAsync(Metadata requestMeta,Metadata responseMeta)
+        public async Task<Metadata> MoveInfoToMetadataAsync(Metadata requestMeta)
         {
             return await Task.Run(() =>
             {
-                responseMeta.Add("sessionid",requestMeta.GetValue("sessionid"));
-                responseMeta.Add("slot", requestMeta.GetValue("slot"));
-                responseMeta.Add("trademarket", requestMeta.GetValue("trademarket"));
-                return responseMeta;
+                Metadata res = new Metadata();
+                res.Add("sessionid",requestMeta.GetValue("sessionid"));
+                res.Add("slot", requestMeta.GetValue("slot"));
+                res.Add("trademarket", requestMeta.GetValue("trademarket"));
+                return res;
             });
         }
 
@@ -139,7 +141,7 @@ namespace TradeMarket.Services
             try
             {
                 //Добавляем заголовки ответа по контексту пользователя user из запроса
-                var meta = await MoveInfoToMetadataAsync(context.RequestHeaders, context.ResponseTrailers);
+                var meta = await MoveInfoToMetadataAsync(context.RequestHeaders);
                 foreach (var entry in meta)
                 {
                     if (entry is not null)
