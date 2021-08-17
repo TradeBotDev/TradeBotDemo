@@ -2,11 +2,12 @@
 using Grpc.Core;
 using History.DataBase;
 using History.DataBase.Data_Models;
+using Serilog;
 using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Linq;
 using System.Threading.Tasks;
-using TradeBot.Common.v1;
 using TradeBot.History.HistoryService.v1;
 
 namespace History
@@ -23,25 +24,43 @@ namespace History
                 case PublishEventRequest.EventTypeOneofCase.None:
                     break;
                 case PublishEventRequest.EventTypeOneofCase.Balance:
-                    BalanceCollection.Add(new BalanceChange
+                    using (var db = new DataContext())
                     {
-                        SessionId = request.Balance.Sessionid,
-                        Time = request.Balance.Time.ToDateTime(),
-                        Balance = Converter.ToBalanceWrapper(request.Balance.Balance)
-                    });
-
+                        BalanceWrapper bw = Converter.ToBalanceWrapper(request.Balance.Balance);
+                        BalanceChange bc = new BalanceChange
+                        {
+                            SessionId = request.Balance.Sessionid,
+                            Time = request.Balance.Time.ToDateTime(),
+                            Balance = bw,
+                        };
+                        BalanceCollection.Add(bc);
+                        db.Add(bw);
+                        db.Add(bc);
+                        db.SaveChanges();
+                        Log.Information("{@Where}: Recorded a change of balance for user {@User}", "History", bc.SessionId);
+                        Log.Information("{@Where}: New balance: " + bw.Value + bw.Currency, "History");
+                    }
                     break;
                 case PublishEventRequest.EventTypeOneofCase.Order:
-                    OrderCollection.Add(new OrderChange
+                    using (var db = new DataContext())
                     {
-                        SessionId = request.Order.Sessionid,
-                        ChangesType = (DataBase.ChangesType)request.Order.ChangesType,
-                        Order = Converter.ToOrderWrapper(request.Order.Order),
-                        Message = request.Order.Message,
-                        Time = request.Order.Time.ToDateTime(),
-                        SlotName = request.Order.SlotName
-                    });
-
+                        OrderWrapper ow = Converter.ToOrderWrapper(request.Order.Order);
+                        OrderChange oc = new OrderChange
+                        {
+                            SessionId = request.Order.Sessionid,
+                            ChangesType = (DataBase.ChangesType)request.Order.ChangesType,
+                            Order = ow,
+                            Message = request.Order.Message,
+                            Time = request.Order.Time.ToDateTime(),
+                            SlotName = request.Order.SlotName
+                        };
+                        OrderCollection.Add(oc);
+                        db.Add(ow);
+                        db.Add(oc);
+                        db.SaveChanges();
+                        Log.Information("{@Where}: Recorded a change of order {@Order}", "History", ow.OrderId);
+                        Log.Information("{@Where}: Order change: " + oc.ChangesType, "History");
+                    }
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

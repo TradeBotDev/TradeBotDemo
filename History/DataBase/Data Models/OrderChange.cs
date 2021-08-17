@@ -11,9 +11,8 @@ namespace History.DataBase
 {
     public class OrderChange
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
+        public int OrderId { get; set; }
         public OrderWrapper Order { get; set; }
         public string SessionId { get; set; }
         public ChangesType ChangesType { get; set; }

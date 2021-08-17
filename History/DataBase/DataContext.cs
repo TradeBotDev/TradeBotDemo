@@ -17,12 +17,9 @@ namespace History.DataBase
 
         public DataContext()
         {
-            Database.Migrate();
+            //Database.EnsureDeleted();
+            Database.EnsureCreated();
         }
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-        }
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=historydb;Username=postgres;Password=password");
