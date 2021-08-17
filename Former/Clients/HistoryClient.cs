@@ -34,6 +34,7 @@ namespace Former.Clients
         /// </summary>
         private async Task ConnectionTester(Func<Task> func)
         {
+            var attempts = 0;
             while (true)
             {
                 try
@@ -43,12 +44,17 @@ namespace Former.Clients
                 }
                 catch (RpcException e)
                 {
+                    if (e.StatusCode == StatusCode.Cancelled || attempts > 3) break;
                     Log.Error("{@Where}: Error {@ExceptionMessage}. Retrying...\r\n{@ExceptionStackTrace}", "Former", e.Message, e.StackTrace);
                     Thread.Sleep(_retryDelay);
+                    attempts++;
                 }
             }
         }
 
+        /// <summary>
+        /// Отправляет обновлённый баланс в сервис истории с указанием валюты и времени.
+        /// </summary>
         internal async Task<PublishEventResponse> WriteBalance(double balance, Metadata meta)
         {
             PublishEventResponse response = null;
@@ -71,6 +77,9 @@ namespace Former.Clients
             return response;
         }
 
+        /// <summary>
+        /// Обновляет инофрмацию об ордере в сервис истории. Это может быть информация об инициализации, добавлении, обновлении, исполнении как своего ордера, так и контр-ордера.
+        /// </summary>
         internal async Task<PublishEventResponse> WriteOrder(Order order, ChangesType changesType, Metadata meta,
             string message)
         {
