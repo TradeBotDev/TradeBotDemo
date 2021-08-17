@@ -45,7 +45,7 @@ namespace TradeMarket
             services.AddSingleton<CommonContextBuilder>();
             services.AddSingleton<UserContextBuilder>();
             services.AddSingleton<ContextBuilder>();
-            services.AddSingleton<BitmexWebsocketClient>(new BitmexWebsocketClient(new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketTestnetUrl)));
+            services.AddSingleton(new BitmexWebsocketClient(new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketTestnetUrl)));
             services.AddSingleton(new BitmexRestfulClient(BitmexRestufllLink.Testnet));
         }
 

@@ -142,7 +142,7 @@ namespace Bitmex.Client.Websocket.Client
             // ********************
             // ADD OBJECT HANDLERS BELOW
             // ********************
-
+            Log.Info("{@ServiceName} Recieved Message {@Message}", "TradeMarket", msg);
             return
 
                 ErrorResponse.TryHandle(msg, Streams.ErrorSubject) ||
