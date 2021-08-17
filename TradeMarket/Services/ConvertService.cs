@@ -190,7 +190,7 @@ namespace TradeMarket.Services
         {
             return new()
             {
-                OrderId = response.Error is null ? "empty" : response.Message.OrderId,
+                OrderId = response.Error is not null ? "empty" : response.Message.OrderId,
                 Response = ResponseFromOrder(response)
             };
         }
