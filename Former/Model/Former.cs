@@ -3,7 +3,6 @@ using Former.Clients;
 using Grpc.Core;
 using Serilog;
 using System.Threading.Tasks;
-
 using System.Linq;
 
 namespace Former.Model

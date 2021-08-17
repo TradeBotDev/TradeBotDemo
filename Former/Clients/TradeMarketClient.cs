@@ -69,7 +69,7 @@ namespace Former.Clients
         }
 
         /// <summary>
-        /// Наблиюдает за изменением рыночных цен.
+        /// Наблюдает за изменением рыночных цен.
         /// </summary>
         private async Task ObserveMarketPrices(Metadata meta)
         {
