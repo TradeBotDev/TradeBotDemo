@@ -40,9 +40,19 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
             return new BookPublisher(client, client.Streams.Book25Stream,_multiplexer,new Book25SubscribeRequest(context.Signature.SlotName), token);
         }
 
+        public IPublisher<string> CreateErrorPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token)
+        {
+            return new ErrorPublisher(client, client.Streams.ErrorStream, token);
+        }
+
         public IPublisher<Instrument> CreateInstrumentPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token)
         {
             return new InstrumentPublisher(client, client.Streams.InstrumentStream,context.Signature.SlotName ,token);
+        }
+
+        public IPublisher<string> CreatePingPongPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token)
+        {
+            return new PingPongPublisher(client,client.Streams.PongStream,token);
         }
 
         public IPublisher<Margin> CreateUserMarginPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token)

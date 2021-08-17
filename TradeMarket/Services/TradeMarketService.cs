@@ -141,9 +141,10 @@ namespace TradeMarket.Services
                 //Добавляем заголовки ответа по контексту пользователя user из запроса
                 await MoveInfoToMetadataAsync(context.RequestHeaders, context.ResponseTrailers);
 
-                await subscribe(handler, /*context.CancellationToken*/new CancellationToken());
+                await subscribe(handler, context.CancellationToken);
                 //ожидаем пока клиенты отменят подписку
-                await AwaitCancellation(/*context.CancellationToken*/ new CancellationToken());
+                await AwaitCancellation(context.CancellationToken);
+                context.Status = Status.DefaultSuccess;
             }
             catch (Exception e)
             {

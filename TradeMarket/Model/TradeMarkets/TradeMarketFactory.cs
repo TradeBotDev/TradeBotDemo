@@ -6,6 +6,7 @@ using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using TradeMarket.DataTransfering.Bitmex;
 using TradeMarket.DataTransfering.Bitmex.Model;
@@ -39,6 +40,15 @@ namespace TradeMarket.Model.TradeMarkets
                 .AddCommonClient(_restClient)
                 .AddPublisherFactory(publisherFactory)
                 .AddName("bitmex")
+
+                .Result;
+        }
+
+        public TradeMarket SubscribeToLifeLineTopics(BitmexTradeMarket tm,CancellationToken token)
+        {
+            return new BitmexTradeMarketBuilder(tm)
+                .StartPingPong(token)
+                .ReadErrors(token)
                 .Result;
         }
 

@@ -26,7 +26,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         
         public event EventHandler<IPublisher<TModel>.ChangedEventArgs> Changed;
 
-        private readonly BitmexWebsocketClient _client;
+        protected readonly BitmexWebsocketClient _client;
 
         public BitmexPublisher(BitmexWebsocketClient client,Action<TResponse, EventHandler<IPublisher<TModel>.ChangedEventArgs>> action)
         {
@@ -47,7 +47,8 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
            {
                //тут не нужно ловить OperationCanceledException. BitmexWebsocketClient все разруливает сам
                stream.Subscribe(responseAction, token);
-               _client.Send(request);
+
+               if (request is not null) _client.Send(request);
            });
         }
 

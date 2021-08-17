@@ -35,6 +35,10 @@ namespace TradeMarket.Model.Publishers
         public IPublisher<bool> CreateAuthenticationPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token);
 
         public IPublisher<Wallet> CreateWalletPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token);
+
+        public IPublisher<string> CreatePingPongPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token);
+
+        public IPublisher<string> CreateErrorPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token);
         #endregion
     }
 }

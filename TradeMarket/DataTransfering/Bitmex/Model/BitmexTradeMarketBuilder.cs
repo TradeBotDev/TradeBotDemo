@@ -3,6 +3,7 @@ using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using TradeMarket.DataTransfering.Bitmex.Rest.Client;
 using TradeMarket.Model.Publishers;
@@ -17,6 +18,10 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
         public BitmexTradeMarketBuilder()
         {
             _tradeMarket = new BitmexTradeMarket();
+        }
+        public BitmexTradeMarketBuilder(BitmexTradeMarket tm)
+        {
+            _tradeMarket = tm;
         }
 
         public TradeMarket.Model.TradeMarkets.TradeMarket Result
@@ -59,10 +64,23 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
             return this;
         }
 
+        public ITradeMarketBuilder ReadErrors(CancellationToken token)
+        {
+            var errorPub = _tradeMarket.PublisherFactory.CreateErrorPublisher(_tradeMarket.CommonWSClient, null, token);
+            errorPub.Start();
+            return this;
+        }
+
         public void Reset()
         {
             _tradeMarket = new BitmexTradeMarket();
         }
 
+        public ITradeMarketBuilder StartPingPong(CancellationToken token)
+        {
+            var pingPongPub = _tradeMarket.PublisherFactory.CreatePingPongPublisher(_tradeMarket.CommonWSClient, null, token);
+            pingPongPub.Start();
+            return this;
+        }
     }
 }
