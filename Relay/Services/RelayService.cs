@@ -47,9 +47,10 @@ namespace Relay.Services
 
         private UserContext GetUserContext(Metadata meta)
         {
-            if (contexts.Keys.FirstOrDefault(x => x[2].Value == meta[2].Value) != null)
+            //TODO рабтает ли тут MetaComparer
+            if (contexts.ContainsKey(meta))
             {
-                return contexts.First(x => x.Value.Meta[2].Value == meta[2].Value).Value;
+                return contexts[meta];
             }
             UserContext newContext = new(meta, _formerClient, _algorithmClient, _tradeMarketClient);
             contexts.Add(meta, newContext);
@@ -67,6 +68,7 @@ namespace Relay.Services
         public override async Task<StartBotResponse> StartBot(StartBotRequest request, ServerCallContext context)
         {
             var user = GetUserContext(context.RequestHeaders);
+            Log.Information("{@ServiceName} StartBot Request Started For user {@context}", "Relay", user);
             user.StatusOfWork();
             user.SubscribeForOrders();
             return await Task.FromResult(new StartBotResponse()

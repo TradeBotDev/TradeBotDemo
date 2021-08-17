@@ -78,7 +78,9 @@ namespace Relay.Model
         {
             if (!IsWorking && !IsStart)
             {
-                IsStart = true;
+                //Включаем сразу два флага в не один.
+                IsStart = IsStart ? IsStart : !IsStart;
+                IsWorking = IsWorking ? IsWorking : !IsWorking;
                 _tradeMarketClient.SubscribeForOrders(_tradeMarketStream);
             }
         }
