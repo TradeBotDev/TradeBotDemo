@@ -19,7 +19,7 @@ namespace TradeMarket.Model.UserContexts
         }
         public async Task UnSubscribeFromBook25UpdatesAsync(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler)
         {
-            await TradeMarket.UnSubscribeFromBook25(handler);
+            await TradeMarket.UnSubscribeFromBook25(handler,this);
         }
 
         public async Task SubscribeToInstrumentUpdate(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler, CancellationToken token)
@@ -28,7 +28,7 @@ namespace TradeMarket.Model.UserContexts
         }
 
         public async Task UnSubscribeFromInstrumentUpdate(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler) {
-            await TradeMarket.UnSubscribeFromInstruments(handler);
+            await TradeMarket.UnSubscribeFromInstruments(handler,this);
         }
 
         public CommonContext(IContext context) : base(context) { }

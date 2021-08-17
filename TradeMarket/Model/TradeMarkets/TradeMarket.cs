@@ -46,22 +46,41 @@ namespace TradeMarket.Model.TradeMarkets
         #endregion
 
         #region Common Publishers
-        public IPublisher<BookLevel> Book25Publisher { get; internal set; }
+        //IContext = CommonContext
+        public Dictionary<IContext, IPublisher<BookLevel>> Book25Publisher { get; internal set; } = new Dictionary<IContext, IPublisher<BookLevel>>();
 
-        public IPublisher<Instrument> InstrumentPublisher { get; internal set; }
+        public Dictionary<IContext, IPublisher<Instrument>> InstrumentPublisher { get; internal set; } = new Dictionary<IContext, IPublisher<Instrument>>();
 
         #endregion
 
         #region Users Publishers
-        public async Task<IPublisher<T>> CreatePublisher<T>(BitmexWebsocketClient client,EventHandler<IPublisher<T>.ChangedEventArgs> handler, IContext context,CancellationToken token, IPublisherFactory.Create<T> create)
+        public async Task<IPublisher<T>> CreatePublisher<T>(BitmexWebsocketClient client, IContext context,CancellationToken token, IPublisherFactory.Create<T> create)
         {
             return await Task.Run(() =>
             {
                 var publisher = create(client, context,token);
-                publisher.Changed += handler;
                 return publisher;
             });
         }
+        public async Task SubscribeTo<T>(BitmexWebsocketClient client,IPublisher<T> publisher,EventHandler<IPublisher<T>.ChangedEventArgs> handler,IContext context,CancellationToken token)
+        {
+            if(publisher is null)
+            {
+                throw new ArgumentException($"Publisher {nameof(publisher)} was null.");
+            }
+            publisher.Changed += handler;
+        }
+
+        public async Task SubscribeTo<T>(BitmexWebsocketClient client,IDictionary<IContext,IPublisher<T>> publisher, EventHandler<IPublisher<T>.ChangedEventArgs> handler, IContext context, IPublisherFactory.Create<T> create,CancellationToken token)
+        {
+            if(publisher.ContainsKey(context) == false)
+            {
+                publisher[context] = await CreatePublisher(client, context, token, create);
+                await publisher[context].Start();
+            }
+            await SubscribeTo(client, publisher[context],handler, context, token);
+        }
+
         public Dictionary<IContext, IPublisher<Wallet>> WalletPublishers { get; internal set; } = new Dictionary<IContext, IPublisher<Wallet>>();
         public Dictionary<IContext, IPublisher<Position>> PositionPublisher { get; internal set; } = new Dictionary<IContext, IPublisher<Position>>();
         public Dictionary<IContext, IPublisher<Order>> OrderPublisher { get; internal set; } = new Dictionary<IContext, IPublisher<Order>>();
@@ -103,14 +122,14 @@ namespace TradeMarket.Model.TradeMarkets
         }
 
         #region Common Subscriptions
-        public abstract Task UnSubscribeFromBook25(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler);
-        public abstract Task UnSubscribeFromInstruments(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler);
+        public abstract Task UnSubscribeFromBook25(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler,IContext context);
+        public abstract Task UnSubscribeFromInstruments(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler,IContext context);
         #endregion
         #region User Subscriptions
-        public abstract Task UnSubscribeFromUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler,UserContext context);
-        public abstract Task UnSubscribeFromUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, UserContext context);
-        public abstract Task UnSubscribeFromUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, UserContext context);
-        public abstract Task UnSubscribeFromBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, UserContext context);
+        public abstract Task UnSubscribeFromUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler,IContext context);
+        public abstract Task UnSubscribeFromUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, IContext context);
+        public abstract Task UnSubscribeFromUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, IContext context);
+        public abstract Task UnSubscribeFromBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, IContext context);
         #endregion
         #endregion
 

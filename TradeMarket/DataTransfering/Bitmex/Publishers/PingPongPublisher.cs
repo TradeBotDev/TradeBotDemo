@@ -15,7 +15,6 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         {
             await Task.Run(() =>
             {
-                Log.Information("{@ServiceName} Pong is : {@Pong}", "TradeMarket", response.Message);
                 e?.Invoke(nameof(UserOrderPublisher), new(response.Message, BitmexAction.Insert));
             });
         };
@@ -40,7 +39,6 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             while (!token.IsCancellationRequested)
             {
                 await Task.Delay(5_000);
-                Log.Information("{@ServiceName} Bitmex : Sending Ping ... ", "TradeMarket");
                 base._client.Send(new PingRequest());
             }
 

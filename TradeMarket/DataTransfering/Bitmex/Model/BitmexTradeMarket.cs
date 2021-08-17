@@ -29,20 +29,13 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
         #region Common 
         public async override Task SubscribeToInstruments(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler, IContext context, CancellationToken token)
         {
-            if (InstrumentPublisher is null)
-            {
-                InstrumentPublisher = await CreatePublisher(CommonWSClient,handler, context, token, PublisherFactory.CreateInstrumentPublisher);
-            }
-            await InstrumentPublisher.Start();
+            await SubscribeTo(CommonWSClient, InstrumentPublisher, handler, context,PublisherFactory.CreateInstrumentPublisher, token);
         }
 
         public async override Task SubscribeToBook25(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, IContext context, CancellationToken token)
         {
-            if (Book25Publisher is null)
-            {
-                Book25Publisher = await CreatePublisher(CommonWSClient, handler, context, token, PublisherFactory.CreateBook25Publisher);
-            }
-            await Book25Publisher.Start();
+            await SubscribeTo(CommonWSClient, Book25Publisher, handler, context, PublisherFactory.CreateBook25Publisher, token);
+
         }
         #endregion
 
@@ -50,73 +43,61 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
 
         public async override Task SubscribeToUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, UserContext context, CancellationToken token)
         {
-            if (PositionPublisher.ContainsKey(context) == false)
-            {
-                PositionPublisher[context] = await CreatePublisher(context.WSClient,handler, context, token, PublisherFactory.CreateUserPositionPublisher);
-            }
-            await PositionPublisher[context].Start();
+            await SubscribeTo(context.WSClient, PositionPublisher, handler, context, PublisherFactory.CreateUserPositionPublisher, token);
+
         }
 
 
         public async override Task SubscribeToUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, UserContext context, CancellationToken token)
         {
-            if (MarginPublisher.ContainsKey(context) == false)
-            {
-                MarginPublisher[context] = await CreatePublisher(context.WSClient,handler, context, token, PublisherFactory.CreateUserMarginPublisher);
-            }
-            await MarginPublisher[context].Start();
+            await SubscribeTo(context.WSClient, MarginPublisher, handler, context, PublisherFactory.CreateUserMarginPublisher, token);
+
         }
 
-        
+
 
         public async override Task SubscribeToUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, UserContext context, CancellationToken token)
         {
-            if (OrderPublisher.ContainsKey(context) == false)
-            {
-                OrderPublisher[context] = await CreatePublisher(context.WSClient,handler, context, token, PublisherFactory.CreateUserOrderPublisher);
-            }
-            await OrderPublisher[context].Start();
+            await SubscribeTo(context.WSClient, OrderPublisher, handler, context, PublisherFactory.CreateUserOrderPublisher, token);
+
         }
 
         public async override Task SubscribeToBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, UserContext context, CancellationToken token)
         {
-            if (WalletPublishers.ContainsKey(context) == false)
-            {
-                WalletPublishers[context] = await CreatePublisher(context.WSClient,handler, context, token, PublisherFactory.CreateWalletPublisher);
-            }
-            await WalletPublishers[context].Start();
+            await SubscribeTo(context.WSClient, WalletPublishers, handler, context, PublisherFactory.CreateWalletPublisher, token);
+
         }
         #endregion
 
         #endregion
 
         #region UnSubscribe Requests
-        public async override Task UnSubscribeFromInstruments(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler)
+        public async override Task UnSubscribeFromInstruments(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler, IContext context)
         {
-            await UnsubscribeFrom(InstrumentPublisher, handler);
+            await UnsubscribeFrom(InstrumentPublisher,context, handler);
         }
 
-        public async override Task UnSubscribeFromBook25(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler)
+        public async override Task UnSubscribeFromBook25(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler,IContext context)
         {
-            await UnsubscribeFrom(Book25Publisher, handler);
+            await UnsubscribeFrom(Book25Publisher,context, handler);
         }
 
-        public async override Task UnSubscribeFromUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, UserContext context)
+        public async override Task UnSubscribeFromUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, IContext context)
         {
             await UnsubscribeFrom(PositionPublisher, context, handler);
         }
 
-        public async override Task UnSubscribeFromUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, UserContext context)
+        public async override Task UnSubscribeFromUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, IContext context)
         {
             await UnsubscribeFrom(MarginPublisher, context, handler);
         }
 
-        public async override Task UnSubscribeFromUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, UserContext context)
+        public async override Task UnSubscribeFromUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, IContext context)
         {
             await UnsubscribeFrom(OrderPublisher, context, handler);
         }
 
-        public async override Task UnSubscribeFromBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, UserContext context)
+        public async override Task UnSubscribeFromBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, IContext context)
         {
             await UnsubscribeFrom(WalletPublishers, context, handler);
         }
@@ -173,17 +154,10 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
         {
             var complition = new TaskCompletionSource<bool>();
             EventHandler<IPublisher<bool>.ChangedEventArgs> handler = (sender, args) => complition.SetResult(args.Changed);
-            
-            if (AuthenticationPublisher.ContainsKey(context) == false)
-            {
-                AuthenticationPublisher[context] = await CreatePublisher(context.WSClient,handler, context, token, PublisherFactory.CreateAuthenticationPublisher);
-                
-            }
-            await AuthenticationPublisher[context].Start();
-
-            //bool result = await complition.Task;
-            //AuthenticationPublisher[context].Changed -= handler;
-            return true;
+            await SubscribeTo(context.WSClient, AuthenticationPublisher, handler, context, PublisherFactory.CreateAuthenticationPublisher, token);
+            bool result = await complition.Task;
+            await UnsubscribeFrom(AuthenticationPublisher, context, handler);
+            return result;
         }
         
     }
