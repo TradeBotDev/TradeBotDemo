@@ -115,20 +115,17 @@ namespace Website.Controllers
             var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
             ViewBag.HaveLicense = haveLicense.HaveAccess;
 
-            // Если была нажата кнопка "Выйти", происходит выход из аккаунта.
-            if (model.Button == "Выйти")
-            {
-                // Запрос на выход из аккаунта.
-                var reply = await Clients.AccountServiceClient.Logout(User.Identity.Name, model.SaveExchanges);
-                // Удаление аутентификационных куки пользователя.
-                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
-                // Если выход не был завершен успешно, возвращается страница с сообщением об ошибке.
-                if (reply.Result != AccountActionCode.Successful)
-                    return View("~/Views/Shared/Error.cshtml", reply.Message);
-            }
+            // Запрос на выход из аккаунта.
+            var reply = await Clients.AccountServiceClient.Logout(User.Identity.Name, model.SaveExchanges);
+            // Удаление аутентификационных куки пользователя.
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            
+            // Если выход не был завершен успешно, возвращается страница с сообщением об ошибке.
+            if (reply.Result != AccountActionCode.Successful)
+                return View("~/Views/Shared/Error.cshtml", reply.Message);
+            
             // Иначе происходит перенаправление на предыдущий url.
-            return Redirect(model.PreviousUrl);
+            return Redirect(Request.Headers["Referer"].ToString());
         }
     }
 }
