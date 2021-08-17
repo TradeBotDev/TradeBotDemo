@@ -108,13 +108,14 @@ namespace TradeMarket.Model.UserContexts.Builders
             {
                 Log.Logger.Information("Getting CommonContext {@slotName} : {@tradeMarketName}", slotName, tradeMarketName);
                 commonContext = RegisteredCommonContexts.FirstOrDefault(el => el.IsEquevalentTo(null, slotName, tradeMarketName));
-                Log.Logger.Information("Contained CommonContext's count {@Count}", RegisteredCommonContexts.Count);
                 if (commonContext is null)
                 {
                     Log.Logger.Information("Creating new CommonContext {@slotName} : {@tradeMarketName}", slotName, tradeMarketName);
                     commonContext = await BuildCommonContextAsync(slotName, tradeMarketName);
                     RegisteredCommonContexts.Add(commonContext);
                 }
+                Log.Logger.Information("Contained CommonContext's count {@Count}", RegisteredCommonContexts.Count);
+
             }
             finally
             {
