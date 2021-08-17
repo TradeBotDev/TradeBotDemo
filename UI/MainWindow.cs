@@ -400,7 +400,7 @@ namespace UI
             cellCheckBox.Value ??= false;
             if (Convert.ToBoolean(cellCheckBox.Value))
             {
-                if (MessageBox.Show(@"Are you sure you want to stop work?", @"Stop work",
+                if (MessageBox.Show(@"Are you sure you want to stop bot?", @"Stop bot",
                     MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
                     Stop(ActiveSlotsDataGridView.Rows[ActiveSlotsDataGridView.CurrentRow.Index].Cells[0]
@@ -467,13 +467,15 @@ namespace UI
                 MessageBox.Show(@"Wrong login or password!", @"Correct the fields");
                 return;
             }
-            CheckConnection(await _facadeClient.RegisterAccount(RegLog.Text, RegPass.Text, RegPass.Text));
+
+            if (CheckConnection(await _facadeClient.RegisterAccount(RegLog.Text, RegPass.Text, RegPass.Text)))
+                WriteMessageToEventConsole($"You have registered an account {RegLog.Text}");
         }
 
         private async void LoginButton_Click(object sender, EventArgs e)
         {
             DefaultResponse sessionId;
-            if (!CheckConnection(sessionId = await _facadeClient.SigningIn(LogLogTextBox.Text, LogPassTextBox.Text, RegKey.Text, RegToken.Text))) return;
+            if (!CheckConnection(sessionId = await _facadeClient.SigningIn(LogLogTextBox.Text, LogPassTextBox.Text, SecretTxb.Text, KeyTxb.Text))) return;
             SessionIDLbl.Text = sessionId.Message;
             LoggedGroupBox.Visible = true;
             LoggedGroupBox.Enabled = true;
