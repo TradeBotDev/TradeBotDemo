@@ -21,7 +21,7 @@ namespace Facade
         }
         public async Task History_SubscribeEvents(Ref.SubscribeEventsRequest request, IServerStreamWriter<Ref.SubscribeEventsResponse> responseStream, ServerCallContext context)
         {
-            var response = Client.SubscribeEvents(new TradeBot.History.HistoryService.v1.SubscribeEventsRequest { Sessionid = request.Sessionid }, context.RequestHeaders);
+            using var response = Client.SubscribeEvents(new TradeBot.History.HistoryService.v1.SubscribeEventsRequest { Sessionid = request.Sessionid }, context.RequestHeaders);
             Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", nameof(History_SubscribeEvents), request.Sessionid);
             while (await response.ResponseStream.MoveNext())
             {

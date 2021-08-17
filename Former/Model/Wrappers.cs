@@ -22,7 +22,7 @@ namespace Former.Model
         public string Id;
         public double Quantity;
         public double Price;
-        public DateTime LastUpdateDate;
+        public DateTimeOffset LastUpdateDate;
         public OrderSignature Signature;
     }
 

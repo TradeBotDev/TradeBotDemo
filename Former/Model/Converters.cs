@@ -14,7 +14,7 @@ namespace Former.Model
             return new Order
             {
                 Id = order.Id,
-                LastUpdateDate = order.LastUpdateDate.ToDateTime(),
+                LastUpdateDate = order.LastUpdateDate.ToDateTimeOffset(),
                 Price = order.Price,
                 Quantity = order.Quantity,
                 Signature = new OrderSignature
@@ -35,7 +35,7 @@ namespace Former.Model
             return new TradeBot.Common.v1.Order
             {
                 Id = order.Id,
-                LastUpdateDate = order.LastUpdateDate.ToTimestamp(),
+                LastUpdateDate = new Timestamp{Seconds = order.LastUpdateDate.ToUnixTimeSeconds()},
                 Price = order.Price,
                 Quantity = order.Quantity,
                 Signature = new TradeBot.Common.v1.OrderSignature

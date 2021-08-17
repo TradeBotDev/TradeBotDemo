@@ -43,17 +43,17 @@ namespace UI
 
         private async Task SubscribeEvents()
         {
-            var response = _client.SubscribeEvents(new SubscribeEventsRequest { Sessionid = _meta.GetValue("sessionid") });
+            using var call = _client.SubscribeEvents(new SubscribeEventsRequest { Sessionid = _meta.GetValue("sessionid") }, _meta);
 
-            while (await response.ResponseStream.MoveNext())
+            while (await call.ResponseStream.MoveNext())
             {
-                switch (response.ResponseStream.Current.EventTypeCase)
+                switch (call.ResponseStream.Current.EventTypeCase)
                 {
                     case SubscribeEventsResponse.EventTypeOneofCase.Balance:
-                        HandleBalanceUpdate?.Invoke(response.ResponseStream.Current.Balance);
+                        HandleBalanceUpdate?.Invoke(call.ResponseStream.Current.Balance);
                         break;
                     case SubscribeEventsResponse.EventTypeOneofCase.Order:
-                        HandleOrderUpdate?.Invoke(response.ResponseStream.Current.Order);
+                        HandleOrderUpdate?.Invoke(call.ResponseStream.Current.Order);
                         break;
                     case SubscribeEventsResponse.EventTypeOneofCase.None:
                         break;
