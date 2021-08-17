@@ -10,7 +10,7 @@ namespace Former.Model
     public class UpdateHandlers
     {
         private readonly Storage _storage;
-        private Config _configuration;
+        private Configuration _configuration;
         private readonly TradeMarketClient _tradeMarketClient;
         private readonly Metadata _metadata;
         private readonly HistoryClient _historyClient; 
@@ -20,7 +20,7 @@ namespace Former.Model
         private int _oldTotalBalance;
 
 
-        internal UpdateHandlers(Storage storage, Config configuration, TradeMarketClient tradeMarketClient, Metadata metadata, HistoryClient historyClient)
+        internal UpdateHandlers(Storage storage, Configuration configuration, TradeMarketClient tradeMarketClient, Metadata metadata, HistoryClient historyClient)
         {
             _storage = storage;
             _storage.HandleUpdateEvent += MainUpdateHandler;
@@ -33,7 +33,7 @@ namespace Former.Model
         /// <summary>
         /// Обвновляет конфигурацию в UpdateHandlers (позволяет изменять конфигурацию во время работы)
         /// </summary>
-        internal void SetConfiguration(Config configuration)
+        internal void SetConfiguration(Configuration configuration)
         {
             _configuration = configuration;
         }
@@ -61,8 +61,8 @@ namespace Former.Model
             if (order is not null)
             {
                 //здесь сообщается истории об инициализации оредра или о его удалении (это касается только контр-ордеров)
-                if (changesType == ChangesType.Partitial) await _historyClient.WriteOrder(order, ChangesType.Partitial, _metadata, "Counter order initialized");
-                if (changesType == ChangesType.Delete) await _historyClient.WriteOrder(order, ChangesType.Delete, _metadata, "Counter order filled");
+                if (changesType == ChangesType.CHANGES_TYPE_PARTITIAL) await _historyClient.WriteOrder(order, ChangesType.CHANGES_TYPE_PARTITIAL, _metadata, "Counter order initialized");
+                if (changesType == ChangesType.CHANGES_TYPE_DELETE) await _historyClient.WriteOrder(order, ChangesType.CHANGES_TYPE_DELETE, _metadata, "Counter order filled");
             }
         }
 
@@ -86,7 +86,7 @@ namespace Former.Model
         /// </summary>
         private double GetFairPrice(OrderType type)
         {
-            return type == OrderType.Sell ? _storage.SellMarketPrice : _storage.BuyMarketPrice;
+            return type == OrderType.ORDER_TYPE_SELL ? _storage.SellMarketPrice : _storage.BuyMarketPrice;
         }
 
         /// <summary>
@@ -101,23 +101,23 @@ namespace Former.Model
             {
                 var fairPrice = GetFairPrice(order.Signature.Type);
                 //отправляем запрос на изменение цены ордера по его id
-                var response = await _tradeMarketClient.AmendOrder(order.Id, fairPrice, _metadata);
+                var response = Converters.ConvertDefaultResponse(await _tradeMarketClient.AmendOrder(order.Id, fairPrice, _metadata).Result);
 
-                if (response.Response.Code == ReplyCode.Succeed)
+                if ((ReplyCode)response.Response.Code == ReplyCode.REPLY_CODE_SUCCEED)
                 {
                     //в случае положительного ответа обновляем его в своём списке и сообщаем об изменениях истории
                     UpdateOrderPrice(order, fairPrice);
-                    await _historyClient.WriteOrder(order, ChangesType.Update, _metadata, "Order amended");
+                    await _historyClient.WriteOrder(order, ChangesType.CHANGES_TYPE_UPDATE, _metadata, "Order amended");
                 }
                 else if (response.Response.Message.Contains("Invalid ordStatus"))
                 {
                     //при получении ошибки Invalid ordStatus мы понимаем, что пытаемся изменить ордер, которого нет на бирже, 
                     //но при этом он есть у нас в списках, поэтому мы удаляем его из своих списков и сообщаем об удалении истории
-                    await _historyClient.WriteOrder(order, ChangesType.Delete, _metadata, "");
+                    await _historyClient.WriteOrder(order, ChangesType.CHANGES_TYPE_DELETE, _metadata, "");
                     var removeResponse = _storage.RemoveOrder(key, _storage.MyOrders);
-                    Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed cause cannot be amended {@ResponseCode} ", "Former", order.Id, order.Price, order.Quantity, order.Signature.Type, removeResponse ? ReplyCode.Succeed : ReplyCode.Failure);
+                    Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed cause cannot be amended {@ResponseCode} ", "Former", order.Id, order.Price, order.Quantity, order.Signature.Type, removeResponse ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
                 } else return;
-                Log.Information("{@Where}: Order {@Id} amended with {@Price} {@ResponseCode} {@ResponseMessage}", "Former", key, fairPrice, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Succeed ? "" : response.Response.Message);
+                Log.Information("{@Where}: Order {@Id} amended with {@Price} {@ResponseCode} {@ResponseMessage}", "Former", key, fairPrice, response.Response.Code.ToString(), (ReplyCode)response.Response.Code == ReplyCode.REPLY_CODE_SUCCEED ? "" : response.Response.Message);
             }
             _storage.FitPricesLocker = false;
         }

@@ -2,11 +2,11 @@
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Former.Model;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Grpc.Net.Client;
 using Serilog;
-using TradeBot.Common.v1;
 using TradeBot.History.HistoryService.v1;
 
 namespace Former.Clients
