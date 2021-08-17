@@ -1,4 +1,6 @@
-﻿<!doctype html>
+﻿@using Website.Components;
+
+<!doctype html>
 <html>
     <head>
         <!--Невидимые на странице подключения и прочее-->
@@ -15,21 +17,19 @@
             <h1>Tradebot</h1>
             <ul>
                 <li><a href="/">Главная страница</a></li>
-                @if (User.Identity.IsAuthenticated)
-                {
+                @if (User.Identity.IsAuthenticated) {
                     <!--Производится проверка вошедшего пользователя на то, обладает ли он лицензией.
                     Если он не обдалает ей, появляется кнопка покупки.-->
                     if (ViewBag.HaveLicense == null || !ViewBag.HaveLicense)
                     {
                         <li><a href="/purchase/buy">Купить</a></li>
                     }
-                    <!--Если пользователь аутентифицирован, ему показываются кнопки аккаунта и выхода-->
+                    <!--Если пользователь аутентифицирован, ему показываются кнопки аккаунта и выхода.-->
                     <li><a href="/account">Управление биржами</a></li>
-                    <component type="typeof(Website.Components.LogoutMessage)" render-mode="ServerPrerendered"/>
-                    <!--<li><a href="/authorization/logout">Выйти</a></li>-->
+                    <!--Кнопка выхода является компонентом, и она показывает окошко выхода при нажатии.-->
+                    <component type="typeof(LogoutDialog)" render-mode="ServerPrerendered"/>
                 }
-                else
-                {
+                else {
                     <!--Иначе ему показываются кнопки покупки, входа и регистрации-->
                     <li><a href="/purchase/buy">Купить</a></li>
                     <li><a href="/authorization/login">Войти</a></li>

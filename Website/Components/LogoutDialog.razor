@@ -1,12 +1,14 @@
-﻿<li><a @onclick="Show">Выйти</a></li>
+﻿<!--Кнопка выхода из аккаунта, которая отображается в шапке сайта.-->
+<li><a @onclick="Show">Выйти</a></li>
 
-@if (isEnabled)
-{
+@if (isEnabled) {
+    <!--Контейнер, который растягивается на всю страницу.-->
     <div class="message_background">
+        <!--Весь блок выхода является формой.-->
         <form action="/authorization/logout" method="post">
             <div class="message_block">
                 <div>
-                    <h3>Выход из аккаунта</h3>
+                    <h3>Выйти из аккаунта</h3>
                     <p>Вы действительно хотите выйти?</p>
                     <div class="form_checkbox_container">
                         <input type="checkbox" id="SaveExchanges" name="SaveExchanges" value="true" />
@@ -14,7 +16,9 @@
                     </div>
                 </div>
                 <div class="message_block_buttons">
+                    <!--Кнопка submit, которая при нажатии произведет отправку формы и выключит диалоговое окно.-->
                     <input class="button color_button" type="submit" @onclick="Close" value="Выход" />
+                    <!--Кнопка, которая просто закроет диалоговое окно.-->
                     <input class="button color_button" type="button" @onclick="Close" value="Остаться" />
                 </div>
             </div>
@@ -24,7 +28,6 @@
 
 @code {
     private bool isEnabled = false;
-    public string SessionId { get; set; }
 
     private async void Show()
     {
