@@ -65,7 +65,16 @@ namespace Former.Clients
 
         private bool EventFilter(Metadata incomingMeta, Metadata filteringMeta)
         {
-            return filteringMeta[0] == incomingMeta[0] && filteringMeta[1] == incomingMeta[1] && filteringMeta[2] == incomingMeta[2];
+            bool IsEqual(Metadata incomingMeta, Metadata filteringMeta, string key)
+            {
+                return (incomingMeta.GetValue(key) is not null &&
+                        incomingMeta.GetValue(key) == filteringMeta.GetValue(key)) 
+                       || incomingMeta.GetValue(key) is null;
+            }
+
+
+            return IsEqual(incomingMeta,filteringMeta,"sessionid") && IsEqual(incomingMeta,filteringMeta,"slot") && IsEqual(incomingMeta,filteringMeta,"trademarket");
+            //return filteringMeta[0] == incomingMeta[0] && filteringMeta[1] == incomingMeta[1] && filteringMeta[2] == incomingMeta[2];
         }
 
         /// <summary>
