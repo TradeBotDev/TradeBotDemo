@@ -48,13 +48,16 @@ namespace Relay.Services
         private UserContext GetUserContext(Metadata meta)
         {
             //TODO рабтает ли тут MetaComparer
-            if (contexts.ContainsKey(meta))
+            lock (this)
             {
-                return contexts[meta];
+                if (contexts.ContainsKey(meta))
+                {
+                    return contexts[meta];
+                }
+                UserContext newContext = new(meta, _formerClient, _algorithmClient, _tradeMarketClient);
+                contexts.Add(meta, newContext);
+                return newContext;
             }
-            UserContext newContext = new(meta, _formerClient, _algorithmClient, _tradeMarketClient);
-            contexts.Add(meta, newContext);
-            return newContext;
         }
 
         public RelayService(AlgorithmClient algorithm, TradeMarketClient tradeMarket, FormerClient former)
