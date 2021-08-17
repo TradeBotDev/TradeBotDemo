@@ -93,7 +93,15 @@ namespace TradeMarket.Model.UserContexts.Builders
             {
                 _userContextSemaphore.Release();
             }
-            return userContext;
+            try
+            {
+                return await userContext.AutharizationCompleted.Task;
+            }
+            catch (Exception e)
+            {
+                RegisteredUserContexts.Remove(userContext);
+                throw e;
+            }
         }
         #endregion
         #region CommonContext
