@@ -2,7 +2,6 @@
 using Former.Clients;
 using Former.Model;
 using Google.Protobuf.WellKnownTypes;
-using Grpc.Core;
 using TradeBot.Common.v1;
 using Xunit;
 
@@ -15,7 +14,7 @@ namespace FormerTests
         {
             var historyClient = new HistoryClient();
             //Arrange
-            var storage = new Storage(historyClient, new Metadata())
+            var storage = new Storage
             {
                 BuyMarketPrice = 0,
                 SellMarketPrice = 0
@@ -33,7 +32,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata())
+            var storage = new Storage
             {
                 BuyMarketPrice = 0,
                 SellMarketPrice = 0
@@ -51,7 +50,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata())
+            var storage = new Storage
             {
                 BuyMarketPrice = 0,
                 SellMarketPrice = 0
@@ -69,7 +68,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
+            var storage = new Storage();
 
             var newComingOrder = new Order
             {
@@ -89,7 +88,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
+            var storage = new Storage();
             var newComingOrder = new Order
             {
                 Quantity = 100, Id = "1", Signature = new OrderSignature{ Status = OrderStatus.Open, Type = OrderType.Sell}, LastUpdateDate = new Timestamp(), Price = 0
@@ -108,7 +107,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
+            var storage = new Storage();
 
             var oldOrder = new Order { Quantity = 400, Id = "1", Signature = new OrderSignature { Status = OrderStatus.Open, Type = OrderType.Sell}, LastUpdateDate = new Timestamp(), Price = 38000};
 
@@ -134,7 +133,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
+            var storage = new Storage();
 
             var oldOrder = new Order { Quantity = 400, Id = "1", Signature = new OrderSignature { Status = OrderStatus.Open, Type = OrderType.Buy}, LastUpdateDate = new Timestamp(), Price = 38000};
 
@@ -160,7 +159,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
+            var storage = new Storage();
 
             var oldOrder = new Order { Quantity = 400, Id = "1", Signature = new OrderSignature { Status = OrderStatus.Open, Type = OrderType.Buy}, LastUpdateDate = new Timestamp(), Price = 38000};
 
@@ -186,7 +185,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
+            var storage = new Storage();
 
             var oldOrder = new Order { Quantity = 400, Id = "1", Signature = new OrderSignature { Status = OrderStatus.Open, Type = OrderType.Sell}, LastUpdateDate = new Timestamp(), Price = 38000};
 
@@ -212,7 +211,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
+            var storage = new Storage();
 
             var oldOrder = new Order { Quantity = 400, Id = "1", Signature = new OrderSignature { Status = OrderStatus.Open, Type = OrderType.Sell}, LastUpdateDate = new Timestamp(), Price = 38000};
 
@@ -236,7 +235,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
+            var storage = new Storage();
 
             var oldOrder = new Order { Quantity = 400, Id = "1", Signature = new OrderSignature { Status = OrderStatus.Open, Type = OrderType.Buy}, LastUpdateDate = new Timestamp(), Price = 38000};
 
@@ -260,7 +259,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata())
+            var storage = new Storage()
             {
                 PositionSize = 0
             };
@@ -276,7 +275,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata())
+            var storage = new Storage()
             {
                 PositionSize = 0
             };
@@ -292,7 +291,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata())
+            var storage = new Storage
             {
                 AvailableBalance = 400,
                 TotalBalance = 100
@@ -309,7 +308,7 @@ namespace FormerTests
         public void UpdateBalance_Available400AndTotal0_Available400AndTotal400returned()
         {var historyClient = new HistoryClient();
             //Arrange
-            var storage = new Storage(historyClient, new Metadata())
+            var storage = new Storage
             {
                 AvailableBalance = 100,
                 TotalBalance = 400
@@ -326,7 +325,7 @@ namespace FormerTests
         public void UpdateBalance_AvailableNegative400AndTotalNegative400_Available100AndTotal100returned()
         {var historyClient = new HistoryClient();
             //Arrange
-            var storage = new Storage(historyClient, new Metadata())
+            var storage = new Storage
             {
                 AvailableBalance = 100,
                 TotalBalance = 100
@@ -344,7 +343,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
+            var storage = new Storage();
             storage.MyOrders.TryAdd("1",new Order{ Id = "1", Price = 0, Quantity =0, Signature = new OrderSignature(), LastUpdateDate = new Timestamp()});
 
             //Act
@@ -359,7 +358,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
+            var storage = new Storage();
             storage.CounterOrders.TryAdd("1",new Order{ Id = "1", Price = 0, Quantity =0, Signature = new OrderSignature(), LastUpdateDate = new Timestamp()});
 
             //Act
@@ -374,7 +373,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
+            var storage = new Storage();
             storage.MyOrders.TryAdd("1",new Order{ Id = "1", Price = 38000, Quantity = 100, Signature = new OrderSignature(), LastUpdateDate = new Timestamp()});
             var newComingOrder = new Order
             {
@@ -395,7 +394,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
+            var storage = new Storage();
             storage.CounterOrders.TryAdd("1",new Order{ Id = "1", Price = 38000, Quantity = 100, Signature = new OrderSignature(), LastUpdateDate = new Timestamp()});
             var newComingOrder = new Order
             {
@@ -416,7 +415,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
+            var storage = new Storage();
             storage.CounterOrders.TryAdd("1",new Order{ Id = "1", Price = 38000, Quantity = 100, Signature = new OrderSignature(), LastUpdateDate = new Timestamp()});
             var newComingOrder = new Order
             {
@@ -437,7 +436,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
+            var storage = new Storage();
             storage.MyOrders.TryAdd("1",new Order{ Id = "1", Price = 38000, Quantity = 100, Signature = new OrderSignature(), LastUpdateDate = new Timestamp()});
             var newComingOrder = new Order
             {
@@ -458,7 +457,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
+            var storage = new Storage();
             storage.CounterOrders.TryAdd("1",new Order{ Id = "1", Price = 0, Quantity = 0, Signature = new OrderSignature(), LastUpdateDate = new Timestamp()});
 
             var newComingOrder = new Order
@@ -476,7 +475,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
+            var storage = new Storage();
             storage.MyOrders.TryAdd("1",new Order{ Id = "1", Price = 0, Quantity = 0, Signature = new OrderSignature(), LastUpdateDate = new Timestamp()});
 
             var newComingOrder = new Order
@@ -494,7 +493,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
+            var storage = new Storage();
             
             var newComingOrder = new Order
             {
@@ -511,7 +510,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
+            var storage = new Storage();
             
             var newComingOrder = new Order
             {
