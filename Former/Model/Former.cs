@@ -93,10 +93,13 @@ namespace Former.Model
         /// </summary>
         private bool CheckPossibilityPlacingOrder(OrderType type)
         {
-            if (!CheckPosition(type)) return false;
+            
+            //вычисляем предполагаемую стоимость ордера по рыночной цене в биткоинах
             var orderCost = _configuration.ContractValue / (type == OrderType.Sell ? _storage.SellMarketPrice : _storage.BuyMarketPrice);
+            //конвертируем баланс в биткоины (XBT), так как он приходит от биржи в сатоши (XBt)
             var totalBalance = ConvertSatoshiToXBT(_storage.TotalBalance);
             var availableBalance = ConvertSatoshiToXBT(_storage.AvailableBalance);
+            //проверяем, возможно ли выставить с текущим общим и доступным балансом с учётом настройки
             if (totalBalance * (_configuration.AvaibleBalance - 1) + availableBalance > orderCost) return true;
             Log.Debug("{@Where}: Cannot place {@Type} order. Insufficient balance.", "Former", type);
             return false;
@@ -107,6 +110,7 @@ namespace Former.Model
         /// </summary>
         private bool CheckPosition(OrderType type)
         {
+            //проверяет, есть ли уже ордера противоположного типа и возвращает false, если таковые имеются.
             var alreadyPresentOrderTypes = type == OrderType.Sell ? OrderType.Buy : OrderType.Sell;
             if (_storage.MyOrders.Count(x => x.Value.Signature.Type == alreadyPresentOrderTypes) > 0 ||
                 _storage.CounterOrders.Count(x => x.Value.Signature.Type == alreadyPresentOrderTypes) > 0 )
@@ -120,15 +124,24 @@ namespace Former.Model
         internal async Task FormOrder(int decision)
         {
             if (_storage.PlaceLocker) return;
+            //тип выставляемого ордера в зависимости от решения алгоритма
             var orderType = decision > 0 ? OrderType.Buy : OrderType.Sell;
+
+            //проверяем можно ли поставить ордер такого типа в текущей позиции
+            if (!CheckPosition(orderType)) return;
+            //проверяем возможность выставления ордера исходя из имеющегося баланса 
             if (!CheckPossibilityPlacingOrder(orderType)) return;
 
+            //размер заказа в зависимости от решения алгоритма (на продажу размер отрицательный) с учётом настройки ContractValue
             var quantity = orderType == OrderType.Buy ? _configuration.ContractValue : -_configuration.ContractValue;
+            //цена выставляемого ордера в зависимости от решения алгоритма (тип рыночной цены)
             var price = orderType == OrderType.Buy ? _storage.BuyMarketPrice : _storage.SellMarketPrice;
 
+            //отправляем запрос на биржу выставить ордер по рыночной цене 
             var response = await _tradeMarketClient.PlaceOrder(price, quantity, _metadata);
             if (response.Response.Code == ReplyCode.Succeed)
             {
+                //в случае успешного выставления ордера, вносим его в список своих ордеров
                 var newOrder = new Order
                 {
                     Id = response.OrderId,
@@ -142,6 +155,7 @@ namespace Former.Model
                     "{@Where}: Order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} added to my orders list {@ResponseCode}",
                     "Former", response.OrderId, price, quantity, orderType,
                     addResponse ? ReplyCode.Succeed : ReplyCode.Failure);
+                //сообщаем сервису истории о новом ордере
                 await _historyClient.WriteOrder(newOrder, ChangesType.Insert, _metadata, "Initial order placed");
             }
 
