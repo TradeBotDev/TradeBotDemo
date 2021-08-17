@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Former.Model;
 using Grpc.Core;
 using Grpc.Net.Client;
 using Serilog;
-using TradeBot.Common.v1;
 using TradeBot.TradeMarket.TradeMarketService.v1;
 
 namespace Former.Clients
@@ -113,7 +113,7 @@ namespace Former.Clients
             {
                 while (await call.ResponseStream.MoveNext(_token.Token))
                 {
-                    if (EventFilter(call.ResponseHeadersAsync.Result, meta)) await UpdateMyOrders?.Invoke(call.ResponseStream.Current.Changed, call.ResponseStream.Current.ChangesType);
+                    if (EventFilter(call.ResponseHeadersAsync.Result, meta)) await UpdateMyOrders?.Invoke(Converters.ConvertOrder(call.ResponseStream.Current.Changed), (ChangesType)call.ResponseStream.Current.ChangesType);
                 }
             }
 

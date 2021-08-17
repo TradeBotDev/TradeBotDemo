@@ -26,7 +26,7 @@ namespace Former.Services
                 else
                 {
                     //устанавливаем или обновляем конфигурацию
-                    userContext.SetConfiguration(request.Request.Config);
+                    userContext.SetConfiguration(Converters.ConvertConfiguration(request.Request.Config));
                     //подписываемся на трейдмаркет
                     userContext.SubscribeStorageToMarket();
                 }

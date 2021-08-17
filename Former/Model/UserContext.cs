@@ -101,7 +101,7 @@ namespace Former.Model
         /// <summary>
         /// Выставляем конфигурацию, где это необходимо.
         /// </summary>
-        internal void SetConfiguration(Config configuration)
+        internal void SetConfiguration(Configuration configuration)
         {
             _former.SetConfiguration(configuration);
             _updateHandlers.SetConfiguration(configuration);

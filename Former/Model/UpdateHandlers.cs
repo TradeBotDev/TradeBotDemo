@@ -101,15 +101,16 @@ namespace Former.Model
             {
                 var fairPrice = GetFairPrice(order.Signature.Type);
                 //отправляем запрос на изменение цены ордера по его id
-                var response = Converters.ConvertDefaultResponse(await _tradeMarketClient.AmendOrder(order.Id, fairPrice, _metadata).Result);
+                var ammendOrderResponse = await _tradeMarketClient.AmendOrder(order.Id, fairPrice, _metadata);
+                var response  = Converters.ConvertDefaultResponse(ammendOrderResponse.Response);
 
-                if ((ReplyCode)response.Response.Code == ReplyCode.REPLY_CODE_SUCCEED)
+                if (response.Code == ReplyCode.REPLY_CODE_SUCCEED)
                 {
                     //в случае положительного ответа обновляем его в своём списке и сообщаем об изменениях истории
                     UpdateOrderPrice(order, fairPrice);
                     await _historyClient.WriteOrder(order, ChangesType.CHANGES_TYPE_UPDATE, _metadata, "Order amended");
                 }
-                else if (response.Response.Message.Contains("Invalid ordStatus"))
+                else if (response.Message.Contains("Invalid ordStatus"))
                 {
                     //при получении ошибки Invalid ordStatus мы понимаем, что пытаемся изменить ордер, которого нет на бирже, 
                     //но при этом он есть у нас в списках, поэтому мы удаляем его из своих списков и сообщаем об удалении истории
@@ -117,7 +118,7 @@ namespace Former.Model
                     var removeResponse = _storage.RemoveOrder(key, _storage.MyOrders);
                     Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed cause cannot be amended {@ResponseCode} ", "Former", order.Id, order.Price, order.Quantity, order.Signature.Type, removeResponse ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
                 } else return;
-                Log.Information("{@Where}: Order {@Id} amended with {@Price} {@ResponseCode} {@ResponseMessage}", "Former", key, fairPrice, response.Response.Code.ToString(), (ReplyCode)response.Response.Code == ReplyCode.REPLY_CODE_SUCCEED ? "" : response.Response.Message);
+                Log.Information("{@Where}: Order {@Id} amended with {@Price} {@ResponseCode} {@ResponseMessage}", "Former", key, fairPrice, response.Code.ToString(), response.Code == ReplyCode.REPLY_CODE_SUCCEED ? "" : response.Message);
             }
             _storage.FitPricesLocker = false;
         }

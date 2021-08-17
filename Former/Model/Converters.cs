@@ -1,5 +1,4 @@
-﻿using System;
-using Google.Protobuf.WellKnownTypes;
+﻿using Google.Protobuf.WellKnownTypes;
 using TradeBot.Common.v1;
 namespace Former.Model
 {
@@ -25,6 +24,7 @@ namespace Former.Model
                 }
             };
         }
+
         public static TradeBot.Common.v1.Order ConvertOrder(Order order)
         {
             var status = order.Signature.Status == OrderStatus.ORDER_STATUS_OPEN
@@ -45,14 +45,15 @@ namespace Former.Model
                 }
             };
         }
-        public static Configuration ConvertConfiguration(TradeBot.Common.v1.Config order)
+
+        public static Configuration ConvertConfiguration(Config order)
         {
             return new Configuration
             {
                 AlgorithmInfo = new AlgorithmInfo
                 {
                     Interval = order.AlgorithmInfo.Interval.ToTimeSpan(),
-                    Sensitivity = order.AlgorithmInfo.Sensivity
+                    Sensitivity = order.AlgorithmInfo.Sensitivity
                 },
                 AvailableBalance = order.AvaibleBalance,
                 ContractValue = order.ContractValue,
@@ -60,14 +61,15 @@ namespace Former.Model
                 RequiredProfit = order.RequiredProfit
             };
         }
-        public static TradeBot.Common.v1.Config ConvertConfiguration(Configuration order)
+
+        public static Config ConvertConfiguration(Configuration order)
         {
             return new Config
             {
                 AlgorithmInfo = new TradeBot.Common.v1.AlgorithmInfo
                 {
                     Interval = order.AlgorithmInfo.Interval.ToDuration(),
-                    Sensivity = order.AlgorithmInfo.Sensitivity
+                    Sensitivity = order.AlgorithmInfo.Sensitivity
                 },
                 AvaibleBalance = order.AvailableBalance,
                 ContractValue = order.ContractValue,
@@ -75,6 +77,7 @@ namespace Former.Model
                 RequiredProfit = order.RequiredProfit
             };
         }
+
         public static DefaultResponse ConvertDefaultResponse(TradeBot.Common.v1.DefaultResponse defaultResponse)
         {
             return new DefaultResponse
@@ -83,12 +86,31 @@ namespace Former.Model
                 Message = defaultResponse.Message
             };
         }
+
         public static TradeBot.Common.v1.DefaultResponse ConvertDefaultResponse(DefaultResponse defaultResponse)
         {
             return new TradeBot.Common.v1.DefaultResponse
             {
                 Code = (TradeBot.Common.v1.ReplyCode)defaultResponse.Code,
                 Message = defaultResponse.Message
+            };
+        }
+
+        public static Balance ConvertBalance(TradeBot.Common.v1.Balance balance)
+        {
+            return new Balance
+            {
+                Currency = balance.Currency,
+                Value = balance.Value
+            };
+        }
+
+        public static TradeBot.Common.v1.Balance ConvertBalance(Balance balance)
+        {
+            return new TradeBot.Common.v1.Balance
+            {
+                Currency = balance.Currency,
+                Value = balance.Value
             };
         }
     }

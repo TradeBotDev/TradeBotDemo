@@ -70,7 +70,7 @@ namespace Former.Model
     }
     public class Balance
     {
-        string Currency;
-        string Value;
+        public string Currency;
+        public string Value;
     }
 }

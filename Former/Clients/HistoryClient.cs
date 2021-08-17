@@ -65,8 +65,10 @@ namespace Former.Clients
                 {
                     Balance = new PublishBalanceEvent
                     {
-                        Balance = new Balance
-                            { Currency = "XBT", Value = balance.ToString(CultureInfo.InvariantCulture) },
+                        Balance = Converters.ConvertBalance(new Balance
+                        {
+                            Currency = "XBT", Value = (balance * 0.00000001).ToString(CultureInfo.InvariantCulture)
+                        }),
                         Sessionid = meta.GetValue("sessionid"),
                         Time = new Timestamp { Seconds = DateTimeOffset.Now.ToUnixTimeSeconds() }
                     }
@@ -91,7 +93,8 @@ namespace Former.Clients
                 {
                     Order = new PublishOrderEvent
                     {
-                        ChangesType = changesType, Order = order, Sessionid = meta.GetValue("sessionid"),
+                        ChangesType = (TradeBot.Common.v1.ChangesType)changesType,
+                        Order = Converters.ConvertOrder(order), Sessionid = meta.GetValue("sessionid"),
                         Time = new Timestamp { Seconds = DateTimeOffset.Now.ToUnixTimeSeconds() },
                         Message = message, SlotName = meta.GetValue("slot")
                     }
