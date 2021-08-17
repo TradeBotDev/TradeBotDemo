@@ -475,7 +475,7 @@ namespace UI
         private async void LoginButton_Click(object sender, EventArgs e)
         {
             DefaultResponse sessionId;
-            if (!CheckConnection(sessionId = await _facadeClient.SigningIn(LogLogTextBox.Text, LogPassTextBox.Text, SecretTxb.Text, KeyTxb.Text))) return;
+            if (!CheckConnection(sessionId = await _facadeClient.SigningIn(LogLogTextBox.Text, LogPassTextBox.Text, KeyTxb.Text, SecretTxb.Text))) return;
             SessionIDLbl.Text = sessionId.Message;
             LoggedGroupBox.Visible = true;
             LoggedGroupBox.Enabled = true;

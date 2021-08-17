@@ -659,7 +659,7 @@ namespace UI
             this.SecretTxb.Name = "SecretTxb";
             this.SecretTxb.Size = new System.Drawing.Size(212, 26);
             this.SecretTxb.TabIndex = 3;
-            this.SecretTxb.Text = "0n8sicC9Y8v3iuwtDDkJ44IO";
+            this.SecretTxb.Text = "PhVLNBRGA199lGgrQ2bbf59Ux7yRsgwkn-sfigW7rMOPoPWh";
             // 
             // KeyTxb
             // 
@@ -669,7 +669,7 @@ namespace UI
             this.KeyTxb.Name = "KeyTxb";
             this.KeyTxb.Size = new System.Drawing.Size(212, 26);
             this.KeyTxb.TabIndex = 20;
-            this.KeyTxb.Text = "PhVLNBRGA199lGgrQ2bbf59Ux7yRsgwkn-sfigW7rMOPoPWh";
+            this.KeyTxb.Text = "0n8sicC9Y8v3iuwtDDkJ44IO";
             // 
             // RegPass
             // 

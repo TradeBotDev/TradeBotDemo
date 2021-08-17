@@ -140,9 +140,13 @@ namespace TradeMarket.Services
             {
                 //Добавляем заголовки ответа по контексту пользователя user из запроса
                 var meta = await MoveInfoToMetadataAsync(context.RequestHeaders, context.ResponseTrailers);
-                foreach(var entry in meta)
+                foreach (var entry in meta)
                 {
-                    context.ResponseTrailers.Add(entry);
+                    if (entry is not null)
+                    {
+                        Log.Information("Service copying entries to response {@Entry}",entry);
+                        context.ResponseTrailers.Add(entry);
+                    }
                 }
 
                 await subscribe(handler, context.CancellationToken);

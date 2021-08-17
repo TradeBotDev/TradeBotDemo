@@ -122,7 +122,7 @@ namespace UI
             }
         }
 
-        public async Task<DefaultResponse> SigningIn(string login, string password, string regKey, string regToken)
+        public async Task<DefaultResponse> SigningIn(string login, string password, string key, string secret)
         {
             //чё за эксченж
             try
@@ -144,8 +144,8 @@ namespace UI
                 _client.AddExchangeAccess(new AddExchangeAccessRequest
                 {
                     SessionId = sessionId,
-                    Token = regKey,
-                    Secret = regToken,
+                    Token = key,
+                    Secret = secret,
                     Code = ExchangeCode.Bitmex,
                     ExchangeName = "BitMEX"
                 });
