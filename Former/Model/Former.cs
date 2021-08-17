@@ -5,6 +5,7 @@ using Grpc.Core;
 using Serilog;
 using System.Threading.Tasks;
 using TradeBot.Common.v1;
+using System.Linq;
 
 namespace Former.Model
 {
@@ -25,7 +26,9 @@ namespace Former.Model
             _metadata = metadata;
             _historyClient = historyClient;
         }
-
+        /// <summary>
+        /// Обвновляет конфигурацию в Former (позволяет изменять конфигурацию во время работы)
+        /// </summary>
         internal void SetConfiguration(Config configuration)
         {
             _configuration = configuration;
@@ -36,16 +39,23 @@ namespace Former.Model
         /// </summary>
         private async Task PlaceCounterOrder(Order oldOrder, Order newComingOrder)
         {
+            //число контрактов контр ордера (работает для полного и для частичного контр-ордера)
             var quantity = oldOrder.Quantity - newComingOrder.Quantity;
+            //тип ордера с которым необходимо выставить контр-ордер
             var type = oldOrder.Signature.Type == OrderType.Buy ? OrderType.Sell : OrderType.Buy;
+            //цена контр ордера, которая зависит цены старого ордера и типа выставляемого ордера с учётом необходимого профита
             var price = type == OrderType.Buy
                 ? oldOrder.Price - oldOrder.Price * _configuration.RequiredProfit
                 : oldOrder.Price + oldOrder.Price * _configuration.RequiredProfit;
-            
+
+            //ответ при добавлении контр-ордера в соответсвующий список (необходимо для логов)
             var addResponse = false;
+            //выставляем контр ордер с рассчитанной ценой и отрицательным числом контрактов, так как контр ордер должен иметь противоположное число 
+            //контрактов по сравнению с oldOrder
             var placeResponse = await _tradeMarketClient.PlaceOrder(price, -quantity, _metadata);
             if (placeResponse.Response.Code == ReplyCode.Succeed)
             {
+                //в случае положительного ответа от биржи вносим контр-ордер в соответсвующий список с полученным в ответе OrderId
                 var newOrder = new Order
                 {
                     Id = placeResponse.OrderId,
@@ -56,16 +66,16 @@ namespace Former.Model
                     LastUpdateDate = new Timestamp()
                 };
                 addResponse = _storage.AddOrder(placeResponse.OrderId, newOrder, _storage.CounterOrders);
+
+                //сообщаем о выставлении контр-ордера истории
+                await _historyClient.WriteOrder(newOrder, ChangesType.Insert, _metadata, "Counter order placed");
+
+                //сообщаем об исполнении старого ордера истории
                 if (Convert.ToInt32(quantity) == Convert.ToInt32(oldOrder.Quantity))
-                {
                     await _historyClient.WriteOrder(oldOrder, ChangesType.Delete, _metadata, "Initial order filled");
-                    await _historyClient.WriteOrder(newOrder, ChangesType.Insert, _metadata, "Counter order placed");
-                }
                 else
-                {
-                    await _historyClient.WriteOrder(newComingOrder, ChangesType.Update, _metadata, "Initial order partially filled");
-                    await _historyClient.WriteOrder(newOrder, ChangesType.Insert, _metadata, "Counter order placed");
-                }
+                    await _historyClient.WriteOrder(newComingOrder, ChangesType.Update, _metadata,
+                        "Initial order partially filled");
             }
 
             Log.Information(
@@ -83,12 +93,25 @@ namespace Former.Model
         /// </summary>
         private bool CheckPossibilityPlacingOrder(OrderType type)
         {
+            if (!CheckPosition(type)) return false;
             var orderCost = _configuration.ContractValue / (type == OrderType.Sell ? _storage.SellMarketPrice : _storage.BuyMarketPrice);
             var totalBalance = ConvertSatoshiToXBT(_storage.TotalBalance);
             var availableBalance = ConvertSatoshiToXBT(_storage.AvailableBalance);
             if (totalBalance * (_configuration.AvaibleBalance - 1) + availableBalance > orderCost) return true;
             Log.Debug("{@Where}: Cannot place {@Type} order. Insufficient balance.", "Former", type);
             return false;
+        }
+
+        /// <summary>
+        /// Если у нас уже есть ордера на этого типа, запрещаем ставить ордер противоположного типа во избежание неверного подсчёта доступного баланса.
+        /// </summary>
+        private bool CheckPosition(OrderType type)
+        {
+            var alreadyPresentOrderTypes = type == OrderType.Sell ? OrderType.Buy : OrderType.Sell;
+            if (_storage.MyOrders.Count(x => x.Value.Signature.Type == alreadyPresentOrderTypes) > 0 ||
+                _storage.CounterOrders.Count(x => x.Value.Signature.Type == alreadyPresentOrderTypes) > 0 )
+                return false;
+            return true;
         }
 
         /// <summary>
@@ -135,6 +158,7 @@ namespace Former.Model
         {
             return satoshiValue * 0.00000001;
         }
+
 
         internal async Task RemoveAllMyOrders()
         {

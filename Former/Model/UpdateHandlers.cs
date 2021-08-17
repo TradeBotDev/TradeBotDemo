@@ -16,21 +16,24 @@ namespace Former.Model
         private readonly Metadata _metadata;
         private readonly HistoryClient _historyClient; 
 
-        private double _savedMarketBuyPrice;
-        private double _savedMarketSellPrice;
-        private int _savedTotalBalance;
+        private double _oldMarketBuyPrice;
+        private double _oldMarketSellPrice;
+        private int _oldTotalBalance;
 
 
         internal UpdateHandlers(Storage storage, Config configuration, TradeMarketClient tradeMarketClient, Metadata metadata, HistoryClient historyClient)
         {
             _storage = storage;
-            _storage.HandleUpdateEvent += CheckIfNeedHandle;
+            _storage.HandleUpdateEvent += MainUpdateHandler;
             _configuration = configuration;
             _metadata = metadata;
             _tradeMarketClient = tradeMarketClient;
             _historyClient = historyClient;
         }
 
+        /// <summary>
+        /// Обвновляет конфигурацию в UpdateHandlers (позволяет изменять конфигурацию во время работы)
+        /// </summary>
         internal void SetConfiguration(Config configuration)
         {
             _configuration = configuration;
@@ -39,20 +42,28 @@ namespace Former.Model
         /// <summary>
         /// Проверяет, стоит ли перевыставлять ордера, и вызывает FitPrices, в том случае, если это необходимо
         /// </summary>
-        private async Task CheckIfNeedHandle()
+        private async Task MainUpdateHandler(Order order, ChangesType changesType)
         {
-            //если рыночная цена изменилась, то необходимо проверить, не устарели ли цени в наших ордерах
-            if (Math.Abs(_storage.SellMarketPrice - _savedMarketSellPrice) > 0.4 || Math.Abs(_savedMarketBuyPrice - _storage.BuyMarketPrice) > 0.4)
+            if (Math.Abs(_storage.SellMarketPrice - _oldMarketSellPrice) > 0.4 || Math.Abs(_oldMarketBuyPrice - _storage.BuyMarketPrice) > 0.4)
             {
-                _savedMarketSellPrice = _storage.SellMarketPrice;
-                _savedMarketBuyPrice = _storage.BuyMarketPrice;
-                Log.Information("{@Where}: Buy market price: {@BuyMarketPrice}, Sell market price: {@SellMarketPrice}", "Former",_storage.BuyMarketPrice, _storage.SellMarketPrice);
+                //если рыночная цена изменилась, то необходимо проверить, не устарели ли цени в наших ордерах и подогнать их к рыночной цене 
+                //с помощью метода FitPrices
+                _oldMarketSellPrice = _storage.SellMarketPrice;
+                _oldMarketBuyPrice = _storage.BuyMarketPrice;
+                //Log.Information("{@Where}: Buy market price: {@BuyMarketPrice}, Sell market price: {@SellMarketPrice}", "Former",_storage.BuyMarketPrice, _storage.SellMarketPrice);
                 if (!_storage.FitPricesLocker && !_storage.MyOrders.IsEmpty) await FitPrices();
             }
-            if (_savedTotalBalance != _storage.TotalBalance)
+            if (_oldTotalBalance != _storage.TotalBalance)
             {
-                _savedTotalBalance= _storage.TotalBalance;
+                //если баланс изменился, необходимо отправить новый баланс в историю
+                _oldTotalBalance= _storage.TotalBalance;
                 await _historyClient.WriteBalance(_storage.TotalBalance, _metadata);
+            }
+            if (order is not null)
+            {
+                //здесь сообщается истории об инициализации оредра или о его удалении (это касается только контр-ордеров)
+                if (changesType == ChangesType.Partitial) await _historyClient.WriteOrder(order, ChangesType.Partitial, _metadata, "Counter order initialized");
+                if (changesType == ChangesType.Delete) await _historyClient.WriteOrder(order, ChangesType.Delete, _metadata, "Counter order filled");
             }
         }
 
@@ -85,26 +96,29 @@ namespace Former.Model
         private async Task FitPrices()
         {
             _storage.FitPricesLocker = true;
-
+            //выбираем ордера из списка своих ордеров, которые необходимо подогнать к новой рыночной цене
             var ordersSuitableForUpdate = _storage.MyOrders.Where(pair => Math.Abs(pair.Value.Price - GetFairPrice(pair.Value.Signature.Type)) >= _configuration.OrderUpdatePriceRange);
             foreach (var (key, order) in ordersSuitableForUpdate)
             {
                 var fairPrice = GetFairPrice(order.Signature.Type);
+                //отправляем запрос на изменение цены ордера по его id
                 var response = await _tradeMarketClient.AmendOrder(order.Id, fairPrice, _metadata);
 
                 if (response.Response.Code == ReplyCode.Succeed)
                 {
+                    //в случае положительного ответа обновляем его в своём списке и сообщаем об изменениях истории
                     UpdateOrderPrice(order, fairPrice);
                     await _historyClient.WriteOrder(order, ChangesType.Update, _metadata, "Order amended");
                 }
                 else if (response.Response.Message.Contains("Invalid ordStatus"))
                 {
+                    //при получении ошибки Invalid ordStatus мы понимаем, что пытаемся изменить ордер, которого нет на бирже, 
+                    //но при этом он есть у нас в списках, поэтому мы удаляем его из своих списков и сообщаем об удалении истории
                     await _historyClient.WriteOrder(order, ChangesType.Delete, _metadata, "");
                     var removeResponse = _storage.RemoveOrder(key, _storage.MyOrders);
                     Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed cause cannot be amended {@ResponseCode} ", "Former", order.Id, order.Price, order.Quantity, order.Signature.Type, removeResponse ? ReplyCode.Succeed : ReplyCode.Failure);
                 } else return;
                 Log.Information("{@Where}: Order {@Id} amended with {@Price} {@ResponseCode} {@ResponseMessage}", "Former", key, fairPrice, response.Response.Code.ToString(), response.Response.Code == ReplyCode.Succeed ? "" : response.Response.Message);
-                
             }
             _storage.FitPricesLocker = false;
         }
