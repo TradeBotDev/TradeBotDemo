@@ -41,6 +41,7 @@ namespace Facade
                     //Уже этой строчки здесь нет!
                     Password = request.Password
                 });
+                Log.Information("Loggin Completed With Result {@LoginResult}", response);
                 return response;
             }
             await Generalization.ConnectionTester(task, methodName, request);
@@ -71,6 +72,8 @@ namespace Facade
                     Password = request.Password,
                     VerifyPassword = request.VerifyPassword
                 }, context.RequestHeaders);
+                Log.Information("Register Completed With Result {@LoginResult}", response);
+
                 return response;
             }
             await Generalization.ConnectionTester(task, methodName, request);

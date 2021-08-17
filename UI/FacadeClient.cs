@@ -131,7 +131,7 @@ namespace UI
                     Email = login,
                     Password = password
                 });
-            
+                
                 var sessionId = logResponse.SessionId;
                 _meta = new Metadata
                 {
