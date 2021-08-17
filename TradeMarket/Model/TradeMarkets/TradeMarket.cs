@@ -6,6 +6,7 @@ using Bitmex.Client.Websocket.Responses.Positions;
 using Bitmex.Client.Websocket.Responses.Wallets;
 using StackExchange.Redis;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -47,9 +48,9 @@ namespace TradeMarket.Model.TradeMarkets
 
         #region Common Publishers
         //IContext = CommonContext
-        public Dictionary<IContext, IPublisher<BookLevel>> Book25Publisher { get; internal set; } = new Dictionary<IContext, IPublisher<BookLevel>>();
+        public IDictionary<IContext, IPublisher<BookLevel>> Book25Publisher { get; internal set; } = new ConcurrentDictionary<IContext, IPublisher<BookLevel>>();
 
-        public Dictionary<IContext, IPublisher<Instrument>> InstrumentPublisher { get; internal set; } = new Dictionary<IContext, IPublisher<Instrument>>();
+        public IDictionary<IContext, IPublisher<Instrument>> InstrumentPublisher { get; internal set; } = new ConcurrentDictionary<IContext, IPublisher<Instrument>>();
 
         #endregion
 
@@ -81,11 +82,11 @@ namespace TradeMarket.Model.TradeMarkets
             await SubscribeTo(client, publisher[context],handler, context, token);
         }
 
-        public Dictionary<IContext, IPublisher<Wallet>> WalletPublishers { get; internal set; } = new Dictionary<IContext, IPublisher<Wallet>>();
-        public Dictionary<IContext, IPublisher<Position>> PositionPublisher { get; internal set; } = new Dictionary<IContext, IPublisher<Position>>();
-        public Dictionary<IContext, IPublisher<Order>> OrderPublisher { get; internal set; } = new Dictionary<IContext, IPublisher<Order>>();
-        public Dictionary<IContext, IPublisher<Margin>> MarginPublisher { get; internal set; } = new Dictionary<IContext, IPublisher<Margin>>();
-        public Dictionary<IContext, IPublisher<bool>> AuthenticationPublisher { get; internal set; } = new Dictionary<IContext, IPublisher<bool>>();
+        public IDictionary<IContext, IPublisher<Wallet>> WalletPublishers { get; internal set; } = new ConcurrentDictionary<IContext, IPublisher<Wallet>>();
+        public IDictionary<IContext, IPublisher<Position>> PositionPublisher { get; internal set; } = new ConcurrentDictionary<IContext, IPublisher<Position>>();
+        public IDictionary<IContext, IPublisher<Order>> OrderPublisher { get; internal set; } = new ConcurrentDictionary<IContext, IPublisher<Order>>();
+        public IDictionary<IContext, IPublisher<Margin>> MarginPublisher { get; internal set; } = new ConcurrentDictionary<IContext, IPublisher<Margin>>();
+        public IDictionary<IContext, IPublisher<bool>> AuthenticationPublisher { get; internal set; } = new ConcurrentDictionary<IContext, IPublisher<bool>>();
         #endregion
 
         #region Subscribe Methods
@@ -112,7 +113,7 @@ namespace TradeMarket.Model.TradeMarkets
                }
            });
         }
-        public async Task UnsubscribeFrom<T>(Dictionary<IContext, IPublisher<T>> publisher,IContext context , EventHandler<IPublisher<T>.ChangedEventArgs> handler)
+        public async Task UnsubscribeFrom<T>(IDictionary<IContext, IPublisher<T>> publisher,IContext context , EventHandler<IPublisher<T>.ChangedEventArgs> handler)
         {
             await Task.Run(async () =>
             {
