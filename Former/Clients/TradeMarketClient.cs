@@ -63,6 +63,11 @@ namespace Former.Clients
             }
         }
 
+        private bool EventFilter(Metadata incomingMeta, Metadata filteringMeta)
+        {
+            return filteringMeta[0] == incomingMeta[0] && filteringMeta[1] == incomingMeta[1] && filteringMeta[2] == incomingMeta[2];
+        }
+
         /// <summary>
         /// Наблиюдает за изменением рыночных цен
         /// </summary>
@@ -73,7 +78,7 @@ namespace Former.Clients
             {
                 while (await call.ResponseStream.MoveNext(_token.Token))
                 {
-                    await UpdateMarketPrices?.Invoke(call.ResponseStream.Current.BidPrice, call.ResponseStream.Current.AskPrice);
+                    if (EventFilter(call.ResponseHeadersAsync.Result, meta)) await UpdateMarketPrices?.Invoke(call.ResponseStream.Current.BidPrice, call.ResponseStream.Current.AskPrice);
                 }
             }
 
@@ -91,7 +96,7 @@ namespace Former.Clients
             {
                 while (await call.ResponseStream.MoveNext(_token.Token))
                 {
-                    await UpdateBalance?.Invoke((int) call.ResponseStream.Current.Margin.AvailableMargin, (int)call.ResponseStream.Current.Margin.MarginBalance);
+                    if (EventFilter(call.ResponseHeadersAsync.Result, meta)) await UpdateBalance?.Invoke((int) call.ResponseStream.Current.Margin.AvailableMargin, (int)call.ResponseStream.Current.Margin.MarginBalance);
                 }
             }
             await ConnectionTester(ObserveBalanceFunc);
@@ -108,7 +113,7 @@ namespace Former.Clients
             {
                 while (await call.ResponseStream.MoveNext(_token.Token))
                 {
-                    await UpdateMyOrders?.Invoke(call.ResponseStream.Current.Changed, call.ResponseStream.Current.ChangesType);
+                    if (EventFilter(call.ResponseHeadersAsync.Result, meta)) await UpdateMyOrders?.Invoke(call.ResponseStream.Current.Changed, call.ResponseStream.Current.ChangesType);
                 }
             }
 
@@ -126,7 +131,7 @@ namespace Former.Clients
             {
                 while (await call.ResponseStream.MoveNext(_token.Token))
                 {
-                    await UpdatePosition?.Invoke(call.ResponseStream.Current.CurrentQty);
+                    if (EventFilter(call.ResponseHeadersAsync.Result, meta)) await UpdatePosition?.Invoke(call.ResponseStream.Current.CurrentQty);
                 }
             }
 
