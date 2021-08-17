@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using Grpc.Core;
 using Grpc.Net.Client;
 using TradeBot.Common.v1;
@@ -131,7 +132,7 @@ namespace UI
                     Email = login,
                     Password = password
                 });
-            
+                //MessageBox.Show(password);
                 var sessionId = logResponse.SessionId;
                 _meta = new Metadata
                 {

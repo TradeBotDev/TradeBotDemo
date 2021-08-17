@@ -139,7 +139,11 @@ namespace TradeMarket.Services
             try
             {
                 //Добавляем заголовки ответа по контексту пользователя user из запроса
-                await MoveInfoToMetadataAsync(context.RequestHeaders, context.ResponseTrailers);
+                var meta = await MoveInfoToMetadataAsync(context.RequestHeaders, context.ResponseTrailers);
+                foreach(var entry in meta)
+                {
+                    context.ResponseTrailers.Add(entry);
+                }
 
                 await subscribe(handler, context.CancellationToken);
                 //ожидаем пока клиенты отменят подписку

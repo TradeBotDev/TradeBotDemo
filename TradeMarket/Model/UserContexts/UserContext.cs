@@ -28,6 +28,8 @@ namespace TradeMarket.Model.UserContexts
     {
         #region Dynamic Part
 
+        public readonly TaskCompletionSource<UserContext> AutharizationCompleted = new TaskCompletionSource<UserContext>();
+
         public Model.TradeMarkets.TradeMarket TradeMarket { get; set; }
 
         public async Task SubscribeToUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, CancellationToken token)
@@ -102,7 +104,16 @@ namespace TradeMarket.Model.UserContexts
 
         public async Task<bool> AutheticateUser(CancellationToken token)
         {
-            return await TradeMarket.AutheticateUser(this,token);
+            bool result = await TradeMarket.AutheticateUser(this,token);
+            if(result == true)
+            {
+                AutharizationCompleted.SetResult(this);
+            }
+            else
+            {
+                AutharizationCompleted.SetException(new ArgumentException("Provided Key and Secret is not valid"));
+            }
+            return result;
         }
 
         #endregion

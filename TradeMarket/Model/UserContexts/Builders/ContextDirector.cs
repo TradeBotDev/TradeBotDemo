@@ -49,7 +49,7 @@ namespace TradeMarket.Model.UserContexts.Builders
                 var keySecretPair = await _accountClient.GetUserInfoAsync(sessionId);
                 var userContextBuilder = new UserContextBuilder(_builder);
                 userContextBuilder
-                .AddKeySecret(keySecretPair.Key, keySecretPair.Secret)
+                .AddKeySecret(key:keySecretPair.Key,secret: keySecretPair.Secret)
                 .AddWebSocketClient(_commonWSClient)
                 .AddTradeMarket(_tradeMarketFactory.GetTradeMarket(tradeMarketName));
                 return await userContextBuilder.InitUser(token);
@@ -93,7 +93,15 @@ namespace TradeMarket.Model.UserContexts.Builders
             {
                 _userContextSemaphore.Release();
             }
-            return userContext;
+            try
+            {
+                return await userContext.AutharizationCompleted.Task;
+            }
+            catch (Exception e)
+            {
+                RegisteredUserContexts.Remove(userContext);
+                throw e;
+            }
         }
         #endregion
         #region CommonContext
@@ -108,13 +116,14 @@ namespace TradeMarket.Model.UserContexts.Builders
             {
                 Log.Logger.Information("Getting CommonContext {@slotName} : {@tradeMarketName}", slotName, tradeMarketName);
                 commonContext = RegisteredCommonContexts.FirstOrDefault(el => el.IsEquevalentTo(null, slotName, tradeMarketName));
-                Log.Logger.Information("Contained CommonContext's count {@Count}", RegisteredCommonContexts.Count);
                 if (commonContext is null)
                 {
                     Log.Logger.Information("Creating new CommonContext {@slotName} : {@tradeMarketName}", slotName, tradeMarketName);
                     commonContext = await BuildCommonContextAsync(slotName, tradeMarketName);
                     RegisteredCommonContexts.Add(commonContext);
                 }
+                Log.Logger.Information("Contained CommonContext's count {@Count}", RegisteredCommonContexts.Count);
+
             }
             finally
             {
