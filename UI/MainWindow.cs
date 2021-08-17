@@ -337,7 +337,7 @@ namespace UI
                 AlgorithmInfo = new AlgorithmInfo
                 {
                     Interval = _intervalMap[ConfigIntervalOfAnalysisTxb.Text],
-                    Sensivity = _sensitivityMap[ConfigAlgorithmSensivityTxb.Text]
+                    Sensitivity = _sensitivityMap[ConfigAlgorithmSensivityTxb.Text]
                 },
                 OrderUpdatePriceRange = double.Parse(ConfigUpdatePriceRangeTxb.Text),
             };

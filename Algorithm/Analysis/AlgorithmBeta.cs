@@ -265,7 +265,7 @@ namespace Algorithm.Analysis
 
         public void ChangeSetting(AlgorithmInfo settings)
         {
-            _precision = settings.Sensivity;
+            _precision = settings.Sensitivity;
             _pm.SetPointInterval((int)settings.Interval.Seconds * 1000 / 5);
             _dc.ClearAllData();
             Log.Information("{@Where}:Settings changed", "Algorithm");
