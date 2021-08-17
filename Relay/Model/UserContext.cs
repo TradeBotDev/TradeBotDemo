@@ -74,7 +74,7 @@ namespace Relay.Model
             _ = _formerClient.UpdateConfig(update, Meta);
         }
 
-        public void SubscribeForOrders()
+        public async Task SubscribeForOrders()
         {
             if (!IsWorking && !IsStart)
             {

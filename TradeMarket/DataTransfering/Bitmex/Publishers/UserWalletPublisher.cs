@@ -6,32 +6,38 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using TradeMarket.Model.Publishers;
 
 namespace TradeMarket.DataTransfering.Bitmex.Publishers
 {
     public class UserWalletPublisher : BitmexPublisher<WalletResponse,WalletSubscribeRequest,Wallet>
     {
-        internal static readonly Action<WalletResponse, EventHandler<IPublisher<Wallet>.ChangedEventArgs>> _action = (response, e) =>
+        internal static readonly Action<WalletResponse, EventHandler<IPublisher<Wallet>.ChangedEventArgs>> _action = async (response, e) =>
         {
-            foreach (var data in response.Data)
+            await Task.Run(() =>
             {
-                e?.Invoke(nameof(UserOrderPublisher), new(data, response.Action));
-            }
+                foreach (var data in response.Data)
+                {
+                    e?.Invoke(nameof(UserOrderPublisher), new(data, response.Action));
+                }
+            });
         };
 
         private IObservable<WalletResponse> _stream;
+        private readonly CancellationToken _token;
 
-        public UserWalletPublisher(BitmexWebsocketClient client,IObservable<WalletResponse> stream) : base(client,_action)
+        public UserWalletPublisher(BitmexWebsocketClient client,IObservable<WalletResponse> stream, CancellationToken token) : base(client,_action)
         {
             _stream = stream;
+            this._token = token;
         }
 
-        public override void Start()
+        public async override Task Start()
         {
-            throw new NotImplementedException();
+            await SubscribeAsync(_token);
         }
 
-        public async Task SubcribeAsync(CancellationToken token)
+        public async Task SubscribeAsync(CancellationToken token)
         {
             await base.SubscribeAsync(new WalletSubscribeRequest(), _stream, token);
 

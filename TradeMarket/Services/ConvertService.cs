@@ -9,13 +9,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeBot.Common.v1;
+using TradeMarket.DataTransfering.Bitmex.Rest.Responses;
 using Order = Bitmex.Client.Websocket.Responses.Orders.Order;
 
 namespace TradeMarket.Services
 {
     public static class ConvertService
     {
-        #region Responses
+        #region Service to Responses Converters
+
+        public static TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceResponse ConvertBalance(Wallet wallet, BitmexAction action)
+        {
+            return new()
+            {
+                Response = new()
+                {
+                    Balance = ConvertBalanceFromWallet(wallet)
+                }
+            };
+        }
+
         public static TradeBot.TradeMarket.TradeMarketService.v1.SubscribeMarginResponse ConvertMargin(Margin margin,BitmexAction action)
         {
             return new()
@@ -23,9 +36,9 @@ namespace TradeMarket.Services
                 ChangedType = ConvertChangeType(action),
                 Margin = new()
                 {
-                    AvailableMargin = margin.AvailableMargin ?? default(long),
-                    RealisedPnl = margin.RealisedPnl ?? default(long),
-                    MarginBalance = margin.MarginBalance ?? default(long)
+                    AvailableMargin = margin.AvailableMargin ?? default,
+                    RealisedPnl = margin.RealisedPnl ?? default,
+                    MarginBalance = margin.MarginBalance ?? default
                 }
             };
         }
@@ -60,7 +73,7 @@ namespace TradeMarket.Services
         {
             return new()
             {
-                CurrentQty = position.CurrentQty ?? default(long)
+                CurrentQty = position.CurrentQty ?? default
             };
         }
 
@@ -68,16 +81,17 @@ namespace TradeMarket.Services
         {
             return new()
             {
-                AskPrice = instrument.AskPrice ?? default(double),
-                BidPrice = instrument.BidPrice ?? default(double),
-                FairPrice = instrument.FairPrice ?? default(double),
+                AskPrice = instrument.AskPrice ?? default,
+                BidPrice = instrument.BidPrice ?? default,
+                FairPrice = instrument.FairPrice ?? default,
                 ChangedType = ConvertChangeType(action)
             };
         }
-        
-        
+
+
         #endregion
 
+        #region Bitmex to Service Converters
         public static ChangesType ConvertChangeType(BitmexAction action)
         {
             switch (action)
@@ -100,8 +114,8 @@ namespace TradeMarket.Services
                 {
                     Seconds = DateTime.Now.Second
                 },
-                Price = book.Price.HasValue ? book.Price.Value : default(double),
-                Quantity = book.Size.HasValue ? (int)book.Size.Value : default(int)
+                Price = book.Price.HasValue ? book.Price.Value : default,
+                Quantity = book.Size.HasValue ? (int)book.Size.Value : default
             };
         }
 
@@ -115,8 +129,8 @@ namespace TradeMarket.Services
                 {
                     Seconds = order.Timestamp.HasValue ? order.Timestamp.Value.Second : DateTime.Now.Second
                 },
-                Price = order.Price.HasValue ? order.Price.Value : default(double),
-                Quantity = order.OrderQty.HasValue ? (int)order.OrderQty.Value : default(int)
+                Price = order.Price.HasValue ? order.Price.Value : default,
+                Quantity = order.OrderQty.HasValue ? (int)order.OrderQty.Value : default
             };
         }
 
@@ -160,7 +174,7 @@ namespace TradeMarket.Services
             return TradeBot.Common.v1.OrderStatus.Unspecified;
         }
 
-        public static TradeBot.Common.v1.Balance ConvertBalance(Wallet wallet)
+        public static TradeBot.Common.v1.Balance ConvertBalanceFromWallet(Wallet wallet)
         {
             return new()
             {
@@ -169,7 +183,60 @@ namespace TradeMarket.Services
             };
         }
 
+        #endregion
 
-        
+        #region Commands to Response Converters
+        public static TradeBot.TradeMarket.TradeMarketService.v1.PlaceOrderResponse ConvertPlaceOrderResponse(BitmexResfulResponse<Order> response)
+        {
+            return new()
+            {
+                OrderId = response.Error is null ? "empty" : response.Message.OrderId,
+                Response = ResponseFromOrder(response)
+            };
+        }
+
+        public static TradeBot.TradeMarket.TradeMarketService.v1.AmmendOrderResponse ConvertAmmendOrderResponse(BitmexResfulResponse<Order> response)
+        {
+            return new()
+            {
+                Response = ResponseFromOrder(response)
+            };
+        }
+
+        public static TradeBot.TradeMarket.TradeMarketService.v1.DeleteOrderResponse ConvertDeleteOrderResponse(BitmexResfulResponse<Order> response)
+        {
+            return new()
+            {
+                Response = ResponseFromOrder(response)
+            };
+        }
+
+        public static DefaultResponse ResponseFromOrder(BitmexResfulResponse<Order> response)
+        {
+            if (response.Error is not null)
+            {
+                return new DefaultResponse()
+                {
+                    Code = ReplyCode.Failure,
+                    Message = response.Error.Message
+                };
+            }
+            if (!string.IsNullOrEmpty(response.Message.OrdRejReason))
+            {
+                return new DefaultResponse()
+                {
+                    Code = ReplyCode.Failure,
+                    Message = response.Message.OrdRejReason
+                };
+            }
+            return new DefaultResponse()
+            {
+                Code = ReplyCode.Succeed,
+                Message = ""
+            };
+        }
+        #endregion
+
+
     }
 }
