@@ -11,17 +11,17 @@ namespace Former.Clients
 {
     public class TradeMarketClient
     {
-        public delegate Task MyOrdersEvent(Order newComingOrder, ChangesType changesType);
-        public MyOrdersEvent UpdateMyOrders;
+        internal delegate Task MyOrdersEvent(Order newComingOrder, ChangesType changesType);
+        internal MyOrdersEvent UpdateMyOrders;
 
-        public delegate Task BalanceEvent(int availableBalance, int totalBalance);
-        public BalanceEvent UpdateBalance;
+        internal delegate Task BalanceEvent(int availableBalance, int totalBalance);
+        internal BalanceEvent UpdateBalance;
 
-        public delegate Task PositionEvent(double positionQuantity);
-        public PositionEvent UpdatePosition;
+        internal delegate Task PositionEvent(double positionQuantity);
+        internal PositionEvent UpdatePosition;
 
-        public delegate Task MarketPricesEvent(double bid, double ask);
-        public MarketPricesEvent UpdateMarketPrices;
+        internal delegate Task MarketPricesEvent(double bid, double ask);
+        internal MarketPricesEvent UpdateMarketPrices;
 
         private static int _retryDelay;
         private static string _connectionString;
@@ -29,19 +29,19 @@ namespace Former.Clients
 
         private readonly TradeMarketService.TradeMarketServiceClient _client;
 
-        public static void Configure(string connectionString, int retryDelay)
+        internal static void Configure(string connectionString, int retryDelay)
         {
             _connectionString = connectionString;
             _retryDelay = retryDelay;
         }
 
-        public TradeMarketClient()
+        internal TradeMarketClient()
         {
             _client = new TradeMarketService.TradeMarketServiceClient(GrpcChannel.ForAddress(_connectionString));
         }
 
         /// <summary>
-        /// Проверяет соединение с биржей, на вход принимает функцию, осуществляющую общение с биржей
+        /// Проверяет соединение с биржей, на вход принимает функцию, осуществляющую общение с биржей.
         /// </summary>
         private async Task ConnectionTester(Func<Task> func)
         {
@@ -69,7 +69,7 @@ namespace Former.Clients
         }
 
         /// <summary>
-        /// Наблиюдает за изменением рыночных цен
+        /// Наблиюдает за изменением рыночных цен.
         /// </summary>
         private async Task ObserveMarketPrices(Metadata meta)
         {
@@ -86,7 +86,7 @@ namespace Former.Clients
         }
 
         /// <summary>
-        /// Наблюдает за обновлением доступного баланса 
+        /// Наблюдает за обновлением доступного баланса.
         /// </summary>
         private async Task ObserveBalance(Metadata meta)
         {
@@ -103,7 +103,7 @@ namespace Former.Clients
         }
 
         /// <summary>
-        /// Наблюдает за событиями моих ордеров
+        /// Наблюдает за событиями моих ордеров.
         /// </summary>
         private async Task ObserveMyOrders(Metadata meta)
         {
@@ -121,7 +121,7 @@ namespace Former.Clients
         }
 
         /// <summary>
-        /// Наблюдает за событиями моих позиций
+        /// Наблюдает за событиями моих позиций.
         /// </summary>
         private async Task ObservePositions(Metadata meta)
         {
@@ -139,7 +139,7 @@ namespace Former.Clients
         }
 
         /// <summary>
-        /// Отправляет запрос в биржу на выставление своего ордера
+        /// Отправляет запрос в биржу на выставление своего ордера.
         /// </summary>
         internal async Task<PlaceOrderResponse> PlaceOrder(double sellPrice, double contractValue, Metadata metadata)
         {
@@ -155,7 +155,7 @@ namespace Former.Clients
         }
 
         /// <summary>
-        /// Отправляет запрос в биржу на изменение цены своего ордера
+        /// Отправляет запрос в биржу на изменение цены своего ордера.
         /// </summary>
         internal async Task<AmmendOrderResponse> AmendOrder(string id, double newPrice, Metadata metadata)
         {
@@ -177,6 +177,9 @@ namespace Former.Clients
             return response;
         }
 
+        /// <summary>
+        /// Отправляет запрос на биржу на удаление своего ордера по id.
+        /// </summary>
         internal async Task<DeleteOrderResponse> DeleteOrder(string id, Metadata metadata)
         {
             DeleteOrderResponse response = null;
@@ -194,6 +197,10 @@ namespace Former.Clients
             return response;
         }
 
+
+        /// <summary>
+        /// Подписывается на обновления с биржи по указанным метаданным, а также создаёт CancellationTokenSource, для дальнейшей отмены.
+        /// </summary>
         internal void StartObserving(Metadata meta)
         {
             _token = new CancellationTokenSource();
@@ -203,10 +210,12 @@ namespace Former.Clients
             _ = ObserveMyOrders(meta);
         }
 
+        /// <summary>
+        /// Отменяет подписку на обновления с биржи путём отмены токена, созданного ранее.
+        /// </summary>
         internal void StopObserving()
         {
             _token.Cancel();
         }
-
     }
 }
