@@ -49,7 +49,7 @@ namespace TradeMarket.Model.UserContexts.Builders
                 var keySecretPair = await _accountClient.GetUserInfoAsync(sessionId);
                 var userContextBuilder = new UserContextBuilder(_builder);
                 userContextBuilder
-                .AddKeySecret(keySecretPair.Key, keySecretPair.Secret)
+                .AddKeySecret(key:keySecretPair.Key,secret: keySecretPair.Secret)
                 .AddWebSocketClient(_commonWSClient)
                 .AddTradeMarket(_tradeMarketFactory.GetTradeMarket(tradeMarketName));
                 return await userContextBuilder.InitUser(token);
