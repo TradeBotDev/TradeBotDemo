@@ -1,10 +1,9 @@
 ﻿using System;
 using Former.Clients;
-using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Serilog;
 using System.Threading.Tasks;
-using TradeBot.Common.v1;
+
 using System.Linq;
 
 namespace Former.Model

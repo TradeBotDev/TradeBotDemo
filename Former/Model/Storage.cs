@@ -1,7 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Serilog;
-using TradeBot.Common.v1;
 
 namespace Former.Model
 {

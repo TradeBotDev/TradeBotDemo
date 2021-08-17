@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Former.Clients;
 using Grpc.Core;
 using Serilog;
-using TradeBot.Common.v1;
 
 namespace Former.Model
 {
