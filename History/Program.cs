@@ -1,9 +1,10 @@
 using History.DataBase;
+using History.DataBase.Data_Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using System;
-using TradeBot.Common.v1;
+using System.Linq;
 
 namespace History
 {
@@ -21,6 +22,9 @@ namespace History
             //CreateHostBuilder(args).Build().Run();
 
             DataContext db = new();
+            //db.BalanceRecords.Add(new BalanceChange() { Balance = new BalanceWrapper() { Currency = "usd", Value = "loads" }, SessionId = "some dude", Time = DateTime.Now });
+            db.Add(new BalanceChange() { Balance = new BalanceWrapper() { Currency = "usd", Value = "loads" }, SessionId = "some dude", Time = DateTime.Now });
+            db.SaveChanges();
             //db.Add(new BalanceChange { Balance = new Balance(), SessionId = "meow", Time = DateTime.Now });
             Console.WriteLine("did it");
             Console.ReadKey();

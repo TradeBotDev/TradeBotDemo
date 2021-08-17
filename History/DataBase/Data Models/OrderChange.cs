@@ -20,7 +20,6 @@ namespace History.DataBase
         public string Message { get; set; }
         public DateTime Time { get; set; }
         public string SlotName { get; set; }
-
     }
     public enum ChangesType
     {

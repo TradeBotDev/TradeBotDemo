@@ -28,7 +28,8 @@ namespace History
                         SessionId = request.Balance.Sessionid,
                         Time = request.Balance.Time.ToDateTime(),
                         Balance = Converter.ToBalanceWrapper(request.Balance.Balance)
-                    }); ;
+                    });
+
                     break;
                 case PublishEventRequest.EventTypeOneofCase.Order:
                     OrderCollection.Add(new OrderChange
@@ -40,6 +41,7 @@ namespace History
                         Time = request.Order.Time.ToDateTime(),
                         SlotName = request.Order.SlotName
                     });
+
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
