@@ -44,7 +44,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             {
                 Parallel.ForEach(response.Data, (el) =>
                 {
-                    var model = _cache.First(x => x.Symbol == el.Symbol);
+                    var model = _cache.FirstOrDefault(x => x.Symbol == el.Symbol);
                     if (model is not null)
                     {
                         switch (response.Action)

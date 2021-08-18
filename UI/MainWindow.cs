@@ -276,17 +276,17 @@ namespace UI
             {
                 case ChangesType.Partitial:
                     InsertOrderToTable(0, incomingMessage.Status == OrderStatus.Open ? ActiveOrdersDataGridView : FilledOrdersDataGridView, incomingMessage);
-                    //UpdateList(orderEvent.Order.Price.ToString(),orderEvent.Time,ref _orderList,zedGraph_1,lastDateOrder);
+                    UpdateList(orderEvent.Order.Price.ToString(),orderEvent.Time,ref _orderList,zedGraph_1,lastDateOrder);
                     break;
                 case ChangesType.Insert:
                     InsertOrderToTable(0, ActiveOrdersDataGridView, incomingMessage);
                     WriteMessageToEventConsole(incomingMessage);
-                    //UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1,lastDateOrder);
+                    UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1,lastDateOrder);
                     break;
 
                 case ChangesType.Update:
                     UpdateTable(ActiveOrdersDataGridView, incomingMessage);
-                    //UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1, lastDateOrder);
+                    UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1, lastDateOrder);
                     break;
 
                 case ChangesType.Delete:
@@ -305,7 +305,7 @@ namespace UI
         private void HandleBalanceUpdate(PublishBalanceEvent balanceUpdate)
         {
             BalanceLabel.Text = $"{balanceUpdate.Balance.Value} {balanceUpdate.Balance.Currency}";
-            //UpdateList(balanceUpdate.Balance.Value, balanceUpdate.Time, ref _balanceList, zedGraph,lastDateBalance);
+            UpdateList(balanceUpdate.Balance.Value, balanceUpdate.Time, ref _balanceList, zedGraph,lastDateBalance);
         }
 
         private async void Start(string slotName)
@@ -596,11 +596,11 @@ namespace UI
 
             pane.XAxis.Type = AxisType.Date;
 
-            pane.YAxis.Scale.Min = list.Last().Y-100;
-            pane.YAxis.Scale.Max = list.Last().Y+100;
+            //pane.YAxis.Scale.Min = list.Last().Y-100;
+            //pane.YAxis.Scale.Max = list.Last().Y+100;
 
-            pane.XAxis.Scale.Min = new XDate(list.Last().X-1);
-            pane.XAxis.Scale.Max = new XDate(list.Last().X+1);
+            //pane.XAxis.Scale.Min = new XDate(list.Last().X-1);
+            //pane.XAxis.Scale.Max = new XDate(list.Last().X+1);
 
             zedGraph.AxisChange();
 

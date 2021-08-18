@@ -50,7 +50,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             {
                 Parallel.ForEach(response.Data, (el) =>
                 {
-                    var model = _cache.First(x => x.Id == el.Id);
+                    var model = _cache.FirstOrDefault(x => x.Id == el.Id);
                     if (model is not null)
                     {
                         _cache.Remove(model);
