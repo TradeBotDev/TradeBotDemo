@@ -122,25 +122,41 @@ namespace Facade
             }
             return await Generalization.ReturnResponse(accountResponse, methodName);
         }
-        
-        //public async Task<Ref.AccountDataResponse> Account_AccountData(Ref.AccountDataRequest request,ServerCallContext context, string methodName)
-        //{
-        //    TradeBot.Account.AccountService.v1.AccountDataResponse respone = null;
-        //    async Task<TradeBot.Account.AccountService.v1.AccountDataResponse> task()
-        //    {
-        //        respone = await ClientAccount.AccountDataAsync(new TradeBot.Account.AccountService.v1.AccountDataRequest 
-        //        { 
-        //            SessionId=request.SessionId
-        //        },context.RequestHeaders);
-        //        await Generalization.ConnectionTester(task,methodName,request);
-        //        TradeBot.Account.AccountService.v1.
-        //        return await Generalization.ReturnResponse(new TradeBot.Facade.FacadeService.v1.AccountDataResponse 
-        //        { 
-        //            CurrentAccount = , 
-        //            Message = respone.Message, 
-        //            Result = (Ref.AccountActionCode)respone.Result }, methodName);
-        //    }
-        //}
+        public async Task<Ref.AccountDataResponse> Account_AccountData(Ref.AccountDataRequest request, ServerCallContext context, string methodName)
+        {
+            TradeBot.Account.AccountService.v1.AccountDataResponse response = null;
+            async Task<TradeBot.Account.AccountService.v1.AccountDataResponse> task()
+            {
+                response = await ClientAccount.AccountDataAsync(new TradeBot.Account.AccountService.v1.AccountDataRequest
+                {
+                    SessionId = request.SessionId
+                }, context.RequestHeaders);
+                await Generalization.ConnectionTester(task, methodName, request);
+                return response;
+            }
+            var accountDataResponse = new Ref.AccountDataResponse
+            {
+                Result = (Ref.AccountActionCode)response.Result,
+                Message = response.Message,
+                CurrentAccount = new Ref.AccountInfo
+                {
+                    AccountId = response.CurrentAccount.AccountId,
+                    Email = response.CurrentAccount.Email
+                }
+            };
+            foreach (var item in response.CurrentAccount.Exchanges)
+            {
+                accountDataResponse.CurrentAccount.Exchanges.Add(new Ref.ExchangeAccessInfo
+                {
+                    Secret = item.Secret,
+                    Code = (Ref.ExchangeCode)item.Code,
+                    ExchangeAccessId = item.ExchangeAccessId,
+                    Name = item.Name,
+                    Token = item.Token
+                });
+            }
+            return await Generalization.ReturnResponse(accountDataResponse, methodName);
+        }
         #endregion
 
         #region Excenge
@@ -209,7 +225,7 @@ namespace Facade
         #endregion
 
         #region License
-        public async Task<Ref.SetLicenseResponse> License_SetLicense(Ref.SetLicenseRequest request,ServerCallContext context, string methodName)
+        public async Task<Ref.SetLicenseResponse> Account_SetLicense(Ref.SetLicenseRequest request,ServerCallContext context, string methodName)
         {
             TradeBot.Account.AccountService.v1.SetLicenseResponse response = null;
             async Task<TradeBot.Account.AccountService.v1.SetLicenseResponse> task()
@@ -226,6 +242,21 @@ namespace Facade
             }
             await Generalization.ConnectionTester(task, methodName, request);
             return await Generalization.ReturnResponse(new Ref.SetLicenseResponse { Code = (Ref.LicenseCode)response.Code, Message = response.Message }, methodName);
+        }
+        public async Task<Ref.CheckLicenseResponse> Account_CheckLicense(Ref.CheckLicenseRequest request,ServerCallContext context,string methodName)
+        {
+            TradeBot.Account.AccountService.v1.CheckLicenseResponse response = null;
+            async Task<TradeBot.Account.AccountService.v1.CheckLicenseResponse> task()
+            {
+                response = await ClientLic.CheckLicenseAsync(new TradeBot.Account.AccountService.v1.CheckLicenseRequest 
+                { 
+                    SessionId= request.SessionId,
+                    Product= (TradeBot.Account.AccountService.v1.ProductCode)request.Product
+                });
+                return response; 
+            }
+            await Generalization.ConnectionTester(task,methodName,request);
+            return await Generalization.ReturnResponse(new Ref.CheckLicenseResponse { Code= (Ref.LicenseCode)response.Code,Message=response.Message,HaveAccess=response.HaveAccess}, methodName);
         }
         #endregion
     }
