@@ -92,7 +92,7 @@ namespace TradeMarket.Model.UserContexts
             return await TradeMarket.PlaceOrder(quontity, price, this,token);
         }
 
-        public async Task<BitmexResfulResponse<Order>> DeleteOrder(string id, CancellationToken token)
+        public async Task<BitmexResfulResponse<Order[]>> DeleteOrder(string id, CancellationToken token)
         {
             return await TradeMarket.DeleteOrder(id, this,token);
         }
