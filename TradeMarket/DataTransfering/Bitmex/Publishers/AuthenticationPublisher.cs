@@ -17,7 +17,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         {
            await Task.Run(() =>
            {
-               Log.Information("Recieved Auth Response with code : {@Code} for operation {@op}", response.Success,response.Op);
+               Log.Information("{ServiceName} Recieved Auth Response with code : {@Code} for operation {@op}", response.Success,response.Op);
                e?.Invoke(typeof(AuthenticationPublisher), new(response.Success, BitmexAction.Undefined));
            });
         };

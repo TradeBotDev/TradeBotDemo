@@ -1,6 +1,5 @@
 ﻿using Google.Protobuf.WellKnownTypes;
 using TradeBot.Common.v1;
-
 namespace Former.Models
 {
     public class Converters

@@ -281,17 +281,18 @@ namespace UI
             {
                 case ChangesType.Partitial:
                     AddOrderToTable(incomingMessage.Status == OrderStatus.Open ? ActiveOrdersDataGridView : FilledOrdersDataGridView, incomingMessage);
-                    //UpdateList(orderEvent.Order.Price.ToString(),orderEvent.Time,ref _orderList,zedGraph_1,lastDateOrder);
+                    UpdateList(orderEvent.Order.Price.ToString(),orderEvent.Time,ref _orderList,zedGraph_1,lastDateOrder);
                     break;
+
                 case ChangesType.Insert:
                     AddOrderToTable(ActiveOrdersDataGridView, incomingMessage);
                     WriteMessageToEventConsole(incomingMessage);
-                    //UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1,lastDateOrder);
+                    UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1,lastDateOrder);
                     break;
 
                 case ChangesType.Update:
                     UpdateTable(ActiveOrdersDataGridView, incomingMessage);
-                    //UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1, lastDateOrder);
+                    UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1, lastDateOrder);
                     break;
 
                 case ChangesType.Delete:
@@ -309,8 +310,8 @@ namespace UI
 
         private void HandleBalanceUpdate(PublishBalanceEvent balanceUpdate)
         {
-            BalanceLabel.Text = $"{balanceUpdate.Balance.Value} {balanceUpdate.Balance.Currency}";
-            //UpdateList(balanceUpdate.Balance.Value, balanceUpdate.Time, ref _balanceList, zedGraph,lastDateBalance);
+            BalanceLabel.Text = $"{double.Parse(balanceUpdate.Balance.Value) / 100000000} {balanceUpdate.Balance.Currency}";
+            UpdateList(balanceUpdate.Balance.Value, balanceUpdate.Time,ref _balanceList, zedGraph,lastDateBalance);
         }
 
         private async void Start(string slotName)
@@ -399,7 +400,7 @@ namespace UI
             cellCheckBox.Value ??= false;
             if (Convert.ToBoolean(cellCheckBox.Value))
             {
-                if (MessageBox.Show(@"Are you sure you want to stop bot?", @"Stop bot",
+                if (MessageBox.Show(@"Are you sure you want to stop work?", @"Stop work",
                     MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
                     Stop(ActiveSlotsDataGridView.Rows[ActiveSlotsDataGridView.CurrentRow.Index].Cells[0]
@@ -466,9 +467,7 @@ namespace UI
                 MessageBox.Show(@"Wrong login or password!", @"Correct the fields");
                 return;
             }
-
-            if (CheckConnection(await _facadeClient.RegisterAccount(RegLog.Text, RegPass.Text, RegPass.Text)))
-                WriteMessageToEventConsole($"You have registered an account {RegLog.Text}");
+            CheckConnection(await _facadeClient.RegisterAccount(RegLog.Text, RegPass.Text, RegPass.Text));
         }
 
         private async void LoginButton_Click(object sender, EventArgs e)

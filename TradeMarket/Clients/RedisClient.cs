@@ -19,14 +19,17 @@ namespace TradeMarket.Clients
 
         public async Task Send<T>(string id, T data, string PublishingTopic)
         {
-            string json = JsonConvert.SerializeObject(data);
-            Log.Information("{@ServiceName} writing to Redis {@Data}", "Trademarket",json);
+            if (_db is not null)
+            {
+                string json = JsonConvert.SerializeObject(data);
+                Log.Information("{@ServiceName} writing to Redis {@Data}", "Trademarket", json);
 
-            Task[] tasks = {
+                Task[] tasks = {
                 _db.SetAddAsync(id, json),
                 _db.PublishAsync(PublishingTopic,id)
-            };
-            await Task.WhenAll(tasks);
+                };
+                await Task.WhenAll(tasks);
+            }
         }
 
 
