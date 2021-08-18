@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using Grpc.Core;
 using Grpc.Net.Client;
 using TradeBot.Common.v1;
 using TradeBot.Facade.FacadeService.v1;
 using UpdateServerConfigRequest = TradeBot.Facade.FacadeService.v1.UpdateServerConfigRequest;
+using System.Threading;
 
 namespace UI
 {
@@ -18,6 +20,8 @@ namespace UI
 
         public delegate void BalanceUpdate(PublishBalanceEvent balance);
         public BalanceUpdate HandleBalanceUpdate;
+        
+        private CancellationTokenSource _token;
 
         public async Task<DefaultResponse> StartBot(string slotName, Config configuration)
         {
@@ -42,9 +46,10 @@ namespace UI
 
         private async Task SubscribeEvents()
         {
+            _token = new CancellationTokenSource();
             using var call = _client.SubscribeEvents(new SubscribeEventsRequest { Sessionid = _meta.GetValue("sessionid") }, _meta);
 
-            while (await call.ResponseStream.MoveNext())
+            while (await call.ResponseStream.MoveNext(_token.Token))
             {
                 switch (call.ResponseStream.Current.EventTypeCase)
                 {
@@ -90,6 +95,7 @@ namespace UI
 
         public async Task<DefaultResponse> StopBot(string slotName, Config configuration)
         {
+            _token.Cancel();
             _meta[1] = new Metadata.Entry("slot", slotName);
             try
             {
