@@ -41,7 +41,8 @@ namespace TradeMarket.DataTransfering.Bitmex.Rest.Responses
         {
             var serializerSettings = new JsonSerializerSettings
             {
-                NullValueHandling = NullValueHandling.Ignore
+                NullValueHandling = NullValueHandling.Ignore,
+                MissingMemberHandling = MissingMemberHandling.Ignore
             };
             if (IsResponseError())
             {
