@@ -82,6 +82,7 @@ footer {
     display: block;
     color: #fff;
     font-size: 14px;
+    cursor: pointer;
 }
 
 .header ul li a:hover {
@@ -251,4 +252,36 @@ footer {
 .text_message a:hover {
     color: #209ca1;
     cursor: pointer;
+}
+
+.message_background {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.message_block {
+    width: 500px;
+    height: 200px;
+    background: #fff;
+    padding: 20px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1), 0 6px 6px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.message_block_buttons {
+    display: flex;
+    justify-content: flex-end;
+    align-content: center;
+}
+
+.message_block_buttons input {
+    margin: 5px;
 }
