@@ -80,7 +80,7 @@ namespace History
             {
                 Task.Run(async () =>
                 {
-                    if (args.NewItems[0].GetType().FullName.Contains("BalanceUpdate"))
+                    if (args.NewItems[0].GetType().FullName.Contains("BalanceChange"))
                     {
                         updateBalance = (BalanceChange)args.NewItems[0];
                         if (updateBalance.SessionId != request.Sessionid) return;
@@ -94,7 +94,7 @@ namespace History
                             }
                         }); ;
                     }
-                    if (args.NewItems[0].GetType().FullName.Contains("OrderUpdate"))
+                    if (args.NewItems[0].GetType().FullName.Contains("OrderChange"))
                     {
                         updateOrder = (OrderChange)args.NewItems[0];
                         if (updateOrder.SessionId != request.Sessionid) return;
