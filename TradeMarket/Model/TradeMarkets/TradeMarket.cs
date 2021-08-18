@@ -140,7 +140,7 @@ namespace TradeMarket.Model.TradeMarkets
 
         public abstract Task<BitmexResfulResponse<Order>> PlaceOrder(double quontity, double price,IContext context, CancellationToken token);
 
-        public abstract Task<BitmexResfulResponse<Order>> DeleteOrder(string id, IContext context, CancellationToken token);
+        public abstract Task<BitmexResfulResponse<Order[]>> DeleteOrder(string id, IContext context, CancellationToken token);
 
         public abstract Task<BitmexResfulResponse<Order>> AmmendOrder(string id,double? price,long? Quantity,long? LeavesQuantity, IContext context, CancellationToken token);
         

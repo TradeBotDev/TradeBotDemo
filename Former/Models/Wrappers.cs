@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Former.Model
+namespace Former.Models
 {
     public class Configuration
     {

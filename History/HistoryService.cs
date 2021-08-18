@@ -80,7 +80,7 @@ namespace History
             {
                 Task.Run(async () =>
                 {
-                    if (args.NewItems[0].GetType().FullName.Contains("BalanceUpdate"))
+                    if (args.NewItems[0].GetType().FullName.Contains("BalanceChange"))
                     {
                         updateBalance = (BalanceChange)args.NewItems[0];
                         if (updateBalance.SessionId != request.Sessionid) return;
@@ -90,11 +90,11 @@ namespace History
                             {
                                 Balance = Converter.ToBalance(updateBalance.Balance),
                                 Sessionid = updateBalance.SessionId,
-                                Time = Timestamp.FromDateTime(updateBalance.Time)
+                                Time = Timestamp.FromDateTime(updateBalance.Time.ToUniversalTime())
                             }
                         }); ;
                     }
-                    if (args.NewItems[0].GetType().FullName.Contains("OrderUpdate"))
+                    if (args.NewItems[0].GetType().FullName.Contains("OrderChange"))
                     {
                         updateOrder = (OrderChange)args.NewItems[0];
                         if (updateOrder.SessionId != request.Sessionid) return;
@@ -105,7 +105,7 @@ namespace History
                                 ChangesType = (TradeBot.Common.v1.ChangesType)updateOrder.ChangesType,
                                 Order = Converter.ToOrder(updateOrder.Order),
                                 Sessionid = updateOrder.SessionId,
-                                Time = Timestamp.FromDateTime(updateOrder.Time),
+                                Time = Timestamp.FromDateTime(updateOrder.Time.ToUniversalTime()),
                                 Message = updateOrder.Message,
                                 SlotName = updateOrder.SlotName
                             }

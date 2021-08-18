@@ -283,6 +283,7 @@ namespace UI
                     AddOrderToTable(incomingMessage.Status == OrderStatus.Open ? ActiveOrdersDataGridView : FilledOrdersDataGridView, incomingMessage);
                     //UpdateList(orderEvent.Order.Price.ToString(),orderEvent.Time,ref _orderList,zedGraph_1,lastDateOrder);
                     break;
+
                 case ChangesType.Insert:
                     AddOrderToTable(ActiveOrdersDataGridView, incomingMessage);
                     WriteMessageToEventConsole(incomingMessage);
@@ -310,7 +311,6 @@ namespace UI
         private void HandleBalanceUpdate(PublishBalanceEvent balanceUpdate)
         {
             BalanceLabel.Text = $"{balanceUpdate.Balance.Value} {balanceUpdate.Balance.Currency}";
-            //UpdateList(balanceUpdate.Balance.Value, balanceUpdate.Time, ref _balanceList, zedGraph,lastDateBalance);
         }
 
         private async void Start(string slotName)
@@ -399,7 +399,7 @@ namespace UI
             cellCheckBox.Value ??= false;
             if (Convert.ToBoolean(cellCheckBox.Value))
             {
-                if (MessageBox.Show(@"Are you sure you want to stop bot?", @"Stop bot",
+                if (MessageBox.Show(@"Are you sure you want to stop work?", @"Stop work",
                     MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
                     Stop(ActiveSlotsDataGridView.Rows[ActiveSlotsDataGridView.CurrentRow.Index].Cells[0]
@@ -444,7 +444,6 @@ namespace UI
                 MainMenuGroupBox.Visible = false;
                 MainMenuGroupBox.Enabled = false;
             }
-
         }
 
         private void ShowMainMenu_Click(object sender, EventArgs e)
@@ -466,9 +465,7 @@ namespace UI
                 MessageBox.Show(@"Wrong login or password!", @"Correct the fields");
                 return;
             }
-
-            if (CheckConnection(await _facadeClient.RegisterAccount(RegLog.Text, RegPass.Text, RegPass.Text)))
-                WriteMessageToEventConsole($"You have registered an account {RegLog.Text}");
+            CheckConnection(await _facadeClient.RegisterAccount(RegLog.Text, RegPass.Text, RegPass.Text));
         }
 
         private async void LoginButton_Click(object sender, EventArgs e)
@@ -480,7 +477,6 @@ namespace UI
                 MessageBox.Show(@"Account with this username and password was not found.",@"Account not found");
                 return;
             }
-            //cyka
             SessionIDLbl.Text = sessionId.Message;
             LoggedGroupBox.Visible = true;
             LoggedGroupBox.Enabled = true;
@@ -552,66 +548,66 @@ namespace UI
         #endregion
 
         #region DrawGraphs
-        private void UpdateList(string b,Timestamp time,ref PointPairList list,ZedGraph.ZedGraphControl graphControl, DateTime ld)
-        {
-            DateTime tm = TimeZoneInfo.ConvertTime(time.ToDateTime(), TimeZoneInfo.Local);//.ToString("HH:mm:ss dd.MM.yyyy");
-            if (double.TryParse(b,out double value))
-            {
-                if (ld.Day == tm.Day)
-                {
-                    list.RemoveAt(list.Count-1);
-                }
-                list.Add(new XDate(tm),value);
-                ld = tm;
-                if(list.Count>40)
-                {
-                    list.RemoveAt(0);
-                }
-                if (graphControl == zedGraph)
-                {
-                    lastDateBalance = tm;
-                }
-                else
-                {
-                    lastDateOrder = tm;
-                }
-            }
-            DrawGraph(graphControl,list);
-        }
-        private void DrawGraph(ZedGraph.ZedGraphControl graphControl,PointPairList list)
-        {
-            GraphPane pane = graphControl.GraphPane;
+        //private void UpdateList(string b,Timestamp time,ref PointPairList list,ZedGraph.ZedGraphControl graphControl, DateTime ld)
+        //{
+        //    DateTime tm = TimeZoneInfo.ConvertTime(time.ToDateTime(), TimeZoneInfo.Local);//.ToString("HH:mm:ss dd.MM.yyyy");
+        //    if (double.TryParse(b,out double value))
+        //    {
+        //        if (ld.Day == tm.Day)
+        //        {
+        //            list.RemoveAt(list.Count-1);
+        //        }
+        //        list.Add(new XDate(tm),value);
+        //        ld = tm;
+        //        if(list.Count>40)
+        //        {
+        //            list.RemoveAt(0);
+        //        }
+        //        if (graphControl == zedGraph)
+        //        {
+        //            lastDateBalance = tm;
+        //        }
+        //        else
+        //        {
+        //            lastDateOrder = tm;
+        //        }
+        //    }
+        //    DrawGraph(graphControl,list);
+        //}
+        //private void DrawGraph(ZedGraph.ZedGraphControl graphControl,PointPairList list)
+        //{
+        //    GraphPane pane = graphControl.GraphPane;
 
-            pane.CurveList.Clear();
+        //    pane.CurveList.Clear();
 
-            //DateTime startDate = new DateTime(2021, 07, 0);
+        //    //DateTime startDate = new DateTime(2021, 07, 0);
 
-            //int daysCount = 40;
+        //    //int daysCount = 40;
 
-            //Random rnd = new Random();
+        //    //Random rnd = new Random();
 
-            //for (int i = 0; i < daysCount; i++)
-            //{
-            //    DateTime currentDate = startDate.AddDays(i);
-            //
-            //    
-            //    list.Add(new XDate(currentDate), yValue);
-            //}
+        //    //for (int i = 0; i < daysCount; i++)
+        //    //{
+        //    //    DateTime currentDate = startDate.AddDays(i);
+        //    //
+        //    //    
+        //    //    list.Add(new XDate(currentDate), yValue);
+        //    //}
 
-            LineItem myCurve = pane.AddCurve("", list, System.Drawing.Color.Blue, SymbolType.Circle);
+        //    LineItem myCurve = pane.AddCurve("", list, System.Drawing.Color.Blue, SymbolType.Circle);
 
-            pane.XAxis.Type = AxisType.Date;
+        //    pane.XAxis.Type = AxisType.Date;
 
-            pane.YAxis.Scale.Min = list.Last().Y-100;
-            pane.YAxis.Scale.Max = list.Last().Y+100;
+        //    pane.YAxis.Scale.Min = list.Last().Y-100;
+        //    pane.YAxis.Scale.Max = list.Last().Y+100;
 
-            pane.XAxis.Scale.Min = new XDate(list.Last().X-1);
-            pane.XAxis.Scale.Max = new XDate(list.Last().X+1);
+        //    pane.XAxis.Scale.Min = new XDate(list.Last().X-1);
+        //    pane.XAxis.Scale.Max = new XDate(list.Last().X+1);
 
-            zedGraph.AxisChange();
+        //    zedGraph.AxisChange();
 
-            zedGraph.Invalidate();
-        }
+        //    zedGraph.Invalidate();
+        //}
 
         #endregion
 

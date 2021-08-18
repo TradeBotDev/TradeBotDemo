@@ -116,7 +116,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
             return await CommonRestClient.SendAsync(new AmmendOrderRequest(context.Key, context.Secret, new() { Id = id, LeavesQuantity = LeavesQuantity, Price = price, Quantity = Quantity }), token);
         }
 
-        public async override Task<BitmexResfulResponse<Order>> DeleteOrder(string id, IContext context,CancellationToken token)
+        public async override Task<BitmexResfulResponse<Order[]>> DeleteOrder(string id, IContext context,CancellationToken token)
         {
             return await CommonRestClient.SendAsync(new DeleteOrderRequest(context.Key, context.Secret, id), token);
         }

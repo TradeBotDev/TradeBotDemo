@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Former.Clients;
-using Former.Model;
+using Former.Models;
 using Grpc.Core;
 using Xunit;
 
@@ -32,7 +32,7 @@ namespace FormerTests
 
             TradeMarketClient.Configure("http://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
-            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
+            var former = new Former.Models.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
             //Act
             var exception = Record.ExceptionAsync(async () => await former.FormOrder(1));
@@ -63,7 +63,7 @@ namespace FormerTests
 
             TradeMarketClient.Configure("http://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
-            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
+            var former = new Former.Models.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
             //Act
             var exception = Record.ExceptionAsync(async () => await former.FormOrder(1));
@@ -92,7 +92,7 @@ namespace FormerTests
 
             TradeMarketClient.Configure("http://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
-            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
+            var former = new Former.Models.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
             //Act
             var exception = Record.ExceptionAsync(async () => await former.FormOrder(-1));
@@ -122,7 +122,7 @@ namespace FormerTests
 
             TradeMarketClient.Configure("http://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
-            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
+            var former = new Former.Models.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
             //Act
             var exception = Record.ExceptionAsync(async () => await former.FormOrder(-1));
@@ -158,7 +158,7 @@ namespace FormerTests
 
             TradeMarketClient.Configure("http://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
-            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
+            var former = new Former.Models.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
             //Act
             var exception = Record.ExceptionAsync(async () => await former.FormOrder(1));
@@ -194,7 +194,7 @@ namespace FormerTests
 
             TradeMarketClient.Configure("http://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
-            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
+            var former = new Former.Models.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
             //Act
             var exception = Record.ExceptionAsync(async () => await former.FormOrder(1));
@@ -230,7 +230,7 @@ namespace FormerTests
 
             TradeMarketClient.Configure("http://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
-            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
+            var former = new Former.Models.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
             //Act
             var exception = Record.ExceptionAsync(async () => await former.FormOrder(1));
@@ -258,7 +258,7 @@ namespace FormerTests
 
             TradeMarketClient.Configure("http://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
-            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
+            var former = new Former.Models.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
             //Act
             var exception = Record.ExceptionAsync(async () => await former.FormOrder(1));
@@ -294,7 +294,7 @@ namespace FormerTests
 
             TradeMarketClient.Configure("http://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
-            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
+            var former = new Former.Models.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
             //Act
             var exception = Record.ExceptionAsync(async () => await former.FormOrder(-1));
@@ -330,7 +330,7 @@ namespace FormerTests
 
             TradeMarketClient.Configure("http://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
-            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
+            var former = new Former.Models.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
             //Act
             var exception = Record.ExceptionAsync(async () => await former.FormOrder(-1));
@@ -366,7 +366,7 @@ namespace FormerTests
 
             TradeMarketClient.Configure("http://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
-            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
+            var former = new Former.Models.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
             //Act
             var exception = Record.ExceptionAsync(async () => await former.FormOrder(-1));
@@ -394,7 +394,7 @@ namespace FormerTests
 
             TradeMarketClient.Configure("http://localhost:5005", 10000);
             var tradeMarketClient = new TradeMarketClient();
-            var former = new Former.Model.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
+            var former = new Former.Models.Former(storage, config, tradeMarketClient, Metadata.Empty, historyClient);
 
             //Act
             var exception = Record.ExceptionAsync(async () => await former.FormOrder(-1));

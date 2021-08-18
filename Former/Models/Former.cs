@@ -1,11 +1,11 @@
 ﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Former.Clients;
 using Grpc.Core;
 using Serilog;
-using System.Threading.Tasks;
-using System.Linq;
 
-namespace Former.Model
+namespace Former.Models
 {
     public class Former
     {
@@ -92,6 +92,7 @@ namespace Former.Model
         /// </summary>
         private bool CheckPossibilityPlacingOrder(OrderType type)
         {
+            
             //вычисляем предполагаемую стоимость ордера по рыночной цене в биткоинах
             var orderCost = _configuration.ContractValue / (type == OrderType.ORDER_TYPE_SELL ? _storage.SellMarketPrice : _storage.BuyMarketPrice);
             //конвертируем баланс в биткоины (XBT), так как он приходит от биржи в сатоши (XBt)
@@ -110,13 +111,7 @@ namespace Former.Model
         {
             //проверяет, есть ли уже ордера противоположного типа и возвращает false, если таковые имеются.
             var alreadyPresentOrderTypes = type == OrderType.ORDER_TYPE_SELL ? OrderType.ORDER_TYPE_BUY : OrderType.ORDER_TYPE_SELL;
-            if (_storage.MyOrders.Count(x => x.Value.Signature.Type == alreadyPresentOrderTypes) > 0 ||
-                _storage.CounterOrders.Count(x => x.Value.Signature.Type == alreadyPresentOrderTypes) > 0)
-            {
-                Log.Debug("{@Where}: Cannot place {@Type} order. There are already orders of another type.", "Former", type);
-                return false;
-            }
-            return true;
+            return _storage.MyOrders.All(x => x.Value.Signature.Type != alreadyPresentOrderTypes) && _storage.CounterOrders.All(x => x.Value.Signature.Type != alreadyPresentOrderTypes);
         }
 
         /// <summary>
@@ -182,16 +177,22 @@ namespace Former.Model
         {
             foreach (var (key, value) in _storage.MyOrders)
             {
-                _storage.MyOrders.TryRemove(key, out _);
+                
                 var deleteResponse = await _tradeMarketClient.DeleteOrder(key, _metadata);
                 var response = Converters.ConvertDefaultResponse(deleteResponse.Response);
-                if (response.Code != ReplyCode.REPLY_CODE_SUCCEED)
+                Log.Information(
+                    "{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed {@ResponseCode}",
+                    "Former", value.Id, value.Price, value.Quantity, value.Signature.Type,
+                    response.Code == ReplyCode.REPLY_CODE_SUCCEED
+                        ? ReplyCode.REPLY_CODE_SUCCEED
+                        : ReplyCode.REPLY_CODE_FAILURE);
+                if (response.Code == ReplyCode.REPLY_CODE_SUCCEED)
                 {
-                    await _historyClient.WriteOrder(value, ChangesType.CHANGES_TYPE_DELETE, _metadata, "Removed by user");
-                    return;
+                    _storage.MyOrders.TryRemove(key, out _);
+                    await _historyClient.WriteOrder(value, ChangesType.CHANGES_TYPE_DELETE, _metadata,
+                        "Removed by user");
                 }
-                Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed {@ResponseCode}", "Former", value.Id, value.Price, value.Quantity, value.Signature.Type, response.Code == ReplyCode.REPLY_CODE_SUCCEED ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
-                
+                else return;
             }
         }
 

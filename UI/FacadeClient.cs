@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using Grpc.Core;
 using Grpc.Net.Client;
 using TradeBot.Common.v1;
