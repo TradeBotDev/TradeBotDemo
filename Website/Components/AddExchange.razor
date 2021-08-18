@@ -1,0 +1,56 @@
+﻿@using Website.Models
+@using Website.Controllers.Clients
+@using TradeBot.Account.AccountService.v1
+
+<ExchangeList SessionId="@SessionId" AccountData="@AccountData" @ref="ChildComponent" />
+<div> <input class="button color_button" type="button" @onclick="Switch" value="Добавить новую биржу" /> </div>
+
+@if (isDisplayed) {
+    <div class="message_background">
+        <EditForm Model="@addModel" OnValidSubmit="AddExchangeAccess" class="form">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <p>Выберите биржу:</p>
+            <InputSelect @bind-Value="addModel.ExchangeCode" class="form_select">
+                <option value="1">Bitmex</option>
+            </InputSelect>
+
+            <p>Токен:</p>
+            <InputText @bind-Value="addModel.Token" class="form_input" type="text" name="Token" />
+            <p>Секрет:</p>
+            <InputText @bind-Value="addModel.Secret" class="form_input" type="text" name="Secret" />
+
+            <input class="button form_button" type="submit" value="Добавить" />
+            <input class="button form_close_button" type="button" @onclick="Switch" value="Закрыть" />
+        </EditForm>
+    </div>
+}
+
+@code {
+        [Parameter] public string SessionId { get; set; }
+        [Parameter] public AccountDataModel AccountData { get; set; }
+
+    private bool isDisplayed = false;
+    private AddExchangeAccessModel addModel = new();
+    protected ExchangeList ChildComponent;
+
+    private void Switch()
+    {
+        if (isDisplayed) isDisplayed = false;
+        else isDisplayed = true;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async void AddExchangeAccess()
+    {
+        var reply = await ExchangeAccessClient.AddExchangeAccess(SessionId, addModel);
+        ChildComponent.RefreshExchanges();
+        if (reply.Result == ExchangeAccessActionCode.Successful)
+            Switch();
+        else
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+}

@@ -33,7 +33,7 @@ else { <p>Биржи отсутствуют.</p> }
         RefreshExchanges();
     }
     // Метод обновления данных о биржах.
-    private async void RefreshExchanges()
+    public async void RefreshExchanges()
     {
         var exchanges = await ExchangeAccessClient.AllExchangesBySession(SessionId);
         AccountData.Exchanges = exchanges.Exchanges;
