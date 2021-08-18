@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using TradeBot.Common.v1;
 
-namespace Former.Model
+namespace Former.Models
 {
     public static class Contexts
     {

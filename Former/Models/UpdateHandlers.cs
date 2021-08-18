@@ -5,7 +5,7 @@ using Former.Clients;
 using Grpc.Core;
 using Serilog;
 
-namespace Former.Model
+namespace Former.Models
 {
     public class UpdateHandlers
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Former.Model;
+using Former.Models;
 using Grpc.Core;
 using Grpc.Net.Client;
 using Serilog;

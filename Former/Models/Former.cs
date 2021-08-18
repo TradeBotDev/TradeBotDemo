@@ -1,11 +1,11 @@
 ﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Former.Clients;
 using Grpc.Core;
 using Serilog;
-using System.Threading.Tasks;
-using System.Linq;
 
-namespace Former.Model
+namespace Former.Models
 {
     public class Former
     {
@@ -62,7 +62,7 @@ namespace Former.Model
                     //Поставил минус
                     Quantity = -quantity,
                     Signature = new OrderSignature { Status = OrderStatus.ORDER_STATUS_OPEN, Type = type },
-                    LastUpdateDate = DateTimeOffset.Now
+                    LastUpdateDate = new DateTime()
                 };
                 addResponse = _storage.AddOrder(placeResponse.OrderId, newOrder, _storage.CounterOrders);
 
@@ -92,6 +92,7 @@ namespace Former.Model
         /// </summary>
         private bool CheckPossibilityPlacingOrder(OrderType type)
         {
+            
             //вычисляем предполагаемую стоимость ордера по рыночной цене в биткоинах
             var orderCost = _configuration.ContractValue / (type == OrderType.ORDER_TYPE_SELL ? _storage.SellMarketPrice : _storage.BuyMarketPrice);
             //конвертируем баланс в биткоины (XBT), так как он приходит от биржи в сатоши (XBt)
@@ -110,13 +111,7 @@ namespace Former.Model
         {
             //проверяет, есть ли уже ордера противоположного типа и возвращает false, если таковые имеются.
             var alreadyPresentOrderTypes = type == OrderType.ORDER_TYPE_SELL ? OrderType.ORDER_TYPE_BUY : OrderType.ORDER_TYPE_SELL;
-            if (_storage.MyOrders.Count(x => x.Value.Signature.Type == alreadyPresentOrderTypes) > 0 ||
-                _storage.CounterOrders.Count(x => x.Value.Signature.Type == alreadyPresentOrderTypes) > 0)
-            {
-                Log.Debug("{@Where}: Cannot place {@Type} order. There are already orders of another type.", "Former", type);
-                return false;
-            }
-            return true;
+            return _storage.MyOrders.All(x => x.Value.Signature.Type != alreadyPresentOrderTypes) && _storage.CounterOrders.All(x => x.Value.Signature.Type != alreadyPresentOrderTypes);
         }
 
         /// <summary>
@@ -152,7 +147,7 @@ namespace Former.Model
                     Price = price,
                     Quantity = quantity,
                     Signature = new OrderSignature { Status = OrderStatus.ORDER_STATUS_OPEN, Type = orderType },
-                    LastUpdateDate = DateTimeOffset.Now
+                    LastUpdateDate = new DateTime()
                 };
                 var addResponse = _storage.AddOrder(id, newOrder, _storage.MyOrders);
                 Log.Information(
