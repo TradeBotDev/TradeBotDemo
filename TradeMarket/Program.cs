@@ -20,7 +20,9 @@ namespace TradeMarket
                .WriteTo.Console()
                .WriteTo.Seq("http://localhost:5341")
                .Enrich.WithProperty("ServiceName", System.AppDomain.CurrentDomain.FriendlyName)
-               .CreateLogger();
+               .//Enrich.With<ServiceNameEnrich>()
+               .CreateLogger()
+               .ForContext("{ServiceName}","TradeMarketService");
             CreateHostBuilder(args).Build().Run();
         }
 
@@ -34,5 +36,9 @@ namespace TradeMarket
                 }).ConfigureServices(services => {
                     services.AddHostedService<Worker>();
                 });
+    }
+
+    internal class ServiceNameEnrich : Serilog.Context.
+    {
     }
 }
