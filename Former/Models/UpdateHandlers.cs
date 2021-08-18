@@ -13,7 +13,7 @@ namespace Former.Models
         private Configuration _configuration;
         private readonly TradeMarketClient _tradeMarketClient;
         private readonly Metadata _metadata;
-        private readonly HistoryClient _historyClient; 
+        private readonly HistoryClient _historyClient;
 
         private double _oldMarketBuyPrice;
         private double _oldMarketSellPrice;
@@ -43,27 +43,36 @@ namespace Former.Models
         /// </summary>
         private async Task MainUpdateHandler(Order order, ChangesType changesType)
         {
-            if (Math.Abs(_storage.SellMarketPrice - _oldMarketSellPrice) > 0.4 || Math.Abs(_oldMarketBuyPrice - _storage.BuyMarketPrice) > 0.4)
-            {
-                //если рыночная цена изменилась, то необходимо проверить, не устарели ли цени в наших ордерах и подогнать их к рыночной цене 
-                //с помощью метода FitPrices
-                _oldMarketSellPrice = _storage.SellMarketPrice;
-                _oldMarketBuyPrice = _storage.BuyMarketPrice;
-                //Log.Information("{@Where}: Buy market price: {@BuyMarketPrice}, Sell market price: {@SellMarketPrice}", "Former",_storage.BuyMarketPrice, _storage.SellMarketPrice);
-                if (!_storage.FitPricesLocker && !_storage.MyOrders.IsEmpty) await FitPrices();
-            }
-            if (_oldTotalBalance != _storage.TotalBalance)
-            {
-                //если баланс изменился, необходимо отправить новый баланс в историю
-                _oldTotalBalance= _storage.TotalBalance;
-                await _historyClient.WriteBalance(_storage.TotalBalance, _metadata);
-            }
-            if (order is not null)
-            {
-                //здесь сообщается истории об инициализации оредра или о его удалении (это касается только контр-ордеров)
-                if (changesType == ChangesType.CHANGES_TYPE_PARTITIAL) await _historyClient.WriteOrder(order, ChangesType.CHANGES_TYPE_PARTITIAL, _metadata, "Counter order initialized");
-                if (changesType == ChangesType.CHANGES_TYPE_DELETE) await _historyClient.WriteOrder(order, ChangesType.CHANGES_TYPE_DELETE, _metadata, "Counter order filled");
-            }
+            //так как шаг изменения рыночных цен равен 0,5, то можно было бы написать >= 0,5, но числа с плавающей точкой плохо работают с = и для этого здесь стоит >0,4, которое несёт такую же функцию
+            //но не использует =
+            if (Math.Abs(_storage.SellMarketPrice - _oldMarketSellPrice) > 0.4 ||
+                Math.Abs(_oldMarketBuyPrice - _storage.BuyMarketPrice) > 0.4) await MarketPriceHandleUpdate();
+            if (_oldTotalBalance != _storage.TotalBalance) await BalanceHandleUpdate();
+            if (order is not null) await OrderUpdateHandle(changesType, order);
+        }
+
+        private async Task OrderUpdateHandle(ChangesType changesType, Order order)
+        {
+            //здесь сообщается истории об инициализации оредра или о его удалении (это касается только контр-ордеров)
+            if (changesType == ChangesType.CHANGES_TYPE_PARTITIAL) await _historyClient.WriteOrder(order, ChangesType.CHANGES_TYPE_PARTITIAL, _metadata, "Counter order initialized");
+            if (changesType == ChangesType.CHANGES_TYPE_DELETE) await _historyClient.WriteOrder(order, ChangesType.CHANGES_TYPE_DELETE, _metadata, "Counter order filled");
+        }
+
+        private async Task BalanceHandleUpdate()
+        {
+            //если баланс изменился, необходимо отправить новый баланс в историю
+            _oldTotalBalance = _storage.TotalBalance;
+            await _historyClient.WriteBalance(_storage.TotalBalance, _metadata);
+        }
+
+        private async Task MarketPriceHandleUpdate()
+        {
+            //если рыночная цена изменилась, то необходимо проверить, не устарели ли цени в наших ордерах и подогнать их к рыночной цене 
+            //с помощью метода FitPrices
+            _oldMarketSellPrice = _storage.SellMarketPrice;
+            _oldMarketBuyPrice = _storage.BuyMarketPrice;
+            //Log.Information("{@Where}: Buy market price: {@BuyMarketPrice}, Sell market price: {@SellMarketPrice}", "Former",_storage.BuyMarketPrice, _storage.SellMarketPrice);
+            if (!_storage.FitPricesLocker && !_storage.MyOrders.IsEmpty) await FitPrices();
         }
 
         /// <summary>
@@ -102,7 +111,7 @@ namespace Former.Models
                 var fairPrice = GetFairPrice(order.Signature.Type);
                 //отправляем запрос на изменение цены ордера по его id
                 var ammendOrderResponse = await _tradeMarketClient.AmendOrder(order.Id, fairPrice, _metadata);
-                var response  = Converters.ConvertDefaultResponse(ammendOrderResponse.Response);
+                var response = Converters.ConvertDefaultResponse(ammendOrderResponse.Response);
 
                 if (response.Code == ReplyCode.REPLY_CODE_SUCCEED)
                 {
@@ -117,7 +126,8 @@ namespace Former.Models
                     await _historyClient.WriteOrder(order, ChangesType.CHANGES_TYPE_DELETE, _metadata, "");
                     var removeResponse = _storage.RemoveOrder(key, _storage.MyOrders);
                     Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed cause cannot be amended {@ResponseCode} ", "Former", order.Id, order.Price, order.Quantity, order.Signature.Type, removeResponse ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
-                } else return;
+                }
+                else return;
                 Log.Information("{@Where}: Order {@Id} amended with {@Price} {@ResponseCode} {@ResponseMessage}", "Former", key, fairPrice, response.Code.ToString(), response.Code == ReplyCode.REPLY_CODE_SUCCEED ? "" : response.Message);
             }
             _storage.FitPricesLocker = false;

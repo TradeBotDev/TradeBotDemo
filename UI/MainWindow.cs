@@ -474,6 +474,12 @@ namespace UI
         {
             DefaultResponse sessionId;
             if (!CheckConnection(sessionId = await _facadeClient.SigningIn(LogLogTextBox.Text, LogPassTextBox.Text, KeyTxb.Text, SecretTxb.Text))) return;
+            if (sessionId.Message.Contains("Отсутствует"))
+            {
+                MessageBox.Show(@"Account with this username and password was not found.",@"Account not found");
+                return;
+            }
+            //cyka
             SessionIDLbl.Text = sessionId.Message;
             LoggedGroupBox.Visible = true;
             LoggedGroupBox.Enabled = true;
