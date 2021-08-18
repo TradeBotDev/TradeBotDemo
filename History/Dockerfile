@@ -1,6 +1,6 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
 # docker build -t history:latest -f . ..
-# docker run --rm -it -p 5007:80 -p 50007:443 -e ASPNETCORE_URLS="https://+;http://+" --env-file=.env -v %USERPROFILE%\.aspnet\https:/https/ history
+# docker run --rm -it -p 5007:80 -p 50007:443 -e ASPNETCORE_URLS="https://+;http://+" -e POSTGRES_CONNECTION_STRING=Host=host.docker.internal;Port=5432;Database=historydb;Username=postgres;Password=password --env-file=.env -v %USERPROFILE%\.aspnet\https:/https/ history
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src

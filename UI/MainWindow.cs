@@ -219,11 +219,6 @@ namespace UI
             return true;
         }
 
-        private void AddOrderToTable(DataGridView table, IncomingMessage message)
-        {
-            table.Rows.Add(message.SlotName, message.Qty, message.Price, message.Type, message.Time, message.Id);
-        }
-
         private void InsertOrderToTable(int index, DataGridView table, IncomingMessage message)
         {
             table.Rows.Insert(index, message.SlotName, message.Qty, message.Price, message.Type, message.Time, message.Id);
@@ -280,11 +275,11 @@ namespace UI
             switch (orderEvent.ChangesType)
             {
                 case ChangesType.Partitial:
-                    AddOrderToTable(incomingMessage.Status == OrderStatus.Open ? ActiveOrdersDataGridView : FilledOrdersDataGridView, incomingMessage);
+                    InsertOrderToTable(0, incomingMessage.Status == OrderStatus.Open ? ActiveOrdersDataGridView : FilledOrdersDataGridView, incomingMessage);
                     //UpdateList(orderEvent.Order.Price.ToString(),orderEvent.Time,ref _orderList,zedGraph_1,lastDateOrder);
                     break;
                 case ChangesType.Insert:
-                    AddOrderToTable(ActiveOrdersDataGridView, incomingMessage);
+                    InsertOrderToTable(0, ActiveOrdersDataGridView, incomingMessage);
                     WriteMessageToEventConsole(incomingMessage);
                     //UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1,lastDateOrder);
                     break;
@@ -295,7 +290,7 @@ namespace UI
                     break;
 
                 case ChangesType.Delete:
-                    AddOrderToTable(FilledOrdersDataGridView, incomingMessage);
+                    InsertOrderToTable(0, FilledOrdersDataGridView, incomingMessage);
                     DeleteFromTable(ActiveOrdersDataGridView, incomingMessage.Id);
                     WriteMessageToEventConsole(incomingMessage);
                     break;
@@ -480,7 +475,6 @@ namespace UI
                 MessageBox.Show(@"Account with this username and password was not found.",@"Account not found");
                 return;
             }
-            //cyka
             SessionIDLbl.Text = sessionId.Message;
             LoggedGroupBox.Visible = true;
             LoggedGroupBox.Enabled = true;
