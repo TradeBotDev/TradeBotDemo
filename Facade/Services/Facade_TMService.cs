@@ -108,6 +108,10 @@ namespace Facade
             return await clientAccount.Account_ExchangeBySession(request, context, nameof(ExchangeBySession));
         }
         #endregion
+        //public async override Task<AccountDataResponse> AccountData(AccountDataRequest request, ServerCallContext context)
+        //{
+        //    return await clientAccount.License_SetLicense(request,context,nameof(AccountData));
+        //}
 
         #region History
         public async override Task SubscribeEvents(SubscribeEventsRequest request, IServerStreamWriter<SubscribeEventsResponse> responseStream, ServerCallContext context)
