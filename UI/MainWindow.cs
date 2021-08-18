@@ -635,5 +635,17 @@ namespace UI
             Process.Start(parameter);
             LinkLabel1.LinkVisited = true;
         }
+
+        private void TradeBotUi_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private async void button1_Click(object sender, EventArgs e)
+        {
+            if (_loggedIn) {
+                await _facadeClient.RegisterLicense();
+            }
+        }
     }
 }
