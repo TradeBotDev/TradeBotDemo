@@ -1,5 +1,5 @@
 ﻿<!--Кнопка выхода из аккаунта, которая отображается в шапке сайта.-->
-<li><a @onclick="Show">Выйти</a></li>
+<li><a @onclick="Switch">Выйти</a></li>
 
 @if (isEnabled) {
 	<!--Контейнер, который растягивается на всю страницу.-->
@@ -19,7 +19,7 @@
 					<!--Кнопка submit, которая при нажатии произведет отправку формы и выключит диалоговое окно.-->
 					<input class="button color_button" type="submit" value="Выход" />
 					<!--Кнопка, которая просто закроет диалоговое окно.-->
-					<input class="button color_button" type="button" @onclick="Close" value="Остаться" />
+					<input class="button color_button" type="button" @onclick="Switch" value="Остаться" />
 				</div>
 			</div>
 		</form>
@@ -29,15 +29,10 @@
 @code {
 	private bool isEnabled = false;
 
-	private async void Show()
+	private async void Switch()
 	{
-		isEnabled = true;
-		await InvokeAsync(StateHasChanged);
-	}
-
-	private async void Close()
-	{
-		isEnabled = false;
+		if (isEnabled) isEnabled = false;
+		else isEnabled = true;
 		await InvokeAsync(StateHasChanged);
 	}
 }
