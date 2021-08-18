@@ -1,35 +1,21 @@
 ﻿using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using History.DataBase;
+using History.DataBase.Data_Models;
+using Serilog;
 using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Linq;
 using System.Threading.Tasks;
-using TradeBot.Common.v1;
 using TradeBot.History.HistoryService.v1;
 
 namespace History
 {
     public class History : HistoryService.HistoryServiceBase
     {
-        private struct BalanceUpdate
-        {
-            public string SessionId;
-            public Timestamp Time;
-            public Balance Balance;
-        }
-        private struct OrderUpdate
-        {
-            public string SessionId;
-            public Timestamp Time;
-            public Order Order;
-            public string Message;
-            public ChangesType ChangesType;
-            public string SlotName;
-        }
-
-        private static readonly ObservableCollection<BalanceUpdate> BalanceCollection = new();
-        private static readonly ObservableCollection<OrderUpdate> OrderCollection = new();
-
+        private static readonly ObservableCollection<BalanceChange> BalanceCollection = new();
+        private static readonly ObservableCollection<OrderChange> OrderCollection = new();
 
         public override async Task<PublishEventResponse> PublishEvent(PublishEventRequest request, ServerCallContext context)
         {
@@ -38,28 +24,47 @@ namespace History
                 case PublishEventRequest.EventTypeOneofCase.None:
                     break;
                 case PublishEventRequest.EventTypeOneofCase.Balance:
-                    BalanceCollection.Add(new BalanceUpdate
+                    using (var db = new DataContext())
                     {
-                        SessionId = request.Balance.Sessionid,
-                        Time = request.Balance.Time,
-                        Balance = request.Balance.Balance
-                    });
+                        BalanceWrapper bw = Converter.ToBalanceWrapper(request.Balance.Balance);
+                        BalanceChange bc = new BalanceChange
+                        {
+                            SessionId = request.Balance.Sessionid,
+                            Time = request.Balance.Time.ToDateTime(),
+                            Balance = bw,
+                        };
+                        BalanceCollection.Add(bc);
+                        db.Add(bw);
+                        db.Add(bc);
+                        db.SaveChanges();
+                        Log.Information("{@Where}: Recorded a change of balance for user {@User}", "History", bc.SessionId);
+                        Log.Information("{@Where}: New balance: " + bw.Value + bw.Currency, "History");
+                    }
                     break;
                 case PublishEventRequest.EventTypeOneofCase.Order:
-                    OrderCollection.Add(new OrderUpdate
+                    using (var db = new DataContext())
                     {
-                        SessionId = request.Order.Sessionid,
-                        ChangesType = request.Order.ChangesType,
-                        Order = request.Order.Order,
-                        Message = request.Order.Message,
-                        Time = request.Order.Time,
-                        SlotName = request.Order.SlotName
-                    });
+                        OrderWrapper ow = Converter.ToOrderWrapper(request.Order.Order);
+                        OrderChange oc = new OrderChange
+                        {
+                            SessionId = request.Order.Sessionid,
+                            ChangesType = (DataBase.ChangesType)request.Order.ChangesType,
+                            Order = ow,
+                            Message = request.Order.Message,
+                            Time = request.Order.Time.ToDateTime(),
+                            SlotName = request.Order.SlotName
+                        };
+                        OrderCollection.Add(oc);
+                        db.Add(ow);
+                        db.Add(oc);
+                        db.SaveChanges();
+                        Log.Information("{@Where}: Recorded a change of order {@Order}", "History", ow.OrderId);
+                        Log.Information("{@Where}: Order change: " + oc.ChangesType, "History");
+                    }
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
             return new PublishEventResponse();
         }
 
@@ -67,38 +72,38 @@ namespace History
             IAsyncStreamWriter<SubscribeEventsResponse> responseStream,
             TaskCompletionSource<SubscribeEventsResponse> taskCompletionSource)
         {
-            BalanceUpdate updateBalance;
-            OrderUpdate updateOrder;
+            BalanceChange updateBalance;
+            OrderChange updateOrder;
             try
             {
                 Task.Run(async () =>
                 {
                     if (args.NewItems[0].GetType().FullName.Contains("BalanceUpdate"))
                     {
-                        updateBalance = (BalanceUpdate)args.NewItems[0];
+                        updateBalance = (BalanceChange)args.NewItems[0];
                         if (updateBalance.SessionId != request.Sessionid) return;
                         await responseStream.WriteAsync(new SubscribeEventsResponse
                         {
                             Balance = new PublishBalanceEvent
                             {
-                                Balance = updateBalance.Balance, 
+                                Balance = Converter.ToBalance(updateBalance.Balance),
                                 Sessionid = updateBalance.SessionId,
-                                Time = updateBalance.Time
+                                Time = Timestamp.FromDateTime(updateBalance.Time)
                             }
-                        });
+                        }); ;
                     }
                     if (args.NewItems[0].GetType().FullName.Contains("OrderUpdate"))
                     {
-                        updateOrder = (OrderUpdate)args.NewItems[0];
+                        updateOrder = (OrderChange)args.NewItems[0];
                         if (updateOrder.SessionId != request.Sessionid) return;
                         await responseStream.WriteAsync(new SubscribeEventsResponse
                         {
                             Order = new PublishOrderEvent
                             {
-                                ChangesType = updateOrder.ChangesType,
-                                Order = updateOrder.Order,
+                                ChangesType = (TradeBot.Common.v1.ChangesType)updateOrder.ChangesType,
+                                Order = Converter.ToOrder(updateOrder.Order),
                                 Sessionid = updateOrder.SessionId,
-                                Time = updateOrder.Time,
+                                Time = Timestamp.FromDateTime(updateOrder.Time),
                                 Message = updateOrder.Message,
                                 SlotName = updateOrder.SlotName
                             }
