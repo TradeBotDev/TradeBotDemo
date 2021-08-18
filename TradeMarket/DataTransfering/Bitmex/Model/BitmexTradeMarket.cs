@@ -56,7 +56,8 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
 
         public async override Task<List<Order>> SubscribeToUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, UserContext context, CancellationToken token)
         {
-            return await SubscribeTo(context.WSClient, OrderPublisher, handler, context, PublisherFactory.CreateUserOrderPublisher, token);        }
+            return await SubscribeTo(context.WSClient, OrderPublisher, handler, context, PublisherFactory.CreateUserOrderPublisher, token);
+        }
 
         public async override Task<List<Wallet>> SubscribeToBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, UserContext context, CancellationToken token)
         {

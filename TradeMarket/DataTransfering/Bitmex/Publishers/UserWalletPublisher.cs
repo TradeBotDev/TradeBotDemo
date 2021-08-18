@@ -46,7 +46,10 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         public override void AddModelToCache(WalletResponse response)
         {
-            Parallel.ForEach(response.Data, (el) => {
+            lock (locker)
+            {
+                Parallel.ForEach(response.Data, (el) =>
+                {
                     switch (response.Action)
                     {
                         case BitmexAction.Delete:
@@ -57,7 +60,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
                         case BitmexAction.Update:
                             {
                                 var model = _cache[0];
-                                el.Amount= el.Amount is null || el.Amount == 0 ? model.Amount : el.Amount;
+                                el.Amount = el.Amount is null || el.Amount == 0 ? model.Amount : el.Amount;
                                 _cache.Add(el);
                                 break;
                             }
@@ -67,8 +70,9 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
                                 break;
                             }
                     }
-               
-            });
+
+                });
+            }
         }
     }
 }

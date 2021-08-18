@@ -23,6 +23,39 @@ namespace UI
         
         private CancellationTokenSource _token;
 
+        public async Task<bool> RegisterLicense()
+        {
+            var sessionId = _meta.GetValue("sessionid");
+            try
+            {
+                var checkHasLicense = await _client.CheckLicenseAsync(new()
+                {
+                    Product = ProductCode.Tradebot,
+                    SessionId = sessionId
+                });
+                if (!checkHasLicense.HaveAccess)
+                {
+                    var setLicenseResponse = await _client.SetLicenseAsync(new()
+                    {
+                        CardNumber = "4276450016026862",
+                        Cvv = 123,
+                        Date = DateTime.Now.AddYears(2).Second,
+                        Product = ProductCode.Tradebot,
+                        SessionId = sessionId,
+                    });
+                    return setLicenseResponse.Code == LicenseCode.Successful || setLicenseResponse.Code == LicenseCode.HaveAccess;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public async Task<DefaultResponse> StartBot(string slotName, Config configuration)
         {
             _meta[1] = new Metadata.Entry("slot", slotName);
@@ -113,12 +146,13 @@ namespace UI
         {
             try
             {
-                await _client.RegisterAsync(new RegisterRequest
+                var response = await _client.RegisterAsync(new RegisterRequest
                 {
                     Email = email,
                     Password = password,
                     VerifyPassword = verifypassword
                 });
+
                 return new DefaultResponse { Code = ReplyCode.Succeed, Message = ""};
             }
             catch

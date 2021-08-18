@@ -51,7 +51,10 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         public override void AddModelToCache(AuthenticationResponse response)
         {
-            _cache.Add(response.Success);
+            lock (base.locker)
+            {
+                _cache.Add(response.Success);
+            }
         }
     }
 }

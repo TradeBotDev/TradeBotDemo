@@ -40,36 +40,40 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         public override void AddModelToCache(PositionResponse response)
         {
-            Parallel.ForEach(response.Data, (el) => {
-                var model = _cache.First(x => x.Symbol == el.Symbol);
-                if (model is not null)
+            lock (locker)
+            {
+                Parallel.ForEach(response.Data, (el) =>
                 {
-                    switch (response.Action)
+                    var model = _cache.First(x => x.Symbol == el.Symbol);
+                    if (model is not null)
                     {
-                        case BitmexAction.Delete:
-                            {
-                                _cache.Remove(model);
-                                break;
-                            }
-                        case BitmexAction.Update:
-                            {
-                                _cache.Remove(model);
-                                el.CurrentQty = el.CurrentQty is null || el.CurrentQty == 0 ? model.CurrentQty : el.CurrentQty;
-                                _cache.Add(el);
-                                break;
-                            }
-                        default:
-                            {
-                                _cache.Add(el);
-                                break;
-                            }
+                        switch (response.Action)
+                        {
+                            case BitmexAction.Delete:
+                                {
+                                    _cache.Remove(model);
+                                    break;
+                                }
+                            case BitmexAction.Update:
+                                {
+                                    _cache.Remove(model);
+                                    el.CurrentQty = el.CurrentQty is null || el.CurrentQty == 0 ? model.CurrentQty : el.CurrentQty;
+                                    _cache.Add(el);
+                                    break;
+                                }
+                            default:
+                                {
+                                    _cache.Add(el);
+                                    break;
+                                }
+                        }
                     }
-                }
-                else
-                {
-                    _cache.Add(el);
-                }
-            });
+                    else
+                    {
+                        _cache.Add(el);
+                    }
+                });
+            }
          }
 
         public async override Task Start()

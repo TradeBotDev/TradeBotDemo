@@ -32,7 +32,10 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         protected List<TModel> _cache;
 
-        public List<TModel> Cache { get => new(_cache);  set => _cache = value; }
+        public object locker = new();
+
+
+        public List<TModel> Cache { get{ lock (locker) { return new(_cache); } }  set => _cache = value; }
 
         public BitmexPublisher(BitmexWebsocketClient client,Action<TResponse, EventHandler<IPublisher<TModel>.ChangedEventArgs>> action)
         {
