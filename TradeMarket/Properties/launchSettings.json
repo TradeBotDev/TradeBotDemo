@@ -11,6 +11,10 @@
     "Docker": {
       "commandName": "Docker",
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "environmentVariables": {
+        "ACCOUNT_CONNECTION_STRING": "http://localhost:5000",
+        "REDIS_CONNECTION_STRING": "localhost:6379"
+      },
       "publishAllPorts": true
     }
   }
