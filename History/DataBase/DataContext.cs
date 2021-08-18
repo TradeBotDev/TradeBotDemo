@@ -22,7 +22,9 @@ namespace History.DataBase
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=historydb;Username=postgres;Password=password");
+            optionsBuilder.UseNpgsql(Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING"));
         }
     }
 }
+
+

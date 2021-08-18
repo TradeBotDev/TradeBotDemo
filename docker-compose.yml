@@ -10,9 +10,9 @@ services:
     ports:
       - 5432:5432
     environment:
-      POSTGRES_PASSWORD: "password"
-      POSTGRES_USER: "postgres"
-      POSTGRES_DB: "postgresdb"
+        POSTGRES_PASSWORD: "password"
+        POSTGRES_USER: "postgres"
+        POSTGRES_DB: "postgresdb"
   redisdb:
     image: redis
     container_name: rediscontainer
@@ -81,6 +81,7 @@ services:
       - .%USERPROFILE%\.aspnet\https:/https/
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
+      POSTGRES_CONNECTION_STRING: "Host=host.docker.internal;Port=5432;Database=historydb;Username=postgres;Password=password"
   former:
     image: former
     container_name: formercontainer

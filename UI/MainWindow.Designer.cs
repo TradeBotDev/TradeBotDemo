@@ -1305,10 +1305,10 @@ namespace UI
             this.Controls.Add(this.Tabs);
             this.Controls.Add(this.RightPanel);
             this.Controls.Add(this.LeftPanel);
+            this.Controls.Add(this.SignUpGroupBox);
             this.Controls.Add(this.SignInGroupBox);
             this.Controls.Add(this.LoggedGroupBox);
             this.Controls.Add(this.MainMenuGroupBox);
-            this.Controls.Add(this.SignUpGroupBox);
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "TradeBotUi";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
