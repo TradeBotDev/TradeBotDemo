@@ -7,6 +7,10 @@ namespace AccountGRPC.Models
     {
         public int LoggedAccountId { get; set; }
         
+        public string RefreshToken { get; set; }
+
+        public string LogoutToken { get; set; }
+
         public string SessionId { get; set; }
 
         public DateTime LoginDate { get; set; }
