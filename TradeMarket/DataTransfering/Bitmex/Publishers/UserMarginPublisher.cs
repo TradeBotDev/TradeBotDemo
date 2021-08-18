@@ -42,5 +42,14 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             await base.SubscribeAsync(new MarginSubscribeRequest(), _stream, token);
 
         }
+
+        public override void AddModelToCache(MarginResponse response)
+        {
+            _cache.Clear();
+            foreach(var data in response.Data)
+            {
+                _cache.Add(data);
+            }
+        }
     }
 }
