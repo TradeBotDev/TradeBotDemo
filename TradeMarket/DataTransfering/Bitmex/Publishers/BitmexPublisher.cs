@@ -23,9 +23,11 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         /// Действие которое выполняет при поступлении новых данных с биржи
         /// </summary>
         private readonly Action<TResponse, EventHandler<IPublisher<TModel>.ChangedEventArgs>> _onNext;
-        
+
         public event EventHandler<IPublisher<TModel>.ChangedEventArgs> Changed;
 
+
+        private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         protected readonly BitmexWebsocketClient _client;
 
         public BitmexPublisher(BitmexWebsocketClient client,Action<TResponse, EventHandler<IPublisher<TModel>.ChangedEventArgs>> action)
@@ -43,10 +45,17 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         internal async Task SubscribeAsync(TRequest request, IObservable<TResponse> stream, CancellationToken token)
         {
+           token.Register(() => {
+                //1 потому что сначала прилетает токен а потом идет отписка от ивента
+                if(Changed?.GetInvocationList().Length == 1)
+               {
+                   cancellationTokenSource.Cancel();
+               }
+           });
            await Task.Run(() =>
            {
                //тут не нужно ловить OperationCanceledException. BitmexWebsocketClient все разруливает сам
-               stream.Subscribe(responseAction, token);
+               stream.Subscribe(responseAction, cancellationTokenSource.Token);
 
                if (request is not null) _client.Send(request);
            });

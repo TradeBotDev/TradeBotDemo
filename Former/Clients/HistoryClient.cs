@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
-using Former.Model;
+using Former.Models;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Grpc.Net.Client;

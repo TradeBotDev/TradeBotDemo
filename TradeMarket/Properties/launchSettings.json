@@ -1,13 +1,23 @@
-﻿{
+{
   "profiles": {
     "TradeMarket": {
       "commandName": "Project",
-      "dotnetRunMessages": "true",
-      "launchBrowser": false,
-      "applicationUrl": "http://localhost:5005;http://localhost:50005",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+        "ACCOUNT_CONNECTION_STRING": "http://localhost:5000",
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "REDIS_CONNECTION_STRING": "localhost:6379"
+      },
+      "dotnetRunMessages": "true",
+      "applicationUrl": "http://localhost:5005;http://localhost:50005"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "environmentVariables": {
+        "ACCOUNT_CONNECTION_STRING": "http://localhost:5000",
+        "REDIS_CONNECTION_STRING": "localhost:6379"
+      },
+      "publishAllPorts": true
     }
   }
 }

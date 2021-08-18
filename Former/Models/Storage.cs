@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Serilog;
 
-namespace Former.Model
+namespace Former.Models
 {
     public class Storage
     {

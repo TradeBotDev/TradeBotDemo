@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Former.Clients;
+using Former.Models;
 using Grpc.Core;
 using Serilog;
-using TradeBot.Common.v1;
 
-namespace Former.Model
+namespace Former.Models
 {
     public class UserContext
     {
@@ -15,7 +15,7 @@ namespace Former.Model
         internal string Slot => Meta.GetValue("slot");
         private readonly Storage _storage;
         private readonly TradeMarketClient _tradeMarketClient;
-        private readonly Former _former;
+        private readonly Models.Former _former;
         private readonly UpdateHandlers _updateHandlers;
         private readonly HistoryClient _historyClient;
         private bool _isSubscribesAttached;
@@ -39,7 +39,7 @@ namespace Former.Model
             _tradeMarketClient = new TradeMarketClient();
 
             _storage = new Storage();
-            _former = new Former(_storage, null, _tradeMarketClient, Meta, _historyClient);
+            _former = new Models.Former(_storage, null, _tradeMarketClient, Meta, _historyClient);
             _updateHandlers = new UpdateHandlers(_storage, null, _tradeMarketClient, Meta, _historyClient);
         }
 
