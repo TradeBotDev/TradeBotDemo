@@ -3,10 +3,10 @@ using TradeBot.Account.AccountService.v1;
 
 namespace Website.Models
 {
-    public class AccountDataModel
-    {
-        public string Email { get; set; }
+	public class AccountDataModel
+	{
+		public string Email { get; set; }
 
-        public RepeatedField<ExchangeAccessInfo> Exchanges { get; set; }
-    }
+		public RepeatedField<ExchangeAccessInfo> Exchanges { get; set; }
+	}
 }
