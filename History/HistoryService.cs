@@ -2,8 +2,10 @@
 using Grpc.Core;
 using History.DataBase;
 using History.DataBase.Data_Models;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
@@ -123,10 +125,50 @@ namespace History
             var taskCompletionSource = new TaskCompletionSource<SubscribeEventsResponse>();
 
             BalanceCollection.CollectionChanged += (_, args) => Handler(args, request, responseStream, taskCompletionSource);
+            List<OrderChange> orderChanges = GetOrderChangesByUser(request.Sessionid);
+            foreach (var record in orderChanges)
+            {
+                await responseStream.WriteAsync(new SubscribeEventsResponse
+                {
+                    Order = new PublishOrderEvent
+                    {
+                        ChangesType = (TradeBot.Common.v1.ChangesType)record.ChangesType,
+                        Order = Converter.ToOrder(record.Order),
+                        Sessionid = record.SessionId,
+                        Time = Timestamp.FromDateTime(record.Time.ToUniversalTime()),
+                        Message = record.Message,
+                        SlotName = record.SlotName
+                    }
+                });
+            }
 
             OrderCollection.CollectionChanged += (_, args) => Handler(args, request, responseStream, taskCompletionSource);
-
+            List<BalanceChange> balanceChanges = GetBalanceChangesByUser(request.Sessionid);
+            foreach (var record in balanceChanges)
+            {
+                await responseStream.WriteAsync(new SubscribeEventsResponse
+                {
+                    Balance = new PublishBalanceEvent
+                    {
+                        Balance = Converter.ToBalance(record.Balance),
+                        Sessionid = record.SessionId,
+                        Time = Timestamp.FromDateTime(record.Time.ToUniversalTime())
+                    }
+                }); ;
+            }
             return await taskCompletionSource.Task;
+        }
+
+        private static List<OrderChange> GetOrderChangesByUser(string user)
+        {
+            var db = new DataContext();
+            return db.OrderRecords.Include(x => x.Order).ToList();
+        }
+
+        private static List<BalanceChange> GetBalanceChangesByUser(string user)
+        {
+            var db = new DataContext();
+            return db.BalanceRecords.Include(x => x.Balance).ToList();
         }
     }
 }
