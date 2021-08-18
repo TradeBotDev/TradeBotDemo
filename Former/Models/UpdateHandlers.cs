@@ -1,11 +1,11 @@
-﻿using Former.Clients;
-using Grpc.Core;
-using Serilog;
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Former.Clients;
+using Grpc.Core;
+using Serilog;
 
-namespace Former.Model
+namespace Former.Models
 {
     public class UpdateHandlers
     {
