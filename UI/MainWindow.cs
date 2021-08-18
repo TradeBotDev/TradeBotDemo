@@ -1,5 +1,6 @@
 ﻿using Google.Protobuf.WellKnownTypes;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -609,25 +610,25 @@ namespace UI
 
         #endregion
 
-        private void LinkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void OurWebsiteLnkLbl_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "http://23.88.34.174:5008/" };
             Process.Start(parameter);
-            LinkLabel1.LinkVisited = true;
+            OurWebsiteLnkLbl1.LinkVisited = true;
         }
 
-        private void LinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void OurWebsiteLnkLbl1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "http://23.88.34.174:5008/" };
             Process.Start(parameter);
-            LinkLabel1.LinkVisited = true;
+            OurWebsiteLnkLbl1.LinkVisited = true;
         }
 
-        private void linkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void BitmexWebsiteLnkLbl_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "https://testnet.bitmex.com/app/trade/XBTUSD" };
             Process.Start(parameter);
-            LinkLabel1.LinkVisited = true;
+            OurWebsiteLnkLbl1.LinkVisited = true;
         }
 
         private void TradeBotUi_Load(object sender, EventArgs e)

@@ -30,13 +30,13 @@ namespace UI
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
             this.zedGraph = new ZedGraph.ZedGraphControl();
             this.zedGraph_1 = new ZedGraph.ZedGraphControl();
             this.Tabs = new System.Windows.Forms.TabControl();
@@ -107,14 +107,14 @@ namespace UI
             this.SignUpGroupBox = new System.Windows.Forms.GroupBox();
             this.SignUpPanel = new System.Windows.Forms.Panel();
             this.label10 = new System.Windows.Forms.Label();
-            this.linkLabel2 = new System.Windows.Forms.LinkLabel();
+            this.BitmexWebsiteLnkLbl = new System.Windows.Forms.LinkLabel();
             this.label2 = new System.Windows.Forms.Label();
-            this.LinkLabel = new System.Windows.Forms.LinkLabel();
+            this.OurWebsiteLnkLbl = new System.Windows.Forms.LinkLabel();
             this.SignInGroupBox = new System.Windows.Forms.GroupBox();
             this.panel5 = new System.Windows.Forms.Panel();
             this.LoggedGroupBox = new System.Windows.Forms.GroupBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.LinkLabel1 = new System.Windows.Forms.LinkLabel();
+            this.OurWebsiteLnkLbl1 = new System.Windows.Forms.LinkLabel();
             this.SessionIDLbl = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.LicenseNumberLbl = new System.Windows.Forms.Label();
@@ -310,11 +310,11 @@ namespace UI
             this.FilledOrdersDataGridView.ReadOnly = true;
             this.FilledOrdersDataGridView.RowHeadersVisible = false;
             this.FilledOrdersDataGridView.RowHeadersWidth = 51;
-            dataGridViewCellStyle1.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.WindowText;
-            this.FilledOrdersDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle8.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle8.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle8.SelectionBackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle8.SelectionForeColor = System.Drawing.SystemColors.WindowText;
+            this.FilledOrdersDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle8;
             this.FilledOrdersDataGridView.RowTemplate.Height = 29;
             this.FilledOrdersDataGridView.Size = new System.Drawing.Size(1060, 450);
             this.FilledOrdersDataGridView.TabIndex = 0;
@@ -401,11 +401,11 @@ namespace UI
             this.ActiveOrdersDataGridView.ReadOnly = true;
             this.ActiveOrdersDataGridView.RowHeadersVisible = false;
             this.ActiveOrdersDataGridView.RowHeadersWidth = 51;
-            dataGridViewCellStyle2.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.WindowText;
-            this.ActiveOrdersDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle9.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle9.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle9.SelectionBackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle9.SelectionForeColor = System.Drawing.SystemColors.WindowText;
+            this.ActiveOrdersDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle9;
             this.ActiveOrdersDataGridView.RowTemplate.Height = 29;
             this.ActiveOrdersDataGridView.Size = new System.Drawing.Size(1059, 453);
             this.ActiveOrdersDataGridView.TabIndex = 1;
@@ -830,26 +830,26 @@ namespace UI
             this.ActiveSlotsDataGridView.AllowUserToResizeRows = false;
             this.ActiveSlotsDataGridView.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.ActiveSlotsDataGridView.BackgroundColor = System.Drawing.Color.White;
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.ActiveSlotsDataGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle10.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle10.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle10.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle10.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle10.SelectionForeColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle10.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.ActiveSlotsDataGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle10;
             this.ActiveSlotsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.ActiveSlotsDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Slot,
             this.Launch});
-            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle6.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.ActiveSlotsDataGridView.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle13.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle13.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle13.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle13.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle13.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle13.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle13.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.ActiveSlotsDataGridView.DefaultCellStyle = dataGridViewCellStyle13;
             this.ActiveSlotsDataGridView.GridColor = System.Drawing.SystemColors.Control;
             this.ActiveSlotsDataGridView.Location = new System.Drawing.Point(537, 12);
             this.ActiveSlotsDataGridView.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -857,11 +857,11 @@ namespace UI
             this.ActiveSlotsDataGridView.ReadOnly = true;
             this.ActiveSlotsDataGridView.RowHeadersVisible = false;
             this.ActiveSlotsDataGridView.RowHeadersWidth = 51;
-            dataGridViewCellStyle7.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle7.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle7.SelectionBackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.WindowText;
-            this.ActiveSlotsDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle7;
+            dataGridViewCellStyle14.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle14.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle14.SelectionBackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle14.SelectionForeColor = System.Drawing.SystemColors.WindowText;
+            this.ActiveSlotsDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle14;
             this.ActiveSlotsDataGridView.RowTemplate.Height = 29;
             this.ActiveSlotsDataGridView.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.ActiveSlotsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
@@ -870,12 +870,12 @@ namespace UI
             // 
             // Slot
             // 
-            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle4.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.WindowText;
-            this.Slot.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle11.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle11.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle11.SelectionBackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle11.SelectionForeColor = System.Drawing.SystemColors.WindowText;
+            this.Slot.DefaultCellStyle = dataGridViewCellStyle11;
             this.Slot.HeaderText = "Slot name";
             this.Slot.MinimumWidth = 6;
             this.Slot.Name = "Slot";
@@ -886,13 +886,13 @@ namespace UI
             // 
             // Launch
             // 
-            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle5.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle5.NullValue = false;
-            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.WindowText;
-            this.Launch.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle12.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle12.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle12.NullValue = false;
+            dataGridViewCellStyle12.SelectionBackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle12.SelectionForeColor = System.Drawing.SystemColors.WindowText;
+            this.Launch.DefaultCellStyle = dataGridViewCellStyle12;
             this.Launch.HeaderText = "Launch";
             this.Launch.MinimumWidth = 6;
             this.Launch.Name = "Launch";
@@ -1066,9 +1066,9 @@ namespace UI
             // SignUpPanel
             // 
             this.SignUpPanel.Controls.Add(this.label10);
-            this.SignUpPanel.Controls.Add(this.linkLabel2);
+            this.SignUpPanel.Controls.Add(this.BitmexWebsiteLnkLbl);
             this.SignUpPanel.Controls.Add(this.label2);
-            this.SignUpPanel.Controls.Add(this.LinkLabel);
+            this.SignUpPanel.Controls.Add(this.OurWebsiteLnkLbl);
             this.SignUpPanel.Controls.Add(this.RegistrationButton);
             this.SignUpPanel.Controls.Add(this.RegLog);
             this.SignUpPanel.Controls.Add(this.SecretTxb);
@@ -1092,16 +1092,16 @@ namespace UI
             this.label10.TabIndex = 30;
             this.label10.Text = "Bitmex address:";
             // 
-            // linkLabel2
+            // BitmexWebsiteLnkLbl
             // 
-            this.linkLabel2.AutoSize = true;
-            this.linkLabel2.Location = new System.Drawing.Point(366, 261);
-            this.linkLabel2.Name = "linkLabel2";
-            this.linkLabel2.Size = new System.Drawing.Size(58, 20);
-            this.linkLabel2.TabIndex = 29;
-            this.linkLabel2.TabStop = true;
-            this.linkLabel2.Text = "BitMEX";
-            this.linkLabel2.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel2_LinkClicked);
+            this.BitmexWebsiteLnkLbl.AutoSize = true;
+            this.BitmexWebsiteLnkLbl.Location = new System.Drawing.Point(366, 261);
+            this.BitmexWebsiteLnkLbl.Name = "BitmexWebsiteLnkLbl";
+            this.BitmexWebsiteLnkLbl.Size = new System.Drawing.Size(58, 20);
+            this.BitmexWebsiteLnkLbl.TabIndex = 29;
+            this.BitmexWebsiteLnkLbl.TabStop = true;
+            this.BitmexWebsiteLnkLbl.Text = "BitMEX";
+            this.BitmexWebsiteLnkLbl.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.BitmexWebsiteLnkLbl_LinkClicked);
             // 
             // label2
             // 
@@ -1112,16 +1112,16 @@ namespace UI
             this.label2.TabIndex = 28;
             this.label2.Text = "Official site:";
             // 
-            // LinkLabel
+            // OurWebsiteLnkLbl
             // 
-            this.LinkLabel.AutoSize = true;
-            this.LinkLabel.Location = new System.Drawing.Point(266, 261);
-            this.LinkLabel.Name = "LinkLabel";
-            this.LinkLabel.Size = new System.Drawing.Size(73, 20);
-            this.LinkLabel.TabIndex = 27;
-            this.LinkLabel.TabStop = true;
-            this.LinkLabel.Text = "TradeBot";
-            this.LinkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkLabel_LinkClicked);
+            this.OurWebsiteLnkLbl.AutoSize = true;
+            this.OurWebsiteLnkLbl.Location = new System.Drawing.Point(266, 261);
+            this.OurWebsiteLnkLbl.Name = "OurWebsiteLnkLbl";
+            this.OurWebsiteLnkLbl.Size = new System.Drawing.Size(73, 20);
+            this.OurWebsiteLnkLbl.TabIndex = 27;
+            this.OurWebsiteLnkLbl.TabStop = true;
+            this.OurWebsiteLnkLbl.Text = "TradeBot";
+            this.OurWebsiteLnkLbl.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.OurWebsiteLnkLbl1_LinkClicked);
             // 
             // SignInGroupBox
             // 
@@ -1157,7 +1157,7 @@ namespace UI
             this.LoggedGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.LoggedGroupBox.Controls.Add(this.label3);
-            this.LoggedGroupBox.Controls.Add(this.LinkLabel1);
+            this.LoggedGroupBox.Controls.Add(this.OurWebsiteLnkLbl1);
             this.LoggedGroupBox.Controls.Add(this.SessionIDLbl);
             this.LoggedGroupBox.Controls.Add(this.label1);
             this.LoggedGroupBox.Controls.Add(this.LicenseNumberLbl);
@@ -1184,16 +1184,16 @@ namespace UI
             this.label3.TabIndex = 30;
             this.label3.Text = "Official site:";
             // 
-            // LinkLabel1
+            // OurWebsiteLnkLbl1
             // 
-            this.LinkLabel1.AutoSize = true;
-            this.LinkLabel1.Location = new System.Drawing.Point(566, 295);
-            this.LinkLabel1.Name = "LinkLabel1";
-            this.LinkLabel1.Size = new System.Drawing.Size(73, 20);
-            this.LinkLabel1.TabIndex = 29;
-            this.LinkLabel1.TabStop = true;
-            this.LinkLabel1.Text = "TradeBot";
-            this.LinkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkLabel1_LinkClicked);
+            this.OurWebsiteLnkLbl1.AutoSize = true;
+            this.OurWebsiteLnkLbl1.Location = new System.Drawing.Point(566, 295);
+            this.OurWebsiteLnkLbl1.Name = "OurWebsiteLnkLbl1";
+            this.OurWebsiteLnkLbl1.Size = new System.Drawing.Size(73, 20);
+            this.OurWebsiteLnkLbl1.TabIndex = 29;
+            this.OurWebsiteLnkLbl1.TabStop = true;
+            this.OurWebsiteLnkLbl1.Text = "TradeBot";
+            this.OurWebsiteLnkLbl1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.OurWebsiteLnkLbl_LinkClicked);
             // 
             // SessionIDLbl
             // 
@@ -1305,10 +1305,10 @@ namespace UI
             this.Controls.Add(this.Tabs);
             this.Controls.Add(this.RightPanel);
             this.Controls.Add(this.LeftPanel);
-            this.Controls.Add(this.SignUpGroupBox);
-            this.Controls.Add(this.SignInGroupBox);
             this.Controls.Add(this.LoggedGroupBox);
             this.Controls.Add(this.MainMenuGroupBox);
+            this.Controls.Add(this.SignUpGroupBox);
+            this.Controls.Add(this.SignInGroupBox);
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "TradeBotUi";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -1429,11 +1429,11 @@ namespace UI
         private System.Windows.Forms.Label SessionIDLbl;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.LinkLabel LinkLabel;
+        private System.Windows.Forms.LinkLabel OurWebsiteLnkLbl;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.LinkLabel LinkLabel1;
+        private System.Windows.Forms.LinkLabel OurWebsiteLnkLbl1;
         private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.LinkLabel linkLabel2;
+        private System.Windows.Forms.LinkLabel BitmexWebsiteLnkLbl;
         private System.Windows.Forms.ErrorProvider ErrorProviderSignUp;
         private System.Windows.Forms.Button button1;
     }
