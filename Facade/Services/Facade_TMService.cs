@@ -87,12 +87,10 @@ namespace Facade
         public async override Task<CurrentAccountReply> CurrentAccountData(SessionRequest request, ServerCallContext context)
         {
             return await clientAccount.Account_CurrentAccountData(request, context, nameof(CurrentAccountData));
-
         }
         public async override Task<AddExchangeAccessReply> AddExchangeAccess(AddExchangeAccessRequest request, ServerCallContext context)
         {
             return await clientAccount.Account_AddExcengeAccess(request, context, nameof(AddExchangeAccess));
-
         }
         public async override Task<AllExchangesBySessionReply> AllExchangesBySession(SessionRequest request, ServerCallContext context)
         {
@@ -101,17 +99,24 @@ namespace Facade
         public async override Task<DeleteExchangeAccessReply> DeleteExchangeAccess(DeleteExchangeAccessRequest request, ServerCallContext context)
         {
             return await clientAccount.Account_DeleteChangesAccess(request, context, nameof(DeleteExchangeAccess));
-
         }
         public async override Task<ExchangeBySessionReply> ExchangeBySession(ExchangeBySessionRequest request, ServerCallContext context)
         {
             return await clientAccount.Account_ExchangeBySession(request, context, nameof(ExchangeBySession));
         }
+        public async override Task<AccountDataResponse> AccountData(AccountDataRequest request, ServerCallContext context)
+        {
+            return await clientAccount.Account_AccountData(request, context, nameof(AccountData));
+        }
+        public async override Task<SetLicenseResponse> SetLicense(SetLicenseRequest request, ServerCallContext context)
+        {
+            return await clientAccount.Account_SetLicense(request,context,nameof(SetLicense));
+        }
+        public async override Task<CheckLicenseResponse> CheckLicense(CheckLicenseRequest request, ServerCallContext context)
+        {
+            return await clientAccount.Account_CheckLicense(request,context,nameof(CheckLicense));
+        }
         #endregion
-        //public async override Task<AccountDataResponse> AccountData(AccountDataRequest request, ServerCallContext context)
-        //{
-        //    return await clientAccount.License_SetLicense(request,context,nameof(AccountData));
-        //}
 
         #region History
         public async override Task SubscribeEvents(SubscribeEventsRequest request, IServerStreamWriter<SubscribeEventsResponse> responseStream, ServerCallContext context)
@@ -120,5 +125,6 @@ namespace Facade
         }
 
         #endregion
+
     }
 }
