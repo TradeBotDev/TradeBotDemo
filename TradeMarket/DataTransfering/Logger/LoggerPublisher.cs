@@ -8,7 +8,7 @@ using TradeMarket.Model.Publishers;
 namespace TradeMarket.DataTransfering
 {
     //TODO Денис пока без логов.
-    public class LoggerPublisher<T> : IPublisher<ILogger<T>>
+    public class LoggerPublisher<T> //: IPublisher<ILogger<T>>
     {
         public event EventHandler<IPublisher<ILogger<T>>.ChangedEventArgs> Changed;
 
@@ -17,9 +17,5 @@ namespace TradeMarket.DataTransfering
             throw new NotImplementedException();
         }
 
-        Task IPublisher<ILogger<T>>.Start()
-        {
-            throw new NotImplementedException();
-        }
     }
 }
