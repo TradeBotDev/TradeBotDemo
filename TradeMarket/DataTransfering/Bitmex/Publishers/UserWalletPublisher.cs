@@ -48,7 +48,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         {
             lock (locker)
             {
-                Parallel.ForEach(response.Data, (el) =>
+                foreach(var el in response.Data)
                 {
                     switch (response.Action)
                     {
