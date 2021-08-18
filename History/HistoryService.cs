@@ -57,9 +57,12 @@ namespace History
                             SlotName = request.Order.SlotName
                         };
                         OrderCollection.Add(oc);
-                        db.Add(ow);
-                        db.Add(oc);
-                        db.SaveChanges();
+                        if (oc.ChangesType == ChangesType.CHANGES_TYPE_DELETE)
+                        {
+                            db.Add(ow);
+                            db.Add(oc);
+                            db.SaveChanges();
+                        }
                         Log.Information("{@Where}: Recorded a change of order {@Order}", "History", ow.OrderIdOnTM);
                         Log.Information("{@Where}: Order change: " + oc.ChangesType, "History");
                     }
