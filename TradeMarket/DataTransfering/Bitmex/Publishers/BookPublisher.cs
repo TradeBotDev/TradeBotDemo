@@ -44,6 +44,18 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             this._token = token;
         }
 
+        public override void AddModelToCache(BookResponse response)
+        {
+            Parallel.ForEach(response.Data, (el) => {
+                var model = _cache.First(x => x.Id == el.Id);
+                if (model is not null)
+                {
+                    _cache.Remove(model);
+                }
+                _cache.Add(el);
+            });
+        }
+
         protected async Task SubscribeAsync(SubscribeRequestBase bookSubscribeRequest,CancellationToken token) 
         {
             await base.SubscribeAsync(bookSubscribeRequest, _stream, token);

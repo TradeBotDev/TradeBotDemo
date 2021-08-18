@@ -50,5 +50,41 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         {
             await base.SubscribeAsync(new OrderSubscribeRequest(), _stream, token);
         }
+
+        public override void AddModelToCache(OrderResponse response)
+        {
+            Parallel.ForEach(response.Data, (el) => {
+                var model = _cache.First(x => x.OrderId == el.OrderId);
+                if (model is not null)
+                {
+                    switch (response.Action)
+                    {
+                        case BitmexAction.Delete:
+                            {
+                                _cache.Remove(model);
+                                break;
+                            }
+                        case BitmexAction.Update:
+                            {
+                                _cache.Remove(model);
+                                el.Price = el.Price is null || el.Price == 0? model.Price : el.Price;
+                                el.OrderQty = el.OrderQty is null || el.OrderQty == 0 ? model.OrderQty: el.OrderQty ;
+                                _cache.Add(el);
+                                break;
+                            }
+                        default:
+                            {
+                                _cache.Add(el);
+                                break;
+                            }
+                    }
+                }
+                else
+                {
+                    _cache.Add(el);
+                }
+
+            });
+        }
     }
 }

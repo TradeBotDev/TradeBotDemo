@@ -32,21 +32,21 @@ namespace TradeMarket.Model.UserContexts
 
         public Model.TradeMarkets.TradeMarket TradeMarket { get; set; }
 
-        public async Task SubscribeToUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, CancellationToken token)
+        public async Task<List<Position>> SubscribeToUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, CancellationToken token)
         {
-            await TradeMarket.SubscribeToUserPositions(handler, this, token);
+            return await TradeMarket.SubscribeToUserPositions(handler, this, token);
         }
-        public async Task SubscribeToUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, CancellationToken token)
+        public async Task<List<Margin>> SubscribeToUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, CancellationToken token)
         {
-            await TradeMarket.SubscribeToUserMargin(handler, this, token);
+            return await TradeMarket.SubscribeToUserMargin(handler, this, token);
         }
-        public async Task SubscribeToUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, CancellationToken token)
+        public async Task<List<Order>> SubscribeToUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, CancellationToken token)
         {
-            await TradeMarket.SubscribeToUserOrders(handler, this, token);
+            return await TradeMarket.SubscribeToUserOrders(handler, this, token);
         }
-        public async Task SubscribeToBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, CancellationToken token)
+        public async Task<List<Wallet>> SubscribeToBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, CancellationToken token)
         {
-            await TradeMarket.SubscribeToBalance(handler, this, token);
+            return await TradeMarket.SubscribeToBalance(handler, this, token);
         }
 
  
