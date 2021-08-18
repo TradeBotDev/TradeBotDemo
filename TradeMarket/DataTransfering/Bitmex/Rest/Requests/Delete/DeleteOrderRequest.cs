@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace TradeMarket.DataTransfering.Bitmex.Rest.Requests
 {
-    public class DeleteOrderRequest : BitmexRestfulRequest<Order>
+    public class DeleteOrderRequest : BitmexRestfulRequest<Order[]>
     {
         public DeleteOrderRequest(string key, string secret, string id) : base(key, secret, HttpMethod.Delete, "/api/v1/order", JsonSerializer.Serialize(new Dictionary<string, string> { {"orderID",id} }))
         {
