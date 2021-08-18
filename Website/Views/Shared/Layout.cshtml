@@ -20,8 +20,7 @@
 				@if (User.Identity.IsAuthenticated) {
 					<!--Производится проверка вошедшего пользователя на то, обладает ли он лицензией.
 					Если он не обдалает ей, появляется кнопка покупки.-->
-					if (ViewBag.HaveLicense == null || !ViewBag.HaveLicense)
-					{
+					if (ViewBag.HaveLicense == null || !ViewBag.HaveLicense) {
 						<li><a href="/purchase/buy">Купить</a></li>
 					}
 					<!--Если пользователь аутентифицирован, ему показываются кнопки аккаунта и выхода.-->
