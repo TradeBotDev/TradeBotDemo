@@ -90,7 +90,7 @@ namespace History
                             {
                                 Balance = Converter.ToBalance(updateBalance.Balance),
                                 Sessionid = updateBalance.SessionId,
-                                Time = Timestamp.FromDateTime(updateBalance.Time)
+                                Time = Timestamp.FromDateTime(updateBalance.Time.ToUniversalTime())
                             }
                         }); ;
                     }
@@ -105,7 +105,7 @@ namespace History
                                 ChangesType = (TradeBot.Common.v1.ChangesType)updateOrder.ChangesType,
                                 Order = Converter.ToOrder(updateOrder.Order),
                                 Sessionid = updateOrder.SessionId,
-                                Time = Timestamp.FromDateTime(updateOrder.Time),
+                                Time = Timestamp.FromDateTime(updateOrder.Time.ToUniversalTime()),
                                 Message = updateOrder.Message,
                                 SlotName = updateOrder.SlotName
                             }
