@@ -36,7 +36,10 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         public override void AddModelToCache(ErrorResponse response)
         {
-            _cache.Add(response.Error);
+            lock (locker)
+            {
+                _cache.Add(response.Error);
+            }
         }
 
         public async override Task Start()

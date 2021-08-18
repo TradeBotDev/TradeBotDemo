@@ -45,10 +45,13 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         public override void AddModelToCache(MarginResponse response)
         {
-            _cache.Clear();
-            foreach(var data in response.Data)
+            lock (locker)
             {
-                _cache.Add(data);
+                _cache.Clear();
+                foreach (var data in response.Data)
+                {
+                    _cache.Add(data);
+                }
             }
         }
     }
