@@ -186,7 +186,6 @@ namespace Former.Models
                     return;
                 }
                 Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed {@ResponseCode}", "Former", value.Id, value.Price, value.Quantity, value.Signature.Type, response.Code == ReplyCode.REPLY_CODE_SUCCEED ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
-                
             }
         }
 

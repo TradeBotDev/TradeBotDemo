@@ -3,7 +3,9 @@
     "TradeMarket": {
       "commandName": "Project",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ACCOUNT_CONNECTION_STRING": "http://localhost:5000",
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "REDIS_CONNECTION_STRING": "localhost:6379"
       },
       "dotnetRunMessages": "true",
       "applicationUrl": "http://localhost:5005;http://localhost:50005"
