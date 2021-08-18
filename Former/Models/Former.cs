@@ -62,7 +62,7 @@ namespace Former.Models
                     //Поставил минус
                     Quantity = -quantity,
                     Signature = new OrderSignature { Status = OrderStatus.ORDER_STATUS_OPEN, Type = type },
-                    LastUpdateDate = new DateTime()
+                    LastUpdateDate = DateTimeOffset.Now
                 };
                 addResponse = _storage.AddOrder(placeResponse.OrderId, newOrder, _storage.CounterOrders);
 
@@ -147,7 +147,7 @@ namespace Former.Models
                     Price = price,
                     Quantity = quantity,
                     Signature = new OrderSignature { Status = OrderStatus.ORDER_STATUS_OPEN, Type = orderType },
-                    LastUpdateDate = new DateTime()
+                    LastUpdateDate = DateTimeOffset.Now
                 };
                 var addResponse = _storage.AddOrder(id, newOrder, _storage.MyOrders);
                 Log.Information(

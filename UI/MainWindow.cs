@@ -480,7 +480,6 @@ namespace UI
                 MessageBox.Show(@"Account with this username and password was not found.",@"Account not found");
                 return;
             }
-            //cyka
             SessionIDLbl.Text = sessionId.Message;
             LoggedGroupBox.Visible = true;
             LoggedGroupBox.Enabled = true;
