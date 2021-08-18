@@ -126,7 +126,6 @@ namespace UI
             this.LeftPanel = new System.Windows.Forms.Panel();
             this.RightPanel = new System.Windows.Forms.Panel();
             this.ErrorProviderSignUp = new System.Windows.Forms.ErrorProvider(this.components);
-            this.label11 = new System.Windows.Forms.Label();
             this.Tabs.SuspendLayout();
             this.LogsPage.SuspendLayout();
             this.GraphicsPage.SuspendLayout();
@@ -1127,7 +1126,6 @@ namespace UI
             // 
             this.SignInGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.SignInGroupBox.Controls.Add(this.label11);
             this.SignInGroupBox.Controls.Add(this.panel5);
             this.SignInGroupBox.Enabled = false;
             this.SignInGroupBox.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
@@ -1287,15 +1285,6 @@ namespace UI
             // 
             this.ErrorProviderSignUp.ContainerControl = this;
             // 
-            // label11
-            // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(60, 93);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(61, 20);
-            this.label11.TabIndex = 37;
-            this.label11.Text = "label11";
-            // 
             // TradeBotUi
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -1332,7 +1321,6 @@ namespace UI
             this.SignUpPanel.ResumeLayout(false);
             this.SignUpPanel.PerformLayout();
             this.SignInGroupBox.ResumeLayout(false);
-            this.SignInGroupBox.PerformLayout();
             this.panel5.ResumeLayout(false);
             this.panel5.PerformLayout();
             this.LoggedGroupBox.ResumeLayout(false);
@@ -1434,7 +1422,6 @@ namespace UI
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.LinkLabel linkLabel2;
         private System.Windows.Forms.ErrorProvider ErrorProviderSignUp;
-        private System.Windows.Forms.Label label11;
     }
 }
 
