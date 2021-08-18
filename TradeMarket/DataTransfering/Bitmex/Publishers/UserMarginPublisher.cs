@@ -47,9 +47,16 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         {
             lock (locker)
             {
-                _cache.Clear();
                 foreach (var data in response.Data)
                 {
+                    var model = _cache.FirstOrDefault(x => x.Account == data.Account);
+                    if(model is not null)
+                    {
+                        data.AvailableMargin = data.AvailableMargin is null || data.AvailableMargin == 0 ? model.AvailableMargin : data.AvailableMargin;
+                        data.RealisedPnl = data.RealisedPnl is null || data.RealisedPnl == 0 ? model.RealisedPnl : data.RealisedPnl;
+                        data.MarginBalance = data.MarginBalance is null || data.MarginBalance == 0 ? model.MarginBalance : data.MarginBalance;
+                        _cache.Remove(model);
+                    }
                     _cache.Add(data);
                 }
             }
