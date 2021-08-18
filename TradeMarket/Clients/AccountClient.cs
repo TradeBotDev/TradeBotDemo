@@ -40,16 +40,16 @@ namespace TradeMarket.Clients
             _client = client;
         }
 
-        public UserAccessInfo GetUserInfo(string sessionId)
+        public async Task<UserAccessInfo> GetUserInfoAsync(string sessionId)
         {
             Log.Logger.Information($"Fetching key and secret by sessionId {sessionId}");
 
-            var reply =  _client.ExchangeBySession(new()
+            var reply =  await _client.ExchangeBySessionAsync(new()
             {
                 Code = ExchangeAccessCode.Bitmex,
                 SessionId = sessionId
             });
-            Log.Logger.Information($"Fetching complete with result : {reply.Result}");
+            Log.Logger.Information($"Fetching complete with result : {reply}");
             if(reply.Result != ExchangeAccessActionCode.Successful)
             {
                 //Если по переданному sessionId нет данных
@@ -57,7 +57,6 @@ namespace TradeMarket.Clients
             }
             var key = reply.Exchange.Token;
             var secret = reply.Exchange.Secret;
-            Log.Logger.Information($"sessionId : {sessionId} \n key : {key}\n secret : {secret}");
             return new UserAccessInfo(key, secret);
         }
         #endregion

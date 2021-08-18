@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using System.Threading.Tasks;
 using Former.Clients;
 using Grpc.Core;
@@ -11,18 +10,17 @@ namespace Former.Model
     public class UserContext
     {
         //Класс контекста пользователя
-        public string SessionId => Meta.GetValue("sessionid");
-        public string TradeMarket => Meta.GetValue("trademarket");
-        public string Slot => Meta.GetValue("slot");
+        internal string SessionId => Meta.GetValue("sessionid");
+        internal string TradeMarket => Meta.GetValue("trademarket");
+        internal string Slot => Meta.GetValue("slot");
         private readonly Storage _storage;
         private readonly TradeMarketClient _tradeMarketClient;
         private readonly Former _former;
         private readonly UpdateHandlers _updateHandlers;
         private readonly HistoryClient _historyClient;
-        private bool _subscribesAttached;
-        
+        private bool _isSubscribesAttached;
 
-        public Metadata Meta { get; }
+        internal Metadata Meta { get; }
 
         internal UserContext(string sessionId, string tradeMarket, string slot)
         {
@@ -32,68 +30,78 @@ namespace Former.Model
                 { "trademarket", tradeMarket },
                 { "slot", slot }
             };
-            HistoryClient.Configure(Environment.GetEnvironmentVariable("HISTORY_CONNECTION_STRING"), int.TryParse(Environment.GetEnvironmentVariable("RETRY_DELAY"), out var retryDelay) ? retryDelay : retryDelay = 10000);
+            if (!int.TryParse(Environment.GetEnvironmentVariable("RETRY_DELAY"), out var retryDelay)) retryDelay = 10000;
+                
+            HistoryClient.Configure(Environment.GetEnvironmentVariable("HISTORY_CONNECTION_STRING"), retryDelay);
             _historyClient = new HistoryClient();
 
             TradeMarketClient.Configure(Environment.GetEnvironmentVariable("TRADEMARKET_CONNECTION_STRING"), retryDelay);
             _tradeMarketClient = new TradeMarketClient();
 
-            _storage = new Storage(_historyClient, Meta);
+            _storage = new Storage();
             _former = new Former(_storage, null, _tradeMarketClient, Meta, _historyClient);
             _updateHandlers = new UpdateHandlers(_storage, null, _tradeMarketClient, Meta, _historyClient);
-
-            SubscribeStorageToMarket();
         }
 
-        public void SubscribeStorageToMarket()
+        /// <summary>
+        /// Подписывает обработчики из Storage на обновления TradeMarket клиента и запускает подписки непосредственно на сервис с данными
+        /// </summary>
+        internal void SubscribeStorageToMarket()
         {
-            if (_subscribesAttached) return;
+            //если мы уже подписаны на обновления - выходим из метода
+            if (_isSubscribesAttached) return;
+            //подписываем обработчики из Storage на обновления TradeMarket клиента
             _tradeMarketClient.UpdateMarketPrices += _storage.UpdateMarketPrices;
             _tradeMarketClient.UpdateBalance += _storage.UpdateBalance;
             _tradeMarketClient.UpdateMyOrders += _storage.UpdateMyOrderList;
             _tradeMarketClient.UpdatePosition += _storage.UpdatePosition;
+            //запускаем подписки на сервис с данными
             _tradeMarketClient.StartObserving(Meta);
-            _subscribesAttached = true;
+            _isSubscribesAttached = true;
             Log.Information("{@Where}: Former has been started!", "Former");
         }
 
-        public void UnsubscribeStorage()
+        /// <summary>
+        /// Отписывает обработчики из Storage от TradeMarket клиента и отменяет подписки на сервис с данными
+        /// </summary>
+        internal void UnsubscribeStorage()
         {
-            if (!_subscribesAttached) return;
+            //если мы не подписаны - выходим из метода
+            if (!_isSubscribesAttached) return;
+            //останавливаем подписку на сервис с данными
             _tradeMarketClient.StopObserving();
+            //отписываем обработчики
             _tradeMarketClient.UpdateMarketPrices -= _storage.UpdateMarketPrices;
             _tradeMarketClient.UpdateBalance -= _storage.UpdateBalance;
             _tradeMarketClient.UpdateMyOrders -= _storage.UpdateMyOrderList;
             _tradeMarketClient.UpdatePosition -= _storage.UpdatePosition;
-            ClearStorage();
-            _subscribesAttached = false;
+            //очищаем хранилище
+            _storage.ClearStorage();
+            _isSubscribesAttached = false;
             Log.Information("{@Where}: Former has been stopped!", "Former");
         }
 
-        private void ClearStorage()
-        {
-            _storage.MyOrders.Clear();
-            _storage.CounterOrders.Clear();
-            _storage.AvailableBalance = 0;
-            _storage.SellMarketPrice = 0;
-            _storage.TotalBalance = 0;
-            _storage.PositionSize = 0;
-            _storage.BuyMarketPrice = 0;
-            _storage.FitPricesLocker = false;
-            _storage.PlaceLocker = false;
-        }
-
-        public async Task FormOrder(int decision)
+        
+        /// <summary>
+        /// Вытаскиваем метод формера наружу, чтобы можно было из юзер контекста запросить формирование ордера
+        /// </summary>
+        internal async Task FormOrder(int decision)
         {
             await _former.FormOrder(decision);
         }
 
-        public async Task RemoveAllMyOrders()
+        
+        /// <summary>
+        /// Вытаскиваем метод формера наружу, чтобы можно было из юзер контекста запросить удаление своих ордеров
+        /// </summary>
+        internal async Task RemoveAllMyOrders()
         {
             await _former.RemoveAllMyOrders();
         }
-        
-        public void SetConfiguration(Config configuration)
+        /// <summary>
+        /// Выставляем конфигурацию, где это необходимо.
+        /// </summary>
+        internal void SetConfiguration(Configuration configuration)
         {
             _former.SetConfiguration(configuration);
             _updateHandlers.SetConfiguration(configuration);

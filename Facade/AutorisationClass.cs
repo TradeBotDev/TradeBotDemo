@@ -34,13 +34,15 @@ namespace Facade
             TradeBot.Account.AccountService.v1.LoginResponse response = null;
             async Task<TradeBot.Account.AccountService.v1.LoginResponse> task()
             {
-                response =await ClientAccount.LoginAsync(new TradeBot.Account.AccountService.v1.LoginRequest
+                var loginrequest = new TradeBot.Account.AccountService.v1.LoginRequest
                 {
                     Email = request.Email,
                     //SaveExchangesAfterLogout = request.SaveExchangesAfterLogout,
                     //Уже этой строчки здесь нет!
                     Password = request.Password
-                });
+                };
+                response =await ClientAccount.LoginAsync(loginrequest);
+                Log.Information("Loggin Completed With Result {@LoginResult}", response);
                 return response;
             }
             await Generalization.ConnectionTester(task, methodName, request);
@@ -71,6 +73,8 @@ namespace Facade
                     Password = request.Password,
                     VerifyPassword = request.VerifyPassword
                 }, context.RequestHeaders);
+                Log.Information("Register Completed With Result {@LoginResult}", response);
+
                 return response;
             }
             await Generalization.ConnectionTester(task, methodName, request);

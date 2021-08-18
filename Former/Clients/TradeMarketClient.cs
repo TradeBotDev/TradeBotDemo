@@ -1,27 +1,27 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Former.Model;
 using Grpc.Core;
 using Grpc.Net.Client;
 using Serilog;
-using TradeBot.Common.v1;
 using TradeBot.TradeMarket.TradeMarketService.v1;
 
 namespace Former.Clients
 {
     public class TradeMarketClient
     {
-        public delegate Task MyOrdersEvent(Order newComingOrder, ChangesType changesType);
-        public MyOrdersEvent UpdateMyOrders;
+        internal delegate Task MyOrdersEvent(Order newComingOrder, ChangesType changesType);
+        internal MyOrdersEvent UpdateMyOrders;
 
-        public delegate Task BalanceEvent(int availableBalance, int totalBalance);
-        public BalanceEvent UpdateBalance;
+        internal delegate Task BalanceEvent(int availableBalance, int totalBalance);
+        internal BalanceEvent UpdateBalance;
 
-        public delegate Task PositionEvent(double positionQuantity);
-        public PositionEvent UpdatePosition;
+        internal delegate Task PositionEvent(double positionQuantity);
+        internal PositionEvent UpdatePosition;
 
-        public delegate Task MarketPricesEvent(double bid, double ask);
-        public MarketPricesEvent UpdateMarketPrices;
+        internal delegate Task MarketPricesEvent(double bid, double ask);
+        internal MarketPricesEvent UpdateMarketPrices;
 
         private static int _retryDelay;
         private static string _connectionString;
@@ -29,21 +29,19 @@ namespace Former.Clients
 
         private readonly TradeMarketService.TradeMarketServiceClient _client;
 
-        public static void Configure(string connectionString, int retryDelay)
+        internal static void Configure(string connectionString, int retryDelay)
         {
             _connectionString = connectionString;
             _retryDelay = retryDelay;
         }
 
-        public TradeMarketClient()
+        internal TradeMarketClient()
         {
-            //AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            //AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2Support", true);
             _client = new TradeMarketService.TradeMarketServiceClient(GrpcChannel.ForAddress(_connectionString));
         }
 
         /// <summary>
-        /// Проверяет соединение с биржей, на вход принимает функцию, осуществляющую общение с биржей
+        /// Проверяет соединение с биржей, на вход принимает функцию, осуществляющую общение с биржей.
         /// </summary>
         private async Task ConnectionTester(Func<Task> func)
         {
@@ -65,8 +63,22 @@ namespace Former.Clients
             }
         }
 
+        private bool EventFilter(Metadata incomingMeta, Metadata filteringMeta)
+        {
+            bool IsEqual(Metadata incomingMeta, Metadata filteringMeta, string key)
+            {
+                return (incomingMeta.GetValue(key) is not null &&
+                        incomingMeta.GetValue(key) == filteringMeta.GetValue(key)) 
+                       || incomingMeta.GetValue(key) is null;
+            }
+
+
+            return IsEqual(incomingMeta,filteringMeta,"sessionid") && IsEqual(incomingMeta,filteringMeta,"slot") && IsEqual(incomingMeta,filteringMeta,"trademarket");
+            //return filteringMeta[0] == incomingMeta[0] && filteringMeta[1] == incomingMeta[1] && filteringMeta[2] == incomingMeta[2];
+        }
+
         /// <summary>
-        /// Наблиюдает за изменением рыночных цен
+        /// Наблюдает за изменением рыночных цен.
         /// </summary>
         private async Task ObserveMarketPrices(Metadata meta)
         {
@@ -75,7 +87,7 @@ namespace Former.Clients
             {
                 while (await call.ResponseStream.MoveNext(_token.Token))
                 {
-                    await UpdateMarketPrices?.Invoke(call.ResponseStream.Current.BidPrice, call.ResponseStream.Current.AskPrice);
+                    if (EventFilter(call.ResponseHeadersAsync.Result, meta)) await UpdateMarketPrices?.Invoke(call.ResponseStream.Current.BidPrice, call.ResponseStream.Current.AskPrice);
                 }
             }
 
@@ -83,7 +95,7 @@ namespace Former.Clients
         }
 
         /// <summary>
-        /// Наблюдает за обновлением доступного баланса 
+        /// Наблюдает за обновлением доступного баланса.
         /// </summary>
         private async Task ObserveBalance(Metadata meta)
         {
@@ -93,14 +105,14 @@ namespace Former.Clients
             {
                 while (await call.ResponseStream.MoveNext(_token.Token))
                 {
-                    await UpdateBalance?.Invoke((int) call.ResponseStream.Current.Margin.AvailableMargin, (int)call.ResponseStream.Current.Margin.MarginBalance);
+                    if (EventFilter(call.ResponseHeadersAsync.Result, meta)) await UpdateBalance?.Invoke((int) call.ResponseStream.Current.Margin.AvailableMargin, (int)call.ResponseStream.Current.Margin.MarginBalance);
                 }
             }
             await ConnectionTester(ObserveBalanceFunc);
         }
 
         /// <summary>
-        /// Наблюдает за событиями моих ордеров
+        /// Наблюдает за событиями моих ордеров.
         /// </summary>
         private async Task ObserveMyOrders(Metadata meta)
         {
@@ -110,7 +122,7 @@ namespace Former.Clients
             {
                 while (await call.ResponseStream.MoveNext(_token.Token))
                 {
-                    await UpdateMyOrders?.Invoke(call.ResponseStream.Current.Changed, call.ResponseStream.Current.ChangesType);
+                    if (EventFilter(call.ResponseHeadersAsync.Result, meta)) await UpdateMyOrders?.Invoke(Converters.ConvertOrder(call.ResponseStream.Current.Changed), (ChangesType)call.ResponseStream.Current.ChangesType);
                 }
             }
 
@@ -118,7 +130,7 @@ namespace Former.Clients
         }
 
         /// <summary>
-        /// Наблюдает за событиями моих позиций
+        /// Наблюдает за событиями моих позиций.
         /// </summary>
         private async Task ObservePositions(Metadata meta)
         {
@@ -128,7 +140,7 @@ namespace Former.Clients
             {
                 while (await call.ResponseStream.MoveNext(_token.Token))
                 {
-                    await UpdatePosition?.Invoke(call.ResponseStream.Current.CurrentQty);
+                    if (EventFilter(call.ResponseHeadersAsync.Result, meta)) await UpdatePosition?.Invoke(call.ResponseStream.Current.CurrentQty);
                 }
             }
 
@@ -136,7 +148,7 @@ namespace Former.Clients
         }
 
         /// <summary>
-        /// Отправляет запрос в биржу на выставление своего ордера
+        /// Отправляет запрос в биржу на выставление своего ордера.
         /// </summary>
         internal async Task<PlaceOrderResponse> PlaceOrder(double sellPrice, double contractValue, Metadata metadata)
         {
@@ -152,7 +164,7 @@ namespace Former.Clients
         }
 
         /// <summary>
-        /// Отправляет запрос в биржу на изменение цены своего ордера
+        /// Отправляет запрос в биржу на изменение цены своего ордера.
         /// </summary>
         internal async Task<AmmendOrderResponse> AmendOrder(string id, double newPrice, Metadata metadata)
         {
@@ -174,6 +186,9 @@ namespace Former.Clients
             return response;
         }
 
+        /// <summary>
+        /// Отправляет запрос на биржу на удаление своего ордера по id.
+        /// </summary>
         internal async Task<DeleteOrderResponse> DeleteOrder(string id, Metadata metadata)
         {
             DeleteOrderResponse response = null;
@@ -191,6 +206,10 @@ namespace Former.Clients
             return response;
         }
 
+
+        /// <summary>
+        /// Подписывается на обновления с биржи по указанным метаданным, а также создаёт CancellationTokenSource, для дальнейшей отмены.
+        /// </summary>
         internal void StartObserving(Metadata meta)
         {
             _token = new CancellationTokenSource();
@@ -200,10 +219,12 @@ namespace Former.Clients
             _ = ObserveMyOrders(meta);
         }
 
+        /// <summary>
+        /// Отменяет подписку на обновления с биржи путём отмены токена, созданного ранее.
+        /// </summary>
         internal void StopObserving()
         {
             _token.Cancel();
         }
-
     }
 }

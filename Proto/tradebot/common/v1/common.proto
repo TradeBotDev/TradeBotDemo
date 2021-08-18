@@ -56,20 +56,20 @@ message AlgorithmInfo{
     //интервал анализа
 	google.protobuf.Duration interval = 1;
 	//чувствительность алгоритма
-	int32 sensivity = 2;
+	int32 sensitivity = 2;
 }
 
 message Config{
 	//доступный процент из общего баланса
-	double avaible_balance = 2;
+	double avaible_balance = 1;
 	//сколько мы хотим прибыли получать с контракта
-	double required_profit = 3;
+	double required_profit = 2;
 	//точный объем контракта
-	double contract_value = 5;
+	double contract_value = 3;
 	//когда снимать свои ордера с биржы
-	double order_update_price_range = 6;
+	double order_update_price_range = 4;
 	//информация необходимая для работы алгоритма
-	AlgorithmInfo algorithm_info = 7;
+	AlgorithmInfo algorithm_info = 5;
 }
 /*
 	пока мы используем microsoft logger то будем использовать его уровни

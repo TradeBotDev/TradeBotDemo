@@ -73,6 +73,22 @@ namespace UI
                 if (fullName != null && fullName.Contains("TextBox"))
                     ((TextBox)control).Validating += OnValidatingTextBox;
             }
+            foreach (var control in SignUpPanel.Controls)
+            {
+                var fullName = control.GetType().FullName;
+                if (fullName != null && fullName.Contains("TextBox"))
+                    ((TextBox)control).Validating += OnValidating;
+            }
+        }
+
+        private void OnValidating(object sender, CancelEventArgs e)
+        {
+            if (string.IsNullOrEmpty(((TextBox)sender).Text))
+            {
+                e.Cancel = true;
+                ErrorProviderMainForm.SetError(((TextBox)sender), "The field must not be empty!");
+            }
+            else ErrorProviderMainForm.Clear();
         }
 
         private ConfigurationJson InitConfigurationJson()
@@ -265,18 +281,17 @@ namespace UI
             {
                 case ChangesType.Partitial:
                     AddOrderToTable(incomingMessage.Status == OrderStatus.Open ? ActiveOrdersDataGridView : FilledOrdersDataGridView, incomingMessage);
-                    UpdateList(orderEvent.Order.Price.ToString(),orderEvent.Time,ref _orderList,zedGraph_1,lastDateOrder);
+                    //UpdateList(orderEvent.Order.Price.ToString(),orderEvent.Time,ref _orderList,zedGraph_1,lastDateOrder);
                     break;
-
                 case ChangesType.Insert:
                     AddOrderToTable(ActiveOrdersDataGridView, incomingMessage);
                     WriteMessageToEventConsole(incomingMessage);
-                    UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1,lastDateOrder);
+                    //UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1,lastDateOrder);
                     break;
 
                 case ChangesType.Update:
                     UpdateTable(ActiveOrdersDataGridView, incomingMessage);
-                    UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1, lastDateOrder);
+                    //UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1, lastDateOrder);
                     break;
 
                 case ChangesType.Delete:
@@ -294,8 +309,8 @@ namespace UI
 
         private void HandleBalanceUpdate(PublishBalanceEvent balanceUpdate)
         {
-            BalanceLabel.Text = $"{double.Parse(balanceUpdate.Balance.Value) / 100000000} {balanceUpdate.Balance.Currency}";
-            UpdateList(balanceUpdate.Balance.Value, balanceUpdate.Time,ref _balanceList, zedGraph,lastDateBalance);
+            BalanceLabel.Text = $"{balanceUpdate.Balance.Value} {balanceUpdate.Balance.Currency}";
+            //UpdateList(balanceUpdate.Balance.Value, balanceUpdate.Time, ref _balanceList, zedGraph,lastDateBalance);
         }
 
         private async void Start(string slotName)
@@ -321,7 +336,7 @@ namespace UI
                 AlgorithmInfo = new AlgorithmInfo
                 {
                     Interval = _intervalMap[ConfigIntervalOfAnalysisTxb.Text],
-                    Sensivity = _sensitivityMap[ConfigAlgorithmSensivityTxb.Text]
+                    Sensitivity = _sensitivityMap[ConfigAlgorithmSensivityTxb.Text]
                 },
                 OrderUpdatePriceRange = double.Parse(ConfigUpdatePriceRangeTxb.Text),
             };
@@ -352,14 +367,14 @@ namespace UI
             if (!double.TryParse(((TextBox)sender).Text, out _))
             {
                 e.Cancel = true;
-                ErrorProvider.SetError((TextBox)sender, "A number is required!");
+                ErrorProviderMainForm.SetError((TextBox)sender, "A number is required!");
             }
             else if (string.IsNullOrEmpty(((TextBox)sender).Text))
             {
                 e.Cancel = true;
-                ErrorProvider.SetError(((TextBox)sender), "The field must not be empty!");
+                ErrorProviderMainForm.SetError(((TextBox)sender), "The field must not be empty!");
             }
-            else ErrorProvider.Clear();
+            else ErrorProviderMainForm.Clear();
         }
 
         private void ConfigUpdatePriceRangeOnTextChanged(object sender, EventArgs e)
@@ -369,7 +384,6 @@ namespace UI
             if (!double.TryParse(ConfigUpdatePriceRangeTxb.Text, out var value)) return;
 
             var floor = Math.Floor(value);
-
             
             ConfigUpdatePriceRangeTxb.Text = (floor + (value - floor < 0.5 ? 0.0 : 0.5)).ToString(CultureInfo.InvariantCulture);
             ConfigUpdatePriceRangeTxb.TextChanged += ConfigUpdatePriceRangeOnTextChanged;
@@ -385,7 +399,7 @@ namespace UI
             cellCheckBox.Value ??= false;
             if (Convert.ToBoolean(cellCheckBox.Value))
             {
-                if (MessageBox.Show(@"Are you sure you want to stop work?", @"Stop work",
+                if (MessageBox.Show(@"Are you sure you want to stop bot?", @"Stop bot",
                     MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
                     Stop(ActiveSlotsDataGridView.Rows[ActiveSlotsDataGridView.CurrentRow.Index].Cells[0]
@@ -447,13 +461,26 @@ namespace UI
 
         private async void RegistrationButton_Click(object sender, EventArgs e)
         {
-            CheckConnection(await _facadeClient.RegisterAccount(RegLog.Text, RegPass.Text, RegPass.Text));
+            if (!ValidateChildren(ValidationConstraints.Enabled))
+            {
+                MessageBox.Show(@"Wrong login or password!", @"Correct the fields");
+                return;
+            }
+
+            if (CheckConnection(await _facadeClient.RegisterAccount(RegLog.Text, RegPass.Text, RegPass.Text)))
+                WriteMessageToEventConsole($"You have registered an account {RegLog.Text}");
         }
 
         private async void LoginButton_Click(object sender, EventArgs e)
         {
             DefaultResponse sessionId;
-            if (!CheckConnection(sessionId = await _facadeClient.SigningIn(LogLogTextBox.Text, LogPassTextBox.Text, RegKey.Text, RegToken.Text))) return;
+            if (!CheckConnection(sessionId = await _facadeClient.SigningIn(LogLogTextBox.Text, LogPassTextBox.Text, KeyTxb.Text, SecretTxb.Text))) return;
+            if (sessionId.Message.Contains("Отсутствует"))
+            {
+                MessageBox.Show(@"Account with this username and password was not found.",@"Account not found");
+                return;
+            }
+            //cyka
             SessionIDLbl.Text = sessionId.Message;
             LoggedGroupBox.Visible = true;
             LoggedGroupBox.Enabled = true;

@@ -1,9 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Former.Clients;
 using Former.Model;
-using Google.Protobuf.WellKnownTypes;
-using Grpc.Core;
-using TradeBot.Common.v1;
 using Xunit;
 
 namespace FormerTests
@@ -15,7 +13,7 @@ namespace FormerTests
         {
             var historyClient = new HistoryClient();
             //Arrange
-            var storage = new Storage(historyClient, new Metadata())
+            var storage = new Storage
             {
                 BuyMarketPrice = 0,
                 SellMarketPrice = 0
@@ -33,7 +31,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata())
+            var storage = new Storage
             {
                 BuyMarketPrice = 0,
                 SellMarketPrice = 0
@@ -51,7 +49,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata())
+            var storage = new Storage
             {
                 BuyMarketPrice = 0,
                 SellMarketPrice = 0
@@ -69,13 +67,13 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
+            var storage = new Storage();
 
             var newComingOrder = new Order
             {
-                Quantity = 100, Id = "1", Signature = new OrderSignature {Status = OrderStatus.Open, Type = OrderType.Buy}, LastUpdateDate = new Timestamp(), Price = 0
+                Quantity = 100, Id = "1", Signature = new OrderSignature {Status = OrderStatus.ORDER_STATUS_OPEN, Type = OrderType.ORDER_TYPE_BUY}, LastUpdateDate = new DateTime(), Price = 0
             };
-            const ChangesType changesType = ChangesType.Partitial;
+            const ChangesType changesType = ChangesType.CHANGES_TYPE_PARTITIAL;
 
             //Act
             await storage.UpdateMyOrderList(newComingOrder, changesType);
@@ -89,12 +87,12 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
+            var storage = new Storage();
             var newComingOrder = new Order
             {
-                Quantity = 100, Id = "1", Signature = new OrderSignature{ Status = OrderStatus.Open, Type = OrderType.Sell}, LastUpdateDate = new Timestamp(), Price = 0
+                Quantity = 100, Id = "1", Signature = new OrderSignature{ Status = OrderStatus.ORDER_STATUS_OPEN, Type = OrderType.ORDER_TYPE_SELL}, LastUpdateDate = new DateTime(), Price = 0
             };
-            var changesType = ChangesType.Partitial;
+            var changesType = ChangesType.CHANGES_TYPE_PARTITIAL;
 
             //Act
             await storage.UpdateMyOrderList(newComingOrder, changesType);
@@ -108,17 +106,17 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
+            var storage = new Storage();
 
-            var oldOrder = new Order { Quantity = 400, Id = "1", Signature = new OrderSignature { Status = OrderStatus.Open, Type = OrderType.Sell}, LastUpdateDate = new Timestamp(), Price = 38000};
+            var oldOrder = new Order { Quantity = 400, Id = "1", Signature = new OrderSignature { Status = OrderStatus.ORDER_STATUS_OPEN, Type = OrderType.ORDER_TYPE_SELL}, LastUpdateDate = new DateTime(), Price = 38000};
 
             storage.AddOrder("1", oldOrder, storage.MyOrders);
 
             var newComingOrder = new Order
             {
-                Quantity = 200, Id = "1", Signature = new OrderSignature{ Status = OrderStatus.Open, Type = OrderType.Sell}, LastUpdateDate = new Timestamp(), Price = 0
+                Quantity = 200, Id = "1", Signature = new OrderSignature{ Status = OrderStatus.ORDER_STATUS_OPEN, Type = OrderType.ORDER_TYPE_SELL}, LastUpdateDate = new DateTime(), Price = 0
             };
-            var changesType = ChangesType.Update;
+            var changesType = ChangesType.CHANGES_TYPE_UPDATE;
 
             //Act
             await storage.UpdateMyOrderList(newComingOrder, changesType);
@@ -134,17 +132,17 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
+            var storage = new Storage();
 
-            var oldOrder = new Order { Quantity = 400, Id = "1", Signature = new OrderSignature { Status = OrderStatus.Open, Type = OrderType.Buy}, LastUpdateDate = new Timestamp(), Price = 38000};
+            var oldOrder = new Order { Quantity = 400, Id = "1", Signature = new OrderSignature { Status = OrderStatus.ORDER_STATUS_OPEN, Type = OrderType.ORDER_TYPE_BUY}, LastUpdateDate = new DateTime(), Price = 38000};
 
             storage.AddOrder("1", oldOrder, storage.CounterOrders);
 
             var newComingOrder = new Order
             {
-                Quantity = 200, Id = "1", Signature = new OrderSignature{ Status = OrderStatus.Open, Type = OrderType.Buy}, LastUpdateDate = new Timestamp(), Price = 0
+                Quantity = 200, Id = "1", Signature = new OrderSignature{ Status = OrderStatus.ORDER_STATUS_OPEN, Type = OrderType.ORDER_TYPE_BUY}, LastUpdateDate = new DateTime(), Price = 0
             };
-            var changesType = ChangesType.Update;
+            var changesType = ChangesType.CHANGES_TYPE_UPDATE;
 
             //Act
             await storage.UpdateMyOrderList(newComingOrder, changesType);
@@ -160,17 +158,17 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
+            var storage = new Storage();
 
-            var oldOrder = new Order { Quantity = 400, Id = "1", Signature = new OrderSignature { Status = OrderStatus.Open, Type = OrderType.Buy}, LastUpdateDate = new Timestamp(), Price = 38000};
+            var oldOrder = new Order { Quantity = 400, Id = "1", Signature = new OrderSignature { Status = OrderStatus.ORDER_STATUS_OPEN, Type = OrderType.ORDER_TYPE_BUY}, LastUpdateDate = new DateTime(), Price = 38000};
 
             storage.AddOrder("1", oldOrder, storage.MyOrders);
 
             var newComingOrder = new Order
             {
-                Quantity = 0, Id = "1", Signature = new OrderSignature{ Status = OrderStatus.Open, Type = OrderType.Buy}, LastUpdateDate = new Timestamp(), Price = 37000
+                Quantity = 0, Id = "1", Signature = new OrderSignature{ Status = OrderStatus.ORDER_STATUS_OPEN, Type = OrderType.ORDER_TYPE_BUY}, LastUpdateDate = new DateTime(), Price = 37000
             };
-            var changesType = ChangesType.Update;
+            var changesType = ChangesType.CHANGES_TYPE_UPDATE;
 
             //Act
             await storage.UpdateMyOrderList(newComingOrder, changesType);
@@ -186,17 +184,17 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
+            var storage = new Storage();
 
-            var oldOrder = new Order { Quantity = 400, Id = "1", Signature = new OrderSignature { Status = OrderStatus.Open, Type = OrderType.Sell}, LastUpdateDate = new Timestamp(), Price = 38000};
+            var oldOrder = new Order { Quantity = 400, Id = "1", Signature = new OrderSignature { Status = OrderStatus.ORDER_STATUS_OPEN, Type = OrderType.ORDER_TYPE_SELL}, LastUpdateDate = new DateTime(), Price = 38000};
 
             storage.AddOrder("1", oldOrder, storage.CounterOrders);
 
             var newComingOrder = new Order
             {
-                Quantity = 0, Id = "1", Signature = new OrderSignature{ Status = OrderStatus.Open, Type = OrderType.Sell}, LastUpdateDate = new Timestamp(), Price = 37000
+                Quantity = 0, Id = "1", Signature = new OrderSignature{ Status = OrderStatus.ORDER_STATUS_OPEN, Type = OrderType.ORDER_TYPE_SELL}, LastUpdateDate = new DateTime(), Price = 37000
             };
-            var changesType = ChangesType.Update;
+            var changesType = ChangesType.CHANGES_TYPE_UPDATE;
 
             //Act
             await storage.UpdateMyOrderList(newComingOrder, changesType);
@@ -212,17 +210,17 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
+            var storage = new Storage();
 
-            var oldOrder = new Order { Quantity = 400, Id = "1", Signature = new OrderSignature { Status = OrderStatus.Open, Type = OrderType.Sell}, LastUpdateDate = new Timestamp(), Price = 38000};
+            var oldOrder = new Order { Quantity = 400, Id = "1", Signature = new OrderSignature { Status = OrderStatus.ORDER_STATUS_OPEN, Type = OrderType.ORDER_TYPE_SELL}, LastUpdateDate = new DateTime(), Price = 38000};
 
             storage.AddOrder("1", oldOrder, storage.CounterOrders);
 
             var newComingOrder = new Order
             {
-                Quantity = 0, Id = "1", Signature = new OrderSignature{ Status = OrderStatus.Closed, Type = OrderType.Sell}, LastUpdateDate = new Timestamp(), Price = 0
+                Quantity = 0, Id = "1", Signature = new OrderSignature{ Status = OrderStatus.ORDER_STATUS_CLOSED, Type = OrderType.ORDER_TYPE_SELL}, LastUpdateDate = new DateTime(), Price = 0
             };
-            var changesType = ChangesType.Delete;
+            var changesType = ChangesType.CHANGES_TYPE_DELETE;
 
             //Act
             await storage.UpdateMyOrderList(newComingOrder, changesType);
@@ -236,17 +234,17 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
+            var storage = new Storage();
 
-            var oldOrder = new Order { Quantity = 400, Id = "1", Signature = new OrderSignature { Status = OrderStatus.Open, Type = OrderType.Buy}, LastUpdateDate = new Timestamp(), Price = 38000};
+            var oldOrder = new Order { Quantity = 400, Id = "1", Signature = new OrderSignature { Status = OrderStatus.ORDER_STATUS_OPEN, Type = OrderType.ORDER_TYPE_BUY}, LastUpdateDate = new DateTime(), Price = 38000};
 
             storage.AddOrder("1", oldOrder, storage.CounterOrders);
 
             var newComingOrder = new Order
             {
-                Quantity = 0, Id = "1", Signature = new OrderSignature{ Status = OrderStatus.Closed, Type = OrderType.Buy}, LastUpdateDate = new Timestamp(), Price = 0
+                Quantity = 0, Id = "1", Signature = new OrderSignature{ Status = OrderStatus.ORDER_STATUS_CLOSED, Type = OrderType.ORDER_TYPE_BUY}, LastUpdateDate = new DateTime(), Price = 0
             };
-            var changesType = ChangesType.Delete;
+            var changesType = ChangesType.CHANGES_TYPE_DELETE;
 
             //Act
             await storage.UpdateMyOrderList(newComingOrder, changesType);
@@ -260,7 +258,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata())
+            var storage = new Storage()
             {
                 PositionSize = 0
             };
@@ -276,7 +274,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata())
+            var storage = new Storage()
             {
                 PositionSize = 0
             };
@@ -292,7 +290,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata())
+            var storage = new Storage
             {
                 AvailableBalance = 400,
                 TotalBalance = 100
@@ -309,7 +307,7 @@ namespace FormerTests
         public void UpdateBalance_Available400AndTotal0_Available400AndTotal400returned()
         {var historyClient = new HistoryClient();
             //Arrange
-            var storage = new Storage(historyClient, new Metadata())
+            var storage = new Storage
             {
                 AvailableBalance = 100,
                 TotalBalance = 400
@@ -326,7 +324,7 @@ namespace FormerTests
         public void UpdateBalance_AvailableNegative400AndTotalNegative400_Available100AndTotal100returned()
         {var historyClient = new HistoryClient();
             //Arrange
-            var storage = new Storage(historyClient, new Metadata())
+            var storage = new Storage
             {
                 AvailableBalance = 100,
                 TotalBalance = 100
@@ -344,8 +342,8 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
-            storage.MyOrders.TryAdd("1",new Order{ Id = "1", Price = 0, Quantity =0, Signature = new OrderSignature(), LastUpdateDate = new Timestamp()});
+            var storage = new Storage();
+            storage.MyOrders.TryAdd("1",new Order{ Id = "1", Price = 0, Quantity =0, Signature = new OrderSignature(), LastUpdateDate = new DateTime()});
 
             //Act
             var actual = storage.RemoveOrder("1", storage.MyOrders);
@@ -359,8 +357,8 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
-            storage.CounterOrders.TryAdd("1",new Order{ Id = "1", Price = 0, Quantity =0, Signature = new OrderSignature(), LastUpdateDate = new Timestamp()});
+            var storage = new Storage();
+            storage.CounterOrders.TryAdd("1",new Order{ Id = "1", Price = 0, Quantity =0, Signature = new OrderSignature(), LastUpdateDate = new DateTime()});
 
             //Act
             var actual = storage.RemoveOrder("1", storage.CounterOrders);
@@ -374,11 +372,11 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
-            storage.MyOrders.TryAdd("1",new Order{ Id = "1", Price = 38000, Quantity = 100, Signature = new OrderSignature(), LastUpdateDate = new Timestamp()});
+            var storage = new Storage();
+            storage.MyOrders.TryAdd("1",new Order{ Id = "1", Price = 38000, Quantity = 100, Signature = new OrderSignature(), LastUpdateDate = new DateTime()});
             var newComingOrder = new Order
             {
-                Quantity = 0, Id = "1", Signature = new OrderSignature(), LastUpdateDate = new Timestamp(), Price = 37000
+                Quantity = 0, Id = "1", Signature = new OrderSignature(), LastUpdateDate = new DateTime(), Price = 37000
             };
             //Act
             var actual = storage.UpdateOrder(newComingOrder, storage.MyOrders);
@@ -395,11 +393,11 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
-            storage.CounterOrders.TryAdd("1",new Order{ Id = "1", Price = 38000, Quantity = 100, Signature = new OrderSignature(), LastUpdateDate = new Timestamp()});
+            var storage = new Storage();
+            storage.CounterOrders.TryAdd("1",new Order{ Id = "1", Price = 38000, Quantity = 100, Signature = new OrderSignature(), LastUpdateDate = new DateTime()});
             var newComingOrder = new Order
             {
-                Quantity = 0, Id = "1", Signature = new OrderSignature(), LastUpdateDate = new Timestamp(), Price = 37000
+                Quantity = 0, Id = "1", Signature = new OrderSignature(), LastUpdateDate = new DateTime(), Price = 37000
             };
             //Act
             var actual = storage.UpdateOrder(newComingOrder, storage.CounterOrders);
@@ -416,11 +414,11 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
-            storage.CounterOrders.TryAdd("1",new Order{ Id = "1", Price = 38000, Quantity = 100, Signature = new OrderSignature(), LastUpdateDate = new Timestamp()});
+            var storage = new Storage();
+            storage.CounterOrders.TryAdd("1",new Order{ Id = "1", Price = 38000, Quantity = 100, Signature = new OrderSignature(), LastUpdateDate = new DateTime()});
             var newComingOrder = new Order
             {
-                Quantity = 400, Id = "1", Signature = new OrderSignature(), LastUpdateDate = new Timestamp(), Price = 0
+                Quantity = 400, Id = "1", Signature = new OrderSignature(), LastUpdateDate = new DateTime(), Price = 0
             };
             //Act
             var actual = storage.UpdateOrder(newComingOrder, storage.CounterOrders);
@@ -437,11 +435,11 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
-            storage.MyOrders.TryAdd("1",new Order{ Id = "1", Price = 38000, Quantity = 100, Signature = new OrderSignature(), LastUpdateDate = new Timestamp()});
+            var storage = new Storage();
+            storage.MyOrders.TryAdd("1",new Order{ Id = "1", Price = 38000, Quantity = 100, Signature = new OrderSignature(), LastUpdateDate = new DateTime()});
             var newComingOrder = new Order
             {
-                Quantity = 400, Id = "1", Signature = new OrderSignature(), LastUpdateDate = new Timestamp(), Price = 0
+                Quantity = 400, Id = "1", Signature = new OrderSignature(), LastUpdateDate = new DateTime(), Price = 0
             };
             //Act
             var actual = storage.UpdateOrder(newComingOrder, storage.MyOrders);
@@ -458,12 +456,12 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
-            storage.CounterOrders.TryAdd("1",new Order{ Id = "1", Price = 0, Quantity = 0, Signature = new OrderSignature(), LastUpdateDate = new Timestamp()});
+            var storage = new Storage();
+            storage.CounterOrders.TryAdd("1",new Order{ Id = "1", Price = 0, Quantity = 0, Signature = new OrderSignature(), LastUpdateDate = new DateTime()});
 
             var newComingOrder = new Order
             {
-                Quantity = 0, Id = "2", Signature = new OrderSignature(), LastUpdateDate = new Timestamp(), Price = 0
+                Quantity = 0, Id = "2", Signature = new OrderSignature(), LastUpdateDate = new DateTime(), Price = 0
             };
             //Act
             var actual1 = storage.UpdateOrder(newComingOrder, storage.CounterOrders);
@@ -476,12 +474,12 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
-            storage.MyOrders.TryAdd("1",new Order{ Id = "1", Price = 0, Quantity = 0, Signature = new OrderSignature(), LastUpdateDate = new Timestamp()});
+            var storage = new Storage();
+            storage.MyOrders.TryAdd("1",new Order{ Id = "1", Price = 0, Quantity = 0, Signature = new OrderSignature(), LastUpdateDate = new DateTime()});
 
             var newComingOrder = new Order
             {
-                Quantity = 0, Id = "2", Signature = new OrderSignature(), LastUpdateDate = new Timestamp(), Price = 0
+                Quantity = 0, Id = "2", Signature = new OrderSignature(), LastUpdateDate = new DateTime(), Price = 0
             };
             //Act
             var actual = storage.UpdateOrder(newComingOrder, storage.MyOrders);
@@ -494,11 +492,11 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
+            var storage = new Storage();
             
             var newComingOrder = new Order
             {
-                Quantity = 0, Id = "1", Signature = new OrderSignature(), LastUpdateDate = new Timestamp(), Price = 0
+                Quantity = 0, Id = "1", Signature = new OrderSignature(), LastUpdateDate = new DateTime(), Price = 0
             };
             //Act
             var actual = storage.AddOrder(newComingOrder.Id,newComingOrder, storage.MyOrders);
@@ -511,11 +509,11 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata());
+            var storage = new Storage();
             
             var newComingOrder = new Order
             {
-                Quantity = 0, Id = "1", Signature = new OrderSignature(), LastUpdateDate = new Timestamp(), Price = 0
+                Quantity = 0, Id = "1", Signature = new OrderSignature(), LastUpdateDate = new DateTime(), Price = 0
             };
             //Act
             var actual = storage.AddOrder(newComingOrder.Id,newComingOrder, storage.CounterOrders);

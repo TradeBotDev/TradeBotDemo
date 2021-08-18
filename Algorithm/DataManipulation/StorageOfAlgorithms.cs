@@ -31,7 +31,7 @@ namespace Algorithm.DataManipulation
 
             if (GetAlgoByMeta(metadata).GetState()!=configRequest.Switch)
             {
-                algorithms[metadata].ChangeState();
+                GetAlgoByMeta(metadata).ChangeState();
                 return;
             }
 
@@ -43,9 +43,9 @@ namespace Algorithm.DataManipulation
             bool result = algorithms.TryAdd(metadata, new AlgorithmBeta(metadata));
             if (result)
             {    
-                orderPublisher.OrderIncomingEvent += algorithms[metadata].NewOrderAlert;
-                algorithms[metadata].ChangeSetting(setting);
-                algorithms[metadata].ChangeState();
+                orderPublisher.OrderIncomingEvent += GetAlgoByMeta(metadata).NewOrderAlert;
+                GetAlgoByMeta(metadata).ChangeSetting(setting);
+                GetAlgoByMeta(metadata).ChangeState();
             }
         }
 
@@ -77,9 +77,7 @@ namespace Algorithm.DataManipulation
         {
             if (firstMeta.GetValue("sessionid") == secondMeta.GetValue("sessionid")
                     && firstMeta.GetValue("slot") == secondMeta.GetValue("slot")
-                    && firstMeta.GetValue("trademarket") == secondMeta.GetValue("trademarket")
-                    && firstMeta.GetValue("user-agent") == secondMeta.GetValue("user-agent")
-                    && firstMeta.GetValue("traceparent") == secondMeta.GetValue("traceparent"))
+                    && firstMeta.GetValue("trademarket") == secondMeta.GetValue("trademarket"))
             {
                 return true;
             }

@@ -1,35 +1,51 @@
 ﻿using Bitmex.Client.Websocket.Client;
 using Bitmex.Client.Websocket.Requests;
 using Bitmex.Client.Websocket.Responses;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using TradeMarket.Model.Publishers;
 
 namespace TradeMarket.DataTransfering.Bitmex.Publishers
 {
     public class AuthenticationPublisher : BitmexPublisher<AuthenticationResponse, AuthenticationRequest, bool>
     {
-        internal static readonly Action<AuthenticationResponse, EventHandler<IPublisher<bool>.ChangedEventArgs>> _action = (response, e) =>
+        internal static readonly Action<AuthenticationResponse, EventHandler<IPublisher<bool>.ChangedEventArgs>> _action = async (response, e) =>
         {
-            e?.Invoke(nameof(AuthenticationPublisher), new(response.Success,BitmexAction.Undefined));
+           await Task.Run(() =>
+           {
+               Log.Information("Recieved Auth Response with code : {@Code} for operation {@op}", response.Success,response.Op);
+               e?.Invoke(typeof(AuthenticationPublisher), new(response.Success, BitmexAction.Undefined));
+           });
         };
 
+
+
         private IObservable<AuthenticationResponse> _stream;
+        private readonly string _apiKey;
+        private readonly string _apiSecret;
+        private readonly CancellationToken _token;
 
-        public AuthenticationPublisher(BitmexWebsocketClient client, IObservable<AuthenticationResponse> orderStream) : base(client, _action)
+        public AuthenticationPublisher(BitmexWebsocketClient client, IObservable<AuthenticationResponse> stream, string apiKey, string apiSecret, CancellationToken token) 
+            : base(client, _action)
         {
-            _stream = orderStream;
+            _stream = stream;
+            this._apiKey = apiKey;
+            this._apiSecret = apiSecret;
+            this._token = token;
         }
 
-        public override void Start()
+        public async override Task Start()
         {
-            throw new NotImplementedException();
+            await SubscribeAsync(_apiKey, _apiSecret, _token);
         }
 
-        public async Task SubcribeAsync(string apiKey, string apiSecret,  CancellationToken token)
+        public async Task SubscribeAsync(string apiKey, string apiSecret,  CancellationToken token)
         {
+            Log.Information("Sending Auth Request for @{key} : {@secret}", apiKey, apiSecret);
             await base.SubscribeAsync(new AuthenticationRequest(apiKey,apiSecret), _stream, token);
         }
     }

@@ -16,9 +16,10 @@ namespace TradeMarket
         public static async Task Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
-               .MinimumLevel.Debug()
+               .MinimumLevel.Verbose()
                .WriteTo.Console()
                .WriteTo.Seq("http://localhost:5341")
+               .Enrich.WithProperty("ServiceName", System.AppDomain.CurrentDomain.FriendlyName)
                .CreateLogger();
             CreateHostBuilder(args).Build().Run();
         }

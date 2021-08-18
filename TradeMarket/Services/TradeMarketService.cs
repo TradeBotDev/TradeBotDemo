@@ -1,84 +1,128 @@
-﻿using Google.Protobuf;
-using Google.Protobuf.WellKnownTypes;
+﻿using Bitmex.Client.Websocket.Responses.Books;
+using Bitmex.Client.Websocket.Responses.Instruments;
+using Bitmex.Client.Websocket.Responses.Wallets;
+using Google.Protobuf;
 using Grpc.Core;
-using Microsoft.Extensions.Logging;
 using Serilog;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TradeBot.TradeMarket.TradeMarketService.v1;
-using TradeMarket.DataTransfering;
-using TradeMarket.Model;
-using TradeMarket.Services;
+using TradeMarket.Model.Publishers;
+using TradeMarket.Model.TradeMarkets;
+using TradeMarket.Model.UserContexts;
+using TradeMarket.Model.UserContexts.Builders;
 using SubscribeBalanceRequest = TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceRequest;
 using SubscribeBalanceResponse = TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceResponse;
-using SubscribeOrdersResponse = TradeBot.TradeMarket.TradeMarketService.v1.SubscribeOrdersResponse;
 using Margin = Bitmex.Client.Websocket.Responses.Margins.Margin;
-using Newtonsoft.Json;
-using Bitmex.Client.Websocket.Responses;
-using TradeBot.Common.v1;
-using TradeMarket.DataTransfering.Bitmex;
 using Bitmex.Client.Websocket.Responses.Positions;
+using Bitmex.Client.Websocket.Responses.Orders;
 
 namespace TradeMarket.Services
 {
     public partial class TradeMarketService : TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceBase
     {
-        private FactoryCache _factory;
+        private readonly ContextDirector _director;
 
-        public TradeMarketService(FactoryCache factory)
+        private readonly TradeMarketFactory _tradeMarketFactory;
+
+        public TradeMarketService(ContextDirector director)
         {
-            _factory = factory;
+            this._director = director;
         }
 
-        public override Task<AuthenticateTokenResponse> AuthenticateToken(AuthenticateTokenRequest request, ServerCallContext context)
+        #region Helpers
+        /// <summary>
+        /// Переводит заголовки запроса в язык сервиса и предоставляет контекст пользователя по переданым заголовкам
+        /// </summary>
+        public async Task<UserContext> GetUserContextAsync(Metadata meta,CancellationToken token)
         {
-            return Task.FromResult(new AuthenticateTokenResponse
+            return await Task.Run(async () =>
             {
-                Response = new TradeBot.Common.v1.DefaultResponse
-                {
-                    Code = TradeBot.Common.v1.ReplyCode.Succeed,
-                    Message = $"Token {request.Token} was authtarized"
-                }
+                var sessionId = meta.Get("sessionid").Value;
+                var slot = meta.Get("slot").Value;
+                var trademarket = meta.Get("trademarket").Value;
 
+                return await _director.GetUserContextAsync(sessionId, slot, trademarket,token);
             });
         }
 
-        public async override Task<PlaceOrderResponse> PlaceOrder(PlaceOrderRequest request, ServerCallContext context)
+        /// <summary>
+        /// Предоставляет доступ к общему контексту биржи по слоту для доступа к информации для которой не нужно логирование
+        /// </summary>
+        public async Task<CommonContext> GetCommonContextAsync(Metadata meta)
         {
-
-            var sessionId = context.RequestHeaders.Get("sessionid").Value;
-            var slot = context.RequestHeaders.Get("slot").Value;
-            var trademarket = context.RequestHeaders.Get("trademarket").Value;
-
-            var user = await _factory.GetUserContextAsync(sessionId, slot, trademarket);
-            var response = await user.PlaceOrder(request.Value, request.Price);
-
-            return response;
-        }
-
-
-        public async override Task Slots(SlotsRequest request, IServerStreamWriter<SlotsResponse> responseStream, ServerCallContext context)
-        {
-            var sessionId = context.RequestHeaders.Get("sessionid").Value;
-            var slot = context.RequestHeaders.Get("slot").Value;
-            var trademarket = context.RequestHeaders.Get("trademarket").Value;
-
-
-            var user = _factory.GetUserContextAsync(sessionId, slot, trademarket);
-
-            //нет функционала получения всех слотов по вебсокету
-            /*FakeSlotPublisher.GetInstance().Changed += async (sender, args) =>
+            return await Task.Run(async () =>
             {
-                await WriteStreamAsync<SlotsResponse>(responseStream, ConvertService.(args.Changed));
-            };*/
-            //TODO отписка после отмены
-            await AwaitCancellation(context.CancellationToken);
+                var slot = meta.Get("slot").Value;
+                var trademarket = meta.Get("trademarket").Value;
 
+                return await _director.GetCommonContextAsync(slot, trademarket);
+            });
         }
 
+        /// <summary>
+        /// Метод заполняет заголовки для ответов по предоставленному контексту пользователя 
+        /// </summary>
+        public async Task<Metadata> AddInfoToMetadataAsync(IContext user)
+        {
+            return await Task.Run(() =>
+            {
+                Metadata res = new Metadata();
+                res.Add("sessionid", user.Signature.SessionId);
+                res.Add("slot", user.Signature.SlotName);
+                res.Add("trademarket", user.Signature.TradeMarketName);
+                return res;
+            });
+        }
+
+        /// <summary>
+        /// Переносит данные о пользователе из запроса в ответ
+        /// </summary>
+        public async Task<Metadata> MoveInfoToMetadataAsync(Metadata requestMeta)
+        {
+            return await Task.Run(() =>
+            {
+                Metadata res = new Metadata();
+                res.Add("sessionid",requestMeta.GetValue("sessionid"));
+                res.Add("slot", requestMeta.GetValue("slot"));
+                res.Add("trademarket", requestMeta.GetValue("trademarket"));
+                return res;
+            });
+        }
+
+        /// <summary>
+        /// Метод ожидает пока запрос не будет отменен по токену
+        /// </summary>
+        private static Task AwaitCancellation(CancellationToken token)
+        {
+            var completion = new TaskCompletionSource<object>();
+            token.Register(() => completion.SetResult(null));
+            return completion.Task;
+        }
+
+
+        /// <summary>
+        /// Проверяет подходит ли принятый с биржи ордер для передачи его по запросу
+        /// </summary>
+        private static bool IsOrderSuitForSignature(TradeBot.Common.v1.OrderSignature orderSignature, TradeBot.Common.v1.OrderSignature signature)
+        {
+            bool typeCheck = false;
+            bool statusCheck = false;
+            if (signature.Status == TradeBot.Common.v1.OrderStatus.Unspecified || orderSignature.Status == signature.Status)
+            {
+                statusCheck = true;
+            }
+            if (signature.Type == TradeBot.Common.v1.OrderType.Unspecified || orderSignature.Type == signature.Type)
+            {
+                typeCheck = true;
+            }
+            return typeCheck && statusCheck;
+        }
+
+        /// <summary>
+        /// Записывает в переданный поток ответы на запрос клиента
+        /// </summary>
         private async Task WriteStreamAsync<TResponse>(IServerStreamWriter<TResponse> stream, TResponse reply) where TResponse : IMessage<TResponse>
         {
             try
@@ -92,198 +136,281 @@ namespace TradeMarket.Services
             }
         }
 
-        public async override Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<SubscribeBalanceResponse> responseStream, ServerCallContext context)
+        public async Task SubscribeToUserTopic<TRequest, TResponse, TModel>(Func<EventHandler<IPublisher<TModel>.ChangedEventArgs>, CancellationToken, Task> subscribe, Func<EventHandler<IPublisher<TModel>.ChangedEventArgs>, Task> unsubscribe, EventHandler<IPublisher<TModel>.ChangedEventArgs> handler, TRequest request, IServerStreamWriter<TResponse> responseStream, ServerCallContext context)
         {
-            var sessionId = context.RequestHeaders.Get("sessionid").Value;
-            var slot = context.RequestHeaders.Get("slot").Value;
-            var trademarket = context.RequestHeaders.Get("trademarket").Value;
+            try
+            {
+                //Добавляем заголовки ответа по контексту пользователя user из запроса
+                var meta = await MoveInfoToMetadataAsync(context.RequestHeaders);
+                foreach (var entry in meta)
+                {
+                    if (entry is not null)
+                    {
+                        Log.Information("Service copying entries to response {@Entry}",entry);
+                        context.ResponseTrailers.Add(entry);
+                    }
+                }
 
-            var user = await _factory.GetUserContextAsync(sessionId, slot, trademarket);
+                await subscribe(handler, context.CancellationToken);
+                //ожидаем пока клиенты отменят подписку
+                await AwaitCancellation(context.CancellationToken);
+                context.Status = Status.DefaultSuccess;
+            }
+            catch (Exception e)
+            {
+                //записываем ошибку в логер
+                Log.Logger.Error(e.Message);
+                Log.Logger.Error(e.StackTrace);
+                //ставим статус "Отмена" в заголовке ответа
+                context.Status = Status.DefaultCancelled;
+            }
+            finally
+            {
+                //отписываемся от обновлений по книге
+                await unsubscribe(handler);
+            }
+        }
 
-            user.UserBalance += async (sender, args) => {
-                await WriteStreamAsync<SubscribeBalanceResponse>(responseStream, new SubscribeBalanceResponse { Response = new() { Balance = ConvertService.ConvertBalance(args.Changed) } });
+        #endregion
+
+        #region Order Commands
+
+        /// <summary>
+        /// Размещает ордер на выбранной бирже
+        /// </summary>
+        public async override Task<TradeBot.TradeMarket.TradeMarketService.v1.PlaceOrderResponse> PlaceOrder(TradeBot.TradeMarket.TradeMarketService.v1.PlaceOrderRequest request, ServerCallContext context)
+        {
+            UserContext user = null;
+            try
+            {
+                //ищем конеткст пользователя
+                user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
+                //отправляем запрос на биржу. TODO как работает тут токен отмены
+                var response = await user.PlaceOrder(request.Value, request.Price, context.CancellationToken);
+
+                //ставим статус запроса как успешный
+                context.Status = Status.DefaultSuccess;
+                //конвертируем из внутреннего типа сервиса в тип grpc
+                return ConvertService.ConvertPlaceOrderResponse(response);
+
+            }
+            catch (Exception e)
+            {
+                //записываем ошибку в логер
+                Log.Logger.Error(e.Message);
+                //ставим статус "Отменен" в заголовке ответа
+                context.Status = Status.DefaultCancelled;
+            }
+            //TODO вообще не красиво
+            return new()
+            {
+                OrderId = "",
+                Response = new()
+                {
+                    Code = TradeBot.Common.v1.ReplyCode.Failure,
+                    Message = "Inner Error"
+                }
             };
-            //TODO отписка после отмены
-            await AwaitCancellation(context.CancellationToken);
 
         }
 
+        /// <summary>
+        /// Изменяет уже выставленный оредр на выбранной бирже в выбранном слоте
+        /// </summary>
+        public async override Task<TradeBot.TradeMarket.TradeMarketService.v1.AmmendOrderResponse> AmmendOrder(TradeBot.TradeMarket.TradeMarketService.v1.AmmendOrderRequest request, ServerCallContext context)
+        {
+            try
+            {
+                //находим пользователя 
+                var user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
+
+                // переводим параметры grpc запроса на язык сервиса
+                double? price = 0;
+                switch (request.PriceType)
+                {
+                    case PriceType.Default: price = request.NewPrice; break;
+                    case PriceType.None: price = null; break;
+                    case PriceType.Unspecified: throw new RpcException(Status.DefaultCancelled, $"{nameof(request.PriceType)} should be specified");
+                }
+                long? quantity = null, leavesQuantity = null;
+                switch (request.QuantityType)
+                {
+                    case QuantityType.Leaves: leavesQuantity = request.NewQuantity; break;
+                    case QuantityType.Default: quantity = request.NewQuantity; break;
+                    case QuantityType.None: break;
+                    case QuantityType.Unspecified: throw new RpcException(Status.DefaultCancelled, $"{nameof(request.QuantityType)} should be specified");
+                }
+                //отправляем запрос на биржу
+                var response = await user.AmmendOrder(request.Id, price, quantity, leavesQuantity, context.CancellationToken);
+                //ставим статус запроса как успешный
+                context.Status = Status.DefaultSuccess;
+                //конвертируем из внутреннего типа сервиса в тип grpc
+                return ConvertService.ConvertAmmendOrderResponse(response);
+            }
+            catch (Exception e)
+            {
+                //записываем ошибку в логер
+                Log.Logger.Error(e.Message);
+                //ставим статус "Отменен" в заголовке ответа
+                context.Status = Status.DefaultCancelled;
+            }
+            //TODO вообще не красиво
+            return new()
+            {
+                Response = new()
+                {
+                    Code = TradeBot.Common.v1.ReplyCode.Failure,
+                    Message = "Inner Error"
+                }
+            };
+        }
+
+        /// <summary>
+        /// Удаляет уже выставленный ордер на выбранной бирже в выбраном слоте
+        /// </summary>
+        public async override Task<DeleteOrderResponse> DeleteOrder(DeleteOrderRequest request, ServerCallContext context)
+        {
+            UserContext user = null;
+            try
+            {
+                //ищем конеткст пользователя
+                user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
+
+                //отправляем запрос на биржу. TODO как работает тут токен отмены
+                var response = await user.DeleteOrder(request.OrderId, context.CancellationToken);
+
+                //ставим статус запроса как успешный
+                context.Status = Status.DefaultSuccess;
+                //конвертируем из внутреннего типа сервиса в тип grpc
+                return ConvertService.ConvertDeleteOrderResponse(response);
+
+            }
+            catch (Exception e)
+            {
+                //записываем ошибку в логер
+                Log.Logger.Error(e.Message);
+                //ставим статус "Отменен" в заголовке ответа
+                context.Status = Status.DefaultCancelled;
+            }
+            //TODO вообще не красиво
+            return new()
+            {
+                Response = new()
+                {
+                    Code = TradeBot.Common.v1.ReplyCode.Failure,
+                    Message = "Inner Error"
+                }
+            };
+
+        }
+        #endregion
+
+        #region Subscribe Commands
+
+
+        /// <summary>
+        /// Метод дает доступ к обновлениям стаканов выбранной биржы выбранного слота
+        /// </summary>
+        public override async Task SubscribeOrders(TradeBot.TradeMarket.TradeMarketService.v1.SubscribeOrdersRequest request, IServerStreamWriter<SubscribeOrdersResponse> responseStream, ServerCallContext context)
+        {
+
+            //тут void потому что ивент по другому не позволяет 
+            async void WriteToStreamAsync(object sender, Model.Publishers.IPublisher<Bitmex.Client.Websocket.Responses.Books.BookLevel>.ChangedEventArgs args)
+            {
+                //переводим из языка сервиса на язык протофайлов
+                var response = ConvertService.ConvertBookOrders(args.Changed, args.Action);
+                //Проверяем подходит ли ордер из бирже по сигнатуре запроса {<продажа,покупка> , <открыт,закрыт>}
+                if (IsOrderSuitForSignature(response.Response.Order.Signature, request.Request.Signature))
+                {
+                    //если ордер подходит то записываем его в поток ответов
+                    await WriteStreamAsync(responseStream, response);
+                }
+            }
+
+            var common = await GetCommonContextAsync(context.RequestHeaders);
+            await SubscribeToUserTopic<SubscribeOrdersRequest, SubscribeOrdersResponse, BookLevel>(common.SubscribeToBook25UpdatesAsync, common.UnSubscribeFromBook25UpdatesAsync, WriteToStreamAsync, request, responseStream, context);
+        }
+
+        /// <summary>
+        /// Доступ к ежедневному обновлению баланса пользователя
+        /// </summary>
+        public async override Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<SubscribeBalanceResponse> responseStream, ServerCallContext context)
+        {
+
+            //тут void потому что ивент по другому не позволяет 
+            async void WriteToStreamAsync(object sender, IPublisher<Wallet>.ChangedEventArgs args)
+            {
+                //переводим из языка сервиса на язык протофайлов
+                var response = ConvertService.ConvertBalance(args.Changed, args.Action);
+
+                await WriteStreamAsync(responseStream, response);
+
+            }
+
+            //находим общий контекст т.к. подписка на стаканы не требует логина в систему биржи
+            var user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
+            await SubscribeToUserTopic<SubscribeBalanceRequest,SubscribeBalanceResponse,Wallet>(user.SubscribeToBalance, user.UnSubscribeFromBalance, WriteToStreamAsync, request, responseStream, context);
+        }
+
+        #endregion
+
         public async override Task SubscribePrice(SubscribePriceRequest request, IServerStreamWriter<SubscribePriceResponse> responseStream, ServerCallContext context)
         {
-            var sessionId = context.RequestHeaders.Get("sessionid").Value;
-            var slot = context.RequestHeaders.Get("slot").Value;
-            var trademarket = context.RequestHeaders.Get("trademarket").Value;
+            async void WriteToStreamAsync(object sender, IPublisher<Instrument>.ChangedEventArgs args)
+            {
+                //переводим из языка сервиса на язык протофайлов
+                var response = ConvertService.ConvertInstrument(args.Changed, args.Action);
+                await WriteStreamAsync(responseStream, response);
 
-            var user = await _factory.GetUserContextAsync(sessionId, slot, trademarket);
-
-            user.InstrumentUpdate += async (sender, args) => {
-                await WriteStreamAsync<SubscribePriceResponse>(responseStream, ConvertService.ConvertInstrument(args.Changed,args.Action));
-            };
-            //TODO отписка после отмены
-            await AwaitCancellation(context.CancellationToken);
+            }
+            var common = await GetCommonContextAsync(context.RequestHeaders);
+            await SubscribeToUserTopic<SubscribePriceRequest, SubscribePriceResponse, Instrument>(common.SubscribeToInstrumentUpdate, common.UnSubscribeFromInstrumentUpdate, WriteToStreamAsync, request, responseStream,context);
         }
 
         public async override Task SubscribeMargin(SubscribeMarginRequest request, IServerStreamWriter<SubscribeMarginResponse> responseStream, ServerCallContext context)
         {
-            Log.Logger.Information($"Connected with {context.Host}");
-
-            var sessionId = context.RequestHeaders.Get("sessionid").Value;
-            var slot = context.RequestHeaders.Get("slot").Value;
-            var trademarket = context.RequestHeaders.Get("trademarket").Value;
-
-
-            var user = await _factory.GetUserContextAsync(sessionId, slot, trademarket);
-            user.UserMargin += async (sender, args) =>
+            async void WriteToStreamAsync(object sender, IPublisher<Margin>.ChangedEventArgs args)
             {
-                var marginResponse = ConvertService.ConvertMargin(args.Changed, args.Action);
-                //Log.Logger.Information($"Sent order : {order} to {context.Host}");
-                await WriteStreamAsync<SubscribeMarginResponse>(responseStream, marginResponse);
-            };
-            //TODO отписка после отмены
-            await AwaitCancellation(context.CancellationToken);
+                //переводим из языка сервиса на язык протофайлов
+                var response = ConvertService.ConvertMargin(args.Changed, args.Action);
+                await WriteStreamAsync(responseStream, response);
+
+            }
+            var user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
+            await SubscribeToUserTopic<SubscribeMarginRequest, SubscribeMarginResponse, Margin>(user.SubscribeToUserMargin, user.UnSubscribeFromUserMargin, WriteToStreamAsync, request, responseStream, context);
+
 
         }
 
         public async override Task SubscribePosition(SubscribePositionRequest request, IServerStreamWriter<SubscribePositionResponse> responseStream, ServerCallContext context)
         {
-            var sessionId = context.RequestHeaders.Get("sessionid").Value;
-            var slot = context.RequestHeaders.Get("slot").Value;
-            var trademarket = context.RequestHeaders.Get("trademarket").Value;
+            async void WriteToStreamAsync(object sender, IPublisher<Position>.ChangedEventArgs args)
+            {
+                //переводим из языка сервиса на язык протофайлов
+                var response = ConvertService.ConvertPosition(args.Changed, args.Action);
+                await WriteStreamAsync(responseStream, response);
 
-            var user = await _factory.GetUserContextAsync(sessionId, slot, trademarket);
-
-
-            user.UserPosition += async (sender, args) => {
-                await WriteStreamAsync<SubscribePositionResponse>(responseStream, ConvertService.ConvertPosition(args.Changed,args.Action));
-            };
-            //TODO отписка после отмены
-            await AwaitCancellation(context.CancellationToken);
+            }
+            var user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
+            await SubscribeToUserTopic<SubscribePositionRequest,SubscribePositionResponse,Position>(user.SubscribeToUserPositions,user.UnSubscribeFromUserPositions,WriteToStreamAsync,request,responseStream,context);
         }
 
-        public override Task SubscribeLogs(TradeBot.TradeMarket.TradeMarketService.v1.SubscribeLogsRequest request, IServerStreamWriter<TradeBot.TradeMarket.TradeMarketService.v1.SubscribeLogsResponse> responseStream, ServerCallContext context)
-        {
-            return base.SubscribeLogs(request, responseStream, context);
-        }
 
         public async override Task SubscribeMyOrders(SubscribeMyOrdersRequest request, IServerStreamWriter<SubscribeMyOrdersResponse> responseStream, ServerCallContext context)
         {
-            Log.Logger.Information($"Connected with {context.Host}");
-
-            var sessionId = context.RequestHeaders.Get("sessionid").Value;
-            var slot = context.RequestHeaders.Get("slot").Value;
-            var trademarket = context.RequestHeaders.Get("trademarket").Value;
-            var user = await _factory.GetUserContextAsync(sessionId, slot, trademarket);
-            user.UserOrders += async (sender, args) => {
-
+            async void WriteToStreamAsync(object sender, IPublisher<Order>.ChangedEventArgs args)
+            {
+                //переводим из языка сервиса на язык протофайлов
                 var response = ConvertService.ConvertMyOrder(args.Changed, args.Action);
-                await WriteStreamAsync<SubscribeMyOrdersResponse>(responseStream, response);
-            };
-            //TODO отписка после отмены
-            await AwaitCancellation(context.CancellationToken);
+                await WriteStreamAsync(responseStream, response);
+
+            }
+            var user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
+            await SubscribeToUserTopic<SubscribeMyOrdersRequest,SubscribeMyOrdersResponse, Order>(user.SubscribeToUserOrders, user.UnSubscribeFromUserOrders, WriteToStreamAsync, request, responseStream, context);
 
         }
 
-        public async override Task SubscribeOrders(TradeBot.TradeMarket.TradeMarketService.v1.SubscribeOrdersRequest request, IServerStreamWriter<SubscribeOrdersResponse> responseStream, ServerCallContext context)
-        {
-            Log.Logger.Information($"Connected with {context.Host}");
 
-            var sessionId = context.RequestHeaders.Get("sessionid").Value;
-            var slot = context.RequestHeaders.Get("slot").Value;
-            var trademarket = context.RequestHeaders.Get("trademarket").Value;
-            try
-            {
-                var user = await _factory.GetUserContextAsync(sessionId, slot, trademarket);
-                user.Book25 += async (sender, args) => {
-                    var response = ConvertService.ConvertBookOrders(args.Changed,args.Action);
-                    if (IsOrderSuitForSignature(response.Response.Order.Signature, request.Request.Signature))
-                    {
-                        await WriteStreamAsync<SubscribeOrdersResponse>(responseStream, response);
-                    }
-                };
-                //TODO отписка после отмены
-                await AwaitCancellation(context.CancellationToken);
-            }
-            catch (Exception e)
-            {
-                Log.Logger.Error("Exception happened");
-                Log.Logger.Error(e.Message);
 
-                Log.Logger.Error(e.StackTrace);
-
-                context.Status = Status.DefaultCancelled;
-                context.ResponseTrailers.Add("sessionid", sessionId);
-                context.ResponseTrailers.Add("error", e.Message);
-
-            }
-
-        }
-
-        private static bool IsOrderSuitForSignature(TradeBot.Common.v1.OrderSignature orderSignature, TradeBot.Common.v1.OrderSignature signature)
-        {
-            bool typeCheck = false;
-            bool statusCheck = false;
-            if(signature.Status == TradeBot.Common.v1.OrderStatus.Unspecified || orderSignature.Status == signature.Status)
-            {
-                statusCheck = true;
-            }
-            if(signature.Type == TradeBot.Common.v1.OrderType.Unspecified || orderSignature.Type == signature.Type)
-            {
-                typeCheck = true;
-            }
-            return typeCheck && statusCheck;
-        }
-
-        private static Task AwaitCancellation(CancellationToken token)
-        {
-            var completion = new TaskCompletionSource<object>();
-            token.Register(() => completion.SetResult(null));
-            return completion.Task;
-        }
-
-        public async override Task<AmmendOrderResponse> AmmendOrder(AmmendOrderRequest request, ServerCallContext context)
-        {
-            var sessionId = context.RequestHeaders.Get("sessionid").Value;
-            var slot = context.RequestHeaders.Get("slot").Value;
-            var trademarket = context.RequestHeaders.Get("trademarket").Value;
-
-            var user = await _factory.GetUserContextAsync(sessionId, slot, trademarket);
-
-            double? price = 0;
-            switch (request.PriceType)
-            {
-                case PriceType.Default:     price = request.NewPrice;break;
-                case PriceType.None:        price = null;break;
-                case PriceType.Unspecified: throw new RpcException(Status.DefaultCancelled,$"{nameof(request.PriceType)} should be specified");
-            }
-            long? quantity = null, leavesQuantity = null;
-            switch (request.QuantityType)
-            {
-                case QuantityType.Leaves:       leavesQuantity = request.NewQuantity;break;
-                case QuantityType.Default:      quantity = request.NewQuantity;break;
-                case QuantityType.None:         break;
-                case QuantityType.Unspecified:  throw new RpcException(Status.DefaultCancelled, $"{nameof(request.QuantityType)} should be specified");
-            }
-            var response = await user.AmmendOrder(request.Id,price,quantity,leavesQuantity);
-
-            return new()
-            {
-                Response = response
-            };
-        }
-
-        public async override Task<DeleteOrderResponse> DeleteOrder(DeleteOrderRequest request, ServerCallContext context)
-        {
-            var sessionId = context.RequestHeaders.Get("sessionid").Value;
-            var slot = context.RequestHeaders.Get("slot").Value;
-            var trademarket = context.RequestHeaders.Get("trademarket").Value;
-
-            var user = await _factory.GetUserContextAsync(sessionId, slot, trademarket);
-            var response = await user.DeleteOrder(request.OrderId);
-            return new()
-            {
-                Response = response
-            };
-
-        }
     }
 }

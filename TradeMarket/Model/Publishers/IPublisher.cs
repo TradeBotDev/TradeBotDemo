@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace TradeMarket.DataTransfering
+namespace TradeMarket.Model.Publishers
 {
     public interface IPublisher<T>
     {
@@ -23,6 +23,6 @@ namespace TradeMarket.DataTransfering
       
         public event EventHandler<ChangedEventArgs> Changed;
 
-        public void Start();
+        public Task Start();
     }
 }

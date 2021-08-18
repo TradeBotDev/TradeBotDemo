@@ -1,5 +1,6 @@
 using System;
 using TradeMarket.DataTransfering.Bitmex;
+using TradeMarket.DataTransfering.Bitmex.Model;
 using Xunit;
 
 namespace TradeMarketTests

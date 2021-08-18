@@ -74,11 +74,13 @@ namespace Relay.Model
             _ = _formerClient.UpdateConfig(update, Meta);
         }
 
-        public void SubscribeForOrders()
+        public async Task SubscribeForOrders()
         {
             if (!IsWorking && !IsStart)
             {
-                IsStart = true;
+                //Включаем сразу два флага в не один.
+                IsStart = IsStart ? IsStart : !IsStart;
+                IsWorking = IsWorking ? IsWorking : !IsWorking;
                 _tradeMarketClient.SubscribeForOrders(_tradeMarketStream);
             }
         }

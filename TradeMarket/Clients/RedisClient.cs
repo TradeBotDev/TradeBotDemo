@@ -14,13 +14,14 @@ namespace TradeMarket.Clients
 
         public RedisClient(IConnectionMultiplexer multiplexer)
         {
-            _db = multiplexer.GetDatabase();
+            _db = multiplexer == null ? null : multiplexer.GetDatabase();        
         }
 
         public async Task Send<T>(string id, T data, string PublishingTopic)
         {
-            Log.Information("{ServiceName} writing to Redis...", "Trademarket");
             string json = JsonConvert.SerializeObject(data);
+            Log.Information("{@ServiceName} writing to Redis {@Data}", "Trademarket",json);
+
             Task[] tasks = {
                 _db.SetAddAsync(id, json),
                 _db.PublishAsync(PublishingTopic,id)

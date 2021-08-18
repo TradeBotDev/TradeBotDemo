@@ -1,41 +1,33 @@
 ﻿using System.Collections.Concurrent;
 using System.Threading.Tasks;
-using Former.Clients;
-using Grpc.Core;
 using Serilog;
-using TradeBot.Common.v1;
 
 namespace Former.Model
 {
     public class Storage
     {
-        public delegate Task NeedPlaceOrderEvent(Order oldOrder, Order newComingOrder);
-        public NeedPlaceOrderEvent PlaceOrderEvent;
+        internal delegate Task NeedPlaceOrderEvent(Order oldOrder, Order newComingOrder);
+        internal NeedPlaceOrderEvent PlaceOrderEvent;
 
-        public delegate Task NeedHandleUpdate();
-        public NeedHandleUpdate HandleUpdateEvent;
+        internal delegate Task NeedHandleUpdate(Order order = null, ChangesType changesType = ChangesType.CHANGES_TYPE_UNDEFIEND);
+        internal NeedHandleUpdate HandleUpdateEvent;
 
-        public readonly ConcurrentDictionary<string, Order> MyOrders;
-        public readonly ConcurrentDictionary<string, Order> CounterOrders;
+        internal readonly ConcurrentDictionary<string, Order> MyOrders;
+        internal readonly ConcurrentDictionary<string, Order> CounterOrders;
 
-        public int TotalBalance;
-        public int AvailableBalance;
+        internal int TotalBalance;
+        internal int AvailableBalance;
 
-        public int PositionSize;
+        internal int PositionSize;
         
-        public double SellMarketPrice;
-        public double BuyMarketPrice;
+        internal double SellMarketPrice;
+        internal double BuyMarketPrice;
 
-        public bool PlaceLocker;
-        public bool FitPricesLocker;
+        internal bool PlaceLocker;
+        internal bool FitPricesLocker;
 
-        private HistoryClient _historyClient;
-        private Metadata _metadata;
-
-        internal Storage(HistoryClient historyClient, Metadata metadata)
+        internal Storage()
         {
-            _historyClient = historyClient;
-            _metadata = metadata;
             MyOrders = new ConcurrentDictionary<string, Order>();
             CounterOrders = new ConcurrentDictionary<string, Order>();
         }
@@ -47,7 +39,8 @@ namespace Former.Model
         {
             if (bid > 0) BuyMarketPrice = bid;
             if (ask > 0) SellMarketPrice = ask;
-            if (HandleUpdateEvent is not null) await HandleUpdateEvent.Invoke();
+            //необоходимо сообщить об изменениях UpdateHandler, чтобы тот проверил необходимость подгонки своих ордеров
+            await HandleUpdateEvent.Invoke();
         }
 
         /// <summary>
@@ -56,43 +49,56 @@ namespace Former.Model
         internal async Task UpdateMyOrderList(Order newComingOrder, ChangesType changesType)
         {
             var id = newComingOrder.Id;
+            //если пришедший ордер нашёлся в списке моих оредров, то это мой ордер, о чём сигнализирует переменная itsMyOrder
             var itsMyOrder = MyOrders.TryGetValue(id, out var myOldOrder);
+            //если пришедший ордер нашёлся в списке контр оредров, то это контр-ордер, о чём сигнализирует переменная itsCounterOrder
             var itsCounterOrder = CounterOrders.TryGetValue(id, out var counterOldOrder);
 
             switch (changesType)
             {
-                case ChangesType.Partitial:
+                case ChangesType.CHANGES_TYPE_PARTITIAL:
+                    //если ордер пришёл с пометкой Partitial, то это либо контр-ордер, либо мой ордер, который потерял связь и стал
+                    //контр ордером. И в том и другом случае его необходимо проинициализировать, то есть добавить в список контр-ордеров
+                    //и сообщить о его прибытии UpdateHandler, чтобы он его отправил в сервис истории.
                     AddOrder(id, InitPartialOrder(newComingOrder), CounterOrders);
-                    await _historyClient.WriteOrder(newComingOrder, ChangesType.Partitial, _metadata, "Counter order initialized");
+                    HandleUpdateEvent?.Invoke(newComingOrder, ChangesType.CHANGES_TYPE_PARTITIAL);
                     return;
-                case ChangesType.Update when itsMyOrder:
+                case ChangesType.CHANGES_TYPE_UPDATE when itsMyOrder:
+                    //если оредр пришёл с пометкой Update и при этом является моим орером, то мы обновляем его в списке своих ордеров, а также
+                    //если он имеет не нулевую, то это означает, что ордер исполнился частично и необходимо сообщить формеру о необходимости 
+                    //выставить частичный контр-ордер (если ордер имеет нулевую Quantity, то обновилась цена)
                     var updateMyOrderResponse = UpdateOrder(newComingOrder, MyOrders);
-                    Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} updated {@ResponseCode}", "Former", myOldOrder.Id, myOldOrder.Price, myOldOrder.Quantity, myOldOrder.Signature.Type, updateMyOrderResponse ? ReplyCode.Succeed : ReplyCode.Failure);
+                    Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} updated {@ResponseCode}", "Former", myOldOrder.Id, myOldOrder.Price, myOldOrder.Quantity, myOldOrder.Signature.Type, updateMyOrderResponse ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
                     LockPlacingOrders(true);
-                    if (newComingOrder.Quantity != 0) await PlaceOrderEvent?.Invoke(myOldOrder, newComingOrder);
+                    if (newComingOrder.Quantity > 0) await PlaceOrderEvent.Invoke(myOldOrder, newComingOrder);
                     LockPlacingOrders(false);
                     break;
-                case ChangesType.Update when itsCounterOrder:
+                case ChangesType.CHANGES_TYPE_UPDATE when itsCounterOrder:
+                    //просто обновляется цена у контр-ордера
                     var updateCounterOrderResponse = UpdateOrder(newComingOrder, CounterOrders);
-                    Log.Information("{@Where}: Counter order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} updated {@ResponseCode}", "Former", counterOldOrder.Id, counterOldOrder.Price, counterOldOrder.Quantity, counterOldOrder.Signature.Type, updateCounterOrderResponse ? ReplyCode.Succeed : ReplyCode.Failure);
+                    Log.Information("{@Where}: Counter order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} updated {@ResponseCode}", "Former", counterOldOrder.Id, counterOldOrder.Price, counterOldOrder.Quantity, counterOldOrder.Signature.Type, updateCounterOrderResponse ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
                     break;
-                case ChangesType.Delete when itsMyOrder:
+                case ChangesType.CHANGES_TYPE_DELETE when itsMyOrder:
+                    //если оредр пришёл с пометкой Delete и при этом является моим орером, то необходимо удалить его из списка
+                    //своих ордеров, и сообщить формеру о необходимости выставить полный контр-ордер
                     var removeMyOrderResponse = RemoveOrder(id, MyOrders);
-                    Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed {@ResponseCode}", "Former", myOldOrder.Id, myOldOrder.Price, myOldOrder.Quantity, myOldOrder.Signature.Type, removeMyOrderResponse ? ReplyCode.Succeed : ReplyCode.Failure);
+                    Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed {@ResponseCode}", "Former", myOldOrder.Id, myOldOrder.Price, myOldOrder.Quantity, myOldOrder.Signature.Type, removeMyOrderResponse ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
                     LockPlacingOrders(true);
-                    await PlaceOrderEvent?.Invoke(myOldOrder, newComingOrder);
+                    await PlaceOrderEvent.Invoke(myOldOrder, newComingOrder);
                     LockPlacingOrders(false);
                     break;
-                case ChangesType.Delete when itsCounterOrder:
+                case ChangesType.CHANGES_TYPE_DELETE when itsCounterOrder:
+                    //если оредр пришёл с пометкой Delete и при этом является контр-орером, то необходимо удалить его из списка
+                    //контр ордеров, и сообщить об этом UpdateHandler, чтобы он сообщил об этом истории.
                     var removeCounterOrderResponse = RemoveOrder(id, CounterOrders);
-                    await _historyClient.WriteOrder(newComingOrder, ChangesType.Delete, _metadata, "Counter order filled");
-                    Log.Information("{@Where}: Counter order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed {@ResponseCode}", "Former", counterOldOrder.Id, counterOldOrder.Price, counterOldOrder.Quantity, counterOldOrder.Signature.Type, removeCounterOrderResponse ? ReplyCode.Succeed : ReplyCode.Failure);
+                    HandleUpdateEvent?.Invoke(newComingOrder, ChangesType.CHANGES_TYPE_DELETE);
+                    Log.Information("{@Where}: Counter order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed {@ResponseCode}", "Former", counterOldOrder.Id, counterOldOrder.Price, counterOldOrder.Quantity, counterOldOrder.Signature.Type, removeCounterOrderResponse ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
                     break;
-                //вновь пришедший ордер не помещается в список моих ордеров здесь, потому что это делается только по событию из алгоритма, во избежание
-                //зацикливания выставления ордеров и контр-ордеров
-                case ChangesType.Insert:
+                case ChangesType.CHANGES_TYPE_INSERT:
+                    //пришедший ордер не помещается в список моих ордеров здесь, потому что это делается только по событию из алгоритма, во избежание
+                    //зацикливания выставления ордеров и контр-ордеров
                     return;
-                case ChangesType.Undefiend:
+                case ChangesType.CHANGES_TYPE_UNDEFIEND:
                     return;
                 default:
                     return;
@@ -104,11 +110,9 @@ namespace Former.Model
         /// </summary>
         internal Task UpdatePosition(double positionQuantity)
         {
-            if (PositionSize != (int)positionQuantity)
-            {
-                Log.Information("{@Where}: Current position: {@Position}", "Former", positionQuantity);
-                PositionSize = (int)positionQuantity;
-            }
+            if (PositionSize == (int)positionQuantity) return Task.CompletedTask;
+            Log.Information("{@Where}: Current position: {@Position}", "Former", positionQuantity);
+            PositionSize = (int)positionQuantity;
             return Task.CompletedTask;
         }
 
@@ -125,6 +129,7 @@ namespace Former.Model
             if (totalBalance > 0)
             {
                 TotalBalance = totalBalance;
+                //необходимо сообщить UpdateHandler, чтобы он передал обновлённый баланс в историю
                 HandleUpdateEvent?.Invoke();
             }
             return Task.CompletedTask;
@@ -167,7 +172,7 @@ namespace Former.Model
                 Price = newComingOrder.Price, 
                 LastUpdateDate = newComingOrder.LastUpdateDate, 
                 Signature = newComingOrder.Signature,
-                Quantity = newComingOrder.Signature.Type == OrderType.Sell ? -newComingOrder.Quantity : newComingOrder.Quantity
+                Quantity = newComingOrder.Signature.Type == OrderType.ORDER_TYPE_SELL ? -newComingOrder.Quantity : newComingOrder.Quantity
             };
 
         }
@@ -187,6 +192,21 @@ namespace Former.Model
         {
             PlaceLocker = needLock;
             FitPricesLocker = needLock;
+        }
+        /// <summary>
+        /// Приводит все поля хранилища в исходное положение
+        /// </summary>
+        internal void ClearStorage()
+        {
+            MyOrders.Clear();
+            CounterOrders.Clear();
+            AvailableBalance = 0;
+            SellMarketPrice = 0;
+            TotalBalance = 0;
+            PositionSize = 0;
+            BuyMarketPrice = 0;
+            FitPricesLocker = false;
+            PlaceLocker = false;
         }
     }
 }

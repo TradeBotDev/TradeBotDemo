@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using Grpc.Core;
 using Grpc.Net.Client;
 using TradeBot.Common.v1;
@@ -42,17 +43,17 @@ namespace UI
 
         private async Task SubscribeEvents()
         {
-            var response = _client.SubscribeEvents(new SubscribeEventsRequest { Sessionid = _meta.GetValue("sessionid") });
+            using var call = _client.SubscribeEvents(new SubscribeEventsRequest { Sessionid = _meta.GetValue("sessionid") }, _meta);
 
-            while (await response.ResponseStream.MoveNext())
+            while (await call.ResponseStream.MoveNext())
             {
-                switch (response.ResponseStream.Current.EventTypeCase)
+                switch (call.ResponseStream.Current.EventTypeCase)
                 {
                     case SubscribeEventsResponse.EventTypeOneofCase.Balance:
-                        HandleBalanceUpdate?.Invoke(response.ResponseStream.Current.Balance);
+                        HandleBalanceUpdate?.Invoke(call.ResponseStream.Current.Balance);
                         break;
                     case SubscribeEventsResponse.EventTypeOneofCase.Order:
-                        HandleOrderUpdate?.Invoke(response.ResponseStream.Current.Order);
+                        HandleOrderUpdate?.Invoke(call.ResponseStream.Current.Order);
                         break;
                     case SubscribeEventsResponse.EventTypeOneofCase.None:
                         break;
@@ -121,7 +122,7 @@ namespace UI
             }
         }
 
-        public async Task<DefaultResponse> SigningIn(string login, string password, string regKey, string regToken)
+        public async Task<DefaultResponse> SigningIn(string login, string password, string key, string secret)
         {
             //чё за эксченж
             try
@@ -129,10 +130,9 @@ namespace UI
                 var logResponse = await _client.LoginAsync(new LoginRequest
                 {
                     Email = login,
-                    Password = password,
-                    SaveExchangesAfterLogout = true
+                    Password = password
                 });
-            
+                //MessageBox.Show(password);
                 var sessionId = logResponse.SessionId;
                 _meta = new Metadata
                 {
@@ -144,8 +144,8 @@ namespace UI
                 _client.AddExchangeAccess(new AddExchangeAccessRequest
                 {
                     SessionId = sessionId,
-                    Token = regKey,
-                    Secret = regToken,
+                    Token = key,
+                    Secret = secret,
                     Code = ExchangeCode.Bitmex,
                     ExchangeName = "BitMEX"
                 });

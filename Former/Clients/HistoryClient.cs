@@ -2,11 +2,11 @@
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Former.Model;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Grpc.Net.Client;
 using Serilog;
-using TradeBot.Common.v1;
 using TradeBot.History.HistoryService.v1;
 
 namespace Former.Clients
@@ -34,6 +34,7 @@ namespace Former.Clients
         /// </summary>
         private async Task ConnectionTester(Func<Task> func)
         {
+            var attempts = 0;
             while (true)
             {
                 try
@@ -43,12 +44,17 @@ namespace Former.Clients
                 }
                 catch (RpcException e)
                 {
+                    if (e.StatusCode == StatusCode.Cancelled || attempts > 3) break;
                     Log.Error("{@Where}: Error {@ExceptionMessage}. Retrying...\r\n{@ExceptionStackTrace}", "Former", e.Message, e.StackTrace);
                     Thread.Sleep(_retryDelay);
+                    attempts++;
                 }
             }
         }
 
+        /// <summary>
+        /// Отправляет обновлённый баланс в сервис истории с указанием валюты и времени.
+        /// </summary>
         internal async Task<PublishEventResponse> WriteBalance(double balance, Metadata meta)
         {
             PublishEventResponse response = null;
@@ -59,8 +65,10 @@ namespace Former.Clients
                 {
                     Balance = new PublishBalanceEvent
                     {
-                        Balance = new Balance
-                            { Currency = "XBT", Value = balance.ToString(CultureInfo.InvariantCulture) },
+                        Balance = Converters.ConvertBalance(new Balance
+                        {
+                            Currency = "XBT", Value = (balance * 0.00000001).ToString(CultureInfo.InvariantCulture)
+                        }),
                         Sessionid = meta.GetValue("sessionid"),
                         Time = new Timestamp { Seconds = DateTimeOffset.Now.ToUnixTimeSeconds() }
                     }
@@ -71,6 +79,9 @@ namespace Former.Clients
             return response;
         }
 
+        /// <summary>
+        /// Обновляет инофрмацию об ордере в сервис истории. Это может быть информация об инициализации, добавлении, обновлении, исполнении как своего ордера, так и контр-ордера.
+        /// </summary>
         internal async Task<PublishEventResponse> WriteOrder(Order order, ChangesType changesType, Metadata meta,
             string message)
         {
@@ -82,7 +93,8 @@ namespace Former.Clients
                 {
                     Order = new PublishOrderEvent
                     {
-                        ChangesType = changesType, Order = order, Sessionid = meta.GetValue("sessionid"),
+                        ChangesType = (TradeBot.Common.v1.ChangesType)changesType,
+                        Order = Converters.ConvertOrder(order), Sessionid = meta.GetValue("sessionid"),
                         Time = new Timestamp { Seconds = DateTimeOffset.Now.ToUnixTimeSeconds() },
                         Message = message, SlotName = meta.GetValue("slot")
                     }

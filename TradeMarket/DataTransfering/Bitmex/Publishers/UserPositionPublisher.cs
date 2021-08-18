@@ -6,32 +6,43 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using TradeMarket.Model.Publishers;
 
 namespace TradeMarket.DataTransfering.Bitmex.Publishers
 {
     public class UserPositionPublisher : BitmexPublisher<PositionResponse,PositionSubscribeRequest,Position>
     {
-        internal static readonly Action<PositionResponse, EventHandler<IPublisher<Position>.ChangedEventArgs>> _action = (response, e) =>
+        internal static readonly Action<PositionResponse, EventHandler<IPublisher<Position>.ChangedEventArgs>> _action = async (response, e) =>
         {
-            foreach (var data in response.Data)
-            {
-                e?.Invoke(nameof(UserOrderPublisher), new(data, response.Action));
-            }
+           await Task.Run(() =>
+           {
+               foreach (var data in response.Data)
+               {
+                   e?.Invoke(nameof(UserOrderPublisher), new(data, response.Action));
+               }
+           });
         };
 
         private IObservable<PositionResponse> _stream;
 
-        public UserPositionPublisher(BitmexWebsocketClient client, IObservable<PositionResponse> stream) : base(client, _action)
+        #region Parameters For SubscribeAsync
+
+        private CancellationToken _token;
+        #endregion
+
+        public UserPositionPublisher(BitmexWebsocketClient client, IObservable<PositionResponse> stream,CancellationToken token) : base(client, _action)
         {
             _stream = stream;
+
+            _token = token;
         }
 
-        public override void Start()
+        public async override Task Start()
         {
-            throw new NotImplementedException();
+            await SubscribeAsync(_token);
         }
 
-        public async Task SubcribeAsync(CancellationToken token)
+        public async Task SubscribeAsync(CancellationToken token)
         {
             await base.SubscribeAsync(new PositionSubscribeRequest(), _stream, token);
 

@@ -1,9 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Former.Clients;
 using Former.Model;
-using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
-using TradeBot.Common.v1;
 using Xunit;
 
 namespace FormerTests
@@ -15,7 +14,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata())
+            var storage = new Storage
             {
                 BuyMarketPrice = 38000,
                 AvailableBalance = 240000,
@@ -23,9 +22,9 @@ namespace FormerTests
                 PositionSize = 100
             };
 
-            var config = new Config
+            var config = new Configuration()
             {
-                AvaibleBalance = 1.0,
+                AvailableBalance = 1.0,
                 RequiredProfit = 0.01,
                 ContractValue = 100,
                 OrderUpdatePriceRange = 1
@@ -46,7 +45,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata())
+            var storage = new Storage
             {
                 BuyMarketPrice = 38000,
                 AvailableBalance = 1200000,
@@ -54,9 +53,9 @@ namespace FormerTests
                 PositionSize = 100
             };
 
-            var config = new Config
+            var config = new Configuration()
             {
-                AvaibleBalance = 1.0,
+                AvailableBalance = 1.0,
                 RequiredProfit = 0.01,
                 ContractValue = 100,
                 OrderUpdatePriceRange = 1
@@ -77,7 +76,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata())
+            var storage = new Storage
             {
                 SellMarketPrice = 38000,
                 AvailableBalance = 240000,
@@ -85,9 +84,9 @@ namespace FormerTests
                 PositionSize = -100
             };
 
-            var config = new Config
+            var config = new Configuration()
             {
-                AvaibleBalance = 1.0,
+                AvailableBalance = 1.0,
                 ContractValue = 100
             };
 
@@ -106,7 +105,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata())
+            var storage = new Storage
             {
                 SellMarketPrice = 38000,
                 AvailableBalance = 1200000,
@@ -114,9 +113,9 @@ namespace FormerTests
                 PositionSize = -100
             };
 
-            var config = new Config
+            var config = new Configuration()
             {
-                AvaibleBalance = 1.0,
+                AvailableBalance = 1.0,
                 RequiredProfit = 0.01,
                 ContractValue = 100
             };
@@ -136,7 +135,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata())
+            var storage = new Storage
             {
                 BuyMarketPrice = 38000,
                 AvailableBalance = 1200000,
@@ -146,14 +145,14 @@ namespace FormerTests
             var order = new Order
             {
                 Quantity = 400, Id = "",
-                Signature = new OrderSignature { Status = OrderStatus.Open, Type = OrderType.Buy },
-                LastUpdateDate = new Timestamp(), Price = 38000
+                Signature = new OrderSignature { Status = OrderStatus.ORDER_STATUS_OPEN, Type = OrderType.ORDER_TYPE_BUY },
+                LastUpdateDate = new DateTime(), Price = 38000
             };
             storage.MyOrders.TryAdd(order.Id,order);
 
-            var config = new Config
+            var config = new Configuration()
             {
-                AvaibleBalance = 1.0,
+                AvailableBalance = 1.0,
                 ContractValue = 100
             };
 
@@ -172,7 +171,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata())
+            var storage = new Storage
             {
                 BuyMarketPrice = 38000,
                 AvailableBalance = 1200000,
@@ -182,14 +181,14 @@ namespace FormerTests
             var order = new Order
             {
                 Quantity = 400, Id = "",
-                Signature = new OrderSignature { Status = OrderStatus.Open, Type = OrderType.Buy },
-                LastUpdateDate = new Timestamp(), Price = 38000
+                Signature = new OrderSignature { Status = OrderStatus.ORDER_STATUS_OPEN, Type = OrderType.ORDER_TYPE_BUY },
+                LastUpdateDate = new DateTime(), Price = 38000
             };
             storage.CounterOrders.TryAdd(order.Id,order);
 
-            var config = new Config
+            var config = new Configuration()
             {
-                AvaibleBalance = 1.0,
+                AvailableBalance = 1.0,
                 ContractValue = 100
             };
 
@@ -208,7 +207,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata())
+            var storage = new Storage
             {
                 BuyMarketPrice = 38000,
                 AvailableBalance = 1200000,
@@ -218,14 +217,14 @@ namespace FormerTests
             var order = new Order
             {
                 Quantity = 100, Id = "",
-                Signature = new OrderSignature { Status = OrderStatus.Open, Type = OrderType.Buy },
-                LastUpdateDate = new Timestamp(), Price = 38000
+                Signature = new OrderSignature { Status = OrderStatus.ORDER_STATUS_OPEN, Type = OrderType.ORDER_TYPE_BUY },
+                LastUpdateDate = new DateTime(), Price = 38000
             };
             storage.CounterOrders.TryAdd(order.Id,order);
             storage.MyOrders.TryAdd(order.Id,order);
-            var config = new Config
+            var config = new Configuration()
             {
-                AvaibleBalance = 1.0,
+                AvailableBalance = 1.0,
                 ContractValue = 100
             };
 
@@ -244,16 +243,16 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata())
+            var storage = new Storage
             {
                 BuyMarketPrice = 38000,
                 AvailableBalance = 1200000,
                 TotalBalance = 1200000,
                 PositionSize = -100
             };
-            var config = new Config
+            var config = new Configuration
             {
-                AvaibleBalance = 1.0,
+                AvailableBalance = 1.0,
                 ContractValue = 500
             };
 
@@ -272,7 +271,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata())
+            var storage = new Storage
             {
                 SellMarketPrice = 38000,
                 AvailableBalance = 1200000,
@@ -282,14 +281,14 @@ namespace FormerTests
             var order = new Order
             {
                 Quantity = 400, Id = "",
-                Signature = new OrderSignature { Status = OrderStatus.Open, Type = OrderType.Buy },
-                LastUpdateDate = new Timestamp(), Price = 38000
+                Signature = new OrderSignature { Status = OrderStatus.ORDER_STATUS_OPEN, Type = OrderType.ORDER_TYPE_BUY },
+                LastUpdateDate = new DateTime(), Price = 38000
             };
             storage.MyOrders.TryAdd(order.Id,order);
 
-            var config = new Config
+            var config = new Configuration()
             {
-                AvaibleBalance = 1.0,
+                AvailableBalance = 1.0,
                 ContractValue = 100
             };
 
@@ -308,7 +307,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata())
+            var storage = new Storage
             {
                 SellMarketPrice = 38000,
                 AvailableBalance = 1200000,
@@ -318,14 +317,14 @@ namespace FormerTests
             var order = new Order
             {
                 Quantity = 400, Id = "",
-                Signature = new OrderSignature { Status = OrderStatus.Open, Type = OrderType.Buy },
-                LastUpdateDate = new Timestamp(), Price = 38000
+                Signature = new OrderSignature { Status = OrderStatus.ORDER_STATUS_OPEN, Type = OrderType.ORDER_TYPE_BUY },
+                LastUpdateDate = new DateTime(), Price = 38000
             };
             storage.CounterOrders.TryAdd(order.Id,order);
 
-            var config = new Config
+            var config = new Configuration()
             {
-                AvaibleBalance = 1.0,
+                AvailableBalance = 1.0,
                 ContractValue = 100
             };
 
@@ -344,7 +343,7 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata())
+            var storage = new Storage
             {
                 SellMarketPrice = 38000,
                 AvailableBalance = 1200000,
@@ -354,14 +353,14 @@ namespace FormerTests
             var order = new Order
             {
                 Quantity = 100, Id = "",
-                Signature = new OrderSignature { Status = OrderStatus.Open, Type = OrderType.Buy },
-                LastUpdateDate = new Timestamp(), Price = 38000
+                Signature = new OrderSignature { Status = OrderStatus.ORDER_STATUS_OPEN, Type = OrderType.ORDER_TYPE_BUY },
+                LastUpdateDate = new DateTime(), Price = 38000
             };
             storage.CounterOrders.TryAdd(order.Id,order);
             storage.MyOrders.TryAdd(order.Id,order);
-            var config = new Config
+            var config = new Configuration()
             {
-                AvaibleBalance = 1.0,
+                AvailableBalance = 1.0,
                 ContractValue = 100
             };
 
@@ -380,16 +379,16 @@ namespace FormerTests
         {
             //Arrange
             var historyClient = new HistoryClient();
-            var storage = new Storage(historyClient, new Metadata())
+            var storage = new Storage
             {
                 SellMarketPrice = 38000,
                 AvailableBalance = 1200000,
                 TotalBalance = 1200000,
                 PositionSize = 100
             };
-            var config = new Config
+            var config = new Configuration()
             {
-                AvaibleBalance = 1.0,
+                AvailableBalance = 1.0,
                 ContractValue = 500
             };
 
