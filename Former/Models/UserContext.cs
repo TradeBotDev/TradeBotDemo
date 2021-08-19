@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using Former.Clients;
 using Serilog;
+using Serilog.Context;
+using Serilog.Core.Enrichers;
 
 namespace Former.Models
 {
@@ -29,16 +31,18 @@ namespace Former.Models
                 Slot = slot
             };
             if (!int.TryParse(Environment.GetEnvironmentVariable("RETRY_DELAY"), out var retryDelay)) retryDelay = 10000;
-                
-            HistoryClient.Configure(Environment.GetEnvironmentVariable("HISTORY_CONNECTION_STRING"), retryDelay);
-            _historyClient = new HistoryClient();
+            using (LogContext.Push(new PropertyEnricher("@Meta",Meta)))
+            {
+                HistoryClient.Configure(Environment.GetEnvironmentVariable("HISTORY_CONNECTION_STRING"), retryDelay);
+                _historyClient = new HistoryClient();
 
-            TradeMarketClient.Configure(Environment.GetEnvironmentVariable("TRADEMARKET_CONNECTION_STRING"), retryDelay);
-            _tradeMarketClient = new TradeMarketClient();
+                TradeMarketClient.Configure(Environment.GetEnvironmentVariable("TRADEMARKET_CONNECTION_STRING"), retryDelay);
+                _tradeMarketClient = new TradeMarketClient();
 
-            _storage = new Storage();
-            _former = new Former(_storage, null, _tradeMarketClient, Meta, _historyClient);
-            _updateHandlers = new UpdateHandlers(_storage, null, _tradeMarketClient, Meta, _historyClient);
+                _storage = new Storage();
+                _former = new Former(_storage, null, _tradeMarketClient, Meta, _historyClient);
+                _updateHandlers = new UpdateHandlers(_storage, null, _tradeMarketClient, Meta, _historyClient);
+            }
         }
 
         /// <summary>
