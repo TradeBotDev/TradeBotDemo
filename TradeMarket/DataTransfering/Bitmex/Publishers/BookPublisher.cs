@@ -56,7 +56,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
                         _cache.Remove(model);
                     }
                     _cache.Add(el);
-                });
+                }
             }
         }
 

@@ -71,7 +71,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
                             }
                     }
 
-                });
+                }
             }
         }
     }

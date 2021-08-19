@@ -87,7 +87,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
                         _cache.Add(el);
                     }
 
-                });
+                }
             }
         }
     }
