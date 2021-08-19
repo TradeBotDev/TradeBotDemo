@@ -21,7 +21,11 @@ namespace Relay
             this._algorithm = algorithm;
             this._tradeMarket = tradeMarket;
         }
-
+        public override Task StartAsync(CancellationToken cancellationToken)
+        {
+            var raiseService = new RaiseService();
+            return base.StartAsync(cancellationToken);
+        }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)
