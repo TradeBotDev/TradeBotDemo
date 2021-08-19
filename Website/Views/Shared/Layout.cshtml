@@ -21,16 +21,16 @@
 					<!--Производится проверка вошедшего пользователя на то, обладает ли он лицензией.
 					Если он не обдалает ей, появляется кнопка покупки.-->
 					if (ViewBag.HaveLicense == null || !ViewBag.HaveLicense) {
-						<li><a href="/purchase/buy">Купить</a></li>
+						<li><component type="typeof(PurchaseDialog)" render-mode="ServerPrerendered" param-SessionId="User.Identity.Name"/></li>
 					}
 					<!--Если пользователь аутентифицирован, ему показываются кнопки аккаунта и выхода.-->
 					<li><a href="/account">Управление биржами</a></li>
 					<!--Кнопка выхода является компонентом, и она показывает окошко выхода при нажатии.-->
-					<component type="typeof(LogoutDialog)" render-mode="ServerPrerendered" />
+					<component type="typeof(LogoutDialog)" render-mode="ServerPrerendered"/>
 				}
 				else {
 					<!--Иначе ему показываются кнопки покупки, входа и регистрации-->
-					<li><a href="/purchase/buy">Купить</a></li>
+					<li><a href="/authorization/login">Купить</a></li>
 					<li><a href="/authorization/login">Войти</a></li>
 					<li><a href="/authorization/register">Регистрация</a></li>
 				}

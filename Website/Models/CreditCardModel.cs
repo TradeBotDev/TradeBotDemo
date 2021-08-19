@@ -9,9 +9,9 @@ namespace Website.Models
 		public string CardNumber { get; set; }
 
 		[Required(ErrorMessage = "Отсутствуют данные в поле ввода даты.")]
-		public int Date { get; set; }
+		public string Date { get; set; }
 
 		[Required(ErrorMessage = "Отсутствуют данные в поле ввода CVV.")]
-		public int CVV { get; set; }
+		public string CVV { get; set; }
 	}
 }

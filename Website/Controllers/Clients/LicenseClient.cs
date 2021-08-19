@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
 using Website.Models;
 
@@ -17,8 +18,8 @@ namespace Website.Controllers.Clients
 				SessionId = sessionId,
 				Product = product,
 				CardNumber = model.CardNumber,
-				Date = model.Date,
-				Cvv = model.CVV
+				Date = Convert.ToInt32(model.Date),
+				Cvv = Convert.ToInt32(model.CVV)
 			};
 			return await client.SetLicenseAsync(request);
 		}

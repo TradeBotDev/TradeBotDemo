@@ -1,0 +1,55 @@
+﻿@using Website.Controllers.Clients
+@using Website.Models
+@using TradeBot.Account.AccountService.v1
+@inject NavigationManager NavigationManager
+
+<a @onclick="Switch">Купить</a>
+
+@if (isDisplayed)
+{
+    <div class="message_background">
+        <EditForm Model="creditCard" OnValidSubmit="Buy" class="form floating_form">
+            <h3>Введите данные карты</h3>
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <p>@replyMessage</p>
+
+            <p>Номер карты:</p>
+            <InputText @bind-Value="creditCard.CardNumber" class="form_input" maxlength="16" />
+            <p>Дата:</p>
+            <InputText class="form_input" @bind-Value="creditCard.Date" type="number" maxlength="4" />
+            <p>CVV-код: </p>
+            <InputText class="form_input" @bind-Value="creditCard.CVV" type="number" maxlength="3" />
+
+            <input class="button form_button" type="submit" value="Купить" />
+            <input class="button form_close_button" type="button" @onclick="Switch" value="Закрыть" />
+        </EditForm>
+    </div>
+}
+
+@code {
+    private bool isDisplayed = false;
+    private string replyMessage;
+    private CreditCardModel creditCard = new();
+
+    [Parameter] public string SessionId { get; set; }
+
+    public void Switch()
+    {
+        if (isDisplayed) isDisplayed = false;
+        else isDisplayed = true;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async void Buy()
+    {
+        var reply = await LicenseClient.SetLicense(SessionId, ProductCode.Tradebot, creditCard);
+        if (reply.Code == LicenseCode.Successful)
+            NavigationManager.NavigateTo("/account", true);
+        else
+        {
+            replyMessage = reply.Message;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+}

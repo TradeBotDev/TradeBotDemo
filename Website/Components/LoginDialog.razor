@@ -12,58 +12,55 @@
 <li><a @onclick="Switch">Войти</a></li>
 @if (isDisplayed)
 {
-    <div class="message_background">
-        <!--Форма входа в аккаунт-->
-        <div class="message_background">
-            <EditForm Model="loginModel" OnValidSubmit="LoginToAccount" class="form floating_form">
-                <h3>Вход в аккаунт</h3>
-                <DataAnnotationsValidator />
-                <ValidationSummary />
-                <p>@replyMessage</p>
+	<!--Форма входа в аккаунт-->
+	<div class="message_background">
+		<EditForm Model="loginModel" OnValidSubmit="Login" class="form floating_form">
+			<h3>Вход в аккаунт</h3>
+			<DataAnnotationsValidator />
+			<ValidationSummary />
+			<p>@replyMessage</p>
+			
+			<p>Email</p>
+			<InputText class="form_input" @bind-Value="loginModel.Email" type="email" />
+			<p>Пароль:</p>
+			<InputText class="form_input" @bind-Value="loginModel.Password" type="password" />
 
-                <p>Email</p>
-                <InputText class="form_input" @bind-Value="loginModel.Email" type="email" />
-                <p>Пароль:</p>
-                <InputText class="form_input" @bind-Value="loginModel.Password" type="password" />
-
-                <input class="button form_button" type="submit" value="Войти" />
-                <input class="button form_close_button" type="button" @onclick="Switch" value="Закрыть" />
-            </EditForm>
-        </div>
-    </div>
+			<input class="button form_button" type="submit" value="Войти" />
+			<input class="button form_close_button" type="button" @onclick="Switch" value="Закрыть" />
+		</EditForm>
+	</div>
 }
 
 @code {
-    private bool isDisplayed = false;
-    private LoginModel loginModel = new();
-    private string replyMessage;
-    [Inject]
-    public NavigationManager navigationManager { get; set; }
+	private bool isDisplayed = false;
+	private LoginModel loginModel = new();
+	private string replyMessage;
+	[Inject]
+	public NavigationManager navigationManager { get; set; }
 
+	private void Switch()
+	{
+		if (isDisplayed) isDisplayed = false;
+		else isDisplayed = true;
+		InvokeAsync(StateHasChanged);
+	}
 
-    private void Switch()
-    {
-        if (isDisplayed) isDisplayed = false;
-        else isDisplayed = true;
-        InvokeAsync(StateHasChanged);
-    }
-
-    private async void LoginToAccount()
-    {
-        var reply = await AccountServiceClient.Login(loginModel);
-        if (reply.Result == AccountActionCode.Successful)
-        {
-            var claims = new List<Claim> { new Claim(ClaimTypes.Name, reply.SessionId) };
-            ClaimsIdentity identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme, ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
-            await httpContextAccessor.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity)).ContinueWith(prop =>
-            {
-                navigationManager.NavigateTo("/");
-            }); ;
-        }
-        else
-        {
-            replyMessage = reply.Message;
-            await InvokeAsync(StateHasChanged);
-        }
-    }
+	private async void Login()
+	{
+		var reply = await AccountServiceClient.Login(loginModel);
+		if (reply.Result == AccountActionCode.Successful)
+		{
+			var claims = new List<Claim> { new Claim(ClaimTypes.Name, reply.SessionId) };
+			ClaimsIdentity identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme, ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
+			await httpContextAccessor.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity)).ContinueWith(prop =>
+			{
+				navigationManager.NavigateTo("/");
+			}); ;
+		}
+		else
+		{
+			replyMessage = reply.Message;
+			await InvokeAsync(StateHasChanged);
+		}
+	}
 }

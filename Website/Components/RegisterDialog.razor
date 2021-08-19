@@ -7,7 +7,7 @@
 @if (isDisplayed)
 {
     <div class="message_background">
-        <EditForm Model="@registerModel" OnValidSubmit="RegisterAccount" class="form floating_form">
+        <EditForm Model="@registerModel" OnValidSubmit="Register" class="form floating_form">
             <h3>Регистрация</h3>
 
             <div>
@@ -45,7 +45,7 @@
         InvokeAsync(StateHasChanged);
     }
 
-    private async void RegisterAccount()
+    private async void Register()
     {
         // Нужно понять, как сделать вход, чтобы сделать регистрацию ._.
 
