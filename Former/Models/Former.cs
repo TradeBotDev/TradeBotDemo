@@ -91,7 +91,6 @@ namespace Former.Models
         /// </summary>
         private bool CheckPossibilityPlacingOrder(OrderType type)
         {
-            
             //вычисляем предполагаемую стоимость ордера по рыночной цене в биткоинах
             var orderCost = _configuration.ContractValue / (type == OrderType.ORDER_TYPE_SELL ? _storage.SellMarketPrice : _storage.BuyMarketPrice);
             //конвертируем баланс в биткоины (XBT), так как он приходит от биржи в сатоши (XBt)

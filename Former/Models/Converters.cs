@@ -46,19 +46,19 @@ namespace Former.Models
             };
         }
 
-        public static Configuration ConvertConfiguration(Config order)
+        public static Configuration ConvertConfiguration(Config configuration)
         {
             return new Configuration
             {
                 AlgorithmInfo = new AlgorithmInfo
                 {
-                    Interval = order.AlgorithmInfo.Interval.ToTimeSpan(),
-                    Sensitivity = order.AlgorithmInfo.Sensitivity
+                    Interval = configuration.AlgorithmInfo.Interval.ToTimeSpan(),
+                    Sensitivity = configuration.AlgorithmInfo.Sensitivity
                 },
-                AvailableBalance = order.AvaibleBalance,
-                ContractValue = order.ContractValue,
-                OrderUpdatePriceRange = order.OrderUpdatePriceRange,
-                RequiredProfit = order.RequiredProfit
+                AvailableBalance = configuration.AvaibleBalance,
+                ContractValue = configuration.ContractValue,
+                OrderUpdatePriceRange = configuration.OrderUpdatePriceRange,
+                RequiredProfit = configuration.RequiredProfit
             };
         }
 

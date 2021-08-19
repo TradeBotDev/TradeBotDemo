@@ -18,6 +18,7 @@ namespace Former
             services.AddGrpc();
 
             var contexts = RedisClient.ReadMeta().Result;
+            if (contexts is null) return;
             foreach (var ctx in contexts)
             {
                 var configuration = RedisClient.ReadConfiguration(ctx).Result;

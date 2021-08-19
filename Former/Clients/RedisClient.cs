@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Former.Models;
+using Newtonsoft.Json;
 using StackExchange.Redis;
 
 namespace Former.Clients
@@ -14,24 +14,23 @@ namespace Former.Clients
         private const string ServiceId = "5003";
 
 
-        public static async Task WriteMeta(List<Metadata> metadata)
+        public static async Task WriteMetaEntries(List<Metadata> metadata)
         {
-            var value = JsonSerializer.Serialize(metadata);
+            var value = JsonConvert.SerializeObject(metadata);
 
             if (await Database.KeyExistsAsync(ServiceId))
             {
-                var oldValue = Database.StringGet(ServiceId);
-                await Database.SetRemoveAsync(ServiceId, oldValue);
-                await Database.SetAddAsync(ServiceId, value);
+                await Database.KeyDeleteAsync(ServiceId);
+                await Database.StringSetAsync(ServiceId, value);
             }
-            else await Database.SetAddAsync(ServiceId, value);
+            else await Database.StringSetAsync(ServiceId, value);
         }
 
         public static async Task<List<Metadata>> ReadMeta()
         {
             if (await Database.KeyExistsAsync(ServiceId))
             {
-                return JsonSerializer.Deserialize<List<Metadata>>(await Database.StringGetAsync(ServiceId));
+                return JsonConvert.DeserializeObject<List<Metadata>>(await Database.StringGetAsync(ServiceId));
             }
             return null;
         }
@@ -39,15 +38,14 @@ namespace Former.Clients
         public static async Task WriteConfiguration(Metadata metadata, Configuration configuration)
         {
             var key = metadata.Sessionid + metadata.Trademarket + metadata.Slot + ServiceId;
-            var value = JsonSerializer.Serialize(configuration);
+            var value = JsonConvert.SerializeObject(configuration);
 
             if (await Database.KeyExistsAsync(key))
             {
-                var oldValue = Database.StringGet(key);
-                await Database.SetRemoveAsync(key, oldValue);
-                await Database.SetAddAsync(key, value);
+                await Database.KeyDeleteAsync(key);
+                await Database.StringSetAsync(key, value);
             }
-            else await Database.SetAddAsync(key, value);
+            else await Database.StringSetAsync(key, value);
         }
 
         public static async Task<Configuration> ReadConfiguration(Metadata metadata)
@@ -55,7 +53,7 @@ namespace Former.Clients
             var key = metadata.Sessionid + metadata.Trademarket + metadata.Slot + ServiceId;
             if (await Database.KeyExistsAsync(key))
             {
-                return JsonSerializer.Deserialize<Configuration>(await Database.StringGetAsync(key));
+                return JsonConvert.DeserializeObject<Configuration>(await Database.StringGetAsync(key));
             }
             return null;
         }
@@ -64,8 +62,7 @@ namespace Former.Clients
         {
             while (await Database.KeyExistsAsync(ServiceId))
             {
-                var oldValue = Database.StringGet(ServiceId);
-                await Database.SetRemoveAsync(ServiceId, oldValue);
+                await Database.KeyDeleteAsync(ServiceId);
             }
         }
 
@@ -74,8 +71,7 @@ namespace Former.Clients
             foreach (var meta in metadata)
             {
                 var key = meta.Sessionid + meta.Trademarket + meta.Slot + ServiceId;
-                var oldValue = Database.StringGet(key);
-                await Database.SetRemoveAsync(key, oldValue);
+                await Database.KeyDeleteAsync(key);
             }
         }
     }
