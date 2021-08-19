@@ -14,20 +14,22 @@
 {
 	<!--Форма входа в аккаунт-->
 	<div class="message_background">
-		<EditForm Model="loginModel" OnValidSubmit="Login" class="form floating_form">
-			<h3>Вход в аккаунт</h3>
-			<DataAnnotationsValidator />
-			<ValidationSummary />
-			<p>@replyMessage</p>
-			
-			<p>Email</p>
-			<InputText class="form_input" @bind-Value="loginModel.Email" type="email" />
-			<p>Пароль:</p>
-			<InputText class="form_input" @bind-Value="loginModel.Password" type="password" />
+        <EditForm Model="loginModel" OnValidSubmit="Login" class="form floating_form">
+            <h3>Вход в аккаунт</h3>
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            @if (!String.IsNullOrEmpty(replyMessage)) {
+                <p class="validation-message">@replyMessage</p>
+            }
 
-			<input class="button form_button" type="submit" value="Войти" />
-			<input class="button form_close_button" type="button" @onclick="Switch" value="Закрыть" />
-		</EditForm>
+            <p>Email</p>
+            <InputText class="form_input" @bind-Value="loginModel.Email" type="email" />
+            <p>Пароль:</p>
+            <InputText class="form_input" @bind-Value="loginModel.Password" type="password" />
+
+            <input class="button form_button" type="submit" value="Войти" />
+            <input class="button form_close_button" type="button" @onclick="Switch" value="Закрыть" />
+        </EditForm>
 	</div>
 }
 

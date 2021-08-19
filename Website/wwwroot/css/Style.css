@@ -64,7 +64,7 @@ footer {
 	font-weight: 700;
 }
 
-.header ul {
+.header_buttons_container {
 	list-style: none;
 	margin-left: 15px;
 	margin-right: 30px;
@@ -72,11 +72,11 @@ footer {
 	justify-content: right;
 }
 
-.header ul li {
+.header_buttons_container li {
 	display: inline-block;
 }
 
-.header ul li a {
+.header_buttons_container li a {
 	padding: 14px;
 	text-decoration: none;
 	display: block;
@@ -85,7 +85,7 @@ footer {
 	cursor: pointer;
 }
 
-.header ul li a:hover {
+.header_buttons_container li a:hover {
 	background: #fff;
 	color: #167c80;
 }
@@ -303,4 +303,9 @@ footer {
 
 .message_block_buttons input {
 	margin: 5px;
+}
+
+.validation-message {
+	font-size: 14px;
+	color: red;
 }

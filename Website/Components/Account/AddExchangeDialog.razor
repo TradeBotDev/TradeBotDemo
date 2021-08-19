@@ -10,28 +10,30 @@
 @if (isDisplayed) {
 	<div class="message_background">
 		<!--Форма добавления биржи. При отправке выполняется метод AddExchangeAccess, валидация проходит автоматически.-->
-		<EditForm Model="@addModel" OnValidSubmit="AddExchangeAccess" class="form floating_form">
-			<h3>Добавить биржу</h3>
+        <EditForm Model="@addModel" OnValidSubmit="AddExchangeAccess" class="form floating_form">
+            <h3>Добавить биржу</h3>
 
-			<!--Вывод результата валидации и сообщений сервиса.-->
-			<DataAnnotationsValidator />
-			<ValidationSummary />
-			<p>@replyMessage</p>
+            <!--Вывод результата валидации и сообщений сервиса.-->
+            <DataAnnotationsValidator />
+            <ValidationSummary class="validation-errors" />
+            @if (!String.IsNullOrEmpty(replyMessage)) {
+                <p class="validation-message">@replyMessage</p>
+            }
 
-			<!--Поля ввода/выбора.-->
-			<p>Выберите биржу:</p>
-			<InputSelect @bind-Value="addModel.ExchangeCode" class="form_select">
-				<option value="1">Bitmex</option>
-			</InputSelect>
-			<p>Токен:</p>
-			<InputText @bind-Value="addModel.Token" class="form_input" type="text" name="Token" />
-			<p>Секрет:</p>
-			<InputText @bind-Value="addModel.Secret" class="form_input" type="text" name="Secret" />
+            <!--Поля ввода/выбора.-->
+            <p>Выберите биржу:</p>
+            <InputSelect @bind-Value="addModel.ExchangeCode" class="form_select">
+                <option value="1">Bitmex</option>
+            </InputSelect>
+            <p>Токен:</p>
+            <InputText @bind-Value="addModel.Token" class="form_input" type="text" name="Token" />
+            <p>Секрет:</p>
+            <InputText @bind-Value="addModel.Secret" class="form_input" type="text" name="Secret" />
 
-			<input class="button form_button" type="submit" value="Добавить" />
-			<!--Отключает отображение формы.-->
-			<input class="button form_close_button" type="button" @onclick="Switch" value="Закрыть" />
-		</EditForm>
+            <input class="button form_button" type="submit" value="Добавить" />
+            <!--Отключает отображение формы.-->
+            <input class="button form_close_button" type="button" @onclick="Switch" value="Закрыть" />
+        </EditForm>
 	</div>
 }
 

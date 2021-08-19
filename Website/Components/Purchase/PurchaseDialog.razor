@@ -3,8 +3,6 @@
 @using TradeBot.Account.AccountService.v1
 @inject NavigationManager NavigationManager
 
-<!--<a onclick="Switch">Купить</a>-->
-
 @if (isDisplayed)
 {
     <div class="message_background">
@@ -12,7 +10,9 @@
             <h3>Введите данные карты</h3>
             <DataAnnotationsValidator />
             <ValidationSummary />
-            <p>@replyMessage</p>
+            @if (!String.IsNullOrEmpty(replyMessage)) {
+                <p class="validation-message">@replyMessage</p>
+            }
 
             <p>Номер карты:</p>
             <InputText @bind-Value="creditCard.CardNumber" class="form_input" maxlength="16" />

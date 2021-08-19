@@ -10,12 +10,12 @@
         <EditForm Model="@registerModel" OnValidSubmit="Register" class="form floating_form">
             <h3>Регистрация</h3>
 
-            <div>
-                <!--Вывод результата валидации и сообщений сервиса.-->
-                <DataAnnotationsValidator />
-                <ValidationSummary />
-                <p>@replyMessage</p>
-            </div>
+            <!--Вывод результата валидации и сообщений сервиса.-->
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            @if (!String.IsNullOrEmpty(replyMessage)) {
+                <p class="validation-message">@replyMessage</p>
+            }
 
             <p>Email:</p>
             <input class="form_input" @bind-value="registerModel.Email" type="email" />
@@ -45,9 +45,10 @@
         InvokeAsync(StateHasChanged);
     }
 
-    private async void Register()
+    private void Register()
     {
         // Нужно понять, как сделать вход, чтобы сделать регистрацию ._.
+        replyMessage = "Регистрация временно недоступна.";
 
         //var reply = await AccountServiceClient.Register(registerModel);
         //if (reply.Result == AccountActionCode.Successful) { }
