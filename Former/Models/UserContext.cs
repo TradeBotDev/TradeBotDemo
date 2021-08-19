@@ -53,6 +53,7 @@ namespace Former.Models
             _tradeMarketClient.UpdateBalance += _storage.UpdateBalance;
             _tradeMarketClient.UpdateMyOrders += _storage.UpdateMyOrderList;
             _tradeMarketClient.UpdatePosition += _storage.UpdatePosition;
+            _tradeMarketClient.UpdateLotSize += _storage.UpdateLotSize;
             //запускаем подписки на сервис с данными
             _tradeMarketClient.StartObserving(Converters.ConvertMetadata(Meta));
             _isSubscribesAttached = true;
@@ -73,6 +74,7 @@ namespace Former.Models
             _tradeMarketClient.UpdateBalance -= _storage.UpdateBalance;
             _tradeMarketClient.UpdateMyOrders -= _storage.UpdateMyOrderList;
             _tradeMarketClient.UpdatePosition -= _storage.UpdatePosition;
+            _tradeMarketClient.UpdateLotSize -= _storage.UpdateLotSize;
             //очищаем хранилище
             _storage.ClearStorage();
             _isSubscribesAttached = false;

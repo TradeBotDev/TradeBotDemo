@@ -80,7 +80,8 @@ message SubscribePriceResponse{
 	double bid_price = 1;
 	double ask_price = 2;
 	double fair_price = 3;
-	tradebot.common.v1.ChangesType changed_type = 4;
+	int32 lot_size = 4;
+	tradebot.common.v1.ChangesType changed_type = 5;
 }
 
 

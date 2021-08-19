@@ -32,7 +32,15 @@ namespace Former.Clients
             {
                 return JsonConvert.DeserializeObject<List<Metadata>>(await Database.StringGetAsync(ServiceId));
             }
-            return null;
+            return new List<Metadata>();
+        }
+
+        public static async Task DeleteMetaEntries()
+        {
+            while (await Database.KeyExistsAsync(ServiceId))
+            {
+                await Database.KeyDeleteAsync(ServiceId);
+            }
         }
 
         public static async Task WriteConfiguration(Metadata metadata, Configuration configuration)
@@ -55,15 +63,7 @@ namespace Former.Clients
             {
                 return JsonConvert.DeserializeObject<Configuration>(await Database.StringGetAsync(key));
             }
-            return null;
-        }
-
-        public static async Task DeleteMetaEntries()
-        {
-            while (await Database.KeyExistsAsync(ServiceId))
-            {
-                await Database.KeyDeleteAsync(ServiceId);
-            }
+            return new Configuration();
         }
 
         public static async Task DeleteConfigurations(List<Metadata> metadata)

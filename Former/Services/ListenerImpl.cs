@@ -22,10 +22,11 @@ namespace Former.Services
 
                 //От релея приходят метаданные, по которым создаётся контекст 
                 var userContext = Contexts.GetUserContext(metadata.Sessionid, metadata.Trademarket, metadata.Slot);
-                //если поле Switch установленно в false, значит мы начинаем работу (или продолжаем её), если установлено в true
-                //то необходимо остановить работу формера, то есть отписаться от трейдмаркета.
+                //
                 Meta.GetMetadata(metadata.Sessionid, metadata.Trademarket, metadata.Slot);
 
+                //если поле Switch установленно в false, значит мы начинаем работу (или продолжаем её), если установлено в true
+                //то необходимо остановить работу формера, то есть отписаться от трейдмаркета.
                 if (request.Request.Switch)
                 {
                     userContext.UnsubscribeStorage();

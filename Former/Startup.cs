@@ -17,8 +17,9 @@ namespace Former
         {
             services.AddGrpc();
 
+            //проверяет, есть в редисе контексты формера, и если они есть, то это значит что сервис был остановлен аварийно
+            //и следует его запустить с контекстами и настройками из редиса
             var contexts = RedisClient.ReadMeta().Result;
-            if (contexts is null) return;
             foreach (var ctx in contexts)
             {
                 var configuration = RedisClient.ReadConfiguration(ctx).Result;
