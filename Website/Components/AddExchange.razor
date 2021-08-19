@@ -36,39 +36,39 @@
 }
 
 @code {
-	// Передается из представления.
-	[Parameter] public string SessionId { get; set; }
-	[Parameter] public AccountDataModel AccountData { get; set; }
+    private bool isDisplayed = false;
+    private AddExchangeAccessModel addModel = new();
+    private ExchangeList ExchangeListChild;
+    private string replyMessage;
 
-	private bool isDisplayed = false;
-	private AddExchangeAccessModel addModel = new();
-	private ExchangeList ExchangeListChild;
-	private string replyMessage;
+    // Передается из представления.
+    [Parameter] public string SessionId { get; set; }
+    [Parameter] public AccountDataModel AccountData { get; set; }
 
-	// Метод включения/отключения отображения формы.
-	private void Switch()
-	{
-		if (isDisplayed) isDisplayed = false;
-		else isDisplayed = true;
-		// Обновление компонента.
-		InvokeAsync(StateHasChanged);
-	}
+    // Метод включения/отключения отображения формы.
+    private void Switch()
+    {
+        if (isDisplayed) isDisplayed = false;
+        else isDisplayed = true;
+        // Обновление компонента.
+        InvokeAsync(StateHasChanged);
+    }
 
-	// Метод добавления новой биржи.
-	private async void AddExchangeAccess()
-	{
-		// Отправка запроса в сервис (в случае, если валидация прошла успешно).
-		var reply = await ExchangeAccessClient.AddExchangeAccess(SessionId, addModel);
-		// Обновление компонента со списком бирж.
-		ExchangeListChild.RefreshExchanges();
-		// Если вход был завершен успешно, происходит просто закрытие формы (ведь компонент с биржами уже обновлен).
-		if (reply.Result == ExchangeAccessActionCode.Successful)
-			Switch();
-		// Иначе на форму выводится сообщение об ошибке и она обноалвяется.
-		else
-		{
-			replyMessage = reply.Message;
-			await InvokeAsync(StateHasChanged);
-		}
-	}
+    // Метод добавления новой биржи.
+    private async void AddExchangeAccess()
+    {
+        // Отправка запроса в сервис (в случае, если валидация прошла успешно).
+        var reply = await ExchangeAccessClient.AddExchangeAccess(SessionId, addModel);
+        // Обновление компонента со списком бирж.
+        ExchangeListChild.RefreshExchanges();
+        // Если вход был завершен успешно, происходит просто закрытие формы (ведь компонент с биржами уже обновлен).
+        if (reply.Result == ExchangeAccessActionCode.Successful)
+            Switch();
+        // Иначе на форму выводится сообщение об ошибке и она обноалвяется.
+        else
+        {
+            replyMessage = reply.Message;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
 }
