@@ -11,6 +11,6 @@
 		<p class="text_message">Вы должны обладать лицензией на продукт, чтобы иметь возможность добавлять новые биржи в аккаунт. <a href="/purchase/buy">Купить</a></p>
 	}
 	else {
-		<component type="typeof(AddExchange)" render-mode="ServerPrerendered" param-SessionId="User.Identity.Name" param-AccountData="Model"/>
+		<component type="typeof(AddExchangeDialog)" render-mode="ServerPrerendered" param-SessionId="User.Identity.Name" param-AccountData="Model"/>
 	}
 }

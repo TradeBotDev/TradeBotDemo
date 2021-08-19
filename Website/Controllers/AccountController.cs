@@ -59,39 +59,5 @@ namespace Website.Controllers
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return View("~/Views/Shared/Error.cshtml", reply.Message);
         }
-
-        // Метод, показывающий форму добавления биржи в аккаунт.
-        [HttpGet]
-        public async Task<IActionResult> AddExchangeAccess()
-        {
-            // Проверка лицензии и передача ее результата в представление через ViewBag.
-            var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
-            ViewBag.HaveLicense = haveLicense.HaveAccess;
-            return View();
-        }
-
-        // Метод, который добавляет биржу после отправки формы добавления биржи.
-        [HttpPost]
-        public async Task<IActionResult> AddExchangeAccess(AddExchangeAccessModel model)
-        {
-            // Проверка лицензии и передача ее результата в представление через ViewBag.
-            var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
-            ViewBag.HaveLicense = haveLicense.HaveAccess;
-            // Если данные модели не являются валидными, возвращается страница формы с сообщениями об ошибках.
-            if (!ModelState.IsValid)
-                return View();
-
-            // Иначе отправляется запрос на добавление биржи в аккаунт.
-            var reply = await Clients.ExchangeAccessClient.AddExchangeAccess(User.Identity.Name, model);
-            // Если биржа была успешно добавлена, происходит перенаправление на страницу аккаунта, где она будет отображаться.
-            if (reply.Result == ExchangeAccessActionCode.Successful)
-                return RedirectToAction("account", "account");
-
-            // Иначе если проблема при добавлении связана с аккаунтом, происходит выход из него.
-            if (reply.Result == ExchangeAccessActionCode.AccountNotFound || reply.Result == ExchangeAccessActionCode.TimePassed)
-                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            // Возвращение страницы с ошибкой.
-            return View("~/Views/Shared/Error.cshtml", reply.Message);
-        }
     }
 }
