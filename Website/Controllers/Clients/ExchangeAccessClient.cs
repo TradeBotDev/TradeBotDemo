@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using Serilog;
+using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
 using Website.Models;
 
@@ -12,6 +13,12 @@ namespace Website.Controllers.Clients
 		// Метод добавления новой биржи в аккаунт.
 		public static async Task<AddExchangeAccessResponse> AddExchangeAccess(string sessionId, AddExchangeAccessModel model)
 		{
+			Log.Information($"ExchangeAccessClient: метод AddExchangeAccess принял запрос: " +
+				$"sessionId - {sessionId}, " +
+				$"ExchangeCode - {model.ExchangeCode}, " +
+				$"Secret - {model.Secret}, " +
+				$"Token - {model.Token}.");
+
 			var request = new AddExchangeAccessRequest
 			{
 				SessionId = sessionId,
@@ -26,6 +33,7 @@ namespace Website.Controllers.Clients
 		// Метод получения информации о всех биржах по Id сессии.
 		public static async Task<AllExchangesBySessionResponse> AllExchangesBySession(string sessionId)
 		{
+			Log.Information($"ExchangeAccessClient: метод AllExchangesBySession принял запрос: sessionId - {sessionId}.");
 			var request = new AllExchangesBySessionRequest
 			{
 				SessionId = sessionId
@@ -36,6 +44,10 @@ namespace Website.Controllers.Clients
 		// Метод удаления выбранной биржи по Id сессии.
 		public static async Task<DeleteExchangeAccessResponse> DeleteExchangeAccess(string sessionId, ExchangeAccessCode code)
 		{
+			Log.Information($"ExchangeAccessClient: метод DeleteExchangeAccess принял запрос:" +
+				$"sessionId - {sessionId}, " +
+				$"code - {code}.");
+
 			var request = new DeleteExchangeAccessRequest
 			{
 				SessionId = sessionId,
@@ -47,6 +59,10 @@ namespace Website.Controllers.Clients
 		// Метод получения информации конкретной биржи по Id сессии.
 		public static async Task<ExchangeBySessionResponse> ExchangeBySession(string sessionId, ExchangeAccessCode code)
 		{
+			Log.Information($"ExchangeAccessClient: метод ExchangeBySession принял запрос:" +
+				$"sessionId - {sessionId}, " +
+				$"code - {code}.");
+
 			var request = new ExchangeBySessionRequest
 			{
 				SessionId = sessionId,

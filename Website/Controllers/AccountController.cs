@@ -2,9 +2,12 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 using System.Threading.Tasks;
-using TradeBot.Account.AccountService.v1;
+using Serilog;
+
 using Website.Models;
+using TradeBot.Account.AccountService.v1;
 
 namespace Website.Controllers
 {
@@ -17,6 +20,8 @@ namespace Website.Controllers
         [HttpGet]
         public async Task<IActionResult> Account()
         {
+            Log.Information("AccountController: метод Account принял запрос GET.");
+
             // Проверка лицензии и передача ее результата в представление через ViewBag.
             var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
             ViewBag.HaveLicense = haveLicense.HaveAccess;
@@ -45,6 +50,8 @@ namespace Website.Controllers
         [HttpPost]
         public async Task<IActionResult> Account(ExchangeAccessCode exchangeCode)
         {
+            Log.Information($"AccountController: метод Account принял запрос POST с данными: exchangeCode - {exchangeCode}.");
+
             // Проверка лицензии и передача ее результата в представление через ViewBag.
             var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
             ViewBag.HaveLicense = haveLicense.HaveAccess;

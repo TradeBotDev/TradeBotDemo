@@ -1,5 +1,6 @@
 ﻿using Grpc.Net.Client;
 using Microsoft.Extensions.Configuration;
+using Serilog;
 using System;
 
 namespace Website.Controllers.Clients
@@ -10,6 +11,8 @@ namespace Website.Controllers.Clients
 		// Метод, который подключается к сервису и возвращает подключение. 
 		public static GrpcChannel GetConnection()
 		{
+			Log.Information($"AccountServiceConnection: вызван метод GetConnection.");
+
 			// Создание конфигурации, которая содержит в себе все настройки из файла appsettings.json.
 			var configuration = new ConfigurationBuilder()
 				.AddJsonFile("appsettings.json", optional: false)

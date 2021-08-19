@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
 using Website.Models;
@@ -13,6 +14,13 @@ namespace Website.Controllers.Clients
 		// Метод установки лицензии для пользователя по Id сессии.
 		public static async Task<SetLicenseResponse> SetLicense(string sessionId, ProductCode product, CreditCardModel model)
 		{
+			Log.Information($"LicenseClient: метод SetLicense принял запрос: " +
+				$"sessionId - {sessionId}, " +
+				$"product - {product}, " +
+				$"CardNumber - {model.CardNumber}, " +
+				$"Date - {model.Date}, " +
+				$"CVV - {model.CVV}.");
+
 			var request = new SetLicenseRequest
 			{
 				SessionId = sessionId,
@@ -27,6 +35,8 @@ namespace Website.Controllers.Clients
 		// Метод проверки на то, есть ли лицензия у текущего пользователя.
 		public static async Task<CheckLicenseResponse> CheckLicense(string sessionId, ProductCode product)
 		{
+			Log.Information($"LicenseClient: метод CheckLicense принял запрос: sessionId - {sessionId}, product - {product}");
+			
 			// Если Id сессии является null, в запросе отправляется просто пустая строка (gRPC не умеет пересылать null).
 			// В таком случае сработает валидация уже в самом сервисе и вернется сообщение об ошибке.
 			if (sessionId == null) sessionId = "";

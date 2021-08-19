@@ -1,4 +1,4 @@
-﻿using Grpc.Net.Client;
+﻿using Serilog;
 using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
 using Website.Models.Authorization;
@@ -13,6 +13,10 @@ namespace Website.Controllers.Clients
 		// Метод входа в аккаунт.
 		public static async Task<LoginResponse> Login(LoginModel model)
 		{
+			Log.Information($"AccountServiceClient: метод Login принял запрос: " +
+				$"Email - {model.Email}, " +
+				$"Password - {model.Password}.");
+
 			var request = new LoginRequest
 			{
 				Email = model.Email,
@@ -24,6 +28,10 @@ namespace Website.Controllers.Clients
 		// Метод выхода из аккаунта.
 		public static async Task<LogoutResponse> Logout(string sessionId, bool saveExchangeAccesses)
 		{
+			Log.Information($"AccountServiceClient: метод Logout принял запрос: " +
+				$"sessionId - {sessionId}, " +
+				$"saveExchangeAccesses - {saveExchangeAccesses}.");
+
 			var request = new LogoutRequest
 			{
 				SessionId = sessionId,
@@ -35,6 +43,11 @@ namespace Website.Controllers.Clients
 		// Метод регистрации.
 		public static async Task<RegisterResponse> Register(RegisterModel model)
 		{
+			Log.Information($"AccountServiceClient: метод Register принял запрос: " +
+				$"Email - {model.Email}, " +
+				$"Password - {model.Password}, " +
+				$"VerifyPassword - {model.VerifyPassword}.");
+
 			var request = new RegisterRequest
 			{
 				Email = model.Email,
@@ -47,6 +60,7 @@ namespace Website.Controllers.Clients
 		// Метод проверки сессии на валидность.
 		public static async Task<IsValidSessionResponse> IsValidSession(string sessionId)
 		{
+			Log.Information($"AccountServiceClient: метод IsValidSession принял запрос: sessionId - {sessionId}.");
 			var request = new IsValidSessionRequest
 			{
 				SessionId = sessionId
@@ -57,6 +71,7 @@ namespace Website.Controllers.Clients
 		// Метод получения информации из аккаунта.
 		public static async Task<AccountDataResponse> AccountData(string sessionId)
 		{
+			Log.Information($"AccountServiceClient: метод AccountData принял запрос: sessionId - {sessionId}.");
 			var request = new AccountDataRequest
 			{
 				SessionId = sessionId

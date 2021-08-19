@@ -1,11 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using TradeBot.Account.AccountService.v1;
+using Serilog;
+
 using Website.Models.Authorization;
+using TradeBot.Account.AccountService.v1;
 
 namespace Website.Controllers
 {
@@ -15,6 +18,8 @@ namespace Website.Controllers
         [HttpGet]
         public async Task<IActionResult> Login()
         {
+            Log.Information("AuthorizationController: метод Login принял запрос GET.");
+
             // Проверка лицензии и передача ее результата в представление через ViewBag.
             var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
             ViewBag.HaveLicense = haveLicense.HaveAccess;
@@ -25,6 +30,10 @@ namespace Website.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginModel model)
         {
+            Log.Information("AuthorizationController: метод Login принял запрос POST с данными: " +
+                $"Email - {model.Email}, " +
+                $"Password - {model.Password}.");
+
             // Проверка лицензии и передача ее результата в представление через ViewBag.
             var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
             ViewBag.HaveLicense = haveLicense.HaveAccess;
@@ -53,6 +62,8 @@ namespace Website.Controllers
         [HttpGet]
         public async Task<IActionResult> Register()
         {
+            Log.Information("AuthorizationController: метод Register принял запрос GET.");
+
             // Проверка лицензии и передача ее результата в представление через ViewBag.
             var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
             ViewBag.HaveLicense = haveLicense.HaveAccess;
@@ -63,6 +74,11 @@ namespace Website.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(RegisterModel model)
         {
+            Log.Information("AuthorizationController: метод Register принял запрос POST с данными: " +
+                $"Email - {model.Email}, " +
+                $"Password - {model.Password}, " +
+                $"VerifyPassword - {model.VerifyPassword}.");
+
             // Проверка лицензии и передача ее результата в представление через ViewBag.
             var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
             ViewBag.HaveLicense = haveLicense.HaveAccess;
@@ -92,6 +108,11 @@ namespace Website.Controllers
         [HttpPost]
         public async Task<IActionResult> Logout(LogoutModel model)
         {
+            Log.Information("AuthorizationController: метод Logout принял запрос POST с данными: " +
+                $"Button - {model.Button}, " + // ¯\_(ツ)_/¯
+                $"PreviousUrl - {model.PreviousUrl}, " +
+                $"SaveExchanges - {model.SaveExchanges}.");
+
             // Проверка лицензии и передача ее результата в представление через ViewBag.
             var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
             ViewBag.HaveLicense = haveLicense.HaveAccess;
