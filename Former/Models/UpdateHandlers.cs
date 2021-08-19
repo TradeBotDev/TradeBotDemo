@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Former.Clients;
-using Grpc.Core;
 using Serilog;
 
 namespace Former.Models
@@ -54,15 +53,33 @@ namespace Former.Models
         private async Task OrderUpdateHandle(ChangesType changesType, Order order)
         {
             //здесь сообщается истории об инициализации оредра или о его удалении (это касается только контр-ордеров)
-            if (changesType == ChangesType.CHANGES_TYPE_PARTITIAL) await _historyClient.WriteOrder(order, ChangesType.CHANGES_TYPE_PARTITIAL, _metadata, "Counter order initialized");
-            if (changesType == ChangesType.CHANGES_TYPE_DELETE) await _historyClient.WriteOrder(order, ChangesType.CHANGES_TYPE_DELETE, _metadata, "Counter order filled");
+            if (changesType == ChangesType.CHANGES_TYPE_PARTITIAL)
+            {
+                await _historyClient.WriteOrder(order, ChangesType.CHANGES_TYPE_PARTITIAL, Converters.ConvertMetadata(_metadata), "Counter order initialized");
+                Log.Information(
+                    "{@Where}: Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sended to history",
+                    "Former", order.Id, order.Price, order.Quantity, ChangesType.CHANGES_TYPE_PARTITIAL,
+                    "Counter order initialized");
+            }
+
+            if (changesType == ChangesType.CHANGES_TYPE_DELETE)
+            {
+                await _historyClient.WriteOrder(order, ChangesType.CHANGES_TYPE_DELETE, Converters.ConvertMetadata( _metadata), "Counter order filled");
+                Log.Information(
+                    "{@Where}: Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sended to history",
+                    "Former", order.Id, order.Price, order.Quantity, ChangesType.CHANGES_TYPE_DELETE,
+                    "Counter order filled");
+            }
         }
 
         private async Task BalanceHandleUpdate()
         {
             //если баланс изменился, необходимо отправить новый баланс в историю
             _oldTotalBalance = _storage.TotalBalance;
-            await _historyClient.WriteBalance(_storage.TotalBalance, _metadata);
+            await _historyClient.WriteBalance(_storage.TotalBalance, Converters.ConvertMetadata(_metadata));
+            Log.Information(
+                "{@Where}: Balance {@Balance} sended to history",
+                "Former", _storage.TotalBalance);
         }
 
         private async Task MarketPriceHandleUpdate()
@@ -110,20 +127,28 @@ namespace Former.Models
             {
                 var fairPrice = GetFairPrice(order.Signature.Type);
                 //отправляем запрос на изменение цены ордера по его id
-                var ammendOrderResponse = await _tradeMarketClient.AmendOrder(order.Id, fairPrice, _metadata);
-                var response = Converters.ConvertDefaultResponse(ammendOrderResponse.Response);
+                var amendOrderResponse = await _tradeMarketClient.AmendOrder(order.Id, fairPrice, Converters.ConvertMetadata(_metadata));
+                var response = Converters.ConvertDefaultResponse(amendOrderResponse.Response);
 
                 if (response.Code == ReplyCode.REPLY_CODE_SUCCEED)
                 {
                     //в случае положительного ответа обновляем его в своём списке и сообщаем об изменениях истории
                     UpdateOrderPrice(order, fairPrice);
-                    await _historyClient.WriteOrder(order, ChangesType.CHANGES_TYPE_UPDATE, _metadata, "Order amended");
+                    await _historyClient.WriteOrder(order, ChangesType.CHANGES_TYPE_UPDATE, Converters.ConvertMetadata(_metadata), "Order amended");
+                    Log.Information(
+                        "{@Where}: Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sended to history",
+                        "Former", order.Id, order.Price, order.Quantity, ChangesType.CHANGES_TYPE_UPDATE,
+                        "Order amended");
                 }
                 else if (response.Message.Contains("Invalid ordStatus"))
                 {
                     //при получении ошибки Invalid ordStatus мы понимаем, что пытаемся изменить ордер, которого нет на бирже, 
                     //но при этом он есть у нас в списках, поэтому мы удаляем его из своих списков и сообщаем об удалении истории
-                    await _historyClient.WriteOrder(order, ChangesType.CHANGES_TYPE_DELETE, _metadata, "");
+                    await _historyClient.WriteOrder(order, ChangesType.CHANGES_TYPE_DELETE, Converters.ConvertMetadata(_metadata), "");
+                    Log.Information(
+                        "{@Where}: Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sended to history",
+                        "Former", order.Id, order.Price, order.Quantity, ChangesType.CHANGES_TYPE_DELETE,
+                        "");
                     var removeResponse = _storage.RemoveOrder(key, _storage.MyOrders);
                     Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed cause cannot be amended {@ResponseCode} ", "Former", order.Id, order.Price, order.Quantity, order.Signature.Type, removeResponse ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
                 }
