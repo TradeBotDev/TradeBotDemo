@@ -1,5 +1,6 @@
 ﻿@model Website.Models.AccountDataModel
-@using Website.Components;
+@using Website.Components.Account;
+@using Website.Components.Purchase;
 
 @{
 	<!--Установка заголовков страницы.-->
@@ -8,7 +9,10 @@
 
 	<!--Если пользователь не имеет лицензию или о ней нет информации, появляется сообщение о необходимости покупки лицензии.-->
 	if (ViewBag.HaveLicense == null || !ViewBag.HaveLicense) {
-		<p class="text_message">Вы должны обладать лицензией на продукт, чтобы иметь возможность добавлять новые биржи в аккаунт. <a href="/purchase/buy">Купить</a></p>
+		<p class="text_message">
+			Вы должны обладать лицензией на продукт, чтобы иметь возможность добавлять новые биржи в аккаунт.
+            <component type="typeof(PurchaseLink)" render-mode="ServerPrerendered" param-SessionId="User.Identity.Name" />
+		</p>
 	}
 	else {
 		<component type="typeof(AddExchangeDialog)" render-mode="ServerPrerendered" param-SessionId="User.Identity.Name" param-AccountData="Model"/>
