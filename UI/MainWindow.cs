@@ -82,16 +82,6 @@ namespace UI
             }
         }
 
-        private void OnValidating(object sender, CancelEventArgs e)
-        {
-            if (string.IsNullOrEmpty(((TextBox)sender).Text))
-            {
-                e.Cancel = true;
-                ErrorProviderMainForm.SetError(((TextBox)sender), "The field must not be empty!");
-            }
-            else ErrorProviderMainForm.Clear();
-        }
-
         private ConfigurationJson InitConfigurationJson()
         {
             return new ConfigurationJson
@@ -277,17 +267,17 @@ namespace UI
             {
                 case ChangesType.Partitial:
                     InsertOrderToTable(0, incomingMessage.Status == OrderStatus.Open ? ActiveOrdersDataGridView : FilledOrdersDataGridView, incomingMessage);
-                    UpdateList(orderEvent.Order.Price.ToString(),orderEvent.Time,ref _orderList,zedGraph_1,lastDateOrder);
+                    //UpdateList(orderEvent.Order.Price.ToString(),orderEvent.Time,ref _orderList,zedGraph_1,lastDateOrder);
                     break;
                 case ChangesType.Insert:
                     InsertOrderToTable(0, ActiveOrdersDataGridView, incomingMessage);
                     WriteMessageToEventConsole(incomingMessage);
-                    UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1,lastDateOrder);
+                    //UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1,lastDateOrder);
                     break;
 
                 case ChangesType.Update:
                     UpdateTable(ActiveOrdersDataGridView, incomingMessage);
-                    UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1, lastDateOrder);
+                    //UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1, lastDateOrder);
                     break;
 
                 case ChangesType.Delete:
@@ -306,7 +296,7 @@ namespace UI
         private void HandleBalanceUpdate(PublishBalanceEvent balanceUpdate)
         {
             BalanceLabel.Text = $"{balanceUpdate.Balance.Value} {balanceUpdate.Balance.Currency}";
-            UpdateList(balanceUpdate.Balance.Value, balanceUpdate.Time, ref _balanceList, zedGraph,lastDateBalance);
+            //UpdateList(balanceUpdate.Balance.Value, balanceUpdate.Time, ref _balanceList, zedGraph,lastDateBalance);
         }
 
         private async void Start(string slotName)
@@ -357,7 +347,17 @@ namespace UI
         }
 
         #region EventHandlers
-        
+
+        private void OnValidating(object sender, CancelEventArgs e)
+        {
+            if (string.IsNullOrEmpty(((TextBox)sender).Text))
+            {
+                e.Cancel = true;
+                ErrorProviderMainForm.SetError(((TextBox)sender), "The field must not be empty!");
+            }
+            else ErrorProviderMainForm.Clear();
+        }
+
         private void OnValidatingTextBox(object sender, CancelEventArgs e)
         {
             if (!double.TryParse(((TextBox)sender).Text, out _))
@@ -544,72 +544,6 @@ namespace UI
             RemoveFromActiveSlots(ActiveSlotsDataGridView.Rows[^1].Cells[0].Value.ToString());
         }
 
-        #endregion
-
-        #region DrawGraphs
-        private void UpdateList(string b,Timestamp time,ref PointPairList list,ZedGraph.ZedGraphControl graphControl, DateTime ld)
-        {
-            DateTime tm = TimeZoneInfo.ConvertTime(time.ToDateTime(), TimeZoneInfo.Local);//.ToString("HH:mm:ss dd.MM.yyyy");
-            if (double.TryParse(b,out double value))
-            {
-                if (ld.Day == tm.Day)
-                {
-                    list.RemoveAt(list.Count-1);
-                }
-                list.Add(new XDate(tm),value);
-                ld = tm;
-                if(list.Count>40)
-                {
-                    list.RemoveAt(0);
-                }
-                if (graphControl == zedGraph)
-                {
-                    lastDateBalance = tm;
-                }
-                else
-                {
-                    lastDateOrder = tm;
-                }
-            }
-            DrawGraph(graphControl,list);
-        }
-        private void DrawGraph(ZedGraph.ZedGraphControl graphControl,PointPairList list)
-        {
-            GraphPane pane = graphControl.GraphPane;
-
-            pane.CurveList.Clear();
-
-            //DateTime startDate = new DateTime(2021, 07, 0);
-
-            //int daysCount = 40;
-
-            //Random rnd = new Random();
-
-            //for (int i = 0; i < daysCount; i++)
-            //{
-            //    DateTime currentDate = startDate.AddDays(i);
-            //
-            //    
-            //    list.Add(new XDate(currentDate), yValue);
-            //}
-
-            LineItem myCurve = pane.AddCurve("", list, System.Drawing.Color.Blue, SymbolType.Circle);
-
-            pane.XAxis.Type = AxisType.Date;
-
-            //pane.YAxis.Scale.Min = list.Last().Y-100;
-            //pane.YAxis.Scale.Max = list.Last().Y+100;
-
-            //pane.XAxis.Scale.Min = new XDate(list.Last().X-1);
-            //pane.XAxis.Scale.Max = new XDate(list.Last().X+1);
-
-            zedGraph.AxisChange();
-
-            zedGraph.Invalidate();
-        }
-
-        #endregion
-
         private void OurWebsiteLnkLbl_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "http://23.88.34.174:5008/" };
@@ -631,16 +565,79 @@ namespace UI
             OurWebsiteLnkLbl1.LinkVisited = true;
         }
 
-        private void TradeBotUi_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private async void button1_Click(object sender, EventArgs e)
+        private async void SetLicense_ButtonClick(object sender, EventArgs e)
         {
             if (_loggedIn) {
                 await _facadeClient.RegisterLicense();
             }
         }
+
+        #endregion
+
+        #region DrawGraphs
+        //private void UpdateList(string b,Timestamp time,ref PointPairList list,ZedGraph.ZedGraphControl graphControl, DateTime ld)
+        //{
+        //    DateTime tm = TimeZoneInfo.ConvertTime(time.ToDateTime(), TimeZoneInfo.Local);//.ToString("HH:mm:ss dd.MM.yyyy");
+        //    if (double.TryParse(b,out double value))
+        //    {
+        //        if (ld.Day == tm.Day)
+        //        {
+        //            list.RemoveAt(list.Count-1);
+        //        }
+        //        list.Add(new XDate(tm),value);
+        //        ld = tm;
+        //        if(list.Count>40)
+        //        {
+        //            list.RemoveAt(0);
+        //        }
+        //        if (graphControl == zedGraph)
+        //        {
+        //            lastDateBalance = tm;
+        //        }
+        //        else
+        //        {
+        //            lastDateOrder = tm;
+        //        }
+        //    }
+        //    DrawGraph(graphControl,list);
+        //}
+        //private void DrawGraph(ZedGraph.ZedGraphControl graphControl,PointPairList list)
+        //{
+        //    GraphPane pane = graphControl.GraphPane;
+
+        //    pane.CurveList.Clear();
+
+        //    //DateTime startDate = new DateTime(2021, 07, 0);
+
+        //    //int daysCount = 40;
+
+        //    //Random rnd = new Random();
+
+        //    //for (int i = 0; i < daysCount; i++)
+        //    //{
+        //    //    DateTime currentDate = startDate.AddDays(i);
+        //    //
+        //    //    
+        //    //    list.Add(new XDate(currentDate), yValue);
+        //    //}
+
+        //    LineItem myCurve = pane.AddCurve("", list, System.Drawing.Color.Blue, SymbolType.Circle);
+
+        //    pane.XAxis.Type = AxisType.Date;
+
+        //    //pane.YAxis.Scale.Min = list.Last().Y-100;
+        //    //pane.YAxis.Scale.Max = list.Last().Y+100;
+
+        //    //pane.XAxis.Scale.Min = new XDate(list.Last().X-1);
+        //    //pane.XAxis.Scale.Max = new XDate(list.Last().X+1);
+
+        //    zedGraph.AxisChange();
+
+        //    zedGraph.Invalidate();
+        //}
+
+        #endregion
+
+        
     }
 }

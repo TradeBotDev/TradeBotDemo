@@ -11,6 +11,13 @@ namespace Former.Models
         public AlgorithmInfo AlgorithmInfo;
     }
 
+    public class Metadata
+    {
+        public string Sessionid;
+        public string Trademarket;
+        public string Slot;
+    }
+
     public class AlgorithmInfo
     {
         public TimeSpan Interval;

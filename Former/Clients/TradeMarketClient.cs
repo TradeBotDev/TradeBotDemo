@@ -6,6 +6,7 @@ using Grpc.Core;
 using Grpc.Net.Client;
 using Serilog;
 using TradeBot.TradeMarket.TradeMarketService.v1;
+using Metadata = Grpc.Core.Metadata;
 
 namespace Former.Clients
 {
@@ -22,6 +23,9 @@ namespace Former.Clients
 
         internal delegate Task MarketPricesEvent(double bid, double ask);
         internal MarketPricesEvent UpdateMarketPrices;
+
+        internal delegate Task LotSizeEvent(int lotSize);
+        internal LotSizeEvent UpdateLotSize;
 
         private static int _retryDelay;
         private static string _connectionString;
@@ -87,7 +91,11 @@ namespace Former.Clients
             {
                 while (await call.ResponseStream.MoveNext(_token.Token))
                 {
-                    if (EventFilter(call.ResponseHeadersAsync.Result, meta)) await UpdateMarketPrices?.Invoke(call.ResponseStream.Current.BidPrice, call.ResponseStream.Current.AskPrice);
+                    if (EventFilter(call.ResponseHeadersAsync.Result, meta))
+                    {
+                        await UpdateMarketPrices?.Invoke(call.ResponseStream.Current.BidPrice, call.ResponseStream.Current.AskPrice);
+                        await UpdateLotSize?.Invoke(call.ResponseStream.Current.LotSize);
+                    }
                 }
             }
 

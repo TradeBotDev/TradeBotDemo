@@ -14,7 +14,7 @@ namespace Former
                 .WriteTo.Console()
                 .WriteTo.Seq("http://localhost:5341")
                 .CreateLogger();
-            AppDomain.CurrentDomain.UnhandledException += (o,e) => Log.Logger.Fatal(e.ExceptionObject as Exception, "Unhandled exceprion");
+            AppDomain.CurrentDomain.UnhandledException += (o,e) => Log.Logger.Fatal(e.ExceptionObject as Exception, "Unhandled exception");
             CreateHostBuilder(args).Build().Run();
         }
 

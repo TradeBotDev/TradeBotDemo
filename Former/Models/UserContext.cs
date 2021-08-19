@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Former.Clients;
-using Former.Models;
-using Grpc.Core;
 using Serilog;
 
 namespace Former.Models
@@ -10,12 +8,12 @@ namespace Former.Models
     public class UserContext
     {
         //Класс контекста пользователя
-        internal string SessionId => Meta.GetValue("sessionid");
-        internal string TradeMarket => Meta.GetValue("trademarket");
-        internal string Slot => Meta.GetValue("slot");
+        internal string SessionId => Meta.Sessionid;
+        internal string TradeMarket => Meta.Trademarket;
+        internal string Slot => Meta.Slot;
         private readonly Storage _storage;
         private readonly TradeMarketClient _tradeMarketClient;
-        private readonly Models.Former _former;
+        private readonly Former _former;
         private readonly UpdateHandlers _updateHandlers;
         private readonly HistoryClient _historyClient;
         private bool _isSubscribesAttached;
@@ -26,9 +24,9 @@ namespace Former.Models
         {
             Meta = new Metadata
             {
-                { "sessionid", sessionId },
-                { "trademarket", tradeMarket },
-                { "slot", slot }
+                Sessionid = sessionId,
+                Trademarket = tradeMarket,
+                Slot = slot
             };
             if (!int.TryParse(Environment.GetEnvironmentVariable("RETRY_DELAY"), out var retryDelay)) retryDelay = 10000;
                 
@@ -39,7 +37,7 @@ namespace Former.Models
             _tradeMarketClient = new TradeMarketClient();
 
             _storage = new Storage();
-            _former = new Models.Former(_storage, null, _tradeMarketClient, Meta, _historyClient);
+            _former = new Former(_storage, null, _tradeMarketClient, Meta, _historyClient);
             _updateHandlers = new UpdateHandlers(_storage, null, _tradeMarketClient, Meta, _historyClient);
         }
 
@@ -55,8 +53,9 @@ namespace Former.Models
             _tradeMarketClient.UpdateBalance += _storage.UpdateBalance;
             _tradeMarketClient.UpdateMyOrders += _storage.UpdateMyOrderList;
             _tradeMarketClient.UpdatePosition += _storage.UpdatePosition;
+            _tradeMarketClient.UpdateLotSize += _storage.UpdateLotSize;
             //запускаем подписки на сервис с данными
-            _tradeMarketClient.StartObserving(Meta);
+            _tradeMarketClient.StartObserving(Converters.ConvertMetadata(Meta));
             _isSubscribesAttached = true;
             Log.Information("{@Where}: Former has been started!", "Former");
         }
@@ -75,6 +74,7 @@ namespace Former.Models
             _tradeMarketClient.UpdateBalance -= _storage.UpdateBalance;
             _tradeMarketClient.UpdateMyOrders -= _storage.UpdateMyOrderList;
             _tradeMarketClient.UpdatePosition -= _storage.UpdatePosition;
+            _tradeMarketClient.UpdateLotSize -= _storage.UpdateLotSize;
             //очищаем хранилище
             _storage.ClearStorage();
             _isSubscribesAttached = false;
