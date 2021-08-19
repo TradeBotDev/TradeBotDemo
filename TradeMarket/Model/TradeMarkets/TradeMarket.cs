@@ -63,23 +63,24 @@ namespace TradeMarket.Model.TradeMarkets
                 return publisher;
             });
         }
-        public async Task SubscribeTo<T>(BitmexWebsocketClient client,IPublisher<T> publisher,EventHandler<IPublisher<T>.ChangedEventArgs> handler,IContext context,CancellationToken token)
+        public async Task<List<T>> SubscribeTo<T>(BitmexWebsocketClient client,IPublisher<T> publisher,EventHandler<IPublisher<T>.ChangedEventArgs> handler,IContext context,CancellationToken token)
         {
             if(publisher is null)
             {
                 throw new ArgumentException($"Publisher {nameof(publisher)} was null.");
             }
             publisher.Changed += handler;
+            return publisher.Cache;
         }
 
-        public async Task SubscribeTo<T>(BitmexWebsocketClient client,IDictionary<IContext,IPublisher<T>> publisher, EventHandler<IPublisher<T>.ChangedEventArgs> handler, IContext context, IPublisherFactory.Create<T> create,CancellationToken token)
+        public async Task<List<T>> SubscribeTo<T>(BitmexWebsocketClient client,IDictionary<IContext,IPublisher<T>> publisher, EventHandler<IPublisher<T>.ChangedEventArgs> handler, IContext context, IPublisherFactory.Create<T> create,CancellationToken token)
         {
             if(publisher.ContainsKey(context) == false)
             {
                 publisher[context] = await CreatePublisher(client, context, token, create);
                 await publisher[context].Start();
             }
-            await SubscribeTo(client, publisher[context],handler, context, token);
+            return await SubscribeTo(client, publisher[context],handler, context, token);
         }
 
         public IDictionary<IContext, IPublisher<Wallet>> WalletPublishers { get; internal set; } = new ConcurrentDictionary<IContext, IPublisher<Wallet>>();
@@ -91,14 +92,14 @@ namespace TradeMarket.Model.TradeMarkets
 
         #region Subscribe Methods
         #region Common Subscriptions
-        public abstract Task SubscribeToBook25(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, IContext context, CancellationToken token);
-        public abstract Task SubscribeToInstruments(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler, IContext context, CancellationToken token);
+        public abstract Task<List<BookLevel>> SubscribeToBook25(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, IContext context, CancellationToken token);
+        public abstract Task<List<Instrument>> SubscribeToInstruments(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler, IContext context, CancellationToken token);
         #endregion
         #region User Subscriptions
-        public abstract Task SubscribeToUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, UserContext context, CancellationToken token);
-        public abstract Task SubscribeToUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, UserContext context, CancellationToken token);
-        public abstract Task SubscribeToUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, UserContext context, CancellationToken token);
-        public abstract Task SubscribeToBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, UserContext context, CancellationToken token);
+        public abstract Task<List<Position>> SubscribeToUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, UserContext context, CancellationToken token);
+        public abstract Task<List<Margin>> SubscribeToUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, UserContext context, CancellationToken token);
+        public abstract Task<List<Order>> SubscribeToUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, UserContext context, CancellationToken token);
+        public abstract Task<List<Wallet>> SubscribeToBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, UserContext context, CancellationToken token);
         #endregion
         #endregion
 
@@ -140,7 +141,7 @@ namespace TradeMarket.Model.TradeMarkets
 
         public abstract Task<BitmexResfulResponse<Order>> PlaceOrder(double quontity, double price,IContext context, CancellationToken token);
 
-        public abstract Task<BitmexResfulResponse<Order>> DeleteOrder(string id, IContext context, CancellationToken token);
+        public abstract Task<BitmexResfulResponse<Order[]>> DeleteOrder(string id, IContext context, CancellationToken token);
 
         public abstract Task<BitmexResfulResponse<Order>> AmmendOrder(string id,double? price,long? Quantity,long? LeavesQuantity, IContext context, CancellationToken token);
         

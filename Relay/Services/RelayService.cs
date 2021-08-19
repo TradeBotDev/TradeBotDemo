@@ -21,8 +21,9 @@ namespace Relay.Services
         private static AlgorithmClient _algorithmClient = null;
         private static TradeMarketClient _tradeMarketClient = null;
         private static FormerClient _formerClient=null;//добавил null
+        private static MetaComparer comparer = new MetaComparer();
 
-        private static IDictionary<Metadata, UserContext> contexts = new Dictionary<Metadata, UserContext>(new MetaComparer());
+        private static IDictionary<Metadata, UserContext> contexts = new Dictionary<Metadata, UserContext>(comparer);
 
         private class MetaComparer : IEqualityComparer<Metadata>
         {
@@ -36,12 +37,15 @@ namespace Relay.Services
                 {
                     return false;
                 }
-                return x.Get("sessionid") == y.Get("sessionid") && x.Get("slot") == y.Get("slot") && x.Get("trademarket") == y.Get("trademarket");
+                var b1 = x.GetValue("sessionid") == y.GetValue("sessionid");
+                var b2 = x.GetValue("slot") == y.GetValue("slot");
+                var b3 = x.GetValue("trademarket") == y.GetValue("trademarket");
+                return  b1 && b2 && b3;
             }
 
             public int GetHashCode([DisallowNull] Metadata obj)
             {
-                return obj.GetHashCode();
+                return 1;
             }
         }
 

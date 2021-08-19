@@ -203,7 +203,7 @@ namespace TradeMarket.Services
             };
         }
 
-        public static TradeBot.TradeMarket.TradeMarketService.v1.DeleteOrderResponse ConvertDeleteOrderResponse(BitmexResfulResponse<Order> response)
+        public static TradeBot.TradeMarket.TradeMarketService.v1.DeleteOrderResponse ConvertDeleteOrderResponse(BitmexResfulResponse<Order[]> response)
         {
             return new()
             {
@@ -227,6 +227,31 @@ namespace TradeMarket.Services
                 {
                     Code = ReplyCode.Failure,
                     Message = response.Message.OrdRejReason
+                };
+            }
+            return new DefaultResponse()
+            {
+                Code = ReplyCode.Succeed,
+                Message = ""
+            };
+        }
+
+        public static DefaultResponse ResponseFromOrder(BitmexResfulResponse<Order[]> response)
+        {
+            if (response.Error is not null)
+            {
+                return new DefaultResponse()
+                {
+                    Code = ReplyCode.Failure,
+                    Message = response.Error.Message
+                };
+            }
+            if (!string.IsNullOrEmpty(response.Message[0].OrdRejReason))
+            {
+                return new DefaultResponse()
+                {
+                    Code = ReplyCode.Failure,
+                    Message = response.Message[0].OrdRejReason
                 };
             }
             return new DefaultResponse()

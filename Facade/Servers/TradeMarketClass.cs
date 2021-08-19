@@ -27,7 +27,6 @@ namespace Facade
             var response = Client.SubscribeBalance(new TradeBot.TradeMarket.TradeMarketService.v1.SubscribeBalanceRequest { Request = request.Request });
             await Generalization.StreamReadWrite(request, responseStream, response, context, methodName);
         }
-
         public async Task TM_Slots(Ref.SlotsRequest request, IServerStreamWriter<Ref.SlotsResponse> responseStream, ServerCallContext context,string methodName)
         {
             var response = Client.Slots(new TradeBot.TradeMarket.TradeMarketService.v1.SlotsRequest { });
@@ -38,7 +37,6 @@ namespace Facade
             var response = Client.SubscribeLogs(new TradeBot.TradeMarket.TradeMarketService.v1.SubscribeLogsRequest { Request = request.R });
             await Generalization.StreamReadWrite(request, responseStream, response, context, methodName);
         }
-
         public async Task<Ref.AuthenticateTokenResponse> TM_AuthenticateToken(Ref.AuthenticateTokenRequest request, string methodName)
         {
             TradeBot.TradeMarket.TradeMarketService.v1.AuthenticateTokenResponse response = null;

@@ -1,5 +1,6 @@
 ﻿using Google.Protobuf.WellKnownTypes;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -79,16 +80,6 @@ namespace UI
                 if (fullName != null && fullName.Contains("TextBox"))
                     ((TextBox)control).Validating += OnValidating;
             }
-        }
-
-        private void OnValidating(object sender, CancelEventArgs e)
-        {
-            if (string.IsNullOrEmpty(((TextBox)sender).Text))
-            {
-                e.Cancel = true;
-                ErrorProviderMainForm.SetError(((TextBox)sender), "The field must not be empty!");
-            }
-            else ErrorProviderMainForm.Clear();
         }
 
         private ConfigurationJson InitConfigurationJson()
@@ -219,11 +210,6 @@ namespace UI
             return true;
         }
 
-        private void AddOrderToTable(DataGridView table, IncomingMessage message)
-        {
-            table.Rows.Add(message.SlotName, message.Qty, message.Price, message.Type, message.Time, message.Id);
-        }
-
         private void InsertOrderToTable(int index, DataGridView table, IncomingMessage message)
         {
             table.Rows.Insert(index, message.SlotName, message.Qty, message.Price, message.Type, message.Time, message.Id);
@@ -280,22 +266,22 @@ namespace UI
             switch (orderEvent.ChangesType)
             {
                 case ChangesType.Partitial:
-                    AddOrderToTable(incomingMessage.Status == OrderStatus.Open ? ActiveOrdersDataGridView : FilledOrdersDataGridView, incomingMessage);
-                    //UpdateList(orderEvent.Order.Price.ToString(),orderEvent.Time,ref _orderList,zedGraph_1,lastDateOrder);
+                    InsertOrderToTable(0, incomingMessage.Status == OrderStatus.Open ? ActiveOrdersDataGridView : FilledOrdersDataGridView, incomingMessage);
+                    UpdateList(orderEvent.Order.Price.ToString(),orderEvent.Time,ref _orderList,zedGraph_1,lastDateOrder);
                     break;
                 case ChangesType.Insert:
-                    AddOrderToTable(ActiveOrdersDataGridView, incomingMessage);
+                    InsertOrderToTable(0, ActiveOrdersDataGridView, incomingMessage);
                     WriteMessageToEventConsole(incomingMessage);
-                    //UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1,lastDateOrder);
+                    UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1,lastDateOrder);
                     break;
 
                 case ChangesType.Update:
                     UpdateTable(ActiveOrdersDataGridView, incomingMessage);
-                    //UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1, lastDateOrder);
+                    UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1, lastDateOrder);
                     break;
 
                 case ChangesType.Delete:
-                    AddOrderToTable(FilledOrdersDataGridView, incomingMessage);
+                    InsertOrderToTable(0, FilledOrdersDataGridView, incomingMessage);
                     DeleteFromTable(ActiveOrdersDataGridView, incomingMessage.Id);
                     WriteMessageToEventConsole(incomingMessage);
                     break;
@@ -310,7 +296,7 @@ namespace UI
         private void HandleBalanceUpdate(PublishBalanceEvent balanceUpdate)
         {
             BalanceLabel.Text = $"{balanceUpdate.Balance.Value} {balanceUpdate.Balance.Currency}";
-            //UpdateList(balanceUpdate.Balance.Value, balanceUpdate.Time, ref _balanceList, zedGraph,lastDateBalance);
+            UpdateList(balanceUpdate.Balance.Value, balanceUpdate.Time, ref _balanceList, zedGraph,lastDateBalance);
         }
 
         private async void Start(string slotName)
@@ -361,7 +347,17 @@ namespace UI
         }
 
         #region EventHandlers
-        
+
+        private void OnValidating(object sender, CancelEventArgs e)
+        {
+            if (string.IsNullOrEmpty(((TextBox)sender).Text))
+            {
+                e.Cancel = true;
+                ErrorProviderMainForm.SetError(((TextBox)sender), "The field must not be empty!");
+            }
+            else ErrorProviderMainForm.Clear();
+        }
+
         private void OnValidatingTextBox(object sender, CancelEventArgs e)
         {
             if (!double.TryParse(((TextBox)sender).Text, out _))
@@ -480,7 +476,6 @@ namespace UI
                 MessageBox.Show(@"Account with this username and password was not found.",@"Account not found");
                 return;
             }
-            //cyka
             SessionIDLbl.Text = sessionId.Message;
             LoggedGroupBox.Visible = true;
             LoggedGroupBox.Enabled = true;
@@ -549,6 +544,34 @@ namespace UI
             RemoveFromActiveSlots(ActiveSlotsDataGridView.Rows[^1].Cells[0].Value.ToString());
         }
 
+        private void OurWebsiteLnkLbl_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "http://23.88.34.174:5008/" };
+            Process.Start(parameter);
+            OurWebsiteLnkLbl1.LinkVisited = true;
+        }
+
+        private void OurWebsiteLnkLbl1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "http://23.88.34.174:5008/" };
+            Process.Start(parameter);
+            OurWebsiteLnkLbl1.LinkVisited = true;
+        }
+
+        private void BitmexWebsiteLnkLbl_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "https://testnet.bitmex.com/app/trade/XBTUSD" };
+            Process.Start(parameter);
+            OurWebsiteLnkLbl1.LinkVisited = true;
+        }
+
+        private async void SetLicense_ButtonClick(object sender, EventArgs e)
+        {
+            if (_loggedIn) {
+                await _facadeClient.RegisterLicense();
+            }
+        }
+
         #endregion
 
         #region DrawGraphs
@@ -602,11 +625,11 @@ namespace UI
 
             pane.XAxis.Type = AxisType.Date;
 
-            pane.YAxis.Scale.Min = list.Last().Y-100;
-            pane.YAxis.Scale.Max = list.Last().Y+100;
+            //pane.YAxis.Scale.Min = list.Last().Y-100;
+            //pane.YAxis.Scale.Max = list.Last().Y+100;
 
-            pane.XAxis.Scale.Min = new XDate(list.Last().X-1);
-            pane.XAxis.Scale.Max = new XDate(list.Last().X+1);
+            //pane.XAxis.Scale.Min = new XDate(list.Last().X-1);
+            //pane.XAxis.Scale.Max = new XDate(list.Last().X+1);
 
             zedGraph.AxisChange();
 
@@ -615,25 +638,6 @@ namespace UI
 
         #endregion
 
-        private void LinkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "http://23.88.34.174:5008/" };
-            Process.Start(parameter);
-            LinkLabel1.LinkVisited = true;
-        }
-
-        private void LinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "http://23.88.34.174:5008/" };
-            Process.Start(parameter);
-            LinkLabel1.LinkVisited = true;
-        }
-
-        private void linkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "https://testnet.bitmex.com/app/trade/XBTUSD" };
-            Process.Start(parameter);
-            LinkLabel1.LinkVisited = true;
-        }
+        
     }
 }

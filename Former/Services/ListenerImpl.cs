@@ -1,6 +1,6 @@
 using System.Linq;
 using System.Threading.Tasks;
-using Former.Model;
+using Former.Models;
 using Grpc.Core;
 using TradeBot.Former.FormerService.v1;
 

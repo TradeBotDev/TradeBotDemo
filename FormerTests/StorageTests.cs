@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Former.Clients;
-using Former.Model;
+using Former.Models;
 using Xunit;
 
 namespace FormerTests

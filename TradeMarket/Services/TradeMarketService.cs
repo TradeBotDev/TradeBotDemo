@@ -17,6 +17,7 @@ using SubscribeBalanceResponse = TradeBot.TradeMarket.TradeMarketService.v1.Subs
 using Margin = Bitmex.Client.Websocket.Responses.Margins.Margin;
 using Bitmex.Client.Websocket.Responses.Positions;
 using Bitmex.Client.Websocket.Responses.Orders;
+using System.Collections.Generic;
 
 namespace TradeMarket.Services
 {
@@ -136,7 +137,7 @@ namespace TradeMarket.Services
             }
         }
 
-        public async Task SubscribeToUserTopic<TRequest, TResponse, TModel>(Func<EventHandler<IPublisher<TModel>.ChangedEventArgs>, CancellationToken, Task> subscribe, Func<EventHandler<IPublisher<TModel>.ChangedEventArgs>, Task> unsubscribe, EventHandler<IPublisher<TModel>.ChangedEventArgs> handler, TRequest request, IServerStreamWriter<TResponse> responseStream, ServerCallContext context)
+        public async Task SubscribeToUserTopic<TRequest, TResponse, TModel>(Func<EventHandler<IPublisher<TModel>.ChangedEventArgs>, CancellationToken, Task<List<TModel>>> subscribe, Func<EventHandler<IPublisher<TModel>.ChangedEventArgs>, Task> unsubscribe, EventHandler<IPublisher<TModel>.ChangedEventArgs> handler, TRequest request, IServerStreamWriter<TResponse> responseStream, ServerCallContext context)
         {
             try
             {
@@ -146,12 +147,16 @@ namespace TradeMarket.Services
                 {
                     if (entry is not null)
                     {
-                        Log.Information("Service copying entries to response {@Entry}",entry);
                         context.ResponseTrailers.Add(entry);
                     }
                 }
 
-                await subscribe(handler, context.CancellationToken);
+                //подписываемся на обновления
+                var cache = await subscribe(handler, context.CancellationToken);
+                    
+                //кидаем данные из кэша
+                Parallel.ForEach(cache, data => handler(this, new(data, Bitmex.Client.Websocket.Responses.BitmexAction.Partial)));
+               
                 //ожидаем пока клиенты отменят подписку
                 await AwaitCancellation(context.CancellationToken);
                 context.Status = Status.DefaultSuccess;

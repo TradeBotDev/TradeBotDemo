@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Former.Model;
+using Former.Models;
 using Grpc.Core;
 using Grpc.Net.Client;
 using Serilog;
@@ -199,7 +199,6 @@ namespace Former.Clients
                 {
                     OrderId = id
                 }, metadata);
-                Log.Information("Deleting was {0} {1}", response.Response.Code, response.Response.Message);
             }
 
             await ConnectionTester(DeleteOrderFunc);

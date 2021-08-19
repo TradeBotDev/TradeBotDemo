@@ -17,7 +17,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         {
            await Task.Run(() =>
            {
-               Log.Information("Recieved Auth Response with code : {@Code} for operation {@op}", response.Success,response.Op);
+               Log.Information("{ServiceName} Recieved Auth Response with code : {@Code} for operation {@op}", response.Success,response.Op);
                e?.Invoke(typeof(AuthenticationPublisher), new(response.Success, BitmexAction.Undefined));
            });
         };
@@ -47,6 +47,14 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         {
             Log.Information("Sending Auth Request for @{key} : {@secret}", apiKey, apiSecret);
             await base.SubscribeAsync(new AuthenticationRequest(apiKey,apiSecret), _stream, token);
+        }
+
+        public override void AddModelToCache(AuthenticationResponse response)
+        {
+            lock (base.locker)
+            {
+                _cache.Add(response.Success);
+            }
         }
     }
 }
