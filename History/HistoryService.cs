@@ -64,7 +64,7 @@ namespace History
                             db.SaveChanges();
                         }
                         Log.Information("{@Where}: Recorded a change of order {@Order}", "History", ow.OrderIdOnTM);
-                        Log.Information("{@Where}: Order change: " + oc.ChangesType, "History");
+                        Log.Information("{@Where}: Order change: " + oc.Message, "History");
                     }
                     break;
                 default:
