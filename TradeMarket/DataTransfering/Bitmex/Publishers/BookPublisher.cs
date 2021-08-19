@@ -1,10 +1,12 @@
 ﻿using Bitmex.Client.Websocket.Client;
 using Bitmex.Client.Websocket.Requests;
+using Bitmex.Client.Websocket.Responses;
 using Bitmex.Client.Websocket.Responses.Books;
 using Serilog;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -35,7 +37,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         private static RedisClient _redisClient;
 
-        public BookPublisher(BitmexWebsocketClient client,IObservable<BookResponse> stream,IConnectionMultiplexer multiplexer, SubscribeRequestBase bookSubscribeRequest, CancellationToken token) 
+        public BookPublisher(BitmexWebsocketClient client, IObservable<BookResponse> stream, IConnectionMultiplexer multiplexer, SubscribeRequestBase bookSubscribeRequest, CancellationToken token)
             : base(client, _OnBookUpdated)
         {
             _redisClient = new RedisClient(multiplexer);
@@ -44,23 +46,58 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             this._token = token;
         }
 
+        private BookLevel FillCacheFiled(BookLevel oldField, BookLevel newField)
+        {
+            newField.Price = newField.Price is null || newField.Price == 0 ? oldField.Price : newField.Price;
+            newField.Size = newField.Size is null || newField.Size == 0 ? oldField.Size : newField.Size;
+            return newField;
+        }
+
+        internal class BookComparer : IEqualityComparer<BookLevel>
+        {
+
+            public bool Equals(BookLevel x, BookLevel y)
+            {
+                return x.Id == y.Id;
+            }
+
+            public int GetHashCode([DisallowNull] BookLevel obj)
+            {
+                return obj.GetHashCode();
+            }
+        }
+
         public override void AddModelToCache(BookResponse response)
         {
             lock (locker)
             {
-                foreach(var el in _cache)
+                switch (response.Action)
                 {
-                    var model = _cache.FirstOrDefault(x => x.Id == el.Id);
-                    if (model is not null)
-                    {
-                        _cache.Remove(model);
-                    }
-                    _cache.Add(el);
-                });
+                    case BitmexAction.Delete:
+                        {
+                            _cache.RemoveAll(el => Enumerable.Contains(response.Data, el, new BookComparer()));
+                            break;
+                        }
+                    default:
+                        {
+                            var changedList =
+                                _cache
+                                .FindAll(x => x.Id == response.Data.FirstOrDefault(y => x.Id == y.Id)?.Id)
+                                .Select(oldField =>
+                                    {
+                                        var newField = response.Data.First(data => data.Id == oldField.Id);
+                                        return FillCacheFiled(oldField, newField);
+                                    });
+                            _cache.RemoveAll(x => x.Id == response.Data.FirstOrDefault(y => x.Id == y.Id)?.Id);
+                            _cache.AddRange(changedList);
+                            break;
+                        }
+                }
+
             }
         }
 
-        protected async Task SubscribeAsync(SubscribeRequestBase bookSubscribeRequest,CancellationToken token) 
+        protected async Task SubscribeAsync(SubscribeRequestBase bookSubscribeRequest, CancellationToken token)
         {
             await base.SubscribeAsync(bookSubscribeRequest, _stream, token);
         }
