@@ -113,6 +113,7 @@ namespace UI
             this.SignInGroupBox = new System.Windows.Forms.GroupBox();
             this.panel5 = new System.Windows.Forms.Panel();
             this.LoggedGroupBox = new System.Windows.Forms.GroupBox();
+            this.SetLicenseBtn = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.OurWebsiteLnkLbl1 = new System.Windows.Forms.LinkLabel();
             this.SessionIDLbl = new System.Windows.Forms.Label();
@@ -126,7 +127,6 @@ namespace UI
             this.LeftPanel = new System.Windows.Forms.Panel();
             this.RightPanel = new System.Windows.Forms.Panel();
             this.ErrorProviderSignUp = new System.Windows.Forms.ErrorProvider(this.components);
-            this.button1 = new System.Windows.Forms.Button();
             this.Tabs.SuspendLayout();
             this.LogsPage.SuspendLayout();
             this.GraphicsPage.SuspendLayout();
@@ -1156,6 +1156,7 @@ namespace UI
             // 
             this.LoggedGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.LoggedGroupBox.Controls.Add(this.SetLicenseBtn);
             this.LoggedGroupBox.Controls.Add(this.label3);
             this.LoggedGroupBox.Controls.Add(this.OurWebsiteLnkLbl1);
             this.LoggedGroupBox.Controls.Add(this.SessionIDLbl);
@@ -1175,10 +1176,21 @@ namespace UI
             this.LoggedGroupBox.Text = "Signed in as ";
             this.LoggedGroupBox.Visible = false;
             // 
+            // SetLicenseBtn
+            // 
+            this.SetLicenseBtn.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.SetLicenseBtn.Location = new System.Drawing.Point(673, 260);
+            this.SetLicenseBtn.Name = "SetLicenseBtn";
+            this.SetLicenseBtn.Size = new System.Drawing.Size(84, 61);
+            this.SetLicenseBtn.TabIndex = 28;
+            this.SetLicenseBtn.Text = "Set license";
+            this.SetLicenseBtn.UseVisualStyleBackColor = true;
+            this.SetLicenseBtn.Click += new System.EventHandler(this.SetLicense_ButtonClick);
+            // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(566, 272);
+            this.label3.Location = new System.Drawing.Point(497, 272);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(93, 20);
             this.label3.TabIndex = 30;
@@ -1187,7 +1199,7 @@ namespace UI
             // OurWebsiteLnkLbl1
             // 
             this.OurWebsiteLnkLbl1.AutoSize = true;
-            this.OurWebsiteLnkLbl1.Location = new System.Drawing.Point(566, 295);
+            this.OurWebsiteLnkLbl1.Location = new System.Drawing.Point(497, 295);
             this.OurWebsiteLnkLbl1.Name = "OurWebsiteLnkLbl1";
             this.OurWebsiteLnkLbl1.Size = new System.Drawing.Size(73, 20);
             this.OurWebsiteLnkLbl1.TabIndex = 29;
@@ -1265,7 +1277,6 @@ namespace UI
             // 
             // LeftPanel
             // 
-            this.LeftPanel.Controls.Add(this.button1);
             this.LeftPanel.Controls.Add(this.ShowMainMenu);
             this.LeftPanel.Controls.Add(this.ShowSignUpPanel);
             this.LeftPanel.Controls.Add(this.ShowSignInPanel);
@@ -1287,16 +1298,6 @@ namespace UI
             // 
             this.ErrorProviderSignUp.ContainerControl = this;
             // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(31, 203);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(94, 29);
-            this.button1.TabIndex = 28;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
             // TradeBotUi
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -1313,7 +1314,6 @@ namespace UI
             this.Name = "TradeBotUi";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "TradeBot";
-            this.Load += new System.EventHandler(this.TradeBotUi_Load);
             this.Tabs.ResumeLayout(false);
             this.LogsPage.ResumeLayout(false);
             this.GraphicsPage.ResumeLayout(false);
@@ -1435,7 +1435,7 @@ namespace UI
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.LinkLabel BitmexWebsiteLnkLbl;
         private System.Windows.Forms.ErrorProvider ErrorProviderSignUp;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button SetLicenseBtn;
     }
 }
 

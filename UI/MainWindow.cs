@@ -82,16 +82,6 @@ namespace UI
             }
         }
 
-        private void OnValidating(object sender, CancelEventArgs e)
-        {
-            if (string.IsNullOrEmpty(((TextBox)sender).Text))
-            {
-                e.Cancel = true;
-                ErrorProviderMainForm.SetError(((TextBox)sender), "The field must not be empty!");
-            }
-            else ErrorProviderMainForm.Clear();
-        }
-
         private ConfigurationJson InitConfigurationJson()
         {
             return new ConfigurationJson
@@ -357,7 +347,17 @@ namespace UI
         }
 
         #region EventHandlers
-        
+
+        private void OnValidating(object sender, CancelEventArgs e)
+        {
+            if (string.IsNullOrEmpty(((TextBox)sender).Text))
+            {
+                e.Cancel = true;
+                ErrorProviderMainForm.SetError(((TextBox)sender), "The field must not be empty!");
+            }
+            else ErrorProviderMainForm.Clear();
+        }
+
         private void OnValidatingTextBox(object sender, CancelEventArgs e)
         {
             if (!double.TryParse(((TextBox)sender).Text, out _))
@@ -544,6 +544,34 @@ namespace UI
             RemoveFromActiveSlots(ActiveSlotsDataGridView.Rows[^1].Cells[0].Value.ToString());
         }
 
+        private void OurWebsiteLnkLbl_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "http://23.88.34.174:5008/" };
+            Process.Start(parameter);
+            OurWebsiteLnkLbl1.LinkVisited = true;
+        }
+
+        private void OurWebsiteLnkLbl1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "http://23.88.34.174:5008/" };
+            Process.Start(parameter);
+            OurWebsiteLnkLbl1.LinkVisited = true;
+        }
+
+        private void BitmexWebsiteLnkLbl_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "https://testnet.bitmex.com/app/trade/XBTUSD" };
+            Process.Start(parameter);
+            OurWebsiteLnkLbl1.LinkVisited = true;
+        }
+
+        private async void SetLicense_ButtonClick(object sender, EventArgs e)
+        {
+            if (_loggedIn) {
+                await _facadeClient.RegisterLicense();
+            }
+        }
+
         #endregion
 
         #region DrawGraphs
@@ -610,37 +638,6 @@ namespace UI
 
         #endregion
 
-        private void OurWebsiteLnkLbl_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "http://23.88.34.174:5008/" };
-            Process.Start(parameter);
-            OurWebsiteLnkLbl1.LinkVisited = true;
-        }
-
-        private void OurWebsiteLnkLbl1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "http://23.88.34.174:5008/" };
-            Process.Start(parameter);
-            OurWebsiteLnkLbl1.LinkVisited = true;
-        }
-
-        private void BitmexWebsiteLnkLbl_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "https://testnet.bitmex.com/app/trade/XBTUSD" };
-            Process.Start(parameter);
-            OurWebsiteLnkLbl1.LinkVisited = true;
-        }
-
-        private void TradeBotUi_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private async void button1_Click(object sender, EventArgs e)
-        {
-            if (_loggedIn) {
-                await _facadeClient.RegisterLicense();
-            }
-        }
+        
     }
 }
