@@ -7,28 +7,34 @@ using System.Linq;
 using System.Threading.Tasks;
 using Auth = TradeBot.Account.AccountService.v1.Account.AccountClient;
 using Exch = TradeBot.Account.AccountService.v1.ExchangeAccess.ExchangeAccessClient;
+using Lic = TradeBot.Account.AccountService.v1.License.LicenseClient;
 using Ref = TradeBot.Facade.FacadeService.v1;
 
 namespace Facade
 {
     public class AutorisationClass
     {
+        #region Initialization
         private GrpcChannel _channel => GrpcChannel.ForAddress(Environment.GetEnvironmentVariable("ACCOUNT_CONNECTION_STRING"));
         private GrpcChannel Channel { get => _channel; }
-
         private Auth _clientAccount => new Auth(Channel);
-        public Auth ClientAccount
-
+        private Auth ClientAccount
         {
             get => _clientAccount;
         }
-
         private Exch _clientExc => new Exch(Channel);
-        public Exch ClientExc
-
+        private Exch ClientExc
         {
             get => _clientExc;
         }
+        private Lic _clientLic => new Lic(Channel);
+        private Lic ClientLic
+        {
+            get => _clientLic;
+        }
+        #endregion
+
+        #region Account
         public async Task<Ref.LoginReply> Account_Login(Ref.LoginRequest request, string methodName)
         {
             TradeBot.Account.AccountService.v1.LoginResponse response = null;
@@ -116,6 +122,44 @@ namespace Facade
             }
             return await Generalization.ReturnResponse(accountResponse, methodName);
         }
+        public async Task<Ref.AccountDataResponse> Account_AccountData(Ref.AccountDataRequest request, ServerCallContext context, string methodName)
+        {
+            TradeBot.Account.AccountService.v1.AccountDataResponse response = null;
+            async Task<TradeBot.Account.AccountService.v1.AccountDataResponse> task()
+            {
+                response = await ClientAccount.AccountDataAsync(new TradeBot.Account.AccountService.v1.AccountDataRequest
+                {
+                    SessionId = request.SessionId
+                }, context.RequestHeaders);
+                await Generalization.ConnectionTester(task, methodName, request);
+                return response;
+            }
+            var accountDataResponse = new Ref.AccountDataResponse
+            {
+                Result = (Ref.AccountActionCode)response.Result,
+                Message = response.Message,
+                CurrentAccount = new Ref.AccountInfo
+                {
+                    AccountId = response.CurrentAccount.AccountId,
+                    Email = response.CurrentAccount.Email
+                }
+            };
+            foreach (var item in response.CurrentAccount.Exchanges)
+            {
+                accountDataResponse.CurrentAccount.Exchanges.Add(new Ref.ExchangeAccessInfo
+                {
+                    Secret = item.Secret,
+                    Code = (Ref.ExchangeCode)item.Code,
+                    ExchangeAccessId = item.ExchangeAccessId,
+                    Name = item.Name,
+                    Token = item.Token
+                });
+            }
+            return await Generalization.ReturnResponse(accountDataResponse, methodName);
+        }
+        #endregion
+
+        #region Excenge
         public async Task<Ref.AddExchangeAccessReply> Account_AddExcengeAccess(Ref.AddExchangeAccessRequest request, ServerCallContext context, string methodName)
         {
             TradeBot.Account.AccountService.v1.AddExchangeAccessResponse response = null;
@@ -176,10 +220,44 @@ namespace Facade
                 return response;
             }
             await Generalization.ConnectionTester(task, methodName, request);
-            return await Generalization.ReturnResponse(new TradeBot.Facade.FacadeService.v1.ExchangeBySessionReply { Message = response.Message, Result = (Ref.ActionCode)response.Result }, methodName);
+            return await Generalization.ReturnResponse(new Ref.ExchangeBySessionReply { Message = response.Message, Result = (Ref.ActionCode)response.Result }, methodName);
         }
+        #endregion
 
-
-
+        #region License
+        public async Task<Ref.SetLicenseResponse> Account_SetLicense(Ref.SetLicenseRequest request,ServerCallContext context, string methodName)
+        {
+            TradeBot.Account.AccountService.v1.SetLicenseResponse response = null;
+            async Task<TradeBot.Account.AccountService.v1.SetLicenseResponse> task()
+            {
+                response = await ClientLic.SetLicenseAsync(new TradeBot.Account.AccountService.v1.SetLicenseRequest 
+                { 
+                    SessionId=request.SessionId,
+                    CardNumber=request.CardNumber,
+                    Cvv=request.Cvv,
+                    Date=request.Date,
+                    Product= (TradeBot.Account.AccountService.v1.ProductCode)request.Product
+                }, context.RequestHeaders);
+                return response;
+            }
+            await Generalization.ConnectionTester(task, methodName, request);
+            return await Generalization.ReturnResponse(new Ref.SetLicenseResponse { Code = (Ref.LicenseCode)response.Code, Message = response.Message }, methodName);
+        }
+        public async Task<Ref.CheckLicenseResponse> Account_CheckLicense(Ref.CheckLicenseRequest request,ServerCallContext context,string methodName)
+        {
+            TradeBot.Account.AccountService.v1.CheckLicenseResponse response = null;
+            async Task<TradeBot.Account.AccountService.v1.CheckLicenseResponse> task()
+            {
+                response = await ClientLic.CheckLicenseAsync(new TradeBot.Account.AccountService.v1.CheckLicenseRequest 
+                { 
+                    SessionId= request.SessionId,
+                    Product= (TradeBot.Account.AccountService.v1.ProductCode)request.Product
+                });
+                return response; 
+            }
+            await Generalization.ConnectionTester(task,methodName,request);
+            return await Generalization.ReturnResponse(new Ref.CheckLicenseResponse { Code= (Ref.LicenseCode)response.Code,Message=response.Message,HaveAccess=response.HaveAccess}, methodName);
+        }
+        #endregion
     }
 }

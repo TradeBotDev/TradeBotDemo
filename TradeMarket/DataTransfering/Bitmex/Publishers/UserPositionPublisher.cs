@@ -1,5 +1,6 @@
 ﻿using Bitmex.Client.Websocket.Client;
 using Bitmex.Client.Websocket.Requests;
+using Bitmex.Client.Websocket.Responses;
 using Bitmex.Client.Websocket.Responses.Positions;
 using System;
 using System.Collections.Generic;
@@ -36,6 +37,44 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
             _token = token;
         }
+
+        public override void AddModelToCache(PositionResponse response)
+        {
+            lock (locker)
+            {
+                foreach(var el in response.Data)
+                {
+                    var model = _cache.FirstOrDefault(x => x.Symbol == el.Symbol);
+                    if (model is not null)
+                    {
+                        switch (response.Action)
+                        {
+                            case BitmexAction.Delete:
+                                {
+                                    _cache.Remove(model);
+                                    break;
+                                }
+                            case BitmexAction.Update:
+                                {
+                                    _cache.Remove(model);
+                                    el.CurrentQty = el.CurrentQty is null || el.CurrentQty == 0 ? model.CurrentQty : el.CurrentQty;
+                                    _cache.Add(el);
+                                    break;
+                                }
+                            default:
+                                {
+                                    _cache.Add(el);
+                                    break;
+                                }
+                        }
+                    }
+                    else
+                    {
+                        _cache.Add(el);
+                    }
+                });
+            }
+         }
 
         public async override Task Start()
         {

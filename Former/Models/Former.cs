@@ -177,16 +177,22 @@ namespace Former.Models
         {
             foreach (var (key, value) in _storage.MyOrders)
             {
-                _storage.MyOrders.TryRemove(key, out _);
+                
                 var deleteResponse = await _tradeMarketClient.DeleteOrder(key, _metadata);
                 var response = Converters.ConvertDefaultResponse(deleteResponse.Response);
-                if (response.Code != ReplyCode.REPLY_CODE_SUCCEED)
+                Log.Information(
+                    "{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed {@ResponseCode}",
+                    "Former", value.Id, value.Price, value.Quantity, value.Signature.Type,
+                    response.Code == ReplyCode.REPLY_CODE_SUCCEED
+                        ? ReplyCode.REPLY_CODE_SUCCEED
+                        : ReplyCode.REPLY_CODE_FAILURE);
+                if (response.Code == ReplyCode.REPLY_CODE_SUCCEED)
                 {
-                    await _historyClient.WriteOrder(value, ChangesType.CHANGES_TYPE_DELETE, _metadata, "Removed by user");
-                    return;
+                    _storage.MyOrders.TryRemove(key, out _);
+                    await _historyClient.WriteOrder(value, ChangesType.CHANGES_TYPE_DELETE, _metadata,
+                        "Removed by user");
                 }
-                Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed {@ResponseCode}", "Former", value.Id, value.Price, value.Quantity, value.Signature.Type, response.Code == ReplyCode.REPLY_CODE_SUCCEED ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
-                
+                else return;
             }
         }
 

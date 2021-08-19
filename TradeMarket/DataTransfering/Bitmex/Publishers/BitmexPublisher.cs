@@ -31,18 +31,30 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         protected readonly BitmexWebsocketClient _client;
 
+        protected List<TModel> _cache;
+
+        public object locker = new();
+
+
+        public List<TModel> Cache { get{ lock (locker) { return new(_cache); } }  set => _cache = value; }
+
         public BitmexPublisher(BitmexWebsocketClient client,Action<TResponse, EventHandler<IPublisher<TModel>.ChangedEventArgs>> action)
         {
             _client = client;
             _onNext = action;
+            Cache = new();
         }
 
 
         private void responseAction(TResponse response)
         {
-            Log.Information("Get Info From Bitmex {@Message}", response);
+            AddModelToCache(response);
             _onNext.Invoke(response, Changed);
         }
+
+        public abstract void AddModelToCache(TResponse response);
+
+        
 
         internal async Task SubscribeAsync(TRequest request, IObservable<TResponse> stream, CancellationToken token)
         {
@@ -63,5 +75,6 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         }
 
         public abstract Task Start();
+
     }
 }

@@ -107,14 +107,14 @@ namespace UI
             this.SignUpGroupBox = new System.Windows.Forms.GroupBox();
             this.SignUpPanel = new System.Windows.Forms.Panel();
             this.label10 = new System.Windows.Forms.Label();
-            this.linkLabel2 = new System.Windows.Forms.LinkLabel();
+            this.BitmexWebsiteLnkLbl = new System.Windows.Forms.LinkLabel();
             this.label2 = new System.Windows.Forms.Label();
-            this.LinkLabel = new System.Windows.Forms.LinkLabel();
+            this.OurWebsiteLnkLbl = new System.Windows.Forms.LinkLabel();
             this.SignInGroupBox = new System.Windows.Forms.GroupBox();
             this.panel5 = new System.Windows.Forms.Panel();
             this.LoggedGroupBox = new System.Windows.Forms.GroupBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.LinkLabel1 = new System.Windows.Forms.LinkLabel();
+            this.OurWebsiteLnkLbl1 = new System.Windows.Forms.LinkLabel();
             this.SessionIDLbl = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.LicenseNumberLbl = new System.Windows.Forms.Label();
@@ -126,6 +126,7 @@ namespace UI
             this.LeftPanel = new System.Windows.Forms.Panel();
             this.RightPanel = new System.Windows.Forms.Panel();
             this.ErrorProviderSignUp = new System.Windows.Forms.ErrorProvider(this.components);
+            this.button1 = new System.Windows.Forms.Button();
             this.Tabs.SuspendLayout();
             this.LogsPage.SuspendLayout();
             this.GraphicsPage.SuspendLayout();
@@ -1065,9 +1066,9 @@ namespace UI
             // SignUpPanel
             // 
             this.SignUpPanel.Controls.Add(this.label10);
-            this.SignUpPanel.Controls.Add(this.linkLabel2);
+            this.SignUpPanel.Controls.Add(this.BitmexWebsiteLnkLbl);
             this.SignUpPanel.Controls.Add(this.label2);
-            this.SignUpPanel.Controls.Add(this.LinkLabel);
+            this.SignUpPanel.Controls.Add(this.OurWebsiteLnkLbl);
             this.SignUpPanel.Controls.Add(this.RegistrationButton);
             this.SignUpPanel.Controls.Add(this.RegLog);
             this.SignUpPanel.Controls.Add(this.SecretTxb);
@@ -1091,16 +1092,16 @@ namespace UI
             this.label10.TabIndex = 30;
             this.label10.Text = "Bitmex address:";
             // 
-            // linkLabel2
+            // BitmexWebsiteLnkLbl
             // 
-            this.linkLabel2.AutoSize = true;
-            this.linkLabel2.Location = new System.Drawing.Point(366, 261);
-            this.linkLabel2.Name = "linkLabel2";
-            this.linkLabel2.Size = new System.Drawing.Size(58, 20);
-            this.linkLabel2.TabIndex = 29;
-            this.linkLabel2.TabStop = true;
-            this.linkLabel2.Text = "BitMEX";
-            this.linkLabel2.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel2_LinkClicked);
+            this.BitmexWebsiteLnkLbl.AutoSize = true;
+            this.BitmexWebsiteLnkLbl.Location = new System.Drawing.Point(366, 261);
+            this.BitmexWebsiteLnkLbl.Name = "BitmexWebsiteLnkLbl";
+            this.BitmexWebsiteLnkLbl.Size = new System.Drawing.Size(58, 20);
+            this.BitmexWebsiteLnkLbl.TabIndex = 29;
+            this.BitmexWebsiteLnkLbl.TabStop = true;
+            this.BitmexWebsiteLnkLbl.Text = "BitMEX";
+            this.BitmexWebsiteLnkLbl.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.BitmexWebsiteLnkLbl_LinkClicked);
             // 
             // label2
             // 
@@ -1111,16 +1112,16 @@ namespace UI
             this.label2.TabIndex = 28;
             this.label2.Text = "Official site:";
             // 
-            // LinkLabel
+            // OurWebsiteLnkLbl
             // 
-            this.LinkLabel.AutoSize = true;
-            this.LinkLabel.Location = new System.Drawing.Point(266, 261);
-            this.LinkLabel.Name = "LinkLabel";
-            this.LinkLabel.Size = new System.Drawing.Size(73, 20);
-            this.LinkLabel.TabIndex = 27;
-            this.LinkLabel.TabStop = true;
-            this.LinkLabel.Text = "TradeBot";
-            this.LinkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkLabel_LinkClicked);
+            this.OurWebsiteLnkLbl.AutoSize = true;
+            this.OurWebsiteLnkLbl.Location = new System.Drawing.Point(266, 261);
+            this.OurWebsiteLnkLbl.Name = "OurWebsiteLnkLbl";
+            this.OurWebsiteLnkLbl.Size = new System.Drawing.Size(73, 20);
+            this.OurWebsiteLnkLbl.TabIndex = 27;
+            this.OurWebsiteLnkLbl.TabStop = true;
+            this.OurWebsiteLnkLbl.Text = "TradeBot";
+            this.OurWebsiteLnkLbl.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.OurWebsiteLnkLbl1_LinkClicked);
             // 
             // SignInGroupBox
             // 
@@ -1156,7 +1157,7 @@ namespace UI
             this.LoggedGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.LoggedGroupBox.Controls.Add(this.label3);
-            this.LoggedGroupBox.Controls.Add(this.LinkLabel1);
+            this.LoggedGroupBox.Controls.Add(this.OurWebsiteLnkLbl1);
             this.LoggedGroupBox.Controls.Add(this.SessionIDLbl);
             this.LoggedGroupBox.Controls.Add(this.label1);
             this.LoggedGroupBox.Controls.Add(this.LicenseNumberLbl);
@@ -1183,16 +1184,16 @@ namespace UI
             this.label3.TabIndex = 30;
             this.label3.Text = "Official site:";
             // 
-            // LinkLabel1
+            // OurWebsiteLnkLbl1
             // 
-            this.LinkLabel1.AutoSize = true;
-            this.LinkLabel1.Location = new System.Drawing.Point(566, 295);
-            this.LinkLabel1.Name = "LinkLabel1";
-            this.LinkLabel1.Size = new System.Drawing.Size(73, 20);
-            this.LinkLabel1.TabIndex = 29;
-            this.LinkLabel1.TabStop = true;
-            this.LinkLabel1.Text = "TradeBot";
-            this.LinkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkLabel1_LinkClicked);
+            this.OurWebsiteLnkLbl1.AutoSize = true;
+            this.OurWebsiteLnkLbl1.Location = new System.Drawing.Point(566, 295);
+            this.OurWebsiteLnkLbl1.Name = "OurWebsiteLnkLbl1";
+            this.OurWebsiteLnkLbl1.Size = new System.Drawing.Size(73, 20);
+            this.OurWebsiteLnkLbl1.TabIndex = 29;
+            this.OurWebsiteLnkLbl1.TabStop = true;
+            this.OurWebsiteLnkLbl1.Text = "TradeBot";
+            this.OurWebsiteLnkLbl1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.OurWebsiteLnkLbl_LinkClicked);
             // 
             // SessionIDLbl
             // 
@@ -1264,6 +1265,7 @@ namespace UI
             // 
             // LeftPanel
             // 
+            this.LeftPanel.Controls.Add(this.button1);
             this.LeftPanel.Controls.Add(this.ShowMainMenu);
             this.LeftPanel.Controls.Add(this.ShowSignUpPanel);
             this.LeftPanel.Controls.Add(this.ShowSignInPanel);
@@ -1285,6 +1287,16 @@ namespace UI
             // 
             this.ErrorProviderSignUp.ContainerControl = this;
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(31, 203);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(94, 29);
+            this.button1.TabIndex = 28;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // TradeBotUi
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -1293,14 +1305,15 @@ namespace UI
             this.Controls.Add(this.Tabs);
             this.Controls.Add(this.RightPanel);
             this.Controls.Add(this.LeftPanel);
+            this.Controls.Add(this.LoggedGroupBox);
             this.Controls.Add(this.MainMenuGroupBox);
             this.Controls.Add(this.SignUpGroupBox);
             this.Controls.Add(this.SignInGroupBox);
-            this.Controls.Add(this.LoggedGroupBox);
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "TradeBotUi";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "TradeBot";
+            this.Load += new System.EventHandler(this.TradeBotUi_Load);
             this.Tabs.ResumeLayout(false);
             this.LogsPage.ResumeLayout(false);
             this.GraphicsPage.ResumeLayout(false);
@@ -1416,12 +1429,13 @@ namespace UI
         private System.Windows.Forms.Label SessionIDLbl;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.LinkLabel LinkLabel;
+        private System.Windows.Forms.LinkLabel OurWebsiteLnkLbl;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.LinkLabel LinkLabel1;
+        private System.Windows.Forms.LinkLabel OurWebsiteLnkLbl1;
         private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.LinkLabel linkLabel2;
+        private System.Windows.Forms.LinkLabel BitmexWebsiteLnkLbl;
         private System.Windows.Forms.ErrorProvider ErrorProviderSignUp;
+        private System.Windows.Forms.Button button1;
     }
 }
 

@@ -1,5 +1,6 @@
 ﻿using Google.Protobuf.WellKnownTypes;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -219,11 +220,6 @@ namespace UI
             return true;
         }
 
-        private void AddOrderToTable(DataGridView table, IncomingMessage message)
-        {
-            table.Rows.Add(message.SlotName, message.Qty, message.Price, message.Type, message.Time, message.Id);
-        }
-
         private void InsertOrderToTable(int index, DataGridView table, IncomingMessage message)
         {
             table.Rows.Insert(index, message.SlotName, message.Qty, message.Price, message.Type, message.Time, message.Id);
@@ -280,12 +276,11 @@ namespace UI
             switch (orderEvent.ChangesType)
             {
                 case ChangesType.Partitial:
-                    AddOrderToTable(incomingMessage.Status == OrderStatus.Open ? ActiveOrdersDataGridView : FilledOrdersDataGridView, incomingMessage);
+                    InsertOrderToTable(0, incomingMessage.Status == OrderStatus.Open ? ActiveOrdersDataGridView : FilledOrdersDataGridView, incomingMessage);
                     UpdateList(orderEvent.Order.Price.ToString(),orderEvent.Time,ref _orderList,zedGraph_1,lastDateOrder);
                     break;
-
                 case ChangesType.Insert:
-                    AddOrderToTable(ActiveOrdersDataGridView, incomingMessage);
+                    InsertOrderToTable(0, ActiveOrdersDataGridView, incomingMessage);
                     WriteMessageToEventConsole(incomingMessage);
                     UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1,lastDateOrder);
                     break;
@@ -296,7 +291,7 @@ namespace UI
                     break;
 
                 case ChangesType.Delete:
-                    AddOrderToTable(FilledOrdersDataGridView, incomingMessage);
+                    InsertOrderToTable(0, FilledOrdersDataGridView, incomingMessage);
                     DeleteFromTable(ActiveOrdersDataGridView, incomingMessage.Id);
                     WriteMessageToEventConsole(incomingMessage);
                     break;
@@ -310,8 +305,8 @@ namespace UI
 
         private void HandleBalanceUpdate(PublishBalanceEvent balanceUpdate)
         {
-            BalanceLabel.Text = $"{double.Parse(balanceUpdate.Balance.Value) / 100000000} {balanceUpdate.Balance.Currency}";
-            UpdateList(balanceUpdate.Balance.Value, balanceUpdate.Time,ref _balanceList, zedGraph,lastDateBalance);
+            BalanceLabel.Text = $"{balanceUpdate.Balance.Value} {balanceUpdate.Balance.Currency}";
+            UpdateList(balanceUpdate.Balance.Value, balanceUpdate.Time, ref _balanceList, zedGraph,lastDateBalance);
         }
 
         private async void Start(string slotName)
@@ -400,7 +395,7 @@ namespace UI
             cellCheckBox.Value ??= false;
             if (Convert.ToBoolean(cellCheckBox.Value))
             {
-                if (MessageBox.Show(@"Are you sure you want to stop work?", @"Stop work",
+                if (MessageBox.Show(@"Are you sure you want to stop bot?", @"Stop bot",
                     MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
                     Stop(ActiveSlotsDataGridView.Rows[ActiveSlotsDataGridView.CurrentRow.Index].Cells[0]
@@ -467,7 +462,9 @@ namespace UI
                 MessageBox.Show(@"Wrong login or password!", @"Correct the fields");
                 return;
             }
-            CheckConnection(await _facadeClient.RegisterAccount(RegLog.Text, RegPass.Text, RegPass.Text));
+
+            if (CheckConnection(await _facadeClient.RegisterAccount(RegLog.Text, RegPass.Text, RegPass.Text)))
+                WriteMessageToEventConsole($"You have registered an account {RegLog.Text}");
         }
 
         private async void LoginButton_Click(object sender, EventArgs e)
@@ -600,11 +597,11 @@ namespace UI
 
             pane.XAxis.Type = AxisType.Date;
 
-            pane.YAxis.Scale.Min = list.Last().Y-100;
-            pane.YAxis.Scale.Max = list.Last().Y+100;
+            //pane.YAxis.Scale.Min = list.Last().Y-100;
+            //pane.YAxis.Scale.Max = list.Last().Y+100;
 
-            pane.XAxis.Scale.Min = new XDate(list.Last().X-1);
-            pane.XAxis.Scale.Max = new XDate(list.Last().X+1);
+            //pane.XAxis.Scale.Min = new XDate(list.Last().X-1);
+            //pane.XAxis.Scale.Max = new XDate(list.Last().X+1);
 
             zedGraph.AxisChange();
 
@@ -613,25 +610,37 @@ namespace UI
 
         #endregion
 
-        private void LinkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void OurWebsiteLnkLbl_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "http://23.88.34.174:5008/" };
             Process.Start(parameter);
-            LinkLabel1.LinkVisited = true;
+            OurWebsiteLnkLbl1.LinkVisited = true;
         }
 
-        private void LinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void OurWebsiteLnkLbl1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "http://23.88.34.174:5008/" };
             Process.Start(parameter);
-            LinkLabel1.LinkVisited = true;
+            OurWebsiteLnkLbl1.LinkVisited = true;
         }
 
-        private void linkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void BitmexWebsiteLnkLbl_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "https://testnet.bitmex.com/app/trade/XBTUSD" };
             Process.Start(parameter);
-            LinkLabel1.LinkVisited = true;
+            OurWebsiteLnkLbl1.LinkVisited = true;
+        }
+
+        private void TradeBotUi_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private async void button1_Click(object sender, EventArgs e)
+        {
+            if (_loggedIn) {
+                await _facadeClient.RegisterLicense();
+            }
         }
     }
 }

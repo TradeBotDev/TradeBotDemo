@@ -48,6 +48,14 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             Log.Information("Sending Auth Request for @{key} : {@secret}", apiKey, apiSecret);
             await base.SubscribeAsync(new AuthenticationRequest(apiKey,apiSecret), _stream, token);
         }
+
+        public override void AddModelToCache(AuthenticationResponse response)
+        {
+            lock (base.locker)
+            {
+                _cache.Add(response.Success);
+            }
+        }
     }
 }
 

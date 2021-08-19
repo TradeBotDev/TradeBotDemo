@@ -38,8 +38,8 @@ namespace TradeMarket
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddGrpc();
-            services.AddSingleton(new AccountClient(new ExchangeAccess.ExchangeAccessClient(GrpcChannel.ForAddress(Configuration.GetConnectionString("AccountService")))));
-            services.AddSingleton<IConnectionMultiplexer>(options => ConnectionMultiplexer.Connect(Configuration.GetConnectionString("Redis")));
+            services.AddSingleton(new AccountClient(new ExchangeAccess.ExchangeAccessClient(GrpcChannel.ForAddress(Environment.GetEnvironmentVariable("ACCOUNT_CONNECTION_STRING")))));
+            services.AddSingleton<IConnectionMultiplexer>(options => ConnectionMultiplexer.Connect(Environment.GetEnvironmentVariable("REDIS_CONNECTION_STRING")));
             services.AddSingleton<TradeMarketFactory>();
             services.AddSingleton<ContextDirector>();
             services.AddSingleton<CommonContextBuilder>();

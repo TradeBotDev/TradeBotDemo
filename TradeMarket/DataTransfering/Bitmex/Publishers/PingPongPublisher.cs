@@ -43,5 +43,13 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             }
 
         }
+
+        public override void AddModelToCache(PongResponse response)
+        {
+            lock (locker)
+            {
+                _cache.Add(response.Message);
+            }
+        }
     }
 }

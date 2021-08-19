@@ -34,6 +34,14 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             _token = token;
         }
 
+        public override void AddModelToCache(ErrorResponse response)
+        {
+            lock (locker)
+            {
+                _cache.Add(response.Error);
+            }
+        }
+
         public async override Task Start()
         {
             await SubscribeAsync(_token);

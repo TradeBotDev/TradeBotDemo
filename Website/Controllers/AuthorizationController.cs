@@ -88,25 +88,6 @@ namespace Website.Controllers
             else return View("~/Views/Shared/Error.cshtml", reply.Message);
         }
 
-        // Метод, показывающий страницу выхода из аккаунта.
-        [HttpGet]
-        public async Task<IActionResult> Logout()
-        {
-            // Проверка лицензии и передача ее результата в представление через ViewBag.
-            var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
-            ViewBag.HaveLicense = haveLicense.HaveAccess;
-
-            // В представление передается предыдущий url, чтобы при post-запросе возвращаться не на эту же страницу, а
-            // на действительно предыдущую.
-            ViewBag.ReturnUrl = Request.Headers["Referer"].ToString();
-
-            // Если пользователь уже вышел, вместо формы выхода отображается сообщение о том, что пользователь уже вышел.
-            if (!User.Identity.IsAuthenticated)
-                return View("~/Views/Shared/Error.cshtml", "Вы уже вышли.");
-            // Иначе возвращается представление с формой выхода.
-            else return View();
-        }
-
         // Метод, который производит выход из аккаунта в ответ на отправку формы.
         [HttpPost]
         public async Task<IActionResult> Logout(LogoutModel model)
@@ -115,20 +96,17 @@ namespace Website.Controllers
             var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
             ViewBag.HaveLicense = haveLicense.HaveAccess;
 
-            // Если была нажата кнопка "Выйти", происходит выход из аккаунта.
-            if (model.Button == "Выйти")
-            {
-                // Запрос на выход из аккаунта.
-                var reply = await Clients.AccountServiceClient.Logout(User.Identity.Name, model.SaveExchanges);
-                // Удаление аутентификационных куки пользователя.
-                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
-                // Если выход не был завершен успешно, возвращается страница с сообщением об ошибке.
-                if (reply.Result != AccountActionCode.Successful)
-                    return View("~/Views/Shared/Error.cshtml", reply.Message);
-            }
+            // Запрос на выход из аккаунта.
+            var reply = await Clients.AccountServiceClient.Logout(User.Identity.Name, model.SaveExchanges);
+            // Удаление аутентификационных куки пользователя.
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            
+            // Если выход не был завершен успешно, возвращается страница с сообщением об ошибке.
+            if (reply.Result != AccountActionCode.Successful)
+                return View("~/Views/Shared/Error.cshtml", reply.Message);
+            
             // Иначе происходит перенаправление на предыдущий url.
-            return Redirect(model.PreviousUrl);
+            return Redirect(Request.Headers["Referer"].ToString());
         }
     }
 }
