@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Former.Clients;
-using Grpc.Core;
 using Serilog;
 
 namespace Former.Models
@@ -50,7 +49,7 @@ namespace Former.Models
             var addResponse = false;
             //выставляем контр ордер с рассчитанной ценой и отрицательным числом контрактов, так как контр ордер должен иметь противоположное число 
             //контрактов по сравнению с oldOrder
-            var placeResponse = await _tradeMarketClient.PlaceOrder(price, -quantity, _metadata);
+            var placeResponse = await _tradeMarketClient.PlaceOrder(price, -quantity, Converters.ConvertMetadata(_metadata));
             var response = Converters.ConvertDefaultResponse(placeResponse.Response);
             if (response.Code == ReplyCode.REPLY_CODE_SUCCEED)
             {
@@ -67,13 +66,13 @@ namespace Former.Models
                 addResponse = _storage.AddOrder(placeResponse.OrderId, newOrder, _storage.CounterOrders);
 
                 //сообщаем о выставлении контр-ордера истории
-                await _historyClient.WriteOrder(newOrder, ChangesType.CHANGES_TYPE_INSERT, _metadata, "Counter order placed");
+                await _historyClient.WriteOrder(newOrder, ChangesType.CHANGES_TYPE_INSERT, Converters.ConvertMetadata(_metadata), "Counter order placed");
 
                 //сообщаем об исполнении старого ордера истории
                 if (Convert.ToInt32(quantity) == Convert.ToInt32(oldOrder.Quantity))
-                    await _historyClient.WriteOrder(oldOrder, ChangesType.CHANGES_TYPE_DELETE, _metadata, "Initial order filled");
+                    await _historyClient.WriteOrder(oldOrder, ChangesType.CHANGES_TYPE_DELETE, Converters.ConvertMetadata(_metadata), "Initial order filled");
                 else
-                    await _historyClient.WriteOrder(newComingOrder, ChangesType.CHANGES_TYPE_UPDATE, _metadata,
+                    await _historyClient.WriteOrder(newComingOrder, ChangesType.CHANGES_TYPE_UPDATE, Converters.ConvertMetadata(_metadata),
                         "Initial order partially filled");
             }
 
@@ -134,7 +133,7 @@ namespace Former.Models
             var price = orderType == OrderType.ORDER_TYPE_BUY ? _storage.BuyMarketPrice : _storage.SellMarketPrice;
 
             //отправляем запрос на биржу выставить ордер по рыночной цене 
-            var placeResponse = await _tradeMarketClient.PlaceOrder(price, quantity, _metadata);
+            var placeResponse = await _tradeMarketClient.PlaceOrder(price, quantity, Converters.ConvertMetadata(_metadata));
             var id = placeResponse.OrderId;
             var response = Converters.ConvertDefaultResponse(placeResponse.Response);
 
@@ -155,7 +154,7 @@ namespace Former.Models
                     "Former", id, price, quantity, orderType,
                     addResponse ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
                 //сообщаем сервису истории о новом ордере
-                await _historyClient.WriteOrder(newOrder, ChangesType.CHANGES_TYPE_INSERT, _metadata, "Initial order placed");
+                await _historyClient.WriteOrder(newOrder, ChangesType.CHANGES_TYPE_INSERT, Converters.ConvertMetadata(_metadata), "Initial order placed");
             }
 
             Log.Information(
@@ -178,7 +177,7 @@ namespace Former.Models
             foreach (var (key, value) in _storage.MyOrders)
             {
                 
-                var deleteResponse = await _tradeMarketClient.DeleteOrder(key, _metadata);
+                var deleteResponse = await _tradeMarketClient.DeleteOrder(key, Converters.ConvertMetadata(_metadata));
                 var response = Converters.ConvertDefaultResponse(deleteResponse.Response);
                 Log.Information(
                     "{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed {@ResponseCode}",
@@ -189,7 +188,7 @@ namespace Former.Models
                 if (response.Code == ReplyCode.REPLY_CODE_SUCCEED)
                 {
                     _storage.MyOrders.TryRemove(key, out _);
-                    await _historyClient.WriteOrder(value, ChangesType.CHANGES_TYPE_DELETE, _metadata,
+                    await _historyClient.WriteOrder(value, ChangesType.CHANGES_TYPE_DELETE, Converters.ConvertMetadata(_metadata),
                         "Removed by user");
                 }
                 else return;

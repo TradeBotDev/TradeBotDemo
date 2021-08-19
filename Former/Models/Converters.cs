@@ -113,5 +113,25 @@ namespace Former.Models
                 Value = balance.Value
             };
         }
+
+        public static Metadata ConvertMetadata(Grpc.Core.Metadata metadata)
+        {
+            return new Metadata
+            {
+                Sessionid = metadata.GetValue("sessionid"),
+                Trademarket = metadata.GetValue("trademarket"),
+                Slot = metadata.GetValue("slot")
+            };
+        }
+
+        public static Grpc.Core.Metadata ConvertMetadata(Metadata metadata)
+        {
+            return new Grpc.Core.Metadata()
+            {
+                {"sessionid", metadata.Sessionid},
+                {"trademarket", metadata.Trademarket},
+                {"slot", metadata.Slot},
+            };
+        }
     }
 }

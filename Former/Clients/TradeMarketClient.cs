@@ -6,6 +6,7 @@ using Grpc.Core;
 using Grpc.Net.Client;
 using Serilog;
 using TradeBot.TradeMarket.TradeMarketService.v1;
+using Metadata = Grpc.Core.Metadata;
 
 namespace Former.Clients
 {

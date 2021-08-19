@@ -1,4 +1,6 @@
-﻿using Former.Services;
+﻿using Former.Clients;
+using Former.Models;
+using Former.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -14,6 +16,15 @@ namespace Former
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddGrpc();
+
+            var contexts = RedisClient.ReadMeta().Result;
+            foreach (var ctx in contexts)
+            {
+                var configuration = RedisClient.ReadConfiguration(ctx).Result;
+                var userContext = Contexts.GetUserContext(ctx.Sessionid, ctx.Trademarket, ctx.Slot);
+                userContext.SetConfiguration(configuration);
+                userContext.SubscribeStorageToMarket();
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

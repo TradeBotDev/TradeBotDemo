@@ -8,6 +8,7 @@ using Grpc.Core;
 using Grpc.Net.Client;
 using Serilog;
 using TradeBot.History.HistoryService.v1;
+using Metadata = Grpc.Core.Metadata;
 
 namespace Former.Clients
 {
