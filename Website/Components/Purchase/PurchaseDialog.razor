@@ -6,14 +6,18 @@
 @if (isDisplayed)
 {
     <div class="message_background">
+        <!--Форма покупки.-->
         <EditForm Model="creditCard" OnValidSubmit="Buy" class="form floating_form">
             <h3>Введите данные карты</h3>
+
+            <!--Вывод результата валидации и сообщений сервиса.-->
             <DataAnnotationsValidator />
             <ValidationSummary />
             @if (!String.IsNullOrEmpty(replyMessage)) {
                 <p class="validation-message">@replyMessage</p>
             }
 
+            <!--Поля ввода данных карты.-->
             <p>Номер карты:</p>
             <InputText @bind-Value="creditCard.CardNumber" class="form_input" maxlength="16" />
             <p>Дата:</p>
@@ -22,6 +26,7 @@
             <InputText class="form_input" @bind-Value="creditCard.CVV" type="number" maxlength="3" />
 
             <input class="button form_button" type="submit" value="Купить" />
+            <!--Закрывает форму.-->
             <input class="button form_close_button" type="button" @onclick="Switch" value="Закрыть" />
         </EditForm>
     </div>
@@ -43,11 +48,14 @@
 
     private async void Buy()
     {
+        // Отправка запроса на покупку лицензии и получение ответа.
         var reply = await LicenseClient.SetLicense(SessionId, ProductCode.Tradebot, creditCard);
+        // Если покупка была совершена успешно, происходит перенаправление на страницу аккаунта.
         if (reply.Code == LicenseCode.Successful)
             NavigationManager.NavigateTo("/account", true);
         else
         {
+            // Иначе происходит вывод сообщения об ошибке в форме.
             replyMessage = reply.Message;
             await InvokeAsync(StateHasChanged);
         }
