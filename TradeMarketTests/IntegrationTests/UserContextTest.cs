@@ -17,7 +17,6 @@ using TradeMarket.Model.Publishers;
 using TradeMarket.Model.TradeMarkets;
 using TradeMarket.Model.UserContexts;
 using TradeMarket.Model.UserContexts.Builders;
-using TypeMock.ArrangeActAssert;
 using Xunit;
 
 namespace TradeMarketTests.IntegrationTests
