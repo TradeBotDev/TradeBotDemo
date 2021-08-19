@@ -17,7 +17,7 @@ namespace Algorithm.DataManipulation
         public static void SendDecision (int decision, Metadata metadata)
         {
             var response = Client.SendAlgorithmDecision(new SendAlgorithmDecisionRequest { Decision = decision }, metadata);
-            Log.Information("{@Where}:Sent " + decision, "Algorithm");
+            Log.Information("{@Where}:Sent " + decision + " on slot {@Slot}", "Algorithm", metadata.GetValue("slot"));
         }
     }
 }

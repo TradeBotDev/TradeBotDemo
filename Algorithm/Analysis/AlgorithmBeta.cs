@@ -50,13 +50,14 @@ namespace Algorithm.Analysis
             _dc = new(_pointPublisher);
             _pm = new();
             _storage = new SortedDictionary<DateTime, double>();
-            Log.Information("{@Where}: Algorithm for user {@User} has been created", "Algorithm", metadata.GetValue("sessionid"));
+            Log.Information("{@Where}: Algorithm for user {@User} on slot {@Slot}has been created", "Algorithm", metadata.GetValue("sessionid"), metadata.GetValue("slot"));
         }
 
         //when a new point is made algo adds it to its storage and checks if it has enough to initiate analysis 
         //if the storage is overfilled we remove the oldest point
         private void NewPointAlert(KeyValuePair<DateTime, double> point)
         {
+            Log.Information("{@Where}: Received a point for slot {@Slot}", "Algorithm", _metadata.GetValue("slot"));
             _storage.Add(point.Key, point.Value);
 
             if (_storage.Count > _durationInPoints)
