@@ -3,6 +3,7 @@ using Grpc.Core;
 using System.Linq;
 using System.Threading.Tasks;
 using Former.Clients;
+using Serilog;
 using TradeBot.Former.FormerService.v1;
 
 namespace Former.Services
