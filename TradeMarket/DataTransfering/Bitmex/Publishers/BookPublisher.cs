@@ -48,7 +48,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         {
             lock (locker)
             {
-                Parallel.ForEach(response.Data, (el) =>
+                foreach(var el in _cache)
                 {
                     var model = _cache.FirstOrDefault(x => x.Id == el.Id);
                     if (model is not null)
@@ -56,7 +56,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
                         _cache.Remove(model);
                     }
                     _cache.Add(el);
-                });
+                }
             }
         }
 
