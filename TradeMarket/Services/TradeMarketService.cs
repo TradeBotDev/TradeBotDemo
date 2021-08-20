@@ -143,7 +143,7 @@ namespace TradeMarket.Services
         {
             try
             {
-                Log.Information("Starting subscriprion for {@Topic}", nameof(subscribe));
+                Log.Information("Starting subscriprion for {@Topic}", nameof(subscribe.Method));
                 Log.Information("Canceletion requested : {@Token}", context.CancellationToken.IsCancellationRequested);
 
                 //Добавляем заголовки ответа по контексту пользователя user из запроса
