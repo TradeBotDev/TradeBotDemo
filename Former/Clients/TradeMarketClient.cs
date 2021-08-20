@@ -93,6 +93,7 @@ namespace Former.Clients
         private async Task ObserveMarketPrices(Metadata meta)
         {
             using var call = _client.SubscribePrice(new SubscribePriceRequest(), meta);
+            Log.Information("Subscribe market prices");
             async Task ObserveMarketPricesFunc()
             {
                 while (await call.ResponseStream.MoveNext(_token.Token))
@@ -106,6 +107,8 @@ namespace Former.Clients
             }
 
             await ConnectionTester(ObserveMarketPricesFunc);
+
+            Log.Information("Unsubscribe market prices");
         }
 
         /// <summary>
@@ -114,15 +117,17 @@ namespace Former.Clients
         private async Task ObserveBalance(Metadata meta)
         {
             using var call = _client.SubscribeMargin(new SubscribeMarginRequest(), meta);
-
+            Log.Information("Subscribe balance");
             async Task ObserveBalanceFunc()
             {
                 while (await call.ResponseStream.MoveNext(_token.Token))
                 {
                     if (EventFilter(call.ResponseHeadersAsync.Result, meta)) await UpdateBalance?.Invoke((int)call.ResponseStream.Current.Margin.AvailableMargin, (int)call.ResponseStream.Current.Margin.MarginBalance);
                 }
+                
             }
             await ConnectionTester(ObserveBalanceFunc);
+            Log.Information("Unsubscribe balance");
         }
 
         /// <summary>
@@ -131,16 +136,18 @@ namespace Former.Clients
         private async Task ObserveMyOrders(Metadata meta)
         {
             using var call = _client.SubscribeMyOrders(new SubscribeMyOrdersRequest(), meta);
-
+            Log.Information("Subscribe my orders");
             async Task ObserveMyOrdersFunc()
             {
                 while (await call.ResponseStream.MoveNext(_token.Token))
                 {
                     if (EventFilter(call.ResponseHeadersAsync.Result, meta)) await UpdateMyOrders?.Invoke(Converters.ConvertOrder(call.ResponseStream.Current.Changed), (ChangesType)call.ResponseStream.Current.ChangesType);
                 }
+                
             }
 
             await ConnectionTester(ObserveMyOrdersFunc);
+            Log.Information("Unsubscribe my orders");
         }
 
         /// <summary>
@@ -149,6 +156,7 @@ namespace Former.Clients
         private async Task ObservePositions(Metadata meta)
         {
             using var call = _client.SubscribePosition(new SubscribePositionRequest(), meta);
+            Log.Information("Subscribe position");
 
             async Task ObservePositionFunc()
             {
@@ -156,9 +164,11 @@ namespace Former.Clients
                 {
                     if (EventFilter(call.ResponseHeadersAsync.Result, meta)) await UpdatePosition?.Invoke(call.ResponseStream.Current.CurrentQty);
                 }
+                
             }
 
             await ConnectionTester(ObservePositionFunc);
+            Log.Information("Unsubscribe position");
         }
 
         /// <summary>
@@ -238,6 +248,7 @@ namespace Former.Clients
         internal void StopObserving()
         {
             _token.Cancel();
+            Log.Information("Cancel token");
         }
     }
 }
