@@ -185,7 +185,7 @@ namespace UI
                     SessionId = sessionId,
                     Token = key,
                     Secret = secret,
-                    Code = ExchangeCode.Bitmex,
+                    Code = ExchangeAccessCode.Bitmex,
                     ExchangeName = "BitMEX"
                 });
                 return new DefaultResponse { Code = ReplyCode.Succeed, Message = sessionId};
@@ -200,7 +200,7 @@ namespace UI
         {
             try
             {
-                await _client.LogoutAsync(new SessionRequest { SessionId = _meta.GetValue("sessionid") });
+                await _client.LogoutAsync(new LogoutRequest { SessionId = _meta.GetValue("sessionid") });
                 return new DefaultResponse { Code = ReplyCode.Succeed, Message = ""};
             }
             catch
