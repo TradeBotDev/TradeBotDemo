@@ -129,6 +129,7 @@ namespace TradeMarket.Services
         {
             try
             {
+                Log.Information("Sent message {@message}",reply);
                 await stream.WriteAsync(reply);
             }
             catch (Exception exception)
