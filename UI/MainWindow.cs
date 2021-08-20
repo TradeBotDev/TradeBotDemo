@@ -276,17 +276,17 @@ namespace UI
             {
                 case ChangesType.Partitial:
                     InsertOrderToTable(0, incomingMessage.Status == OrderStatus.Open ? ActiveOrdersDataGridView : FilledOrdersDataGridView, incomingMessage);
-                    UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1, lastDateOrder);
+                    UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, _orderList, OrderGraph, lastDateOrder);
                     break;
                 case ChangesType.Insert:
                     InsertOrderToTable(0, ActiveOrdersDataGridView, incomingMessage);
                     WriteMessageToEventConsole(incomingMessage);
-                    UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1, lastDateOrder);
+                    UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, _orderList, OrderGraph, lastDateOrder);
                     break;
 
                 case ChangesType.Update:
                     UpdateTable(ActiveOrdersDataGridView, incomingMessage);
-                    UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1, lastDateOrder);
+                    UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, _orderList, OrderGraph, lastDateOrder);
                     break;
 
                 case ChangesType.Delete:
@@ -305,7 +305,7 @@ namespace UI
         private void HandleBalanceUpdate(PublishBalanceEvent balanceUpdate)
         {
             BalanceLabel.Text = $"{balanceUpdate.Balance.Value} {balanceUpdate.Balance.Currency}";
-            UpdateList(balanceUpdate.Balance.Value, balanceUpdate.Time, ref _balanceList, zedGraph, lastDateBalance);
+            UpdateList(balanceUpdate.Balance.Value, balanceUpdate.Time, _balanceList, BalanceGraph, lastDateBalance);
         }
 
         private async void Start(string slotName)
@@ -605,9 +605,10 @@ namespace UI
         #endregion
 
         #region DrawGraphs
-        private void UpdateList(string b, Timestamp time, ref PointPairList list, ZedGraph.ZedGraphControl graphControl, DateTime ld)
+        private void UpdateList(string b, Timestamp time, PointPairList list, ZedGraph.ZedGraphControl graphControl, DateTime ld)
         {
             DateTime tm = TimeZoneInfo.ConvertTime(time.ToDateTime(), TimeZoneInfo.Local);//.ToString("HH:mm:ss dd.MM.yyyy");
+            b = b.Replace('.', ',');
             if (double.TryParse(b, out double value))
             {
                 if (ld.Day == tm.Day)
@@ -620,7 +621,7 @@ namespace UI
                 {
                     list.RemoveAt(0);
                 }
-                if (graphControl == zedGraph)
+                if (graphControl == BalanceGraph)
                 {
                     lastDateBalance = tm;
                 }
@@ -628,8 +629,8 @@ namespace UI
                 {
                     lastDateOrder = tm;
                 }
+                DrawGraph(graphControl, list);
             }
-            DrawGraph(graphControl, list);
         }
         private void DrawGraph(ZedGraph.ZedGraphControl graphControl, PointPairList list)
         {
@@ -637,28 +638,24 @@ namespace UI
 
             pane.CurveList.Clear();
 
-            //DateTime startDate = new DateTime(2021, 07, 0);
-
-            //int daysCount = 40;
-
-            //Random rnd = new Random();
-
-            //for (int i = 0; i < daysCount; i++)
-            //{
-            //    DateTime currentDate = startDate.AddDays(i);
-            //
-            //    
-            //    list.Add(new XDate(currentDate), yValue);
-            //}
-
             LineItem myCurve = pane.AddCurve("", list, System.Drawing.Color.Blue, SymbolType.Circle);
-
+            if(graphControl.Name.Contains("Balance"))
+            {
+                pane.Title.Text = "Balance graph";
+                pane.YAxis.Title.Text = "Balance, XBT";
+            }
+            else
+            {
+                pane.Title.Text = "Order graph";
+                pane.YAxis.Title.Text = "Filled orders";
+            }
             pane.XAxis.Type = AxisType.Date;
-
+            pane.XAxis.Title.Text = "Date";
+            
             try
             {
-                pane.YAxis.Scale.Min = list.Last().Y - 100;
-                pane.YAxis.Scale.Max = list.Last().Y + 100;
+                pane.YAxis.Scale.Min = list.Last().Y - 0.01;
+                pane.YAxis.Scale.Max = list.Last().Y + 0.01;
 
                 pane.XAxis.Scale.Min = new XDate(list.Last().X - 1);
                 pane.XAxis.Scale.Max = new XDate(list.Last().X + 1);
@@ -668,9 +665,34 @@ namespace UI
 
             }
             
-            zedGraph.AxisChange();
+            BalanceGraph.AxisChange();
 
-            zedGraph.Invalidate();
+            BalanceGraph.Invalidate();
+        }
+        void zedGraph_ZoomEvent(ZedGraphControl sender, ZoomState oldState, ZoomState newState)
+        {
+            GraphPane pane = sender.GraphPane;
+
+
+            if (pane.XAxis.Scale.Min <= 0)
+            {
+                pane.XAxis.Scale.Min = 0;
+            }
+
+            if (pane.XAxis.Scale.Max >= 10)
+            {
+                pane.XAxis.Scale.Max = 10;
+            }
+
+            //if (pane.YAxis.Scale.Min <= -1)
+            //{
+            //    pane.YAxis.Scale.Min = -1;
+            //}
+
+            //if (pane.YAxis.Scale.Max >= 2)
+            //{
+            //    pane.YAxis.Scale.Max = 2;
+            //}
         }
 
         #endregion

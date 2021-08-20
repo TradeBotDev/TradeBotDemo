@@ -83,40 +83,50 @@ namespace History
             {
                 Task.Run(async () =>
                 {
-                    if (args.NewItems[0].GetType().FullName.Contains("BalanceChange"))
+                    try
                     {
-                        updateBalance = (BalanceChange)args.NewItems[0];
-                        if (updateBalance.SessionId != request.Sessionid) return;
-                        await responseStream.WriteAsync(new SubscribeEventsResponse
+                        if (args.NewItems[0].GetType().FullName.Contains("BalanceChange"))
                         {
-                            Balance = new PublishBalanceEvent
+                            updateBalance = (BalanceChange)args.NewItems[0];
+                            if (updateBalance.SessionId != request.Sessionid) return;
+                            await responseStream.WriteAsync(new SubscribeEventsResponse
                             {
-                                Balance = Converter.ToBalance(updateBalance.Balance),
-                                Sessionid = updateBalance.SessionId,
-                                Time = Timestamp.FromDateTime(updateBalance.Time.ToUniversalTime())
-                            }
-                        }); ;
+                                Balance = new PublishBalanceEvent
+                                {
+                                    Balance = Converter.ToBalance(updateBalance.Balance),
+                                    Sessionid = updateBalance.SessionId,
+                                    Time = Timestamp.FromDateTime(new DateTime(updateBalance.Time.Year, updateBalance.Time.Month, updateBalance.Time.Day, 0,0,0).ToUniversalTime())
+                                }
+                            });
+                        }
+                        if (args.NewItems[0].GetType().FullName.Contains("OrderChange"))
+                        {
+                            updateOrder = (OrderChange)args.NewItems[0];
+                            if (updateOrder.SessionId != request.Sessionid) return;
+                            await responseStream.WriteAsync(new SubscribeEventsResponse
+                            {
+                                Order = new PublishOrderEvent
+                                {
+                                    ChangesType = (TradeBot.Common.v1.ChangesType)updateOrder.ChangesType,
+                                    Order = Converter.ToOrder(updateOrder.Order),
+                                    Sessionid = updateOrder.SessionId,
+                                    Time = Timestamp.FromDateTime(updateOrder.Time.ToUniversalTime()),
+                                    Message = updateOrder.Message,
+                                    SlotName = updateOrder.SlotName
+                                }
+                            });
+                        }
                     }
-                    if (args.NewItems[0].GetType().FullName.Contains("OrderChange"))
+                    catch (Exception e)
                     {
-                        updateOrder = (OrderChange)args.NewItems[0];
-                        if (updateOrder.SessionId != request.Sessionid) return;
-                        await responseStream.WriteAsync(new SubscribeEventsResponse
-                        {
-                            Order = new PublishOrderEvent
-                            {
-                                ChangesType = (TradeBot.Common.v1.ChangesType)updateOrder.ChangesType,
-                                Order = Converter.ToOrder(updateOrder.Order),
-                                Sessionid = updateOrder.SessionId,
-                                Time = Timestamp.FromDateTime(updateOrder.Time.ToUniversalTime()),
-                                Message = updateOrder.Message,
-                                SlotName = updateOrder.SlotName
-                            }
-                        });
+
+                        throw;
                     }
+                    
+                    
                 }).Wait();
             }
-            catch
+            catch(Exception e)
             {
                 taskCompletionSource.SetCanceled();
             }
@@ -127,51 +137,72 @@ namespace History
         {
             var taskCompletionSource = new TaskCompletionSource<SubscribeEventsResponse>();
 
-            BalanceCollection.CollectionChanged += (_, args) => Handler(args, request, responseStream, taskCompletionSource);
-            List<OrderChange> orderChanges = GetOrderChangesByUser(request.Sessionid);
-            foreach (var record in orderChanges)
+            try
             {
-                await responseStream.WriteAsync(new SubscribeEventsResponse
-                {
-                    Order = new PublishOrderEvent
-                    {
-                        ChangesType = (TradeBot.Common.v1.ChangesType)record.ChangesType,
-                        Order = Converter.ToOrder(record.Order),
-                        Sessionid = record.SessionId,
-                        Time = Timestamp.FromDateTime(record.Time.ToUniversalTime()),
-                        Message = record.Message,
-                        SlotName = record.SlotName
-                    }
-                });
-            }
 
-            OrderCollection.CollectionChanged += (_, args) => Handler(args, request, responseStream, taskCompletionSource);
-            List<BalanceChange> balanceChanges = GetBalanceChangesByUser(request.Sessionid);
-            BalanceChange currentBalance = balanceChanges.ElementAt(0);
-            foreach (var record in balanceChanges)
-            {
-                if (record.Time.Year != currentBalance.Time.Year || record.Time.Month != currentBalance.Time.Month
-                    || record.Time.Day != currentBalance.Time.Day)
+                BalanceCollection.CollectionChanged += (_, args) => Handler(args, request, responseStream, taskCompletionSource);
+                List<OrderChange> orderChanges = GetOrderChangesByUser(request.Sessionid);
+                foreach (var record in orderChanges)
                 {
                     await responseStream.WriteAsync(new SubscribeEventsResponse
                     {
-                        Balance = new PublishBalanceEvent
+                        Order = new PublishOrderEvent
                         {
-                            Balance = Converter.ToBalance(currentBalance.Balance),
-                            Sessionid = currentBalance.SessionId,
-                            Time = Timestamp.FromDateTime(new DateTime(currentBalance.Time.Year, currentBalance.Time.Month, currentBalance.Time.Day, 0, 0, 0).ToUniversalTime())
+                            ChangesType = (TradeBot.Common.v1.ChangesType)record.ChangesType,
+                            Order = Converter.ToOrder(record.Order),
+                            Sessionid = record.SessionId,
+                            Time = Timestamp.FromDateTime(record.Time.ToUniversalTime()),
+                            Message = record.Message,
+                            SlotName = record.SlotName
                         }
-                    }); ;
+                    });
                 }
-                currentBalance = record;
+
+                OrderCollection.CollectionChanged += (_, args) => Handler(args, request, responseStream, taskCompletionSource);
+                List<BalanceChange> balanceChanges = GetBalanceChangesByUser(request.Sessionid);
+                if (balanceChanges.Count > 0)
+                {
+                    BalanceChange currentBalance = balanceChanges.ElementAt(0);
+                    foreach (var record in balanceChanges)
+                    {
+                        if (record.Time.Year != currentBalance.Time.Year || record.Time.Month != currentBalance.Time.Month
+                            || record.Time.Day != currentBalance.Time.Day)
+                        {
+                            var a = Timestamp.FromDateTime(new DateTime(currentBalance.Time.Year, currentBalance.Time.Month, currentBalance.Time.Day, 0, 0, 0).ToUniversalTime());
+                            await responseStream.WriteAsync(new SubscribeEventsResponse
+                            {
+                                Balance = new PublishBalanceEvent
+                                {
+                                    Balance = Converter.ToBalance(currentBalance.Balance),
+                                    Sessionid = currentBalance.SessionId,
+                                    Time = a
+                                }
+                            }); ;
+                        }
+                        currentBalance = record;
+                    }
+                }
+                return await taskCompletionSource.Task;
+            }
+            catch(Exception e) 
+            {
+                Log.Error("History:"+e.Message);
             }
             return await taskCompletionSource.Task;
         }
 
         private static List<OrderChange> GetOrderChangesByUser(string user)
         {
-            var db = new DataContext();
-            return db.OrderRecords.Include(x => x.Order).ToList();
+            try
+            {
+                var db = new DataContext();
+                return db.OrderRecords.Include(x => x.Order).ToList();
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
+            
         }
 
         private static List<BalanceChange> GetBalanceChangesByUser(string user)

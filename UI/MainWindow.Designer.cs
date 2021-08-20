@@ -1,4 +1,6 @@
 ﻿
+using ZedGraph;
+
 namespace UI
 {
     partial class TradeBotUi
@@ -30,15 +32,15 @@ namespace UI
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            this.zedGraph = new ZedGraph.ZedGraphControl();
-            this.zedGraph_1 = new ZedGraph.ZedGraphControl();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
+            this.BalanceGraph = new ZedGraph.ZedGraphControl();
+            this.OrderGraph = new ZedGraph.ZedGraphControl();
             this.Tabs = new System.Windows.Forms.TabControl();
             this.LogsPage = new System.Windows.Forms.TabPage();
             this.EventConsole = new System.Windows.Forms.RichTextBox();
@@ -150,41 +152,42 @@ namespace UI
             ((System.ComponentModel.ISupportInitialize)(this.ErrorProviderSignUp)).BeginInit();
             this.SuspendLayout();
             // 
-            // zedGraph
+            // BalanceGraph
             // 
-            this.zedGraph.AutoSize = true;
-            this.zedGraph.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.zedGraph.Location = new System.Drawing.Point(3, 2);
-            this.zedGraph.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
-            this.zedGraph.Name = "zedGraph";
-            this.zedGraph.ScrollGrace = 0D;
-            this.zedGraph.ScrollMaxX = 0D;
-            this.zedGraph.ScrollMaxY = 0D;
-            this.zedGraph.ScrollMaxY2 = 0D;
-            this.zedGraph.ScrollMinX = 0D;
-            this.zedGraph.ScrollMinY = 0D;
-            this.zedGraph.ScrollMinY2 = 0D;
-            this.zedGraph.Size = new System.Drawing.Size(1039, 411);
-            this.zedGraph.TabIndex = 0;
-            this.zedGraph.UseExtendedPrintDialog = true;
+            this.BalanceGraph.AutoSize = true;
+            this.BalanceGraph.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.BalanceGraph.Location = new System.Drawing.Point(3, 2);
+            this.BalanceGraph.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
+            this.BalanceGraph.Name = "BalanceGraph";
+            this.BalanceGraph.ScrollGrace = 0D;
+            this.BalanceGraph.ScrollMaxX = 0D;
+            this.BalanceGraph.ScrollMaxY = 0D;
+            this.BalanceGraph.ScrollMaxY2 = 0D;
+            this.BalanceGraph.ScrollMinX = 0D;
+            this.BalanceGraph.ScrollMinY = 0D;
+            this.BalanceGraph.ScrollMinY2 = 0D;
+            this.BalanceGraph.Size = new System.Drawing.Size(906, 296);
+            this.BalanceGraph.TabIndex = 0;
+            this.BalanceGraph.UseExtendedPrintDialog = true;
+            this.BalanceGraph.ZoomEvent += zedGraph_ZoomEvent;
             // 
-            // zedGraph_1
+            // OrderGraph
             // 
-            this.zedGraph_1.AutoSize = true;
-            this.zedGraph_1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.zedGraph_1.Location = new System.Drawing.Point(3, 2);
-            this.zedGraph_1.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
-            this.zedGraph_1.Name = "zedGraph_1";
-            this.zedGraph_1.ScrollGrace = 0D;
-            this.zedGraph_1.ScrollMaxX = 0D;
-            this.zedGraph_1.ScrollMaxY = 0D;
-            this.zedGraph_1.ScrollMaxY2 = 0D;
-            this.zedGraph_1.ScrollMinX = 0D;
-            this.zedGraph_1.ScrollMinY = 0D;
-            this.zedGraph_1.ScrollMinY2 = 0D;
-            this.zedGraph_1.Size = new System.Drawing.Size(1039, 411);
-            this.zedGraph_1.TabIndex = 0;
-            this.zedGraph_1.UseExtendedPrintDialog = true;
+            this.OrderGraph.AutoSize = true;
+            this.OrderGraph.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.OrderGraph.Location = new System.Drawing.Point(3, 2);
+            this.OrderGraph.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
+            this.OrderGraph.Name = "OrderGraph";
+            this.OrderGraph.ScrollGrace = 0D;
+            this.OrderGraph.ScrollMaxX = 0D;
+            this.OrderGraph.ScrollMaxY = 0D;
+            this.OrderGraph.ScrollMaxY2 = 0D;
+            this.OrderGraph.ScrollMinX = 0D;
+            this.OrderGraph.ScrollMinY = 0D;
+            this.OrderGraph.ScrollMinY2 = 0D;
+            this.OrderGraph.Size = new System.Drawing.Size(906, 296);
+            this.OrderGraph.TabIndex = 0;
+            this.OrderGraph.UseExtendedPrintDialog = true;
             // 
             // Tabs
             // 
@@ -195,22 +198,22 @@ namespace UI
             this.Tabs.Controls.Add(this.FilledOrdersPage);
             this.Tabs.Controls.Add(this.ActiveOrdersPage);
             this.Tabs.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.Tabs.Location = new System.Drawing.Point(0, 367);
+            this.Tabs.Location = new System.Drawing.Point(0, 275);
             this.Tabs.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Tabs.Multiline = true;
             this.Tabs.Name = "Tabs";
             this.Tabs.SelectedIndex = 0;
-            this.Tabs.Size = new System.Drawing.Size(1067, 485);
+            this.Tabs.Size = new System.Drawing.Size(934, 364);
             this.Tabs.TabIndex = 26;
             // 
             // LogsPage
             // 
             this.LogsPage.Controls.Add(this.EventConsole);
-            this.LogsPage.Location = new System.Drawing.Point(4, 29);
+            this.LogsPage.Location = new System.Drawing.Point(4, 26);
             this.LogsPage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.LogsPage.Name = "LogsPage";
             this.LogsPage.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.LogsPage.Size = new System.Drawing.Size(1059, 452);
+            this.LogsPage.Size = new System.Drawing.Size(926, 334);
             this.LogsPage.TabIndex = 0;
             this.LogsPage.Text = "Logs";
             this.LogsPage.UseVisualStyleBackColor = true;
@@ -224,18 +227,18 @@ namespace UI
             this.EventConsole.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.EventConsole.Name = "EventConsole";
             this.EventConsole.ReadOnly = true;
-            this.EventConsole.Size = new System.Drawing.Size(1053, 448);
+            this.EventConsole.Size = new System.Drawing.Size(920, 330);
             this.EventConsole.TabIndex = 24;
             this.EventConsole.Text = "";
             // 
             // GraphicsPage
             // 
             this.GraphicsPage.Controls.Add(this.tabControl1);
-            this.GraphicsPage.Location = new System.Drawing.Point(4, 29);
+            this.GraphicsPage.Location = new System.Drawing.Point(4, 26);
             this.GraphicsPage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.GraphicsPage.Name = "GraphicsPage";
             this.GraphicsPage.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.GraphicsPage.Size = new System.Drawing.Size(1059, 452);
+            this.GraphicsPage.Size = new System.Drawing.Size(926, 334);
             this.GraphicsPage.TabIndex = 1;
             this.GraphicsPage.Text = "Graphics";
             this.GraphicsPage.UseVisualStyleBackColor = true;
@@ -249,29 +252,29 @@ namespace UI
             this.tabControl1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1053, 448);
+            this.tabControl1.Size = new System.Drawing.Size(920, 330);
             this.tabControl1.TabIndex = 0;
             // 
             // BalanceGraphPage
             // 
-            this.BalanceGraphPage.Controls.Add(this.zedGraph);
-            this.BalanceGraphPage.Location = new System.Drawing.Point(4, 29);
+            this.BalanceGraphPage.Controls.Add(this.BalanceGraph);
+            this.BalanceGraphPage.Location = new System.Drawing.Point(4, 26);
             this.BalanceGraphPage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.BalanceGraphPage.Name = "BalanceGraphPage";
             this.BalanceGraphPage.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.BalanceGraphPage.Size = new System.Drawing.Size(1045, 415);
+            this.BalanceGraphPage.Size = new System.Drawing.Size(912, 300);
             this.BalanceGraphPage.TabIndex = 0;
             this.BalanceGraphPage.Text = "Balance Graph";
             this.BalanceGraphPage.UseVisualStyleBackColor = true;
             // 
             // ClosedOrdersPage
             // 
-            this.ClosedOrdersPage.Controls.Add(this.zedGraph_1);
-            this.ClosedOrdersPage.Location = new System.Drawing.Point(4, 29);
+            this.ClosedOrdersPage.Controls.Add(this.OrderGraph);
+            this.ClosedOrdersPage.Location = new System.Drawing.Point(4, 26);
             this.ClosedOrdersPage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ClosedOrdersPage.Name = "ClosedOrdersPage";
             this.ClosedOrdersPage.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.ClosedOrdersPage.Size = new System.Drawing.Size(1045, 415);
+            this.ClosedOrdersPage.Size = new System.Drawing.Size(912, 300);
             this.ClosedOrdersPage.TabIndex = 1;
             this.ClosedOrdersPage.Text = "Closed Orders Graph";
             this.ClosedOrdersPage.UseVisualStyleBackColor = true;
@@ -279,10 +282,10 @@ namespace UI
             // FilledOrdersPage
             // 
             this.FilledOrdersPage.Controls.Add(this.FilledOrdersDataGridView);
-            this.FilledOrdersPage.Location = new System.Drawing.Point(4, 29);
+            this.FilledOrdersPage.Location = new System.Drawing.Point(4, 26);
             this.FilledOrdersPage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.FilledOrdersPage.Name = "FilledOrdersPage";
-            this.FilledOrdersPage.Size = new System.Drawing.Size(1059, 452);
+            this.FilledOrdersPage.Size = new System.Drawing.Size(926, 334);
             this.FilledOrdersPage.TabIndex = 2;
             this.FilledOrdersPage.Text = "Filled Orders";
             this.FilledOrdersPage.UseVisualStyleBackColor = true;
@@ -310,13 +313,13 @@ namespace UI
             this.FilledOrdersDataGridView.ReadOnly = true;
             this.FilledOrdersDataGridView.RowHeadersVisible = false;
             this.FilledOrdersDataGridView.RowHeadersWidth = 51;
-            dataGridViewCellStyle1.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.WindowText;
-            this.FilledOrdersDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle8.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle8.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle8.SelectionBackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle8.SelectionForeColor = System.Drawing.SystemColors.WindowText;
+            this.FilledOrdersDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle8;
             this.FilledOrdersDataGridView.RowTemplate.Height = 29;
-            this.FilledOrdersDataGridView.Size = new System.Drawing.Size(1060, 450);
+            this.FilledOrdersDataGridView.Size = new System.Drawing.Size(928, 338);
             this.FilledOrdersDataGridView.TabIndex = 0;
             // 
             // SlotName
@@ -370,10 +373,10 @@ namespace UI
             // ActiveOrdersPage
             // 
             this.ActiveOrdersPage.Controls.Add(this.ActiveOrdersDataGridView);
-            this.ActiveOrdersPage.Location = new System.Drawing.Point(4, 29);
+            this.ActiveOrdersPage.Location = new System.Drawing.Point(4, 26);
             this.ActiveOrdersPage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ActiveOrdersPage.Name = "ActiveOrdersPage";
-            this.ActiveOrdersPage.Size = new System.Drawing.Size(1059, 452);
+            this.ActiveOrdersPage.Size = new System.Drawing.Size(926, 334);
             this.ActiveOrdersPage.TabIndex = 3;
             this.ActiveOrdersPage.Text = "Active Orders";
             this.ActiveOrdersPage.UseVisualStyleBackColor = true;
@@ -401,13 +404,13 @@ namespace UI
             this.ActiveOrdersDataGridView.ReadOnly = true;
             this.ActiveOrdersDataGridView.RowHeadersVisible = false;
             this.ActiveOrdersDataGridView.RowHeadersWidth = 51;
-            dataGridViewCellStyle2.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.WindowText;
-            this.ActiveOrdersDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle9.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle9.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle9.SelectionBackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle9.SelectionForeColor = System.Drawing.SystemColors.WindowText;
+            this.ActiveOrdersDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle9;
             this.ActiveOrdersDataGridView.RowTemplate.Height = 29;
-            this.ActiveOrdersDataGridView.Size = new System.Drawing.Size(1059, 453);
+            this.ActiveOrdersDataGridView.Size = new System.Drawing.Size(927, 340);
             this.ActiveOrdersDataGridView.TabIndex = 1;
             // 
             // dataGridViewTextBoxColumn3
@@ -462,41 +465,41 @@ namespace UI
             // 
             this.ConfigAvailableBalanceTxb.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.ConfigAvailableBalanceTxb.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.ConfigAvailableBalanceTxb.Location = new System.Drawing.Point(185, 120);
-            this.ConfigAvailableBalanceTxb.Margin = new System.Windows.Forms.Padding(4);
+            this.ConfigAvailableBalanceTxb.Location = new System.Drawing.Point(162, 90);
+            this.ConfigAvailableBalanceTxb.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.ConfigAvailableBalanceTxb.Name = "ConfigAvailableBalanceTxb";
-            this.ConfigAvailableBalanceTxb.Size = new System.Drawing.Size(90, 26);
+            this.ConfigAvailableBalanceTxb.Size = new System.Drawing.Size(79, 22);
             this.ConfigAvailableBalanceTxb.TabIndex = 1;
             // 
             // ConfigRequiredProfitTxb
             // 
             this.ConfigRequiredProfitTxb.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.ConfigRequiredProfitTxb.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.ConfigRequiredProfitTxb.Location = new System.Drawing.Point(185, 181);
-            this.ConfigRequiredProfitTxb.Margin = new System.Windows.Forms.Padding(4);
+            this.ConfigRequiredProfitTxb.Location = new System.Drawing.Point(162, 136);
+            this.ConfigRequiredProfitTxb.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.ConfigRequiredProfitTxb.Name = "ConfigRequiredProfitTxb";
-            this.ConfigRequiredProfitTxb.Size = new System.Drawing.Size(90, 26);
+            this.ConfigRequiredProfitTxb.Size = new System.Drawing.Size(79, 22);
             this.ConfigRequiredProfitTxb.TabIndex = 2;
             // 
             // ConfigUpdatePriceRangeTxb
             // 
             this.ConfigUpdatePriceRangeTxb.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.ConfigUpdatePriceRangeTxb.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.ConfigUpdatePriceRangeTxb.Location = new System.Drawing.Point(185, 59);
-            this.ConfigUpdatePriceRangeTxb.Margin = new System.Windows.Forms.Padding(4);
+            this.ConfigUpdatePriceRangeTxb.Location = new System.Drawing.Point(162, 44);
+            this.ConfigUpdatePriceRangeTxb.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.ConfigUpdatePriceRangeTxb.Name = "ConfigUpdatePriceRangeTxb";
-            this.ConfigUpdatePriceRangeTxb.Size = new System.Drawing.Size(90, 26);
+            this.ConfigUpdatePriceRangeTxb.Size = new System.Drawing.Size(79, 22);
             this.ConfigUpdatePriceRangeTxb.TabIndex = 4;
             // 
             // ConfigAvailableBalanceLbl
             // 
             this.ConfigAvailableBalanceLbl.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.ConfigAvailableBalanceLbl.AutoSize = true;
-            this.ConfigAvailableBalanceLbl.Location = new System.Drawing.Point(20, 116);
-            this.ConfigAvailableBalanceLbl.Margin = new System.Windows.Forms.Padding(3);
+            this.ConfigAvailableBalanceLbl.Location = new System.Drawing.Point(18, 87);
+            this.ConfigAvailableBalanceLbl.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ConfigAvailableBalanceLbl.Name = "ConfigAvailableBalanceLbl";
-            this.ConfigAvailableBalanceLbl.Padding = new System.Windows.Forms.Padding(5);
-            this.ConfigAvailableBalanceLbl.Size = new System.Drawing.Size(155, 30);
+            this.ConfigAvailableBalanceLbl.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ConfigAvailableBalanceLbl.Size = new System.Drawing.Size(127, 25);
             this.ConfigAvailableBalanceLbl.TabIndex = 7;
             this.ConfigAvailableBalanceLbl.Text = "Available balance";
             // 
@@ -504,9 +507,9 @@ namespace UI
             // 
             this.ConfigRequiredProfitl.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ConfigRequiredProfitl.AutoSize = true;
-            this.ConfigRequiredProfitl.Location = new System.Drawing.Point(-432, 104);
+            this.ConfigRequiredProfitl.Location = new System.Drawing.Point(-378, 78);
             this.ConfigRequiredProfitl.Name = "ConfigRequiredProfitl";
-            this.ConfigRequiredProfitl.Size = new System.Drawing.Size(117, 20);
+            this.ConfigRequiredProfitl.Size = new System.Drawing.Size(96, 17);
             this.ConfigRequiredProfitl.TabIndex = 8;
             this.ConfigRequiredProfitl.Text = "Required profit";
             // 
@@ -514,11 +517,11 @@ namespace UI
             // 
             this.ConfigVolumeOfContractslbl.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.ConfigVolumeOfContractslbl.AutoSize = true;
-            this.ConfigVolumeOfContractslbl.Location = new System.Drawing.Point(7, 26);
-            this.ConfigVolumeOfContractslbl.Margin = new System.Windows.Forms.Padding(3);
+            this.ConfigVolumeOfContractslbl.Location = new System.Drawing.Point(6, 20);
+            this.ConfigVolumeOfContractslbl.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ConfigVolumeOfContractslbl.Name = "ConfigVolumeOfContractslbl";
-            this.ConfigVolumeOfContractslbl.Padding = new System.Windows.Forms.Padding(5);
-            this.ConfigVolumeOfContractslbl.Size = new System.Drawing.Size(168, 30);
+            this.ConfigVolumeOfContractslbl.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ConfigVolumeOfContractslbl.Size = new System.Drawing.Size(138, 25);
             this.ConfigVolumeOfContractslbl.TabIndex = 9;
             this.ConfigVolumeOfContractslbl.Text = "Volume of contracts";
             // 
@@ -526,11 +529,11 @@ namespace UI
             // 
             this.ConfigUpdatePriceRangelbl.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.ConfigUpdatePriceRangelbl.AutoSize = true;
-            this.ConfigUpdatePriceRangelbl.Location = new System.Drawing.Point(10, 55);
-            this.ConfigUpdatePriceRangelbl.Margin = new System.Windows.Forms.Padding(3);
+            this.ConfigUpdatePriceRangelbl.Location = new System.Drawing.Point(9, 41);
+            this.ConfigUpdatePriceRangelbl.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ConfigUpdatePriceRangelbl.Name = "ConfigUpdatePriceRangelbl";
-            this.ConfigUpdatePriceRangelbl.Padding = new System.Windows.Forms.Padding(5);
-            this.ConfigUpdatePriceRangelbl.Size = new System.Drawing.Size(165, 30);
+            this.ConfigUpdatePriceRangelbl.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ConfigUpdatePriceRangelbl.Size = new System.Drawing.Size(133, 25);
             this.ConfigUpdatePriceRangelbl.TabIndex = 10;
             this.ConfigUpdatePriceRangelbl.Text = "Update price range";
             // 
@@ -538,11 +541,11 @@ namespace UI
             // 
             this.ConfigIntervalOfAnalysislbl.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.ConfigIntervalOfAnalysislbl.AutoSize = true;
-            this.ConfigIntervalOfAnalysislbl.Location = new System.Drawing.Point(21, 87);
-            this.ConfigIntervalOfAnalysislbl.Margin = new System.Windows.Forms.Padding(3);
+            this.ConfigIntervalOfAnalysislbl.Location = new System.Drawing.Point(18, 65);
+            this.ConfigIntervalOfAnalysislbl.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ConfigIntervalOfAnalysislbl.Name = "ConfigIntervalOfAnalysislbl";
-            this.ConfigIntervalOfAnalysislbl.Padding = new System.Windows.Forms.Padding(5);
-            this.ConfigIntervalOfAnalysislbl.Size = new System.Drawing.Size(154, 30);
+            this.ConfigIntervalOfAnalysislbl.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ConfigIntervalOfAnalysislbl.Size = new System.Drawing.Size(125, 25);
             this.ConfigIntervalOfAnalysislbl.TabIndex = 11;
             this.ConfigIntervalOfAnalysislbl.Text = "Interval of analysis";
             // 
@@ -555,7 +558,7 @@ namespace UI
             this.ShowSignUpPanel.Location = new System.Drawing.Point(3, 2);
             this.ShowSignUpPanel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ShowSignUpPanel.Name = "ShowSignUpPanel";
-            this.ShowSignUpPanel.Size = new System.Drawing.Size(142, 60);
+            this.ShowSignUpPanel.Size = new System.Drawing.Size(124, 45);
             this.ShowSignUpPanel.TabIndex = 14;
             this.ShowSignUpPanel.Text = "Sign Up";
             this.ShowSignUpPanel.UseVisualStyleBackColor = true;
@@ -567,10 +570,10 @@ namespace UI
             this.ShowSignInPanel.FlatAppearance.BorderSize = 0;
             this.ShowSignInPanel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.ShowSignInPanel.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.ShowSignInPanel.Location = new System.Drawing.Point(3, 59);
+            this.ShowSignInPanel.Location = new System.Drawing.Point(3, 44);
             this.ShowSignInPanel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ShowSignInPanel.Name = "ShowSignInPanel";
-            this.ShowSignInPanel.Size = new System.Drawing.Size(142, 60);
+            this.ShowSignInPanel.Size = new System.Drawing.Size(124, 45);
             this.ShowSignInPanel.TabIndex = 15;
             this.ShowSignInPanel.Text = "Sign In";
             this.ShowSignInPanel.UseVisualStyleBackColor = true;
@@ -582,10 +585,10 @@ namespace UI
             this.ShowMainMenu.FlatAppearance.BorderSize = 0;
             this.ShowMainMenu.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.ShowMainMenu.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.ShowMainMenu.Location = new System.Drawing.Point(3, 120);
+            this.ShowMainMenu.Location = new System.Drawing.Point(3, 90);
             this.ShowMainMenu.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ShowMainMenu.Name = "ShowMainMenu";
-            this.ShowMainMenu.Size = new System.Drawing.Size(142, 60);
+            this.ShowMainMenu.Size = new System.Drawing.Size(124, 45);
             this.ShowMainMenu.TabIndex = 16;
             this.ShowMainMenu.Text = "Main Menu";
             this.ShowMainMenu.UseVisualStyleBackColor = true;
@@ -595,10 +598,10 @@ namespace UI
             // 
             this.RegistrationButton.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.RegistrationButton.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.RegistrationButton.Location = new System.Drawing.Point(6, 238);
+            this.RegistrationButton.Location = new System.Drawing.Point(5, 178);
             this.RegistrationButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.RegistrationButton.Name = "RegistrationButton";
-            this.RegistrationButton.Size = new System.Drawing.Size(228, 60);
+            this.RegistrationButton.Size = new System.Drawing.Size(200, 45);
             this.RegistrationButton.TabIndex = 26;
             this.RegistrationButton.Text = "Sign Up";
             this.RegistrationButton.UseVisualStyleBackColor = true;
@@ -608,11 +611,11 @@ namespace UI
             // 
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label6.Location = new System.Drawing.Point(257, 128);
-            this.label6.Margin = new System.Windows.Forms.Padding(5);
+            this.label6.Location = new System.Drawing.Point(225, 96);
+            this.label6.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.label6.Name = "label6";
-            this.label6.Padding = new System.Windows.Forms.Padding(5);
-            this.label6.Size = new System.Drawing.Size(46, 30);
+            this.label6.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.label6.Size = new System.Drawing.Size(37, 25);
             this.label6.TabIndex = 25;
             this.label6.Text = "Key";
             // 
@@ -620,11 +623,11 @@ namespace UI
             // 
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label5.Location = new System.Drawing.Point(6, 128);
-            this.label5.Margin = new System.Windows.Forms.Padding(5);
+            this.label5.Location = new System.Drawing.Point(5, 96);
+            this.label5.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.label5.Name = "label5";
-            this.label5.Padding = new System.Windows.Forms.Padding(5);
-            this.label5.Size = new System.Drawing.Size(89, 30);
+            this.label5.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.label5.Size = new System.Drawing.Size(71, 25);
             this.label5.TabIndex = 24;
             this.label5.Text = "Password";
             // 
@@ -632,11 +635,11 @@ namespace UI
             // 
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label4.Location = new System.Drawing.Point(6, 58);
-            this.label4.Margin = new System.Windows.Forms.Padding(5);
+            this.label4.Location = new System.Drawing.Point(5, 44);
+            this.label4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.label4.Name = "label4";
-            this.label4.Padding = new System.Windows.Forms.Padding(5);
-            this.label4.Size = new System.Drawing.Size(58, 30);
+            this.label4.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.label4.Size = new System.Drawing.Size(48, 25);
             this.label4.TabIndex = 23;
             this.label4.Text = "Login";
             // 
@@ -644,61 +647,61 @@ namespace UI
             // 
             this.ConfigTokenl.AutoSize = true;
             this.ConfigTokenl.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.ConfigTokenl.Location = new System.Drawing.Point(255, 58);
-            this.ConfigTokenl.Margin = new System.Windows.Forms.Padding(5);
+            this.ConfigTokenl.Location = new System.Drawing.Point(223, 44);
+            this.ConfigTokenl.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.ConfigTokenl.Name = "ConfigTokenl";
-            this.ConfigTokenl.Padding = new System.Windows.Forms.Padding(5);
-            this.ConfigTokenl.Size = new System.Drawing.Size(66, 30);
+            this.ConfigTokenl.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ConfigTokenl.Size = new System.Drawing.Size(56, 25);
             this.ConfigTokenl.TabIndex = 21;
             this.ConfigTokenl.Text = "Secret";
             // 
             // SecretTxb
             // 
             this.SecretTxb.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.SecretTxb.Location = new System.Drawing.Point(264, 94);
+            this.SecretTxb.Location = new System.Drawing.Point(231, 70);
             this.SecretTxb.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.SecretTxb.Name = "SecretTxb";
-            this.SecretTxb.Size = new System.Drawing.Size(212, 26);
+            this.SecretTxb.Size = new System.Drawing.Size(186, 22);
             this.SecretTxb.TabIndex = 3;
             this.SecretTxb.Text = "PhVLNBRGA199lGgrQ2bbf59Ux7yRsgwkn-sfigW7rMOPoPWh";
             // 
             // KeyTxb
             // 
             this.KeyTxb.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.KeyTxb.Location = new System.Drawing.Point(264, 162);
+            this.KeyTxb.Location = new System.Drawing.Point(231, 122);
             this.KeyTxb.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.KeyTxb.Name = "KeyTxb";
-            this.KeyTxb.Size = new System.Drawing.Size(212, 26);
+            this.KeyTxb.Size = new System.Drawing.Size(186, 22);
             this.KeyTxb.TabIndex = 20;
             this.KeyTxb.Text = "0n8sicC9Y8v3iuwtDDkJ44IO";
             // 
             // RegPass
             // 
             this.RegPass.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.RegPass.Location = new System.Drawing.Point(16, 160);
+            this.RegPass.Location = new System.Drawing.Point(14, 120);
             this.RegPass.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.RegPass.Name = "RegPass";
-            this.RegPass.Size = new System.Drawing.Size(210, 26);
+            this.RegPass.Size = new System.Drawing.Size(184, 22);
             this.RegPass.TabIndex = 1;
             this.RegPass.UseSystemPasswordChar = true;
             // 
             // RegLog
             // 
             this.RegLog.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.RegLog.Location = new System.Drawing.Point(16, 95);
+            this.RegLog.Location = new System.Drawing.Point(14, 71);
             this.RegLog.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.RegLog.Name = "RegLog";
-            this.RegLog.Size = new System.Drawing.Size(210, 26);
+            this.RegLog.Size = new System.Drawing.Size(184, 22);
             this.RegLog.TabIndex = 0;
             // 
             // LoginButton
             // 
             this.LoginButton.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.LoginButton.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.LoginButton.Location = new System.Drawing.Point(6, 238);
+            this.LoginButton.Location = new System.Drawing.Point(5, 178);
             this.LoginButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.LoginButton.Name = "LoginButton";
-            this.LoginButton.Size = new System.Drawing.Size(228, 60);
+            this.LoginButton.Size = new System.Drawing.Size(200, 45);
             this.LoginButton.TabIndex = 35;
             this.LoginButton.Text = "Sign In";
             this.LoginButton.UseVisualStyleBackColor = true;
@@ -708,21 +711,21 @@ namespace UI
             // 
             this.label8.AutoSize = true;
             this.label8.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label8.Location = new System.Drawing.Point(6, 128);
-            this.label8.Margin = new System.Windows.Forms.Padding(5);
+            this.label8.Location = new System.Drawing.Point(5, 96);
+            this.label8.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.label8.Name = "label8";
-            this.label8.Padding = new System.Windows.Forms.Padding(5);
-            this.label8.Size = new System.Drawing.Size(89, 30);
+            this.label8.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.label8.Size = new System.Drawing.Size(71, 25);
             this.label8.TabIndex = 33;
             this.label8.Text = "Password";
             // 
             // LogLogTextBox
             // 
             this.LogLogTextBox.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.LogLogTextBox.Location = new System.Drawing.Point(16, 95);
+            this.LogLogTextBox.Location = new System.Drawing.Point(14, 71);
             this.LogLogTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.LogLogTextBox.Name = "LogLogTextBox";
-            this.LogLogTextBox.Size = new System.Drawing.Size(210, 26);
+            this.LogLogTextBox.Size = new System.Drawing.Size(184, 22);
             this.LogLogTextBox.TabIndex = 27;
             this.LogLogTextBox.Text = "a@mail.ru";
             // 
@@ -730,21 +733,21 @@ namespace UI
             // 
             this.label9.AutoSize = true;
             this.label9.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label9.Location = new System.Drawing.Point(6, 58);
-            this.label9.Margin = new System.Windows.Forms.Padding(5);
+            this.label9.Location = new System.Drawing.Point(5, 44);
+            this.label9.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.label9.Name = "label9";
-            this.label9.Padding = new System.Windows.Forms.Padding(5);
-            this.label9.Size = new System.Drawing.Size(58, 30);
+            this.label9.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.label9.Size = new System.Drawing.Size(48, 25);
             this.label9.TabIndex = 32;
             this.label9.Text = "Login";
             // 
             // LogPassTextBox
             // 
             this.LogPassTextBox.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.LogPassTextBox.Location = new System.Drawing.Point(16, 160);
+            this.LogPassTextBox.Location = new System.Drawing.Point(14, 120);
             this.LogPassTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.LogPassTextBox.Name = "LogPassTextBox";
-            this.LogPassTextBox.Size = new System.Drawing.Size(210, 26);
+            this.LogPassTextBox.Size = new System.Drawing.Size(184, 22);
             this.LogPassTextBox.TabIndex = 28;
             this.LogPassTextBox.Text = "123";
             this.LogPassTextBox.UseSystemPasswordChar = true;
@@ -775,11 +778,11 @@ namespace UI
             this.MainMenuGroupBox.Controls.Add(this.ConfigRequiredProfitTxb);
             this.MainMenuGroupBox.Controls.Add(this.ConfigVolumeOfContractslbl);
             this.MainMenuGroupBox.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.MainMenuGroupBox.Location = new System.Drawing.Point(153, 0);
+            this.MainMenuGroupBox.Location = new System.Drawing.Point(134, 0);
             this.MainMenuGroupBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.MainMenuGroupBox.Name = "MainMenuGroupBox";
             this.MainMenuGroupBox.Padding = new System.Windows.Forms.Padding(0);
-            this.MainMenuGroupBox.Size = new System.Drawing.Size(760, 325);
+            this.MainMenuGroupBox.Size = new System.Drawing.Size(665, 244);
             this.MainMenuGroupBox.TabIndex = 20;
             this.MainMenuGroupBox.TabStop = false;
             this.MainMenuGroupBox.Text = "Main Menu";
@@ -787,10 +790,10 @@ namespace UI
             // RemoveRowButton
             // 
             this.RemoveRowButton.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.RemoveRowButton.Location = new System.Drawing.Point(696, 293);
+            this.RemoveRowButton.Location = new System.Drawing.Point(609, 220);
             this.RemoveRowButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.RemoveRowButton.Name = "RemoveRowButton";
-            this.RemoveRowButton.Size = new System.Drawing.Size(62, 30);
+            this.RemoveRowButton.Size = new System.Drawing.Size(54, 22);
             this.RemoveRowButton.TabIndex = 23;
             this.RemoveRowButton.Text = "-";
             this.RemoveRowButton.UseVisualStyleBackColor = true;
@@ -799,10 +802,10 @@ namespace UI
             // AddRowButton
             // 
             this.AddRowButton.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.AddRowButton.Location = new System.Drawing.Point(635, 293);
+            this.AddRowButton.Location = new System.Drawing.Point(556, 220);
             this.AddRowButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.AddRowButton.Name = "AddRowButton";
-            this.AddRowButton.Size = new System.Drawing.Size(62, 30);
+            this.AddRowButton.Size = new System.Drawing.Size(54, 22);
             this.AddRowButton.TabIndex = 22;
             this.AddRowButton.Text = "+";
             this.AddRowButton.UseVisualStyleBackColor = true;
@@ -816,10 +819,10 @@ namespace UI
             "XBTUSD",
             "ETHUSD",
             "DOGEUSD"});
-            this.SlotsComboBox.Location = new System.Drawing.Point(537, 294);
+            this.SlotsComboBox.Location = new System.Drawing.Point(470, 220);
             this.SlotsComboBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.SlotsComboBox.Name = "SlotsComboBox";
-            this.SlotsComboBox.Size = new System.Drawing.Size(99, 28);
+            this.SlotsComboBox.Size = new System.Drawing.Size(87, 25);
             this.SlotsComboBox.TabIndex = 25;
             // 
             // ActiveSlotsDataGridView
@@ -830,55 +833,55 @@ namespace UI
             this.ActiveSlotsDataGridView.AllowUserToResizeRows = false;
             this.ActiveSlotsDataGridView.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.ActiveSlotsDataGridView.BackgroundColor = System.Drawing.Color.White;
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.ActiveSlotsDataGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle10.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle10.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle10.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle10.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle10.SelectionForeColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle10.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.ActiveSlotsDataGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle10;
             this.ActiveSlotsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.ActiveSlotsDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Slot,
             this.Launch});
-            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle6.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.ActiveSlotsDataGridView.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle13.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle13.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle13.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle13.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle13.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle13.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle13.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.ActiveSlotsDataGridView.DefaultCellStyle = dataGridViewCellStyle13;
             this.ActiveSlotsDataGridView.GridColor = System.Drawing.SystemColors.Control;
-            this.ActiveSlotsDataGridView.Location = new System.Drawing.Point(537, 12);
+            this.ActiveSlotsDataGridView.Location = new System.Drawing.Point(470, 9);
             this.ActiveSlotsDataGridView.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ActiveSlotsDataGridView.MultiSelect = false;
             this.ActiveSlotsDataGridView.Name = "ActiveSlotsDataGridView";
             this.ActiveSlotsDataGridView.ReadOnly = true;
             this.ActiveSlotsDataGridView.RowHeadersVisible = false;
             this.ActiveSlotsDataGridView.RowHeadersWidth = 51;
-            dataGridViewCellStyle7.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle7.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle7.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            this.ActiveSlotsDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle7;
+            dataGridViewCellStyle14.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle14.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle14.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle14.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            this.ActiveSlotsDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle14;
             this.ActiveSlotsDataGridView.RowTemplate.Height = 29;
             this.ActiveSlotsDataGridView.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.ActiveSlotsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.ActiveSlotsDataGridView.Size = new System.Drawing.Size(220, 284);
+            this.ActiveSlotsDataGridView.Size = new System.Drawing.Size(192, 213);
             this.ActiveSlotsDataGridView.TabIndex = 21;
             this.ActiveSlotsDataGridView.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DataGridView1_CellContentClick);
             this.ActiveSlotsDataGridView.SelectionChanged += new System.EventHandler(this.ActiveOrdersDataGridView_SelectionChanged);
             // 
             // Slot
             // 
-            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle4.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.WindowText;
-            this.Slot.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle11.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle11.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle11.SelectionBackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle11.SelectionForeColor = System.Drawing.SystemColors.WindowText;
+            this.Slot.DefaultCellStyle = dataGridViewCellStyle11;
             this.Slot.HeaderText = "Slot name";
             this.Slot.MinimumWidth = 6;
             this.Slot.Name = "Slot";
@@ -889,13 +892,13 @@ namespace UI
             // 
             // Launch
             // 
-            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle5.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle5.NullValue = false;
-            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.WindowText;
-            this.Launch.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle12.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle12.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle12.NullValue = false;
+            dataGridViewCellStyle12.SelectionBackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle12.SelectionForeColor = System.Drawing.SystemColors.WindowText;
+            this.Launch.DefaultCellStyle = dataGridViewCellStyle12;
             this.Launch.HeaderText = "Launch";
             this.Launch.MinimumWidth = 6;
             this.Launch.Name = "Launch";
@@ -909,19 +912,20 @@ namespace UI
             this.panel3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel3.Controls.Add(this.UpdateConfigButton);
             this.panel3.Controls.Add(this.RemoveMyOrdersButton);
-            this.panel3.Location = new System.Drawing.Point(354, 12);
+            this.panel3.Location = new System.Drawing.Point(310, 9);
+            this.panel3.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(186, 310);
+            this.panel3.Size = new System.Drawing.Size(163, 233);
             this.panel3.TabIndex = 27;
             // 
             // UpdateConfigButton
             // 
             this.UpdateConfigButton.FlatAppearance.BorderSize = 0;
             this.UpdateConfigButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.UpdateConfigButton.Location = new System.Drawing.Point(-1, 47);
+            this.UpdateConfigButton.Location = new System.Drawing.Point(-1, 35);
             this.UpdateConfigButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.UpdateConfigButton.Name = "UpdateConfigButton";
-            this.UpdateConfigButton.Size = new System.Drawing.Size(182, 42);
+            this.UpdateConfigButton.Size = new System.Drawing.Size(159, 32);
             this.UpdateConfigButton.TabIndex = 17;
             this.UpdateConfigButton.Text = "Update configuration";
             this.UpdateConfigButton.UseVisualStyleBackColor = true;
@@ -934,7 +938,7 @@ namespace UI
             this.RemoveMyOrdersButton.Location = new System.Drawing.Point(-1, 0);
             this.RemoveMyOrdersButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.RemoveMyOrdersButton.Name = "RemoveMyOrdersButton";
-            this.RemoveMyOrdersButton.Size = new System.Drawing.Size(182, 43);
+            this.RemoveMyOrdersButton.Size = new System.Drawing.Size(159, 32);
             this.RemoveMyOrdersButton.TabIndex = 16;
             this.RemoveMyOrdersButton.Text = "Remove my orders";
             this.RemoveMyOrdersButton.UseVisualStyleBackColor = true;
@@ -944,11 +948,11 @@ namespace UI
             // 
             this.ConfigRequiredProfitLbl.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.ConfigRequiredProfitLbl.AutoSize = true;
-            this.ConfigRequiredProfitLbl.Location = new System.Drawing.Point(49, 180);
-            this.ConfigRequiredProfitLbl.Margin = new System.Windows.Forms.Padding(3);
+            this.ConfigRequiredProfitLbl.Location = new System.Drawing.Point(43, 135);
+            this.ConfigRequiredProfitLbl.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ConfigRequiredProfitLbl.Name = "ConfigRequiredProfitLbl";
-            this.ConfigRequiredProfitLbl.Padding = new System.Windows.Forms.Padding(5);
-            this.ConfigRequiredProfitLbl.Size = new System.Drawing.Size(126, 30);
+            this.ConfigRequiredProfitLbl.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ConfigRequiredProfitLbl.Size = new System.Drawing.Size(103, 25);
             this.ConfigRequiredProfitLbl.TabIndex = 26;
             this.ConfigRequiredProfitLbl.Text = "Required Profit";
             // 
@@ -956,17 +960,17 @@ namespace UI
             // 
             this.BalanceLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.BalanceLabel.AutoSize = true;
-            this.BalanceLabel.Location = new System.Drawing.Point(85, 294);
+            this.BalanceLabel.Location = new System.Drawing.Point(74, 220);
             this.BalanceLabel.Name = "BalanceLabel";
-            this.BalanceLabel.Size = new System.Drawing.Size(0, 20);
+            this.BalanceLabel.Size = new System.Drawing.Size(0, 17);
             this.BalanceLabel.TabIndex = 20;
             // 
             // BalanceNameLbl
             // 
             this.BalanceNameLbl.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.BalanceNameLbl.Location = new System.Drawing.Point(7, 294);
+            this.BalanceNameLbl.Location = new System.Drawing.Point(6, 220);
             this.BalanceNameLbl.Name = "BalanceNameLbl";
-            this.BalanceNameLbl.Size = new System.Drawing.Size(74, 20);
+            this.BalanceNameLbl.Size = new System.Drawing.Size(65, 15);
             this.BalanceNameLbl.TabIndex = 19;
             this.BalanceNameLbl.Text = "Balance:";
             // 
@@ -994,10 +998,10 @@ namespace UI
             "1w",
             "2w",
             "1mon"});
-            this.ConfigIntervalOfAnalysisTxb.Location = new System.Drawing.Point(185, 89);
-            this.ConfigIntervalOfAnalysisTxb.Margin = new System.Windows.Forms.Padding(4);
+            this.ConfigIntervalOfAnalysisTxb.Location = new System.Drawing.Point(162, 67);
+            this.ConfigIntervalOfAnalysisTxb.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.ConfigIntervalOfAnalysisTxb.Name = "ConfigIntervalOfAnalysisTxb";
-            this.ConfigIntervalOfAnalysisTxb.Size = new System.Drawing.Size(90, 28);
+            this.ConfigIntervalOfAnalysisTxb.Size = new System.Drawing.Size(79, 25);
             this.ConfigIntervalOfAnalysisTxb.TabIndex = 15;
             // 
             // ConfigVolumeOfContractsTxb
@@ -1012,10 +1016,10 @@ namespace UI
             "3",
             "4",
             "5"});
-            this.ConfigVolumeOfContractsTxb.Location = new System.Drawing.Point(185, 28);
-            this.ConfigVolumeOfContractsTxb.Margin = new System.Windows.Forms.Padding(4);
+            this.ConfigVolumeOfContractsTxb.Location = new System.Drawing.Point(162, 21);
+            this.ConfigVolumeOfContractsTxb.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.ConfigVolumeOfContractsTxb.Name = "ConfigVolumeOfContractsTxb";
-            this.ConfigVolumeOfContractsTxb.Size = new System.Drawing.Size(90, 28);
+            this.ConfigVolumeOfContractsTxb.Size = new System.Drawing.Size(79, 25);
             this.ConfigVolumeOfContractsTxb.TabIndex = 14;
             // 
             // ConfigAlgorithmSensivityTxb
@@ -1029,21 +1033,21 @@ namespace UI
             "Medium",
             "High",
             "Ultra"});
-            this.ConfigAlgorithmSensivityTxb.Location = new System.Drawing.Point(185, 150);
-            this.ConfigAlgorithmSensivityTxb.Margin = new System.Windows.Forms.Padding(4);
+            this.ConfigAlgorithmSensivityTxb.Location = new System.Drawing.Point(162, 112);
+            this.ConfigAlgorithmSensivityTxb.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.ConfigAlgorithmSensivityTxb.Name = "ConfigAlgorithmSensivityTxb";
-            this.ConfigAlgorithmSensivityTxb.Size = new System.Drawing.Size(90, 28);
+            this.ConfigAlgorithmSensivityTxb.Size = new System.Drawing.Size(79, 25);
             this.ConfigAlgorithmSensivityTxb.TabIndex = 13;
             // 
             // ConfigAlgorithmSensLbl
             // 
             this.ConfigAlgorithmSensLbl.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.ConfigAlgorithmSensLbl.AutoSize = true;
-            this.ConfigAlgorithmSensLbl.Location = new System.Drawing.Point(23, 148);
-            this.ConfigAlgorithmSensLbl.Margin = new System.Windows.Forms.Padding(3);
+            this.ConfigAlgorithmSensLbl.Location = new System.Drawing.Point(20, 111);
+            this.ConfigAlgorithmSensLbl.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ConfigAlgorithmSensLbl.Name = "ConfigAlgorithmSensLbl";
-            this.ConfigAlgorithmSensLbl.Padding = new System.Windows.Forms.Padding(5);
-            this.ConfigAlgorithmSensLbl.Size = new System.Drawing.Size(152, 30);
+            this.ConfigAlgorithmSensLbl.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ConfigAlgorithmSensLbl.Size = new System.Drawing.Size(127, 25);
             this.ConfigAlgorithmSensLbl.TabIndex = 12;
             this.ConfigAlgorithmSensLbl.Text = "Algorithm sensivity";
             // 
@@ -1054,11 +1058,11 @@ namespace UI
             this.SignUpGroupBox.Controls.Add(this.SignUpPanel);
             this.SignUpGroupBox.Enabled = false;
             this.SignUpGroupBox.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.SignUpGroupBox.Location = new System.Drawing.Point(153, 0);
+            this.SignUpGroupBox.Location = new System.Drawing.Point(134, 0);
             this.SignUpGroupBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.SignUpGroupBox.Name = "SignUpGroupBox";
             this.SignUpGroupBox.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.SignUpGroupBox.Size = new System.Drawing.Size(760, 325);
+            this.SignUpGroupBox.Size = new System.Drawing.Size(665, 244);
             this.SignUpGroupBox.TabIndex = 21;
             this.SignUpGroupBox.TabStop = false;
             this.SignUpGroupBox.Text = "Sign Up";
@@ -1079,26 +1083,27 @@ namespace UI
             this.SignUpPanel.Controls.Add(this.label5);
             this.SignUpPanel.Controls.Add(this.label4);
             this.SignUpPanel.Controls.Add(this.RegPass);
-            this.SignUpPanel.Location = new System.Drawing.Point(232, 15);
+            this.SignUpPanel.Location = new System.Drawing.Point(203, 11);
+            this.SignUpPanel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.SignUpPanel.Name = "SignUpPanel";
-            this.SignUpPanel.Size = new System.Drawing.Size(522, 303);
+            this.SignUpPanel.Size = new System.Drawing.Size(457, 227);
             this.SignUpPanel.TabIndex = 27;
             // 
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(364, 237);
+            this.label10.Location = new System.Drawing.Point(318, 178);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(121, 20);
+            this.label10.Size = new System.Drawing.Size(100, 17);
             this.label10.TabIndex = 30;
             this.label10.Text = "Bitmex address:";
             // 
             // BitmexWebsiteLnkLbl
             // 
             this.BitmexWebsiteLnkLbl.AutoSize = true;
-            this.BitmexWebsiteLnkLbl.Location = new System.Drawing.Point(366, 261);
+            this.BitmexWebsiteLnkLbl.Location = new System.Drawing.Point(320, 196);
             this.BitmexWebsiteLnkLbl.Name = "BitmexWebsiteLnkLbl";
-            this.BitmexWebsiteLnkLbl.Size = new System.Drawing.Size(58, 20);
+            this.BitmexWebsiteLnkLbl.Size = new System.Drawing.Size(47, 17);
             this.BitmexWebsiteLnkLbl.TabIndex = 29;
             this.BitmexWebsiteLnkLbl.TabStop = true;
             this.BitmexWebsiteLnkLbl.Text = "BitMEX";
@@ -1107,18 +1112,18 @@ namespace UI
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(264, 238);
+            this.label2.Location = new System.Drawing.Point(231, 178);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(93, 20);
+            this.label2.Size = new System.Drawing.Size(78, 17);
             this.label2.TabIndex = 28;
             this.label2.Text = "Official site:";
             // 
             // OurWebsiteLnkLbl
             // 
             this.OurWebsiteLnkLbl.AutoSize = true;
-            this.OurWebsiteLnkLbl.Location = new System.Drawing.Point(266, 261);
+            this.OurWebsiteLnkLbl.Location = new System.Drawing.Point(233, 196);
             this.OurWebsiteLnkLbl.Name = "OurWebsiteLnkLbl";
-            this.OurWebsiteLnkLbl.Size = new System.Drawing.Size(73, 20);
+            this.OurWebsiteLnkLbl.Size = new System.Drawing.Size(61, 17);
             this.OurWebsiteLnkLbl.TabIndex = 27;
             this.OurWebsiteLnkLbl.TabStop = true;
             this.OurWebsiteLnkLbl.Text = "TradeBot";
@@ -1131,11 +1136,11 @@ namespace UI
             this.SignInGroupBox.Controls.Add(this.panel5);
             this.SignInGroupBox.Enabled = false;
             this.SignInGroupBox.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.SignInGroupBox.Location = new System.Drawing.Point(153, 0);
+            this.SignInGroupBox.Location = new System.Drawing.Point(134, 0);
             this.SignInGroupBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.SignInGroupBox.Name = "SignInGroupBox";
             this.SignInGroupBox.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.SignInGroupBox.Size = new System.Drawing.Size(760, 325);
+            this.SignInGroupBox.Size = new System.Drawing.Size(665, 244);
             this.SignInGroupBox.TabIndex = 22;
             this.SignInGroupBox.TabStop = false;
             this.SignInGroupBox.Text = "Sign In";
@@ -1148,9 +1153,10 @@ namespace UI
             this.panel5.Controls.Add(this.label9);
             this.panel5.Controls.Add(this.LogPassTextBox);
             this.panel5.Controls.Add(this.label8);
-            this.panel5.Location = new System.Drawing.Point(232, 15);
+            this.panel5.Location = new System.Drawing.Point(203, 11);
+            this.panel5.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.panel5.Name = "panel5";
-            this.panel5.Size = new System.Drawing.Size(522, 303);
+            this.panel5.Size = new System.Drawing.Size(457, 227);
             this.panel5.TabIndex = 36;
             // 
             // LoggedGroupBox
@@ -1167,11 +1173,11 @@ namespace UI
             this.LoggedGroupBox.Controls.Add(this.SignOutButton);
             this.LoggedGroupBox.Enabled = false;
             this.LoggedGroupBox.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.LoggedGroupBox.Location = new System.Drawing.Point(153, 0);
+            this.LoggedGroupBox.Location = new System.Drawing.Point(134, 0);
             this.LoggedGroupBox.Margin = new System.Windows.Forms.Padding(3, 2, 0, 2);
             this.LoggedGroupBox.Name = "LoggedGroupBox";
             this.LoggedGroupBox.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.LoggedGroupBox.Size = new System.Drawing.Size(760, 325);
+            this.LoggedGroupBox.Size = new System.Drawing.Size(665, 244);
             this.LoggedGroupBox.TabIndex = 24;
             this.LoggedGroupBox.TabStop = false;
             this.LoggedGroupBox.Text = "Signed in as ";
@@ -1180,9 +1186,10 @@ namespace UI
             // SetLicenseBtn
             // 
             this.SetLicenseBtn.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.SetLicenseBtn.Location = new System.Drawing.Point(673, 260);
+            this.SetLicenseBtn.Location = new System.Drawing.Point(589, 195);
+            this.SetLicenseBtn.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.SetLicenseBtn.Name = "SetLicenseBtn";
-            this.SetLicenseBtn.Size = new System.Drawing.Size(84, 61);
+            this.SetLicenseBtn.Size = new System.Drawing.Size(74, 46);
             this.SetLicenseBtn.TabIndex = 28;
             this.SetLicenseBtn.Text = "Set license";
             this.SetLicenseBtn.UseVisualStyleBackColor = true;
@@ -1191,18 +1198,18 @@ namespace UI
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(497, 272);
+            this.label3.Location = new System.Drawing.Point(435, 204);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(93, 20);
+            this.label3.Size = new System.Drawing.Size(78, 17);
             this.label3.TabIndex = 30;
             this.label3.Text = "Official site:";
             // 
             // OurWebsiteLnkLbl1
             // 
             this.OurWebsiteLnkLbl1.AutoSize = true;
-            this.OurWebsiteLnkLbl1.Location = new System.Drawing.Point(497, 295);
+            this.OurWebsiteLnkLbl1.Location = new System.Drawing.Point(435, 221);
             this.OurWebsiteLnkLbl1.Name = "OurWebsiteLnkLbl1";
-            this.OurWebsiteLnkLbl1.Size = new System.Drawing.Size(73, 20);
+            this.OurWebsiteLnkLbl1.Size = new System.Drawing.Size(61, 17);
             this.OurWebsiteLnkLbl1.TabIndex = 29;
             this.OurWebsiteLnkLbl1.TabStop = true;
             this.OurWebsiteLnkLbl1.Text = "TradeBot";
@@ -1211,46 +1218,46 @@ namespace UI
             // SessionIDLbl
             // 
             this.SessionIDLbl.AutoSize = true;
-            this.SessionIDLbl.Location = new System.Drawing.Point(225, 112);
+            this.SessionIDLbl.Location = new System.Drawing.Point(197, 84);
             this.SessionIDLbl.Name = "SessionIDLbl";
-            this.SessionIDLbl.Size = new System.Drawing.Size(53, 20);
+            this.SessionIDLbl.Size = new System.Drawing.Size(45, 17);
             this.SessionIDLbl.TabIndex = 4;
             this.SessionIDLbl.Text = "label2";
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(138, 112);
+            this.label1.Location = new System.Drawing.Point(121, 84);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(88, 20);
+            this.label1.Size = new System.Drawing.Size(72, 17);
             this.label1.TabIndex = 3;
             this.label1.Text = "Session ID: ";
             // 
             // LicenseNumberLbl
             // 
             this.LicenseNumberLbl.AutoSize = true;
-            this.LicenseNumberLbl.Location = new System.Drawing.Point(225, 164);
+            this.LicenseNumberLbl.Location = new System.Drawing.Point(197, 123);
             this.LicenseNumberLbl.Name = "LicenseNumberLbl";
-            this.LicenseNumberLbl.Size = new System.Drawing.Size(152, 20);
+            this.LicenseNumberLbl.Size = new System.Drawing.Size(132, 17);
             this.LicenseNumberLbl.TabIndex = 2;
             this.LicenseNumberLbl.Text = "5352-4234-4251-1040";
             // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(98, 164);
+            this.label7.Location = new System.Drawing.Point(86, 123);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(128, 20);
+            this.label7.Size = new System.Drawing.Size(104, 17);
             this.label7.TabIndex = 1;
             this.label7.Text = "License number:";
             // 
             // SignOutButton
             // 
             this.SignOutButton.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.SignOutButton.Location = new System.Drawing.Point(238, 254);
+            this.SignOutButton.Location = new System.Drawing.Point(208, 190);
             this.SignOutButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.SignOutButton.Name = "SignOutButton";
-            this.SignOutButton.Size = new System.Drawing.Size(228, 60);
+            this.SignOutButton.Size = new System.Drawing.Size(200, 45);
             this.SignOutButton.TabIndex = 0;
             this.SignOutButton.Text = "Sign Out";
             this.SignOutButton.UseVisualStyleBackColor = true;
@@ -1284,15 +1291,16 @@ namespace UI
             this.LeftPanel.Location = new System.Drawing.Point(0, 0);
             this.LeftPanel.Margin = new System.Windows.Forms.Padding(0);
             this.LeftPanel.Name = "LeftPanel";
-            this.LeftPanel.Size = new System.Drawing.Size(150, 367);
+            this.LeftPanel.Size = new System.Drawing.Size(131, 275);
             this.LeftPanel.TabIndex = 27;
             // 
             // RightPanel
             // 
             this.RightPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.RightPanel.Location = new System.Drawing.Point(917, 0);
+            this.RightPanel.Location = new System.Drawing.Point(802, 0);
+            this.RightPanel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.RightPanel.Name = "RightPanel";
-            this.RightPanel.Size = new System.Drawing.Size(150, 367);
+            this.RightPanel.Size = new System.Drawing.Size(131, 275);
             this.RightPanel.TabIndex = 28;
             // 
             // ErrorProviderSignUp
@@ -1301,9 +1309,9 @@ namespace UI
             // 
             // TradeBotUi
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1067, 853);
+            this.ClientSize = new System.Drawing.Size(934, 562);
             this.Controls.Add(this.Tabs);
             this.Controls.Add(this.RightPanel);
             this.Controls.Add(this.LeftPanel);
@@ -1347,8 +1355,8 @@ namespace UI
         }
 
         #endregion
-        private ZedGraph.ZedGraphControl zedGraph;
-        private ZedGraph.ZedGraphControl zedGraph_1;
+        private ZedGraph.ZedGraphControl BalanceGraph;
+        private ZedGraph.ZedGraphControl OrderGraph;
         private System.Windows.Forms.TextBox ConfigAvailableBalanceTxb;
         private System.Windows.Forms.TextBox ConfigRequiredProfitTxb;
         private System.Windows.Forms.TextBox ConfigUpdatePriceRangeTxb;
