@@ -35,26 +35,26 @@ namespace TradeMarketTests.IntegrationTests
                 .Result;
             var context1 = new CommonContext(tm, "XBTUSD");
 
-            int count = 0;
             CancellationTokenSource source1 = new CancellationTokenSource();
 
             EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler1 = (sender, args) => { };
-            Action<Websocket.Client.ResponseMessage> action = (message) => { count++; };
             //setup
             await communicator.Start();
+            int stoppedCount = 0;
+            int count = 0;
+            Action<Websocket.Client.ResponseMessage> action = (message) => { count++; };
+
             //act
-
-            var reciever = communicator.MessageReceived.Subscribe(action);
-            
-
+            using (var reciever = communicator.MessageReceived.Subscribe(action))
+            {
                 await context1.SubscribeToBook25UpdatesAsync(handler1, source1.Token);
                 await Task.Delay(10_000);
                 source1.Cancel();
-            
-            int stoppedCount = count;
-            await context1.UnSubscribeFromBook25UpdatesAsync(handler1);
-            await Task.Delay(50_000);
 
+                stoppedCount = count;
+                await context1.UnSubscribeFromBook25UpdatesAsync(handler1);
+                await Task.Delay(50_000);
+            }
 
             //assert
             //10 это магическое число которое нужно т.к. на сервер должна успеть прилететь сообщение об отмене подписки
