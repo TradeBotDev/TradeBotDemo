@@ -143,18 +143,23 @@ namespace TradeMarket.Services
         {
             try
             {
+                Log.Information("Canceletion requested : {@Token}", context.CancellationToken.IsCancellationRequested);
+
                 //Добавляем заголовки ответа по контексту пользователя user из запроса
                 var meta = await MoveInfoToMetadataAsync(context.RequestHeaders);
                 await context.WriteResponseHeadersAsync(meta);
-
+                Log.Information("Wrote Response Headers {@Meta}", context.ResponseTrailers);
                 //подписываемся на обновления
                 var cache = await subscribe(handler, context.CancellationToken);
+                Log.Information("Cache Contains {@CacheCount} elements", cache.Count);
+
                     
                 //кидаем данные из кэша
                 Parallel.ForEach(cache, data => handler(this, new(data, Bitmex.Client.Websocket.Responses.BitmexAction.Partial)));
                
                 //ожидаем пока клиенты отменят подписку
                 await AwaitCancellation(context.CancellationToken);
+                Log.Information("Connection was Canceled");
                 context.Status = Status.DefaultSuccess;
             }
             catch (Exception e)
@@ -308,6 +313,78 @@ namespace TradeMarket.Services
 
         #region Subscribe Commands
 
+        public async override Task SubscribePrice(SubscribePriceRequest request, IServerStreamWriter<SubscribePriceResponse> responseStream, ServerCallContext context)
+        {
+            async void WriteToStreamAsync(object sender, IPublisher<Instrument>.ChangedEventArgs args)
+            {
+                //переводим из языка сервиса на язык протофайлов
+                Log.Information("Sent Price");
+                var response = ConvertService.ConvertInstrument(args.Changed, args.Action);
+                await WriteStreamAsync(responseStream, response);
+
+            }
+            using (LogContext.Push(new PropertyEnricher("RPC Method", context.Method), new PropertyEnricher("RequestId", Guid.NewGuid().ToString()), new PropertyEnricher("UserSessionId", context.RequestHeaders.Get("sessionid"))))
+            {
+                Log.Information("Starting subscriprion for {@Topic}", "price");
+
+                var common = await GetCommonContextAsync(context.RequestHeaders);
+                await SubscribeToUserTopic<SubscribePriceRequest, SubscribePriceResponse, Instrument>(common.SubscribeToInstrumentUpdate, common.UnSubscribeFromInstrumentUpdate, WriteToStreamAsync, request, responseStream, context);
+            }
+        }
+
+        public async override Task SubscribeMargin(SubscribeMarginRequest request, IServerStreamWriter<SubscribeMarginResponse> responseStream, ServerCallContext context)
+        {
+            async void WriteToStreamAsync(object sender, IPublisher<Margin>.ChangedEventArgs args)
+            {
+                //переводим из языка сервиса на язык протофайлов
+                Log.Information("Sent margin");
+
+                var response = ConvertService.ConvertMargin(args.Changed, args.Action);
+                await WriteStreamAsync(responseStream, response);
+
+            }
+            Log.Information("Starting subscriprion for {@Topic}", "margin");
+
+            var user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
+            await SubscribeToUserTopic<SubscribeMarginRequest, SubscribeMarginResponse, Margin>(user.SubscribeToUserMargin, user.UnSubscribeFromUserMargin, WriteToStreamAsync, request, responseStream, context);
+
+
+        }
+
+        public async override Task SubscribePosition(SubscribePositionRequest request, IServerStreamWriter<SubscribePositionResponse> responseStream, ServerCallContext context)
+        {
+            async void WriteToStreamAsync(object sender, IPublisher<Position>.ChangedEventArgs args)
+            {
+                //переводим из языка сервиса на язык протофайлов
+                Log.Information("Sent position");
+                var response = ConvertService.ConvertPosition(args.Changed, args.Action);
+                await WriteStreamAsync(responseStream, response);
+
+            }
+            Log.Information("Starting subscriprion for {@Topic}", "position");
+
+            var user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
+            await SubscribeToUserTopic<SubscribePositionRequest, SubscribePositionResponse, Position>(user.SubscribeToUserPositions, user.UnSubscribeFromUserPositions, WriteToStreamAsync, request, responseStream, context);
+        }
+
+
+        public async override Task SubscribeMyOrders(SubscribeMyOrdersRequest request, IServerStreamWriter<SubscribeMyOrdersResponse> responseStream, ServerCallContext context)
+        {
+            async void WriteToStreamAsync(object sender, IPublisher<Order>.ChangedEventArgs args)
+            {
+                //переводим из языка сервиса на язык протофайлов
+                Log.Information("Sent User Order");
+                var response = ConvertService.ConvertMyOrder(args.Changed, args.Action);
+                await WriteStreamAsync(responseStream, response);
+
+            }
+            Log.Information("Starting subscriprion for {@Topic}", "user orders");
+
+            var user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
+            await SubscribeToUserTopic<SubscribeMyOrdersRequest, SubscribeMyOrdersResponse, Order>(user.SubscribeToUserOrders, user.UnSubscribeFromUserOrders, WriteToStreamAsync, request, responseStream, context);
+
+        }
+
 
         /// <summary>
         /// Метод дает доступ к обновлениям стаканов выбранной биржы выбранного слота
@@ -323,10 +400,13 @@ namespace TradeMarket.Services
                 //Проверяем подходит ли ордер из бирже по сигнатуре запроса {<продажа,покупка> , <открыт,закрыт>}
                 if (IsOrderSuitForSignature(response.Response.Order.Signature, request.Request.Signature))
                 {
+                    Log.Information("Sent BookLevel");
+
                     //если ордер подходит то записываем его в поток ответов
                     await WriteStreamAsync(responseStream, response);
                 }
             }
+            Log.Information("Starting subscriprion for {@Topic}", "booklevel25");
 
             var common = await GetCommonContextAsync(context.RequestHeaders);
             await SubscribeToUserTopic<SubscribeOrdersRequest, SubscribeOrdersResponse, BookLevel>(common.SubscribeToBook25UpdatesAsync, common.UnSubscribeFromBook25UpdatesAsync, WriteToStreamAsync, request, responseStream, context);
@@ -343,11 +423,11 @@ namespace TradeMarket.Services
             {
                 //переводим из языка сервиса на язык протофайлов
                 var response = ConvertService.ConvertBalance(args.Changed, args.Action);
-
+                Log.Information("Sent  Balance");
                 await WriteStreamAsync(responseStream, response);
 
             }
-
+            Log.Information("Starting subscriprion for {@Topic}", "balance");
             //находим общий контекст т.к. подписка на стаканы не требует логина в систему биржи
             var user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
             await SubscribeToUserTopic<SubscribeBalanceRequest,SubscribeBalanceResponse,Wallet>(user.SubscribeToBalance, user.UnSubscribeFromBalance, WriteToStreamAsync, request, responseStream, context);
@@ -355,64 +435,7 @@ namespace TradeMarket.Services
 
         #endregion
 
-        public async override Task SubscribePrice(SubscribePriceRequest request, IServerStreamWriter<SubscribePriceResponse> responseStream, ServerCallContext context)
-        {
-            async void WriteToStreamAsync(object sender, IPublisher<Instrument>.ChangedEventArgs args)
-            {
-                //переводим из языка сервиса на язык протофайлов
-                var response = ConvertService.ConvertInstrument(args.Changed, args.Action);
-                await WriteStreamAsync(responseStream, response);
-
-            }
-            using (LogContext.Push(new PropertyEnricher("RPC Method", context.Method), new PropertyEnricher("RequestId", Guid.NewGuid().ToString()), new PropertyEnricher("UserSessionId", context.RequestHeaders.Get("sessionid"))))
-            {
-                var common = await GetCommonContextAsync(context.RequestHeaders);
-                await SubscribeToUserTopic<SubscribePriceRequest, SubscribePriceResponse, Instrument>(common.SubscribeToInstrumentUpdate, common.UnSubscribeFromInstrumentUpdate, WriteToStreamAsync, request, responseStream, context);
-            }
-        }
-
-        public async override Task SubscribeMargin(SubscribeMarginRequest request, IServerStreamWriter<SubscribeMarginResponse> responseStream, ServerCallContext context)
-        {
-            async void WriteToStreamAsync(object sender, IPublisher<Margin>.ChangedEventArgs args)
-            {
-                //переводим из языка сервиса на язык протофайлов
-                var response = ConvertService.ConvertMargin(args.Changed, args.Action);
-                await WriteStreamAsync(responseStream, response);
-
-            }
-            var user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
-            await SubscribeToUserTopic<SubscribeMarginRequest, SubscribeMarginResponse, Margin>(user.SubscribeToUserMargin, user.UnSubscribeFromUserMargin, WriteToStreamAsync, request, responseStream, context);
-
-
-        }
-
-        public async override Task SubscribePosition(SubscribePositionRequest request, IServerStreamWriter<SubscribePositionResponse> responseStream, ServerCallContext context)
-        {
-            async void WriteToStreamAsync(object sender, IPublisher<Position>.ChangedEventArgs args)
-            {
-                //переводим из языка сервиса на язык протофайлов
-                var response = ConvertService.ConvertPosition(args.Changed, args.Action);
-                await WriteStreamAsync(responseStream, response);
-
-            }
-            var user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
-            await SubscribeToUserTopic<SubscribePositionRequest,SubscribePositionResponse,Position>(user.SubscribeToUserPositions,user.UnSubscribeFromUserPositions,WriteToStreamAsync,request,responseStream,context);
-        }
-
-
-        public async override Task SubscribeMyOrders(SubscribeMyOrdersRequest request, IServerStreamWriter<SubscribeMyOrdersResponse> responseStream, ServerCallContext context)
-        {
-            async void WriteToStreamAsync(object sender, IPublisher<Order>.ChangedEventArgs args)
-            {
-                //переводим из языка сервиса на язык протофайлов
-                var response = ConvertService.ConvertMyOrder(args.Changed, args.Action);
-                await WriteStreamAsync(responseStream, response);
-
-            }
-            var user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
-            await SubscribeToUserTopic<SubscribeMyOrdersRequest,SubscribeMyOrdersResponse, Order>(user.SubscribeToUserOrders, user.UnSubscribeFromUserOrders, WriteToStreamAsync, request, responseStream, context);
-
-        }
+        
 
 
 

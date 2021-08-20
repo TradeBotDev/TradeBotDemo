@@ -61,16 +61,16 @@
     {
         // Отправка запроса в сервис (в случае, если валидация прошла успешно).
         var reply = await ExchangeAccessClient.AddExchangeAccess(SessionId, addModel);
-        // Обновление компонента со списком бирж.
-        ExchangeListChild.RefreshExchanges();
-        // Если вход был завершен успешно, происходит просто закрытие формы (ведь компонент с биржами уже обновлен).
+        // Если добавление было завершено успешно, происходит просто закрытие формы.
         if (reply.Result == ExchangeAccessActionCode.Successful)
             Switch();
-        // Иначе на форму выводится сообщение об ошибке и она обноалвяется.
+        // Иначе на форму выводится сообщение об ошибке и она обновляется.
         else
         {
             replyMessage = reply.Message;
             await InvokeAsync(StateHasChanged);
         }
+        // Обновление компонента со списком бирж.
+        ExchangeListChild.RefreshExchanges();
     }
 }

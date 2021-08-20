@@ -57,7 +57,7 @@
 			await httpContextAccessor.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity)).ContinueWith(prop =>
 			{
 				navigationManager.NavigateTo("/");
-			}); ;
+			});
 		}
 		else
 		{

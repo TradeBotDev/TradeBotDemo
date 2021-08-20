@@ -56,7 +56,9 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         }
         private void responseAction(TResponse response)
         {
+            Log.Information("Adding Response {@Response} to Cache", response);
             AddModelToCache(response);
+            Log.Information("Invoking Event with response {@Response}", response);
             _onNext.Invoke(response, Changed);
         }
 
@@ -71,7 +73,8 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         internal async Task SubscribeAsync(TRequest request, IObservable<TResponse> stream, CancellationToken token)
         {
            token.Register(() => {
-                //1 потому что сначала прилетает токен а потом идет отписка от ивента
+               //1 потому что сначала прилетает токен а потом идет отписка от ивента
+               Log.Warning("Remaining listeners {@ListenersCount}", Changed?.GetInvocationList().Length);
                 if(Changed?.GetInvocationList().Length == 1)
                {
                    cancellationTokenSource.Cancel();
@@ -82,10 +85,18 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
                    }
                    (request as SubscribeRequestBase).IsUnsubscribe = false;
                    IsWorking = false;
+                   if (request is not null)
+                   {
+                       Log.Information("Subscriber Stoped Working for topic {@Topic}", request is SubscribeRequestBase ? (request as SubscribeRequestBase).Topic : request.OperationString);
+                   }
                }
            });
            await Task.Run(() =>
            {
+               if (request is not null)
+               {
+                   Log.Information("Subscribed For topic {@Topic}", request is SubscribeRequestBase ? (request as SubscribeRequestBase).Topic : request.OperationString);
+               }
                IsWorking = true;
                //тут не нужно ловить OperationCanceledException. BitmexWebsocketClient все разруливает сам
                //TODO тестирование 

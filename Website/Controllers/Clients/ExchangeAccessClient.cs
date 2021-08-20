@@ -1,6 +1,5 @@
 ﻿using Serilog;
 using System.Threading.Tasks;
-//using TradeBot.Account.AccountService.v1;
 using TradeBot.Facade.FacadeService.v1;
 using Website.Models;
 
@@ -24,7 +23,7 @@ namespace Website.Controllers.Clients
 			var request = new AddExchangeAccessRequest
 			{
 				SessionId = sessionId,
-				Code = (ExchangeAccessCode)model.ExchangeCode,
+				Code = model.ExchangeCode,
 				ExchangeName = model.ExchangeCode.ToString(),
 				Token = model.Token,
 				Secret = model.Secret
