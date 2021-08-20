@@ -1,5 +1,6 @@
 ﻿using Bitmex.Client.Websocket;
 using Bitmex.Client.Websocket.Client;
+using Bitmex.Client.Websocket.Requests;
 using Bitmex.Client.Websocket.Responses.Books;
 using Bitmex.Client.Websocket.Websockets;
 using Moq;
@@ -16,7 +17,6 @@ using TradeMarket.Model.Publishers;
 using TradeMarket.Model.TradeMarkets;
 using TradeMarket.Model.UserContexts;
 using TradeMarket.Model.UserContexts.Builders;
-using TypeMock.ArrangeActAssert;
 using Xunit;
 
 namespace TradeMarketTests.IntegrationTests
@@ -103,9 +103,7 @@ namespace TradeMarketTests.IntegrationTests
 
             int count1 = 0;
             int count2 = 0;
-            EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler1 = (sender, args) => {
-                count1++; 
-            };
+            EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler1 = (sender, args) => { count1++; };
             EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler2 = (sender, args) => { count2++; };
 
             //act
@@ -122,5 +120,93 @@ namespace TradeMarketTests.IntegrationTests
             //assert
             Assert.True(count2 > count1);
         }
+
+        //попытка замокать тест сверху. провалилась
+       /* private class BookEventRiser
+        {
+            private Action<BookResponse> _action;
+
+            public void Subscribe(Action<BookResponse> action)
+            {
+
+                _action += action;
+            }
+
+            public void Unsubscribe(Action<BookResponse> action)
+            {
+                _action -= action;
+            }
+
+            public async Task Simulate()
+            {
+                while (true)
+                {
+                    await Task.Delay(10);
+                    _action(new BookResponse());
+                }
+            }
+        }
+        class Counter
+        {
+            private int count = 0;
+            public void Increase()
+            {
+                count++;
+            }
+        }
+        [Fact]
+        public async Task CancelationRequestedMoq_ShouldNotKillConnectionForOtherSubscribres()
+        {
+            //arrange
+            var publisherFactory = new BitmexPublisherFactory(null);
+            TradeMarket.Model.TradeMarkets.TradeMarket tm;
+            var communicator = new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketTestnetUrl);
+            var client = new Mock<BitmexWebsocketClient>(MockBehavior.Strict);
+           
+            var builder = new BitmexTradeMarketBuilder();
+            tm = builder
+                .AddConnectionMultiplexer(null)
+                .AddCommonClient(client.Object)
+                .AddPublisherFactory(publisherFactory)
+                .Result;
+            var context1 = new CommonContext(tm, "XBTUSD");
+            var context2 = new CommonContext(tm, "XBTUSD");
+
+            CancellationTokenSource source1 = new CancellationTokenSource();
+            CancellationTokenSource source2 = new CancellationTokenSource();
+
+            int count1 = 0;
+            int count2 = 0;
+           
+            List<Tuple<CommonContext, Counter>> list = new();
+            EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler1 = (sender, args) => { count1++; };
+            EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler2 = (sender, args) => { count2++; };
+
+            void subscribeUnsubscribe(CommonContext context,CancellationToken token,int count)
+            {
+                EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler = (sender, args) => { list.Find(x => x.Item1 == context).Item2.Increase(); };
+                token.Register(() => context.TradeMarket.Book25Publisher[context].Changed -= handler);
+                context.TradeMarket.Book25Publisher[context].Changed += handler;
+            }
+            //setup
+
+            client.Setup(cl => cl.Send(It.IsAny<RequestBase>())).Callback(() => { });
+            client.Setup(cl => cl.Streams.Book25Stream.Subscribe(It.IsAny<Action<BookResponse>>(), It.IsAny<CancellationToken>())).Callback(() => {
+                context1.TradeMarket.Book25Publisher[context1].Changed += It.
+            });
+            //act
+            await context1.SubscribeToBook25UpdatesAsync(handler1, source1.Token);
+            await context2.SubscribeToBook25UpdatesAsync(handler2, source2.Token);
+            await Task.Delay(1000);
+            source1.Cancel();
+            await context1.UnSubscribeFromBook25UpdatesAsync(handler1);
+            await Task.Delay(5000);
+            source2.Cancel();
+            await context2.UnSubscribeFromBook25UpdatesAsync(handler2);
+
+
+            //assert
+            Assert.True(count2 > count1);
+        }*/
     }
 }

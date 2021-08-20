@@ -5,6 +5,7 @@
       "environmentVariables": {
         "RETRY_DELAY": "10000",
         "ASPNETCORE_ENVIRONMENT": "Development",
+        "REDIS_CONNECTION_STRING": "localhost:6379",
         "HISTORY_CONNECTION_STRING": "http://localhost:5007",
         "TRADEMARKET_CONNECTION_STRING": "http://localhost:5005"
       },
