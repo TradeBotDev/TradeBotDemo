@@ -22,9 +22,9 @@ namespace Website.Controllers.Clients
 
 			// Если выбран докер, возвращается строка подключения к сервису, который тоже находится в докере.
 			if (useDocker)
-				return GrpcChannel.ForAddress(configuration.GetSection("GrpcClients")["AccountServiceDocker"]);
+				return GrpcChannel.ForAddress(configuration.GetSection("GrpcClients")["FacadeServiceDocker"]);
 			// Иначе используется localhost
-			else return GrpcChannel.ForAddress(configuration.GetSection("GrpcClients")["AccountServiceLocal"]);
+			else return GrpcChannel.ForAddress(configuration.GetSection("GrpcClients")["FacadeServiceLocal"]);
 		}
 	}
 }

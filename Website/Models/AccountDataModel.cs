@@ -1,5 +1,5 @@
 ﻿using Google.Protobuf.Collections;
-using TradeBot.Account.AccountService.v1;
+using TradeBot.Facade.FacadeService.v1;
 
 namespace Website.Models
 {

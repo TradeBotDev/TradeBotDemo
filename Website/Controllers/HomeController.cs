@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using System.Threading.Tasks;
-using TradeBot.Account.AccountService.v1;
+using TradeBot.Facade.FacadeService.v1;
 
 namespace Website.Controllers
 {

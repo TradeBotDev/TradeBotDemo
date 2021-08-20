@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Serilog;
 
 using Website.Models.Authorization;
-using TradeBot.Account.AccountService.v1;
+using TradeBot.Facade.FacadeService.v1;
 
 namespace Website.Controllers
 {

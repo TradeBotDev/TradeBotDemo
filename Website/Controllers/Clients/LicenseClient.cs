@@ -1,7 +1,8 @@
 ﻿using Serilog;
 using System;
 using System.Threading.Tasks;
-using TradeBot.Account.AccountService.v1;
+//using TradeBot.Account.AccountService.v1;
+using TradeBot.Facade.FacadeService.v1;
 using Website.Models;
 
 namespace Website.Controllers.Clients
@@ -9,7 +10,8 @@ namespace Website.Controllers.Clients
 	public static class LicenseClient
 	{
 		// Клиент сервиса лицензий для того, чтобы можно было получить к нему доступ.
-		private static License.LicenseClient client = new(AccountServiceConnection.GetConnection());
+		//private static License.LicenseClient client = new(AccountServiceConnection.GetConnection());
+		private static FacadeService.FacadeServiceClient client = new(AccountServiceConnection.GetConnection());
 
 		// Метод установки лицензии для пользователя по Id сессии.
 		public static async Task<SetLicenseResponse> SetLicense(string sessionId, ProductCode product, CreditCardModel model)

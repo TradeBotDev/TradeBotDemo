@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using System.Threading.Tasks;
-using TradeBot.Account.AccountService.v1;
+//using TradeBot.Account.AccountService.v1;
+using TradeBot.Facade.FacadeService.v1;
 using Website.Models.Authorization;
 
 namespace Website.Controllers.Clients
@@ -8,7 +9,8 @@ namespace Website.Controllers.Clients
 	public static class AccountServiceClient
 	{
 		// Клиент сервиса аккаунтов для того, чтобы можно было получить к нему доступ.
-		private static Account.AccountClient client = new(AccountServiceConnection.GetConnection());
+		//private static Account.AccountClient client = new(AccountServiceConnection.GetConnection());
+		private static FacadeService.FacadeServiceClient client = new(AccountServiceConnection.GetConnection());
 
 		// Метод входа в аккаунт.
 		public static async Task<LoginResponse> Login(LoginModel model)

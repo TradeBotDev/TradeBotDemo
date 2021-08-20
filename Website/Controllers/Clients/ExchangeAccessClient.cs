@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using System.Threading.Tasks;
-using TradeBot.Account.AccountService.v1;
+//using TradeBot.Account.AccountService.v1;
+using TradeBot.Facade.FacadeService.v1;
 using Website.Models;
 
 namespace Website.Controllers.Clients
@@ -8,7 +9,8 @@ namespace Website.Controllers.Clients
 	public class ExchangeAccessClient
 	{
 		// Клиент сервиса бирж для того, чтобы можно было получить к нему доступ.
-		private static ExchangeAccess.ExchangeAccessClient client = new(AccountServiceConnection.GetConnection());
+		//private static ExchangeAccess.ExchangeAccessClient client = new(AccountServiceConnection.GetConnection());
+		private static FacadeService.FacadeServiceClient client = new(AccountServiceConnection.GetConnection());
 
 		// Метод добавления новой биржи в аккаунт.
 		public static async Task<AddExchangeAccessResponse> AddExchangeAccess(string sessionId, AddExchangeAccessModel model)
@@ -22,7 +24,7 @@ namespace Website.Controllers.Clients
 			var request = new AddExchangeAccessRequest
 			{
 				SessionId = sessionId,
-				Code = model.ExchangeCode,
+				Code = (ExchangeAccessCode)model.ExchangeCode,
 				ExchangeName = model.ExchangeCode.ToString(),
 				Token = model.Token,
 				Secret = model.Secret
