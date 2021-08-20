@@ -1,6 +1,6 @@
-﻿using System.Collections.Concurrent;
+﻿using Serilog;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
-using Serilog;
 
 namespace Former.Models
 {
@@ -19,7 +19,7 @@ namespace Former.Models
         internal int AvailableBalance;
 
         internal int PositionSize;
-        
+
         internal double SellMarketPrice;
         internal double BuyMarketPrice;
 
@@ -39,8 +39,17 @@ namespace Former.Models
         /// </summary>
         internal async Task UpdateMarketPrices(double bid, double ask)
         {
-            if (bid > 0) BuyMarketPrice = bid;
-            if (ask > 0) SellMarketPrice = ask;
+            if (bid > 0)
+            {
+                BuyMarketPrice = bid;
+                Log.Information("New buy market price {@BuyMarketPrice}", bid);
+            }
+
+            if (ask > 0)
+            {
+                SellMarketPrice = ask;
+                Log.Information("New sell market price {@SellMarketPrice}", ask);
+            }
             //необоходимо сообщить об изменениях UpdateHandler, чтобы тот проверил необходимость подгонки своих ордеров
             await HandleUpdateEvent.Invoke();
         }
@@ -144,7 +153,7 @@ namespace Former.Models
             }
             return Task.CompletedTask;
         }
-        
+
         /// <summary>
         /// Возвращает true, если получилось удалить ордер по идентификатору из выбранного списка, иначе false
         /// </summary>
@@ -178,9 +187,9 @@ namespace Former.Models
         {
             return new Order
             {
-                Id = newComingOrder.Id, 
-                Price = newComingOrder.Price, 
-                LastUpdateDate = newComingOrder.LastUpdateDate, 
+                Id = newComingOrder.Id,
+                Price = newComingOrder.Price,
+                LastUpdateDate = newComingOrder.LastUpdateDate,
                 Signature = newComingOrder.Signature,
                 Quantity = newComingOrder.Signature.Type == OrderType.ORDER_TYPE_SELL ? -newComingOrder.Quantity : newComingOrder.Quantity
             };
