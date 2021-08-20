@@ -38,6 +38,8 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         public List<TModel> Cache { get{ lock (locker) { return new(_cache); } }  set => _cache = value; }
 
+        public bool IsWorking { get; private set; } = false;
+
         public BitmexPublisher(BitmexWebsocketClient client,Action<TResponse, EventHandler<IPublisher<TModel>.ChangedEventArgs>> action)
         {
             _client = client;
@@ -45,7 +47,13 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             Cache = new();
         }
 
-
+        private void ClearCahce()
+        {
+            lock (locker)
+            {
+                _cache.Clear();
+            }
+        }
         private void responseAction(TResponse response)
         {
             AddModelToCache(response);
@@ -70,13 +78,15 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
                    if (request is SubscribeRequestBase)
                    {
                        _client.Send(CreateUnsubsscribeReqiest(request as SubscribeRequestBase));
-                       _cache.Clear();
+                       ClearCahce();
                    }
                    (request as SubscribeRequestBase).IsUnsubscribe = false;
+                   IsWorking = false;
                }
            });
            await Task.Run(() =>
            {
+               IsWorking = true;
                //тут не нужно ловить OperationCanceledException. BitmexWebsocketClient все разруливает сам
                //TODO тестирование 
                stream.Subscribe(responseAction, cancellationTokenSource.Token);
