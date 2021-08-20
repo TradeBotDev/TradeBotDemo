@@ -110,19 +110,21 @@ namespace TradeMarket.Model.UserContexts.Builders
 
         public async Task<CommonContext> GetCommonContextAsync(string slotName,string tradeMarketName)
         {
+            var logger = Log.ForContext<ContextDirector>().ForContext("MethodName", nameof(GetCommonContextAsync));
             CommonContext commonContext = null;
+            logger.Debug("Current");
             await _commonContextSemephore.WaitAsync();
             try
             {
-                Log.Logger.Information("Getting CommonContext {@slotName} : {@tradeMarketName}", slotName, tradeMarketName);
+                logger.Information("Getting CommonContext {@slotName} : {@tradeMarketName}", slotName, tradeMarketName);
                 commonContext = RegisteredCommonContexts.FirstOrDefault(el => el.IsEquevalentTo(null, slotName, tradeMarketName));
                 if (commonContext is null)
                 {
-                    Log.Logger.Information("Creating new CommonContext {@slotName} : {@tradeMarketName}", slotName, tradeMarketName);
+                    logger.Information("Creating new CommonContext {@slotName} : {@tradeMarketName}", slotName, tradeMarketName);
                     commonContext = await BuildCommonContextAsync(slotName, tradeMarketName);
                     RegisteredCommonContexts.Add(commonContext);
                 }
-                Log.Logger.Information("Contained CommonContext's count {@Count}", RegisteredCommonContexts.Count);
+                logger.Information("Contained CommonContext's count {@Count}", RegisteredCommonContexts.Count);
 
             }
             finally

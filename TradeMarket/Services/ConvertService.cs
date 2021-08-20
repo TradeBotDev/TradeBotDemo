@@ -84,6 +84,7 @@ namespace TradeMarket.Services
                 AskPrice = instrument.AskPrice ?? default,
                 BidPrice = instrument.BidPrice ?? default,
                 FairPrice = instrument.FairPrice ?? default,
+                 LotSize = instrument.LotSize is null ? default : (int) instrument.LotSize,
                 ChangedType = ConvertChangeType(action)
             };
         }

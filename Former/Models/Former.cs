@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Former.Clients;
-using Grpc.Core;
 using Serilog;
 
 namespace Former.Models
@@ -50,7 +49,7 @@ namespace Former.Models
             var addResponse = false;
             //выставляем контр ордер с рассчитанной ценой и отрицательным числом контрактов, так как контр ордер должен иметь противоположное число 
             //контрактов по сравнению с oldOrder
-            var placeResponse = await _tradeMarketClient.PlaceOrder(price, -quantity, _metadata);
+            var placeResponse = await _tradeMarketClient.PlaceOrder(price, -quantity, Converters.ConvertMetadata(_metadata));
             var response = Converters.ConvertDefaultResponse(placeResponse.Response);
             if (response.Code == ReplyCode.REPLY_CODE_SUCCEED)
             {
@@ -67,14 +66,31 @@ namespace Former.Models
                 addResponse = _storage.AddOrder(placeResponse.OrderId, newOrder, _storage.CounterOrders);
 
                 //сообщаем о выставлении контр-ордера истории
-                await _historyClient.WriteOrder(newOrder, ChangesType.CHANGES_TYPE_INSERT, _metadata, "Counter order placed");
-
+                await _historyClient.WriteOrder(newOrder, ChangesType.CHANGES_TYPE_INSERT, Converters.ConvertMetadata(_metadata), "Counter order placed");
+                Log.Information(
+                    "{@Where}: Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sended to history",
+                    "Former", newOrder.Id, newOrder.Price, newOrder.Quantity, ChangesType.CHANGES_TYPE_INSERT,
+                    "Counter order placed");
+                //чмошник
                 //сообщаем об исполнении старого ордера истории
                 if (Convert.ToInt32(quantity) == Convert.ToInt32(oldOrder.Quantity))
-                    await _historyClient.WriteOrder(oldOrder, ChangesType.CHANGES_TYPE_DELETE, _metadata, "Initial order filled");
+                {
+                    await _historyClient.WriteOrder(oldOrder, ChangesType.CHANGES_TYPE_DELETE,
+                        Converters.ConvertMetadata(_metadata), "Initial order filled");
+                    Log.Information(
+                        "{@Where}: Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sended to history",
+                        "Former", oldOrder.Id, oldOrder.Price, oldOrder.Quantity, ChangesType.CHANGES_TYPE_DELETE,
+                        "Initial order filled");
+                }
                 else
-                    await _historyClient.WriteOrder(newComingOrder, ChangesType.CHANGES_TYPE_UPDATE, _metadata,
+                {
+                    await _historyClient.WriteOrder(newComingOrder, ChangesType.CHANGES_TYPE_UPDATE, Converters.ConvertMetadata(_metadata),
                         "Initial order partially filled");
+                    Log.Information(
+                        "{@Where}: Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sended to history",
+                        "Former", newComingOrder.Id, newComingOrder.Price, newComingOrder.Quantity, ChangesType.CHANGES_TYPE_UPDATE,
+                        "Initial order partially filled");
+                }
             }
 
             Log.Information(
@@ -92,9 +108,9 @@ namespace Former.Models
         /// </summary>
         private bool CheckPossibilityPlacingOrder(OrderType type)
         {
-            
+            if (_storage.LotSize == 0) return false;
             //вычисляем предполагаемую стоимость ордера по рыночной цене в биткоинах
-            var orderCost = _configuration.ContractValue / (type == OrderType.ORDER_TYPE_SELL ? _storage.SellMarketPrice : _storage.BuyMarketPrice);
+            var orderCost = (_configuration.ContractValue * _storage.LotSize) / (type == OrderType.ORDER_TYPE_SELL ? _storage.SellMarketPrice : _storage.BuyMarketPrice);
             //конвертируем баланс в биткоины (XBT), так как он приходит от биржи в сатоши (XBt)
             var totalBalance = ConvertSatoshiToXBT(_storage.TotalBalance);
             var availableBalance = ConvertSatoshiToXBT(_storage.AvailableBalance);
@@ -129,12 +145,12 @@ namespace Former.Models
             if (!CheckPossibilityPlacingOrder(orderType)) return;
 
             //размер заказа в зависимости от решения алгоритма (на продажу размер отрицательный) с учётом настройки ContractValue
-            var quantity = orderType == OrderType.ORDER_TYPE_BUY ? _configuration.ContractValue : -_configuration.ContractValue;
+            var quantity = orderType == OrderType.ORDER_TYPE_BUY ? (_configuration.ContractValue * _storage.LotSize) : -(_configuration.ContractValue*_storage.LotSize);
             //цена выставляемого ордера в зависимости от решения алгоритма (тип рыночной цены)
             var price = orderType == OrderType.ORDER_TYPE_BUY ? _storage.BuyMarketPrice : _storage.SellMarketPrice;
 
             //отправляем запрос на биржу выставить ордер по рыночной цене 
-            var placeResponse = await _tradeMarketClient.PlaceOrder(price, quantity, _metadata);
+            var placeResponse = await _tradeMarketClient.PlaceOrder(price, quantity, Converters.ConvertMetadata(_metadata));
             var id = placeResponse.OrderId;
             var response = Converters.ConvertDefaultResponse(placeResponse.Response);
 
@@ -155,7 +171,12 @@ namespace Former.Models
                     "Former", id, price, quantity, orderType,
                     addResponse ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
                 //сообщаем сервису истории о новом ордере
-                await _historyClient.WriteOrder(newOrder, ChangesType.CHANGES_TYPE_INSERT, _metadata, "Initial order placed");
+                await _historyClient.WriteOrder(newOrder, ChangesType.CHANGES_TYPE_INSERT,
+                    Converters.ConvertMetadata(_metadata), "Initial order placed");
+                Log.Information(
+                    "{@Where}: Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sended to history",
+                    "Former", newOrder.Id, newOrder.Price, newOrder.Quantity, ChangesType.CHANGES_TYPE_INSERT,
+                    "Initial order placed");
             }
 
             Log.Information(
@@ -178,7 +199,7 @@ namespace Former.Models
             foreach (var (key, value) in _storage.MyOrders)
             {
                 
-                var deleteResponse = await _tradeMarketClient.DeleteOrder(key, _metadata);
+                var deleteResponse = await _tradeMarketClient.DeleteOrder(key, Converters.ConvertMetadata(_metadata));
                 var response = Converters.ConvertDefaultResponse(deleteResponse.Response);
                 Log.Information(
                     "{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed {@ResponseCode}",
@@ -189,7 +210,11 @@ namespace Former.Models
                 if (response.Code == ReplyCode.REPLY_CODE_SUCCEED)
                 {
                     _storage.MyOrders.TryRemove(key, out _);
-                    await _historyClient.WriteOrder(value, ChangesType.CHANGES_TYPE_DELETE, _metadata,
+                    await _historyClient.WriteOrder(value, ChangesType.CHANGES_TYPE_DELETE, Converters.ConvertMetadata(_metadata),
+                        "Removed by user");
+                    Log.Information(
+                        "{@Where}: Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sended to history",
+                        "Former", value.Id, value.Price, value.Quantity, ChangesType.CHANGES_TYPE_DELETE,
                         "Removed by user");
                 }
                 else return;
