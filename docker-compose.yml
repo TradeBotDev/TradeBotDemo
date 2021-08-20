@@ -21,6 +21,9 @@ services:
   account:
     image: account
     container_name: accountcontainer
+    build:      
+      context: .
+      dockerfile: ./Account/Dockerfile
     ports:
       - 5000:80
     volumes:
@@ -28,6 +31,9 @@ services:
   trademarket:
     image: trademarket
     container_name: trademarketcontainer
+    build:      
+      context: .
+      dockerfile: ./TradeMarket/Dockerfile
     ports:
       - 5005:80
     volumes:
@@ -39,6 +45,9 @@ services:
   facade:
     image: facade
     container_name: facadecontainer
+    build:      
+      context: .
+      dockerfile: ./Facade/Dockerfile
     ports:
       - 5002:80
     volumes:
@@ -53,6 +62,9 @@ services:
   relay:
     image: relay
     container_name: relaycontainer
+    build:      
+      context: .
+      dockerfile: ./Relay/Dockerfile
     ports:
       - 5004:80
     volumes:
@@ -65,6 +77,9 @@ services:
   algorithm:
     image: algorithm
     container_name: algorithmcontainer
+    build:      
+      context: .
+      dockerfile: ./Algorithm/Dockerfile
     ports:
       - 5006:80
     volumes:
@@ -75,6 +90,9 @@ services:
   history:
     image: history
     container_name: historycontainer
+    build:      
+      context: .
+      dockerfile: ./History/Dockerfile
     ports:
       - 5007:80
     volumes:
@@ -85,6 +103,9 @@ services:
   former:
     image: former
     container_name: formercontainer
+    build:      
+      context: .
+      dockerfile: ./Former/Dockerfile
     ports:
       - 5003:80
     volumes:
