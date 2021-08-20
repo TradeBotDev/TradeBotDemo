@@ -95,17 +95,18 @@ namespace Facade
 
             var response = new Ref.AccountDataResponse
             {
-                CurrentAccount = new Ref.AccountInfo
-                {
-                    AccountId = accountServiceResponse.CurrentAccount.AccountId,
-                    Email = accountServiceResponse.CurrentAccount.Email,
-                },
                 Result = (Ref.AccountActionCode)accountServiceResponse.Result,
                 Message = accountServiceResponse.Message
             };
 
             if (accountServiceResponse.CurrentAccount != null)
             {
+                response.CurrentAccount = new Ref.AccountInfo
+                {
+                    AccountId = accountServiceResponse.CurrentAccount.AccountId,
+                    Email = accountServiceResponse.CurrentAccount.Email,
+                };
+
                 foreach (var exchange in accountServiceResponse.CurrentAccount.Exchanges)
                 {
                     response.CurrentAccount.Exchanges.Add(new Ref.ExchangeAccessInfo
