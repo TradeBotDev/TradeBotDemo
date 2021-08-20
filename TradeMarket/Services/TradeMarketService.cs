@@ -143,7 +143,6 @@ namespace TradeMarket.Services
         {
             try
             {
-                Log.Information("Starting subscriprion for {@Topic}", nameof(subscribe.Method));
                 Log.Information("Canceletion requested : {@Token}", context.CancellationToken.IsCancellationRequested);
 
                 //Добавляем заголовки ответа по контексту пользователя user из запроса
@@ -372,6 +371,8 @@ namespace TradeMarket.Services
             }
             using (LogContext.Push(new PropertyEnricher("RPC Method", context.Method), new PropertyEnricher("RequestId", Guid.NewGuid().ToString()), new PropertyEnricher("UserSessionId", context.RequestHeaders.Get("sessionid"))))
             {
+                Log.Information("Starting subscriprion for {@Topic}", "price");
+
                 var common = await GetCommonContextAsync(context.RequestHeaders);
                 await SubscribeToUserTopic<SubscribePriceRequest, SubscribePriceResponse, Instrument>(common.SubscribeToInstrumentUpdate, common.UnSubscribeFromInstrumentUpdate, WriteToStreamAsync, request, responseStream, context);
             }
@@ -386,6 +387,8 @@ namespace TradeMarket.Services
                 await WriteStreamAsync(responseStream, response);
 
             }
+            Log.Information("Starting subscriprion for {@Topic}", "margin");
+
             var user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
             await SubscribeToUserTopic<SubscribeMarginRequest, SubscribeMarginResponse, Margin>(user.SubscribeToUserMargin, user.UnSubscribeFromUserMargin, WriteToStreamAsync, request, responseStream, context);
 
@@ -401,6 +404,8 @@ namespace TradeMarket.Services
                 await WriteStreamAsync(responseStream, response);
 
             }
+            Log.Information("Starting subscriprion for {@Topic}", "position");
+
             var user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
             await SubscribeToUserTopic<SubscribePositionRequest,SubscribePositionResponse,Position>(user.SubscribeToUserPositions,user.UnSubscribeFromUserPositions,WriteToStreamAsync,request,responseStream,context);
         }
@@ -415,6 +420,8 @@ namespace TradeMarket.Services
                 await WriteStreamAsync(responseStream, response);
 
             }
+            Log.Information("Starting subscriprion for {@Topic}", "user orders");
+
             var user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
             await SubscribeToUserTopic<SubscribeMyOrdersRequest,SubscribeMyOrdersResponse, Order>(user.SubscribeToUserOrders, user.UnSubscribeFromUserOrders, WriteToStreamAsync, request, responseStream, context);
 
