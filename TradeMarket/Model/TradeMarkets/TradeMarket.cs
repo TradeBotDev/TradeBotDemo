@@ -69,6 +69,10 @@ namespace TradeMarket.Model.TradeMarkets
             {
                 throw new ArgumentException($"Publisher {nameof(publisher)} was null.");
             }
+            if(publisher.IsWorking == false)
+            {
+                await publisher.Start();
+            }
             publisher.Changed += handler;
             return publisher.Cache;
         }

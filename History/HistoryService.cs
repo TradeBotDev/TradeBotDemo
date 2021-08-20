@@ -57,14 +57,14 @@ namespace History
                             SlotName = request.Order.SlotName
                         };
                         OrderCollection.Add(oc);
-                        if (oc.ChangesType == ChangesType.CHANGES_TYPE_DELETE)
+                        if (oc.ChangesType == ChangesType.CHANGES_TYPE_DELETE && oc.Message != "Removed by user")
                         {
                             db.Add(ow);
                             db.Add(oc);
                             db.SaveChanges();
                         }
                         Log.Information("{@Where}: Recorded a change of order {@Order}", "History", ow.OrderIdOnTM);
-                        Log.Information("{@Where}: Order change: " + oc.ChangesType, "History");
+                        Log.Information("{@Where}: Order change: " + oc.Message, "History");
                     }
                     break;
                 default:
@@ -147,17 +147,23 @@ namespace History
 
             OrderCollection.CollectionChanged += (_, args) => Handler(args, request, responseStream, taskCompletionSource);
             List<BalanceChange> balanceChanges = GetBalanceChangesByUser(request.Sessionid);
+            BalanceChange currentBalance = balanceChanges.ElementAt(0);
             foreach (var record in balanceChanges)
             {
-                await responseStream.WriteAsync(new SubscribeEventsResponse
+                if (record.Time.Year != currentBalance.Time.Year || record.Time.Month != currentBalance.Time.Month
+                    || record.Time.Day != currentBalance.Time.Day)
                 {
-                    Balance = new PublishBalanceEvent
+                    await responseStream.WriteAsync(new SubscribeEventsResponse
                     {
-                        Balance = Converter.ToBalance(record.Balance),
-                        Sessionid = record.SessionId,
-                        Time = Timestamp.FromDateTime(record.Time.ToUniversalTime())
-                    }
-                }); ;
+                        Balance = new PublishBalanceEvent
+                        {
+                            Balance = Converter.ToBalance(currentBalance.Balance),
+                            Sessionid = currentBalance.SessionId,
+                            Time = Timestamp.FromDateTime(currentBalance.Time.ToUniversalTime())
+                        }
+                    }); ;
+                }
+                currentBalance = record;
             }
             return await taskCompletionSource.Task;
         }

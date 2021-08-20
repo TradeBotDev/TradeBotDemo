@@ -368,6 +368,7 @@ namespace UI
 
         private void OnValidatingTextBox(object sender, CancelEventArgs e)
         {
+            if (ActiveOrdersDataGridView.RowCount <= 0) return;
             if (!double.TryParse(((TextBox)sender).Text, out _))
             {
                 e.Cancel = true;
@@ -395,6 +396,7 @@ namespace UI
 
         private void ActiveOrdersDataGridView_SelectionChanged(object sender, EventArgs e)
         {
+            if (_configurations.Count <= 0) return;
             if (ActiveSlotsDataGridView.CurrentRow is not null)
             SetConfiguration(_configurations[ActiveSlotsDataGridView.Rows[ActiveSlotsDataGridView.CurrentRow.Index].Cells[0].EditedFormattedValue.ToString()]);
         }
@@ -406,6 +408,7 @@ namespace UI
             if (e.ColumnIndex is -1 or 0) return;
             _configurations[ActiveSlotsDataGridView.Rows[ActiveSlotsDataGridView.CurrentRow.Index].Cells[0]
                 .EditedFormattedValue.ToString()] = GetConfiguration();
+            WriteToJson(_configurations);
             if (!CheckIfLogged()) return;
             var cellCheckBox = (DataGridViewCheckBoxCell)ActiveSlotsDataGridView.Rows[ActiveSlotsDataGridView.CurrentRow.Index].Cells[1];
             cellCheckBox.Value ??= false;
@@ -652,12 +655,19 @@ namespace UI
 
             pane.XAxis.Type = AxisType.Date;
 
-            //pane.YAxis.Scale.Min = list.Last().Y-100;
-            //pane.YAxis.Scale.Max = list.Last().Y+100;
+            try
+            {
+                pane.YAxis.Scale.Min = list.Last().Y - 100;
+                pane.YAxis.Scale.Max = list.Last().Y + 100;
 
-            //pane.XAxis.Scale.Min = new XDate(list.Last().X-1);
-            //pane.XAxis.Scale.Max = new XDate(list.Last().X+1);
+                pane.XAxis.Scale.Min = new XDate(list.Last().X - 1);
+                pane.XAxis.Scale.Max = new XDate(list.Last().X + 1);
+            }
+            catch (Exception e)
+            {
 
+            }
+            
             zedGraph.AxisChange();
 
             zedGraph.Invalidate();

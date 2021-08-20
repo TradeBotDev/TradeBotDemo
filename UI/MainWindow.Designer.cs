@@ -461,32 +461,32 @@ namespace UI
             // ConfigAvailableBalanceTxb
             // 
             this.ConfigAvailableBalanceTxb.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ConfigAvailableBalanceTxb.BackColor = System.Drawing.SystemColors.ControlLight;
             this.ConfigAvailableBalanceTxb.Location = new System.Drawing.Point(185, 120);
             this.ConfigAvailableBalanceTxb.Margin = new System.Windows.Forms.Padding(4);
             this.ConfigAvailableBalanceTxb.Name = "ConfigAvailableBalanceTxb";
             this.ConfigAvailableBalanceTxb.Size = new System.Drawing.Size(90, 26);
             this.ConfigAvailableBalanceTxb.TabIndex = 1;
-            this.ConfigAvailableBalanceTxb.Text = "0,5";
             // 
             // ConfigRequiredProfitTxb
             // 
             this.ConfigRequiredProfitTxb.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ConfigRequiredProfitTxb.BackColor = System.Drawing.SystemColors.ControlLight;
             this.ConfigRequiredProfitTxb.Location = new System.Drawing.Point(185, 181);
             this.ConfigRequiredProfitTxb.Margin = new System.Windows.Forms.Padding(4);
             this.ConfigRequiredProfitTxb.Name = "ConfigRequiredProfitTxb";
             this.ConfigRequiredProfitTxb.Size = new System.Drawing.Size(90, 26);
             this.ConfigRequiredProfitTxb.TabIndex = 2;
-            this.ConfigRequiredProfitTxb.Text = "0,005";
             // 
             // ConfigUpdatePriceRangeTxb
             // 
             this.ConfigUpdatePriceRangeTxb.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ConfigUpdatePriceRangeTxb.BackColor = System.Drawing.SystemColors.ControlLight;
             this.ConfigUpdatePriceRangeTxb.Location = new System.Drawing.Point(185, 59);
             this.ConfigUpdatePriceRangeTxb.Margin = new System.Windows.Forms.Padding(4);
             this.ConfigUpdatePriceRangeTxb.Name = "ConfigUpdatePriceRangeTxb";
             this.ConfigUpdatePriceRangeTxb.Size = new System.Drawing.Size(90, 26);
             this.ConfigUpdatePriceRangeTxb.TabIndex = 4;
-            this.ConfigUpdatePriceRangeTxb.Text = "50";
             // 
             // ConfigAvailableBalanceLbl
             // 
@@ -973,7 +973,7 @@ namespace UI
             // ConfigIntervalOfAnalysisTxb
             // 
             this.ConfigIntervalOfAnalysisTxb.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.ConfigIntervalOfAnalysisTxb.DisplayMember = "0";
+            this.ConfigIntervalOfAnalysisTxb.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.ConfigIntervalOfAnalysisTxb.FormattingEnabled = true;
             this.ConfigIntervalOfAnalysisTxb.Items.AddRange(new object[] {
             "5s",
@@ -999,12 +999,12 @@ namespace UI
             this.ConfigIntervalOfAnalysisTxb.Name = "ConfigIntervalOfAnalysisTxb";
             this.ConfigIntervalOfAnalysisTxb.Size = new System.Drawing.Size(90, 28);
             this.ConfigIntervalOfAnalysisTxb.TabIndex = 15;
-            this.ConfigIntervalOfAnalysisTxb.Text = "5s";
             // 
             // ConfigVolumeOfContractsTxb
             // 
             this.ConfigVolumeOfContractsTxb.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.ConfigVolumeOfContractsTxb.DisplayMember = "(none)";
+            this.ConfigVolumeOfContractsTxb.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.ConfigVolumeOfContractsTxb.FormattingEnabled = true;
             this.ConfigVolumeOfContractsTxb.Items.AddRange(new object[] {
             "1",
@@ -1017,12 +1017,11 @@ namespace UI
             this.ConfigVolumeOfContractsTxb.Name = "ConfigVolumeOfContractsTxb";
             this.ConfigVolumeOfContractsTxb.Size = new System.Drawing.Size(90, 28);
             this.ConfigVolumeOfContractsTxb.TabIndex = 14;
-            this.ConfigVolumeOfContractsTxb.Text = "1";
             // 
             // ConfigAlgorithmSensivityTxb
             // 
             this.ConfigAlgorithmSensivityTxb.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.ConfigAlgorithmSensivityTxb.DisplayMember = "0";
+            this.ConfigAlgorithmSensivityTxb.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.ConfigAlgorithmSensivityTxb.FormattingEnabled = true;
             this.ConfigAlgorithmSensivityTxb.Items.AddRange(new object[] {
             "Minimal",
@@ -1035,7 +1034,6 @@ namespace UI
             this.ConfigAlgorithmSensivityTxb.Name = "ConfigAlgorithmSensivityTxb";
             this.ConfigAlgorithmSensivityTxb.Size = new System.Drawing.Size(90, 28);
             this.ConfigAlgorithmSensivityTxb.TabIndex = 13;
-            this.ConfigAlgorithmSensivityTxb.Text = "Minimal";
             // 
             // ConfigAlgorithmSensLbl
             // 
