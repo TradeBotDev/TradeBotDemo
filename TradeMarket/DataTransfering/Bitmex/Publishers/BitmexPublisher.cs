@@ -72,7 +72,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         {
            token.Register(() => {
                //1 потому что сначала прилетает токен а потом идет отписка от ивента
-               Log.Warning("Subscribe was cancelled by client. Remaining listeners {@ListenersCount}", Changed?.GetInvocationList().Length);
+               Log.Warning("Remaining listeners {@ListenersCount}", Changed?.GetInvocationList().Length);
                 if(Changed?.GetInvocationList().Length == 1)
                {
                    cancellationTokenSource.Cancel();

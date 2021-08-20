@@ -4,6 +4,7 @@ using Bitmex.Client.Websocket.Responses.Instruments;
 using Bitmex.Client.Websocket.Responses.Orders;
 using Bitmex.Client.Websocket.Responses.Positions;
 using Bitmex.Client.Websocket.Responses.Wallets;
+using Serilog;
 using StackExchange.Redis;
 using System;
 using System.Collections.Concurrent;
@@ -73,6 +74,7 @@ namespace TradeMarket.Model.TradeMarkets
             {
                 await publisher.Start();
             }
+            Log.Information("Added Handler {@Handler} for Publisher {@PublisherName} ",handler,publisher);
             publisher.Changed += handler;
             return publisher.Cache;
         }
