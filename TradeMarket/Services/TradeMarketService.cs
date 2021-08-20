@@ -313,53 +313,6 @@ namespace TradeMarket.Services
 
         #region Subscribe Commands
 
-
-        /// <summary>
-        /// Метод дает доступ к обновлениям стаканов выбранной биржы выбранного слота
-        /// </summary>
-        public override async Task SubscribeOrders(TradeBot.TradeMarket.TradeMarketService.v1.SubscribeOrdersRequest request, IServerStreamWriter<SubscribeOrdersResponse> responseStream, ServerCallContext context)
-        {
-
-            //тут void потому что ивент по другому не позволяет 
-            async void WriteToStreamAsync(object sender, Model.Publishers.IPublisher<Bitmex.Client.Websocket.Responses.Books.BookLevel>.ChangedEventArgs args)
-            {
-                //переводим из языка сервиса на язык протофайлов
-                var response = ConvertService.ConvertBookOrders(args.Changed, args.Action);
-                //Проверяем подходит ли ордер из бирже по сигнатуре запроса {<продажа,покупка> , <открыт,закрыт>}
-                if (IsOrderSuitForSignature(response.Response.Order.Signature, request.Request.Signature))
-                {
-                    //если ордер подходит то записываем его в поток ответов
-                    await WriteStreamAsync(responseStream, response);
-                }
-            }
-
-            var common = await GetCommonContextAsync(context.RequestHeaders);
-            await SubscribeToUserTopic<SubscribeOrdersRequest, SubscribeOrdersResponse, BookLevel>(common.SubscribeToBook25UpdatesAsync, common.UnSubscribeFromBook25UpdatesAsync, WriteToStreamAsync, request, responseStream, context);
-        }
-
-        /// <summary>
-        /// Доступ к ежедневному обновлению баланса пользователя
-        /// </summary>
-        public async override Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<SubscribeBalanceResponse> responseStream, ServerCallContext context)
-        {
-
-            //тут void потому что ивент по другому не позволяет 
-            async void WriteToStreamAsync(object sender, IPublisher<Wallet>.ChangedEventArgs args)
-            {
-                //переводим из языка сервиса на язык протофайлов
-                var response = ConvertService.ConvertBalance(args.Changed, args.Action);
-
-                await WriteStreamAsync(responseStream, response);
-
-            }
-
-            //находим общий контекст т.к. подписка на стаканы не требует логина в систему биржи
-            var user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
-            await SubscribeToUserTopic<SubscribeBalanceRequest,SubscribeBalanceResponse,Wallet>(user.SubscribeToBalance, user.UnSubscribeFromBalance, WriteToStreamAsync, request, responseStream, context);
-        }
-
-        #endregion
-
         public async override Task SubscribePrice(SubscribePriceRequest request, IServerStreamWriter<SubscribePriceResponse> responseStream, ServerCallContext context)
         {
             async void WriteToStreamAsync(object sender, IPublisher<Instrument>.ChangedEventArgs args)
@@ -411,7 +364,7 @@ namespace TradeMarket.Services
             Log.Information("Starting subscriprion for {@Topic}", "position");
 
             var user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
-            await SubscribeToUserTopic<SubscribePositionRequest,SubscribePositionResponse,Position>(user.SubscribeToUserPositions,user.UnSubscribeFromUserPositions,WriteToStreamAsync,request,responseStream,context);
+            await SubscribeToUserTopic<SubscribePositionRequest, SubscribePositionResponse, Position>(user.SubscribeToUserPositions, user.UnSubscribeFromUserPositions, WriteToStreamAsync, request, responseStream, context);
         }
 
 
@@ -420,7 +373,7 @@ namespace TradeMarket.Services
             async void WriteToStreamAsync(object sender, IPublisher<Order>.ChangedEventArgs args)
             {
                 //переводим из языка сервиса на язык протофайлов
-                Log.Information("Sent User Orders");
+                Log.Information("Sent User Order");
                 var response = ConvertService.ConvertMyOrder(args.Changed, args.Action);
                 await WriteStreamAsync(responseStream, response);
 
@@ -428,9 +381,61 @@ namespace TradeMarket.Services
             Log.Information("Starting subscriprion for {@Topic}", "user orders");
 
             var user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
-            await SubscribeToUserTopic<SubscribeMyOrdersRequest,SubscribeMyOrdersResponse, Order>(user.SubscribeToUserOrders, user.UnSubscribeFromUserOrders, WriteToStreamAsync, request, responseStream, context);
+            await SubscribeToUserTopic<SubscribeMyOrdersRequest, SubscribeMyOrdersResponse, Order>(user.SubscribeToUserOrders, user.UnSubscribeFromUserOrders, WriteToStreamAsync, request, responseStream, context);
 
         }
+
+
+        /// <summary>
+        /// Метод дает доступ к обновлениям стаканов выбранной биржы выбранного слота
+        /// </summary>
+        public override async Task SubscribeOrders(TradeBot.TradeMarket.TradeMarketService.v1.SubscribeOrdersRequest request, IServerStreamWriter<SubscribeOrdersResponse> responseStream, ServerCallContext context)
+        {
+
+            //тут void потому что ивент по другому не позволяет 
+            async void WriteToStreamAsync(object sender, Model.Publishers.IPublisher<Bitmex.Client.Websocket.Responses.Books.BookLevel>.ChangedEventArgs args)
+            {
+                //переводим из языка сервиса на язык протофайлов
+                var response = ConvertService.ConvertBookOrders(args.Changed, args.Action);
+                //Проверяем подходит ли ордер из бирже по сигнатуре запроса {<продажа,покупка> , <открыт,закрыт>}
+                if (IsOrderSuitForSignature(response.Response.Order.Signature, request.Request.Signature))
+                {
+                    Log.Information("Sent BookLevel");
+
+                    //если ордер подходит то записываем его в поток ответов
+                    await WriteStreamAsync(responseStream, response);
+                }
+            }
+            Log.Information("Starting subscriprion for {@Topic}", "booklevel25");
+
+            var common = await GetCommonContextAsync(context.RequestHeaders);
+            await SubscribeToUserTopic<SubscribeOrdersRequest, SubscribeOrdersResponse, BookLevel>(common.SubscribeToBook25UpdatesAsync, common.UnSubscribeFromBook25UpdatesAsync, WriteToStreamAsync, request, responseStream, context);
+        }
+
+        /// <summary>
+        /// Доступ к ежедневному обновлению баланса пользователя
+        /// </summary>
+        public async override Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<SubscribeBalanceResponse> responseStream, ServerCallContext context)
+        {
+
+            //тут void потому что ивент по другому не позволяет 
+            async void WriteToStreamAsync(object sender, IPublisher<Wallet>.ChangedEventArgs args)
+            {
+                //переводим из языка сервиса на язык протофайлов
+                var response = ConvertService.ConvertBalance(args.Changed, args.Action);
+                Log.Information("Sent  Balance");
+                await WriteStreamAsync(responseStream, response);
+
+            }
+            Log.Information("Starting subscriprion for {@Topic}", "balance");
+            //находим общий контекст т.к. подписка на стаканы не требует логина в систему биржи
+            var user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
+            await SubscribeToUserTopic<SubscribeBalanceRequest,SubscribeBalanceResponse,Wallet>(user.SubscribeToBalance, user.UnSubscribeFromBalance, WriteToStreamAsync, request, responseStream, context);
+        }
+
+        #endregion
+
+        
 
 
 
