@@ -45,7 +45,13 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             Cache = new();
         }
 
-
+        private void ClearCahce()
+        {
+            lock (locker)
+            {
+                _cache.Clear();
+            }
+        }
         private void responseAction(TResponse response)
         {
             AddModelToCache(response);
@@ -70,7 +76,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
                    if (request is SubscribeRequestBase)
                    {
                        _client.Send(CreateUnsubsscribeReqiest(request as SubscribeRequestBase));
-                       _cache.Clear();
+                       ClearCahce();
                    }
                    (request as SubscribeRequestBase).IsUnsubscribe = false;
                }
