@@ -20,7 +20,7 @@ namespace Algorithm.DataManipulation
         {
             orderPublisher.Publish(order, metadata);
         }
-        public static void SendNewConfig (Metadata metadata, UpdateServerConfigRequest configRequest)
+        public static void SendNewConfig(Metadata metadata, UpdateServerConfigRequest configRequest)
         {
             if (!MetaExists(metadata))
             {
@@ -37,12 +37,22 @@ namespace Algorithm.DataManipulation
 
             GetAlgoByMeta(metadata).ChangeSetting(configRequest.Config.AlgorithmInfo);
         }
+        public static void SendNewConfig(Metadata metadata, AlgorithmInfo settings)
+        {
+            if (!MetaExists(metadata))
+            {
+                threadsWithAlgos.Add(new Thread(() => CreateAlgorithm(settings, metadata)));
+                threadsWithAlgos.Last().Start();
+                return;
+            }
+        }
         private static void CreateAlgorithm(AlgorithmInfo setting, Metadata metadata)
         {
             Log.Information("{@Where}: Initiated algorithm creation for user {@User}", "Algorithm", metadata.GetValue("sessionid"));
             bool result = algorithms.TryAdd(metadata, new AlgorithmBeta(metadata));
             if (result)
-            {    
+            { 
+                
                 orderPublisher.OrderIncomingEvent += GetAlgoByMeta(metadata).NewOrderAlert;
                 GetAlgoByMeta(metadata).ChangeSetting(setting);
                 GetAlgoByMeta(metadata).ChangeState();
