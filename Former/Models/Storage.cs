@@ -26,6 +26,8 @@ namespace Former.Models
         internal bool PlaceLocker;
         internal bool FitPricesLocker;
 
+        internal int LotSize;
+
         internal Storage()
         {
             MyOrders = new ConcurrentDictionary<string, Order>();
@@ -41,6 +43,14 @@ namespace Former.Models
             if (ask > 0) SellMarketPrice = ask;
             //необоходимо сообщить об изменениях UpdateHandler, чтобы тот проверил необходимость подгонки своих ордеров
             await HandleUpdateEvent.Invoke();
+        }
+
+        internal Task UpdateLotSize(int lotSize)
+        {
+            if (lotSize <= 0) return Task.CompletedTask;
+            LotSize = lotSize;
+            Log.Information("{@Where}: Lot size: {@LotSize}", "Former", lotSize);
+            return Task.CompletedTask;
         }
 
         /// <summary>

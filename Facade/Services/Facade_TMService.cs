@@ -72,35 +72,31 @@ namespace Facade
         #endregion
 
         #region Account
-        public async override Task<LoginReply> Login(LoginRequest request, ServerCallContext context)
+        public async override Task<LoginResponse> Login(LoginRequest request, ServerCallContext context)
         {
             return await clientAccount.Account_Login(request, nameof(Login));
         }
-        public async override Task<LogoutReply> Logout(SessionRequest request, ServerCallContext context)
+        public async override Task<LogoutResponse> Logout(LogoutRequest request, ServerCallContext context)
         {
             return await clientAccount.Account_Logout(request, context, nameof(Logout));
         }
-        public async override Task<RegisterReply> Register(RegisterRequest request, ServerCallContext context)
+        public async override Task<RegisterResponse> Register(RegisterRequest request, ServerCallContext context)
         {
             return await clientAccount.Account_Register(request, context, nameof(Register));
         }
-        public async override Task<CurrentAccountReply> CurrentAccountData(SessionRequest request, ServerCallContext context)
-        {
-            return await clientAccount.Account_CurrentAccountData(request, context, nameof(CurrentAccountData));
-        }
-        public async override Task<AddExchangeAccessReply> AddExchangeAccess(AddExchangeAccessRequest request, ServerCallContext context)
+        public async override Task<AddExchangeAccessResponse> AddExchangeAccess(AddExchangeAccessRequest request, ServerCallContext context)
         {
             return await clientAccount.Account_AddExcengeAccess(request, context, nameof(AddExchangeAccess));
         }
-        public async override Task<AllExchangesBySessionReply> AllExchangesBySession(SessionRequest request, ServerCallContext context)
+        public async override Task<AllExchangesBySessionResponse> AllExchangesBySession(AllExchangesBySessionRequest request, ServerCallContext context)
         {
             return await clientAccount.Account_AllExcangesBySession(request, context, nameof(AllExchangesBySession));
         }
-        public async override Task<DeleteExchangeAccessReply> DeleteExchangeAccess(DeleteExchangeAccessRequest request, ServerCallContext context)
+        public async override Task<DeleteExchangeAccessResponse> DeleteExchangeAccess(DeleteExchangeAccessRequest request, ServerCallContext context)
         {
             return await clientAccount.Account_DeleteChangesAccess(request, context, nameof(DeleteExchangeAccess));
         }
-        public async override Task<ExchangeBySessionReply> ExchangeBySession(ExchangeBySessionRequest request, ServerCallContext context)
+        public async override Task<ExchangeBySessionResponse> ExchangeBySession(ExchangeBySessionRequest request, ServerCallContext context)
         {
             return await clientAccount.Account_ExchangeBySession(request, context, nameof(ExchangeBySession));
         }

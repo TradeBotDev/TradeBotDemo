@@ -45,27 +45,25 @@ service FacadeService{
 	rpc DeleteOrder(DeleteOrderRequest) returns (DeleteOrderResponse);
 	
 	// Метод входа в аккаунт
-	rpc Login (LoginRequest) returns (LoginReply);
+	rpc Login (LoginRequest) returns (LoginResponse);
 	// Метод выхода из аккаунта
-	rpc Logout (SessionRequest) returns (LogoutReply);
+	rpc Logout (LogoutRequest) returns (LogoutResponse);
 	// Метод регистрации аккаунта
-	rpc Register (RegisterRequest) returns (RegisterReply);
+	rpc Register (RegisterRequest) returns (RegisterResponse);
 	// Проверка текущего пользователя на валидность по Id сессии
-	rpc IsValidSession (SessionRequest) returns (SessionReply);
+	rpc IsValidSession (IsValidSessionRequest) returns (IsValidSessionResponse);
 	// Получение данных текущего пользователя
-	rpc CurrentAccountData (SessionRequest) returns (CurrentAccountReply);
+	rpc AccountData (AccountDataRequest) returns (AccountDataResponse);
 	// Добавление новой биржи для текущего пользователя
-	rpc AddExchangeAccess(AddExchangeAccessRequest) returns (AddExchangeAccessReply);
-	// Получение массива бирж текущего пользователя
-	rpc AllExchangesBySession (SessionRequest) returns (AllExchangesBySessionReply);
-	// Удаление информации о доступе к бирже по id в базе данных (пока что)
-	rpc DeleteExchangeAccess (DeleteExchangeAccessRequest) returns (DeleteExchangeAccessReply);
-	// Получение информации о доступе текущего пользователя к бирже
-	rpc ExchangeBySession (ExchangeBySessionRequest) returns (ExchangeBySessionReply);
+	rpc AddExchangeAccess(AddExchangeAccessRequest) returns (AddExchangeAccessResponse);
+	// Получение массива бирж текущего пользователя.
+	rpc AllExchangesBySession (AllExchangesBySessionRequest) returns (AllExchangesBySessionResponse);
+	// Удаление информации о доступе к бирже по ее коду и id сессии.
+	rpc DeleteExchangeAccess (DeleteExchangeAccessRequest) returns (DeleteExchangeAccessResponse);
+	// Получение информации о доступе текущего пользователя к бирже.
+	rpc ExchangeBySession (ExchangeBySessionRequest) returns (ExchangeBySessionResponse);
 	// Sub history
 	rpc SubscribeEvents(SubscribeEventsRequest) returns (stream SubscribeEventsResponse);
-	// Get user data
-	rpc AccountData (AccountDataRequest) returns (AccountDataResponse);
 	// Метод для сайта. Позволяет добавить лицензию в аккаунт при покупке продукта.
 	rpc SetLicense (SetLicenseRequest) returns (SetLicenseResponse);
 	// Метод для сервиса Account. Позволяет проверить, есть ли лицензия на продукт для данного аккаунта.
@@ -172,74 +170,72 @@ message LoginRequest {
 }
 
 // Ответ на запрос о входе в аккаунт.
-message LoginReply {
-	ActionCode result = 1;
+message LoginResponse {
+	AccountActionCode result = 1;
 	string message = 2;
 	string session_id = 3;
 }
 
-// Ответ на запрос о выходе из аккаунта
-message LogoutReply {
-	ActionCode result = 1;
+// Запрос на выход из аккаунта.
+message LogoutRequest {
+	string session_id = 1;
+	bool save_exchange_accesses = 2;
+}
+
+// Ответ на запрос о выходе из аккаунта.
+message LogoutResponse {
+	AccountActionCode result = 1;
 	string message = 2;
 }
 
 // Данные для регистрации аккаунта.
 message RegisterRequest {
 	string email = 1;
-	string firstname = 2;
-	string lastname = 3;
-	string phone_number = 4;
-	string password = 5;
-	string verify_password = 6;
+	string password = 2;
+	string verify_password = 3;
 }
 
 // Ответ на запрос о регистрации аккаунта.
-message RegisterReply {
-	ActionCode result = 1;
+message RegisterResponse {
+	AccountActionCode result = 1;
 	string message = 2;
 }
 
-// Запрос на передачу сессии.
-message SessionRequest {
+// Запрос на проверку сессии на валидность.
+message IsValidSessionRequest {
 	string session_id = 1;
 }
 
 // Результат проверки сессии на валидность.
-message SessionReply {
+message IsValidSessionResponse {
 	bool is_valid = 1;
 	string message = 2;
 }
 
-// Получение данных текущего пользователя.
-message CurrentAccountReply {
-	ActionCode result = 1;
-	string message = 2;
-	AccountInfo current_account = 3;
-}
-
-//Информация о пользователе, необходимая для отображения в UI
+//Информация о пользователе, необходимая для отображения в UI.
 message AccountInfo {
 	int32 account_id = 1;
-	string firstname = 2;
-	string lastname = 3;
-	string email = 4;
-	string phone_number = 5;
-	repeated ExchangeAccessInfo exchanges = 6;
+	string email = 2;
+	repeated ExchangeAccessInfo exchanges = 3;
 }
 
 // Информация о данных для доступа к бирже.
 message ExchangeAccessInfo {
 	int32 exchange_access_id = 1;
-	ExchangeCode code = 2;
+	ExchangeAccessCode code = 2;
 	string name = 3;
 	string token = 4;
 	string secret = 5;
 }
 
-// Коды всех бирж.
-enum ExchangeCode {
-	EXCHANGE_CODE_BITMEX = 0;
+// Коды с результатом действия с аккаунтами.
+enum AccountActionCode {
+	ACCOUNT_ACTION_CODE_UNSPECIFIED = 0;
+	ACCOUNT_ACTION_CODE_SUCCESSFUL = 1;
+	ACCOUNT_ACTION_CODE_FAILED = 2;
+	ACCOUNT_ACTION_CODE_IS_NOT_FOUND = 3;
+	ACCOUNT_ACTION_CODE_IS_EXISTS = 4;
+	ACCOUNT_ACTION_CODE_TIME_PASSED = 5;
 }
 
 // Коды результата выполнения входа или регистрации.
@@ -266,21 +262,26 @@ enum ActionCode {
 // Запрос на добавление биржи для текущего пользователя.
 message AddExchangeAccessRequest {
 	string session_id = 1;
-	ExchangeCode code = 2;
+	ExchangeAccessCode code = 2;
 	string exchange_name = 3;
 	string token = 4;
 	string secret = 5;
 }
 
 // Ответ на добавление биржи для текущего пользователя.
-message AddExchangeAccessReply {
-	ActionCode result = 1;
+message AddExchangeAccessResponse {
+	ExchangeAccessActionCode result = 1;
 	string message = 2;
 }
 
+// Запрос на получение информации о всех биржах пользователя.
+message AllExchangesBySessionRequest {
+	string session_id = 1;
+}
+
 // Получение всех добавленных бирж текущего пользователя.
-message AllExchangesBySessionReply {
-	ActionCode result = 1;
+message AllExchangesBySessionResponse {
+	ExchangeAccessActionCode result = 1;
 	string message = 2;
 	repeated ExchangeAccessInfo exchanges = 3;
 }
@@ -288,26 +289,37 @@ message AllExchangesBySessionReply {
 // Запрос на удаление записи о конкретной бирже для текущего пользователя.
 message DeleteExchangeAccessRequest {
 	string session_id = 1;
-	ExchangeCode code = 2;
+	ExchangeAccessCode code = 2;
 }
 
 // Ответ на запрос об удалении записи о бирже для текущего пользователя.
-message DeleteExchangeAccessReply {
-	ActionCode result = 1;
+message DeleteExchangeAccessResponse {
+	ExchangeAccessActionCode result = 1;
 	string message = 2;
 }
 
 // Запрос на получение информации о доступе пользователя к конкретной бирже.
 message ExchangeBySessionRequest {
 	string session_id = 1;
-	ExchangeCode code = 2;
+	ExchangeAccessCode code = 2;
 }
 
 // Ответ на запрос с получением информации о доступе пользователя к конкретной бирже.
-message ExchangeBySessionReply {
-	ActionCode result = 1;
+message ExchangeBySessionResponse {
+	ExchangeAccessActionCode result = 1;
 	string message = 2;
 	ExchangeAccessInfo exchange = 3;
+}
+
+// Коды с результатом действия с биржами.
+enum ExchangeAccessActionCode {
+	EXCHANGE_ACCESS_ACTION_CODE_UNSPECIFIED = 0;
+	EXCHANGE_ACCESS_ACTION_CODE_SUCCESSFUL = 1;
+	EXCHANGE_ACCESS_ACTION_CODE_FAILED = 2;
+	EXCHANGE_ACCESS_ACTION_CODE_IS_NOT_FOUND = 3;
+	EXCHANGE_ACCESS_ACTION_CODE_ACCOUNT_NOT_FOUND = 4;
+	EXCHANGE_ACCESS_ACTION_CODE_IS_EXISTS = 5;
+	EXCHANGE_ACCESS_ACTION_CODE_TIME_PASSED = 6;
 }
 
 message SwitchBotRequest {
@@ -364,13 +376,8 @@ message AuthenticateTokenResponse{
 	tradebot.common.v1.DefaultResponse response = 1;
 	tradebot.common.v1.DefaultResponse message = 2;
 }
-
-// Коды с результатом действия с аккаунтами.
-enum AccountActionCode {
-	ACCOUNT_ACTION_CODE_UNSPECIFIED = 0;
-	ACCOUNT_ACTION_CODE_SUCCESSFUL = 1;
-	ACCOUNT_ACTION_CODE_FAILED = 2;
-	ACCOUNT_ACTION_CODE_IS_NOT_FOUND = 3;
-	ACCOUNT_ACTION_CODE_IS_EXISTS = 4;
-	ACCOUNT_ACTION_CODE_TIME_PASSED = 5;
+// Коды всех бирж.
+enum ExchangeAccessCode {
+	EXCHANGE_ACCESS_CODE_UNSPECIFIED = 0;
+	EXCHANGE_ACCESS_CODE_BITMEX = 1;
 }

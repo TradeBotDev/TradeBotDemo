@@ -22,7 +22,8 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         /// <summary>
         /// Действие которое выполняет при поступлении новых данных с биржи
         /// </summary>
-        private readonly Action<TResponse, EventHandler<IPublisher<TModel>.ChangedEventArgs>> _onNext;
+        //public для тестов ((
+        public readonly Action<TResponse, EventHandler<IPublisher<TModel>.ChangedEventArgs>> _onNext;
 
         public event EventHandler<IPublisher<TModel>.ChangedEventArgs> Changed;
 

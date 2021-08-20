@@ -1,7 +1,9 @@
-using System.Linq;
-using System.Threading.Tasks;
 using Former.Models;
 using Grpc.Core;
+using System.Linq;
+using System.Threading.Tasks;
+using Former.Clients;
+using Serilog;
 using TradeBot.Former.FormerService.v1;
 
 namespace Former.Services
@@ -15,16 +17,27 @@ namespace Former.Services
         public override async Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request,
             ServerCallContext context)
         {
-            var task = Task.Run(() =>
+            var task = Task.Run(async () =>
             {
-                var meta = context.RequestHeaders.ToDictionary(x => x.Key, x => x.Value);
+                var metadata = Converters.ConvertMetadata(context.RequestHeaders);
+
                 //От релея приходят метаданные, по которым создаётся контекст 
-                var userContext = Contexts.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"]);
+                var userContext = Contexts.GetUserContext(metadata.Sessionid, metadata.Trademarket, metadata.Slot);
+                //
+                Meta.GetMetadata(metadata.Sessionid, metadata.Trademarket, metadata.Slot);
+
                 //если поле Switch установленно в false, значит мы начинаем работу (или продолжаем её), если установлено в true
                 //то необходимо остановить работу формера, то есть отписаться от трейдмаркета.
-                if (request.Request.Switch) userContext.UnsubscribeStorage();
+                if (request.Request.Switch)
+                {
+                    userContext.UnsubscribeStorage();
+                    await RedisClient.DeleteMetaEntries();
+                    await RedisClient.DeleteConfigurations(Meta.GetMetaList());
+                }
                 else
                 {
+                    await RedisClient.WriteMetaEntries(Meta.GetMetaList());
+                    await RedisClient.WriteConfiguration(metadata, Converters.ConvertConfiguration(request.Request.Config));
                     //устанавливаем или обновляем конфигурацию
                     userContext.SetConfiguration(Converters.ConvertConfiguration(request.Request.Config));
                     //подписываемся на трейдмаркет
