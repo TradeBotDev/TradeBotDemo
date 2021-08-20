@@ -365,6 +365,7 @@ namespace TradeMarket.Services
             async void WriteToStreamAsync(object sender, IPublisher<Instrument>.ChangedEventArgs args)
             {
                 //переводим из языка сервиса на язык протофайлов
+                Log.Information("Sent Price");
                 var response = ConvertService.ConvertInstrument(args.Changed, args.Action);
                 await WriteStreamAsync(responseStream, response);
 
@@ -383,6 +384,8 @@ namespace TradeMarket.Services
             async void WriteToStreamAsync(object sender, IPublisher<Margin>.ChangedEventArgs args)
             {
                 //переводим из языка сервиса на язык протофайлов
+                Log.Information("Sent margin");
+
                 var response = ConvertService.ConvertMargin(args.Changed, args.Action);
                 await WriteStreamAsync(responseStream, response);
 
@@ -400,6 +403,7 @@ namespace TradeMarket.Services
             async void WriteToStreamAsync(object sender, IPublisher<Position>.ChangedEventArgs args)
             {
                 //переводим из языка сервиса на язык протофайлов
+                Log.Information("Sent position");
                 var response = ConvertService.ConvertPosition(args.Changed, args.Action);
                 await WriteStreamAsync(responseStream, response);
 
@@ -416,6 +420,7 @@ namespace TradeMarket.Services
             async void WriteToStreamAsync(object sender, IPublisher<Order>.ChangedEventArgs args)
             {
                 //переводим из языка сервиса на язык протофайлов
+                Log.Information("Sent User Orders");
                 var response = ConvertService.ConvertMyOrder(args.Changed, args.Action);
                 await WriteStreamAsync(responseStream, response);
 
