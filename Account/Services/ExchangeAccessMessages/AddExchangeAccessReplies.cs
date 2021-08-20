@@ -52,5 +52,17 @@ namespace AccountGRPC.AccountMessages
                 Message = Message
             };
         }
+
+        public static AddExchangeAccessResponse LicenseNotFound()
+        {
+            const string Message = "Произошла ошибка добавления биржи: лицензия на данный продукт отсутствует.";
+            Log.Information(Message);
+
+            return new AddExchangeAccessResponse
+            {
+                Result = ExchangeAccessActionCode.LicenseNotFound,
+                Message = Message
+            };
+        }
     }
 }
