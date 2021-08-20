@@ -56,7 +56,9 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         }
         private void responseAction(TResponse response)
         {
+            Log.Information("Adding Response {@Response} to Cache", response);
             AddModelToCache(response);
+            Log.Information("Invoking Event with response {@Response}", response);
             _onNext.Invoke(response, Changed);
         }
 
