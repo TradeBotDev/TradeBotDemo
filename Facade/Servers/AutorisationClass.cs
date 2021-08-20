@@ -35,7 +35,7 @@ namespace Facade
         #endregion
 
         #region Account
-        public async Task<Ref.LoginReply> Account_Login(Ref.LoginRequest request, string methodName)
+        public async Task<Ref.LoginResponse> Account_Login(Ref.LoginRequest request, string methodName)
         {
             TradeBot.Account.AccountService.v1.LoginResponse response = null;
             async Task<TradeBot.Account.AccountService.v1.LoginResponse> task()
@@ -52,9 +52,9 @@ namespace Facade
                 return response;
             }
             await Generalization.ConnectionTester(task, methodName, request);
-            return await Generalization.ReturnResponse(new Ref.LoginReply { SessionId = response.SessionId, Message = response.Message, Result = (Ref.ActionCode)response.Result }, methodName);
+            return await Generalization.ReturnResponse(new Ref.LoginResponse { SessionId = response.SessionId, Message = response.Message, Result = (Ref.AccountActionCode)response.Result }, methodName);
         }
-        public async Task<Ref.LogoutReply> Account_Logout(Ref.SessionRequest request, ServerCallContext context, string methodName)
+        public async Task<Ref.LogoutResponse> Account_Logout(Ref.LogoutRequest request, ServerCallContext context, string methodName)
         {
             TradeBot.Account.AccountService.v1.LogoutResponse response = null;
             async Task<TradeBot.Account.AccountService.v1.LogoutResponse> task()
@@ -66,9 +66,9 @@ namespace Facade
                 return response;
             }
             await Generalization.ConnectionTester(task, methodName, request);
-            return await Generalization.ReturnResponse(new TradeBot.Facade.FacadeService.v1.LogoutReply { Message = response.Message, Result = (Ref.ActionCode)response.Result }, methodName);
+            return await Generalization.ReturnResponse(new TradeBot.Facade.FacadeService.v1.LogoutResponse { Message = response.Message, Result = (Ref.AccountActionCode)response.Result }, methodName);
         }
-        public async Task<Ref.RegisterReply> Account_Register(Ref.RegisterRequest request, ServerCallContext context, string methodName)
+        public async Task<Ref.RegisterResponse> Account_Register(Ref.RegisterRequest request, ServerCallContext context, string methodName)
         {
             TradeBot.Account.AccountService.v1.RegisterResponse response = null;
             async Task<TradeBot.Account.AccountService.v1.RegisterResponse> task()
@@ -84,43 +84,7 @@ namespace Facade
                 return response;
             }
             await Generalization.ConnectionTester(task, methodName, request);
-            return await Generalization.ReturnResponse(new TradeBot.Facade.FacadeService.v1.RegisterReply { Message = response.Message, Result = (Ref.ActionCode)response.Result }, methodName);
-        }
-        public async Task<Ref.CurrentAccountReply> Account_CurrentAccountData(Ref.SessionRequest request, ServerCallContext context, string methodName)
-        {
-            TradeBot.Account.AccountService.v1.AccountDataResponse response = null;
-            async Task<TradeBot.Account.AccountService.v1.AccountDataResponse> task()
-            {
-                response = await ClientAccount.AccountDataAsync(new TradeBot.Account.AccountService.v1.AccountDataRequest
-                {
-                    SessionId = request.SessionId
-                }, context.RequestHeaders);
-                return response;
-            }
-            await Generalization.ConnectionTester(task, methodName, request);
-
-            var accountResponse = new Ref.CurrentAccountReply()
-            {
-                Message = response.Message,
-                Result = (Ref.ActionCode)response.Result,
-                CurrentAccount = new Ref.AccountInfo
-                {
-                    AccountId = response.CurrentAccount.AccountId,
-                    Email = response.CurrentAccount.Email
-                }
-            };
-            foreach (var item in response.CurrentAccount.Exchanges)
-            {
-                accountResponse.CurrentAccount.Exchanges.Add(new Ref.ExchangeAccessInfo
-                {
-                    Secret = item.Secret,
-                    Code = (Ref.ExchangeCode)item.Code,
-                    ExchangeAccessId = item.ExchangeAccessId,
-                    Name = item.Name,
-                    Token = item.Token
-                });
-            }
-            return await Generalization.ReturnResponse(accountResponse, methodName);
+            return await Generalization.ReturnResponse(new TradeBot.Facade.FacadeService.v1.RegisterResponse { Message = response.Message, Result = (Ref.AccountActionCode)response.Result }, methodName);
         }
         public async Task<Ref.AccountDataResponse> Account_AccountData(Ref.AccountDataRequest request, ServerCallContext context, string methodName)
         {
@@ -149,7 +113,7 @@ namespace Facade
                 accountDataResponse.CurrentAccount.Exchanges.Add(new Ref.ExchangeAccessInfo
                 {
                     Secret = item.Secret,
-                    Code = (Ref.ExchangeCode)item.Code,
+                    Code = (Ref.ExchangeAccessCode)item.Code,
                     ExchangeAccessId = item.ExchangeAccessId,
                     Name = item.Name,
                     Token = item.Token
@@ -160,7 +124,7 @@ namespace Facade
         #endregion
 
         #region Excenge
-        public async Task<Ref.AddExchangeAccessReply> Account_AddExcengeAccess(Ref.AddExchangeAccessRequest request, ServerCallContext context, string methodName)
+        public async Task<Ref.AddExchangeAccessResponse> Account_AddExcengeAccess(Ref.AddExchangeAccessRequest request, ServerCallContext context, string methodName)
         {
             TradeBot.Account.AccountService.v1.AddExchangeAccessResponse response = null;
             async Task<TradeBot.Account.AccountService.v1.AddExchangeAccessResponse> task()
@@ -176,9 +140,9 @@ namespace Facade
                 return response;
             }
             await Generalization.ConnectionTester(task, methodName, request);
-            return await Generalization.ReturnResponse(new TradeBot.Facade.FacadeService.v1.AddExchangeAccessReply { Message = response.Message, Result = (Ref.ActionCode)response.Result }, methodName);
+            return await Generalization.ReturnResponse(new TradeBot.Facade.FacadeService.v1.AddExchangeAccessResponse { Message = response.Message, Result = (Ref.ExchangeAccessActionCode)response.Result }, methodName);
         }
-        public async Task<Ref.AllExchangesBySessionReply> Account_AllExcangesBySession(Ref.SessionRequest request, ServerCallContext context, string methodName)
+        public async Task<Ref.AllExchangesBySessionResponse> Account_AllExcangesBySession(Ref.AllExchangesBySessionRequest request, ServerCallContext context, string methodName)
         {
             TradeBot.Account.AccountService.v1.AllExchangesBySessionResponse response = null;
             async Task<TradeBot.Account.AccountService.v1.AllExchangesBySessionResponse> task()
@@ -190,9 +154,9 @@ namespace Facade
                 return response;
             }
             await Generalization.ConnectionTester(task, methodName, request);
-            return await Generalization.ReturnResponse(new TradeBot.Facade.FacadeService.v1.AllExchangesBySessionReply { Message = response.Message, Result = (Ref.ActionCode)response.Result }, methodName);
+            return await Generalization.ReturnResponse(new TradeBot.Facade.FacadeService.v1.AllExchangesBySessionResponse { Message = response.Message, Result = (Ref.ExchangeAccessActionCode)response.Result }, methodName);
         }
-        public async Task<Ref.DeleteExchangeAccessReply> Account_DeleteChangesAccess(Ref.DeleteExchangeAccessRequest request, ServerCallContext context, string methodName)
+        public async Task<Ref.DeleteExchangeAccessResponse> Account_DeleteChangesAccess(Ref.DeleteExchangeAccessRequest request, ServerCallContext context, string methodName)
         {
             TradeBot.Account.AccountService.v1.DeleteExchangeAccessResponse response = null;
             async Task<TradeBot.Account.AccountService.v1.DeleteExchangeAccessResponse> task()
@@ -205,9 +169,9 @@ namespace Facade
                 return response;
             }
             await Generalization.ConnectionTester(task, methodName, request);
-            return await Generalization.ReturnResponse(new TradeBot.Facade.FacadeService.v1.DeleteExchangeAccessReply { Message = response.Message, Result = (Ref.ActionCode)response.Result }, methodName);
+            return await Generalization.ReturnResponse(new TradeBot.Facade.FacadeService.v1.DeleteExchangeAccessResponse { Message = response.Message, Result = (Ref.ExchangeAccessActionCode)response.Result }, methodName);
         }
-        public async Task<Ref.ExchangeBySessionReply> Account_ExchangeBySession(Ref.ExchangeBySessionRequest request, ServerCallContext context, string methodName)
+        public async Task<Ref.ExchangeBySessionResponse> Account_ExchangeBySession(Ref.ExchangeBySessionRequest request, ServerCallContext context, string methodName)
         {
             TradeBot.Account.AccountService.v1.ExchangeBySessionResponse response = null;
             async Task<TradeBot.Account.AccountService.v1.ExchangeBySessionResponse> task()
@@ -220,7 +184,7 @@ namespace Facade
                 return response;
             }
             await Generalization.ConnectionTester(task, methodName, request);
-            return await Generalization.ReturnResponse(new Ref.ExchangeBySessionReply { Message = response.Message, Result = (Ref.ActionCode)response.Result }, methodName);
+            return await Generalization.ReturnResponse(new Ref.ExchangeBySessionResponse { Message = response.Message, Result = (Ref.ExchangeAccessActionCode)response.Result }, methodName);
         }
         #endregion
 
