@@ -9,6 +9,7 @@ namespace TradeMarket.Model.Publishers
     public interface IPublisher<T>
     {
 
+        public bool IsWorking { get; }
         public List<T> Cache { get; set; }
 
         public class ChangedEventArgs : EventArgs

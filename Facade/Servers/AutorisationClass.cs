@@ -88,38 +88,72 @@ namespace Facade
         }
         public async Task<Ref.AccountDataResponse> Account_AccountData(Ref.AccountDataRequest request, ServerCallContext context, string methodName)
         {
-            TradeBot.Account.AccountService.v1.AccountDataResponse response = null;
-            async Task<TradeBot.Account.AccountService.v1.AccountDataResponse> task()
+            var accountServiceResponse = await ClientAccount.AccountDataAsync(new TradeBot.Account.AccountService.v1.AccountDataRequest
             {
-                response = await ClientAccount.AccountDataAsync(new TradeBot.Account.AccountService.v1.AccountDataRequest
-                {
-                    SessionId = request.SessionId
-                }, context.RequestHeaders);
-                await Generalization.ConnectionTester(task, methodName, request);
-                return response;
-            }
-            var accountDataResponse = new Ref.AccountDataResponse
+                SessionId = request.SessionId
+            }, context.RequestHeaders);
+
+            var response = new Ref.AccountDataResponse
             {
-                Result = (Ref.AccountActionCode)response.Result,
-                Message = response.Message,
-                CurrentAccount = new Ref.AccountInfo
-                {
-                    AccountId = response.CurrentAccount.AccountId,
-                    Email = response.CurrentAccount.Email
-                }
+                Result = (Ref.AccountActionCode)accountServiceResponse.Result,
+                Message = accountServiceResponse.Message
             };
-            foreach (var item in response.CurrentAccount.Exchanges)
+
+            if (accountServiceResponse.CurrentAccount != null)
             {
-                accountDataResponse.CurrentAccount.Exchanges.Add(new Ref.ExchangeAccessInfo
+                response.CurrentAccount = new Ref.AccountInfo
                 {
-                    Secret = item.Secret,
-                    Code = (Ref.ExchangeAccessCode)item.Code,
-                    ExchangeAccessId = item.ExchangeAccessId,
-                    Name = item.Name,
-                    Token = item.Token
-                });
+                    AccountId = accountServiceResponse.CurrentAccount.AccountId,
+                    Email = accountServiceResponse.CurrentAccount.Email,
+                };
+
+                foreach (var exchange in accountServiceResponse.CurrentAccount.Exchanges)
+                {
+                    response.CurrentAccount.Exchanges.Add(new Ref.ExchangeAccessInfo
+                    {
+                        ExchangeAccessId = exchange.ExchangeAccessId,
+                        Code = (Ref.ExchangeAccessCode)exchange.Code,
+                        Name = exchange.Name,
+                        Token = exchange.Token,
+                        Secret = exchange.Secret
+                    });
+                }
             }
-            return await Generalization.ReturnResponse(accountDataResponse, methodName);
+
+            return response;
+
+            //TradeBot.Account.AccountService.v1.AccountDataResponse response = null;
+            //async Task<TradeBot.Account.AccountService.v1.AccountDataResponse> task()
+            //{
+            //    response = await ClientAccount.AccountDataAsync(new TradeBot.Account.AccountService.v1.AccountDataRequest
+            //    {
+            //        SessionId = request.SessionId
+            //    }, context.RequestHeaders);
+            //    await Generalization.ConnectionTester(task, methodName, request);
+            //    return response;
+            //}
+            //var accountDataResponse = new Ref.AccountDataResponse
+            //{
+            //    Result = (Ref.AccountActionCode)response.Result,
+            //    Message = response.Message,
+            //    CurrentAccount = new Ref.AccountInfo
+            //    {
+            //        AccountId = response.CurrentAccount.AccountId,
+            //        Email = response.CurrentAccount.Email
+            //    }
+            //};
+            //foreach (var item in response.CurrentAccount.Exchanges)
+            //{
+            //    accountDataResponse.CurrentAccount.Exchanges.Add(new Ref.ExchangeAccessInfo
+            //    {
+            //        Secret = item.Secret,
+            //        Code = (Ref.ExchangeAccessCode)item.Code,
+            //        ExchangeAccessId = item.ExchangeAccessId,
+            //        Name = item.Name,
+            //        Token = item.Token
+            //    });
+            //}
+            //return await Generalization.ReturnResponse(accountDataResponse, methodName);
         }
         #endregion
 

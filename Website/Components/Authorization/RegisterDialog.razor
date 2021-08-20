@@ -1,0 +1,56 @@
+﻿@using Website.Models.Authorization
+@using Website.Controllers.Clients
+@using TradeBot.Account.AccountService.v1
+
+<li><a @onclick="Switch">Регистрация</a></li>
+
+@if (isDisplayed)
+{
+    <div class="message_background">
+        <EditForm Model="@registerModel" OnValidSubmit="Register" class="form floating_form">
+            <h3>Регистрация</h3>
+
+            <!--Вывод результата валидации и сообщений сервиса.-->
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            @if (!String.IsNullOrEmpty(replyMessage)) {
+                <p class="validation-message">@replyMessage</p>
+            }
+
+            <p>Email:</p>
+            <input class="form_input" @bind-value="registerModel.Email" type="email" />
+            <p>Пароль:</p>
+            <input class="form_input" @bind-value="registerModel.Password" type="password" />
+            <p>Подтвердите пароль:</p>
+            <input class="form_input" @bind-value="registerModel.VerifyPassword" type="password" />
+
+            <input class="button form_button" type="submit" value="Регистрация" />
+            <!--Отключает отображение формы.-->
+            <input class="button form_close_button" type="button" @onclick="Switch" value="Закрыть" />
+        </EditForm>
+    </div>
+}
+
+@code {
+    private bool isDisplayed = false;
+    private RegisterModel registerModel = new();
+    private string replyMessage;
+
+    // Метод включения/отключения отображения формы.
+    private void Switch()
+    {
+        if (isDisplayed) isDisplayed = false;
+        else isDisplayed = true;
+        // Обновление компонента.
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void Register()
+    {
+        // Нужно понять, как сделать вход, чтобы сделать регистрацию ._.
+        replyMessage = "Регистрация временно недоступна.";
+
+        //var reply = await AccountServiceClient.Register(registerModel);
+        //if (reply.Result == AccountActionCode.Successful) { }
+}
+}
