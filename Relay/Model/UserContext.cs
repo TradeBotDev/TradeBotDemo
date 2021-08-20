@@ -24,7 +24,7 @@ namespace Relay.Model
         private IClientStreamWriter<AddOrderRequest> _algorithmStream;
         private IAsyncStreamReader<SubscribeOrdersResponse> _tradeMarketStream;
         private IAsyncStreamReader<TradeBot.Former.FormerService.v1.SubscribeLogsResponse> _formerStream;
-        private bool IsWorking = true;
+        private bool IsWorking = false;
 
         public UserContext(Metadata meta, FormerClient formerClient, AlgorithmClient algorithmClient, TradeMarketClient tradeMarketClient)
         {
@@ -33,8 +33,7 @@ namespace Relay.Model
             _algorithmClient = algorithmClient;
             _tradeMarketClient = tradeMarketClient;
             
-            _algorithmStream = _algorithmClient.OpenStream(meta);
-            _tradeMarketStream = _tradeMarketClient.OpenStream(meta);
+
 
         }
         public IAsyncStreamReader<SubscribeOrdersResponse> ReConnect()
@@ -48,15 +47,17 @@ namespace Relay.Model
             if (!IsWorking)
             {
                 IsWorking = true;
-                _tradeMarketClient.OrderRecievedEvent -= _tradeMarketClient_OrderRecievedEvent;
-                Log.Information("The bot is stopping...");
+                _tradeMarketClient.OrderRecievedEvent += _tradeMarketClient_OrderRecievedEvent;
+                Log.Information("The bot is starting...");
+                _algorithmStream = _algorithmClient.OpenStream(Meta);
+                _tradeMarketStream = _tradeMarketClient.OpenStream(Meta);
                 return new CancellationTokenSource();
             }
             else
             {
                 IsWorking = false;
-                _tradeMarketClient.OrderRecievedEvent += _tradeMarketClient_OrderRecievedEvent;
-                Log.Information("The bot is starting...");
+                _tradeMarketClient.OrderRecievedEvent -= _tradeMarketClient_OrderRecievedEvent;
+                Log.Information("The bot is stopping...");
                 cancellationTokenSource.Cancel();
                 return cancellationTokenSource;
             }

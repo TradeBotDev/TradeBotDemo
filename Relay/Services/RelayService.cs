@@ -79,7 +79,7 @@ namespace Relay.Services
             var user = GetUserContext(context.RequestHeaders);
             Log.Information("{@ServiceName} StartBot Request Started For user {@context}", "Relay", user);
             _stopBotCancelationTokenSource = user.StatusOfWork(_stopBotCancelationTokenSource);
-            user.SubscribeForOrders();
+            user.SubscribeForOrders(_stopBotCancelationTokenSource.Token);
             return await Task.FromResult(new StartBotResponse()
             {
                 Response = new DefaultResponse()
