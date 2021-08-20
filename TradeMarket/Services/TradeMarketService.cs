@@ -143,18 +143,23 @@ namespace TradeMarket.Services
         {
             try
             {
+                Log.Information("Canceletion requested : {@Token}", context.CancellationToken.IsCancellationRequested);
+
                 //Добавляем заголовки ответа по контексту пользователя user из запроса
                 var meta = await MoveInfoToMetadataAsync(context.RequestHeaders);
                 await context.WriteResponseHeadersAsync(meta);
-
+                Log.Information("Wrote Response Headers {@Meta}", context.ResponseTrailers);
                 //подписываемся на обновления
                 var cache = await subscribe(handler, context.CancellationToken);
+                Log.Information("Cache Contains {@CacheCount} elements", cache.Count);
+
                     
                 //кидаем данные из кэша
                 Parallel.ForEach(cache, data => handler(this, new(data, Bitmex.Client.Websocket.Responses.BitmexAction.Partial)));
                
                 //ожидаем пока клиенты отменят подписку
                 await AwaitCancellation(context.CancellationToken);
+                Log.Information("Connection was Canceled");
                 context.Status = Status.DefaultSuccess;
             }
             catch (Exception e)
@@ -366,6 +371,8 @@ namespace TradeMarket.Services
             }
             using (LogContext.Push(new PropertyEnricher("RPC Method", context.Method), new PropertyEnricher("RequestId", Guid.NewGuid().ToString()), new PropertyEnricher("UserSessionId", context.RequestHeaders.Get("sessionid"))))
             {
+                Log.Information("Starting subscriprion for {@Topic}", "price");
+
                 var common = await GetCommonContextAsync(context.RequestHeaders);
                 await SubscribeToUserTopic<SubscribePriceRequest, SubscribePriceResponse, Instrument>(common.SubscribeToInstrumentUpdate, common.UnSubscribeFromInstrumentUpdate, WriteToStreamAsync, request, responseStream, context);
             }
@@ -380,6 +387,8 @@ namespace TradeMarket.Services
                 await WriteStreamAsync(responseStream, response);
 
             }
+            Log.Information("Starting subscriprion for {@Topic}", "margin");
+
             var user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
             await SubscribeToUserTopic<SubscribeMarginRequest, SubscribeMarginResponse, Margin>(user.SubscribeToUserMargin, user.UnSubscribeFromUserMargin, WriteToStreamAsync, request, responseStream, context);
 
@@ -395,6 +404,8 @@ namespace TradeMarket.Services
                 await WriteStreamAsync(responseStream, response);
 
             }
+            Log.Information("Starting subscriprion for {@Topic}", "position");
+
             var user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
             await SubscribeToUserTopic<SubscribePositionRequest,SubscribePositionResponse,Position>(user.SubscribeToUserPositions,user.UnSubscribeFromUserPositions,WriteToStreamAsync,request,responseStream,context);
         }
@@ -409,6 +420,8 @@ namespace TradeMarket.Services
                 await WriteStreamAsync(responseStream, response);
 
             }
+            Log.Information("Starting subscriprion for {@Topic}", "user orders");
+
             var user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
             await SubscribeToUserTopic<SubscribeMyOrdersRequest,SubscribeMyOrdersResponse, Order>(user.SubscribeToUserOrders, user.UnSubscribeFromUserOrders, WriteToStreamAsync, request, responseStream, context);
 
