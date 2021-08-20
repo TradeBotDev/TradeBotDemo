@@ -1,10 +1,10 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Former.Models;
+﻿using Former.Models;
 using Grpc.Core;
 using Grpc.Net.Client;
 using Serilog;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using TradeBot.TradeMarket.TradeMarketService.v1;
 using Metadata = Grpc.Core.Metadata;
 
@@ -55,11 +55,17 @@ namespace Former.Clients
                 try
                 {
                     await func.Invoke();
+                    attempts = 0;
                     break;
                 }
                 catch (RpcException e)
                 {
-                    if (e.StatusCode == StatusCode.Cancelled || attempts > 3) break;
+                    if (e.StatusCode == StatusCode.Cancelled) break;
+                    if (attempts > 3)
+                    {
+                        Log.Error("{@Where}: Error {@ExceptionMessage}. Retrying...\r\n{@ExceptionStackTrace}", "Former", e.Message, e.StackTrace);
+                        throw new RpcException(e.Status);
+                    }
                     Log.Error("{@Where}: Error {@ExceptionMessage}. Retrying...\r\n{@ExceptionStackTrace}", "Former", e.Message, e.StackTrace);
                     Thread.Sleep(_retryDelay);
                     attempts++;
@@ -164,7 +170,7 @@ namespace Former.Clients
 
             async Task PlaceOrdersFunc()
             {
-                response = await _client.PlaceOrderAsync(new PlaceOrderRequest {Price = sellPrice, Value = contractValue}, metadata);
+                response = await _client.PlaceOrderAsync(new PlaceOrderRequest { Price = sellPrice, Value = contractValue }, metadata);
             }
 
             await ConnectionTester(PlaceOrdersFunc);
@@ -220,10 +226,10 @@ namespace Former.Clients
         internal void StartObserving(Metadata meta)
         {
             _token = new CancellationTokenSource();
-            _ = ObservePositions(meta);
-            _ = ObserveBalance(meta);
-            _ = ObserveMarketPrices(meta);
-            _ = ObserveMyOrders(meta);
+            ObservePositions(meta);
+            ObserveBalance(meta);
+            ObserveMarketPrices(meta);
+            ObserveMyOrders(meta);
         }
 
         /// <summary>
