@@ -110,7 +110,7 @@ namespace Algorithm.Analysis
             }
         }
         //this func needs points and subset averages and decides if it's time to buy
-        private int MakeADecision(IReadOnlyCollection<double> subTrends, SortedDictionary<DateTime, double> points)
+        private int MakeADecision(IReadOnlyCollection<double> subTrends, IDictionary<DateTime, double> points)
         {
             Log.Information("{@Where}:Analysing the following points: " + string.Join(Environment.NewLine, points), "Algorithm");
             if (_precision == 0)
@@ -165,6 +165,9 @@ namespace Algorithm.Analysis
                     case 3:
                         trend = AnalyseTrendWithHighPrecision(subTrends, points, uptrend);
                         break;
+                    case 4:
+                        trend = AnalyseTrendWithUltraPrecision(subTrends, points, uptrend);
+                        break;
                     default:
                         trend = AnalyseTrendWithHighPrecision(subTrends, points, uptrend);
                         break;
@@ -178,7 +181,7 @@ namespace Algorithm.Analysis
             return 0;
         }
 
-        private static int AnalyseTrendWithMinimalPrecision(SortedDictionary<DateTime, double> prices)
+        private static int AnalyseTrendWithMinimalPrecision(IDictionary<DateTime, double> prices)
         {
             if (prices.ElementAt(prices.Count - 4).Value < prices.ElementAt(prices.Count - 3).Value
                 && prices.ElementAt(prices.Count - 3).Value < prices.ElementAt(prices.Count - 2).Value
@@ -196,7 +199,7 @@ namespace Algorithm.Analysis
             }
             return 0;
         }
-        private static int AnalyseTrendWithLowPrecision(IReadOnlyCollection<double> subTrends, SortedDictionary<DateTime, double> prices, bool currentTrend)
+        private static int AnalyseTrendWithLowPrecision(IReadOnlyCollection<double> subTrends, IDictionary<DateTime, double> prices, bool currentTrend)
         {
             if (currentTrend)
             {
@@ -215,7 +218,7 @@ namespace Algorithm.Analysis
             return 0;
         }
 
-        private static int AnalyseTrendWithMediumPrecision(IReadOnlyCollection<double> subTrends, SortedDictionary<DateTime, double> prices, bool currentTrend)
+        private static int AnalyseTrendWithMediumPrecision(IReadOnlyCollection<double> subTrends, IDictionary<DateTime, double> prices, bool currentTrend)
         {
             if (currentTrend)
             {
@@ -235,7 +238,7 @@ namespace Algorithm.Analysis
             }
             return 0;
         }
-        private static int AnalyseTrendWithHighPrecision(IReadOnlyCollection<double> subTrends, SortedDictionary<DateTime, double> prices, bool currentTrend)
+        private static int AnalyseTrendWithHighPrecision(IReadOnlyCollection<double> subTrends, IDictionary<DateTime, double> prices, bool currentTrend)
         {
             if (currentTrend)
             {
@@ -257,6 +260,32 @@ namespace Algorithm.Analysis
             }
             return 0;
         }
+
+        private static int AnalyseTrendWithUltraPrecision(IReadOnlyCollection<double> subTrends, IDictionary<DateTime, double> prices, bool currentTrend)
+        {
+            if (currentTrend)
+            {
+                if (subTrends.Last() > prices.Last().Value &&
+                    prices.Last().Value < prices.ElementAt(prices.Count - 2).Value &&
+                    prices.ElementAt(prices.Count - 3).Value < prices.ElementAt(prices.Count - 2).Value &&
+                    prices.ElementAt(prices.Count - 4).Value < prices.ElementAt(prices.Count - 3).Value)
+                {
+                    return -1;
+                }
+            }
+            else
+            {
+                if (subTrends.Last() < prices.Last().Value &&
+                    prices.Last().Value > prices.ElementAt(prices.Count - 2).Value &&
+                    prices.ElementAt(prices.Count - 3).Value > prices.ElementAt(prices.Count - 2).Value &&
+                    prices.ElementAt(prices.Count - 4).Value > prices.ElementAt(prices.Count - 3).Value)
+                {
+                    return 1;
+                }
+            }
+            return 0;
+        }
+
         //func to find average price
         private static double CalculateSMA(List<double> points)
         {
