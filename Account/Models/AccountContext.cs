@@ -21,8 +21,6 @@ namespace AccountGRPC.Models
 
             // Получение строки подкючения из appsettings.json.
             connectionString = configuration.GetConnectionString("PostgreSQL");
-            // Создание базы данных, если она еще не была создана.
-            Database.EnsureCreated();
         }
 
         // Указание, что будет использовать PostgreSQL и файл из строки подключения для него.
