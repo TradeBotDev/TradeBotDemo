@@ -1,22 +1,27 @@
-﻿@{
+﻿@using Website.Components.Purchase;
+
+@{
     <!--Установка заголовков страницы-->
     ViewBag.Title = "Главная страница";
     ViewBag.SectionTitle = "Представляем наш бот";
 
     <!--Если пользователь не имеет лицензию или о ней нет информации, появляется форма покупки лицензии.-->
-    if (ViewBag.HaveLicense == null || !ViewBag.HaveLicense)
-    {
+    if (ViewBag.HaveLicense == null || !ViewBag.HaveLicense) {
         <p>
             Наш торговый бот TradeBot предназначен для автоматический торговли на бирже.
             Имеет широкий спектр настроек алгоритма, поддерживает многопользовательность
             и позволяет управлять биржами прямо на сайте.
         </p>
-        <form action="/purchase/buy">
-            <input class="button color_button" type="submit" value="Купить" />
-        </form>
+        if (User.Identity.IsAuthenticated) {
+            <component type="typeof(PurchaseButton)" render-mode="ServerPrerendered" param-SessionId="User.Identity.Name" />
+        }
+        else {
+            <form action="/authorization/login">
+                <input class="button color_button" type="submit" value="Купить" />
+            </form>
+        }
     }
-    else
-    {
+    else {
         <p class="text_message">Вы уже обладаете лицензией на данный продукт. <a href="/account">Перейти в аккаунт</a></p>
     }
 }

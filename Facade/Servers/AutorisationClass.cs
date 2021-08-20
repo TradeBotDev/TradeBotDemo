@@ -95,31 +95,70 @@ namespace Facade
                 {
                     SessionId = request.SessionId
                 }, context.RequestHeaders);
-                await Generalization.ConnectionTester(task, methodName, request);
                 return response;
             }
+            await Generalization.ConnectionTester(task, methodName, request);
             var accountDataResponse = new Ref.AccountDataResponse
             {
                 Result = (Ref.AccountActionCode)response.Result,
-                Message = response.Message,
-                CurrentAccount = new Ref.AccountInfo
+                Message = response.Message
+            };
+
+            if (response.CurrentAccount != null)
+            {
+                accountDataResponse.CurrentAccount = new Ref.AccountInfo
                 {
                     AccountId = response.CurrentAccount.AccountId,
-                    Email = response.CurrentAccount.Email
-                }
-            };
-            foreach (var item in response.CurrentAccount.Exchanges)
-            {
-                accountDataResponse.CurrentAccount.Exchanges.Add(new Ref.ExchangeAccessInfo
+                    Email = response.CurrentAccount.Email,
+                };
+
+                foreach (var exchange in response.CurrentAccount.Exchanges)
                 {
-                    Secret = item.Secret,
-                    Code = (Ref.ExchangeAccessCode)item.Code,
-                    ExchangeAccessId = item.ExchangeAccessId,
-                    Name = item.Name,
-                    Token = item.Token
-                });
+                    accountDataResponse.CurrentAccount.Exchanges.Add(new Ref.ExchangeAccessInfo
+                    {
+                        ExchangeAccessId = exchange.ExchangeAccessId,
+                        Code = (Ref.ExchangeAccessCode)exchange.Code,
+                        Name = exchange.Name,
+                        Token = exchange.Token,
+                        Secret = exchange.Secret
+                    });
+                }
             }
+
             return await Generalization.ReturnResponse(accountDataResponse, methodName);
+
+            //TradeBot.Account.AccountService.v1.AccountDataResponse response = null;
+            //async Task<TradeBot.Account.AccountService.v1.AccountDataResponse> task()
+            //{
+            //    response = await ClientAccount.AccountDataAsync(new TradeBot.Account.AccountService.v1.AccountDataRequest
+            //    {
+            //        SessionId = request.SessionId
+            //    }, context.RequestHeaders);
+            //    await Generalization.ConnectionTester(task, methodName, request);
+            //    return response;
+            //}
+            //var accountDataResponse = new Ref.AccountDataResponse
+            //{
+            //    Result = (Ref.AccountActionCode)response.Result,
+            //    Message = response.Message,
+            //    CurrentAccount = new Ref.AccountInfo
+            //    {
+            //        AccountId = response.CurrentAccount.AccountId,
+            //        Email = response.CurrentAccount.Email
+            //    }
+            //};
+            //foreach (var item in response.CurrentAccount.Exchanges)
+            //{
+            //    accountDataResponse.CurrentAccount.Exchanges.Add(new Ref.ExchangeAccessInfo
+            //    {
+            //        Secret = item.Secret,
+            //        Code = (Ref.ExchangeAccessCode)item.Code,
+            //        ExchangeAccessId = item.ExchangeAccessId,
+            //        Name = item.Name,
+            //        Token = item.Token
+            //    });
+            //}
+            //return await Generalization.ReturnResponse(accountDataResponse, methodName);
         }
         #endregion
 

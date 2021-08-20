@@ -1,0 +1,11 @@
+﻿<PurchaseDialog SessionId="@SessionId" @ref="PurchaseDialogChild"></PurchaseDialog>
+<input @onclick="ShowDialog" class="button color_button" type="button" value="Купить"/>
+
+@code {
+    [Parameter] public string SessionId { get; set; }
+    private PurchaseDialog PurchaseDialogChild;
+
+    private void ShowDialog() {
+        PurchaseDialogChild.Switch();
+    }
+}
