@@ -54,7 +54,11 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         public abstract void AddModelToCache(TResponse response);
 
-        
+        protected RequestBase CreateUnsubsscribeReqiest(SubscribeRequestBase request)
+        {
+            request.IsUnsubscribe = true;
+            return request;
+        }
 
         internal async Task SubscribeAsync(TRequest request, IObservable<TResponse> stream, CancellationToken token)
         {
@@ -63,11 +67,18 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
                 if(Changed?.GetInvocationList().Length == 1)
                {
                    cancellationTokenSource.Cancel();
+                   if (request is SubscribeRequestBase)
+                   {
+                       _client.Send(CreateUnsubsscribeReqiest(request as SubscribeRequestBase));
+                       _cache.Clear();
+                   }
+                   (request as SubscribeRequestBase).IsUnsubscribe = false;
                }
            });
            await Task.Run(() =>
            {
                //тут не нужно ловить OperationCanceledException. BitmexWebsocketClient все разруливает сам
+               //TODO тестирование 
                stream.Subscribe(responseAction, cancellationTokenSource.Token);
 
                if (request is not null) _client.Send(request);
