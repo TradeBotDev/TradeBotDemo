@@ -2,9 +2,12 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 using System.Threading.Tasks;
-using TradeBot.Account.AccountService.v1;
+using Serilog;
+
 using Website.Models;
+using TradeBot.Facade.FacadeService.v1;
 
 namespace Website.Controllers
 {
@@ -17,6 +20,8 @@ namespace Website.Controllers
         [HttpGet]
         public async Task<IActionResult> Account()
         {
+            Log.Information("AccountController: метод Account принял запрос GET.");
+
             // Проверка лицензии и передача ее результата в представление через ViewBag.
             var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
             ViewBag.HaveLicense = haveLicense.HaveAccess;
@@ -45,6 +50,8 @@ namespace Website.Controllers
         [HttpPost]
         public async Task<IActionResult> Account(ExchangeAccessCode exchangeCode)
         {
+            Log.Information($"AccountController: метод Account принял запрос POST с данными: exchangeCode - {exchangeCode}.");
+
             // Проверка лицензии и передача ее результата в представление через ViewBag.
             var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
             ViewBag.HaveLicense = haveLicense.HaveAccess;
@@ -57,40 +64,6 @@ namespace Website.Controllers
 
             // Иначе происходит выход из аккаунта и появляется страница с сообщением об ошибке.
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return View("~/Views/Shared/Error.cshtml", reply.Message);
-        }
-
-        // Метод, показывающий форму добавления биржи в аккаунт.
-        [HttpGet]
-        public async Task<IActionResult> AddExchangeAccess()
-        {
-            // Проверка лицензии и передача ее результата в представление через ViewBag.
-            var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
-            ViewBag.HaveLicense = haveLicense.HaveAccess;
-            return View();
-        }
-
-        // Метод, который добавляет биржу после отправки формы добавления биржи.
-        [HttpPost]
-        public async Task<IActionResult> AddExchangeAccess(AddExchangeAccessModel model)
-        {
-            // Проверка лицензии и передача ее результата в представление через ViewBag.
-            var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
-            ViewBag.HaveLicense = haveLicense.HaveAccess;
-            // Если данные модели не являются валидными, возвращается страница формы с сообщениями об ошибках.
-            if (!ModelState.IsValid)
-                return View();
-
-            // Иначе отправляется запрос на добавление биржи в аккаунт.
-            var reply = await Clients.ExchangeAccessClient.AddExchangeAccess(User.Identity.Name, model);
-            // Если биржа была успешно добавлена, происходит перенаправление на страницу аккаунта, где она будет отображаться.
-            if (reply.Result == ExchangeAccessActionCode.Successful)
-                return RedirectToAction("account", "account");
-
-            // Иначе если проблема при добавлении связана с аккаунтом, происходит выход из него.
-            if (reply.Result == ExchangeAccessActionCode.AccountNotFound || reply.Result == ExchangeAccessActionCode.TimePassed)
-                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            // Возвращение страницы с ошибкой.
             return View("~/Views/Shared/Error.cshtml", reply.Message);
         }
     }
