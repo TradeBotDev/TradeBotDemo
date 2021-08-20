@@ -88,28 +88,33 @@ namespace Facade
         }
         public async Task<Ref.AccountDataResponse> Account_AccountData(Ref.AccountDataRequest request, ServerCallContext context, string methodName)
         {
-            var accountServiceResponse = await ClientAccount.AccountDataAsync(new TradeBot.Account.AccountService.v1.AccountDataRequest
+            TradeBot.Account.AccountService.v1.AccountDataResponse response = null;
+            async Task<TradeBot.Account.AccountService.v1.AccountDataResponse> task()
             {
-                SessionId = request.SessionId
-            }, context.RequestHeaders);
-
-            var response = new Ref.AccountDataResponse
+                response = await ClientAccount.AccountDataAsync(new TradeBot.Account.AccountService.v1.AccountDataRequest
+                {
+                    SessionId = request.SessionId
+                }, context.RequestHeaders);
+                return response;
+            }
+            await Generalization.ConnectionTester(task, methodName, request);
+            var accountDataResponse = new Ref.AccountDataResponse
             {
-                Result = (Ref.AccountActionCode)accountServiceResponse.Result,
-                Message = accountServiceResponse.Message
+                Result = (Ref.AccountActionCode)response.Result,
+                Message = response.Message
             };
 
-            if (accountServiceResponse.CurrentAccount != null)
+            if (response.CurrentAccount != null)
             {
-                response.CurrentAccount = new Ref.AccountInfo
+                accountDataResponse.CurrentAccount = new Ref.AccountInfo
                 {
-                    AccountId = accountServiceResponse.CurrentAccount.AccountId,
-                    Email = accountServiceResponse.CurrentAccount.Email,
+                    AccountId = response.CurrentAccount.AccountId,
+                    Email = response.CurrentAccount.Email,
                 };
 
-                foreach (var exchange in accountServiceResponse.CurrentAccount.Exchanges)
+                foreach (var exchange in response.CurrentAccount.Exchanges)
                 {
-                    response.CurrentAccount.Exchanges.Add(new Ref.ExchangeAccessInfo
+                    accountDataResponse.CurrentAccount.Exchanges.Add(new Ref.ExchangeAccessInfo
                     {
                         ExchangeAccessId = exchange.ExchangeAccessId,
                         Code = (Ref.ExchangeAccessCode)exchange.Code,
@@ -120,7 +125,7 @@ namespace Facade
                 }
             }
 
-            return response;
+            return await Generalization.ReturnResponse(accountDataResponse, methodName);
 
             //TradeBot.Account.AccountService.v1.AccountDataResponse response = null;
             //async Task<TradeBot.Account.AccountService.v1.AccountDataResponse> task()
