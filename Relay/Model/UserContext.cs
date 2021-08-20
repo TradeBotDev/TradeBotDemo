@@ -4,6 +4,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using TradeBot.Algorithm.AlgorithmService.v1;
 using TradeBot.Common.v1;
@@ -42,19 +43,22 @@ namespace Relay.Model
             return _tradeMarketStream;
         }
 
-        public void StatusOfWork()
+        public CancellationTokenSource StatusOfWork(CancellationTokenSource cancellationTokenSource)
         {
             if (!IsWorking)
             {
                 IsWorking = true;
                 _tradeMarketClient.OrderRecievedEvent -= _tradeMarketClient_OrderRecievedEvent;
                 Log.Information("The bot is stopping...");
+                return new CancellationTokenSource();
             }
             else
             {
                 IsWorking = false;
                 _tradeMarketClient.OrderRecievedEvent += _tradeMarketClient_OrderRecievedEvent;
                 Log.Information("The bot is starting...");
+                cancellationTokenSource.Cancel();
+                return cancellationTokenSource;
             }
         }
 
@@ -74,12 +78,12 @@ namespace Relay.Model
             _ = _formerClient.UpdateConfig(update, Meta);
         }
 
-        public async Task SubscribeForOrders()
+        public async Task SubscribeForOrders(CancellationToken token)
         {
             if (!IsWorking && !IsStart)
             {
                 IsStart = IsStart ? IsStart : !IsStart;
-                _tradeMarketClient.SubscribeForOrders(_tradeMarketStream);
+                _tradeMarketClient.SubscribeForOrders(_tradeMarketStream,token);
             }
         }
 

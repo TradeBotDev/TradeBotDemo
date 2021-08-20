@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Grpc.Net.Client;
@@ -40,7 +41,7 @@ namespace Relay.Clients
 
 
 
-        public IAsyncEnumerable<Order> SubscribeForOrders(IAsyncStreamReader<SubscribeOrdersResponse> stream)
+        public IAsyncEnumerable<Order> SubscribeForOrders(IAsyncStreamReader<SubscribeOrdersResponse> stream,CancellationToken token)
         {
             System.Threading.Channels.Channel<Order> channel = System.Threading.Channels.Channel.CreateUnbounded<Order>();
             Task.Run(async() =>
@@ -49,7 +50,7 @@ namespace Relay.Clients
                 {
                     try
                     {
-                        while (await stream.MoveNext())
+                        while (await stream.MoveNext(token))
                         {
                             await channel.Writer.WriteAsync(new(stream.Current.Response.Order));
                             OrderRecievedEvent?.Invoke(this, new(stream.Current.Response.Order));

@@ -13,6 +13,7 @@ using UpdateServerConfigRequest = TradeBot.Relay.RelayService.v1.UpdateServerCon
 using UpdateServerConfigResponse = TradeBot.Relay.RelayService.v1.UpdateServerConfigResponse;
 using System.Diagnostics.CodeAnalysis;
 using Serilog;
+using System.Threading;
 
 namespace Relay.Services
 {
@@ -22,6 +23,7 @@ namespace Relay.Services
         private static TradeMarketClient _tradeMarketClient = null;
         private static FormerClient _formerClient=null;//добавил null
         private static MetaComparer comparer = new MetaComparer();
+        private static CancellationTokenSource _stopBotCancelationTokenSource;
 
         private static IDictionary<Metadata, UserContext> contexts = new Dictionary<Metadata, UserContext>(comparer);
 
@@ -76,7 +78,7 @@ namespace Relay.Services
         {
             var user = GetUserContext(context.RequestHeaders);
             Log.Information("{@ServiceName} StartBot Request Started For user {@context}", "Relay", user);
-            user.StatusOfWork();
+            _stopBotCancelationTokenSource = user.StatusOfWork(_stopBotCancelationTokenSource);
             user.SubscribeForOrders();
             return await Task.FromResult(new StartBotResponse()
             {
@@ -97,7 +99,7 @@ namespace Relay.Services
         {
             var user = GetUserContext(context.RequestHeaders);
             user.UpdateConfig(new TradeBot.Common.v1.UpdateServerConfigRequest { Config = request.Request.Config, Switch = request.Request.Switch });
-            user.StatusOfWork();
+            _stopBotCancelationTokenSource = user.StatusOfWork(_stopBotCancelationTokenSource);
             return await Task.FromResult(new StopBotResponse { });
         }
         public async override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request,
