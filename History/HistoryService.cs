@@ -93,7 +93,7 @@ namespace History
                             {
                                 Balance = Converter.ToBalance(updateBalance.Balance),
                                 Sessionid = updateBalance.SessionId,
-                                Time = Timestamp.FromDateTime(updateBalance.Time.ToUniversalTime())
+                                Time = Timestamp.FromDateTime(new DateTime(updateBalance.Time.Year, updateBalance.Time.Month, updateBalance.Time.Day, 0, 0, 0).ToUniversalTime())
                             }
                         }); ;
                     }
