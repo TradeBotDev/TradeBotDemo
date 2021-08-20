@@ -6,6 +6,7 @@ using Grpc.Core;
 using Grpc.Net.Client;
 using Serilog;
 using TradeBot.TradeMarket.TradeMarketService.v1;
+using Metadata = Grpc.Core.Metadata;
 
 namespace Former.Clients
 {
@@ -22,6 +23,9 @@ namespace Former.Clients
 
         internal delegate Task MarketPricesEvent(double bid, double ask);
         internal MarketPricesEvent UpdateMarketPrices;
+
+        internal delegate Task LotSizeEvent(int lotSize);
+        internal LotSizeEvent UpdateLotSize;
 
         private static int _retryDelay;
         private static string _connectionString;
@@ -65,16 +69,16 @@ namespace Former.Clients
 
         private bool EventFilter(Metadata incomingMeta, Metadata filteringMeta)
         {
-            bool IsEqual(Metadata incomingMeta, Metadata filteringMeta, string key)
-            {
-                return (incomingMeta.GetValue(key) is not null &&
-                        incomingMeta.GetValue(key) == filteringMeta.GetValue(key)) 
-                       || incomingMeta.GetValue(key) is null;
-            }
+            //bool IsEqual(Metadata incomingMeta, Metadata filteringMeta, string key)
+            //{
+            //    return (incomingMeta.GetValue(key) is not null &&
+            //            incomingMeta.GetValue(key) == filteringMeta.GetValue(key)) 
+            //           || incomingMeta.GetValue(key) is null;
+            //}
 
 
-            return IsEqual(incomingMeta,filteringMeta,"sessionid") && IsEqual(incomingMeta,filteringMeta,"slot") && IsEqual(incomingMeta,filteringMeta,"trademarket");
-            //return filteringMeta[0] == incomingMeta[0] && filteringMeta[1] == incomingMeta[1] && filteringMeta[2] == incomingMeta[2];
+            //return IsEqual(incomingMeta,filteringMeta,"sessionid") && IsEqual(incomingMeta,filteringMeta,"slot") && IsEqual(incomingMeta,filteringMeta,"trademarket");
+            return filteringMeta.GetValue("sessionid") == incomingMeta.GetValue("sessionid") && filteringMeta.GetValue("trademarket") == incomingMeta.GetValue("trademarket") && filteringMeta.GetValue("slot") == incomingMeta.GetValue("slot");
         }
 
         /// <summary>
@@ -87,7 +91,11 @@ namespace Former.Clients
             {
                 while (await call.ResponseStream.MoveNext(_token.Token))
                 {
-                    if (EventFilter(call.ResponseHeadersAsync.Result, meta)) await UpdateMarketPrices?.Invoke(call.ResponseStream.Current.BidPrice, call.ResponseStream.Current.AskPrice);
+                    if (EventFilter(call.ResponseHeadersAsync.Result, meta))
+                    {
+                        await UpdateMarketPrices?.Invoke(call.ResponseStream.Current.BidPrice, call.ResponseStream.Current.AskPrice);
+                        await UpdateLotSize?.Invoke(call.ResponseStream.Current.LotSize);
+                    }
                 }
             }
 
@@ -105,7 +113,7 @@ namespace Former.Clients
             {
                 while (await call.ResponseStream.MoveNext(_token.Token))
                 {
-                    if (EventFilter(call.ResponseHeadersAsync.Result, meta)) await UpdateBalance?.Invoke((int) call.ResponseStream.Current.Margin.AvailableMargin, (int)call.ResponseStream.Current.Margin.MarginBalance);
+                    if (EventFilter(call.ResponseHeadersAsync.Result, meta)) await UpdateBalance?.Invoke((int)call.ResponseStream.Current.Margin.AvailableMargin, (int)call.ResponseStream.Current.Margin.MarginBalance);
                 }
             }
             await ConnectionTester(ObserveBalanceFunc);

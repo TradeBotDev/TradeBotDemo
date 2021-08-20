@@ -18,14 +18,15 @@ using Margin = Bitmex.Client.Websocket.Responses.Margins.Margin;
 using Bitmex.Client.Websocket.Responses.Positions;
 using Bitmex.Client.Websocket.Responses.Orders;
 using System.Collections.Generic;
+using Serilog.Context;
+using Serilog.Enrichers;
+using Serilog.Core.Enrichers;
 
 namespace TradeMarket.Services
 {
     public partial class TradeMarketService : TradeBot.TradeMarket.TradeMarketService.v1.TradeMarketService.TradeMarketServiceBase
     {
         private readonly ContextDirector _director;
-
-        private readonly TradeMarketFactory _tradeMarketFactory;
 
         public TradeMarketService(ContextDirector director)
         {
@@ -143,13 +144,7 @@ namespace TradeMarket.Services
             {
                 //Добавляем заголовки ответа по контексту пользователя user из запроса
                 var meta = await MoveInfoToMetadataAsync(context.RequestHeaders);
-                foreach (var entry in meta)
-                {
-                    if (entry is not null)
-                    {
-                        context.ResponseTrailers.Add(entry);
-                    }
-                }
+                await context.WriteResponseHeadersAsync(meta);
 
                 //подписываемся на обновления
                 var cache = await subscribe(handler, context.CancellationToken);
@@ -164,8 +159,8 @@ namespace TradeMarket.Services
             catch (Exception e)
             {
                 //записываем ошибку в логер
-                Log.Logger.Error(e.Message);
-                Log.Logger.Error(e.StackTrace);
+                Log.Error(e.Message);
+                Log.Error(e.StackTrace);
                 //ставим статус "Отмена" в заголовке ответа
                 context.Status = Status.DefaultCancelled;
             }
@@ -368,8 +363,11 @@ namespace TradeMarket.Services
                 await WriteStreamAsync(responseStream, response);
 
             }
-            var common = await GetCommonContextAsync(context.RequestHeaders);
-            await SubscribeToUserTopic<SubscribePriceRequest, SubscribePriceResponse, Instrument>(common.SubscribeToInstrumentUpdate, common.UnSubscribeFromInstrumentUpdate, WriteToStreamAsync, request, responseStream,context);
+            using (LogContext.Push(new PropertyEnricher("RPC Method", context.Method), new PropertyEnricher("RequestId", Guid.NewGuid().ToString()), new PropertyEnricher("UserSessionId", context.RequestHeaders.Get("sessionid"))))
+            {
+                var common = await GetCommonContextAsync(context.RequestHeaders);
+                await SubscribeToUserTopic<SubscribePriceRequest, SubscribePriceResponse, Instrument>(common.SubscribeToInstrumentUpdate, common.UnSubscribeFromInstrumentUpdate, WriteToStreamAsync, request, responseStream, context);
+            }
         }
 
         public async override Task SubscribeMargin(SubscribeMarginRequest request, IServerStreamWriter<SubscribeMarginResponse> responseStream, ServerCallContext context)

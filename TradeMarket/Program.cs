@@ -19,10 +19,13 @@ namespace TradeMarket
                .MinimumLevel.Verbose()
                .WriteTo.Console()
                .WriteTo.Seq("http://localhost:5341")
-               .Enrich.WithProperty("ServiceName", System.AppDomain.CurrentDomain.FriendlyName)
-               //Enrich.With<ServiceNameEnrich>()
+               .Enrich.WithEnvironmentName()
+               .Enrich.WithMemoryUsage()
+               .Enrich.WithThreadName()
+               .Enrich.WithThreadId()
+               .Enrich.FromLogContext()
                .CreateLogger()
-               .ForContext("{ServiceName}","TradeMarketService");
+               ;
             CreateHostBuilder(args).Build().Run();
         }
 
