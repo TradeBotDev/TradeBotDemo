@@ -18,10 +18,9 @@ namespace Algorithm.DataManipulation
         public static void SendNewRecordToRedis(Metadata meta, AlgorithmInfo settings)
         {
             cache.StringSet(meta.GetValue("sessionid") + meta.GetValue("trademarket") + meta.GetValue("slot") + serviceId, JsonConvert.SerializeObject(settings));
-            var result = JsonConvert.DeserializeObject<string[]>(cache.StringGet(serviceId));
-            var newResult = result.ToList();
-            newResult.Add(JsonConvert.SerializeObject(meta));
-            cache.StringSet(serviceId, JsonConvert.SerializeObject(newResult.ToArray()));
+            var result = JsonConvert.DeserializeObject<List<Metadata>>(cache.StringGet(serviceId));
+            result.Add(meta);
+            cache.StringSet(serviceId, JsonConvert.SerializeObject(result));
         }
         public static void UpdateRecordInRedis(Metadata meta, AlgorithmInfo settings)
         {
@@ -30,6 +29,22 @@ namespace Algorithm.DataManipulation
         public static void DeleteRecordFromRedis(Metadata meta)
         {
             cache.KeyDelete(meta.GetValue("sessionid") + meta.GetValue("trademarket") + meta.GetValue("slot") + serviceId.ToString());
+            var result = JsonConvert.DeserializeObject<List<Metadata>>(cache.StringGet(serviceId));
+            int toDelete = -1;
+            foreach (var metadata in result)
+            {
+                if (metadata.GetValue("sessionid") == meta.GetValue("sessionid")
+                    && metadata.GetValue("slot") == meta.GetValue("slot")
+                    && metadata.GetValue("trademarket") == meta.GetValue("trademarket"))
+                {
+                    toDelete = result.IndexOf(metadata);
+                }
+            }
+            if (toDelete != -1)
+            {
+                result.RemoveAt(toDelete);
+            }
+            cache.StringSet(serviceId, JsonConvert.SerializeObject(result));
         }
     }
 }
