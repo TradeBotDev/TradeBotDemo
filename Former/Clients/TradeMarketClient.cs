@@ -113,7 +113,7 @@ namespace Former.Clients
             {
                 while (await call.ResponseStream.MoveNext(_token.Token))
                 {
-                    if (EventFilter(call.ResponseHeadersAsync.Result, meta)) await UpdateBalance?.Invoke((int) call.ResponseStream.Current.Margin.AvailableMargin, (int)call.ResponseStream.Current.Margin.MarginBalance);
+                    if (EventFilter(call.ResponseHeadersAsync.Result, meta)) await UpdateBalance?.Invoke((int)call.ResponseStream.Current.Margin.AvailableMargin, (int)call.ResponseStream.Current.Margin.MarginBalance);
                 }
             }
             await ConnectionTester(ObserveBalanceFunc);

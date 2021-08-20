@@ -1,6 +1,5 @@
 ﻿using Google.Protobuf.WellKnownTypes;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -13,17 +12,17 @@ using Newtonsoft.Json.Linq;
 using TradeBot.Common.v1;
 using TradeBot.Facade.FacadeService.v1;
 using ZedGraph;
-using System.Web;
 
 namespace UI
 {
     public partial class TradeBotUi : Form
     {
         private readonly List<string> _listOfAllSlots;
-        private readonly List<string> _listOfActiveSlots;
+        private Dictionary<string, Configuration> _configurations;
         private readonly Dictionary<string, Duration> _intervalMap;
         private readonly Dictionary<string, int> _sensitivityMap;
         private readonly FacadeClient _facadeClient;
+        private bool _loggedIn;
         private PointPairList _balanceList = new PointPairList();
         private PointPairList _orderList = new PointPairList();
         private DateTime lastDateBalance = new DateTime();
@@ -39,7 +38,7 @@ namespace UI
             public string Id;
             public string Message;
         }
-        public class ConfigurationJson
+        public class Configuration
         {
             public string AlgorithmSensitivity;
             public string AlgorithmInterval;
@@ -47,10 +46,7 @@ namespace UI
             public string RequiredProfit;
             public string VolumeOfContracts;
             public string UpdatePriceRange;
-            public List<string> activeSlots;
         }
-
-        private bool _loggedIn;
 
         public TradeBotUi()
         {
@@ -61,11 +57,8 @@ namespace UI
             _intervalMap = InitIntervalMap();
             _sensitivityMap = InitSensitivityMap();
             _listOfAllSlots = InitListOfAllSlots();
-            _listOfActiveSlots = new List<string>();
-            ApplyConfiguration(ReadConfiguration());
             FormClosing += MainWindow_FormClosing;
             ConfigUpdatePriceRangeTxb.TextChanged += ConfigUpdatePriceRangeOnTextChanged;
-            ActiveSlotsDataGridView.CellContentClick += DataGridView1_CellContentClick;
             SlotsComboBox.DataSource = _listOfAllSlots;
             SlotsComboBox.SelectedIndex = 0;
             foreach (var control in MainMenuGroupBox.Controls)
@@ -80,11 +73,13 @@ namespace UI
                 if (fullName != null && fullName.Contains("TextBox"))
                     ((TextBox)control).Validating += OnValidating;
             }
+            SetConfigurationBySlots(ReadFromJson());
+            
         }
 
-        private ConfigurationJson InitConfigurationJson()
+        private Configuration GetConfiguration()
         {
-            return new ConfigurationJson
+            return new Configuration
             {
                 AlgorithmSensitivity = ConfigAlgorithmSensivityTxb.Text,
                 AlgorithmInterval = ConfigIntervalOfAnalysisTxb.Text,
@@ -92,24 +87,51 @@ namespace UI
                 RequiredProfit = ConfigRequiredProfitTxb.Text,
                 VolumeOfContracts = ConfigVolumeOfContractsTxb.Text,
                 UpdatePriceRange = ConfigUpdatePriceRangeTxb.Text,
-                activeSlots = new List<string>(_listOfActiveSlots)
             };
         }
 
-        private void SaveConfiguration(ConfigurationJson configuration)
+        private void SetConfigurationBySlots(Dictionary<string, Configuration> saved)
+        {
+            _configurations = saved;
+            if (_configurations.Count > 0)
+            {
+                SetConfiguration(_configurations["XBTUSD"]);
+                SetSlots();
+            }
+        }
+
+        private void SetSlots()
+        {
+            foreach (var rows in _configurations)
+            {
+                AddToActiveSlots(rows.Key);
+            }
+        }
+
+        private void SetConfiguration(Configuration configuration)
+        {
+            ConfigAlgorithmSensivityTxb.Text = configuration.AlgorithmSensitivity;
+            ConfigIntervalOfAnalysisTxb.Text = configuration.AlgorithmInterval;
+            ConfigAvailableBalanceTxb.Text = configuration.AvailableBalance;
+            ConfigRequiredProfitTxb.Text = configuration.RequiredProfit;
+            ConfigVolumeOfContractsTxb.Text = configuration.VolumeOfContracts;
+            ConfigUpdatePriceRangeTxb.Text = configuration.UpdatePriceRange;
+        }
+
+        private void WriteToJson(Dictionary<string, Configuration> save)
         {
             var serializer = new JsonSerializer();
             if (File.Exists("configuration.save")) File.Delete("configuration.save");
             var sw = new StreamWriter("configuration.save");
             var writer = new JsonTextWriter(sw);
-            serializer.Serialize(writer, configuration);
+            serializer.Serialize(writer, save);
             writer.Close();
             sw.Close();
         }
 
-        private ConfigurationJson ReadConfiguration()
+        private Dictionary<string, Configuration> ReadFromJson()
         {
-            JObject obj = null;
+            JObject obj;
             if (File.Exists("configuration.save"))
             {
                 var serializer = new JsonSerializer();
@@ -118,24 +140,11 @@ namespace UI
                 obj = serializer.Deserialize(jsonReader) as JObject;
                 jsonReader.Close();
                 sr.Close();
+                return (Dictionary<string, Configuration>)obj?.ToObject(typeof(Dictionary<string, Configuration>));
             }
-            return (ConfigurationJson)obj?.ToObject(typeof(ConfigurationJson));
+            return new Dictionary<string, Configuration>();
         }
 
-        private void ApplyConfiguration(ConfigurationJson configuration)
-        {
-            if (configuration is null) return;
-            ConfigAvailableBalanceTxb.Text = configuration.AvailableBalance;
-            ConfigRequiredProfitTxb.Text = configuration.RequiredProfit;
-            ConfigAlgorithmSensivityTxb.Text = configuration.AlgorithmSensitivity;
-            ConfigIntervalOfAnalysisTxb.Text = configuration.AlgorithmInterval;
-            ConfigUpdatePriceRangeTxb.Text = configuration.UpdatePriceRange;
-            ConfigVolumeOfContractsTxb.Text = configuration.VolumeOfContracts;
-            foreach (var activeSlot in configuration.activeSlots)
-            {
-                AddToActiveSlots(activeSlot);
-            }
-        }
 
         private static List<string> InitListOfAllSlots()
         {
@@ -301,7 +310,7 @@ namespace UI
 
         private async void Start(string slotName)
         {
-            SaveConfiguration(InitConfigurationJson());
+            WriteToJson(_configurations);
             await _facadeClient.StartBot(slotName, GetConfig());
             WriteMessageToEventConsole("Bot has been started!");
         }
@@ -332,16 +341,15 @@ namespace UI
         {
             ActiveSlotsDataGridView.Rows.Add(comboboxElem);
             _listOfAllSlots.Remove(comboboxElem);
-            _listOfActiveSlots.Add(comboboxElem);
-            SlotsComboBox.DataSource = _listOfAllSlots.Except(_listOfActiveSlots).ToList();
+            SlotsComboBox.DataSource = _listOfAllSlots.Except(_configurations.Keys.ToList()).ToList();
             SlotsComboBox.SelectedIndex = 0;
         }
 
         private void RemoveFromActiveSlots(string comboboxElem)
         {
             _listOfAllSlots.Insert(0, comboboxElem);
-            _listOfActiveSlots.Remove(comboboxElem);
-            SlotsComboBox.DataSource = _listOfAllSlots.Except(_listOfActiveSlots).ToList();
+            _configurations.Remove(comboboxElem);
+            SlotsComboBox.DataSource = _listOfAllSlots.Except(_configurations.Keys.ToList()).ToList();
             SlotsComboBox.SelectedIndex = 0;
             ActiveSlotsDataGridView.Rows.RemoveAt(ActiveSlotsDataGridView.Rows.Count - 1);
         }
@@ -385,11 +393,19 @@ namespace UI
             ConfigUpdatePriceRangeTxb.TextChanged += ConfigUpdatePriceRangeOnTextChanged;
         }
 
+        private void ActiveOrdersDataGridView_SelectionChanged(object sender, EventArgs e)
+        {
+            if (ActiveSlotsDataGridView.CurrentRow is not null)
+            SetConfiguration(_configurations[ActiveSlotsDataGridView.Rows[ActiveSlotsDataGridView.CurrentRow.Index].Cells[0].EditedFormattedValue.ToString()]);
+        }
+
+
         private void DataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex == -1) return;
             if (e.ColumnIndex is -1 or 0) return;
-
+            _configurations[ActiveSlotsDataGridView.Rows[ActiveSlotsDataGridView.CurrentRow.Index].Cells[0]
+                .EditedFormattedValue.ToString()] = GetConfiguration();
             if (!CheckIfLogged()) return;
             var cellCheckBox = (DataGridViewCheckBoxCell)ActiveSlotsDataGridView.Rows[ActiveSlotsDataGridView.CurrentRow.Index].Cells[1];
             cellCheckBox.Value ??= false;
@@ -511,7 +527,7 @@ namespace UI
             if (MessageBox.Show(@"Are you sure you want to update the configuration?", @"Update configuration",
                 MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
-                SaveConfiguration(InitConfigurationJson());
+                WriteToJson(_configurations);
                 CheckConnection(await _facadeClient.UpdateConfig(GetConfig()));
             }
         }
@@ -522,7 +538,7 @@ namespace UI
                 @"Close window",
                 MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
-                SaveConfiguration(InitConfigurationJson());
+                WriteToJson(_configurations);
                 for (var i = 0; i < ActiveSlotsDataGridView.Rows.Count; i++)
                 {
                     if (Convert.ToBoolean(ActiveSlotsDataGridView.Rows[i].Cells[1].EditedFormattedValue))
@@ -536,7 +552,18 @@ namespace UI
         private void AddRowButton_Click(object sender, EventArgs e)
         {
             if (ActiveSlotsDataGridView.Rows.Count >= 7 || _listOfAllSlots.Count == 1) return;
+            ClearConfigsTextBoxes();
             AddToActiveSlots(SlotsComboBox.Text);
+        }
+
+        private void ClearConfigsTextBoxes()
+        {
+            ConfigAlgorithmSensivityTxb.Text = "";
+            ConfigAvailableBalanceTxb.Text = "";
+            ConfigIntervalOfAnalysisTxb.SelectedIndex = 0;
+            ConfigRequiredProfitTxb.Text = "";
+            ConfigUpdatePriceRangeTxb.Text = "";
+            ConfigVolumeOfContractsTxb.SelectedIndex = 0;
         }
 
         private void RemoveRowButton_Click(object sender, EventArgs e)
