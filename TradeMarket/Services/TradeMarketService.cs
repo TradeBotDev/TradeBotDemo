@@ -143,18 +143,24 @@ namespace TradeMarket.Services
         {
             try
             {
+                Log.Information("Starting subscriprion for {@Topic}", nameof(subscribe));
+                Log.Information("Canceletion requested : {@Token}", context.CancellationToken.IsCancellationRequested);
+
                 //Добавляем заголовки ответа по контексту пользователя user из запроса
                 var meta = await MoveInfoToMetadataAsync(context.RequestHeaders);
                 await context.WriteResponseHeadersAsync(meta);
-
+                Log.Information("Wrote Response Headers {@Meta}", context.ResponseTrailers);
                 //подписываемся на обновления
                 var cache = await subscribe(handler, context.CancellationToken);
+                Log.Information("Cache Contains {@CacheCount} elements", cache.Count);
+
                     
                 //кидаем данные из кэша
                 Parallel.ForEach(cache, data => handler(this, new(data, Bitmex.Client.Websocket.Responses.BitmexAction.Partial)));
                
                 //ожидаем пока клиенты отменят подписку
                 await AwaitCancellation(context.CancellationToken);
+                Log.Information("Connection was Canceled");
                 context.Status = Status.DefaultSuccess;
             }
             catch (Exception e)
