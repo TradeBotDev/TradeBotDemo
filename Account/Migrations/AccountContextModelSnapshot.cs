@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace Account.Migrations
+namespace AccountGRPC.Migrations
 {
     [DbContext(typeof(AccountContext))]
     partial class AccountContextModelSnapshot : ModelSnapshot
