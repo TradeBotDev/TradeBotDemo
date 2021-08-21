@@ -3,8 +3,10 @@ using Microsoft.Extensions.Configuration;
 
 // Подключение к СУБД в Docker:
 // docker run -p 5432:5432 -d -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres -e POSTGRES_DB=postgresdb postgres
-// Для применения миграций:
+// Для применения миграций в Visual Studio:
 // Update-Database
+// Для применения миграций из командной строки (из папки проекта):
+// dotnet ef database update
 
 namespace AccountGRPC.Models
 {
