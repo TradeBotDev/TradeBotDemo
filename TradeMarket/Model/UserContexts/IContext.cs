@@ -1,4 +1,6 @@
 ﻿using Bitmex.Client.Websocket.Client;
+using Serilog;
+using Serilog.Context;
 using System;
 using System.Collections.Generic;
 using System.Linq;

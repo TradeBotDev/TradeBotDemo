@@ -76,7 +76,8 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         protected async Task UnSubscribeAsync<T>(T request) where T : SubscribeRequestBase 
         {
             Log.Information("Unsubscribing from topic {@Topic}", request.Topic);
-            await Task.Run(() => CreateUnsubsscribeReqiest(request));
+            await Task.Run(() => _client.Send(CreateUnsubsscribeReqiest(request)));
+            Log.Information("Successfully unsubscribed from topic {@Topic}", request.Topic);
             IsWorking = false;
         }
         protected async Task SubscribeAsync(TRequest request, IObservable<TResponse> stream, CancellationToken token)
