@@ -31,9 +31,10 @@ namespace TradeMarket.Model.UserContexts
 
         public Func<UserContext, bool> Func { get => (context) => context.IsEquevalentTo(sessionId: SessionId, slotName: SlotName, tradeMarketName: TradeMarketName); }
 
+        public delegate ContextFilter GetFilter(string sessionId, string slotName, string tradeMarketName);
         public static ContextFilter GetFullContextFilter(string sessionId, string slotName,string tradeMarketName)=> new( sessionId, slotName, tradeMarketName, ContextFilterType.Full);
-        public static ContextFilter GetCommonContextFilter(string slotName,string tradeMarketName) => new(null, slotName, tradeMarketName, ContextFilterType.Common);
-        public static ContextFilter GetTradeMarketContextFilter(string tradeMarketName) => new(null, null, tradeMarketName, ContextFilterType.TradeMarket);
+        public static ContextFilter GetCommonContextFilter(string sessionId, string slotName, string tradeMarketName) => new(null, slotName, tradeMarketName, ContextFilterType.Common);
+        public static ContextFilter GetTradeMarketContextFilter(string sessionId, string slotName, string tradeMarketName) => new(null, null, tradeMarketName, ContextFilterType.TradeMarket);
 
 
     }
