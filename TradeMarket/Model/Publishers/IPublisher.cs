@@ -27,6 +27,10 @@ namespace TradeMarket.Model.Publishers
       
         public event EventHandler<ChangedEventArgs> Changed;
 
+        public int SubscribersCount { get; }
+
         public Task Start();
+
+        public Task Stop();
     }
 }

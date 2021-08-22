@@ -47,10 +47,15 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             await SubscribeAsync(_token);
         }
 
+        public async override Task Stop()
+        {
+            ClearCahce();
+        }
+
         public async Task SubscribeAsync(CancellationToken token)
         {
             await base.SubscribeAsync(null,_stream, token);
-
         }
+
     }
 }

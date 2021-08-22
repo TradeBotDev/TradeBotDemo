@@ -38,7 +38,9 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         public List<TModel> Cache { get{ lock (locker) { return new(_cache); } }  set => _cache = value; }
 
-        public bool IsWorking { get; private set; } = false;
+        public bool IsWorking { get; internal set; } = false;
+
+        public int SubscribersCount => Changed is not null ? Changed.GetInvocationList().Length : 0;
 
         public BitmexPublisher(BitmexWebsocketClient client,Action<TResponse, EventHandler<IPublisher<TModel>.ChangedEventArgs>> action)
         {
@@ -47,7 +49,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             Cache = new();
         }
 
-        private void ClearCahce()
+        protected void ClearCahce()
         {
             lock (locker)
             {
@@ -70,36 +72,23 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             return request;
         }
 
-        internal async Task SubscribeAsync(TRequest request, IObservable<TResponse> stream, CancellationToken token)
+
+        protected async Task UnSubscribeAsync<T>(T request) where T : SubscribeRequestBase 
         {
-           token.Register(() => {
-               //1 потому что сначала прилетает токен а потом идет отписка от ивента
-               Log.Warning("Remaining listeners {@ListenersCount}", Changed?.GetInvocationList().Length);
-                if(Changed?.GetInvocationList().Length == 1)
-               {
-                   cancellationTokenSource.Cancel();
-                   if (request is SubscribeRequestBase)
-                   {
-                       _client.Send(CreateUnsubsscribeReqiest(request as SubscribeRequestBase));
-                       ClearCahce();
-                   }
-                   (request as SubscribeRequestBase).IsUnsubscribe = false;
-                   IsWorking = false;
-                   if (request is not null)
-                   {
-                       Log.Information("Subscriber Stoped Working for topic {@Topic}", request is SubscribeRequestBase ? (request as SubscribeRequestBase).Topic : request.OperationString);
-                   }
-               }
-           });
+            Log.Information("Unsubscribing from topic {@Topic}", request.Topic);
+            await Task.Run(() => CreateUnsubsscribeReqiest(request));
+            IsWorking = false;
+        }
+        protected async Task SubscribeAsync(TRequest request, IObservable<TResponse> stream, CancellationToken token)
+        {
+           //TODO убрать отсюда токен
            await Task.Run(() =>
            {
                if (request is not null)
                {
-                   Log.Information("Subscribed For topic {@Topic}", request is SubscribeRequestBase ? (request as SubscribeRequestBase).Topic : request.OperationString);
+                   Log.Information("Subscribing For topic {@Topic}", request is SubscribeRequestBase ? (request as SubscribeRequestBase).Topic : request.OperationString);
                }
                IsWorking = true;
-               //тут не нужно ловить OperationCanceledException. BitmexWebsocketClient все разруливает сам
-               //TODO тестирование 
                stream.Subscribe(responseAction, cancellationTokenSource.Token);
 
                if (request is not null) _client.Send(request);
@@ -108,5 +97,6 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         public abstract Task Start();
 
+        public abstract Task Stop();
     }
 }
