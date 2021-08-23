@@ -33,6 +33,7 @@ namespace AccountTests.ExchangeAccessServiceTests
                 Password = registerRequest.Password
             };
 
+            // Запрос для получения лицензии.
             var licenseRequest = new SetLicenseRequest
             {
                 CardNumber = "1234123412341234",
@@ -46,9 +47,11 @@ namespace AccountTests.ExchangeAccessServiceTests
             var reply = await accountService.Register(registerRequest, null)
                 .ContinueWith(async registerReply => await accountService.Login(loginRequest, null));
 
+            // Получение лицензии для того, чтобы была возможность получать биржи.
             licenseRequest.SessionId = reply.Result.SessionId;
             await licenseService.SetLicense(licenseRequest, null);
 
+            // Возврат результата входа.
             return reply.Result;
         }
     }

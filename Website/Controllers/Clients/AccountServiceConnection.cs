@@ -13,15 +13,20 @@ namespace Website.Controllers.Clients
 		{
 			Log.Information($"AccountServiceConnection: вызван метод GetConnection.");
 
+			// Получение из переменной окружения адреса Facade.
 			string connectionString = Environment.GetEnvironmentVariable("FACADE_CONNECTION_STRING");
+
+			// Если адрес Facade не был найден, происходит его получение из файла appsettings.json.
 			if (connectionString == null)
 			{
 				// Создание конфигурации, которая содержит в себе все настройки из файла appsettings.json.
 				var configuration = new ConfigurationBuilder()
 					.AddJsonFile("appsettings.json", optional: false)
 					.Build();
+				// Получение адреса Facade из appsettings.json и возврат результата.
 				return GrpcChannel.ForAddress(configuration.GetSection("GrpcClients")["FacadeService"]);
 			}
+			// Иначе используется он.
 			else return GrpcChannel.ForAddress(connectionString);
 		}
 	}

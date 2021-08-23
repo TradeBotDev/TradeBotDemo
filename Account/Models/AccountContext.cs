@@ -29,6 +29,7 @@ namespace AccountGRPC.Models
                 // Получение строки подкючения из appsettings.json.
                 connectionString = configuration.GetConnectionString("PostgreSQL");
             }
+            // Создание таблицы, если она еще не была создана.
             Database.EnsureCreated();
         }
 
@@ -45,6 +46,7 @@ namespace AccountGRPC.Models
         // Таблица с данными о вошедших аккаунтах.
         public DbSet<LoggedAccount> LoggedAccounts { get; set; }
 
+        // Таблица с лицензями пользователя.
         public DbSet<License> Licenses { get; set; }
     }
 }
