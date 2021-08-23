@@ -19,7 +19,20 @@ namespace AccountGRPC.Models
         // Создание базы данных, если она отсутствует (к примеру, при первом запуске).
         public AccountContext()
         {
+            // Получение строки подключения из переменной окружения.
             connectionString = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING");
+
+            // В случае, если такой переменной окружения не существует, берется строка подключения из appsettings.json.
+            if (connectionString == null)
+            {
+                // Получение данных из файла appsettings.json.
+                var configuration = new ConfigurationBuilder()
+                    .AddJsonFile("appsettings.json", optional: false)
+                    .Build();
+
+                // Получение строки подкючения из appsettings.json.
+                connectionString = configuration.GetConnectionString("PostgreSQL");
+            }
             Database.EnsureCreated();
         }
 
