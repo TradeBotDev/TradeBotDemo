@@ -128,7 +128,7 @@ namespace UI
 
         public async Task<DefaultResponse> StopBot(string slotName, Config configuration)
         {
-            //_token.Cancel();
+            _token.Cancel();
             _meta[1] = new Metadata.Entry("slot", slotName);
             try
             {
@@ -171,7 +171,6 @@ namespace UI
                     Email = login,
                     Password = password
                 });
-                //MessageBox.Show(password);
                 var sessionId = logResponse.SessionId;
                 _meta = new Metadata
                 {
@@ -209,9 +208,6 @@ namespace UI
             {
                 return new DefaultResponse { Code = ReplyCode.Failure, Message = ""};
             }
-            
         }
-
-
     }
 }

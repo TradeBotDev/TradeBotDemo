@@ -63,13 +63,10 @@ namespace Facade
                             break;
                     }
                 }
-
-
             }
             catch (Exception e)
             {
                 Log.Error("{@Where}: {@MethodName} Exception: {@Exception}","Facade",nameof(History_SubscribeEvents),e.Message);
-                throw;
             }
         }
     }
