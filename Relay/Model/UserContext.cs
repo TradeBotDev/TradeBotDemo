@@ -34,7 +34,7 @@ namespace Relay.Model
             
             _algorithmStream = _algorithmClient.OpenStream(meta);
             _tradeMarketStream = _tradeMarketClient.OpenStream(meta);
-
+            _tradeMarketClient.OrderRecievedEvent += _tradeMarketClient_OrderRecievedEvent;
         }
         public IAsyncStreamReader<SubscribeOrdersResponse> ReConnect()
         {
@@ -55,7 +55,8 @@ namespace Relay.Model
             {
                 IsWorking = false;
                 //прокинуть openstream
-                _tradeMarketClient.OrderRecievedEvent += _tradeMarketClient_OrderRecievedEvent;
+                //_tradeMarketClient.OrderRecievedEvent += _tradeMarketClient_OrderRecievedEvent;
+                ReConnect();
                 Log.Information("The bot is starting...");
             }
         }
@@ -81,7 +82,7 @@ namespace Relay.Model
             
             if (!IsWorking && !IsStart)
             {
-                IsStart = IsStart ? IsStart : !IsStart;
+                IsStart = IsStart ? !IsStart : IsStart;
                 _tradeMarketClient.SubscribeForOrders(_tradeMarketStream);
             }
         }
