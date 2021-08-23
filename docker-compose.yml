@@ -28,6 +28,8 @@ services:
       - 5000:80
     volumes:
       - .%USERPROFILE%\.aspnet\https:/https/
+    environment:
+      POSTGRES_CONNECTION_STRING: "Host=host.docker.internal;Port=5432;Database=accountdb;Username=postgres;Password=password"
   trademarket:
     image: trademarket
     container_name: trademarketcontainer
