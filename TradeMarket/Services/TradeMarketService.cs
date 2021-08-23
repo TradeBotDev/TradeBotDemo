@@ -179,38 +179,44 @@ namespace TradeMarket.Services
         /// </summary>
         public async override Task<TradeBot.TradeMarket.TradeMarketService.v1.PlaceOrderResponse> PlaceOrder(TradeBot.TradeMarket.TradeMarketService.v1.PlaceOrderRequest request, ServerCallContext context)
         {
-            UserContext user = null;
-            try
+            using (LogContext.Push(new PropertyEnricher("RPC Method", context.Method),
+             new PropertyEnricher("RequestId", Guid.NewGuid().ToString()),
+             new PropertyEnricher("UserSessionId", context.RequestHeaders.Get("sessionid").Value),
+             new PropertyEnricher("Command", "Place")))
             {
-                //ищем конеткст пользователя
-                user = await GetUserContextAsync(context.RequestHeaders,ContextFilter.GetFullContextFilter, context.CancellationToken);
-                //отправляем запрос на биржу. TODO как работает тут токен отмены
-                var response = await user.PlaceOrder(request.Value, request.Price, context.CancellationToken);
-
-                //ставим статус запроса как успешный
-                context.Status = Status.DefaultSuccess;
-                //конвертируем из внутреннего типа сервиса в тип grpc
-                return ConvertService.ConvertPlaceOrderResponse(response);
-
-            }
-            catch (Exception e)
-            {
-                //записываем ошибку в логер
-                Log.Logger.Error(e.Message);
-                //ставим статус "Отменен" в заголовке ответа
-                context.Status = Status.DefaultCancelled;
-            }
-            //TODO вообще не красиво
-            return new()
-            {
-                OrderId = "",
-                Response = new()
+                UserContext user = null;
+                try
                 {
-                    Code = TradeBot.Common.v1.ReplyCode.Failure,
-                    Message = "Inner Error"
-                }
-            };
+                    //ищем конеткст пользователя
+                    user = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetFullContextFilter, context.CancellationToken);
+                    //отправляем запрос на биржу. TODO как работает тут токен отмены
+                    var response = await user.PlaceOrder(request.Value, request.Price, context.CancellationToken);
 
+                    //ставим статус запроса как успешный
+                    context.Status = Status.DefaultSuccess;
+                    //конвертируем из внутреннего типа сервиса в тип grpc
+                    return ConvertService.ConvertPlaceOrderResponse(response);
+
+                }
+                catch (Exception e)
+                {
+                    //записываем ошибку в логер
+                    Log.Logger.Error(e.Message);
+                    //ставим статус "Отменен" в заголовке ответа
+                    context.Status = Status.DefaultCancelled;
+                }
+                //TODO вообще не красиво
+                return new()
+                {
+                    OrderId = "",
+                    Response = new()
+                    {
+                        Code = TradeBot.Common.v1.ReplyCode.Failure,
+                        Message = "Inner Error"
+                    }
+                };
+
+            } 
         }
 
         /// <summary>
@@ -218,50 +224,56 @@ namespace TradeMarket.Services
         /// </summary>
         public async override Task<TradeBot.TradeMarket.TradeMarketService.v1.AmmendOrderResponse> AmmendOrder(TradeBot.TradeMarket.TradeMarketService.v1.AmmendOrderRequest request, ServerCallContext context)
         {
-            try
+            using (LogContext.Push(new PropertyEnricher("RPC Method", context.Method),
+             new PropertyEnricher("RequestId", Guid.NewGuid().ToString()),
+             new PropertyEnricher("UserSessionId", context.RequestHeaders.Get("sessionid").Value),
+             new PropertyEnricher("Command", "Ammend")))
             {
-                //находим пользователя 
-                var user = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetFullContextFilter, context.CancellationToken);
+                try
+                {
+                    //находим пользователя 
+                    var user = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetFullContextFilter, context.CancellationToken);
 
-                // переводим параметры grpc запроса на язык сервиса
-                double? price = 0;
-                switch (request.PriceType)
-                {
-                    case PriceType.Default: price = request.NewPrice; break;
-                    case PriceType.None: price = null; break;
-                    case PriceType.Unspecified: throw new RpcException(Status.DefaultCancelled, $"{nameof(request.PriceType)} should be specified");
+                    // переводим параметры grpc запроса на язык сервиса
+                    double? price = 0;
+                    switch (request.PriceType)
+                    {
+                        case PriceType.Default: price = request.NewPrice; break;
+                        case PriceType.None: price = null; break;
+                        case PriceType.Unspecified: throw new RpcException(Status.DefaultCancelled, $"{nameof(request.PriceType)} should be specified");
+                    }
+                    long? quantity = null, leavesQuantity = null;
+                    switch (request.QuantityType)
+                    {
+                        case QuantityType.Leaves: leavesQuantity = request.NewQuantity; break;
+                        case QuantityType.Default: quantity = request.NewQuantity; break;
+                        case QuantityType.None: break;
+                        case QuantityType.Unspecified: throw new RpcException(Status.DefaultCancelled, $"{nameof(request.QuantityType)} should be specified");
+                    }
+                    //отправляем запрос на биржу
+                    var response = await user.AmmendOrder(request.Id, price, quantity, leavesQuantity, context.CancellationToken);
+                    //ставим статус запроса как успешный
+                    context.Status = Status.DefaultSuccess;
+                    //конвертируем из внутреннего типа сервиса в тип grpc
+                    return ConvertService.ConvertAmmendOrderResponse(response);
                 }
-                long? quantity = null, leavesQuantity = null;
-                switch (request.QuantityType)
+                catch (Exception e)
                 {
-                    case QuantityType.Leaves: leavesQuantity = request.NewQuantity; break;
-                    case QuantityType.Default: quantity = request.NewQuantity; break;
-                    case QuantityType.None: break;
-                    case QuantityType.Unspecified: throw new RpcException(Status.DefaultCancelled, $"{nameof(request.QuantityType)} should be specified");
+                    //записываем ошибку в логер
+                    Log.Logger.Error(e.Message);
+                    //ставим статус "Отменен" в заголовке ответа
+                    context.Status = Status.DefaultCancelled;
                 }
-                //отправляем запрос на биржу
-                var response = await user.AmmendOrder(request.Id, price, quantity, leavesQuantity, context.CancellationToken);
-                //ставим статус запроса как успешный
-                context.Status = Status.DefaultSuccess;
-                //конвертируем из внутреннего типа сервиса в тип grpc
-                return ConvertService.ConvertAmmendOrderResponse(response);
+                //TODO вообще не красиво
+                return new()
+                {
+                    Response = new()
+                    {
+                        Code = TradeBot.Common.v1.ReplyCode.Failure,
+                        Message = "Inner Error"
+                    }
+                };
             }
-            catch (Exception e)
-            {
-                //записываем ошибку в логер
-                Log.Logger.Error(e.Message);
-                //ставим статус "Отменен" в заголовке ответа
-                context.Status = Status.DefaultCancelled;
-            }
-            //TODO вообще не красиво
-            return new()
-            {
-                Response = new()
-                {
-                    Code = TradeBot.Common.v1.ReplyCode.Failure,
-                    Message = "Inner Error"
-                }
-            };
         }
 
         /// <summary>
@@ -269,38 +281,43 @@ namespace TradeMarket.Services
         /// </summary>
         public async override Task<DeleteOrderResponse> DeleteOrder(DeleteOrderRequest request, ServerCallContext context)
         {
-            UserContext user = null;
-            try
+            using (LogContext.Push(new PropertyEnricher("RPC Method", context.Method),
+             new PropertyEnricher("RequestId", Guid.NewGuid().ToString()),
+             new PropertyEnricher("UserSessionId", context.RequestHeaders.Get("sessionid").Value),
+             new PropertyEnricher("Command", "Delete")))
             {
-                //ищем конеткст пользователя
-                user = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetFullContextFilter, context.CancellationToken);
-
-                //отправляем запрос на биржу. TODO как работает тут токен отмены
-                var response = await user.DeleteOrder(request.OrderId, context.CancellationToken);
-
-                //ставим статус запроса как успешный
-                context.Status = Status.DefaultSuccess;
-                //конвертируем из внутреннего типа сервиса в тип grpc
-                return ConvertService.ConvertDeleteOrderResponse(response);
-
-            }
-            catch (Exception e)
-            {
-                //записываем ошибку в логер
-                Log.Logger.Error(e.Message);
-                //ставим статус "Отменен" в заголовке ответа
-                context.Status = Status.DefaultCancelled;
-            }
-            //TODO вообще не красиво
-            return new()
-            {
-                Response = new()
+                UserContext user = null;
+                try
                 {
-                    Code = TradeBot.Common.v1.ReplyCode.Failure,
-                    Message = "Inner Error"
-                }
-            };
+                    //ищем конеткст пользователя
+                    user = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetFullContextFilter, context.CancellationToken);
 
+                    //отправляем запрос на биржу. TODO как работает тут токен отмены
+                    var response = await user.DeleteOrder(request.OrderId, context.CancellationToken);
+
+                    //ставим статус запроса как успешный
+                    context.Status = Status.DefaultSuccess;
+                    //конвертируем из внутреннего типа сервиса в тип grpc
+                    return ConvertService.ConvertDeleteOrderResponse(response);
+
+                }
+                catch (Exception e)
+                {
+                    //записываем ошибку в логер
+                    Log.Logger.Error(e.Message);
+                    //ставим статус "Отменен" в заголовке ответа
+                    context.Status = Status.DefaultCancelled;
+                }
+                //TODO вообще не красиво
+                return new()
+                {
+                    Response = new()
+                    {
+                        Code = TradeBot.Common.v1.ReplyCode.Failure,
+                        Message = "Inner Error"
+                    }
+                };
+            }
         }
         #endregion
 
@@ -325,14 +342,17 @@ namespace TradeMarket.Services
                    
                    }).Wait();
             }
-            using (LogContext.Push(new PropertyEnricher("RPC Method", context.Method), new PropertyEnricher("RequestId", Guid.NewGuid().ToString()), new PropertyEnricher("UserSessionId", context.RequestHeaders.Get("sessionid"))))
+            using (LogContext.Push(new PropertyEnricher("RPC Method", context.Method),
+                new PropertyEnricher("RequestId", Guid.NewGuid().ToString()),
+                new PropertyEnricher("UserSessionId", context.RequestHeaders.Get("sessionid").Value),
+                new PropertyEnricher("Topic", "Instrument")))
             {
-                Log.Information("Starting subscriprion for {@Topic}", "price");
+                Log.Information("Starting subscriprion");
 
-                var common = await GetUserContextAsync(context.RequestHeaders,ContextFilter.GetCommonContextFilter,context.CancellationToken);
+                var common = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetCommonContextFilter, context.CancellationToken);
                 await SubscribeToUserTopic<SubscribePriceRequest, SubscribePriceResponse, Instrument>(
-                    common.SubscribeToInstrumentUpdate, 
-                    common.UnSubscribeFromInstrumentUpdate, 
+                    common.SubscribeToInstrumentUpdate,
+                    common.UnSubscribeFromInstrumentUpdate,
                     WriteToStreamAsync,
                     request, responseStream, context);
             }
@@ -349,11 +369,16 @@ namespace TradeMarket.Services
                 await WriteStreamAsync(responseStream, response);
 
             }
-            Log.Information("Starting subscriprion for {@Topic}", "margin");
+            using (LogContext.Push(new PropertyEnricher("RPC Method", context.Method),
+              new PropertyEnricher("RequestId", Guid.NewGuid().ToString()),
+              new PropertyEnricher("UserSessionId", context.RequestHeaders.GetValue("sessionid")),
+              new PropertyEnricher("Topic", "Margin")))
+            {
+                Log.Information("Starting subscriprion for");
 
-            var user = await GetUserContextAsync(context.RequestHeaders,ContextFilter.GetTradeMarketContextFilter, context.CancellationToken);
-            await SubscribeToUserTopic<SubscribeMarginRequest, SubscribeMarginResponse, Margin>(user.SubscribeToUserMargin, user.UnSubscribeFromUserMargin, WriteToStreamAsync, request, responseStream, context);
-
+                var user = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetTradeMarketContextFilter, context.CancellationToken);
+                await SubscribeToUserTopic<SubscribeMarginRequest, SubscribeMarginResponse, Margin>(user.SubscribeToUserMargin, user.UnSubscribeFromUserMargin, WriteToStreamAsync, request, responseStream, context);
+            }
 
         }
 
@@ -361,13 +386,21 @@ namespace TradeMarket.Services
         {
             async void WriteToStreamAsync(object sender, IPublisher<Position>.ChangedEventArgs args)
             {
-                //переводим из языка сервиса на язык протофайлов
-                Log.Information("Sent position");
-                var response = ConvertService.ConvertPosition(args.Changed, args.Action);
-                await WriteStreamAsync(responseStream, response);
+                //филтруем позицую по валютной паре
+                if (args.Changed.Symbol == context.RequestHeaders.GetValue("slot"))
+                {
+                    Log.Information("Sent");
+                    var response = ConvertService.ConvertPosition(args.Changed, args.Action);
+                    await WriteStreamAsync(responseStream, response);
+                }
 
             }
-            Log.Information("Starting subscriprion for {@Topic}", "position");
+            using (LogContext.Push(new PropertyEnricher("RPC Method", context.Method),
+              new PropertyEnricher("RequestId", Guid.NewGuid().ToString()),
+              new PropertyEnricher("UserSessionId", context.RequestHeaders.GetValue("sessionid")),
+              new PropertyEnricher("Topic", "Position")))
+            {
+                Log.Information("Starting subscriprion for {@Topic}", "position");
 
             var user = await GetUserContextAsync(context.RequestHeaders,ContextFilter.GetTradeMarketContextFilter, context.CancellationToken);
             await SubscribeToUserTopic<SubscribePositionRequest, SubscribePositionResponse, Position>(user.SubscribeToUserPositions, user.UnSubscribeFromUserPositions, WriteToStreamAsync, request, responseStream, context);
@@ -379,16 +412,21 @@ namespace TradeMarket.Services
             async void WriteToStreamAsync(object sender, IPublisher<Order>.ChangedEventArgs args)
             {
                 //переводим из языка сервиса на язык протофайлов
-                Log.Information("Sent User Order");
                 var response = ConvertService.ConvertMyOrder(args.Changed, args.Action);
                 await WriteStreamAsync(responseStream, response);
+                Log.Information("Sent");
 
             }
-            Log.Information("Starting subscriprion for {@Topic}", "user orders");
+            using (LogContext.Push(new PropertyEnricher("RPC Method", context.Method),
+              new PropertyEnricher("RequestId", Guid.NewGuid().ToString()),
+              new PropertyEnricher("UserSessionId", context.RequestHeaders.Get("sessionid").Value),
+              new PropertyEnricher("Topic", "Orders")))
+            {
+                Log.Information("Starting subscriprion");
 
-            var user = await GetUserContextAsync(context.RequestHeaders,ContextFilter.GetTradeMarketContextFilter,context.CancellationToken);
-            await SubscribeToUserTopic<SubscribeMyOrdersRequest, SubscribeMyOrdersResponse, Order>(user.SubscribeToUserOrders, user.UnSubscribeFromUserOrders, WriteToStreamAsync, request, responseStream, context);
-
+                var user = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetTradeMarketContextFilter, context.CancellationToken);
+                await SubscribeToUserTopic<SubscribeMyOrdersRequest, SubscribeMyOrdersResponse, Order>(user.SubscribeToUserOrders, user.UnSubscribeFromUserOrders, WriteToStreamAsync, request, responseStream, context);
+            }
         }
 
 
@@ -406,16 +444,20 @@ namespace TradeMarket.Services
                 //Проверяем подходит ли ордер из бирже по сигнатуре запроса {<продажа,покупка> , <открыт,закрыт>}
                 if (IsOrderSuitForSignature(response.Response.Order.Signature, request.Request.Signature))
                 {
-                    Log.Information("Sent BookLevel");
-
                     //если ордер подходит то записываем его в поток ответов
                     await WriteStreamAsync(responseStream, response);
                 }
             }
-            Log.Information("Starting subscriprion for {@Topic}", "booklevel25");
+            using (LogContext.Push(new PropertyEnricher("RPC Method", context.Method),
+              new PropertyEnricher("RequestId", Guid.NewGuid().ToString()),
+              new PropertyEnricher("UserSessionId", context.RequestHeaders.Get("sessionid").Value),
+              new PropertyEnricher("Topic", "BookLevel")))
+            {
+                Log.Information("Starting subscriprion");
 
-            var common = await GetUserContextAsync(context.RequestHeaders,ContextFilter.GetCommonContextFilter,context.CancellationToken);
-            await SubscribeToUserTopic<SubscribeOrdersRequest, SubscribeOrdersResponse, BookLevel>(common.SubscribeToBook25UpdatesAsync, common.UnSubscribeFromBook25UpdatesAsync, WriteToStreamAsync, request, responseStream, context);
+                var common = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetCommonContextFilter, context.CancellationToken);
+                await SubscribeToUserTopic<SubscribeOrdersRequest, SubscribeOrdersResponse, BookLevel>(common.SubscribeToBook25UpdatesAsync, common.UnSubscribeFromBook25UpdatesAsync, WriteToStreamAsync, request, responseStream, context);
+            }
         }
 
         /// <summary>
@@ -429,14 +471,20 @@ namespace TradeMarket.Services
             {
                 //переводим из языка сервиса на язык протофайлов
                 var response = ConvertService.ConvertBalance(args.Changed, args.Action);
-                Log.Information("Sent  Balance");
+                Log.Information("Sent");
                 await WriteStreamAsync(responseStream, response);
 
             }
-            Log.Information("Starting subscriprion for {@Topic}", "balance");
-            //находим общий контекст т.к. подписка на стаканы не требует логина в систему биржи
-            var user = await GetUserContextAsync(context.RequestHeaders,ContextFilter.GetTradeMarketContextFilter ,context.CancellationToken);
-            await SubscribeToUserTopic<SubscribeBalanceRequest,SubscribeBalanceResponse,Wallet>(user.SubscribeToBalance, user.UnSubscribeFromBalance, WriteToStreamAsync, request, responseStream, context);
+            using (LogContext.Push(new PropertyEnricher("RPC Method", context.Method),
+             new PropertyEnricher("RequestId", Guid.NewGuid().ToString()),
+             new PropertyEnricher("UserSessionId", context.RequestHeaders.Get("sessionid").Value),
+             new PropertyEnricher("Topic", "Wallet")))
+            {
+                Log.Information("Starting subscriprion");
+                //находим общий контекст т.к. подписка на стаканы не требует логина в систему биржи
+                var user = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetTradeMarketContextFilter, context.CancellationToken);
+                await SubscribeToUserTopic<SubscribeBalanceRequest, SubscribeBalanceResponse, Wallet>(user.SubscribeToBalance, user.UnSubscribeFromBalance, WriteToStreamAsync, request, responseStream, context);
+            }
         }
 
         #endregion
