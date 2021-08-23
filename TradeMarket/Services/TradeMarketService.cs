@@ -125,7 +125,7 @@ namespace TradeMarket.Services
             {
                 //TODO что делать когда разорвется соеденение ?
                 Log.Logger.Error("Connection was interrupted by network services.");
-                throw;
+                //throw;
             }
         }
 
@@ -320,7 +320,7 @@ namespace TradeMarket.Services
                    }catch(Exception e)
                    {
                        Log.Error("Error {@Error}", e.Message);
-                       throw;
+                       //throw;
                    }
                    
                    }).Wait();

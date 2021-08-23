@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Grpc.Net.Client;
@@ -16,6 +17,7 @@ namespace Relay.Clients
     public class TradeMarketClient
     {
         private TradeMarketService.TradeMarketServiceClient _client;
+        private CancellationTokenSource _token;
 
         public TradeMarketClient(string uri)
         {
@@ -28,7 +30,7 @@ namespace Relay.Clients
             {
                 Request = new TradeBot.Common.v1.SubscribeOrdersRequest()
                 {
-                    Signature = new OrderSignature()
+                    Signature = new OrderSignature
                     {
                         Type = OrderType.Unspecified,
                         Status = OrderStatus.Unspecified
@@ -42,6 +44,7 @@ namespace Relay.Clients
 
         public IAsyncEnumerable<Order> SubscribeForOrders(IAsyncStreamReader<SubscribeOrdersResponse> stream)
         {
+            _token = new CancellationTokenSource();
             System.Threading.Channels.Channel<Order> channel = System.Threading.Channels.Channel.CreateUnbounded<Order>();
             Task.Run(async() =>
             {
@@ -49,17 +52,18 @@ namespace Relay.Clients
                 {
                     try
                     {
-                        while (await stream.MoveNext())
+                        while (await stream.MoveNext(_token.Token))
                         {
                             await channel.Writer.WriteAsync(new(stream.Current.Response.Order));
                             OrderRecievedEvent?.Invoke(this, new(stream.Current.Response.Order));
                         }
                         break;
                     }
-                    catch (Exception e)
+                    catch (RpcException e)
                     {
                         Log.Error(e.Message);
-                        //reconnect
+                        if(e.StatusCode==StatusCode.Cancelled) break;
+                        
                     }
                 }
             });
@@ -67,6 +71,10 @@ namespace Relay.Clients
 
         }
 
+        public void CancellationToken()
+        {
+            _token.Cancel();
+        }
         public event EventHandler<Order> OrderRecievedEvent;
     }
 }

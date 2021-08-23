@@ -81,6 +81,7 @@ namespace Relay.Services
             var user = GetUserContext(context.RequestHeaders);
             user.UpdateConfig(new TradeBot.Common.v1.UpdateServerConfigRequest { Config = request.Request.Config, Switch = request.Request.Switch });
             user.StatusOfWork();
+            
             RaiseService.DeleteFromRedis(user);
             return await Task.FromResult(new StopBotResponse { });
         }
