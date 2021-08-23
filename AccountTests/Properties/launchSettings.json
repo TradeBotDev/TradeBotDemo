@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "AccountTests": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "POSTGRES_CONNECTION_STRING": "Host=localhost;Port=5432;Database=Accounts;Username=postgres;Password=password"
+      }
+    }
+  }
+}
