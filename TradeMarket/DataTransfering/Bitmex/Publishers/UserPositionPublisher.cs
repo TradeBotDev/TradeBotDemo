@@ -23,7 +23,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
                }
            });
         };
-
+        private PositionSubscribeRequest _request;
         private IObservable<PositionResponse> _stream;
 
         #region Parameters For SubscribeAsync
@@ -31,8 +31,9 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         private CancellationToken _token;
         #endregion
 
-        public UserPositionPublisher(BitmexWebsocketClient client, IObservable<PositionResponse> stream,CancellationToken token) : base(client, _action)
+        public UserPositionPublisher(BitmexWebsocketClient client, IObservable<PositionResponse> stream, PositionSubscribeRequest positionSubscribeRequest, CancellationToken token) : base(client, _action)
         {
+            _request = positionSubscribeRequest;
             _stream = stream;
 
             _token = token;
@@ -83,8 +84,15 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         public async Task SubscribeAsync(CancellationToken token)
         {
-            await base.SubscribeAsync(new PositionSubscribeRequest(), _stream, token);
+            await base.SubscribeAsync(_request, _stream, token);
 
         }
+
+        public async override Task Stop()
+        {
+            await UnSubscribeAsync(_request);
+            ClearCahce();
+        }
+
     }
 }

@@ -47,7 +47,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
 
         public IPublisher<Instrument> CreateInstrumentPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token)
         {
-            return new InstrumentPublisher(client, client.Streams.InstrumentStream,context.Signature.SlotName ,token);
+            return new InstrumentPublisher(client, client.Streams.InstrumentStream,new(context.Signature.SlotName),token);
         }
 
         public IPublisher<string> CreatePingPongPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token)
@@ -57,22 +57,22 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
 
         public IPublisher<Margin> CreateUserMarginPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token)
         {
-            return new UserMarginPublisher(client, client.Streams.MarginStream, token);
+            return new UserMarginPublisher(client, client.Streams.MarginStream,new MarginSubscribeRequest(), token);
         }
 
         public IPublisher<Order> CreateUserOrderPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token)
         {
-            return new UserOrderPublisher(client, client.Streams.OrderStream, token);
+            return new UserOrderPublisher(client, client.Streams.OrderStream,new OrderSubscribeRequest(), token);
         }
 
         public IPublisher<Position> CreateUserPositionPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token)
         {
-            return new UserPositionPublisher(client, client.Streams.PositionStream, token);
+            return new UserPositionPublisher(client, client.Streams.PositionStream,new PositionSubscribeRequest(), token);
         }
 
         public IPublisher<Wallet> CreateWalletPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token)
         {
-            return new UserWalletPublisher(client, client.Streams.WalletStream, token);
+            return new UserWalletPublisher(client, client.Streams.WalletStream,new WalletSubscribeRequest(), token);
         }
     }
 }

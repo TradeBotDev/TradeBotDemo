@@ -106,5 +106,11 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         {
             await SubscribeAsync(_bookSubscribeRequest, _token);
         }
+
+        public async override Task Stop()
+        {
+            await UnSubscribeAsync(_bookSubscribeRequest);
+            ClearCahce();
+        }
     }
 }

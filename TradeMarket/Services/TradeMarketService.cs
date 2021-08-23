@@ -34,10 +34,11 @@ namespace TradeMarket.Services
         }
 
         #region Helpers
+        //TODO Перевести все в одну функцию
         /// <summary>
         /// Переводит заголовки запроса в язык сервиса и предоставляет контекст пользователя по переданым заголовкам
         /// </summary>
-        public async Task<UserContext> GetUserContextAsync(Metadata meta,CancellationToken token)
+        public async Task<UserContext> GetUserContextAsync(Metadata meta,ContextFilter.GetFilter getFilter,CancellationToken token)
         {
             return await Task.Run(async () =>
             {
@@ -45,23 +46,10 @@ namespace TradeMarket.Services
                 var slot = meta.Get("slot").Value;
                 var trademarket = meta.Get("trademarket").Value;
 
-                return await _director.GetUserContextAsync(sessionId, slot, trademarket,token);
+                return await _director.GetUserContextAsync(getFilter(sessionId,slot,trademarket),token);
             });
         }
 
-        /// <summary>
-        /// Предоставляет доступ к общему контексту биржи по слоту для доступа к информации для которой не нужно логирование
-        /// </summary>
-        public async Task<CommonContext> GetCommonContextAsync(Metadata meta)
-        {
-            return await Task.Run(async () =>
-            {
-                var slot = meta.Get("slot").Value;
-                var trademarket = meta.Get("trademarket").Value;
-
-                return await _director.GetCommonContextAsync(slot, trademarket);
-            });
-        }
 
         /// <summary>
         /// Метод заполняет заголовки для ответов по предоставленному контексту пользователя 
@@ -131,11 +119,13 @@ namespace TradeMarket.Services
             {
                 Log.Information("Sent message {@message}",reply);
                 await stream.WriteAsync(reply);
+                Log.Information("Message sent succesful");
             }
-            catch (Exception exception)
+            catch 
             {
                 //TODO что делать когда разорвется соеденение ?
-                Log.Logger.Warning("Connection was interrupted by network services.");
+                Log.Logger.Error("Connection was interrupted by network services.");
+                throw;
             }
         }
 
@@ -173,7 +163,10 @@ namespace TradeMarket.Services
             finally
             {
                 //отписываемся от обновлений по книге
+                Log.Information("Finnaly unsubscribed before");
                 await unsubscribe(handler);
+                Log.Information("Finnaly unsubscribed after");
+
             }
         }
 
@@ -190,7 +183,7 @@ namespace TradeMarket.Services
             try
             {
                 //ищем конеткст пользователя
-                user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
+                user = await GetUserContextAsync(context.RequestHeaders,ContextFilter.GetFullContextFilter, context.CancellationToken);
                 //отправляем запрос на биржу. TODO как работает тут токен отмены
                 var response = await user.PlaceOrder(request.Value, request.Price, context.CancellationToken);
 
@@ -228,7 +221,7 @@ namespace TradeMarket.Services
             try
             {
                 //находим пользователя 
-                var user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
+                var user = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetFullContextFilter, context.CancellationToken);
 
                 // переводим параметры grpc запроса на язык сервиса
                 double? price = 0;
@@ -280,7 +273,7 @@ namespace TradeMarket.Services
             try
             {
                 //ищем конеткст пользователя
-                user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
+                user = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetFullContextFilter, context.CancellationToken);
 
                 //отправляем запрос на биржу. TODO как работает тут токен отмены
                 var response = await user.DeleteOrder(request.OrderId, context.CancellationToken);
@@ -315,20 +308,33 @@ namespace TradeMarket.Services
 
         public async override Task SubscribePrice(SubscribePriceRequest request, IServerStreamWriter<SubscribePriceResponse> responseStream, ServerCallContext context)
         {
-            async void WriteToStreamAsync(object sender, IPublisher<Instrument>.ChangedEventArgs args)
+            void WriteToStreamAsync(object sender, IPublisher<Instrument>.ChangedEventArgs args)
             {
-                //переводим из языка сервиса на язык протофайлов
-                Log.Information("Sent Price");
-                var response = ConvertService.ConvertInstrument(args.Changed, args.Action);
-                await WriteStreamAsync(responseStream, response);
-
+               Task.Run(async () =>
+               {
+                   try {
+                       //переводим из языка сервиса на язык протофайлов
+                       Log.Information("Sent Price");
+                       var response = ConvertService.ConvertInstrument(args.Changed, args.Action);
+                       await WriteStreamAsync(responseStream, response);
+                   }catch(Exception e)
+                   {
+                       Log.Error("Error {@Error}", e.Message);
+                       throw;
+                   }
+                   
+                   }).Wait();
             }
             using (LogContext.Push(new PropertyEnricher("RPC Method", context.Method), new PropertyEnricher("RequestId", Guid.NewGuid().ToString()), new PropertyEnricher("UserSessionId", context.RequestHeaders.Get("sessionid"))))
             {
                 Log.Information("Starting subscriprion for {@Topic}", "price");
 
-                var common = await GetCommonContextAsync(context.RequestHeaders);
-                await SubscribeToUserTopic<SubscribePriceRequest, SubscribePriceResponse, Instrument>(common.SubscribeToInstrumentUpdate, common.UnSubscribeFromInstrumentUpdate, WriteToStreamAsync, request, responseStream, context);
+                var common = await GetUserContextAsync(context.RequestHeaders,ContextFilter.GetCommonContextFilter,context.CancellationToken);
+                await SubscribeToUserTopic<SubscribePriceRequest, SubscribePriceResponse, Instrument>(
+                    common.SubscribeToInstrumentUpdate, 
+                    common.UnSubscribeFromInstrumentUpdate, 
+                    WriteToStreamAsync,
+                    request, responseStream, context);
             }
         }
 
@@ -345,7 +351,7 @@ namespace TradeMarket.Services
             }
             Log.Information("Starting subscriprion for {@Topic}", "margin");
 
-            var user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
+            var user = await GetUserContextAsync(context.RequestHeaders,ContextFilter.GetTradeMarketContextFilter, context.CancellationToken);
             await SubscribeToUserTopic<SubscribeMarginRequest, SubscribeMarginResponse, Margin>(user.SubscribeToUserMargin, user.UnSubscribeFromUserMargin, WriteToStreamAsync, request, responseStream, context);
 
 
@@ -363,7 +369,7 @@ namespace TradeMarket.Services
             }
             Log.Information("Starting subscriprion for {@Topic}", "position");
 
-            var user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
+            var user = await GetUserContextAsync(context.RequestHeaders,ContextFilter.GetTradeMarketContextFilter, context.CancellationToken);
             await SubscribeToUserTopic<SubscribePositionRequest, SubscribePositionResponse, Position>(user.SubscribeToUserPositions, user.UnSubscribeFromUserPositions, WriteToStreamAsync, request, responseStream, context);
         }
 
@@ -380,7 +386,7 @@ namespace TradeMarket.Services
             }
             Log.Information("Starting subscriprion for {@Topic}", "user orders");
 
-            var user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
+            var user = await GetUserContextAsync(context.RequestHeaders,ContextFilter.GetTradeMarketContextFilter,context.CancellationToken);
             await SubscribeToUserTopic<SubscribeMyOrdersRequest, SubscribeMyOrdersResponse, Order>(user.SubscribeToUserOrders, user.UnSubscribeFromUserOrders, WriteToStreamAsync, request, responseStream, context);
 
         }
@@ -408,7 +414,7 @@ namespace TradeMarket.Services
             }
             Log.Information("Starting subscriprion for {@Topic}", "booklevel25");
 
-            var common = await GetCommonContextAsync(context.RequestHeaders);
+            var common = await GetUserContextAsync(context.RequestHeaders,ContextFilter.GetCommonContextFilter,context.CancellationToken);
             await SubscribeToUserTopic<SubscribeOrdersRequest, SubscribeOrdersResponse, BookLevel>(common.SubscribeToBook25UpdatesAsync, common.UnSubscribeFromBook25UpdatesAsync, WriteToStreamAsync, request, responseStream, context);
         }
 
@@ -429,7 +435,7 @@ namespace TradeMarket.Services
             }
             Log.Information("Starting subscriprion for {@Topic}", "balance");
             //находим общий контекст т.к. подписка на стаканы не требует логина в систему биржи
-            var user = await GetUserContextAsync(context.RequestHeaders, context.CancellationToken);
+            var user = await GetUserContextAsync(context.RequestHeaders,ContextFilter.GetTradeMarketContextFilter ,context.CancellationToken);
             await SubscribeToUserTopic<SubscribeBalanceRequest,SubscribeBalanceResponse,Wallet>(user.SubscribeToBalance, user.UnSubscribeFromBalance, WriteToStreamAsync, request, responseStream, context);
         }
 

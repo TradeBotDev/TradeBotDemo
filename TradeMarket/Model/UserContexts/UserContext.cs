@@ -49,7 +49,26 @@ namespace TradeMarket.Model.UserContexts
             return await TradeMarket.SubscribeToBalance(handler, this, token);
         }
 
- 
+        public async Task<List<BookLevel>> SubscribeToBook25UpdatesAsync(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, CancellationToken token)
+        {
+            return await TradeMarket.SubscribeToBook25(handler, this, token);
+        }
+
+        public async Task<List<Instrument>> SubscribeToInstrumentUpdate(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler, CancellationToken token)
+        {
+            return await TradeMarket.SubscribeToInstruments(handler, this, token);
+        }
+
+        public async Task UnSubscribeFromBook25UpdatesAsync(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler)
+        {
+            await TradeMarket.UnSubscribeFromBook25(handler, this);
+        }
+
+        public async Task UnSubscribeFromInstrumentUpdate(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler)
+        {
+            await TradeMarket.UnSubscribeFromInstruments(handler, this);
+        }
+
 
         public async Task UnSubscribeFromUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler)
         {

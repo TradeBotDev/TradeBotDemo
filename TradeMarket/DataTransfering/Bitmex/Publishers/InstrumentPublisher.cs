@@ -22,15 +22,14 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
                }
            });
         };
-
+        private InstrumentSubscribeRequest _request;
         private IObservable<InstrumentResponse> _stream;
-        private readonly string _slot;
         private readonly CancellationToken _token;
 
-        public InstrumentPublisher(BitmexWebsocketClient client, IObservable<InstrumentResponse> stream, string slot, CancellationToken token) : base(client, _action)
+        public InstrumentPublisher(BitmexWebsocketClient client, IObservable<InstrumentResponse> stream, InstrumentSubscribeRequest request, CancellationToken token) : base(client, _action)
         {
+            _request = request;
             _stream = stream;
-            this._slot = slot;
             this._token = token;
         }
 
@@ -45,13 +44,18 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         public async override Task Start()
         {
-            await SubscribeAsync(_slot,_token);
+            await SubscribeAsync(_token);
         }
 
-        public async Task SubscribeAsync(string slot,CancellationToken token)
+        public async Task SubscribeAsync(CancellationToken token)
         {
-            await base.SubscribeAsync(new InstrumentSubscribeRequest(slot),_stream, token);
+            await base.SubscribeAsync(_request,_stream, token);
 
+        }
+
+        public async override Task Stop()
+        {
+            await UnSubscribeAsync(_request);
         }
     }
 }

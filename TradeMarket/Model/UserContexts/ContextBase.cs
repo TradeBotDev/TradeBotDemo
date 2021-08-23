@@ -34,7 +34,10 @@ namespace TradeMarket.Model.UserContexts
 
         public bool IsEquevalentTo(string sessionId, string slotName, string tradeMarketName)
         {
-            return Signature.SessionId == sessionId && Signature.SlotName == slotName && Signature.TradeMarketName == tradeMarketName;
+            bool sessionCheck = Signature.SessionId == sessionId || sessionId == null;
+            bool slotNameCheck = Signature.SlotName == slotName || slotName == null;
+            bool tradeMarketNameCheck = Signature.TradeMarketName == tradeMarketName || tradeMarketName == null;
+            return sessionCheck && slotNameCheck &&  tradeMarketNameCheck;
         }
 
         public static bool operator == (ContextBase left,ContextBase right)

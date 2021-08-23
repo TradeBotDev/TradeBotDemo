@@ -20,9 +20,9 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
            {
                foreach (var data in response.Data)
                {
-                    //при исполнении ордера с биржи прилетает не делит а апдейт
+                    //при исполнении ордера с биржи прилетает не делит а апдейт и показывается что ордер "перестал работать"
                     BitmexAction action = response.Action;
-                   if (data.Price is null && data.OrderQty is null)
+                   if ((data.Price is null && data.OrderQty is null) || (data.WorkingIndicator is not null && data.WorkingIndicator == false))
                    {
                        action = BitmexAction.Delete;
                    }
@@ -31,12 +31,13 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
                }
            });
         };
-
+        private OrderSubscribeRequest _request;
         private IObservable<OrderResponse> _stream;
         private readonly CancellationToken _token;
 
-        public UserOrderPublisher(BitmexWebsocketClient client,IObservable<OrderResponse> stream,CancellationToken token) : base(client,_action)
+        public UserOrderPublisher(BitmexWebsocketClient client,IObservable<OrderResponse> stream, OrderSubscribeRequest orderSubscribeRequest, CancellationToken token) : base(client,_action)
         {
+            _request = orderSubscribeRequest;
             _stream = stream;
             this._token = token;
         }
@@ -48,7 +49,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         public async Task SubscribeAsync(CancellationToken token)
         {
-            await base.SubscribeAsync(new OrderSubscribeRequest(), _stream, token);
+            await base.SubscribeAsync(_request, _stream, token);
         }
 
         public override void AddModelToCache(OrderResponse response)
@@ -89,6 +90,11 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
                 }
             }
+        }
+
+        public async override Task Stop()
+        {
+            await UnSubscribeAsync(_request);
         }
     }
 }
