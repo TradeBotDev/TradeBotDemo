@@ -615,7 +615,23 @@ namespace UI
                 {
                     list.RemoveAt(list.Count - 1);
                 }
-                list.Add(new XDate(tm), value);
+                if(!graphControl.Name.Contains("Balance"))
+                {
+                    if(list.Count==0)
+                    {
+                        list.Add(new XDate(tm),1);
+                    }
+                    else
+                    {
+                        var d = list.Last().Y;
+                        d += 1;
+                        list.Add(new XDate(tm), d);
+                    }
+                }
+                else
+                {
+                    list.Add(new XDate(tm), value);
+                }
                 ld = tm;
                 if (list.Count > 40)
                 {

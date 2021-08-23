@@ -71,7 +71,6 @@ namespace Former.Models
                     "{@Where}: Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sended to history",
                     "Former", newOrder.Id, newOrder.Price, newOrder.Quantity, ChangesType.CHANGES_TYPE_INSERT,
                     "Counter order placed");
-                //чмошник
                 //сообщаем об исполнении старого ордера истории
                 if (Convert.ToInt32(quantity) == Convert.ToInt32(oldOrder.Quantity))
                 {
