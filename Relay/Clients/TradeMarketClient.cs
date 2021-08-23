@@ -63,7 +63,6 @@ namespace Relay.Clients
                     {
                         Log.Error(e.Message);
                         if(e.StatusCode==StatusCode.Cancelled) break;
-                        
                     }
                 }
             });
