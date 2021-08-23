@@ -1,6 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
+// Подключение к СУБД в Docker:
+// docker run -p 5432:5432 -d -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres -e POSTGRES_DB=postgresdb postgres
+// Для применения миграций в Visual Studio:
+// Update-Database
+// Для применения миграций из командной строки (из папки проекта):
+// dotnet ef database update
+
 namespace AccountGRPC.Models
 {
     public class AccountContext : DbContext
@@ -17,14 +24,13 @@ namespace AccountGRPC.Models
                 .Build();
 
             // Получение строки подкючения из appsettings.json.
-            connectionString = configuration.GetConnectionString("AccountConnection");
-            // Создание базы данных, если она еще не была создана.
-            Database.EnsureCreated();
+            connectionString = configuration.GetConnectionString("PostgreSQL");
         }
 
-        // Указание, что будет использовать SQLite и файл из строки подключения для него (accounts.db).
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseSqlite(connectionString);
-        
+        // Указание, что будет использовать PostgreSQL и файл из строки подключения для него.
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+            => optionsBuilder.UseNpgsql(connectionString);
+
         // Таблица с данными аккаунтов.
         public DbSet<Account> Accounts { get; set; }
 
