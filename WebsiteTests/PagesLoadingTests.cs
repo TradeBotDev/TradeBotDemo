@@ -14,11 +14,8 @@ namespace WebsiteTests
         [Theory]
         [InlineData("/")]
         [InlineData("/Account")]
-        [InlineData("/Account/AddExchangeAccess")]
         [InlineData("/Authorization/Login")]
         [InlineData("/Authorization/Register")]
-        [InlineData("/Authorization/Logout")]
-        [InlineData("/Purchase/Buy")]
         public async Task Get_EndpointsReturnSuccessAndCorrectContentType(string url)
         {
             var client = _factory.CreateClient();
