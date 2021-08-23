@@ -28,7 +28,7 @@ namespace AccountTests.LicenseServiceTests
             var reply = GenerateLogin("not_ex_license").ContinueWith(login =>
                 licenseService.CheckLicense(new CheckLicenseRequest
                 {
-                    SessionId = login.Result.Result.SessionId,
+                    SessionId = login.Result.SessionId,
                     Product = ProductCode.Tradebot
                 }, null));
             // Ожидается, что у пользователя по прежнему не будет доступа к продукту.
@@ -50,7 +50,7 @@ namespace AccountTests.LicenseServiceTests
             var reply = GenerateLogin("ex_license").ContinueWith(login =>
                licenseService.SetLicense(new SetLicenseRequest
                {
-                   SessionId = WriteSessionId(login.Result.Result.SessionId),
+                   SessionId = WriteSessionId(login.Result.SessionId),
                    Product = ProductCode.Tradebot,
                    CardNumber = "1234567812345678",
                    Date = 1234,
