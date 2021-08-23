@@ -402,8 +402,9 @@ namespace TradeMarket.Services
             {
                 Log.Information("Starting subscriprion for {@Topic}", "position");
 
-            var user = await GetUserContextAsync(context.RequestHeaders,ContextFilter.GetTradeMarketContextFilter, context.CancellationToken);
-            await SubscribeToUserTopic<SubscribePositionRequest, SubscribePositionResponse, Position>(user.SubscribeToUserPositions, user.UnSubscribeFromUserPositions, WriteToStreamAsync, request, responseStream, context);
+                var user = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetTradeMarketContextFilter, context.CancellationToken);
+                await SubscribeToUserTopic<SubscribePositionRequest, SubscribePositionResponse, Position>(user.SubscribeToUserPositions, user.UnSubscribeFromUserPositions, WriteToStreamAsync, request, responseStream, context);
+            }
         }
 
 
