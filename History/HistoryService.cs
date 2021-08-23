@@ -75,12 +75,13 @@ namespace History
 
         private static void Handler(NotifyCollectionChangedEventArgs args, SubscribeEventsRequest request,
             IAsyncStreamWriter<SubscribeEventsResponse> responseStream,
-            TaskCompletionSource<SubscribeEventsResponse> taskCompletionSource)
+            TaskCompletionSource<SubscribeEventsResponse> taskCompletionSource, ServerCallContext context)
         {
             BalanceChange updateBalance;
             OrderChange updateOrder;
             try
             {
+                if (context.CancellationToken.IsCancellationRequested) throw new Exception();
                 Task.Run(async () =>
                 {
                     try
@@ -140,7 +141,7 @@ namespace History
             try
             {
 
-                BalanceCollection.CollectionChanged += (_, args) => Handler(args, request, responseStream, taskCompletionSource);
+                BalanceCollection.CollectionChanged += (_, args) => Handler(args, request, responseStream, taskCompletionSource, context);
                 List<OrderChange> orderChanges = GetOrderChangesByUser(request.Sessionid);
                 foreach (var record in orderChanges)
                 {
@@ -158,7 +159,7 @@ namespace History
                     });
                 }
 
-                OrderCollection.CollectionChanged += (_, args) => Handler(args, request, responseStream, taskCompletionSource);
+                OrderCollection.CollectionChanged += (_, args) => Handler(args, request, responseStream, taskCompletionSource, context);
                 List<BalanceChange> balanceChanges = GetBalanceChangesByUser(request.Sessionid);
                 if (balanceChanges.Count > 0)
                 {

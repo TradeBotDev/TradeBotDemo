@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 // Подключение к СУБД в Docker:
@@ -18,13 +19,8 @@ namespace AccountGRPC.Models
         // Создание базы данных, если она отсутствует (к примеру, при первом запуске).
         public AccountContext()
         {
-            // Получение данных из файла appsettings.json.
-            var configuration = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", optional: false)
-                .Build();
-
-            // Получение строки подкючения из appsettings.json.
-            connectionString = configuration.GetConnectionString("PostgreSQL");
+            connectionString = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING");
+            Database.EnsureCreated();
         }
 
         // Указание, что будет использовать PostgreSQL и файл из строки подключения для него.
