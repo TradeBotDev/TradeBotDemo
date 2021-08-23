@@ -15,7 +15,7 @@ namespace AccountTests.ExchangeAccessServiceTests
             var reply = GenerateLogin("getting_not_existing_exchange").ContinueWith(loginReply => 
                 exchangeAccessService.ExchangeBySession(new ExchangeBySessionRequest
                 {
-                    SessionId = loginReply.Result.Result.SessionId,
+                    SessionId = loginReply.Result.SessionId,
                     Code = ExchangeAccessCode.Bitmex
                 }, null));
 
@@ -63,7 +63,7 @@ namespace AccountTests.ExchangeAccessServiceTests
             // Последовательная генерация входа в аккаунт, добавление информации о доступе к биржи в аккаунт,
             // а затем ее чтение.
             var reply = GenerateLogin("one_existing_exchange")
-                .ContinueWith(loginReply => exchangeAccessService.AddExchangeAccess(GenerateRequest(loginReply.Result.Result.SessionId), null))
+                .ContinueWith(loginReply => exchangeAccessService.AddExchangeAccess(GenerateRequest(loginReply.Result.SessionId), null))
                 .ContinueWith(none => exchangeAccessService.ExchangeBySession(new ExchangeBySessionRequest
                 {
                     SessionId = sessionId,

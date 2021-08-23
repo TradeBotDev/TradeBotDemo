@@ -13,8 +13,10 @@ namespace AccountTests.ExchangeAccessServiceTests
         // Объект сервиса с доступами к бирже для того, чтобы взаимодействовать с методами.
         public ExchangeAccessService exchangeAccessService = new();
 
+        public LicenseService licenseService = new();
+
         // Метод, создающий временный аккаунт в процессе тестирования.
-        public Task<Task<LoginResponse>> GenerateLogin(string prefix)
+        public async Task<LoginResponse> GenerateLogin(string prefix)
         {
             // Запрос для регистрации.
             var registerRequest = new RegisterRequest
@@ -31,10 +33,23 @@ namespace AccountTests.ExchangeAccessServiceTests
                 Password = registerRequest.Password
             };
 
+            var licenseRequest = new SetLicenseRequest
+            {
+                CardNumber = "1234123412341234",
+                Cvv = 123,
+                Date = 1234,
+                Product = ProductCode.Tradebot
+            };
+
             // Последовательно производится регистрация аккаунта, а затем вход в него, чтобы получить id
             // сессии и работать с ним.
-            return accountService.Register(registerRequest, null)
-                .ContinueWith(registerReply => accountService.Login(loginRequest, null));
+            var reply = await accountService.Register(registerRequest, null)
+                .ContinueWith(async registerReply => await accountService.Login(loginRequest, null));
+
+            licenseRequest.SessionId = reply.Result.SessionId;
+            await licenseService.SetLicense(licenseRequest, null);
+
+            return reply.Result;
         }
     }
 }
