@@ -65,7 +65,7 @@ namespace Former.Services
             ServerCallContext context)
         {
             var meta = context.RequestHeaders.ToDictionary(x => x.Key, x => x.Value);
-            await Contexts.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"]).FormOrder(request.Decision);
+            if (request.Decision > 0) await Contexts.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"]).FormOrder(request.Decision);
             return new SendAlgorithmDecisionResponse();
         }
     }

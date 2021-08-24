@@ -2,6 +2,7 @@
 # docker run -p 5432:5432 -d -e POSTGRES_PASSWORD=password -e POSTGRES_USER=postgres -e POSTGRES_DB=postgresdb postgres
 # docker run --rm -it -p 5000:80 -e ASPNETCORE_URLS="http://+;" -e POSTGRES_CONNECTION_STRING=Host=host.docker.internal;Port=5432;Database=account;Username=postgres;Password=password account
 # docker run -p 6379:6379 -d redis
+# docker run --name seq -d -e ACCEPT_EULA=Y -p 5341:80 datalust/seq:latest
 version: "3.9"
 
 services:
@@ -11,14 +12,21 @@ services:
     ports:
       - 5432:5432
     environment:
-        POSTGRES_PASSWORD: "password"
-        POSTGRES_USER: "postgres"
-        POSTGRES_DB: "postgresdb"
+      POSTGRES_PASSWORD: "password"
+      POSTGRES_USER: "postgres"
+      POSTGRES_DB: "postgresdb"
   redisdb:
     image: redis
     container_name: rediscontainer
     ports:
       - 6379:6379
+  seq:
+    image: seq
+    container_name: seqcontainer
+    ports:
+     - 5341:80
+    environment:
+      ACCEPT_EULA: "Y"
   account:
     image: account
     container_name: accountcontainer
