@@ -15,8 +15,16 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         {
             await Task.Run(() =>
             {
-                Log.Error("Error {@Error} from request {@Request}", response.Error, response.Request);
-                e?.Invoke(nameof(UserOrderPublisher), new(response.Error, BitmexAction.Insert));
+                try
+                {
+                    Log.Error("Error {@Error} from request {@Request}", response.Error, response.Request);
+                    e?.Invoke(nameof(UserOrderPublisher), new(response.Error, BitmexAction.Insert));
+                }
+                catch (Exception e)
+                {
+                    Log.Warning(e.Message);
+                    Log.Warning(e.StackTrace);
+                }
             });
         };
 
