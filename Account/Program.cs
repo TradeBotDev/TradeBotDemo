@@ -10,7 +10,7 @@ namespace AccountGRPC
         public static void Main(string[] args)
         {
             // Создание и запуск сервера
-            var server = new MetricServer(hostname: "localhost", port: 12340);
+            var server = new MetricServer(hostname: "*", port: 9464);
             server.Start();
 
             CreateHostBuilder(args).Build().Run();
