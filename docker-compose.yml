@@ -33,6 +33,8 @@ services:
     build:      
       context: .
       dockerfile: ./Account/Dockerfile
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - 5000:80
       - 9464:9464
@@ -62,6 +64,8 @@ services:
     build:      
       context: .
       dockerfile: ./Facade/Dockerfile
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - 5002:80
     volumes:
@@ -140,6 +144,8 @@ services:
     build:      
       context: .
       dockerfile: ./Website/Dockerfile
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - 5008:80
       - 6008:6008
