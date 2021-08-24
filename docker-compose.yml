@@ -113,6 +113,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
       POSTGRES_CONNECTION_STRING: "Host=host.docker.internal;Port=5432;Database=historydb;Username=postgres;Password=password"
+      SEQ_CONNECTION_STRING: "http://host.docker.internal:5341"
   former:
     image: former
     container_name: formercontainer

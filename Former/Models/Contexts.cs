@@ -24,5 +24,10 @@ namespace Former.Models
                 return result;
             }
         }
+
+        public static void ClearContexts()
+        {
+            UserContexts.Clear();
+        }
     }
 }

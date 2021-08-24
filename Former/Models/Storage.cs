@@ -45,7 +45,6 @@ namespace Former.Models
                 BuyMarketPrice = bid;
                 Log.Information("New buy market price {@BuyMarketPrice}", bid);
             }
-
             if (ask > 0)
             {
                 SellMarketPrice = ask;

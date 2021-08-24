@@ -75,15 +75,6 @@ namespace Former.Clients
 
         private bool EventFilter(Metadata incomingMeta, Metadata filteringMeta)
         {
-            //bool IsEqual(Metadata incomingMeta, Metadata filteringMeta, string key)
-            //{
-            //    return (incomingMeta.GetValue(key) is not null &&
-            //            incomingMeta.GetValue(key) == filteringMeta.GetValue(key)) 
-            //           || incomingMeta.GetValue(key) is null;
-            //}
-
-
-            //return IsEqual(incomingMeta,filteringMeta,"sessionid") && IsEqual(incomingMeta,filteringMeta,"slot") && IsEqual(incomingMeta,filteringMeta,"trademarket");
             return filteringMeta.GetValue("sessionid") == incomingMeta.GetValue("sessionid") && filteringMeta.GetValue("trademarket") == incomingMeta.GetValue("trademarket") && filteringMeta.GetValue("slot") == incomingMeta.GetValue("slot");
         }
 
@@ -124,7 +115,6 @@ namespace Former.Clients
                 {
                     if (EventFilter(call.ResponseHeadersAsync.Result, meta)) await UpdateBalance?.Invoke((int)call.ResponseStream.Current.Margin.AvailableMargin, (int)call.ResponseStream.Current.Margin.MarginBalance);
                 }
-                
             }
             await ConnectionTester(ObserveBalanceFunc);
             Log.Information("Unsubscribe balance");
