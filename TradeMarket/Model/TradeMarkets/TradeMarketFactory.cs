@@ -64,8 +64,6 @@ namespace TradeMarket.Model.TradeMarkets
         }
 
 
-        #region Static Part
-        
-        #endregion
+       
     }
 }

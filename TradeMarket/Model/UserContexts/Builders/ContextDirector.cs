@@ -44,15 +44,22 @@ namespace TradeMarket.Model.UserContexts.Builders
 
         private delegate Task<UserContext> BuildContextDeligate(string sessionId,string slotName,string tradeMarketName,CancellationToken token);
 
-        internal BitmexWebsocketClient CreateWebsocketClient()
+        internal BitmexWebsocketClient CreateWebsocketClient(ILogger logger)
         {
+            var log = logger.ForContext("Method", nameof(CreateWebsocketClient));
+            logger.Information("Creating new BitmexWebsocketClient");
             var communicator = new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketTestnetUrl);
             var res = new BitmexWebsocketClient(communicator);
             communicator.Start();
             return res;
         }
 
-        internal async Task<UserContext> BuildUserContextAsync(string sessionId, string slotName, string tradeMarketName,CancellationToken token)
+        internal async Task<UserContext> BuildUserContextAsync(
+            string sessionId, 
+            string slotName, 
+            string tradeMarketName,
+            CancellationToken token,
+            Serilog.ILogger logger)
         {
             return await Task.Run(async () =>
             {
