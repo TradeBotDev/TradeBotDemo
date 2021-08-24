@@ -16,7 +16,7 @@ namespace Algorithm.Services
             while (await requestStream.MoveNext())
             {
                 var order = requestStream.Current;
-                StorageOfAlgorithms.SendNewOrderToAllAlgos(order.Order, context.RequestHeaders);
+                StorageOfAlgorithms.SendNewOrderToAllAlgos(OrderConverter.WrapOrder(order.Order), context.RequestHeaders);
             }
 
             return new AddOrderResponse();
