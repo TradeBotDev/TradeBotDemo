@@ -42,9 +42,9 @@ namespace TradeMarket.Services
         {
             return await Task.Run(async () =>
             {
-                var sessionId = meta.GetValue("sessionid").Value;
-                var slot = meta.Get("slot").Value;
-                var trademarket = meta.Get("trademarket").Value;
+                var sessionId = meta.GetValue("sessionid");
+                var slot = meta.GetValue("slot");
+                var trademarket = meta.GetValue("trademarket");
 
                 return await _director.GetUserContextAsync(getFilter(sessionId, slot, trademarket), token, logger);
             });
