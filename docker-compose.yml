@@ -87,6 +87,7 @@ services:
     volumes:
       - .%USERPROFILE%\.aspnet\https:/https/
     environment:
+      SEQ_CONNECTION_STRING: "http://host.docker.internal:5341"
       FORMER_CONNECTION_STRING: "http://host.docker.internal:5003"
       ASPNETCORE_ENVIRONMENT: "Development"
   history:

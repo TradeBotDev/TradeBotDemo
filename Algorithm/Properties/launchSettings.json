@@ -5,6 +5,7 @@
       "environmentVariables": {
         "FORMER_CONNECTION_STRING": "http://localhost:5003",
         "REDIS_CONNECTION_STRING": "http://localhost:6379",
+        "SEQ_CONNECTION_STRING": "http://localhost:5341",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": "true",
