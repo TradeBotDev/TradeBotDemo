@@ -73,13 +73,15 @@ namespace Former.Models
             //если пришедший ордер нашёлся в списке контр оредров, то это контр-ордер, о чём сигнализирует переменная itsCounterOrder
             var itsCounterOrder = CounterOrders.TryGetValue(id, out var counterOldOrder);
 
+            newComingOrder = InitOrderFromTM(newComingOrder);
+
             switch (changesType)
             {
                 case ChangesType.CHANGES_TYPE_PARTITIAL:
                     //если ордер пришёл с пометкой Partitial, то это либо контр-ордер, либо мой ордер, который потерял связь и стал
                     //контр ордером. И в том и другом случае его необходимо проинициализировать, то есть добавить в список контр-ордеров
                     //и сообщить о его прибытии UpdateHandler, чтобы он его отправил в сервис истории.
-                    AddOrder(id, InitPartialOrder(newComingOrder), CounterOrders);
+                    AddOrder(id, newComingOrder, CounterOrders);
                     HandleUpdateEvent?.Invoke(newComingOrder, ChangesType.CHANGES_TYPE_PARTITIAL);
                     return;
                 case ChangesType.CHANGES_TYPE_UPDATE when itsMyOrder:
@@ -183,7 +185,7 @@ namespace Former.Models
         /// <summary>
         /// Из-за того, что инициализонные ордера приходят с биржи с положительным числом контрактов независимо от типа ордера, необходимо самому проинициализировать число контрактов
         /// </summary>
-        private Order InitPartialOrder(Order newComingOrder)
+        private Order InitOrderFromTM(Order newComingOrder)
         {
             return new Order
             {

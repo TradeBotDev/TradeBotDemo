@@ -171,6 +171,7 @@ namespace UI
             this.BalanceGraph.Size = new System.Drawing.Size(1039, 488);
             this.BalanceGraph.TabIndex = 0;
             this.BalanceGraph.UseExtendedPrintDialog = true;
+            this.BalanceGraph.ZoomEvent += new ZedGraph.ZedGraphControl.ZoomEventHandler(this.zedGraph_ZoomEvent);
             // 
             // OrderGraph
             // 
@@ -189,6 +190,7 @@ namespace UI
             this.OrderGraph.Size = new System.Drawing.Size(1039, 488);
             this.OrderGraph.TabIndex = 0;
             this.OrderGraph.UseExtendedPrintDialog = true;
+            this.OrderGraph.ZoomEvent += new ZedGraph.ZedGraphControl.ZoomEventHandler(this.zedGraph_ZoomEvent);
             // 
             // Tabs
             // 
@@ -299,6 +301,7 @@ namespace UI
             this.dataGridViewTextBoxColumn7,
             this.Time,
             this.dataGridViewTextBoxColumn8});
+            this.FilledOrdersDataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.FilledOrdersDataGridView.GridColor = System.Drawing.SystemColors.Control;
             this.FilledOrdersDataGridView.Location = new System.Drawing.Point(0, 0);
             this.FilledOrdersDataGridView.Name = "FilledOrdersDataGridView";
@@ -311,7 +314,7 @@ namespace UI
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.WindowText;
             this.FilledOrdersDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle1;
             this.FilledOrdersDataGridView.RowTemplate.Height = 29;
-            this.FilledOrdersDataGridView.Size = new System.Drawing.Size(1061, 451);
+            this.FilledOrdersDataGridView.Size = new System.Drawing.Size(1059, 533);
             this.FilledOrdersDataGridView.TabIndex = 0;
             // 
             // SlotName
@@ -388,6 +391,7 @@ namespace UI
             this.Type,
             this.dataGridViewTextBoxColumn6,
             this.OrderID});
+            this.ActiveOrdersDataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ActiveOrdersDataGridView.GridColor = System.Drawing.SystemColors.Control;
             this.ActiveOrdersDataGridView.Location = new System.Drawing.Point(0, 0);
             this.ActiveOrdersDataGridView.Name = "ActiveOrdersDataGridView";
@@ -400,7 +404,7 @@ namespace UI
             dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.WindowText;
             this.ActiveOrdersDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle2;
             this.ActiveOrdersDataGridView.RowTemplate.Height = 29;
-            this.ActiveOrdersDataGridView.Size = new System.Drawing.Size(1059, 453);
+            this.ActiveOrdersDataGridView.Size = new System.Drawing.Size(1059, 533);
             this.ActiveOrdersDataGridView.TabIndex = 1;
             // 
             // dataGridViewTextBoxColumn3

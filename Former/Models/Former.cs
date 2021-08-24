@@ -74,7 +74,8 @@ namespace Former.Models
                 //сообщаем об исполнении старого ордера истории
                 if (Convert.ToInt32(quantity) == Convert.ToInt32(oldOrder.Quantity))
                 {
-                    await _historyClient.WriteOrder(oldOrder, ChangesType.CHANGES_TYPE_DELETE,
+                    
+                    await _historyClient.WriteOrder(FormatDeletedOrder(oldOrder), ChangesType.CHANGES_TYPE_DELETE,
                         Converters.ConvertMetadata(_metadata), "Initial order filled");
                     Log.Information(
                         "{@Where}: Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sended to history",
@@ -100,6 +101,19 @@ namespace Former.Models
                 "{@Where}: Order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@ResponseCode} added to counter orders list {@ResponseMessage}",
                 "Former", placeResponse.OrderId, price, -quantity, type,
                 addResponse ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
+        }
+
+        private Order FormatDeletedOrder(Order unformattedOrder)
+        {
+            return new Order
+            {
+                Id = unformattedOrder.Id, LastUpdateDate = unformattedOrder.LastUpdateDate, Price = unformattedOrder.Price, Quantity = unformattedOrder.Quantity,
+                Signature = new OrderSignature
+                {
+                    Status = OrderStatus.ORDER_STATUS_CLOSED,
+                    Type = unformattedOrder.Signature.Type
+                }
+            };
         }
 
         /// <summary>

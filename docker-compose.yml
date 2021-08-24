@@ -1,5 +1,6 @@
 # docker-compose up
 # docker run -p 5432:5432 -d -e POSTGRES_PASSWORD=password -e POSTGRES_USER=postgres -e POSTGRES_DB=postgresdb postgres
+# docker run --rm -it -p 5000:80 -e ASPNETCORE_URLS="http://+;" -e POSTGRES_CONNECTION_STRING=Host=host.docker.internal;Port=5432;Database=account;Username=postgres;Password=password account
 # docker run -p 6379:6379 -d redis
 version: "3.9"
 
@@ -28,6 +29,8 @@ services:
       - 5000:80
     volumes:
       - .%USERPROFILE%\.aspnet\https:/https/
+    environment:
+      POSTGRES_CONNECTION_STRING: "Host=host.docker.internal;Port=5432;Database=accountdb;Username=postgres;Password=password"
   trademarket:
     image: trademarket
     container_name: trademarketcontainer
@@ -58,7 +61,6 @@ services:
       ASPNETCORE_ENVIRONMENT: "Development"
       HISTORY_CONNECTION_STRING: "http://host.docker.internal:5007"
       TRADEMARKET_CONNECTION_STRING: "http://host.docker.internal:5005"
-
   relay:
     image: relay
     container_name: relaycontainer

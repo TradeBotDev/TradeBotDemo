@@ -57,7 +57,7 @@ namespace History
                             SlotName = request.Order.SlotName
                         };
                         OrderCollection.Add(oc);
-                        if (oc.ChangesType == ChangesType.CHANGES_TYPE_DELETE && oc.Message != "Removed by user")
+                        if (oc.ChangesType == ChangesType.CHANGES_TYPE_DELETE && oc.Message != "Removed by user" && oc.Message != "")
                         {
                             db.Add(ow);
                             db.Add(oc);
@@ -84,50 +84,41 @@ namespace History
                 if (context.CancellationToken.IsCancellationRequested) throw new Exception();
                 Task.Run(async () =>
                 {
-                    try
-                    {
-                        if (args.NewItems[0].GetType().FullName.Contains("BalanceChange"))
-                        {
-                            updateBalance = (BalanceChange)args.NewItems[0];
-                            if (updateBalance.SessionId != request.Sessionid) return;
-                            await responseStream.WriteAsync(new SubscribeEventsResponse
-                            {
-                                Balance = new PublishBalanceEvent
-                                {
-                                    Balance = Converter.ToBalance(updateBalance.Balance),
-                                    Sessionid = updateBalance.SessionId,
-                                    Time = Timestamp.FromDateTime(new DateTime(updateBalance.Time.Year, updateBalance.Time.Month, updateBalance.Time.Day, 0,0,0).ToUniversalTime())
-                                }
-                            });
-                        }
-                        if (args.NewItems[0].GetType().FullName.Contains("OrderChange"))
-                        {
-                            updateOrder = (OrderChange)args.NewItems[0];
-                            if (updateOrder.SessionId != request.Sessionid) return;
-                            await responseStream.WriteAsync(new SubscribeEventsResponse
-                            {
-                                Order = new PublishOrderEvent
-                                {
-                                    ChangesType = (TradeBot.Common.v1.ChangesType)updateOrder.ChangesType,
-                                    Order = Converter.ToOrder(updateOrder.Order),
-                                    Sessionid = updateOrder.SessionId,
-                                    Time = Timestamp.FromDateTime(updateOrder.Time.ToUniversalTime()),
-                                    Message = updateOrder.Message,
-                                    SlotName = updateOrder.SlotName
-                                }
-                            });
-                        }
-                    }
-                    catch (Exception e)
-                    {
 
-                        throw;
+                    if (args.NewItems[0].GetType().FullName.Contains("BalanceChange"))
+                    {
+                        updateBalance = (BalanceChange)args.NewItems[0];
+                        if (updateBalance.SessionId != request.Sessionid) return;
+                        await responseStream.WriteAsync(new SubscribeEventsResponse
+                        {
+                            Balance = new PublishBalanceEvent
+                            {
+                                Balance = Converter.ToBalance(updateBalance.Balance),
+                                Sessionid = updateBalance.SessionId,
+                                Time = Timestamp.FromDateTime(new DateTime(updateBalance.Time.Year, updateBalance.Time.Month, updateBalance.Time.Day, 0, 0, 0).ToUniversalTime())
+                            }
+                        });
                     }
-                    
-                    
+                    if (args.NewItems[0].GetType().FullName.Contains("OrderChange"))
+                    {
+                        updateOrder = (OrderChange)args.NewItems[0];
+                        if (updateOrder.SessionId != request.Sessionid) return;
+                        await responseStream.WriteAsync(new SubscribeEventsResponse
+                        {
+                            Order = new PublishOrderEvent
+                            {
+                                ChangesType = (TradeBot.Common.v1.ChangesType)updateOrder.ChangesType,
+                                Order = Converter.ToOrder(updateOrder.Order),
+                                Sessionid = updateOrder.SessionId,
+                                Time = Timestamp.FromDateTime(updateOrder.Time.ToUniversalTime()),
+                                Message = updateOrder.Message,
+                                SlotName = updateOrder.SlotName
+                            }
+                        });
+                    }
                 }).Wait();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 taskCompletionSource.SetCanceled();
             }
@@ -140,7 +131,8 @@ namespace History
 
             try
             {
-
+                if (context.CancellationToken.IsCancellationRequested) throw new RpcException(Status.DefaultCancelled);
+                
                 BalanceCollection.CollectionChanged += (_, args) => Handler(args, request, responseStream, taskCompletionSource, context);
                 List<OrderChange> orderChanges = GetOrderChangesByUser(request.Sessionid);
                 foreach (var record in orderChanges)
@@ -149,7 +141,7 @@ namespace History
                     {
                         Order = new PublishOrderEvent
                         {
-                            ChangesType = (TradeBot.Common.v1.ChangesType)record.ChangesType,
+                            ChangesType = (TradeBot.Common.v1.ChangesType)ChangesType.CHANGES_TYPE_PARTITIAL,
                             Order = Converter.ToOrder(record.Order),
                             Sessionid = record.SessionId,
                             Time = Timestamp.FromDateTime(record.Time.ToUniversalTime()),
@@ -178,16 +170,16 @@ namespace History
                                     Sessionid = currentBalance.SessionId,
                                     Time = a
                                 }
-                            }); ;
+                            });
                         }
                         currentBalance = record;
                     }
                 }
-                return await taskCompletionSource.Task;
             }
-            catch(Exception e) 
+            catch (RpcException e)
             {
-                Log.Error("History:"+e.Message);
+                if (e.StatusCode != StatusCode.Cancelled) Log.Error("History:" + e.Message);
+                taskCompletionSource.SetCanceled();
             }
             return await taskCompletionSource.Task;
         }
@@ -203,7 +195,7 @@ namespace History
             {
                 throw;
             }
-            
+
         }
 
         private static List<BalanceChange> GetBalanceChangesByUser(string user)
