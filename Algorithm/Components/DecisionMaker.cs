@@ -1,22 +1,15 @@
-﻿using Algorithm.DataManipulation;
-using Grpc.Core;
+﻿using Algorithm.Components.Publishers;
+using Algorithm.DataManipulation;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TradeBot.Common.v1;
+using System.Threading.Tasks;
 
-namespace Algorithm.Analysis
+namespace Algorithm.Components
 {
-    public class AlgorithmBeta
+    public class DecisionMaker
     {
-        //This algo looks back several seconds (set by user) and looks for price peaks and pits 
-        //we analyse the trend by calculating SMAs (simple moving average) of several subsets withing the timeframe
-        //if the general price trend is rising/falling, but the current price is doing the opposite we conclude that this might be a local pit or a peak
-        //pits are good for buying (lowest price we could find)
-        //peaks are good for selling (highest price we could find)
-        //this decision is then sent to Former service which does what it can with it 
-
         //algo's inner storage of points made by PointMaker
         //incoming into Algorithm service are all the orders from TM, so in order to simplify this data for calculations we transform orders into "point"
         //these points are basically the average market prices at some specific points in time
@@ -26,31 +19,16 @@ namespace Algorithm.Analysis
         //hardcoded, not sure if this will need to change
         private int _durationInPoints = 5;
 
-        //1 - low, 2 - medium, 3 - high
-        private int _precision = 1;
-
+        //0 - minimal, 1 - low, 2 - medium, 3 - high, 4 - max
+        private int _precision = 0;
+        private DecisionPublisher _decisionPublisher;
         private PointPublisher _pointPublisher;
-        private DataCollector _dc;
-        private PointMaker _pm;
-        private bool _isStopped = true;
-
-        private Metadata _metadata;
-
-        public bool GetState()
+        public DecisionMaker(DecisionPublisher decisionPublisher, PointPublisher pointPublisher)
         {
-            return _isStopped;
-        }
-
-        //when an algo is created it's immediately subscribed to new points 
-        public AlgorithmBeta(Metadata metadata)
-        {
-            _metadata = metadata;
-            _pointPublisher = new();
+            _storage = new();
+            _decisionPublisher = decisionPublisher;
+            _pointPublisher = pointPublisher;
             _pointPublisher.PointMadeEvent += NewPointAlert;
-            _dc = new(_pointPublisher);
-            _pm = new();
-            _storage = new SortedDictionary<DateTime, double>();
-            Log.Information("{@Where}: Algorithm for user {@User} has been created", "Algorithm", metadata.GetValue("sessionid"));
         }
 
         //when a new point is made algo adds it to its storage and checks if it has enough to initiate analysis 
@@ -69,19 +47,9 @@ namespace Algorithm.Analysis
                 PerformCalculations(_storage);
             }
         }
-
-        public void NewOrderAlert(Order order, Metadata metadata)
-        {
-            if (metadata.GetValue("slot") == _metadata.GetValue("slot"))
-            {
-                _dc.AddNewOrder(order);
-            }
-        }
-
-        //this function gathers all the data and sends it for analysis
-        //
         private void PerformCalculations(SortedDictionary<DateTime, double> points)
         {
+
             //subsets are used later in this func to help determine the general trend
             List<double> subSet = new();
             List<double> subTrends = new();
@@ -106,7 +74,7 @@ namespace Algorithm.Analysis
             int trend = MakeADecision(subTrends, points);
             if (trend != 0)
             {
-                PriceSender.SendDecision(trend, _metadata);
+                _decisionPublisher.Publish(trend);
             }
         }
         //this func needs points and subset averages and decides if it's time to buy
@@ -220,68 +188,62 @@ namespace Algorithm.Analysis
 
         private static int AnalyseTrendWithMediumPrecision(IReadOnlyCollection<double> subTrends, IDictionary<DateTime, double> prices, bool currentTrend)
         {
-            if (currentTrend)
+            int result = AnalyseTrendWithLowPrecision(subTrends, prices, currentTrend);
+
+            switch(result)
             {
-                if (subTrends.Last() > prices.Last().Value &&
-                    prices.Last().Value < prices.ElementAt(prices.Count - 2).Value)
-                {
-                    return -1;
-                }
-            }
-            else
-            {
-                if (subTrends.Last() < prices.Last().Value &&
-                    prices.Last().Value > prices.ElementAt(prices.Count - 2).Value)
-                {
-                    return 1;
-                }
+                case 0: return 0;
+                case 1: if (prices.Last().Value > prices.ElementAt(prices.Count - 2).Value)
+                    {
+                        return 1;
+                    }
+                    break;
+                case -1: if (prices.Last().Value < prices.ElementAt(prices.Count - 2).Value)
+                    {
+                        return -1;
+                    }
+                    break;
             }
             return 0;
         }
         private static int AnalyseTrendWithHighPrecision(IReadOnlyCollection<double> subTrends, IDictionary<DateTime, double> prices, bool currentTrend)
         {
-            if (currentTrend)
+            int result = AnalyseTrendWithMediumPrecision(subTrends, prices, currentTrend);
+
+            switch (result)
             {
-                if (subTrends.Last() > prices.Last().Value &&
-                    prices.Last().Value < prices.ElementAt(prices.Count - 2).Value &&
-                    prices.ElementAt(prices.Count - 3).Value < prices.ElementAt(prices.Count - 2).Value)
-                {
-                    return -1;
-                }
+                case 0: return 0;
+                case 1: if (prices.ElementAt(prices.Count - 3).Value > prices.ElementAt(prices.Count - 2).Value)
+                    {
+                        return 1;
+                    }
+                    break;
+                case -1: if (prices.ElementAt(prices.Count - 3).Value < prices.ElementAt(prices.Count - 2).Value)
+                    {
+                        return -1;
+                    }
+                    break;
             }
-            else
-            {
-                if (subTrends.Last() < prices.Last().Value &&
-                    prices.Last().Value > prices.ElementAt(prices.Count - 2).Value &&
-                    prices.ElementAt(prices.Count - 3).Value > prices.ElementAt(prices.Count - 2).Value)
-                {
-                    return 1;
-                }
-            }
-            return 0;
+            return 0;           
         }
 
         private static int AnalyseTrendWithUltraPrecision(IReadOnlyCollection<double> subTrends, IDictionary<DateTime, double> prices, bool currentTrend)
         {
-            if (currentTrend)
+            int result = AnalyseTrendWithHighPrecision(subTrends, prices, currentTrend);
+
+            switch (result)
             {
-                if (subTrends.Last() > prices.Last().Value &&
-                    prices.Last().Value < prices.ElementAt(prices.Count - 2).Value &&
-                    prices.ElementAt(prices.Count - 3).Value < prices.ElementAt(prices.Count - 2).Value &&
-                    prices.ElementAt(prices.Count - 4).Value < prices.ElementAt(prices.Count - 3).Value)
-                {
-                    return -1;
-                }
-            }
-            else
-            {
-                if (subTrends.Last() < prices.Last().Value &&
-                    prices.Last().Value > prices.ElementAt(prices.Count - 2).Value &&
-                    prices.ElementAt(prices.Count - 3).Value > prices.ElementAt(prices.Count - 2).Value &&
-                    prices.ElementAt(prices.Count - 4).Value > prices.ElementAt(prices.Count - 3).Value)
-                {
-                    return 1;
-                }
+                case 0: return 0;
+                case 1: if (prices.ElementAt(prices.Count - 4).Value > prices.ElementAt(prices.Count - 3).Value)
+                    {
+                        return 1;
+                    }
+                    break;
+                case -1: if (prices.ElementAt(prices.Count - 4).Value < prices.ElementAt(prices.Count - 3).Value)
+                    {
+                        return -1;
+                    }
+                    break;
             }
             return 0;
         }
@@ -290,38 +252,6 @@ namespace Algorithm.Analysis
         private static double CalculateSMA(List<double> points)
         {
             return points.Sum() / points.Count;
-        }
-
-        public void ChangeSetting(AlgorithmInfo settings)
-        {
-            _precision = settings.Sensitivity;
-            _pm.SetPointInterval((int)settings.Interval.Seconds * 1000 / 5);
-            _dc.ClearAllData();
-            Log.Information("{@Where}:Settings changed", "Algorithm");
-        }
-        public void ChangeState()
-        {
-            if (_isStopped)
-            {
-                Start();
-            }
-            else
-            {
-                Stop();
-            }
-        }
-        private void Stop()
-        {
-            _isStopped = true;
-            Log.Information("{@Where}:Algorithm has been stopped", "Algorithm");
-            _pm.Stop();
-        }
-
-        private void Start()
-        {
-            _isStopped = false;
-            Log.Information("{@Where}:Algorithm has been launched", "Algorithm");
-            _pm.Launch(_pointPublisher, _dc);
         }
     }
 }
