@@ -1,24 +1,36 @@
 ﻿using Bitmex.Client.Websocket.Client;
 using Bitmex.Client.Websocket.Requests;
 using Bitmex.Client.Websocket.Responses.Instruments;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Serilog;
 using TradeMarket.Model.Publishers;
 
 namespace TradeMarket.DataTransfering.Bitmex.Publishers
 {
     public class InstrumentPublisher : BitmexPublisher<InstrumentResponse, InstrumentSubscribeRequest, Instrument>
     {
-        internal static readonly Action<InstrumentResponse, EventHandler<IPublisher<Instrument>.ChangedEventArgs>> _action = async (response, e) =>
+        internal static readonly Action<InstrumentResponse, EventHandler<IPublisher<Instrument>.ChangedEventArgs>,ILogger> _action = async (response, e,logger) =>
         {
             await Task.Run(() =>
            {
-               foreach (var data in response.Data)
+              var log = logger.ForContext<InstrumentPublisher>();
+               try
                {
-                   e?.Invoke(nameof(UserOrderPublisher), new(data, response.Action));
+                   foreach (var data in response.Data)
+                   {
+                        log.Information("Response : {@Response}", data);
+                       e?.Invoke(nameof(UserOrderPublisher), new(data, response.Action));
+                   }
+               }
+               catch(Exception e)
+               {
+                   log.Warning(e.Message);
+                   log.Warning(e.StackTrace);
                }
            });
         };
@@ -42,20 +54,22 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             }
         }
 
-        public async override Task Start()
+        public async override Task Start(ILogger logger)
         {
-            await SubscribeAsync(_token);
+            var log = logger.ForContext<InstrumentPublisher>();
+            await SubscribeAsync(_token,log);
         }
 
-        public async Task SubscribeAsync(CancellationToken token)
+        public async Task SubscribeAsync(CancellationToken token,ILogger logger)
         {
-            await base.SubscribeAsync(_request,_stream, token);
+            await base.SubscribeAsync(_request,_stream, token,logger);
 
         }
 
-        public async override Task Stop()
+        public async override Task Stop(ILogger logger)
         {
-            await UnSubscribeAsync(_request);
+            var log = logger.ForContext<InstrumentPublisher>();
+            await UnSubscribeAsync(_request,log);
         }
     }
 }

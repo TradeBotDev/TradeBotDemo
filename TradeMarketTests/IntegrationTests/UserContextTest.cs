@@ -107,14 +107,14 @@ namespace TradeMarketTests.IntegrationTests
             EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler2 = (sender, args) => { count2++; };
 
             //act
-            await context1.SubscribeToBook25UpdatesAsync(handler1, source1.Token);
-            await context2.SubscribeToBook25UpdatesAsync(handler2, source2.Token);
+            //await context1.SubscribeToBook25UpdatesAsync(handler1, source1.Token);
+            //await context2.SubscribeToBook25UpdatesAsync(handler2, source2.Token);
             await Task.Delay(1000);
             source1.Cancel();
-            await context1.UnSubscribeFromBook25UpdatesAsync(handler1);
+            //await context1.UnSubscribeFromBook25UpdatesAsync(handler1);
             await Task.Delay(5000);
             source2.Cancel();
-            await context2.UnSubscribeFromBook25UpdatesAsync(handler2);
+            //await context2.UnSubscribeFromBook25UpdatesAsync(handler2);
 
 
             //assert

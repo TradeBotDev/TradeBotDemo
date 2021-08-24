@@ -3,6 +3,7 @@ using Bitmex.Client.Websocket.Client;
 using Bitmex.Client.Websocket.Responses.Books;
 using Bitmex.Client.Websocket.Websockets;
 using Moq;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,12 +48,12 @@ namespace TradeMarketTests.IntegrationTests
             //act
             using (var reciever = communicator.MessageReceived.Subscribe(action))
             {
-                await context1.SubscribeToBook25UpdatesAsync(handler1, source1.Token);
+                //await context1.SubscribeToBook25UpdatesAsync(handler1, source1.Token,Log.Logger);
                 await Task.Delay(10_000);
                 source1.Cancel();
 
                 stoppedCount = count;
-                await context1.UnSubscribeFromBook25UpdatesAsync(handler1);
+                //await context1.UnSubscribeFromBook25UpdatesAsync(handler1,Log.Logger);
                 await Task.Delay(50_000);
             }
 

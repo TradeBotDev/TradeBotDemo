@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Prometheus;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -26,6 +27,9 @@ namespace TradeMarket
                .Enrich.FromLogContext()
                .CreateLogger()
                ;
+            var server = new MetricServer(hostname: "localhost", port: 6005);
+            server.Start();
+
             CreateHostBuilder(args).Build().Run();
         }
 

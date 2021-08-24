@@ -2,6 +2,7 @@
 using Bitmex.Client.Websocket.Requests;
 using Bitmex.Client.Websocket.Responses;
 using Bitmex.Client.Websocket.Responses.Positions;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,13 +14,22 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 {
     public class UserPositionPublisher : BitmexPublisher<PositionResponse,PositionSubscribeRequest,Position>
     {
-        internal static readonly Action<PositionResponse, EventHandler<IPublisher<Position>.ChangedEventArgs>> _action = async (response, e) =>
+        internal static readonly Action<PositionResponse, EventHandler<IPublisher<Position>.ChangedEventArgs>,ILogger> _action = async (response, e,logger) =>
         {
            await Task.Run(() =>
            {
-               foreach (var data in response.Data)
+               var log = logger.ForContext<UserPositionPublisher>();
+               try
                {
-                   e?.Invoke(nameof(UserOrderPublisher), new(data, response.Action));
+                   foreach (var data in response.Data)
+                   {
+                        log.Information("Response : {@Response}", data);
+                       e?.Invoke(nameof(UserOrderPublisher), new(data, response.Action));
+                   }
+               }catch(Exception e)
+               {
+                   log.Warning(e.Message);
+                   log.Warning(e.StackTrace);
                }
            });
         };
@@ -77,21 +87,23 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             }
          }
 
-        public async override Task Start()
+        public async override Task Start(ILogger logger)
         {
-            await SubscribeAsync(_token);
+            var log = logger.ForContext<UserPositionPublisher>();
+            await SubscribeAsync(_token,log);
         }
 
-        public async Task SubscribeAsync(CancellationToken token)
+        public async Task SubscribeAsync(CancellationToken token,ILogger logger)
         {
-            await base.SubscribeAsync(_request, _stream, token);
+            await base.SubscribeAsync(_request, _stream, token,logger);
 
         }
 
-        public async override Task Stop()
+        public async override Task Stop(ILogger logger)
         {
-            await UnSubscribeAsync(_request);
-            ClearCahce();
+            var log = logger.ForContext<UserPositionPublisher>();
+            await UnSubscribeAsync(_request,log);
+            ClearCahce(log);
         }
 
     }
