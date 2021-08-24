@@ -13,18 +13,19 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 {
     public class AuthenticationPublisher : BitmexPublisher<AuthenticationResponse, AuthenticationRequest, bool>
     {
-        internal static readonly Action<AuthenticationResponse, EventHandler<IPublisher<bool>.ChangedEventArgs>> _action = async (response, e) =>
+        internal static readonly Action<AuthenticationResponse, EventHandler<IPublisher<bool>.ChangedEventArgs>,ILogger> _action = async (response, e,logger) =>
         {
            await Task.Run(() =>
            {
+                var log = logger.ForContext<AuthenticationPublisher>();
                try
                {
-                   Log.Information("{ServiceName} Recieved Auth Response with code : {@Code} for operation {@op}", response.Success, response.Op);
-                   e?.Invoke(typeof(AuthenticationPublisher), new(response.Success, BitmexAction.Undefined));
+                    log.Information("Response : @{Response}", response);
+                    e?.Invoke(typeof(AuthenticationPublisher), new(response.Success, BitmexAction.Undefined));
                }catch(Exception e)
                {
-                   Log.Warning(e.Message);
-                   Log.Warning(e.StackTrace);
+                   log.Warning(e.Message);
+                   log.Warning(e.StackTrace);
                }
            });
         };
@@ -45,15 +46,14 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             this._token = token;
         }
 
-        public async override Task Start()
+        public async override Task Start(ILogger logger)
         {
-            await SubscribeAsync(_apiKey, _apiSecret, _token);
+            await SubscribeAsync(_apiKey, _apiSecret, _token,logger);
         }
 
-        public async Task SubscribeAsync(string apiKey, string apiSecret,  CancellationToken token)
+        public async Task SubscribeAsync(string apiKey, string apiSecret,  CancellationToken token,ILogger logger)
         {
-            Log.Information("Sending Auth Request for @{key} : {@secret}", apiKey, apiSecret);
-            await base.SubscribeAsync(new AuthenticationRequest(apiKey,apiSecret), _stream, token);
+            await base.SubscribeAsync(new AuthenticationRequest(apiKey,apiSecret), _stream, token,logger);
         }
 
         public override void AddModelToCache(AuthenticationResponse response)
@@ -64,9 +64,9 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             }
         }
 
-        public async override Task Stop()
+        public async override Task Stop(ILogger logger)
         {
-            await Task.Run(() => ClearCahce());
+            await Task.Run(() => ClearCahce(logger));
         }
     }
 }

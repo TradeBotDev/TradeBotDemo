@@ -1,4 +1,5 @@
 ﻿using Bitmex.Client.Websocket.Client;
+using Serilog;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -64,10 +65,10 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
             return this;
         }
 
-        public ITradeMarketBuilder ReadErrors(CancellationToken token)
+        public ITradeMarketBuilder ReadErrors(CancellationToken token,ILogger logger)
         {
             var errorPub = _tradeMarket.PublisherFactory.CreateErrorPublisher(_tradeMarket.CommonWSClient, null, token);
-            errorPub.Start();
+            errorPub.Start(logger);
             return this;
         }
 
@@ -76,10 +77,10 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
             _tradeMarket = new BitmexTradeMarket();
         }
 
-        public ITradeMarketBuilder StartPingPong(CancellationToken token)
+        public ITradeMarketBuilder StartPingPong(CancellationToken token,ILogger logger)
         {
             var pingPongPub = _tradeMarket.PublisherFactory.CreatePingPongPublisher(_tradeMarket.CommonWSClient, null, token);
-            pingPongPub.Start();
+            pingPongPub.Start(logger);
             return this;
         }
     }

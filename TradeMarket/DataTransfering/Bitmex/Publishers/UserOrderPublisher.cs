@@ -14,10 +14,11 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 {
     public class UserOrderPublisher : BitmexPublisher<OrderResponse,OrderSubscribeRequest,Order>
     {
-        internal static readonly Action<OrderResponse, EventHandler<IPublisher<Order>.ChangedEventArgs>> _action = async (response, e) =>
+        internal static readonly Action<OrderResponse, EventHandler<IPublisher<Order>.ChangedEventArgs>,ILogger> _action = async (response, e,logger) =>
         {
             await Task.Run(() =>
            {
+               var log = logger.ForContext<UserOrderPublisher>();
                try
                {
                    foreach (var data in response.Data)
@@ -28,13 +29,14 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
                        {
                            action = BitmexAction.Delete;
                        }
-                       Log.Information("User Order Recieved {@OrderId} {@OrderQuantity} @{OrderPrice} @{OrderAction}", data.OrderId, data.OrderQty, data.Price, action);
-                       e?.Invoke(typeof(UserOrderPublisher), new(data, action));
+                        log.Information("Response : {@Response}", data);
+                        log.Information("User Order Recieved {@OrderId} {@OrderQuantity} @{OrderPrice} @{OrderAction}", data.OrderId, data.OrderQty, data.Price, action);
+                        e?.Invoke(typeof(UserOrderPublisher), new(data, action));
                    }
                }catch(Exception e)
                {
-                   Log.Warning(e.Message);
-                   Log.Warning(e.StackTrace);
+                   log.Warning(e.Message);
+                   log.Warning(e.StackTrace);
                }
            });
         };
@@ -49,14 +51,15 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             this._token = token;
         }
 
-        public async override Task Start()
+        public async override Task Start(ILogger logger)
         {
-            await SubscribeAsync(_token);
+            var log = logger.ForContext<UserOrderPublisher>();
+            await SubscribeAsync(_token,log);
         }
 
-        public async Task SubscribeAsync(CancellationToken token)
+        public async Task SubscribeAsync(CancellationToken token,ILogger logger)
         {
-            await base.SubscribeAsync(_request, _stream, token);
+            await base.SubscribeAsync(_request, _stream, token,logger);
         }
 
         public override void AddModelToCache(OrderResponse response)
@@ -99,9 +102,10 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             }
         }
 
-        public async override Task Stop()
+        public async override Task Stop(ILogger logger)
         {
-            await UnSubscribeAsync(_request);
+            var log = logger.ForContext<UserOrderPublisher>();
+            await UnSubscribeAsync(_request,logger);
         }
     }
 }

@@ -11,19 +11,20 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 {
     public class ErrorPublisher : BitmexPublisher<ErrorResponse, RequestBase, string>
     {
-        internal static readonly Action<ErrorResponse, EventHandler<IPublisher<string>.ChangedEventArgs>> _action = async (response, e) =>
+        internal static readonly Action<ErrorResponse, EventHandler<IPublisher<string>.ChangedEventArgs>,ILogger> _action = async (response, e,logger) =>
         {
+            var log = logger.ForContext<ErrorPublisher>();
             await Task.Run(() =>
             {
                 try
                 {
-                    Log.Error("Error {@Error} from request {@Request}", response.Error, response.Request);
+                    log.Error("Error {@Error} from request {@Request}", response.Error, response.Request);
                     e?.Invoke(nameof(UserOrderPublisher), new(response.Error, BitmexAction.Insert));
                 }
                 catch (Exception e)
                 {
-                    Log.Warning(e.Message);
-                    Log.Warning(e.StackTrace);
+                    log.Warning(e.Message);
+                    log.Warning(e.StackTrace);
                 }
             });
         };
@@ -50,19 +51,21 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             }
         }
 
-        public async override Task Start()
+        public async override Task Start(ILogger logger)
         {
-            await SubscribeAsync(_token);
+            var log = logger.ForContext<ErrorPublisher>();
+            await SubscribeAsync(_token,log);
         }
 
-        public async override Task Stop()
+        public async override Task Stop(ILogger logger)
         {
-            ClearCahce();
+            var log = logger.ForContext<ErrorPublisher>();
+            ClearCahce(log);
         }
 
-        public async Task SubscribeAsync(CancellationToken token)
+        public async Task SubscribeAsync(CancellationToken token,ILogger logger)
         {
-            await base.SubscribeAsync(null,_stream, token);
+            await base.SubscribeAsync(null,_stream, token,logger);
         }
 
     }

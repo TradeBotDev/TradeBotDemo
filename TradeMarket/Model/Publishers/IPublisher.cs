@@ -1,4 +1,5 @@
 ﻿using Bitmex.Client.Websocket.Responses;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,8 +30,8 @@ namespace TradeMarket.Model.Publishers
 
         public int SubscribersCount { get; }
 
-        public Task Start();
+        public Task Start(ILogger logger);
 
-        public Task Stop();
+        public Task Stop(ILogger logger);
     }
 }

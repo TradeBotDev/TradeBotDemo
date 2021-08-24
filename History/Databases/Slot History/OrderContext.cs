@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +10,10 @@ namespace History.Databases.Slot_History
     public class OrderContext : DbContext
     {
         public DbSet<Order> SlotHistory { get; set; }
-
+        
         public OrderContext()
         {
-            Database.EnsureCreated();
+            Database.EnsureCreated();           
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
