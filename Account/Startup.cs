@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,11 +15,16 @@ namespace AccountGRPC
     {
         public Startup()
         {
+            // Получение данных из файла appsettings.json.
+            var configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: false)
+                .Build();
+
             // Добавление нового логгера, который будет выводить всю информацию в консоль.
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
-                .WriteTo.Seq("http://localhost:5341")
+                .WriteTo.Seq(configuration.GetConnectionString("Seq"))
                 .CreateLogger();
         }
 
