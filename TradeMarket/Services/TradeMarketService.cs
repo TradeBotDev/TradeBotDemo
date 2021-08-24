@@ -25,9 +25,12 @@ namespace TradeMarket.Services
     {
         private readonly ContextDirector _director;
 
+        private ILogger _logger;
+
         public TradeMarketService(ContextDirector director)
         {
             this._director = director;
+            _logger = Log.ForContext("Where", "TradeMarketService");
         }
 
         #region Helpers
@@ -110,18 +113,18 @@ namespace TradeMarket.Services
         /// <summary>
         /// Записывает в переданный поток ответы на запрос клиента
         /// </summary>
-        private async Task WriteStreamAsync<TResponse>(IServerStreamWriter<TResponse> stream, TResponse response) where TResponse : IMessage<TResponse>
+        private async Task WriteStreamAsync<TResponse>(IServerStreamWriter<TResponse> stream, TResponse response,ILogger logger) where TResponse : IMessage<TResponse>
         {
             try
             {
-                Log.Information("Sent message {@message}", response);
+                logger.Information("Sent message {@message}", response);
                 await stream.WriteAsync(response);
-                Log.Information("Message sent succesful");
+                logger.Information("Message sent succesful");
             }
             catch
             {
                 //TODO что делать когда разорвется соеденение ?
-                Log.Logger.Error("Connection was interrupted by network services.");
+                logger.Error("Connection was interrupted by network services.");
                 throw;
             }
         }
@@ -148,7 +151,7 @@ namespace TradeMarket.Services
                 {
                     try
                     {
-                        WriteStreamAsync(responseStream, response).Wait();
+                        WriteStreamAsync(responseStream, response,log).Wait();
                     }
                     catch
                     {
@@ -208,7 +211,7 @@ namespace TradeMarket.Services
         /// </summary>
         public async override Task<TradeBot.TradeMarket.TradeMarketService.v1.PlaceOrderResponse> PlaceOrder(TradeBot.TradeMarket.TradeMarketService.v1.PlaceOrderRequest request, ServerCallContext context)
         {
-            var logger = Log.
+            var logger = _logger.
                    ForContext<TradeMarketService>().
                    ForContext("RPC Method", context.Method).
                    ForContext("RequestId", Guid.NewGuid().ToString()).
@@ -256,7 +259,7 @@ namespace TradeMarket.Services
         /// </summary>
         public async override Task<TradeBot.TradeMarket.TradeMarketService.v1.AmmendOrderResponse> AmmendOrder(TradeBot.TradeMarket.TradeMarketService.v1.AmmendOrderRequest request, ServerCallContext context)
         {
-            var logger = Log.
+            var logger = _logger.
                    ForContext<TradeMarketService>().
                    ForContext("RPC Method", context.Method).
                    ForContext("RequestId", Guid.NewGuid().ToString()).
@@ -317,7 +320,7 @@ namespace TradeMarket.Services
         /// </summary>
         public async override Task<DeleteOrderResponse> DeleteOrder(DeleteOrderRequest request, ServerCallContext context)
         {
-            var logger = Log.
+            var logger = _logger.
                    ForContext<TradeMarketService>().
                    ForContext("RPC Method", context.Method).
                    ForContext("RequestId", Guid.NewGuid().ToString()).
@@ -343,7 +346,7 @@ namespace TradeMarket.Services
             catch (Exception e)
             {
                 //записываем ошибку в логер
-                Log.Logger.Error(e.Message);
+                logger.Error(e.Message);
                 //ставим статус "Отменен" в заголовке ответа
                 context.Status = Status.DefaultCancelled;
             }
@@ -365,7 +368,7 @@ namespace TradeMarket.Services
         public async override Task SubscribePrice(SubscribePriceRequest request, IServerStreamWriter<SubscribePriceResponse> responseStream, ServerCallContext context)
         {
 
-            var logger = Log.
+            var logger = _logger.
                 ForContext<TradeMarketService>().
                 ForContext("RPC Method", context.Method).
                 ForContext("RequestId", Guid.NewGuid().ToString()).
@@ -391,7 +394,7 @@ namespace TradeMarket.Services
         public async override Task SubscribeMargin(SubscribeMarginRequest request, IServerStreamWriter<SubscribeMarginResponse> responseStream, ServerCallContext context)
         {
 
-            var logger = Log.
+            var logger = _logger.
                 ForContext<TradeMarketService>().
                 ForContext("RPC Method", context.Method).
                 ForContext("RequestId", Guid.NewGuid().ToString()).
@@ -417,7 +420,7 @@ namespace TradeMarket.Services
 
         public async override Task SubscribePosition(SubscribePositionRequest request, IServerStreamWriter<SubscribePositionResponse> responseStream, ServerCallContext context)
         {
-            var logger = Log.
+            var logger = _logger.
                ForContext<TradeMarketService>().
                ForContext("RPC Method", context.Method).
                ForContext("RequestId", Guid.NewGuid().ToString()).
@@ -441,7 +444,7 @@ namespace TradeMarket.Services
 
         public async override Task SubscribeMyOrders(SubscribeMyOrdersRequest request, IServerStreamWriter<SubscribeMyOrdersResponse> responseStream, ServerCallContext context)
         {
-            var logger = Log.
+            var logger = _logger.
                ForContext<TradeMarketService>().
                ForContext("RPC Method", context.Method).
                ForContext("RequestId", Guid.NewGuid().ToString()).
@@ -470,7 +473,7 @@ namespace TradeMarket.Services
         /// </summary>
         public override async Task SubscribeOrders(TradeBot.TradeMarket.TradeMarketService.v1.SubscribeOrdersRequest request, IServerStreamWriter<SubscribeOrdersResponse> responseStream, ServerCallContext context)
         {
-            var logger = Log.
+            var logger = _logger.
                    ForContext<TradeMarketService>().
                    ForContext("RPC Method", context.Method).
                    ForContext("RequestId", Guid.NewGuid().ToString()).
@@ -496,7 +499,7 @@ namespace TradeMarket.Services
         /// </summary>
         public async override Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<SubscribeBalanceResponse> responseStream, ServerCallContext context)
         {
-            var logger = Log.
+            var logger = _logger.
                   ForContext<TradeMarketService>().
                   ForContext("RPC Method", context.Method).
                   ForContext("RequestId", Guid.NewGuid().ToString()).
