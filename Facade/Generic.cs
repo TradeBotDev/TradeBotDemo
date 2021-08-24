@@ -16,12 +16,12 @@ namespace Facade
         {
             try
             {
-                Log.Information("{@Where}: {@MethodName} \n args: response: {@response}", "Facade", methodName,message);
-                return await Task<T>.FromResult((T)message);
+                Log.Information("{@Where}: {@MethodName} \n args: response: {@response}\n", "Facade", methodName,message);
+                return await Task.FromResult((T)message);
             }
             catch (Exception e)
             {
-                Log.Error("{@Where}: {@MethodName}-Exception: {@Exception}", "Facade", methodName, e);
+                Log.Error("{@Where}: {@MethodName}-Exception: {@Exception}\n", "Facade", methodName, e);
                 throw;
             }
         }
@@ -37,20 +37,20 @@ namespace Facade
             {
                 while (await request.ResponseStream.MoveNext(context.CancellationToken))
                 {
-                    Log.Information("{@Where}: {@MethodName} \n args: response={@response}", "Facade", methodName, request.ResponseStream.Current);
+                    Log.Information("{@Where}: {@MethodName} \n args: response={@response}\n", "Facade", methodName, request.ResponseStream.Current);
 
                     await responseStream.WriteAsync((TResponse)message);
                 }
             }
             catch (Exception e)
             {
-                Log.Information("{@Where}: {@MethodName}-Exception: {@Exception}", "Facade", methodName, e.Message);
+                Log.Information("{@Where}: {@MethodName}-Exception: {@Exception}\n", "Facade", methodName, e.Message);
                 throw;
             }
         }
         public static async Task ConnectionTester<TRequest>(Func<Task> func, string methodName, IMessage<TRequest> request=null) where TRequest: IMessage<TRequest>
         {
-            Log.Information("{@Where}: {@MethodName} \n args: response={@response}", "Facade", methodName, request);
+            Log.Information("{@Where}: {@MethodName} \n args: request={@response}\n", "Facade", methodName, request);
             while (true)
             {
                 try
@@ -61,7 +61,7 @@ namespace Facade
                 catch (RpcException e)
                 {
                     if (e.StatusCode == StatusCode.Cancelled) break;
-                    Log.Error("{@Where}: Error {@ExceptionMessage}. Retrying...\r\n{@ExceptionStackTrace}", "Facade", e.Message, e.StackTrace);
+                    Log.Error("{@Where}: Error {@ExceptionMessage}. Retrying...\r\n{@ExceptionStackTrace}\n", "Facade", e.Message, e.StackTrace);
                     Thread.Sleep(5000);
                 }
             }
