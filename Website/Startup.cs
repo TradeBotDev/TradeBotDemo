@@ -1,7 +1,9 @@
+п»їusing System;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -13,13 +15,19 @@ namespace Website
 	{
 		public Startup(IConfiguration configuration)
 		{
-			// Добавление нового логгера, который будет выводить всю информацию в консоль.
 			Configuration = configuration;
+
+			// РџРѕР»СѓС‡РµРЅРёРµ СЃС‚СЂРѕРєРё РїРѕРґРєР»СЋС‡РµРЅРёСЏ Рє Seq.
+			string seqConnection = Environment.GetEnvironmentVariable("SEQ_CONNECTION_STRING");
+			if (seqConnection == null)
+				seqConnection = Configuration.GetConnectionString("Seq");
+
+			// Р”РѕР±Р°РІР»РµРЅРёРµ РЅРѕРІРѕРіРѕ Р»РѕРіРіРµСЂР°, РєРѕС‚РѕСЂС‹Р№ Р±СѓРґРµС‚ РІС‹РІРѕРґРёС‚СЊ РІСЃСЋ РёРЅС„РѕСЂРјР°С†РёСЋ РІ РєРѕРЅСЃРѕР»СЊ.
 			Log.Logger = new LoggerConfiguration()
 				.Enrich.FromLogContext()
 				.MinimumLevel.Debug()
 				.WriteTo.Console()
-				.WriteTo.Seq("http://localhost:5341")
+				.WriteTo.Seq(seqConnection)
 				.CreateLogger();
 		}
 

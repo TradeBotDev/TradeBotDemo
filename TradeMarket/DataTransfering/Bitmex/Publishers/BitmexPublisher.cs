@@ -38,7 +38,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         public List<TModel> Cache { get{ lock (locker) { return new(_cache); } }  set => _cache = value; }
 
-        public bool IsWorking { get; internal set; } = false;
+        public bool IsWorking { get; protected set; } = false;
 
         public int SubscribersCount => Changed is not null ? Changed.GetInvocationList().Length : 0;
 
@@ -75,9 +75,11 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         protected async Task UnSubscribeAsync<T>(T request) where T : SubscribeRequestBase 
         {
-            Log.Information("Unsubscribing from topic {@Topic}", request.Topic);
+            Log.Information("Sending unsubscribe request with topic {@Topic}", request.Topic);
             await Task.Run(() => _client.Send(CreateUnsubsscribeReqiest(request)));
-            Log.Information("Successfully unsubscribed from topic {@Topic}", request.Topic);
+            //Log.Information("Successfully unsubscribed from topic {@Topic}", request.Topic);
+            cancellationTokenSource.Cancel();
+            cancellationTokenSource = new CancellationTokenSource();
             IsWorking = false;
         }
         protected async Task SubscribeAsync(TRequest request, IObservable<TResponse> stream, CancellationToken token)
@@ -85,14 +87,21 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
            //TODO убрать отсюда токен
            await Task.Run(() =>
            {
-               if (request is not null)
+               try
                {
-                   Log.Information("Subscribing For topic {@Topic}", request is SubscribeRequestBase ? (request as SubscribeRequestBase).Topic : request.OperationString);
-               }
-               IsWorking = true;
-               stream.Subscribe(responseAction, cancellationTokenSource.Token);
+                   if (request is not null)
+                   {
+                       Log.Information("Subscribing For topic {@Topic}", request is SubscribeRequestBase ? (request as SubscribeRequestBase).Topic : request.OperationString);
+                   }
+                   IsWorking = true;
+                   stream.Subscribe(responseAction, cancellationTokenSource.Token);
 
-               if (request is not null) _client.Send(request);
+                   if (request is not null) _client.Send(request);
+               }
+               catch
+               {
+                   throw;
+               }
            });
         }
 

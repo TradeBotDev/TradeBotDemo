@@ -33,7 +33,7 @@ namespace Relay.Model
             _tradeMarketClient = tradeMarketClient;
             
             _algorithmStream = _algorithmClient.OpenStream(meta);
-            _tradeMarketStream = _tradeMarketClient.OpenStream(meta);
+            //_tradeMarketStream = _tradeMarketClient.OpenStream(meta);
             _tradeMarketClient.OrderRecievedEvent += _tradeMarketClient_OrderRecievedEvent;
         }
         public IAsyncStreamReader<SubscribeOrdersResponse> ReConnect()

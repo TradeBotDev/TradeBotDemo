@@ -53,6 +53,7 @@ services:
       ACCOUNT_CONNECTION_STRING: "http://host.docker.internal:5000"
       ASPNETCORE_ENVIRONMENT: "Development"
       REDIS_CONNECTION_STRING: "host.docker.internal:6379"
+      SEQ_CONNTECTION_STRING: "http://host.docker.internal:5341"
   facade:
     image: facade
     container_name: facadecontainer

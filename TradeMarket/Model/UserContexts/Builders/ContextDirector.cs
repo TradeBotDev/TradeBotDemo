@@ -44,6 +44,14 @@ namespace TradeMarket.Model.UserContexts.Builders
 
         private delegate Task<UserContext> BuildContextDeligate(string sessionId,string slotName,string tradeMarketName,CancellationToken token);
 
+        internal BitmexWebsocketClient CreateWebsocketClient()
+        {
+            var communicator = new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketTestnetUrl);
+            var res = new BitmexWebsocketClient(communicator);
+            communicator.Start();
+            return res;
+        }
+
         internal async Task<UserContext> BuildUserContextAsync(string sessionId, string slotName, string tradeMarketName,CancellationToken token)
         {
             return await Task.Run(async () =>
@@ -53,7 +61,7 @@ namespace TradeMarket.Model.UserContexts.Builders
                 var userContextBuilder = new UserContextBuilder(_builder);
                 userContextBuilder
                 .AddKeySecret(key:keySecretPair.Key,secret: keySecretPair.Secret)
-                .AddWebSocketClient(_commonWSClient)
+                .AddWebSocketClient(CreateWebsocketClient())
                 .AddTradeMarket(_tradeMarketFactory.GetTradeMarket(tradeMarketName));
                 return await userContextBuilder.InitUser(token);
             });
@@ -102,7 +110,7 @@ namespace TradeMarket.Model.UserContexts.Builders
             {
                 return await userContext.AutharizationCompleted.Task;
             }
-            catch (Exception e)
+            catch
             {
                 RegisteredUserContexts.Remove(userContext);
                 throw;

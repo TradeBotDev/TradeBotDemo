@@ -24,10 +24,6 @@ namespace TradeMarket
             _logger = logger;
         }
 
-        private async Task SomeTask()
-        {
-
-        }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -36,7 +32,6 @@ namespace TradeMarket
             AccountClient._accountClient = _account;
             _factory.SubscribeToLifeLineTopics(_factory.GetTradeMarket("bitmex") as BitmexTradeMarket, stoppingToken);
 
-            await SomeTask();
             while (!stoppingToken.IsCancellationRequested)
             {
 

@@ -24,7 +24,7 @@ namespace Website.Controllers.Clients
 					.AddJsonFile("appsettings.json", optional: false)
 					.Build();
 				// Получение адреса Facade из appsettings.json и возврат результата.
-				return GrpcChannel.ForAddress(configuration.GetSection("GrpcClients")["FacadeService"]);
+				return GrpcChannel.ForAddress(configuration.GetConnectionString("FacadeService"));
 			}
 			// Иначе используется он.
 			else return GrpcChannel.ForAddress(connectionString);

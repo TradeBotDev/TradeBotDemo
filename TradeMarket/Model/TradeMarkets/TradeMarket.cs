@@ -61,6 +61,7 @@ namespace TradeMarket.Model.TradeMarkets
             return await Task.Run(() =>
             {
                 var publisher = create(client, context,token);
+                Log.Information("Created {@Publisher} for {@Context}", publisher,context);
                 return publisher;
             });
         }
@@ -74,19 +75,21 @@ namespace TradeMarket.Model.TradeMarkets
             {
                 await publisher.Start();
             }
-            Log.Information("Added Handler {@Handler} for Publisher {@PublisherName} ",handler,publisher);
             publisher.Changed += handler;
+            Log.Information("Added Handler {@Handler} for Publisher {@Publisher} ", handler, publisher);
             return publisher.Cache;
         }
 
         public async Task<List<T>> SubscribeTo<T>(BitmexWebsocketClient client,IDictionary<IContext,IPublisher<T>> publisher, EventHandler<IPublisher<T>.ChangedEventArgs> handler, IContext context, IPublisherFactory.Create<T> create,CancellationToken token)
         {
+            var log = Log.ForContext("@PublisherDictionary", publisher);
+            log.Information("Subscribing");
             if(publisher.ContainsKey(context) == false)
             {
+                log.Information("Creatung publisher for {@Context} ",context);
                 publisher[context] = await CreatePublisher(client, context, token, create);
-                await publisher[context].Start();
             }
-            return await SubscribeTo(client, publisher[context],handler, context, token);
+            return await SubscribeTo(client, publisher[context], handler, context, token);
         }
 
         public IDictionary<IContext, IPublisher<Wallet>> WalletPublishers { get; internal set; } = new ConcurrentDictionary<IContext, IPublisher<Wallet>>();

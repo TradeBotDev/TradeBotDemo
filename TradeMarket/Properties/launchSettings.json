@@ -15,7 +15,8 @@
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
       "environmentVariables": {
         "ACCOUNT_CONNECTION_STRING": "http://localhost:5000",
-        "REDIS_CONNECTION_STRING": "localhost:6379"
+        "REDIS_CONNECTION_STRING": "localhost:6379",
+        "SEQ_CONNTECTION_STRING": "http://localhost:5341"
       },
       "publishAllPorts": true
     }
