@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -17,12 +17,12 @@ namespace Website
 		{
 			Configuration = configuration;
 
-			// Получение строки подключения к Seq.
+			// РџРѕР»СѓС‡РµРЅРёРµ СЃС‚СЂРѕРєРё РїРѕРґРєР»СЋС‡РµРЅРёСЏ Рє Seq.
 			string seqConnection = Environment.GetEnvironmentVariable("SEQ_CONNECTION_STRING");
 			if (seqConnection == null)
 				seqConnection = Configuration.GetConnectionString("Seq");
 
-			// Добавление нового логгера, который будет выводить всю информацию в консоль.
+			// Р”РѕР±Р°РІР»РµРЅРёРµ РЅРѕРІРѕРіРѕ Р»РѕРіРіРµСЂР°, РєРѕС‚РѕСЂС‹Р№ Р±СѓРґРµС‚ РІС‹РІРѕРґРёС‚СЊ РІСЃСЋ РёРЅС„РѕСЂРјР°С†РёСЋ РІ РєРѕРЅСЃРѕР»СЊ.
 			Log.Logger = new LoggerConfiguration()
 				.Enrich.FromLogContext()
 				.MinimumLevel.Debug()
