@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Serilog;
 using TradeMarket.Model.Publishers;
 
 namespace TradeMarket.DataTransfering.Bitmex.Publishers
