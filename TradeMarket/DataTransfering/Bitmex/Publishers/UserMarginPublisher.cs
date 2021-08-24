@@ -13,21 +13,23 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 {
     public class UserMarginPublisher : BitmexPublisher<MarginResponse,MarginSubscribeRequest, Margin>
     {
-        internal static readonly Action<MarginResponse, EventHandler<IPublisher<Margin>.ChangedEventArgs>> _action = async (response, e) =>
+        internal static readonly Action<MarginResponse, EventHandler<IPublisher<Margin>.ChangedEventArgs>,ILogger> _action = async (response, e,logger) =>
         {
             await Task.Run(() =>
             {
+                var log = logger.ForContext<UserMarginPublisher>();
                 try
                 {
                     foreach (var data in response.Data)
                     {
+                        log.Information("Response : {@Response}", data);
                         e?.Invoke(nameof(UserOrderPublisher), new(data, response.Action));
                     }
                 }
                 catch(Exception e)
                 {
-                    Log.Warning(e.Message);
-                    Log.Warning(e.StackTrace);
+                    log.Warning(e.Message);
+                    log.Warning(e.StackTrace);
                 }
             });
         };
@@ -42,14 +44,15 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             this._token = token;
         }
 
-        public async override Task Start()
+        public async override Task Start(ILogger logger)
         {
-            await SubscribeAsync(_token);
+            var log = logger.ForContext<UserMarginPublisher>();
+            await SubscribeAsync(_token,log);
         }
 
-        public async Task SubscribeAsync(CancellationToken token)
+        public async Task SubscribeAsync(CancellationToken token,ILogger logger)
         {
-            await base.SubscribeAsync(_request, _stream, token);
+            await base.SubscribeAsync(_request, _stream, token,logger);
 
         }
 
@@ -72,10 +75,11 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             }
         }
 
-        public async override Task Stop()
+        public async override Task Stop(ILogger logger)
         {
-            await UnSubscribeAsync(_request);
-            ClearCahce();
+            var log = logger.ForContext<UserMarginPublisher>();
+            await UnSubscribeAsync(_request,log);
+            ClearCahce(log);
         }
     }
 }

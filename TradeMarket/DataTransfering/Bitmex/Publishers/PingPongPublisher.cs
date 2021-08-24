@@ -11,19 +11,23 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 {
     public class PingPongPublisher : BitmexPublisher< PongResponse, PingRequest, string>
     {
-        internal static readonly Action<PongResponse, EventHandler<IPublisher<string>.ChangedEventArgs>> _action = async (response, e) =>
+        internal static readonly Action<PongResponse, EventHandler<IPublisher<string>.ChangedEventArgs>,ILogger> _action = async (response, e,logger) =>
         {
             await Task.Run(() =>
             {
+                var log = logger.ForContext<PingPongPublisher>();
+                
                 try
                 {
+                log.Information("Response : {@Response}", response);
+
                     e?.Invoke(nameof(UserOrderPublisher), new(response.Message, BitmexAction.Insert));
 
                 }
                 catch (Exception e)
                 {
-                    Log.Warning(e.Message);
-                    Log.Warning(e.StackTrace);
+                    log.Warning(e.Message);
+                    log.Warning(e.StackTrace);
                 } 
             });
         };
@@ -37,17 +41,20 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             this._token = token;
         }
 
-        public async override Task Start()
+        public async override Task Start(ILogger logger)
         {
-            await SubscribeAsync( _token);
+            var log = logger.ForContext<PingPongPublisher>();
+            await SubscribeAsync( _token,log);
         }
 
-        public async Task SubscribeAsync(CancellationToken token)
+        public async Task SubscribeAsync(CancellationToken token,ILogger logger)
         {
-            await base.SubscribeAsync(null, _stream, token);
+            var log = logger.ForContext("Method", nameof(SubscribeAsync));
+            await base.SubscribeAsync(null, _stream, token,logger);
             while (!token.IsCancellationRequested)
             {
                 await Task.Delay(5_000);
+                log.Information("Ping");
                 base._client.Send(new PingRequest());
             }
 
@@ -61,9 +68,10 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             }
         }
 
-        public async override Task Stop()
+        public async override Task Stop(ILogger logger)
         {
-            ClearCahce();
+            var log = logger.ForContext<PingPongPublisher>();
+            ClearCahce(log);
         }
     }
 }

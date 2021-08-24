@@ -23,7 +23,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         /// Действие которое выполняет при поступлении новых данных с биржи
         /// </summary>
         //public для тестов ((
-        public readonly Action<TResponse, EventHandler<IPublisher<TModel>.ChangedEventArgs>> _onNext;
+        public readonly Action<TResponse, EventHandler<IPublisher<TModel>.ChangedEventArgs>,ILogger> _onNext;
 
         public event EventHandler<IPublisher<TModel>.ChangedEventArgs> Changed;
 
@@ -42,27 +42,22 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         public int SubscribersCount => Changed is not null ? Changed.GetInvocationList().Length : 0;
 
-        public BitmexPublisher(BitmexWebsocketClient client,Action<TResponse, EventHandler<IPublisher<TModel>.ChangedEventArgs>> action)
+        public BitmexPublisher(BitmexWebsocketClient client,Action<TResponse, EventHandler<IPublisher<TModel>.ChangedEventArgs>,ILogger> action)
         {
             _client = client;
             _onNext = action;
             Cache = new();
         }
 
-        protected void ClearCahce()
+        protected void ClearCahce(ILogger logger)
         {
+            var log = logger.ForContext("Method", nameof(ClearCahce));
             lock (locker)
             {
                 _cache.Clear();
             }
         }
-        private void responseAction(TResponse response)
-        {
-            Log.Information("Adding Response {@Response} to Cache", response);
-            AddModelToCache(response);
-            Log.Information("Invoking Event with response {@Response}", response);
-            _onNext.Invoke(response, Changed);
-        }
+        
 
         public abstract void AddModelToCache(TResponse response);
 
@@ -73,40 +68,49 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         }
 
 
-        protected async Task UnSubscribeAsync<T>(T request) where T : SubscribeRequestBase 
+        protected async Task UnSubscribeAsync<T>(T request, ILogger logger) where T : SubscribeRequestBase 
         {
-            Log.Information("Sending unsubscribe request with topic {@Topic}", request.Topic);
+            var log = logger.ForContext<BitmexPublisher<TResponse, TRequest, TModel>>().ForContext("Method", nameof(UnSubscribeAsync));
+            log.Information("Sending unsubscribe request");
             await Task.Run(() => _client.Send(CreateUnsubsscribeReqiest(request)));
             //Log.Information("Successfully unsubscribed from topic {@Topic}", request.Topic);
             cancellationTokenSource.Cancel();
             cancellationTokenSource = new CancellationTokenSource();
             IsWorking = false;
         }
-        protected async Task SubscribeAsync(TRequest request, IObservable<TResponse> stream, CancellationToken token)
+        protected async Task SubscribeAsync(TRequest request, IObservable<TResponse> stream, CancellationToken token, ILogger logger)
         {
-           //TODO убрать отсюда токен
-           await Task.Run(() =>
+            //TODO убрать отсюда токен
+            var log = logger.ForContext<BitmexPublisher<TResponse, TRequest, TModel>>().ForContext("Method",nameof(SubscribeAsync));
+
+            void responseAction(TResponse response)
+            {
+                log.Information("Adding Response to Cache", response);
+                AddModelToCache(response);
+                log.Information("Invoking Event with response ", response);
+                _onNext.Invoke(response, Changed,log);
+            }
+
+            await Task.Run(() =>
            {
                try
                {
-                   if (request is not null)
-                   {
-                       Log.Information("Subscribing For topic {@Topic}", request is SubscribeRequestBase ? (request as SubscribeRequestBase).Topic : request.OperationString);
-                   }
                    IsWorking = true;
                    stream.Subscribe(responseAction, cancellationTokenSource.Token);
+                   log.Information("Subscribed");
 
                    if (request is not null) _client.Send(request);
                }
                catch
                {
+                   log.Error("Exception Catched");
                    throw;
                }
            });
         }
 
-        public abstract Task Start();
+        public abstract Task Start(ILogger logger);
 
-        public abstract Task Stop();
+        public abstract Task Stop(ILogger logger);
     }
 }

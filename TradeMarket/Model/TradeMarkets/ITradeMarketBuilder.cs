@@ -1,4 +1,5 @@
 ﻿using Bitmex.Client.Websocket.Client;
+using Serilog;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -22,9 +23,9 @@ namespace TradeMarket.Model.TradeMarkets
 
         public ITradeMarketBuilder AddConnectionMultiplexer(IConnectionMultiplexer multiplexer);
 
-        public ITradeMarketBuilder StartPingPong(CancellationToken token);
+        public ITradeMarketBuilder StartPingPong(CancellationToken token,ILogger logger);
 
-        public ITradeMarketBuilder ReadErrors(CancellationToken token);
+        public ITradeMarketBuilder ReadErrors(CancellationToken token, ILogger logger);
 
         public void Reset();
 

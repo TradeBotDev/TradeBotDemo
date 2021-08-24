@@ -1,4 +1,5 @@
 ﻿using Bitmex.Client.Websocket.Client;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,9 +47,10 @@ namespace TradeMarket.Model.UserContexts.Builders
             return this;
         }
 
-        public async Task<UserContext> InitUser(CancellationToken token)
+        public async Task<UserContext> InitUser(CancellationToken token,ILogger logger)
         {
-            if(await Context.AutheticateUser(token) == false)
+            var log = logger.ForContext<UserContextBuilder>().ForContext("Method", nameof(InitUser));
+            if(await Context.AutheticateUser(token,logger) == false)
             {
                 throw new WrongKeySecretException($"{Context.Signature.SessionId} contains not real key secret");
             }

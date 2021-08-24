@@ -65,31 +65,39 @@ namespace TradeMarket.Model.TradeMarkets
                 return publisher;
             });
         }
-        public async Task<List<T>> SubscribeTo<T>(BitmexWebsocketClient client,IPublisher<T> publisher,EventHandler<IPublisher<T>.ChangedEventArgs> handler,IContext context,CancellationToken token)
+        public async Task<List<T>> SubscribeTo<T>(BitmexWebsocketClient client,IPublisher<T> publisher,EventHandler<IPublisher<T>.ChangedEventArgs> handler,IContext context,CancellationToken token, ILogger logger)
         {
+            var log = logger;
             if(publisher is null)
             {
                 throw new ArgumentException($"Publisher {nameof(publisher)} was null.");
             }
             if(publisher.IsWorking == false)
             {
-                await publisher.Start();
+                await publisher.Start(log);
             }
             publisher.Changed += handler;
-            Log.Information("Added Handler {@Handler} for Publisher {@Publisher} ", handler, publisher);
+            log.Information("Added Handler for Publisher", handler, publisher);
             return publisher.Cache;
         }
 
-        public async Task<List<T>> SubscribeTo<T>(BitmexWebsocketClient client,IDictionary<IContext,IPublisher<T>> publisher, EventHandler<IPublisher<T>.ChangedEventArgs> handler, IContext context, IPublisherFactory.Create<T> create,CancellationToken token)
+        public async Task<List<T>> SubscribeTo<T>(
+            BitmexWebsocketClient client,
+            IDictionary<IContext,IPublisher<T>> publisher, 
+            EventHandler<IPublisher<T>.ChangedEventArgs> handler, 
+            IContext context, 
+            IPublisherFactory.Create<T> create,
+            CancellationToken token, 
+            ILogger logger)
         {
-            var log = Log.ForContext("@PublisherDictionary", publisher);
+            var log = logger;
             log.Information("Subscribing");
             if(publisher.ContainsKey(context) == false)
             {
-                log.Information("Creatung publisher for {@Context} ",context);
+                log.Information("Creatung publisher");
                 publisher[context] = await CreatePublisher(client, context, token, create);
             }
-            return await SubscribeTo(client, publisher[context], handler, context, token);
+            return await SubscribeTo(client, publisher[context], handler, context, token,log);
         }
 
         public IDictionary<IContext, IPublisher<Wallet>> WalletPublishers { get; internal set; } = new ConcurrentDictionary<IContext, IPublisher<Wallet>>();
@@ -101,66 +109,73 @@ namespace TradeMarket.Model.TradeMarkets
 
         #region Subscribe Methods
         #region Common Subscriptions
-        public abstract Task<List<BookLevel>> SubscribeToBook25(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, IContext context, CancellationToken token);
-        public abstract Task<List<Instrument>> SubscribeToInstruments(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler, IContext context, CancellationToken token);
+        public abstract Task<List<BookLevel>> SubscribeToBook25(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, IContext context, CancellationToken token, ILogger logger);
+        public abstract Task<List<Instrument>> SubscribeToInstruments(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler, IContext context, CancellationToken token, ILogger logger);
         #endregion
         #region User Subscriptions
-        public abstract Task<List<Position>> SubscribeToUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, UserContext context, CancellationToken token);
-        public abstract Task<List<Margin>> SubscribeToUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, UserContext context, CancellationToken token);
-        public abstract Task<List<Order>> SubscribeToUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, UserContext context, CancellationToken token);
-        public abstract Task<List<Wallet>> SubscribeToBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, UserContext context, CancellationToken token);
+        public abstract Task<List<Position>> SubscribeToUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, UserContext context, CancellationToken token, ILogger logger);
+        public abstract Task<List<Margin>> SubscribeToUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, UserContext context, CancellationToken token, ILogger logger);
+        public abstract Task<List<Order>> SubscribeToUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, UserContext context, CancellationToken token, ILogger logger);
+        public abstract Task<List<Wallet>> SubscribeToBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, UserContext context, CancellationToken token, ILogger logger);
         #endregion
         #endregion
 
         #region Unsubscribe Methods
-        public async Task UnsubscribeFrom<T>(IPublisher<T> publisher, EventHandler<IPublisher<T>.ChangedEventArgs> handler)
+        public async Task UnsubscribeFrom<T>(IPublisher<T> publisher, EventHandler<IPublisher<T>.ChangedEventArgs> handler, ILogger logger)
         {
             await Task.Run(() =>
-           {
-               if (publisher is not null)
-               {
-                   publisher.Changed -= handler;
-               }
+            {
+                var log = logger; 
+                if (publisher is not null)
+                {
+                    log.Information("Removing Handler");
+                    publisher.Changed -= handler;
+                }
            });
         }
-        public async Task UnsubscribeFrom<T>(IDictionary<IContext, IPublisher<T>> publisher,IContext context , EventHandler<IPublisher<T>.ChangedEventArgs> handler)
+        public async Task UnsubscribeFrom<T>(IDictionary<IContext, IPublisher<T>> publisher,IContext context , EventHandler<IPublisher<T>.ChangedEventArgs> handler, ILogger logger)
         {
             await Task.Run(async () =>
             {
                 var contextPublisher = publisher.ContainsKey(context) ? publisher[context] : null;
-                Log.Information("Unsubscribing {@PublisherDictionary} {@Publisher}", publisher, contextPublisher);
-                await UnsubscribeFrom(contextPublisher, handler);
+                var log = logger
+                    .ForContext("Method", nameof(UnsubscribeFrom))
+                    .ForContext("@PublisherDictionary", publisher)
+                    .ForContext("@Publisher",contextPublisher);
+
+                Log.Information("Unsubscribing", publisher, contextPublisher);
+                await UnsubscribeFrom(contextPublisher, handler,log);
                 if(contextPublisher.SubscribersCount == 0)
                 {
-                    Log.Information("Stoping {@PublisherDictionary} {@Publisher}", publisher, contextPublisher);
-                    await contextPublisher.Stop();
-                    Log.Information("Removing {@PublisherDictionary} {@Publisher}", publisher, contextPublisher);
+                    Log.Information("Stoping", publisher, contextPublisher);
+                    await contextPublisher.Stop(log);
+                    Log.Information("Removing", publisher, contextPublisher);
                     publisher.Remove(context);
                 }
             });
         }
 
         #region Common Subscriptions
-        public abstract Task UnSubscribeFromBook25(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler,IContext context);
-        public abstract Task UnSubscribeFromInstruments(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler,IContext context);
+        public abstract Task UnSubscribeFromBook25(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler,IContext context, ILogger logger);
+        public abstract Task UnSubscribeFromInstruments(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler,IContext context, ILogger logger);
         #endregion
         #region User Subscriptions
-        public abstract Task UnSubscribeFromUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler,IContext context);
-        public abstract Task UnSubscribeFromUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, IContext context);
-        public abstract Task UnSubscribeFromUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, IContext context);
-        public abstract Task UnSubscribeFromBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, IContext context);
+        public abstract Task UnSubscribeFromUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler,IContext context, ILogger logger);
+        public abstract Task UnSubscribeFromUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, IContext context, ILogger logger);
+        public abstract Task UnSubscribeFromUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, IContext context, ILogger logger);
+        public abstract Task UnSubscribeFromBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, IContext context, ILogger logger);
         #endregion
         #endregion
 
         #region Commands
 
-        public abstract Task<bool> AutheticateUser(UserContext context, CancellationToken token);
+        public abstract Task<bool> AutheticateUser(UserContext context, CancellationToken token, ILogger logger);
 
-        public abstract Task<BitmexResfulResponse<Order>> PlaceOrder(double quontity, double price,IContext context, CancellationToken token);
+        public abstract Task<BitmexResfulResponse<Order>> PlaceOrder(double quontity, double price,IContext context, CancellationToken token, ILogger logger);
 
-        public abstract Task<BitmexResfulResponse<Order[]>> DeleteOrder(string id, IContext context, CancellationToken token);
+        public abstract Task<BitmexResfulResponse<Order[]>> DeleteOrder(string id, IContext context, CancellationToken token, ILogger logger);
 
-        public abstract Task<BitmexResfulResponse<Order>> AmmendOrder(string id,double? price,long? Quantity,long? LeavesQuantity, IContext context, CancellationToken token);
+        public abstract Task<BitmexResfulResponse<Order>> AmmendOrder(string id,double? price,long? Quantity,long? LeavesQuantity, IContext context, CancellationToken token, ILogger logger);
         
         #endregion
 
