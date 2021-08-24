@@ -26,7 +26,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
                    {
                        action = BitmexAction.Delete;
                    }
-                   //Log.Information("{@Where} {@OrderId} {@OrderQuantity} @{OrderPrice} @{OrderAction}", "Trademarket", data.OrderId, data.OrderQty, data.Price, action);
+                   Log.Information("User Order Recieved {@OrderId} {@OrderQuantity} @{OrderPrice} @{OrderAction}", data.OrderId, data.OrderQty, data.Price, action);
                    e?.Invoke(typeof(UserOrderPublisher), new(data, action));
                }
            });
