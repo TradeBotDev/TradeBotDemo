@@ -53,6 +53,7 @@ services:
       ACCOUNT_CONNECTION_STRING: "http://host.docker.internal:5000"
       ASPNETCORE_ENVIRONMENT: "Development"
       REDIS_CONNECTION_STRING: "host.docker.internal:6379"
+      SEQ_CONNTECTION_STRING: "http://host.docker.internal:5341"
   facade:
     image: facade
     container_name: facadecontainer
@@ -68,6 +69,7 @@ services:
       RELAY_CONNECTION_STRING: "http://host.docker.internal:5004"
       ASPNETCORE_ENVIRONMENT: "Development"
       HISTORY_CONNECTION_STRING: "http://host.docker.internal:5007"
+      SEQ_CONNECTION_STRING: "http://host.docker.internal:5341"
       TRADEMARKET_CONNECTION_STRING: "http://host.docker.internal:5005"
   relay:
     image: relay
@@ -83,6 +85,7 @@ services:
       ALGORITHM_CONNECTION_STRING: "http://host.docker.internal:5006"
       FORMER_CONNECTION_STRING: "http://host.docker.internal:5003"
       ASPNETCORE_ENVIRONMENT: "Development"
+      SEQ_CONNECTION_STRING: "http://host.docker.internal:5341"
       TRADEMARKET_CONNECTION_STRING: "http://host.docker.internal:5005"
   algorithm:
     image: algorithm
