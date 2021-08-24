@@ -35,6 +35,7 @@ services:
       dockerfile: ./Account/Dockerfile
     ports:
       - 5000:80
+      - 12340:12340
     volumes:
       - .%USERPROFILE%\.aspnet\https:/https/
     environment:
