@@ -653,8 +653,9 @@ namespace UI
             GraphPane pane = graphControl.GraphPane;
 
             pane.CurveList.Clear();
-
+            
             LineItem myCurve = pane.AddCurve("", list, System.Drawing.Color.Blue, SymbolType.Circle);
+            myCurve.Line.Width = 2;
             if(graphControl.Name.Contains("Balance"))
             {
                 pane.Title.Text = "Balance graph";

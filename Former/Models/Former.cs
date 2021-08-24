@@ -37,7 +37,7 @@ namespace Former.Models
         private async Task PlaceCounterOrder(Order oldOrder, Order newComingOrder)
         {
             //число контрактов контр ордера (работает для полного и для частичного контр-ордера)
-            var quantity = oldOrder.Quantity - newComingOrder.Quantity;
+            var quantity = Convert.ToInt32(oldOrder.Quantity) != Convert.ToInt32(newComingOrder.Quantity) ? oldOrder.Quantity - newComingOrder.Quantity : oldOrder.Quantity;
             //тип ордера с которым необходимо выставить контр-ордер
             var type = oldOrder.Signature.Type == OrderType.ORDER_TYPE_BUY ? OrderType.ORDER_TYPE_SELL : OrderType.ORDER_TYPE_BUY;
             //цена контр ордера, которая зависит цены старого ордера и типа выставляемого ордера с учётом необходимого профита
