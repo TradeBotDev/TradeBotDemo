@@ -126,4 +126,16 @@ services:
       HISTORY_CONNECTION_STRING: "http://host.docker.internal:5007"
       TRADEMARKET_CONNECTION_STRING: "http://host.docker.internal:5005"
       RETRY_DELAY: "10000"
-    
+  website:
+    image: website
+    container_name: websitecontainer
+    build:      
+      context: .
+      dockerfile: ./Website/Dockerfile
+    ports:
+      - 5008:80
+    volumes:
+      - .%USERPROFILE%\.aspnet\https:/https/
+    environment:
+      FACADE_CONNECTION_STRING: "http://host.docker.internal:5002"
+      SEQ_CONNECTION_STRING: "http://host.docker.internal:5341"
