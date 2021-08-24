@@ -77,6 +77,7 @@ namespace Website
 					name: "default",
 					pattern: "{controller=Home}/{action=Index}/{id?}");
 				endpoints.MapBlazorHub();
+				endpoints.MapMetrics();
 			});
 		}
 	}

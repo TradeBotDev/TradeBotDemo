@@ -10,6 +10,8 @@ using System;
 using System.IO;
 using Serilog;
 using AccountGRPC.Models;
+using Prometheus;
+using Prometheus.SystemMetrics;
 
 namespace AccountGRPC
 {
@@ -41,6 +43,7 @@ namespace AccountGRPC
         {
             services.AddGrpc();
             services.AddDbContext<AccountContext>();
+            services.AddSystemMetrics();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -52,6 +55,7 @@ namespace AccountGRPC
             }
 
             app.UseRouting();
+            app.UseGrpcMetrics();
 
             app.UseEndpoints(endpoints =>
             {

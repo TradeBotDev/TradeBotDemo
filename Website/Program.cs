@@ -9,9 +9,6 @@ namespace Website
 	{
 		public static void Main(string[] args)
 		{
-			var server = new MetricServer(hostname: "localhost", port: 1234);
-			server.Start();
-
 			CreateHostBuilder(args).Build().Run();
 		}
 
