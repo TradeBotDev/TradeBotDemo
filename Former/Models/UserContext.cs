@@ -1,9 +1,7 @@
-﻿using System;
-using System.Threading.Tasks;
-using Former.Clients;
+﻿using Former.Clients;
 using Serilog;
-using Serilog.Context;
-using Serilog.Core.Enrichers;
+using System;
+using System.Threading.Tasks;
 
 namespace Former.Models
 {
@@ -31,18 +29,17 @@ namespace Former.Models
                 Slot = slot
             };
             if (!int.TryParse(Environment.GetEnvironmentVariable("RETRY_DELAY"), out var retryDelay)) retryDelay = 10000;
-            using (LogContext.Push(new PropertyEnricher("@Meta",Meta)))
-            {
-                HistoryClient.Configure(Environment.GetEnvironmentVariable("HISTORY_CONNECTION_STRING"), retryDelay);
-                _historyClient = new HistoryClient();
 
-                TradeMarketClient.Configure(Environment.GetEnvironmentVariable("TRADEMARKET_CONNECTION_STRING"), retryDelay);
-                _tradeMarketClient = new TradeMarketClient();
+            HistoryClient.Configure(Environment.GetEnvironmentVariable("HISTORY_CONNECTION_STRING"), retryDelay);
+            _historyClient = new HistoryClient();
 
-                _storage = new Storage();
-                _former = new Former(_storage, null, _tradeMarketClient, Meta, _historyClient);
-                _updateHandlers = new UpdateHandlers(_storage, null, _tradeMarketClient, Meta, _historyClient);
-            }
+            TradeMarketClient.Configure(Environment.GetEnvironmentVariable("TRADEMARKET_CONNECTION_STRING"), retryDelay);
+            _tradeMarketClient = new TradeMarketClient();
+
+            _storage = new Storage();
+            _former = new Former(_storage, null, _tradeMarketClient, Meta, _historyClient);
+            _updateHandlers = new UpdateHandlers(_storage, null, _tradeMarketClient, Meta, _historyClient);
+
         }
 
         /// <summary>
@@ -85,7 +82,7 @@ namespace Former.Models
             Log.Information("{@Where}: Former has been stopped!", "Former");
         }
 
-        
+
         /// <summary>
         /// Вытаскиваем метод формера наружу, чтобы можно было из юзер контекста запросить формирование ордера
         /// </summary>
@@ -94,7 +91,7 @@ namespace Former.Models
             await _former.FormOrder(decision);
         }
 
-        
+
         /// <summary>
         /// Вытаскиваем метод формера наружу, чтобы можно было из юзер контекста запросить удаление своих ордеров
         /// </summary>

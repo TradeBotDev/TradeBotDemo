@@ -90,9 +90,6 @@ namespace Former.Models
             //если баланс изменился, необходимо отправить новый баланс в историю
             _oldTotalBalance = _storage.TotalBalance;
             await _historyClient.WriteBalance(_storage.TotalBalance, Converters.ConvertMetadata(_metadata));
-            Log.Information(
-                "{@Where}: Balance {@Balance} sended to history",
-                "Former", _storage.TotalBalance);
         }
 
         private async Task MarketPriceHandleUpdate()

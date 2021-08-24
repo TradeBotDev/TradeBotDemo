@@ -133,7 +133,6 @@ namespace Former.Clients
                 {
                     if (EventFilter(call.ResponseHeadersAsync.Result, meta)) await UpdateMyOrders?.Invoke(Converters.ConvertOrder(call.ResponseStream.Current.Changed), (ChangesType)call.ResponseStream.Current.ChangesType);
                 }
-                
             }
 
             await ConnectionTester(ObserveMyOrdersFunc);
