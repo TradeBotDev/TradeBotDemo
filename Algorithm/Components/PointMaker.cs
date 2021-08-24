@@ -1,9 +1,8 @@
-﻿using Serilog;
+﻿using Algorithm.Services;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Threading;
-
-using TradeBot.Common.v1;
 
 namespace Algorithm.DataManipulation
 {
@@ -22,18 +21,18 @@ namespace Algorithm.DataManipulation
         {
             _isOrderedToStop = true;
         }
-        private KeyValuePair<DateTime, double> MakePoint(List<Order> orders, DateTime timestamp)
+        private KeyValuePair<DateTime, double> MakePoint(List<OrderWrapper> orders, DateTime timestamp)
         {
             double price = 0;
             int numberOfOrders = 0;
 
-            foreach (Order order in orders)
+            foreach (OrderWrapper order in orders)
             {
                 //sometimes it recieves an order with a price zero (for example, if the order in question was updated)
                 //they shouldn't be used for calculations so we ignore them  
-                if (order.Price != 0)
+                if (order.price != 0)
                 {
-                    price += order.Price;
+                    price += order.price;
                     numberOfOrders++;
                 }
             }
@@ -63,7 +62,7 @@ namespace Algorithm.DataManipulation
                     continue;
 
                 var newOrders = dataCollector.Orders;
-                var newPoint = MakePoint(new List<Order>(newOrders), DateTime.Now);
+                var newPoint = MakePoint(new List<OrderWrapper>(newOrders), DateTime.Now);
                 //if a point was made we notify everyone involved (algo and dataCollector) 
                 if (newPoint.Value != 0)
                 {
