@@ -15,7 +15,7 @@ namespace AccountTests.ExchangeAccessServiceTests
             var reply = GenerateLogin("not_existing_exchange_deletion").ContinueWith(loginReply =>
                 exchangeAccessService.DeleteExchangeAccess(new DeleteExchangeAccessRequest
                 {
-                    SessionId = loginReply.Result.Result.SessionId,
+                    SessionId = loginReply.Result.SessionId,
                     Code = ExchangeAccessCode.Bitmex
                 }, null));
 
@@ -63,7 +63,7 @@ namespace AccountTests.ExchangeAccessServiceTests
             // Последовательная генерация входа в аккаунт, добавление информации о доступе к биржи в аккаунт,
             // а затем ее удаление.
             var reply = GenerateLogin("delete_existing_exchange")
-                .ContinueWith(loginReply => exchangeAccessService.AddExchangeAccess(GenerateRequest(loginReply.Result.Result.SessionId), null))
+                .ContinueWith(loginReply => exchangeAccessService.AddExchangeAccess(GenerateRequest(loginReply.Result.SessionId), null))
                 .ContinueWith(none => exchangeAccessService.DeleteExchangeAccess(new DeleteExchangeAccessRequest
                 {
                     SessionId = sessionId,
