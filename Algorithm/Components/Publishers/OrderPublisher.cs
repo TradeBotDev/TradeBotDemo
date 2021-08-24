@@ -1,16 +1,16 @@
-﻿using Grpc.Core;
+﻿using Algorithm.Services;
+using Grpc.Core;
 using System;
 using System.Collections.Generic;
-using TradeBot.Common.v1;
 
 namespace Algorithm.DataManipulation
 {
     public class OrderPublisher
     {
-        public delegate void OrderIncoming(Order order, Metadata metadata);
+        public delegate void OrderIncoming(OrderWrapper order, Metadata metadata);
         public OrderIncoming OrderIncomingEvent;
 
-        public void Publish(Order order, Metadata metadata)
+        public void Publish(OrderWrapper order, Metadata metadata)
         {
             OrderIncomingEvent?.Invoke(order, metadata);
         }

@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using System;
+using Serilog;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
@@ -193,7 +194,7 @@ namespace Former.Models
                 Price = newComingOrder.Price,
                 LastUpdateDate = newComingOrder.LastUpdateDate,
                 Signature = newComingOrder.Signature,
-                Quantity = newComingOrder.Signature.Type == OrderType.ORDER_TYPE_SELL ? -newComingOrder.Quantity : newComingOrder.Quantity
+                Quantity = newComingOrder.Signature.Type == OrderType.ORDER_TYPE_SELL ? -Math.Abs(newComingOrder.Quantity) : Math.Abs(newComingOrder.Quantity)
             };
 
         }
