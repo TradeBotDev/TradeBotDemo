@@ -34,12 +34,15 @@ namespace TradeMarket.Model.UserContexts.Builders
 
             _commonWSClient = wsClient;
             _restClient = restClient;
+
         }
 
         public BitmexWebsocketClient GetNewBitmexWebSocketClient()
         {
             return new BitmexWebsocketClient(new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketTestnetUrl));
         }
+
+        private delegate Task<UserContext> BuildContextDeligate(string sessionId,string slotName,string tradeMarketName,CancellationToken token);
 
         internal async Task<UserContext> BuildUserContextAsync(string sessionId, string slotName, string tradeMarketName,CancellationToken token)
         {
@@ -56,7 +59,7 @@ namespace TradeMarket.Model.UserContexts.Builders
             });
         }
 
-        internal async Task<CommonContext> BuildCommonContextAsync(string slotName,string tradeMarketName)
+        internal async Task<CommonContext> BuildCommonContextAsync(string sessioid,string slotName,string tradeMarketName,CancellationToken token)
         {
             return await Task.Run(() =>
             {
@@ -73,19 +76,21 @@ namespace TradeMarket.Model.UserContexts.Builders
         private List<UserContext> RegisteredUserContexts = new List<UserContext>();
         private readonly SemaphoreSlim _userContextSemaphore = new SemaphoreSlim(1);
 
-        public async Task<UserContext> GetUserContextAsync(string sessionId, string slotName, string tradeMarketName,CancellationToken token)
+
+        public async Task<UserContext> GetUserContextAsync(ContextFilter filter, CancellationToken token)
         {
             UserContext userContext = null;
             await _userContextSemaphore.WaitAsync();
             try
             {
-                Log.Logger.Information("Getting UserContext {@sessionId} : {@slotName} : {@tradeMarketName}", sessionId, slotName, tradeMarketName);
-                userContext = RegisteredUserContexts.FirstOrDefault(el => el.IsEquevalentTo(sessionId, slotName, tradeMarketName));
+                //el.IsEquevalentTo(sessionId, slotName, tradeMarketName)
+                Log.Logger.Information("Getting UserContext");
+                userContext = RegisteredUserContexts.FirstOrDefault(filter.Func);
                 Log.Logger.Information("Contained UserContext's count {@Count}", RegisteredUserContexts.Count);
                 if (userContext is null)
                 {
-                    Log.Logger.Information("Creating new UserContext {@sessionId} : {@slotName} : {@tradeMarketName}", sessionId, slotName, tradeMarketName);
-                    userContext = await BuildUserContextAsync(sessionId, slotName, tradeMarketName,token);
+                    Log.Logger.Information("Creating new UserContext");
+                    userContext = await BuildUserContextAsync(filter.SessionId, filter.SlotName, filter.TradeMarketName,token);
                     RegisteredUserContexts.Add(userContext);
                 }
             }
@@ -100,40 +105,10 @@ namespace TradeMarket.Model.UserContexts.Builders
             catch (Exception e)
             {
                 RegisteredUserContexts.Remove(userContext);
-                throw e;
+                throw;
             }
         }
         #endregion
-        #region CommonContext
-        private List<CommonContext> RegisteredCommonContexts = new List<CommonContext>();
-        private readonly SemaphoreSlim _commonContextSemephore = new SemaphoreSlim(1);
-
-        public async Task<CommonContext> GetCommonContextAsync(string slotName,string tradeMarketName)
-        {
-            var logger = Log.ForContext<ContextDirector>().ForContext("MethodName", nameof(GetCommonContextAsync));
-            CommonContext commonContext = null;
-            logger.Debug("Current");
-            await _commonContextSemephore.WaitAsync();
-            try
-            {
-                logger.Information("Getting CommonContext {@slotName} : {@tradeMarketName}", slotName, tradeMarketName);
-                commonContext = RegisteredCommonContexts.FirstOrDefault(el => el.IsEquevalentTo(null, slotName, tradeMarketName));
-                if (commonContext is null)
-                {
-                    logger.Information("Creating new CommonContext {@slotName} : {@tradeMarketName}", slotName, tradeMarketName);
-                    commonContext = await BuildCommonContextAsync(slotName, tradeMarketName);
-                    RegisteredCommonContexts.Add(commonContext);
-                }
-                logger.Information("Contained CommonContext's count {@Count}", RegisteredCommonContexts.Count);
-
-            }
-            finally
-            {
-                _commonContextSemephore.Release();
-            }
-            return commonContext;
-        }
-
-        #endregion
+       
     }
 }

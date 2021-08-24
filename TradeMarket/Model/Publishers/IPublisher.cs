@@ -9,6 +9,7 @@ namespace TradeMarket.Model.Publishers
     public interface IPublisher<T>
     {
 
+        public bool IsWorking { get; }
         public List<T> Cache { get; set; }
 
         public class ChangedEventArgs : EventArgs
@@ -26,6 +27,10 @@ namespace TradeMarket.Model.Publishers
       
         public event EventHandler<ChangedEventArgs> Changed;
 
+        public int SubscribersCount { get; }
+
         public Task Start();
+
+        public Task Stop();
     }
 }

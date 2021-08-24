@@ -1,4 +1,6 @@
 ﻿
+using ZedGraph;
+
 namespace UI
 {
     partial class TradeBotUi
@@ -37,8 +39,8 @@ namespace UI
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            this.zedGraph = new ZedGraph.ZedGraphControl();
-            this.zedGraph_1 = new ZedGraph.ZedGraphControl();
+            this.BalanceGraph = new ZedGraph.ZedGraphControl();
+            this.OrderGraph = new ZedGraph.ZedGraphControl();
             this.Tabs = new System.Windows.Forms.TabControl();
             this.LogsPage = new System.Windows.Forms.TabPage();
             this.EventConsole = new System.Windows.Forms.RichTextBox();
@@ -150,41 +152,45 @@ namespace UI
             ((System.ComponentModel.ISupportInitialize)(this.ErrorProviderSignUp)).BeginInit();
             this.SuspendLayout();
             // 
-            // zedGraph
+            // BalanceGraph
             // 
-            this.zedGraph.AutoSize = true;
-            this.zedGraph.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.zedGraph.Location = new System.Drawing.Point(3, 2);
-            this.zedGraph.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
-            this.zedGraph.Name = "zedGraph";
-            this.zedGraph.ScrollGrace = 0D;
-            this.zedGraph.ScrollMaxX = 0D;
-            this.zedGraph.ScrollMaxY = 0D;
-            this.zedGraph.ScrollMaxY2 = 0D;
-            this.zedGraph.ScrollMinX = 0D;
-            this.zedGraph.ScrollMinY = 0D;
-            this.zedGraph.ScrollMinY2 = 0D;
-            this.zedGraph.Size = new System.Drawing.Size(1039, 411);
-            this.zedGraph.TabIndex = 0;
-            this.zedGraph.UseExtendedPrintDialog = true;
+            this.BalanceGraph.AutoSize = true;
+            this.BalanceGraph.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.BalanceGraph.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.BalanceGraph.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.BalanceGraph.Location = new System.Drawing.Point(3, 3);
+            this.BalanceGraph.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
+            this.BalanceGraph.Name = "BalanceGraph";
+            this.BalanceGraph.ScrollGrace = 0D;
+            this.BalanceGraph.ScrollMaxX = 0D;
+            this.BalanceGraph.ScrollMaxY = 0D;
+            this.BalanceGraph.ScrollMaxY2 = 0D;
+            this.BalanceGraph.ScrollMinX = 0D;
+            this.BalanceGraph.ScrollMinY = 0D;
+            this.BalanceGraph.ScrollMinY2 = 0D;
+            this.BalanceGraph.Size = new System.Drawing.Size(1039, 488);
+            this.BalanceGraph.TabIndex = 0;
+            this.BalanceGraph.UseExtendedPrintDialog = true;
+            this.BalanceGraph.ZoomEvent += new ZedGraph.ZedGraphControl.ZoomEventHandler(this.zedGraph_ZoomEvent);
             // 
-            // zedGraph_1
+            // OrderGraph
             // 
-            this.zedGraph_1.AutoSize = true;
-            this.zedGraph_1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.zedGraph_1.Location = new System.Drawing.Point(3, 2);
-            this.zedGraph_1.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
-            this.zedGraph_1.Name = "zedGraph_1";
-            this.zedGraph_1.ScrollGrace = 0D;
-            this.zedGraph_1.ScrollMaxX = 0D;
-            this.zedGraph_1.ScrollMaxY = 0D;
-            this.zedGraph_1.ScrollMaxY2 = 0D;
-            this.zedGraph_1.ScrollMinX = 0D;
-            this.zedGraph_1.ScrollMinY = 0D;
-            this.zedGraph_1.ScrollMinY2 = 0D;
-            this.zedGraph_1.Size = new System.Drawing.Size(1039, 411);
-            this.zedGraph_1.TabIndex = 0;
-            this.zedGraph_1.UseExtendedPrintDialog = true;
+            this.OrderGraph.AutoSize = true;
+            this.OrderGraph.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.OrderGraph.Location = new System.Drawing.Point(3, 3);
+            this.OrderGraph.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
+            this.OrderGraph.Name = "OrderGraph";
+            this.OrderGraph.ScrollGrace = 0D;
+            this.OrderGraph.ScrollMaxX = 0D;
+            this.OrderGraph.ScrollMaxY = 0D;
+            this.OrderGraph.ScrollMaxY2 = 0D;
+            this.OrderGraph.ScrollMinX = 0D;
+            this.OrderGraph.ScrollMinY = 0D;
+            this.OrderGraph.ScrollMinY2 = 0D;
+            this.OrderGraph.Size = new System.Drawing.Size(1039, 488);
+            this.OrderGraph.TabIndex = 0;
+            this.OrderGraph.UseExtendedPrintDialog = true;
+            this.OrderGraph.ZoomEvent += new ZedGraph.ZedGraphControl.ZoomEventHandler(this.zedGraph_ZoomEvent);
             // 
             // Tabs
             // 
@@ -195,22 +201,20 @@ namespace UI
             this.Tabs.Controls.Add(this.FilledOrdersPage);
             this.Tabs.Controls.Add(this.ActiveOrdersPage);
             this.Tabs.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.Tabs.Location = new System.Drawing.Point(0, 367);
-            this.Tabs.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Tabs.Location = new System.Drawing.Point(0, 385);
             this.Tabs.Multiline = true;
             this.Tabs.Name = "Tabs";
             this.Tabs.SelectedIndex = 0;
-            this.Tabs.Size = new System.Drawing.Size(1067, 485);
+            this.Tabs.Size = new System.Drawing.Size(1067, 566);
             this.Tabs.TabIndex = 26;
             // 
             // LogsPage
             // 
             this.LogsPage.Controls.Add(this.EventConsole);
             this.LogsPage.Location = new System.Drawing.Point(4, 29);
-            this.LogsPage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.LogsPage.Name = "LogsPage";
-            this.LogsPage.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.LogsPage.Size = new System.Drawing.Size(1059, 452);
+            this.LogsPage.Padding = new System.Windows.Forms.Padding(3);
+            this.LogsPage.Size = new System.Drawing.Size(1059, 533);
             this.LogsPage.TabIndex = 0;
             this.LogsPage.Text = "Logs";
             this.LogsPage.UseVisualStyleBackColor = true;
@@ -220,11 +224,10 @@ namespace UI
             this.EventConsole.BackColor = System.Drawing.Color.White;
             this.EventConsole.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.EventConsole.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.EventConsole.Location = new System.Drawing.Point(3, 2);
-            this.EventConsole.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.EventConsole.Location = new System.Drawing.Point(3, 3);
             this.EventConsole.Name = "EventConsole";
             this.EventConsole.ReadOnly = true;
-            this.EventConsole.Size = new System.Drawing.Size(1053, 448);
+            this.EventConsole.Size = new System.Drawing.Size(1053, 527);
             this.EventConsole.TabIndex = 24;
             this.EventConsole.Text = "";
             // 
@@ -232,10 +235,9 @@ namespace UI
             // 
             this.GraphicsPage.Controls.Add(this.tabControl1);
             this.GraphicsPage.Location = new System.Drawing.Point(4, 29);
-            this.GraphicsPage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.GraphicsPage.Name = "GraphicsPage";
-            this.GraphicsPage.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.GraphicsPage.Size = new System.Drawing.Size(1059, 452);
+            this.GraphicsPage.Padding = new System.Windows.Forms.Padding(3);
+            this.GraphicsPage.Size = new System.Drawing.Size(1059, 533);
             this.GraphicsPage.TabIndex = 1;
             this.GraphicsPage.Text = "Graphics";
             this.GraphicsPage.UseVisualStyleBackColor = true;
@@ -245,33 +247,30 @@ namespace UI
             this.tabControl1.Controls.Add(this.BalanceGraphPage);
             this.tabControl1.Controls.Add(this.ClosedOrdersPage);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl1.Location = new System.Drawing.Point(3, 2);
-            this.tabControl1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.tabControl1.Location = new System.Drawing.Point(3, 3);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1053, 448);
+            this.tabControl1.Size = new System.Drawing.Size(1053, 527);
             this.tabControl1.TabIndex = 0;
             // 
             // BalanceGraphPage
             // 
-            this.BalanceGraphPage.Controls.Add(this.zedGraph);
+            this.BalanceGraphPage.Controls.Add(this.BalanceGraph);
             this.BalanceGraphPage.Location = new System.Drawing.Point(4, 29);
-            this.BalanceGraphPage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.BalanceGraphPage.Name = "BalanceGraphPage";
-            this.BalanceGraphPage.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.BalanceGraphPage.Size = new System.Drawing.Size(1045, 415);
+            this.BalanceGraphPage.Padding = new System.Windows.Forms.Padding(3);
+            this.BalanceGraphPage.Size = new System.Drawing.Size(1045, 494);
             this.BalanceGraphPage.TabIndex = 0;
             this.BalanceGraphPage.Text = "Balance Graph";
             this.BalanceGraphPage.UseVisualStyleBackColor = true;
             // 
             // ClosedOrdersPage
             // 
-            this.ClosedOrdersPage.Controls.Add(this.zedGraph_1);
+            this.ClosedOrdersPage.Controls.Add(this.OrderGraph);
             this.ClosedOrdersPage.Location = new System.Drawing.Point(4, 29);
-            this.ClosedOrdersPage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ClosedOrdersPage.Name = "ClosedOrdersPage";
-            this.ClosedOrdersPage.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.ClosedOrdersPage.Size = new System.Drawing.Size(1045, 415);
+            this.ClosedOrdersPage.Padding = new System.Windows.Forms.Padding(3);
+            this.ClosedOrdersPage.Size = new System.Drawing.Size(1045, 494);
             this.ClosedOrdersPage.TabIndex = 1;
             this.ClosedOrdersPage.Text = "Closed Orders Graph";
             this.ClosedOrdersPage.UseVisualStyleBackColor = true;
@@ -280,9 +279,8 @@ namespace UI
             // 
             this.FilledOrdersPage.Controls.Add(this.FilledOrdersDataGridView);
             this.FilledOrdersPage.Location = new System.Drawing.Point(4, 29);
-            this.FilledOrdersPage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.FilledOrdersPage.Name = "FilledOrdersPage";
-            this.FilledOrdersPage.Size = new System.Drawing.Size(1059, 452);
+            this.FilledOrdersPage.Size = new System.Drawing.Size(1059, 533);
             this.FilledOrdersPage.TabIndex = 2;
             this.FilledOrdersPage.Text = "Filled Orders";
             this.FilledOrdersPage.UseVisualStyleBackColor = true;
@@ -303,9 +301,9 @@ namespace UI
             this.dataGridViewTextBoxColumn7,
             this.Time,
             this.dataGridViewTextBoxColumn8});
+            this.FilledOrdersDataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.FilledOrdersDataGridView.GridColor = System.Drawing.SystemColors.Control;
             this.FilledOrdersDataGridView.Location = new System.Drawing.Point(0, 0);
-            this.FilledOrdersDataGridView.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.FilledOrdersDataGridView.Name = "FilledOrdersDataGridView";
             this.FilledOrdersDataGridView.ReadOnly = true;
             this.FilledOrdersDataGridView.RowHeadersVisible = false;
@@ -316,7 +314,7 @@ namespace UI
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.WindowText;
             this.FilledOrdersDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle1;
             this.FilledOrdersDataGridView.RowTemplate.Height = 29;
-            this.FilledOrdersDataGridView.Size = new System.Drawing.Size(1060, 450);
+            this.FilledOrdersDataGridView.Size = new System.Drawing.Size(1059, 533);
             this.FilledOrdersDataGridView.TabIndex = 0;
             // 
             // SlotName
@@ -371,9 +369,8 @@ namespace UI
             // 
             this.ActiveOrdersPage.Controls.Add(this.ActiveOrdersDataGridView);
             this.ActiveOrdersPage.Location = new System.Drawing.Point(4, 29);
-            this.ActiveOrdersPage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ActiveOrdersPage.Name = "ActiveOrdersPage";
-            this.ActiveOrdersPage.Size = new System.Drawing.Size(1059, 452);
+            this.ActiveOrdersPage.Size = new System.Drawing.Size(1059, 533);
             this.ActiveOrdersPage.TabIndex = 3;
             this.ActiveOrdersPage.Text = "Active Orders";
             this.ActiveOrdersPage.UseVisualStyleBackColor = true;
@@ -394,9 +391,9 @@ namespace UI
             this.Type,
             this.dataGridViewTextBoxColumn6,
             this.OrderID});
+            this.ActiveOrdersDataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ActiveOrdersDataGridView.GridColor = System.Drawing.SystemColors.Control;
             this.ActiveOrdersDataGridView.Location = new System.Drawing.Point(0, 0);
-            this.ActiveOrdersDataGridView.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ActiveOrdersDataGridView.Name = "ActiveOrdersDataGridView";
             this.ActiveOrdersDataGridView.ReadOnly = true;
             this.ActiveOrdersDataGridView.RowHeadersVisible = false;
@@ -407,7 +404,7 @@ namespace UI
             dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.WindowText;
             this.ActiveOrdersDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle2;
             this.ActiveOrdersDataGridView.RowTemplate.Height = 29;
-            this.ActiveOrdersDataGridView.Size = new System.Drawing.Size(1059, 453);
+            this.ActiveOrdersDataGridView.Size = new System.Drawing.Size(1059, 533);
             this.ActiveOrdersDataGridView.TabIndex = 1;
             // 
             // dataGridViewTextBoxColumn3
@@ -460,39 +457,39 @@ namespace UI
             // 
             // ConfigAvailableBalanceTxb
             // 
-            this.ConfigAvailableBalanceTxb.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ConfigAvailableBalanceTxb.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ConfigAvailableBalanceTxb.BackColor = System.Drawing.SystemColors.ControlLight;
             this.ConfigAvailableBalanceTxb.Location = new System.Drawing.Point(185, 120);
-            this.ConfigAvailableBalanceTxb.Margin = new System.Windows.Forms.Padding(4);
+            this.ConfigAvailableBalanceTxb.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.ConfigAvailableBalanceTxb.Name = "ConfigAvailableBalanceTxb";
             this.ConfigAvailableBalanceTxb.Size = new System.Drawing.Size(90, 26);
             this.ConfigAvailableBalanceTxb.TabIndex = 1;
-            this.ConfigAvailableBalanceTxb.Text = "0,5";
             // 
             // ConfigRequiredProfitTxb
             // 
-            this.ConfigRequiredProfitTxb.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ConfigRequiredProfitTxb.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ConfigRequiredProfitTxb.BackColor = System.Drawing.SystemColors.ControlLight;
             this.ConfigRequiredProfitTxb.Location = new System.Drawing.Point(185, 181);
-            this.ConfigRequiredProfitTxb.Margin = new System.Windows.Forms.Padding(4);
+            this.ConfigRequiredProfitTxb.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.ConfigRequiredProfitTxb.Name = "ConfigRequiredProfitTxb";
             this.ConfigRequiredProfitTxb.Size = new System.Drawing.Size(90, 26);
             this.ConfigRequiredProfitTxb.TabIndex = 2;
-            this.ConfigRequiredProfitTxb.Text = "0,005";
             // 
             // ConfigUpdatePriceRangeTxb
             // 
-            this.ConfigUpdatePriceRangeTxb.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ConfigUpdatePriceRangeTxb.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ConfigUpdatePriceRangeTxb.BackColor = System.Drawing.SystemColors.ControlLight;
             this.ConfigUpdatePriceRangeTxb.Location = new System.Drawing.Point(185, 59);
-            this.ConfigUpdatePriceRangeTxb.Margin = new System.Windows.Forms.Padding(4);
+            this.ConfigUpdatePriceRangeTxb.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.ConfigUpdatePriceRangeTxb.Name = "ConfigUpdatePriceRangeTxb";
             this.ConfigUpdatePriceRangeTxb.Size = new System.Drawing.Size(90, 26);
             this.ConfigUpdatePriceRangeTxb.TabIndex = 4;
-            this.ConfigUpdatePriceRangeTxb.Text = "50";
             // 
             // ConfigAvailableBalanceLbl
             // 
-            this.ConfigAvailableBalanceLbl.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ConfigAvailableBalanceLbl.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ConfigAvailableBalanceLbl.AutoSize = true;
-            this.ConfigAvailableBalanceLbl.Location = new System.Drawing.Point(20, 116);
+            this.ConfigAvailableBalanceLbl.Location = new System.Drawing.Point(21, 116);
             this.ConfigAvailableBalanceLbl.Margin = new System.Windows.Forms.Padding(3);
             this.ConfigAvailableBalanceLbl.Name = "ConfigAvailableBalanceLbl";
             this.ConfigAvailableBalanceLbl.Padding = new System.Windows.Forms.Padding(5);
@@ -512,9 +509,9 @@ namespace UI
             // 
             // ConfigVolumeOfContractslbl
             // 
-            this.ConfigVolumeOfContractslbl.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ConfigVolumeOfContractslbl.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ConfigVolumeOfContractslbl.AutoSize = true;
-            this.ConfigVolumeOfContractslbl.Location = new System.Drawing.Point(7, 26);
+            this.ConfigVolumeOfContractslbl.Location = new System.Drawing.Point(7, 27);
             this.ConfigVolumeOfContractslbl.Margin = new System.Windows.Forms.Padding(3);
             this.ConfigVolumeOfContractslbl.Name = "ConfigVolumeOfContractslbl";
             this.ConfigVolumeOfContractslbl.Padding = new System.Windows.Forms.Padding(5);
@@ -524,7 +521,7 @@ namespace UI
             // 
             // ConfigUpdatePriceRangelbl
             // 
-            this.ConfigUpdatePriceRangelbl.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ConfigUpdatePriceRangelbl.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ConfigUpdatePriceRangelbl.AutoSize = true;
             this.ConfigUpdatePriceRangelbl.Location = new System.Drawing.Point(10, 55);
             this.ConfigUpdatePriceRangelbl.Margin = new System.Windows.Forms.Padding(3);
@@ -536,7 +533,7 @@ namespace UI
             // 
             // ConfigIntervalOfAnalysislbl
             // 
-            this.ConfigIntervalOfAnalysislbl.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ConfigIntervalOfAnalysislbl.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ConfigIntervalOfAnalysislbl.AutoSize = true;
             this.ConfigIntervalOfAnalysislbl.Location = new System.Drawing.Point(21, 87);
             this.ConfigIntervalOfAnalysislbl.Margin = new System.Windows.Forms.Padding(3);
@@ -552,8 +549,7 @@ namespace UI
             this.ShowSignUpPanel.FlatAppearance.BorderSize = 0;
             this.ShowSignUpPanel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.ShowSignUpPanel.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.ShowSignUpPanel.Location = new System.Drawing.Point(3, 2);
-            this.ShowSignUpPanel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.ShowSignUpPanel.Location = new System.Drawing.Point(3, 3);
             this.ShowSignUpPanel.Name = "ShowSignUpPanel";
             this.ShowSignUpPanel.Size = new System.Drawing.Size(142, 60);
             this.ShowSignUpPanel.TabIndex = 14;
@@ -568,7 +564,6 @@ namespace UI
             this.ShowSignInPanel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.ShowSignInPanel.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.ShowSignInPanel.Location = new System.Drawing.Point(3, 59);
-            this.ShowSignInPanel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ShowSignInPanel.Name = "ShowSignInPanel";
             this.ShowSignInPanel.Size = new System.Drawing.Size(142, 60);
             this.ShowSignInPanel.TabIndex = 15;
@@ -583,7 +578,6 @@ namespace UI
             this.ShowMainMenu.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.ShowMainMenu.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.ShowMainMenu.Location = new System.Drawing.Point(3, 120);
-            this.ShowMainMenu.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ShowMainMenu.Name = "ShowMainMenu";
             this.ShowMainMenu.Size = new System.Drawing.Size(142, 60);
             this.ShowMainMenu.TabIndex = 16;
@@ -595,10 +589,9 @@ namespace UI
             // 
             this.RegistrationButton.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.RegistrationButton.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.RegistrationButton.Location = new System.Drawing.Point(6, 238);
-            this.RegistrationButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.RegistrationButton.Location = new System.Drawing.Point(6, 237);
             this.RegistrationButton.Name = "RegistrationButton";
-            this.RegistrationButton.Size = new System.Drawing.Size(228, 60);
+            this.RegistrationButton.Size = new System.Drawing.Size(229, 60);
             this.RegistrationButton.TabIndex = 26;
             this.RegistrationButton.Text = "Sign Up";
             this.RegistrationButton.UseVisualStyleBackColor = true;
@@ -632,7 +625,7 @@ namespace UI
             // 
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label4.Location = new System.Drawing.Point(6, 58);
+            this.label4.Location = new System.Drawing.Point(6, 59);
             this.label4.Margin = new System.Windows.Forms.Padding(5);
             this.label4.Name = "label4";
             this.label4.Padding = new System.Windows.Forms.Padding(5);
@@ -644,7 +637,7 @@ namespace UI
             // 
             this.ConfigTokenl.AutoSize = true;
             this.ConfigTokenl.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.ConfigTokenl.Location = new System.Drawing.Point(255, 58);
+            this.ConfigTokenl.Location = new System.Drawing.Point(255, 59);
             this.ConfigTokenl.Margin = new System.Windows.Forms.Padding(5);
             this.ConfigTokenl.Name = "ConfigTokenl";
             this.ConfigTokenl.Padding = new System.Windows.Forms.Padding(5);
@@ -655,8 +648,7 @@ namespace UI
             // SecretTxb
             // 
             this.SecretTxb.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.SecretTxb.Location = new System.Drawing.Point(264, 94);
-            this.SecretTxb.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.SecretTxb.Location = new System.Drawing.Point(264, 93);
             this.SecretTxb.Name = "SecretTxb";
             this.SecretTxb.Size = new System.Drawing.Size(212, 26);
             this.SecretTxb.TabIndex = 3;
@@ -665,8 +657,7 @@ namespace UI
             // KeyTxb
             // 
             this.KeyTxb.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.KeyTxb.Location = new System.Drawing.Point(264, 162);
-            this.KeyTxb.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.KeyTxb.Location = new System.Drawing.Point(264, 163);
             this.KeyTxb.Name = "KeyTxb";
             this.KeyTxb.Size = new System.Drawing.Size(212, 26);
             this.KeyTxb.TabIndex = 20;
@@ -676,7 +667,6 @@ namespace UI
             // 
             this.RegPass.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.RegPass.Location = new System.Drawing.Point(16, 160);
-            this.RegPass.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.RegPass.Name = "RegPass";
             this.RegPass.Size = new System.Drawing.Size(210, 26);
             this.RegPass.TabIndex = 1;
@@ -686,7 +676,6 @@ namespace UI
             // 
             this.RegLog.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.RegLog.Location = new System.Drawing.Point(16, 95);
-            this.RegLog.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.RegLog.Name = "RegLog";
             this.RegLog.Size = new System.Drawing.Size(210, 26);
             this.RegLog.TabIndex = 0;
@@ -695,10 +684,9 @@ namespace UI
             // 
             this.LoginButton.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.LoginButton.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.LoginButton.Location = new System.Drawing.Point(6, 238);
-            this.LoginButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.LoginButton.Location = new System.Drawing.Point(6, 237);
             this.LoginButton.Name = "LoginButton";
-            this.LoginButton.Size = new System.Drawing.Size(228, 60);
+            this.LoginButton.Size = new System.Drawing.Size(229, 60);
             this.LoginButton.TabIndex = 35;
             this.LoginButton.Text = "Sign In";
             this.LoginButton.UseVisualStyleBackColor = true;
@@ -720,7 +708,6 @@ namespace UI
             // 
             this.LogLogTextBox.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.LogLogTextBox.Location = new System.Drawing.Point(16, 95);
-            this.LogLogTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.LogLogTextBox.Name = "LogLogTextBox";
             this.LogLogTextBox.Size = new System.Drawing.Size(210, 26);
             this.LogLogTextBox.TabIndex = 27;
@@ -730,7 +717,7 @@ namespace UI
             // 
             this.label9.AutoSize = true;
             this.label9.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label9.Location = new System.Drawing.Point(6, 58);
+            this.label9.Location = new System.Drawing.Point(6, 59);
             this.label9.Margin = new System.Windows.Forms.Padding(5);
             this.label9.Name = "label9";
             this.label9.Padding = new System.Windows.Forms.Padding(5);
@@ -742,7 +729,6 @@ namespace UI
             // 
             this.LogPassTextBox.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.LogPassTextBox.Location = new System.Drawing.Point(16, 160);
-            this.LogPassTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.LogPassTextBox.Name = "LogPassTextBox";
             this.LogPassTextBox.Size = new System.Drawing.Size(210, 26);
             this.LogPassTextBox.TabIndex = 28;
@@ -751,9 +737,7 @@ namespace UI
             // 
             // MainMenuGroupBox
             // 
-            this.MainMenuGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.MainMenuGroupBox.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.MainMenuGroupBox.Controls.Add(this.RemoveRowButton);
             this.MainMenuGroupBox.Controls.Add(this.AddRowButton);
             this.MainMenuGroupBox.Controls.Add(this.SlotsComboBox);
@@ -775,8 +759,7 @@ namespace UI
             this.MainMenuGroupBox.Controls.Add(this.ConfigRequiredProfitTxb);
             this.MainMenuGroupBox.Controls.Add(this.ConfigVolumeOfContractslbl);
             this.MainMenuGroupBox.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.MainMenuGroupBox.Location = new System.Drawing.Point(153, 0);
-            this.MainMenuGroupBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.MainMenuGroupBox.Location = new System.Drawing.Point(153, 12);
             this.MainMenuGroupBox.Name = "MainMenuGroupBox";
             this.MainMenuGroupBox.Padding = new System.Windows.Forms.Padding(0);
             this.MainMenuGroupBox.Size = new System.Drawing.Size(760, 325);
@@ -786,11 +769,10 @@ namespace UI
             // 
             // RemoveRowButton
             // 
-            this.RemoveRowButton.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.RemoveRowButton.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.RemoveRowButton.Location = new System.Drawing.Point(696, 293);
-            this.RemoveRowButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.RemoveRowButton.Name = "RemoveRowButton";
-            this.RemoveRowButton.Size = new System.Drawing.Size(62, 30);
+            this.RemoveRowButton.Size = new System.Drawing.Size(62, 29);
             this.RemoveRowButton.TabIndex = 23;
             this.RemoveRowButton.Text = "-";
             this.RemoveRowButton.UseVisualStyleBackColor = true;
@@ -798,11 +780,10 @@ namespace UI
             // 
             // AddRowButton
             // 
-            this.AddRowButton.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.AddRowButton.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.AddRowButton.Location = new System.Drawing.Point(635, 293);
-            this.AddRowButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.AddRowButton.Name = "AddRowButton";
-            this.AddRowButton.Size = new System.Drawing.Size(62, 30);
+            this.AddRowButton.Size = new System.Drawing.Size(62, 29);
             this.AddRowButton.TabIndex = 22;
             this.AddRowButton.Text = "+";
             this.AddRowButton.UseVisualStyleBackColor = true;
@@ -810,14 +791,13 @@ namespace UI
             // 
             // SlotsComboBox
             // 
-            this.SlotsComboBox.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.SlotsComboBox.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.SlotsComboBox.FormattingEnabled = true;
             this.SlotsComboBox.Items.AddRange(new object[] {
             "XBTUSD",
             "ETHUSD",
             "DOGEUSD"});
-            this.SlotsComboBox.Location = new System.Drawing.Point(537, 294);
-            this.SlotsComboBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.SlotsComboBox.Location = new System.Drawing.Point(537, 293);
             this.SlotsComboBox.Name = "SlotsComboBox";
             this.SlotsComboBox.Size = new System.Drawing.Size(99, 28);
             this.SlotsComboBox.TabIndex = 25;
@@ -828,7 +808,7 @@ namespace UI
             this.ActiveSlotsDataGridView.AllowUserToDeleteRows = false;
             this.ActiveSlotsDataGridView.AllowUserToResizeColumns = false;
             this.ActiveSlotsDataGridView.AllowUserToResizeRows = false;
-            this.ActiveSlotsDataGridView.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.ActiveSlotsDataGridView.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ActiveSlotsDataGridView.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
             dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
@@ -852,7 +832,6 @@ namespace UI
             this.ActiveSlotsDataGridView.DefaultCellStyle = dataGridViewCellStyle6;
             this.ActiveSlotsDataGridView.GridColor = System.Drawing.SystemColors.Control;
             this.ActiveSlotsDataGridView.Location = new System.Drawing.Point(537, 12);
-            this.ActiveSlotsDataGridView.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ActiveSlotsDataGridView.MultiSelect = false;
             this.ActiveSlotsDataGridView.Name = "ActiveSlotsDataGridView";
             this.ActiveSlotsDataGridView.ReadOnly = true;
@@ -866,7 +845,7 @@ namespace UI
             this.ActiveSlotsDataGridView.RowTemplate.Height = 29;
             this.ActiveSlotsDataGridView.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.ActiveSlotsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.ActiveSlotsDataGridView.Size = new System.Drawing.Size(220, 284);
+            this.ActiveSlotsDataGridView.Size = new System.Drawing.Size(219, 284);
             this.ActiveSlotsDataGridView.TabIndex = 21;
             this.ActiveSlotsDataGridView.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DataGridView1_CellContentClick);
             this.ActiveSlotsDataGridView.SelectionChanged += new System.EventHandler(this.ActiveOrdersDataGridView_SelectionChanged);
@@ -905,7 +884,7 @@ namespace UI
             // 
             // panel3
             // 
-            this.panel3.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.panel3.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.panel3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel3.Controls.Add(this.UpdateConfigButton);
             this.panel3.Controls.Add(this.RemoveMyOrdersButton);
@@ -919,9 +898,8 @@ namespace UI
             this.UpdateConfigButton.FlatAppearance.BorderSize = 0;
             this.UpdateConfigButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.UpdateConfigButton.Location = new System.Drawing.Point(-1, 47);
-            this.UpdateConfigButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.UpdateConfigButton.Name = "UpdateConfigButton";
-            this.UpdateConfigButton.Size = new System.Drawing.Size(182, 42);
+            this.UpdateConfigButton.Size = new System.Drawing.Size(182, 43);
             this.UpdateConfigButton.TabIndex = 17;
             this.UpdateConfigButton.Text = "Update configuration";
             this.UpdateConfigButton.UseVisualStyleBackColor = true;
@@ -932,7 +910,6 @@ namespace UI
             this.RemoveMyOrdersButton.FlatAppearance.BorderSize = 0;
             this.RemoveMyOrdersButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.RemoveMyOrdersButton.Location = new System.Drawing.Point(-1, 0);
-            this.RemoveMyOrdersButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.RemoveMyOrdersButton.Name = "RemoveMyOrdersButton";
             this.RemoveMyOrdersButton.Size = new System.Drawing.Size(182, 43);
             this.RemoveMyOrdersButton.TabIndex = 16;
@@ -942,7 +919,7 @@ namespace UI
             // 
             // ConfigRequiredProfitLbl
             // 
-            this.ConfigRequiredProfitLbl.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ConfigRequiredProfitLbl.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ConfigRequiredProfitLbl.AutoSize = true;
             this.ConfigRequiredProfitLbl.Location = new System.Drawing.Point(49, 180);
             this.ConfigRequiredProfitLbl.Margin = new System.Windows.Forms.Padding(3);
@@ -954,17 +931,17 @@ namespace UI
             // 
             // BalanceLabel
             // 
-            this.BalanceLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.BalanceLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.BalanceLabel.AutoSize = true;
-            this.BalanceLabel.Location = new System.Drawing.Point(85, 294);
+            this.BalanceLabel.Location = new System.Drawing.Point(85, 293);
             this.BalanceLabel.Name = "BalanceLabel";
             this.BalanceLabel.Size = new System.Drawing.Size(0, 20);
             this.BalanceLabel.TabIndex = 20;
             // 
             // BalanceNameLbl
             // 
-            this.BalanceNameLbl.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.BalanceNameLbl.Location = new System.Drawing.Point(7, 294);
+            this.BalanceNameLbl.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.BalanceNameLbl.Location = new System.Drawing.Point(7, 293);
             this.BalanceNameLbl.Name = "BalanceNameLbl";
             this.BalanceNameLbl.Size = new System.Drawing.Size(74, 20);
             this.BalanceNameLbl.TabIndex = 19;
@@ -972,8 +949,8 @@ namespace UI
             // 
             // ConfigIntervalOfAnalysisTxb
             // 
-            this.ConfigIntervalOfAnalysisTxb.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.ConfigIntervalOfAnalysisTxb.DisplayMember = "0";
+            this.ConfigIntervalOfAnalysisTxb.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ConfigIntervalOfAnalysisTxb.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.ConfigIntervalOfAnalysisTxb.FormattingEnabled = true;
             this.ConfigIntervalOfAnalysisTxb.Items.AddRange(new object[] {
             "5s",
@@ -995,16 +972,16 @@ namespace UI
             "2w",
             "1mon"});
             this.ConfigIntervalOfAnalysisTxb.Location = new System.Drawing.Point(185, 89);
-            this.ConfigIntervalOfAnalysisTxb.Margin = new System.Windows.Forms.Padding(4);
+            this.ConfigIntervalOfAnalysisTxb.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.ConfigIntervalOfAnalysisTxb.Name = "ConfigIntervalOfAnalysisTxb";
             this.ConfigIntervalOfAnalysisTxb.Size = new System.Drawing.Size(90, 28);
             this.ConfigIntervalOfAnalysisTxb.TabIndex = 15;
-            this.ConfigIntervalOfAnalysisTxb.Text = "5s";
             // 
             // ConfigVolumeOfContractsTxb
             // 
-            this.ConfigVolumeOfContractsTxb.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ConfigVolumeOfContractsTxb.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ConfigVolumeOfContractsTxb.DisplayMember = "(none)";
+            this.ConfigVolumeOfContractsTxb.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.ConfigVolumeOfContractsTxb.FormattingEnabled = true;
             this.ConfigVolumeOfContractsTxb.Items.AddRange(new object[] {
             "1",
@@ -1013,16 +990,15 @@ namespace UI
             "4",
             "5"});
             this.ConfigVolumeOfContractsTxb.Location = new System.Drawing.Point(185, 28);
-            this.ConfigVolumeOfContractsTxb.Margin = new System.Windows.Forms.Padding(4);
+            this.ConfigVolumeOfContractsTxb.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.ConfigVolumeOfContractsTxb.Name = "ConfigVolumeOfContractsTxb";
             this.ConfigVolumeOfContractsTxb.Size = new System.Drawing.Size(90, 28);
             this.ConfigVolumeOfContractsTxb.TabIndex = 14;
-            this.ConfigVolumeOfContractsTxb.Text = "1";
             // 
             // ConfigAlgorithmSensivityTxb
             // 
-            this.ConfigAlgorithmSensivityTxb.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.ConfigAlgorithmSensivityTxb.DisplayMember = "0";
+            this.ConfigAlgorithmSensivityTxb.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ConfigAlgorithmSensivityTxb.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.ConfigAlgorithmSensivityTxb.FormattingEnabled = true;
             this.ConfigAlgorithmSensivityTxb.Items.AddRange(new object[] {
             "Minimal",
@@ -1030,16 +1006,15 @@ namespace UI
             "Medium",
             "High",
             "Ultra"});
-            this.ConfigAlgorithmSensivityTxb.Location = new System.Drawing.Point(185, 150);
-            this.ConfigAlgorithmSensivityTxb.Margin = new System.Windows.Forms.Padding(4);
+            this.ConfigAlgorithmSensivityTxb.Location = new System.Drawing.Point(185, 149);
+            this.ConfigAlgorithmSensivityTxb.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.ConfigAlgorithmSensivityTxb.Name = "ConfigAlgorithmSensivityTxb";
             this.ConfigAlgorithmSensivityTxb.Size = new System.Drawing.Size(90, 28);
             this.ConfigAlgorithmSensivityTxb.TabIndex = 13;
-            this.ConfigAlgorithmSensivityTxb.Text = "Minimal";
             // 
             // ConfigAlgorithmSensLbl
             // 
-            this.ConfigAlgorithmSensLbl.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ConfigAlgorithmSensLbl.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ConfigAlgorithmSensLbl.AutoSize = true;
             this.ConfigAlgorithmSensLbl.Location = new System.Drawing.Point(23, 148);
             this.ConfigAlgorithmSensLbl.Margin = new System.Windows.Forms.Padding(3);
@@ -1051,15 +1026,12 @@ namespace UI
             // 
             // SignUpGroupBox
             // 
-            this.SignUpGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.SignUpGroupBox.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.SignUpGroupBox.Controls.Add(this.SignUpPanel);
             this.SignUpGroupBox.Enabled = false;
             this.SignUpGroupBox.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.SignUpGroupBox.Location = new System.Drawing.Point(153, 0);
-            this.SignUpGroupBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.SignUpGroupBox.Location = new System.Drawing.Point(153, 12);
             this.SignUpGroupBox.Name = "SignUpGroupBox";
-            this.SignUpGroupBox.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.SignUpGroupBox.Size = new System.Drawing.Size(760, 325);
             this.SignUpGroupBox.TabIndex = 21;
             this.SignUpGroupBox.TabStop = false;
@@ -1089,7 +1061,7 @@ namespace UI
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(364, 237);
+            this.label10.Location = new System.Drawing.Point(363, 237);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(121, 20);
             this.label10.TabIndex = 30;
@@ -1109,7 +1081,7 @@ namespace UI
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(264, 238);
+            this.label2.Location = new System.Drawing.Point(264, 237);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(93, 20);
             this.label2.TabIndex = 28;
@@ -1128,15 +1100,12 @@ namespace UI
             // 
             // SignInGroupBox
             // 
-            this.SignInGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.SignInGroupBox.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.SignInGroupBox.Controls.Add(this.panel5);
             this.SignInGroupBox.Enabled = false;
             this.SignInGroupBox.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.SignInGroupBox.Location = new System.Drawing.Point(153, 0);
-            this.SignInGroupBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.SignInGroupBox.Location = new System.Drawing.Point(153, 12);
             this.SignInGroupBox.Name = "SignInGroupBox";
-            this.SignInGroupBox.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.SignInGroupBox.Size = new System.Drawing.Size(760, 325);
             this.SignInGroupBox.TabIndex = 22;
             this.SignInGroupBox.TabStop = false;
@@ -1157,8 +1126,7 @@ namespace UI
             // 
             // LoggedGroupBox
             // 
-            this.LoggedGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.LoggedGroupBox.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.LoggedGroupBox.Controls.Add(this.SetLicenseBtn);
             this.LoggedGroupBox.Controls.Add(this.label3);
             this.LoggedGroupBox.Controls.Add(this.OurWebsiteLnkLbl1);
@@ -1169,10 +1137,9 @@ namespace UI
             this.LoggedGroupBox.Controls.Add(this.SignOutButton);
             this.LoggedGroupBox.Enabled = false;
             this.LoggedGroupBox.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.LoggedGroupBox.Location = new System.Drawing.Point(153, 0);
-            this.LoggedGroupBox.Margin = new System.Windows.Forms.Padding(3, 2, 0, 2);
+            this.LoggedGroupBox.Location = new System.Drawing.Point(153, 12);
+            this.LoggedGroupBox.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
             this.LoggedGroupBox.Name = "LoggedGroupBox";
-            this.LoggedGroupBox.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.LoggedGroupBox.Size = new System.Drawing.Size(760, 325);
             this.LoggedGroupBox.TabIndex = 24;
             this.LoggedGroupBox.TabStop = false;
@@ -1184,7 +1151,7 @@ namespace UI
             this.SetLicenseBtn.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.SetLicenseBtn.Location = new System.Drawing.Point(673, 260);
             this.SetLicenseBtn.Name = "SetLicenseBtn";
-            this.SetLicenseBtn.Size = new System.Drawing.Size(84, 61);
+            this.SetLicenseBtn.Size = new System.Drawing.Size(85, 61);
             this.SetLicenseBtn.TabIndex = 28;
             this.SetLicenseBtn.Text = "Set license";
             this.SetLicenseBtn.UseVisualStyleBackColor = true;
@@ -1249,10 +1216,9 @@ namespace UI
             // SignOutButton
             // 
             this.SignOutButton.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.SignOutButton.Location = new System.Drawing.Point(238, 254);
-            this.SignOutButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.SignOutButton.Location = new System.Drawing.Point(238, 253);
             this.SignOutButton.Name = "SignOutButton";
-            this.SignOutButton.Size = new System.Drawing.Size(228, 60);
+            this.SignOutButton.Size = new System.Drawing.Size(229, 60);
             this.SignOutButton.TabIndex = 0;
             this.SignOutButton.Text = "Sign Out";
             this.SignOutButton.UseVisualStyleBackColor = true;
@@ -1280,10 +1246,11 @@ namespace UI
             // 
             // LeftPanel
             // 
+            this.LeftPanel.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.LeftPanel.Controls.Add(this.ShowMainMenu);
             this.LeftPanel.Controls.Add(this.ShowSignUpPanel);
             this.LeftPanel.Controls.Add(this.ShowSignInPanel);
-            this.LeftPanel.Location = new System.Drawing.Point(0, 0);
+            this.LeftPanel.Location = new System.Drawing.Point(0, 12);
             this.LeftPanel.Margin = new System.Windows.Forms.Padding(0);
             this.LeftPanel.Name = "LeftPanel";
             this.LeftPanel.Size = new System.Drawing.Size(150, 367);
@@ -1291,8 +1258,8 @@ namespace UI
             // 
             // RightPanel
             // 
-            this.RightPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.RightPanel.Location = new System.Drawing.Point(917, 0);
+            this.RightPanel.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.RightPanel.Location = new System.Drawing.Point(917, 12);
             this.RightPanel.Name = "RightPanel";
             this.RightPanel.Size = new System.Drawing.Size(150, 367);
             this.RightPanel.TabIndex = 28;
@@ -1305,7 +1272,7 @@ namespace UI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1067, 853);
+            this.ClientSize = new System.Drawing.Size(1067, 953);
             this.Controls.Add(this.Tabs);
             this.Controls.Add(this.RightPanel);
             this.Controls.Add(this.LeftPanel);
@@ -1313,7 +1280,6 @@ namespace UI
             this.Controls.Add(this.SignUpGroupBox);
             this.Controls.Add(this.SignInGroupBox);
             this.Controls.Add(this.LoggedGroupBox);
-            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "TradeBotUi";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "TradeBot";
@@ -1349,8 +1315,8 @@ namespace UI
         }
 
         #endregion
-        private ZedGraph.ZedGraphControl zedGraph;
-        private ZedGraph.ZedGraphControl zedGraph_1;
+        private ZedGraph.ZedGraphControl BalanceGraph;
+        private ZedGraph.ZedGraphControl OrderGraph;
         private System.Windows.Forms.TextBox ConfigAvailableBalanceTxb;
         private System.Windows.Forms.TextBox ConfigRequiredProfitTxb;
         private System.Windows.Forms.TextBox ConfigUpdatePriceRangeTxb;

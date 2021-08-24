@@ -22,12 +22,13 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
                 }
             });
         };
-
+        private MarginSubscribeRequest _request;
         private IObservable<MarginResponse> _stream;
         private readonly CancellationToken _token;
 
-        public UserMarginPublisher(BitmexWebsocketClient client, IObservable<MarginResponse> stream, CancellationToken token) : base(client, _action)
+        public UserMarginPublisher(BitmexWebsocketClient client, IObservable<MarginResponse> stream, MarginSubscribeRequest marginSubscribeRequest, CancellationToken token) : base(client, _action)
         {
+            _request = marginSubscribeRequest;
             _stream = stream;
             this._token = token;
         }
@@ -39,7 +40,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         public async Task SubscribeAsync(CancellationToken token)
         {
-            await base.SubscribeAsync(new MarginSubscribeRequest(), _stream, token);
+            await base.SubscribeAsync(_request, _stream, token);
 
         }
 
@@ -60,6 +61,12 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
                     _cache.Add(data);
                 }
             }
+        }
+
+        public async override Task Stop()
+        {
+            await UnSubscribeAsync(_request);
+            ClearCahce();
         }
     }
 }

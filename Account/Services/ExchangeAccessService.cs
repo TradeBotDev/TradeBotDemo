@@ -46,7 +46,12 @@ namespace AccountGRPC
                 // Получение данных о текущем входе (которому соответствует Id сессии) и информации об аккаунте.
                 var loginInfo = database.LoggedAccounts
                     .Where(login => login.SessionId == request.SessionId)
-                    .Include(account => account.Account).First();
+                    .Include(account => account.Account)
+                    .Include(account => account.Account.Licenses).First();
+
+                // Проверка на то, обладает ли пользователь лицензией. Если не обладает, возвращается сообщиние об ошибке.
+                if (loginInfo.Account.Licenses.Count() == 0)
+                    return await Task.FromResult(AddExchangeAccessReplies.LicenseNotFound());
 
                 // Проверка на то, была ли уже добавлена информация о добавляемой бирже.
                 bool isExists = database.ExchangeAccesses.Any(exchange =>

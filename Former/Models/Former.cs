@@ -37,7 +37,7 @@ namespace Former.Models
         private async Task PlaceCounterOrder(Order oldOrder, Order newComingOrder)
         {
             //число контрактов контр ордера (работает для полного и для частичного контр-ордера)
-            var quantity = oldOrder.Quantity - newComingOrder.Quantity;
+            var quantity = Convert.ToInt32(oldOrder.Quantity) != Convert.ToInt32(newComingOrder.Quantity) ? oldOrder.Quantity - newComingOrder.Quantity : oldOrder.Quantity;
             //тип ордера с которым необходимо выставить контр-ордер
             var type = oldOrder.Signature.Type == OrderType.ORDER_TYPE_BUY ? OrderType.ORDER_TYPE_SELL : OrderType.ORDER_TYPE_BUY;
             //цена контр ордера, которая зависит цены старого ордера и типа выставляемого ордера с учётом необходимого профита
@@ -71,11 +71,11 @@ namespace Former.Models
                     "{@Where}: Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sended to history",
                     "Former", newOrder.Id, newOrder.Price, newOrder.Quantity, ChangesType.CHANGES_TYPE_INSERT,
                     "Counter order placed");
-                //чмошник
                 //сообщаем об исполнении старого ордера истории
                 if (Convert.ToInt32(quantity) == Convert.ToInt32(oldOrder.Quantity))
                 {
-                    await _historyClient.WriteOrder(oldOrder, ChangesType.CHANGES_TYPE_DELETE,
+                    
+                    await _historyClient.WriteOrder(FormatDeletedOrder(oldOrder), ChangesType.CHANGES_TYPE_DELETE,
                         Converters.ConvertMetadata(_metadata), "Initial order filled");
                     Log.Information(
                         "{@Where}: Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sended to history",
@@ -101,6 +101,19 @@ namespace Former.Models
                 "{@Where}: Order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@ResponseCode} added to counter orders list {@ResponseMessage}",
                 "Former", placeResponse.OrderId, price, -quantity, type,
                 addResponse ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
+        }
+
+        private Order FormatDeletedOrder(Order unformattedOrder)
+        {
+            return new Order
+            {
+                Id = unformattedOrder.Id, LastUpdateDate = unformattedOrder.LastUpdateDate, Price = unformattedOrder.Price, Quantity = unformattedOrder.Quantity,
+                Signature = new OrderSignature
+                {
+                    Status = OrderStatus.ORDER_STATUS_CLOSED,
+                    Type = unformattedOrder.Signature.Type
+                }
+            };
         }
 
         /// <summary>

@@ -171,7 +171,6 @@ namespace UI
                     Email = login,
                     Password = password
                 });
-                //MessageBox.Show(password);
                 var sessionId = logResponse.SessionId;
                 _meta = new Metadata
                 {
@@ -179,6 +178,8 @@ namespace UI
                     { "slot", "XBTUSD" },
                     { "trademarket", "bitmex" }
                 };
+
+                await RegisterLicense();
 
                 _client.AddExchangeAccess(new AddExchangeAccessRequest
                 {
@@ -207,9 +208,6 @@ namespace UI
             {
                 return new DefaultResponse { Code = ReplyCode.Failure, Message = ""};
             }
-            
         }
-
-
     }
 }

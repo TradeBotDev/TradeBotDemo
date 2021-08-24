@@ -23,12 +23,13 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
                 }
             });
         };
-
+        private WalletSubscribeRequest _request;
         private IObservable<WalletResponse> _stream;
         private readonly CancellationToken _token;
 
-        public UserWalletPublisher(BitmexWebsocketClient client,IObservable<WalletResponse> stream, CancellationToken token) : base(client,_action)
+        public UserWalletPublisher(BitmexWebsocketClient client,IObservable<WalletResponse> stream, WalletSubscribeRequest walletSubscribeRequest, CancellationToken token) : base(client,_action)
         {
+            _request = walletSubscribeRequest;
             _stream = stream;
             this._token = token;
         }
@@ -40,7 +41,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         public async Task SubscribeAsync(CancellationToken token)
         {
-            await base.SubscribeAsync(new WalletSubscribeRequest(), _stream, token);
+            await base.SubscribeAsync(_request, _stream, token);
 
         }
 
@@ -73,6 +74,12 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
                 }
             }
+        }
+
+        public async override Task Stop()
+        {
+            await UnSubscribeAsync(_request);
+            ClearCahce();
         }
     }
 }

@@ -1,6 +1,6 @@
 # Команды для запуска:
 # Windows: docker build -t account:latest -f . ..
-# Windows: docker run --rm -it -p 5000:80 -e ASPNETCORE_URLS="http://+;" account
+# Windows: docker run --rm -it -p 5000:80 -e ASPNETCORE_URLS="http://+;" -e POSTGRES_CONNECTION_STRING=Host=host.docker.internal;Port=5432;Database=account;Username=postgres;Password=password account
 # Linux: sudo docker build -t account:latest -f Dockerfile ..
 # Linux: sudo docker run --rm -it -p 5000:80 -e ASPNETCORE_URLS="http://+;" account
 

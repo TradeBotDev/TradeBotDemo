@@ -25,8 +25,9 @@ namespace Facade
             {
                 using var response = Client.SubscribeEvents(new TradeBot.History.HistoryService.v1.SubscribeEventsRequest { Sessionid = request.Sessionid }, context.RequestHeaders);
                 Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", nameof(History_SubscribeEvents), request.Sessionid);
-                while (await response.ResponseStream.MoveNext())
+                while (await response.ResponseStream.MoveNext(context.CancellationToken))
                 {
+                    if (context.CancellationToken.IsCancellationRequested) throw new Exception();
                     switch (response.ResponseStream.Current.EventTypeCase)
                     {
                         case TradeBot.History.HistoryService.v1.SubscribeEventsResponse.EventTypeOneofCase.Balance:
@@ -62,13 +63,10 @@ namespace Facade
                             break;
                     }
                 }
-
-
             }
             catch (Exception e)
             {
                 Log.Error("{@Where}: {@MethodName} Exception: {@Exception}","Facade",nameof(History_SubscribeEvents),e.Message);
-                throw;
             }
         }
     }

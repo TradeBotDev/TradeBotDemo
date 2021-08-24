@@ -64,12 +64,25 @@ namespace Former.Models
 
             if (changesType == ChangesType.CHANGES_TYPE_DELETE)
             {
-                await _historyClient.WriteOrder(order, ChangesType.CHANGES_TYPE_DELETE, Converters.ConvertMetadata( _metadata), "Counter order filled");
+                await _historyClient.WriteOrder(FormatDeletedOrder(order), ChangesType.CHANGES_TYPE_DELETE, Converters.ConvertMetadata( _metadata), "Counter order filled");
                 Log.Information(
                     "{@Where}: Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sended to history",
                     "Former", order.Id, order.Price, order.Quantity, ChangesType.CHANGES_TYPE_DELETE,
                     "Counter order filled");
             }
+        }
+
+        private Order FormatDeletedOrder(Order unformattedOrder)
+        {
+            return new Order
+            {
+                Id = unformattedOrder.Id, LastUpdateDate = unformattedOrder.LastUpdateDate, Price = unformattedOrder.Price, Quantity = unformattedOrder.Quantity,
+                Signature = new OrderSignature
+                {
+                    Status = OrderStatus.ORDER_STATUS_CLOSED,
+                    Type = unformattedOrder.Signature.Type
+                }
+            };
         }
 
         private async Task BalanceHandleUpdate()

@@ -56,6 +56,11 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
                 _cache.Add(response.Success);
             }
         }
+
+        public async override Task Stop()
+        {
+            await Task.Run(() => ClearCahce());
+        }
     }
 }
 

@@ -23,10 +23,8 @@ namespace UI
         private readonly Dictionary<string, int> _sensitivityMap;
         private readonly FacadeClient _facadeClient;
         private bool _loggedIn;
-        private PointPairList _balanceList = new PointPairList();
-        private PointPairList _orderList = new PointPairList();
-        private DateTime lastDateBalance = new DateTime();
-        private DateTime lastDateOrder = new DateTime();
+        private PointPairList _balanceList = new ();
+        private PointPairList _orderList = new ();
         private struct IncomingMessage
         {
             public string SlotName;
@@ -276,20 +274,19 @@ namespace UI
             {
                 case ChangesType.Partitial:
                     InsertOrderToTable(0, incomingMessage.Status == OrderStatus.Open ? ActiveOrdersDataGridView : FilledOrdersDataGridView, incomingMessage);
-                    UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1, lastDateOrder);
+                    ProcessOrderUpdate(orderEvent.Time);
                     break;
                 case ChangesType.Insert:
                     InsertOrderToTable(0, ActiveOrdersDataGridView, incomingMessage);
                     WriteMessageToEventConsole(incomingMessage);
-                    UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1, lastDateOrder);
                     break;
 
                 case ChangesType.Update:
                     UpdateTable(ActiveOrdersDataGridView, incomingMessage);
-                    UpdateList(orderEvent.Order.Price.ToString(), orderEvent.Time, ref _orderList, zedGraph_1, lastDateOrder);
                     break;
 
                 case ChangesType.Delete:
+                    ProcessOrderUpdate(orderEvent.Time);
                     InsertOrderToTable(0, FilledOrdersDataGridView, incomingMessage);
                     DeleteFromTable(ActiveOrdersDataGridView, incomingMessage.Id);
                     WriteMessageToEventConsole(incomingMessage);
@@ -305,14 +302,16 @@ namespace UI
         private void HandleBalanceUpdate(PublishBalanceEvent balanceUpdate)
         {
             BalanceLabel.Text = $"{balanceUpdate.Balance.Value} {balanceUpdate.Balance.Currency}";
-            UpdateList(balanceUpdate.Balance.Value, balanceUpdate.Time, ref _balanceList, zedGraph, lastDateBalance);
+            ProcessBalanceUpdate(balanceUpdate.Balance.Value, balanceUpdate.Time);
         }
 
         private async void Start(string slotName)
         {
             WriteToJson(_configurations);
+            ActiveOrdersDataGridView.Rows.Clear();
+            FilledOrdersDataGridView.Rows.Clear();
             await _facadeClient.StartBot(slotName, GetConfig());
-            WriteMessageToEventConsole("Bot has been started!");
+            WriteMessageToEventConsole($"Bot has been started on {slotName}!");
         }
 
         private async void Stop(string slotName)
@@ -368,6 +367,7 @@ namespace UI
 
         private void OnValidatingTextBox(object sender, CancelEventArgs e)
         {
+            if (ActiveOrdersDataGridView.RowCount <= 0) return;
             if (!double.TryParse(((TextBox)sender).Text, out _))
             {
                 e.Cancel = true;
@@ -395,8 +395,17 @@ namespace UI
 
         private void ActiveOrdersDataGridView_SelectionChanged(object sender, EventArgs e)
         {
+            if (_configurations.Count <= 0) return;
             if (ActiveSlotsDataGridView.CurrentRow is not null)
-            SetConfiguration(_configurations[ActiveSlotsDataGridView.Rows[ActiveSlotsDataGridView.CurrentRow.Index].Cells[0].EditedFormattedValue.ToString()]);
+            {
+                var configurationState = _configurations.FirstOrDefault(x => x.Key == ActiveSlotsDataGridView
+                    .Rows[ActiveSlotsDataGridView.CurrentRow.Index].Cells[0].EditedFormattedValue
+                    .ToString()).Value;
+                if (configurationState is not null)
+                    SetConfiguration(configurationState);
+                else ClearConfigsTextBoxes();
+            }
+
         }
 
 
@@ -406,6 +415,7 @@ namespace UI
             if (e.ColumnIndex is -1 or 0) return;
             _configurations[ActiveSlotsDataGridView.Rows[ActiveSlotsDataGridView.CurrentRow.Index].Cells[0]
                 .EditedFormattedValue.ToString()] = GetConfiguration();
+            WriteToJson(_configurations);
             if (!CheckIfLogged()) return;
             var cellCheckBox = (DataGridViewCheckBoxCell)ActiveSlotsDataGridView.Rows[ActiveSlotsDataGridView.CurrentRow.Index].Cells[1];
             cellCheckBox.Value ??= false;
@@ -602,65 +612,85 @@ namespace UI
         #endregion
 
         #region DrawGraphs
-        private void UpdateList(string b, Timestamp time, ref PointPairList list, ZedGraph.ZedGraphControl graphControl, DateTime ld)
+
+        private void ProcessBalanceUpdate(string balance, Timestamp time)
         {
-            DateTime tm = TimeZoneInfo.ConvertTime(time.ToDateTime(), TimeZoneInfo.Local);//.ToString("HH:mm:ss dd.MM.yyyy");
-            if (double.TryParse(b, out double value))
-            {
-                if (ld.Day == tm.Day)
-                {
-                    list.RemoveAt(list.Count - 1);
-                }
-                list.Add(new XDate(tm), value);
-                ld = tm;
-                if (list.Count > 40)
-                {
-                    list.RemoveAt(0);
-                }
-                if (graphControl == zedGraph)
-                {
-                    lastDateBalance = tm;
-                }
-                else
-                {
-                    lastDateOrder = tm;
-                }
-            }
-            DrawGraph(graphControl, list);
+            balance = balance.Replace('.', ',');
+            var date = TimeZoneInfo.ConvertTime(time.ToDateTime(), TimeZoneInfo.Local);
+            if (double.TryParse(balance, out var doubleBalance))
+                UpdateBalanceGraphList(date, doubleBalance, time);
+            DrawGraph(BalanceGraph, _balanceList);
         }
-        private void DrawGraph(ZedGraph.ZedGraphControl graphControl, PointPairList list)
+
+        private void UpdateBalanceGraphList(DateTime date, double balance, Timestamp timestamp)
+        {
+            var index = _balanceList.LastOrDefault(x =>
+                DateTime.TryParse(new XDate(x.X).ToString(), out DateTime c) && c.Day == date.Day && c.Month == date.Month);
+            if (index != default(PointPair)) _balanceList.Remove(index);
+            _balanceList.Add(new XDate(date), balance);
+        }
+
+        private void ProcessOrderUpdate(Timestamp time)
+        {
+            var date = TimeZoneInfo.ConvertTime(time.ToDateTime(), TimeZoneInfo.Local);
+            UpdateOrderGraphList(date);
+            DrawGraph(OrderGraph, _orderList);
+        }
+
+        private void UpdateOrderGraphList(DateTime date)
+        {
+            var index = _orderList.LastOrDefault(x =>
+                DateTime.TryParse(new XDate(x.X).ToString(), out DateTime c) && c.Day == date.Day && c.Month == date.Month);
+            if (index != default(PointPair)) _orderList.Find(x => x == index).Y++;
+            else _orderList.Add(new XDate(date), 1);
+        }
+
+        private void DrawGraph(ZedGraphControl graphControl, PointPairList list)
         {
             GraphPane pane = graphControl.GraphPane;
 
             pane.CurveList.Clear();
-
-            //DateTime startDate = new DateTime(2021, 07, 0);
-
-            //int daysCount = 40;
-
-            //Random rnd = new Random();
-
-            //for (int i = 0; i < daysCount; i++)
-            //{
-            //    DateTime currentDate = startDate.AddDays(i);
-            //
-            //    
-            //    list.Add(new XDate(currentDate), yValue);
-            //}
-
+            
             LineItem myCurve = pane.AddCurve("", list, System.Drawing.Color.Blue, SymbolType.Circle);
-
+            myCurve.Line.Width = 2;
+            if(graphControl.Name.Contains("Balance"))
+            {
+                pane.Title.Text = "Balance graph";
+                pane.YAxis.Title.Text = "Balance, XBT";
+            }
+            else
+            {
+                pane.Title.Text = "Order graph";
+                pane.YAxis.Title.Text = "Filled orders";
+            }
             pane.XAxis.Type = AxisType.Date;
+            pane.XAxis.Title.Text = "Date";
+            
+            try
+            {
+                pane.YAxis.Scale.Min = list.Last().Y - 0.01;
+                pane.YAxis.Scale.Max = list.Last().Y + 0.01;
 
-            //pane.YAxis.Scale.Min = list.Last().Y-100;
-            //pane.YAxis.Scale.Max = list.Last().Y+100;
+                pane.XAxis.Scale.Min = new XDate(list.Last().X - 1);
+                pane.XAxis.Scale.Max = new XDate(list.Last().X + 1);
+            }
+            catch (Exception e)
+            {
 
-            //pane.XAxis.Scale.Min = new XDate(list.Last().X-1);
-            //pane.XAxis.Scale.Max = new XDate(list.Last().X+1);
+            }
+            
+            BalanceGraph.AxisChange();
 
-            zedGraph.AxisChange();
-
-            zedGraph.Invalidate();
+            BalanceGraph.Invalidate();
+        }
+        void zedGraph_ZoomEvent(ZedGraphControl sender, ZoomState oldState, ZoomState newState)
+        {
+            GraphPane pane = sender.GraphPane;
+            if(sender.Name.Contains("Balance"))
+            {
+                pane.YAxis.Scale.Max = 0.1;
+            }
+            pane.YAxis.Scale.Min = 0;
         }
 
         #endregion

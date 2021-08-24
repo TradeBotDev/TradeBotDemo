@@ -14,7 +14,7 @@ namespace AccountTests.LicenseServiceTests
         public LicenseService licenseService = new();
 
         // Метод, создающий временный аккаунт в процессе тестирования.
-        public Task<Task<LoginResponse>> GenerateLogin(string prefix)
+        public async Task<LoginResponse> GenerateLogin(string prefix)
         {
             // Запрос для регистрации.
             var registerRequest = new RegisterRequest
@@ -33,8 +33,8 @@ namespace AccountTests.LicenseServiceTests
 
             // Последовательно производится регистрация аккаунта, а затем вход в него, чтобы получить id
             // сессии и работать с ним.
-            return accountService.Register(registerRequest, null)
-                .ContinueWith(registerReply => accountService.Login(loginRequest, null));
+            return await accountService.Register(registerRequest, null)
+                .ContinueWith(async registerReply => await accountService.Login(loginRequest, null)).Result;
         }
     }
 }

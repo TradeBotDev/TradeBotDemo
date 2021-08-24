@@ -1,0 +1,76 @@
+﻿@using Website.Models
+@using Website.Controllers.Clients
+@using TradeBot.Facade.FacadeService.v1
+
+<!--Компонент, отображающий карточки бирж.-->
+<ExchangeList SessionId="@SessionId" AccountData="@AccountData" @ref="ExchangeListChild" />
+<!--Кнопка добавления биржи, которая включает отображение формы добавления.-->
+<div> <input class="button color_button" type="button" @onclick="Switch" value="Добавить новую биржу" /> </div>
+
+@if (isDisplayed) {
+	<div class="message_background">
+		<!--Форма добавления биржи. При отправке выполняется метод AddExchangeAccess, валидация проходит автоматически.-->
+        <EditForm Model="@addModel" OnValidSubmit="AddExchangeAccess" class="form floating_form">
+            <h3>Добавить биржу</h3>
+
+            <!--Вывод результата валидации и сообщений сервиса.-->
+            <DataAnnotationsValidator />
+            <ValidationSummary class="validation-errors" />
+            @if (!String.IsNullOrEmpty(replyMessage)) {
+                <p class="validation-message">@replyMessage</p>
+            }
+
+            <!--Поля ввода/выбора.-->
+            <p>Выберите биржу:</p>
+            <InputSelect @bind-Value="addModel.ExchangeCode" class="form_select">
+                <option value="1">Bitmex</option>
+            </InputSelect>
+            <p>Токен:</p>
+            <InputText @bind-Value="addModel.Token" class="form_input" type="text" name="Token" />
+            <p>Секрет:</p>
+            <InputText @bind-Value="addModel.Secret" class="form_input" type="text" name="Secret" />
+
+            <input class="button form_button" type="submit" value="Добавить" />
+            <!--Отключает отображение формы.-->
+            <input class="button form_close_button" type="button" @onclick="Switch" value="Закрыть" />
+        </EditForm>
+	</div>
+}
+
+@code {
+    private bool isDisplayed = false;
+    private AddExchangeAccessModel addModel = new();
+    private ExchangeList ExchangeListChild;
+    private string replyMessage;
+
+    // Передается из представления.
+    [Parameter] public string SessionId { get; set; }
+    [Parameter] public AccountDataModel AccountData { get; set; }
+
+    // Метод включения/отключения отображения формы.
+    private void Switch()
+    {
+        if (isDisplayed) isDisplayed = false;
+        else isDisplayed = true;
+        // Обновление компонента.
+        InvokeAsync(StateHasChanged);
+    }
+
+    // Метод добавления новой биржи.
+    private async void AddExchangeAccess()
+    {
+        // Отправка запроса в сервис (в случае, если валидация прошла успешно).
+        var reply = await ExchangeAccessClient.AddExchangeAccess(SessionId, addModel);
+        // Если добавление было завершено успешно, происходит просто закрытие формы.
+        if (reply.Result == ExchangeAccessActionCode.Successful)
+            Switch();
+        // Иначе на форму выводится сообщение об ошибке и она обновляется.
+        else
+        {
+            replyMessage = reply.Message;
+            await InvokeAsync(StateHasChanged);
+        }
+        // Обновление компонента со списком бирж.
+        ExchangeListChild.RefreshExchanges();
+    }
+}

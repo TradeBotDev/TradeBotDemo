@@ -1,4 +1,5 @@
-﻿using TradeBot.Account.AccountService.v1;
+﻿using System.Linq;
+using TradeBot.Account.AccountService.v1;
 using Xunit;
 
 namespace AccountTests.LicenseServiceTests
@@ -25,20 +26,28 @@ namespace AccountTests.LicenseServiceTests
         }
 
         [Fact]
-        public void SetLicenseToExistingAccount()
+        public async void SetLicenseToExistingAccount()
         {
             // Генерация аккаунта и добавление в него лицензии.
-            var reply = GenerateLogin("set_lic_to_ex").ContinueWith(login =>
-                licenseService.SetLicense(new SetLicenseRequest
+            var reply = await GenerateLogin("set_lic_to_ex").ContinueWith(async login =>
+                await licenseService.SetLicense(new SetLicenseRequest
                 {
-                    SessionId = login.Result.Result.SessionId,
+                    SessionId = login.Result.SessionId,
                     CardNumber = "1234123412341234",
-                    Product = ProductCode.Tradebot,
+                    Product = ProductCode.Unspecified,
                     Date = 1234,
                     Cvv = 123
                 }, null));
+
+            using (var database = new AccountGRPC.Models.AccountContext())
+            {
+                var licenses = database.Licenses.Where(license => license.Product == ProductCode.Unspecified);
+                database.Licenses.Remove(licenses.First());
+                database.SaveChanges();
+            }
+
             // Ожидается, что добавление лицензии будет успешным.
-            Assert.Equal(LicenseCode.Successful, reply.Result.Result.Code);
+            Assert.Equal(LicenseCode.Successful, reply.Result.Code);
         }
     }
 }

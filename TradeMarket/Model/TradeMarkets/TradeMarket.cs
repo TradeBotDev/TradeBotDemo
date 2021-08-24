@@ -4,6 +4,7 @@ using Bitmex.Client.Websocket.Responses.Instruments;
 using Bitmex.Client.Websocket.Responses.Orders;
 using Bitmex.Client.Websocket.Responses.Positions;
 using Bitmex.Client.Websocket.Responses.Wallets;
+using Serilog;
 using StackExchange.Redis;
 using System;
 using System.Collections.Concurrent;
@@ -69,6 +70,11 @@ namespace TradeMarket.Model.TradeMarkets
             {
                 throw new ArgumentException($"Publisher {nameof(publisher)} was null.");
             }
+            if(publisher.IsWorking == false)
+            {
+                await publisher.Start();
+            }
+            Log.Information("Added Handler {@Handler} for Publisher {@PublisherName} ",handler,publisher);
             publisher.Changed += handler;
             return publisher.Cache;
         }
@@ -119,7 +125,15 @@ namespace TradeMarket.Model.TradeMarkets
             await Task.Run(async () =>
             {
                 var contextPublisher = publisher.ContainsKey(context) ? publisher[context] : null;
+                Log.Information("Unsubscribing {@PublisherDictionary} {@Publisher}", publisher, contextPublisher);
                 await UnsubscribeFrom(contextPublisher, handler);
+                if(contextPublisher.SubscribersCount == 0)
+                {
+                    Log.Information("Stoping {@PublisherDictionary} {@Publisher}", publisher, contextPublisher);
+                    await contextPublisher.Stop();
+                    Log.Information("Removing {@PublisherDictionary} {@Publisher}", publisher, contextPublisher);
+                    publisher.Remove(context);
+                }
             });
         }
 
