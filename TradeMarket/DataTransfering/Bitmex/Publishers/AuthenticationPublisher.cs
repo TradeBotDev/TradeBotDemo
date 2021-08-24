@@ -17,9 +17,16 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         {
            await Task.Run(() =>
            {
-               var log = logger.ForContext<AuthenticationPublisher>();
-               log.Information("Response : @{Response}", response);
-               e?.Invoke(typeof(AuthenticationPublisher), new(response.Success, BitmexAction.Undefined));
+                var log = logger.ForContext<AuthenticationPublisher>();
+               try
+               {
+                    log.Information("Response : @{Response}", response);
+                    e?.Invoke(typeof(AuthenticationPublisher), new(response.Success, BitmexAction.Undefined));
+               }catch(Exception e)
+               {
+                   log.Warning(e.Message);
+                   log.Warning(e.StackTrace);
+               }
            });
         };
 

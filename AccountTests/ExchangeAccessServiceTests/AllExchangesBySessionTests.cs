@@ -1,5 +1,4 @@
-﻿using AccountGRPC.Models;
-using TradeBot.Account.AccountService.v1;
+﻿using TradeBot.Account.AccountService.v1;
 using Xunit;
 
 namespace AccountTests.ExchangeAccessServiceTests
@@ -32,7 +31,7 @@ namespace AccountTests.ExchangeAccessServiceTests
             // Последовательная регистрация и вход (внутри метода GenerateLogin), добавление информации о
             // доступе к бирже, а затем ее чтение.
             var reply = GenerateLogin("all_exs_from_acc")
-                .ContinueWith(loginReply => exchangeAccessService.AddExchangeAccess(GenerateRequest(loginReply.Result.Result.SessionId), null))
+                .ContinueWith(loginReply => exchangeAccessService.AddExchangeAccess(GenerateRequest(loginReply.Result.SessionId), null))
                 .ContinueWith(addExchangeReply => exchangeAccessService.AllExchangesBySession(
                     new AllExchangesBySessionRequest { SessionId = sessionId }, null));
 
@@ -48,7 +47,7 @@ namespace AccountTests.ExchangeAccessServiceTests
         {
             var reply = GenerateLogin("ex_not_exist")
                 .ContinueWith(loginReply => exchangeAccessService.AllExchangesBySession(
-                    new AllExchangesBySessionRequest { SessionId = loginReply.Result.Result.SessionId }, null));
+                    new AllExchangesBySessionRequest { SessionId = loginReply.Result.SessionId }, null));
 
             Assert.Equal(ExchangeAccessActionCode.IsNotFound, reply.Result.Result.Result);
             Assert.Empty(reply.Result.Result.Exchanges);

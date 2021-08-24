@@ -19,18 +19,24 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             await Task.Run(() =>
            {
                var log = logger.ForContext<UserOrderPublisher>();
-               foreach (var data in response.Data)
+               try
                {
-
-                    //при исполнении ордера с биржи прилетает не делит а апдейт и показывается что ордер "перестал работать"
-                    BitmexAction action = response.Action;
-                   if ((data.Price is null && data.OrderQty is null) || (data.WorkingIndicator is not null && data.WorkingIndicator == false))
+                   foreach (var data in response.Data)
                    {
-                       action = BitmexAction.Delete;
+                       //при исполнении ордера с биржи прилетает не делит а апдейт и показывается что ордер "перестал работать"
+                       BitmexAction action = response.Action;
+                       if ((data.Price is null && data.OrderQty is null) || (data.WorkingIndicator is not null && data.WorkingIndicator == false))
+                       {
+                           action = BitmexAction.Delete;
+                       }
+                        log.Information("Response : {@Response}", data);
+                        log.Information("User Order Recieved {@OrderId} {@OrderQuantity} @{OrderPrice} @{OrderAction}", data.OrderId, data.OrderQty, data.Price, action);
+                        e?.Invoke(typeof(UserOrderPublisher), new(data, action));
                    }
-                   log.Information("Response : {@Response}", data);
-                   log.Information("User Order Recieved {@OrderId} {@OrderQuantity} @{OrderPrice} @{OrderAction}", data.OrderId, data.OrderQty, data.Price, action);
-                   e?.Invoke(typeof(UserOrderPublisher), new(data, action));
+               }catch(Exception e)
+               {
+                   log.Warning(e.Message);
+                   log.Warning(e.StackTrace);
                }
            });
         };

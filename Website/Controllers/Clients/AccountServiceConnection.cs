@@ -13,18 +13,21 @@ namespace Website.Controllers.Clients
 		{
 			Log.Information($"AccountServiceConnection: вызван метод GetConnection.");
 
-			// Создание конфигурации, которая содержит в себе все настройки из файла appsettings.json.
-			var configuration = new ConfigurationBuilder()
-				.AddJsonFile("appsettings.json", optional: false)
-				.Build();
-			// Конвертация параметра с переключением строки подключения (для докера или локально).
-			bool useDocker = Convert.ToBoolean(configuration.GetSection("GrpcClients")["UseDocker"]);
+			// Получение из переменной окружения адреса Facade.
+			string connectionString = Environment.GetEnvironmentVariable("FACADE_CONNECTION_STRING");
 
-			// Если выбран докер, возвращается строка подключения к сервису, который тоже находится в докере.
-			if (useDocker)
-				return GrpcChannel.ForAddress(configuration.GetSection("GrpcClients")["FacadeServiceDocker"]);
-			// Иначе используется localhost
-			else return GrpcChannel.ForAddress(configuration.GetSection("GrpcClients")["FacadeServiceLocal"]);
+			// Если адрес Facade не был найден, происходит его получение из файла appsettings.json.
+			if (connectionString == null)
+			{
+				// Создание конфигурации, которая содержит в себе все настройки из файла appsettings.json.
+				var configuration = new ConfigurationBuilder()
+					.AddJsonFile("appsettings.json", optional: false)
+					.Build();
+				// Получение адреса Facade из appsettings.json и возврат результата.
+				return GrpcChannel.ForAddress(configuration.GetConnectionString("FacadeService"));
+			}
+			// Иначе используется он.
+			else return GrpcChannel.ForAddress(connectionString);
 		}
 	}
 }

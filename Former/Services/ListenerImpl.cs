@@ -23,7 +23,6 @@ namespace Former.Services
 
                 //ќт реле€ приход€т метаданные, по которым создаЄтс€ контекст 
                 var userContext = Contexts.GetUserContext(metadata.Sessionid, metadata.Trademarket, metadata.Slot);
-                //
                 Meta.GetMetadata(metadata.Sessionid, metadata.Trademarket, metadata.Slot);
 
                 //если поле Switch установленно в false, значит мы начинаем работу (или продолжаем еЄ), если установлено в true
@@ -31,8 +30,9 @@ namespace Former.Services
                 if (request.Request.Switch)
                 {
                     userContext.UnsubscribeStorage();
-                    await RedisClient.DeleteMetaEntries();
-                    await RedisClient.DeleteConfigurations(Meta.GetMetaList());
+                    RedisClient.DeleteMetaEntries();
+                    RedisClient.DeleteConfigurations(Meta.GetMetaList());
+                    Contexts.ClearContexts();
                 }
                 else
                 {

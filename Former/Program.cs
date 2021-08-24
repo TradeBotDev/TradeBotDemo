@@ -13,7 +13,7 @@ namespace Former
                 .MinimumLevel.Debug()
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
-                .WriteTo.Seq("http://localhost:5341")
+                .WriteTo.Seq(Environment.GetEnvironmentVariable("SEQ_CONNECTION_STRING"))
                 .CreateLogger();
             AppDomain.CurrentDomain.UnhandledException += (o,e) => Log.Logger.Fatal(e.ExceptionObject as Exception, "Unhandled exception");
             CreateHostBuilder(args).Build().Run();

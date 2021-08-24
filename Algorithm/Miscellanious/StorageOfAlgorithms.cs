@@ -1,4 +1,5 @@
 ﻿using Algorithm.Analysis;
+using Algorithm.Services;
 using Grpc.Core;
 using Serilog;
 using System;
@@ -16,7 +17,7 @@ namespace Algorithm.DataManipulation
         private static OrderPublisher orderPublisher = new();
         private static List<Thread> threadsWithAlgos = new();
 
-        public static void SendNewOrderToAllAlgos(Order order, Metadata metadata)
+        public static void SendNewOrderToAllAlgos(OrderWrapper order, Metadata metadata)
         {
             orderPublisher.Publish(order, metadata);
         }
@@ -51,8 +52,7 @@ namespace Algorithm.DataManipulation
             Log.Information("{@Where}: Initiated algorithm creation for user {@User}", "Algorithm", metadata.GetValue("sessionid"));
             bool result = algorithms.TryAdd(metadata, new AlgorithmBeta(metadata));
             if (result)
-            { 
-                
+            {     
                 orderPublisher.OrderIncomingEvent += GetAlgoByMeta(metadata).NewOrderAlert;
                 GetAlgoByMeta(metadata).ChangeSetting(setting);
                 GetAlgoByMeta(metadata).ChangeState();

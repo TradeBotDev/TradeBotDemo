@@ -19,10 +19,17 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
            await Task.Run(() =>
            {
                var log = logger.ForContext<UserPositionPublisher>();
-               foreach (var data in response.Data)
+               try
                {
-                   log.Information("Response : {@Response}", data);
-                   e?.Invoke(nameof(UserOrderPublisher), new(data, response.Action));
+                   foreach (var data in response.Data)
+                   {
+                        log.Information("Response : {@Response}", data);
+                       e?.Invoke(nameof(UserOrderPublisher), new(data, response.Action));
+                   }
+               }catch(Exception e)
+               {
+                   log.Warning(e.Message);
+                   log.Warning(e.StackTrace);
                }
            });
         };

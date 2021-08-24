@@ -34,7 +34,7 @@ namespace AccountTests.ExchangeAccessServiceTests
                 // Генерация нового пользователя и вход в него.
                 var reply = GenerateLogin("ex_to_acc")
                     .ContinueWith(loginReply => exchangeAccessService.AddExchangeAccess(
-                        GenerateRequest(loginReply.Result.Result.SessionId), null));
+                        GenerateRequest(loginReply.Result.SessionId), null));
 
                 // Ожидается, что добавление новой информации о доступе к бирже будет успешно завершено.
                 Assert.Equal(ExchangeAccessActionCode.Successful, reply.Result.Result.Result);

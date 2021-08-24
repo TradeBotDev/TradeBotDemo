@@ -16,8 +16,19 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             await Task.Run(() =>
             {
                 var log = logger.ForContext<PingPongPublisher>();
+                
+                try
+                {
                 log.Information("Response : {@Response}", response);
-                e?.Invoke(nameof(UserOrderPublisher), new(response.Message, BitmexAction.Insert));
+
+                    e?.Invoke(nameof(UserOrderPublisher), new(response.Message, BitmexAction.Insert));
+
+                }
+                catch (Exception e)
+                {
+                    log.Warning(e.Message);
+                    log.Warning(e.StackTrace);
+                } 
             });
         };
 

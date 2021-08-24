@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using System;
+using Serilog;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
@@ -44,7 +45,6 @@ namespace Former.Models
                 BuyMarketPrice = bid;
                 Log.Information("New buy market price {@BuyMarketPrice}", bid);
             }
-
             if (ask > 0)
             {
                 SellMarketPrice = ask;
@@ -73,13 +73,15 @@ namespace Former.Models
             //если пришедший ордер нашёлся в списке контр оредров, то это контр-ордер, о чём сигнализирует переменная itsCounterOrder
             var itsCounterOrder = CounterOrders.TryGetValue(id, out var counterOldOrder);
 
+            newComingOrder = InitOrderFromTM(newComingOrder);
+
             switch (changesType)
             {
                 case ChangesType.CHANGES_TYPE_PARTITIAL:
                     //если ордер пришёл с пометкой Partitial, то это либо контр-ордер, либо мой ордер, который потерял связь и стал
                     //контр ордером. И в том и другом случае его необходимо проинициализировать, то есть добавить в список контр-ордеров
                     //и сообщить о его прибытии UpdateHandler, чтобы он его отправил в сервис истории.
-                    AddOrder(id, InitPartialOrder(newComingOrder), CounterOrders);
+                    AddOrder(id, newComingOrder, CounterOrders);
                     HandleUpdateEvent?.Invoke(newComingOrder, ChangesType.CHANGES_TYPE_PARTITIAL);
                     return;
                 case ChangesType.CHANGES_TYPE_UPDATE when itsMyOrder:
@@ -89,7 +91,7 @@ namespace Former.Models
                     var updateMyOrderResponse = UpdateOrder(newComingOrder, MyOrders);
                     Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} updated {@ResponseCode}", "Former", myOldOrder.Id, myOldOrder.Price, myOldOrder.Quantity, myOldOrder.Signature.Type, updateMyOrderResponse ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
                     LockPlacingOrders(true);
-                    if (newComingOrder.Quantity > 0) await PlaceOrderEvent.Invoke(myOldOrder, newComingOrder);
+                    if (Math.Abs(newComingOrder.Quantity) < Math.Abs(myOldOrder.Quantity)) await PlaceOrderEvent.Invoke(myOldOrder, newComingOrder);
                     LockPlacingOrders(false);
                     break;
                 case ChangesType.CHANGES_TYPE_UPDATE when itsCounterOrder:
@@ -183,7 +185,7 @@ namespace Former.Models
         /// <summary>
         /// Из-за того, что инициализонные ордера приходят с биржи с положительным числом контрактов независимо от типа ордера, необходимо самому проинициализировать число контрактов
         /// </summary>
-        private Order InitPartialOrder(Order newComingOrder)
+        private Order InitOrderFromTM(Order newComingOrder)
         {
             return new Order
             {
@@ -191,7 +193,7 @@ namespace Former.Models
                 Price = newComingOrder.Price,
                 LastUpdateDate = newComingOrder.LastUpdateDate,
                 Signature = newComingOrder.Signature,
-                Quantity = newComingOrder.Signature.Type == OrderType.ORDER_TYPE_SELL ? -newComingOrder.Quantity : newComingOrder.Quantity
+                Quantity = newComingOrder.Signature.Type == OrderType.ORDER_TYPE_SELL ? -Math.Abs(newComingOrder.Quantity) : Math.Abs(newComingOrder.Quantity)
             };
 
         }
