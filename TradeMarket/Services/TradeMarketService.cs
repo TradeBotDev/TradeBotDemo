@@ -42,7 +42,7 @@ namespace TradeMarket.Services
         {
             return await Task.Run(async () =>
             {
-                var sessionId = meta.Get("sessionid").Value;
+                var sessionId = meta.GetValue("sessionid").Value;
                 var slot = meta.Get("slot").Value;
                 var trademarket = meta.Get("trademarket").Value;
 
@@ -215,7 +215,7 @@ namespace TradeMarket.Services
                    ForContext<TradeMarketService>().
                    ForContext("RPC Method", context.Method).
                    ForContext("RequestId", Guid.NewGuid().ToString()).
-                   ForContext("UserSessionId", context.RequestHeaders.Get("sessionid")).
+                   ForContext("UserSessionId", context.RequestHeaders.GetValue("sessionid")).
                    ForContext("Command", "Place");
 
             UserContext user = null;
@@ -263,7 +263,7 @@ namespace TradeMarket.Services
                    ForContext<TradeMarketService>().
                    ForContext("RPC Method", context.Method).
                    ForContext("RequestId", Guid.NewGuid().ToString()).
-                   ForContext("UserSessionId", context.RequestHeaders.Get("sessionid")).
+                   ForContext("UserSessionId", context.RequestHeaders.GetValue("sessionid")).
                    ForContext("Command", "Ammend");
 
             try
@@ -324,7 +324,7 @@ namespace TradeMarket.Services
                    ForContext<TradeMarketService>().
                    ForContext("RPC Method", context.Method).
                    ForContext("RequestId", Guid.NewGuid().ToString()).
-                   ForContext("UserSessionId", context.RequestHeaders.Get("sessionid")).
+                   ForContext("UserSessionId", context.RequestHeaders.GetValue("sessionid")).
                    ForContext("Command", "Delete");
             UserContext user = null;
             try
@@ -372,7 +372,7 @@ namespace TradeMarket.Services
                 ForContext<TradeMarketService>().
                 ForContext("RPC Method", context.Method).
                 ForContext("RequestId", Guid.NewGuid().ToString()).
-                ForContext("UserSessionId", context.RequestHeaders.Get("sessionid")).
+                ForContext("UserSessionId", context.RequestHeaders.GetValue("sessionid")).
                 ForContext("Topic", "Instrument");
 
             logger.Information("Request : {@Request}", request);
@@ -398,7 +398,7 @@ namespace TradeMarket.Services
                 ForContext<TradeMarketService>().
                 ForContext("RPC Method", context.Method).
                 ForContext("RequestId", Guid.NewGuid().ToString()).
-                ForContext("UserSessionId", context.RequestHeaders.Get("sessionid")).
+                ForContext("UserSessionId", context.RequestHeaders.GetValue("sessionid")).
                 ForContext("Topic", "Margin");
             logger.Information("Request : {@Request}", request);
 
@@ -424,7 +424,7 @@ namespace TradeMarket.Services
                ForContext<TradeMarketService>().
                ForContext("RPC Method", context.Method).
                ForContext("RequestId", Guid.NewGuid().ToString()).
-               ForContext("UserSessionId", context.RequestHeaders.Get("sessionid")).
+               ForContext("UserSessionId", context.RequestHeaders.GetValue("sessionid")).
                ForContext("Topic", "Position");
             logger.Information("Request : {@Request}", request);
 
@@ -448,7 +448,7 @@ namespace TradeMarket.Services
                ForContext<TradeMarketService>().
                ForContext("RPC Method", context.Method).
                ForContext("RequestId", Guid.NewGuid().ToString()).
-               ForContext("UserSessionId", context.RequestHeaders.Get("sessionid")).
+               ForContext("UserSessionId", context.RequestHeaders.GetValue("sessionid")).
                ForContext("Topic", "Orders");
             logger.Information("Request : {@Request}", request);
 
@@ -477,7 +477,7 @@ namespace TradeMarket.Services
                    ForContext<TradeMarketService>().
                    ForContext("RPC Method", context.Method).
                    ForContext("RequestId", Guid.NewGuid().ToString()).
-                   ForContext("UserSessionId", context.RequestHeaders.Get("sessionid")).
+                   ForContext("UserSessionId", context.RequestHeaders.GetValue("sessionid")).
                    ForContext("Topic", "BookLevel25");
             logger.Information("Request : {@Request}", request);
 
@@ -503,7 +503,7 @@ namespace TradeMarket.Services
                   ForContext<TradeMarketService>().
                   ForContext("RPC Method", context.Method).
                   ForContext("RequestId", Guid.NewGuid().ToString()).
-                  ForContext("UserSessionId", context.RequestHeaders.Get("sessionid")).
+                  ForContext("UserSessionId", context.RequestHeaders.GetValue("sessionid")).
                   ForContext("Topic", "Wallet");
 
             logger.Information("Request : {@Request}", request);
