@@ -16,8 +16,8 @@ namespace Website
 			// Создание и запуск сервера, если операционной системой не является Windows.
 			if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 			{
+				int.TryParse(Environment.GetEnvironmentVariable("METRICS_PORT") ?? "6008", out int port);
 				string host = Environment.GetEnvironmentVariable("METRICS_HOST") ?? "*";
-                int.TryParse(Environment.GetEnvironmentVariable("METRICS_PORT") ?? "6008", out int port);
 				var server = new MetricServer(hostname: host, port: port);
 				server.Start();
 			}

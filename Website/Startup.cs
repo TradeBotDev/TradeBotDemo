@@ -23,7 +23,7 @@ namespace Website
 			// Получение строки подключения к Seq.
 			string seqConnection = Environment.GetEnvironmentVariable("SEQ_CONNECTION_STRING");
 			if (seqConnection == null)
-				seqConnection = Configuration.GetConnectionString("Seq");
+				seqConnection = configuration.GetConnectionString("Seq");
 
 			// Добавление нового логгера, который будет выводить всю информацию в консоль.
 			Log.Logger = new LoggerConfiguration()
