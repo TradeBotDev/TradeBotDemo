@@ -2,6 +2,7 @@
 # docker run -p 5432:5432 -d -e POSTGRES_PASSWORD=password -e POSTGRES_USER=postgres -e POSTGRES_DB=postgresdb postgres
 # docker run --rm -it -p 5000:80 -e ASPNETCORE_URLS="http://+;" -e POSTGRES_CONNECTION_STRING=Host=host.docker.internal;Port=5432;Database=account;Username=postgres;Password=password account
 # docker run -p 6379:6379 -d redis
+# docker run --name seq -d -e ACCEPT_EULA=Y -p 5341:80 datalust/seq:latest
 version: "3.9"
 
 services:
@@ -11,14 +12,21 @@ services:
     ports:
       - 5432:5432
     environment:
-        POSTGRES_PASSWORD: "password"
-        POSTGRES_USER: "postgres"
-        POSTGRES_DB: "postgresdb"
+      POSTGRES_PASSWORD: "password"
+      POSTGRES_USER: "postgres"
+      POSTGRES_DB: "postgresdb"
   redisdb:
     image: redis
     container_name: rediscontainer
     ports:
       - 6379:6379
+  seq:
+    image: seq
+    container_name: seqcontainer
+    ports:
+     - 5341:80
+    environment:
+      ACCEPT_EULA: "Y"
   account:
     image: account
     container_name: accountcontainer
@@ -31,6 +39,7 @@ services:
       - .%USERPROFILE%\.aspnet\https:/https/
     environment:
       POSTGRES_CONNECTION_STRING: "Host=host.docker.internal;Port=5432;Database=accountdb;Username=postgres;Password=password"
+      SEQ_CONNECTION_STRING: "http://host.docker.internal:5341"
   trademarket:
     image: trademarket
     container_name: trademarketcontainer
@@ -45,6 +54,7 @@ services:
       ACCOUNT_CONNECTION_STRING: "http://host.docker.internal:5000"
       ASPNETCORE_ENVIRONMENT: "Development"
       REDIS_CONNECTION_STRING: "host.docker.internal:6379"
+      SEQ_CONNTECTION_STRING: "http://host.docker.internal:5341"
   facade:
     image: facade
     container_name: facadecontainer
@@ -60,6 +70,7 @@ services:
       RELAY_CONNECTION_STRING: "http://host.docker.internal:5004"
       ASPNETCORE_ENVIRONMENT: "Development"
       HISTORY_CONNECTION_STRING: "http://host.docker.internal:5007"
+      SEQ_CONNECTION_STRING: "http://host.docker.internal:5341"
       TRADEMARKET_CONNECTION_STRING: "http://host.docker.internal:5005"
   relay:
     image: relay
@@ -75,6 +86,7 @@ services:
       ALGORITHM_CONNECTION_STRING: "http://host.docker.internal:5006"
       FORMER_CONNECTION_STRING: "http://host.docker.internal:5003"
       ASPNETCORE_ENVIRONMENT: "Development"
+      SEQ_CONNECTION_STRING: "http://host.docker.internal:5341"
       TRADEMARKET_CONNECTION_STRING: "http://host.docker.internal:5005"
   algorithm:
     image: algorithm
@@ -87,6 +99,7 @@ services:
     volumes:
       - .%USERPROFILE%\.aspnet\https:/https/
     environment:
+      SEQ_CONNECTION_STRING: "http://host.docker.internal:5341"
       FORMER_CONNECTION_STRING: "http://host.docker.internal:5003"
       ASPNETCORE_ENVIRONMENT: "Development"
   history:
@@ -102,6 +115,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
       POSTGRES_CONNECTION_STRING: "Host=host.docker.internal;Port=5432;Database=historydb;Username=postgres;Password=password"
+      SEQ_CONNECTION_STRING: "http://host.docker.internal:5341"
   former:
     image: former
     container_name: formercontainer
@@ -115,5 +129,18 @@ services:
     environment:
       HISTORY_CONNECTION_STRING: "http://host.docker.internal:5007"
       TRADEMARKET_CONNECTION_STRING: "http://host.docker.internal:5005"
+      SEQ_CONNECTION_STRING: "http://host.docker.internal:5341"
       RETRY_DELAY: "10000"
-    
+  website:
+    image: website
+    container_name: websitecontainer
+    build:      
+      context: .
+      dockerfile: ./Website/Dockerfile
+    ports:
+      - 5008:80
+    volumes:
+      - .%USERPROFILE%\.aspnet\https:/https/
+    environment:
+      FACADE_CONNECTION_STRING: "http://host.docker.internal:5002"
+      SEQ_CONNECTION_STRING: "http://host.docker.internal:5341"

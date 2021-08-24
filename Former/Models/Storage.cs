@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using System;
+using Serilog;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
@@ -44,7 +45,6 @@ namespace Former.Models
                 BuyMarketPrice = bid;
                 Log.Information("New buy market price {@BuyMarketPrice}", bid);
             }
-
             if (ask > 0)
             {
                 SellMarketPrice = ask;
@@ -91,7 +91,7 @@ namespace Former.Models
                     var updateMyOrderResponse = UpdateOrder(newComingOrder, MyOrders);
                     Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} updated {@ResponseCode}", "Former", myOldOrder.Id, myOldOrder.Price, myOldOrder.Quantity, myOldOrder.Signature.Type, updateMyOrderResponse ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
                     LockPlacingOrders(true);
-                    if (newComingOrder.Quantity > 0) await PlaceOrderEvent.Invoke(myOldOrder, newComingOrder);
+                    if (Math.Abs(newComingOrder.Quantity) < Math.Abs(myOldOrder.Quantity)) await PlaceOrderEvent.Invoke(myOldOrder, newComingOrder);
                     LockPlacingOrders(false);
                     break;
                 case ChangesType.CHANGES_TYPE_UPDATE when itsCounterOrder:
@@ -193,7 +193,7 @@ namespace Former.Models
                 Price = newComingOrder.Price,
                 LastUpdateDate = newComingOrder.LastUpdateDate,
                 Signature = newComingOrder.Signature,
-                Quantity = newComingOrder.Signature.Type == OrderType.ORDER_TYPE_SELL ? -newComingOrder.Quantity : newComingOrder.Quantity
+                Quantity = newComingOrder.Signature.Type == OrderType.ORDER_TYPE_SELL ? -Math.Abs(newComingOrder.Quantity) : Math.Abs(newComingOrder.Quantity)
             };
 
         }

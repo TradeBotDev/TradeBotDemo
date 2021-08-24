@@ -128,9 +128,9 @@ namespace TradeMarket.Services
                 Id = order.OrderId.ToString(),
                 LastUpdateDate = new Google.Protobuf.WellKnownTypes.Timestamp()
                 {
-                    Seconds = order.Timestamp.HasValue ? order.Timestamp.Value.Second : DateTime.Now.Second
+                    Seconds = order.Timestamp?.Second ?? DateTime.Now.Second
                 },
-                Price = order.Price.HasValue ? order.Price.Value : default,
+                Price = order.Price ?? default,
                 Quantity = order.OrderQty.HasValue ? (int)order.OrderQty.Value : default
             };
         }
@@ -155,7 +155,20 @@ namespace TradeMarket.Services
 
         public static TradeBot.Common.v1.OrderType ConvertOrderType(Order order)
         {
-            return order.Side == BitmexSide.Buy ? TradeBot.Common.v1.OrderType.Buy : TradeBot.Common.v1.OrderType.Sell;
+            switch (order.Side)
+            {
+                case BitmexSide.Undefined:
+                    return OrderType.Unspecified;
+                    break;
+                case BitmexSide.Buy:
+                    return OrderType.Buy;
+                    break;
+                case BitmexSide.Sell:
+                    return OrderType.Sell;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         public static TradeBot.Common.v1.OrderType ConvertOrderType(BookLevel book)

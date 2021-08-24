@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
+using System;
 using System.IO;
 using Serilog;
 using AccountGRPC.Models;
@@ -14,11 +17,21 @@ namespace AccountGRPC
     {
         public Startup()
         {
+            // Получение данных из файла appsettings.json.
+            var configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: false)
+                .Build();
+
+            // Получение строки подключения к Seq.
+            string seqConnection = Environment.GetEnvironmentVariable("SEQ_CONNECTION_STRING");
+            if (seqConnection == null)
+                seqConnection = configuration.GetConnectionString("Seq");
+
             // Добавление нового логгера, который будет выводить всю информацию в консоль.
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
-                .WriteTo.Seq("http://localhost:5341")
+                .WriteTo.Seq(seqConnection)
                 .CreateLogger();
         }
 

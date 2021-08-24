@@ -16,9 +16,17 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         {
             await Task.Run(() =>
            {
-               foreach (var data in response.Data)
+               try
                {
-                   e?.Invoke(nameof(UserOrderPublisher), new(data, response.Action));
+                   foreach (var data in response.Data)
+                   {
+                       e?.Invoke(nameof(UserOrderPublisher), new(data, response.Action));
+                   }
+               }
+               catch(Exception e)
+               {
+                   Log.Warning(e.Message);
+                   Log.Warning(e.StackTrace);
                }
            });
         };

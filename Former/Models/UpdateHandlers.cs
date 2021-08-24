@@ -46,7 +46,7 @@ namespace Former.Models
             //но не использует =
             if (Math.Abs(_storage.SellMarketPrice - _oldMarketSellPrice) > 0.4 ||
                 Math.Abs(_oldMarketBuyPrice - _storage.BuyMarketPrice) > 0.4) await MarketPriceHandleUpdate();
-            if (_oldTotalBalance != _storage.TotalBalance) await BalanceHandleUpdate();
+            if (_storage.TotalBalance > 0 && Math.Abs(_oldTotalBalance - _storage.TotalBalance) > 0) await BalanceHandleUpdate();
             if (order is not null) await OrderUpdateHandle(changesType, order);
         }
 
