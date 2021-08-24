@@ -4,9 +4,6 @@ using Algorithm.DataManipulation;
 using Algorithm.Services;
 using Grpc.Core;
 using Serilog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using TradeBot.Common.v1;
 
 namespace Algorithm.Analysis
@@ -21,19 +18,18 @@ namespace Algorithm.Analysis
         //this decision is then sent to Former service which does what it can with it 
 
         //algo components
-        private DataCollector _dc;
-        private PointMaker _pm;
-        private DecisionMaker _dm;
-        private ITrendSender _ps;
+        private readonly DataCollector _dc;
+        private readonly PointMaker _pm;
+        private readonly DecisionMaker _dm;
+        private readonly ITrendSender _ts;
 
         //publishers to coordinate the components
-        private PointPublisher _pointPublisher;
-        private DecisionPublisher _decisionPublisher;
+        private readonly PointPublisher _pointPublisher;
+        private readonly DecisionPublisher _decisionPublisher;
 
         private bool _isStopped = true;
-        private int _precision = 0;
 
-        private Metadata _metadata;
+        private readonly Metadata _metadata;
 
         public bool GetState()
         {
@@ -50,7 +46,7 @@ namespace Algorithm.Analysis
             _dm = new(_decisionPublisher, _pointPublisher);
             _dc = new(_pointPublisher);
             _pm = new();
-            _ps = new TrendSender(_decisionPublisher, _metadata);
+            _ts = new TrendSender(_decisionPublisher, _metadata);
 
             Log.Information("{@Where}: Algorithm for user {@User} has been created", "Algorithm", metadata.GetValue("sessionid"));
         }
@@ -65,7 +61,7 @@ namespace Algorithm.Analysis
 
         public void ChangeSetting(AlgorithmInfo settings)
         {
-            _precision = settings.Sensitivity;
+            _dm.ChangeSensitivity(settings.Sensitivity);
             _pm.SetPointInterval((int)settings.Interval.Seconds * 1000 / 5);
             _dc.ClearAllData();
             Log.Information("{@Where}:Settings changed", "Algorithm");

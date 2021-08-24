@@ -20,7 +20,7 @@ namespace Algorithm.Components
         private int _durationInPoints = 5;
 
         //0 - minimal, 1 - low, 2 - medium, 3 - high, 4 - max
-        private int _precision = 0;
+        private int _precision;
         private DecisionPublisher _decisionPublisher;
         private PointPublisher _pointPublisher;
         public DecisionMaker(DecisionPublisher decisionPublisher, PointPublisher pointPublisher)
@@ -29,13 +29,13 @@ namespace Algorithm.Components
             _decisionPublisher = decisionPublisher;
             _pointPublisher = pointPublisher;
             _pointPublisher.PointMadeEvent += NewPointAlert;
+            _precision = 0;
         }
 
         //when a new point is made algo adds it to its storage and checks if it has enough to initiate analysis 
         //if the storage is overfilled we remove the oldest point
         private void NewPointAlert(KeyValuePair<DateTime, double> point)
         {
-            Log.Information("{@Where}: Received a point for slot {@Slot}", "Algorithm", _metadata.GetValue("slot"));
             _storage.Add(point.Key, point.Value);
 
             if (_storage.Count > _durationInPoints)
@@ -253,6 +253,11 @@ namespace Algorithm.Components
         private static double CalculateSMA(List<double> points)
         {
             return points.Sum() / points.Count;
+        }
+
+        public void ChangeSensitivity (int setting)
+        {
+            _precision = setting; 
         }
     }
 }
