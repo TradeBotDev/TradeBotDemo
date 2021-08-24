@@ -4,6 +4,7 @@
       "commandName": "Project",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
+        "SEQ_CONNECTION_STRING": "http://localhost:5341",
         "POSTGRES_CONNECTION_STRING": "Host=localhost;Port=5432;Database=historydb;Username=postgres;Password=password"
       },
       "dotnetRunMessages": "true",

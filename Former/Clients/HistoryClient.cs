@@ -88,7 +88,7 @@ namespace Former.Clients
         {
             PublishEventResponse response = null;
 
-            async Task PublishBalanceUpdateFunc()
+            async Task PublishOrderUpdateFunc()
             {
                 response = await _client.PublishEventAsync(new PublishEventRequest
                 {
@@ -99,11 +99,10 @@ namespace Former.Clients
                         Time = new Timestamp { Seconds = DateTimeOffset.Now.ToUnixTimeSeconds() },
                         Message = message, SlotName = meta.GetValue("slot")
                     }
-
                 });
             }
 
-            await ConnectionTester(PublishBalanceUpdateFunc);
+            await ConnectionTester(PublishOrderUpdateFunc);
             return response;
         }
 

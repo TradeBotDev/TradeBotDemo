@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Prometheus;
+using Prometheus.SystemMetrics;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -52,6 +54,7 @@ namespace TradeMarket
                 return res;
             });
             services.AddSingleton(new BitmexRestfulClient(BitmexRestufllLink.Testnet));
+            services.AddSystemMetrics();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -63,6 +66,7 @@ namespace TradeMarket
             }
 
             app.UseRouting();
+            app.UseGrpcMetrics();
 
             app.UseEndpoints(endpoints =>
             {

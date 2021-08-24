@@ -21,7 +21,7 @@ services:
     ports:
       - 6379:6379
   seq:
-    image: seq
+    image: datalust/seq
     container_name: seqcontainer
     ports:
      - 5341:80
@@ -39,6 +39,7 @@ services:
       - .%USERPROFILE%\.aspnet\https:/https/
     environment:
       POSTGRES_CONNECTION_STRING: "Host=host.docker.internal;Port=5432;Database=accountdb;Username=postgres;Password=password"
+      SEQ_CONNECTION_STRING: "http://host.docker.internal:5341"
   trademarket:
     image: trademarket
     container_name: trademarketcontainer
@@ -87,6 +88,7 @@ services:
       ASPNETCORE_ENVIRONMENT: "Development"
       SEQ_CONNECTION_STRING: "http://host.docker.internal:5341"
       TRADEMARKET_CONNECTION_STRING: "http://host.docker.internal:5005"
+      REDIS_CONNECTION_STRING: "host.docker.internal:6379"
   algorithm:
     image: algorithm
     container_name: algorithmcontainer
@@ -98,6 +100,7 @@ services:
     volumes:
       - .%USERPROFILE%\.aspnet\https:/https/
     environment:
+      SEQ_CONNECTION_STRING: "http://host.docker.internal:5341"
       FORMER_CONNECTION_STRING: "http://host.docker.internal:5003"
       ASPNETCORE_ENVIRONMENT: "Development"
   history:
@@ -113,6 +116,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
       POSTGRES_CONNECTION_STRING: "Host=host.docker.internal;Port=5432;Database=historydb;Username=postgres;Password=password"
+      SEQ_CONNECTION_STRING: "http://host.docker.internal:5341"
   former:
     image: former
     container_name: formercontainer
@@ -126,5 +130,19 @@ services:
     environment:
       HISTORY_CONNECTION_STRING: "http://host.docker.internal:5007"
       TRADEMARKET_CONNECTION_STRING: "http://host.docker.internal:5005"
+      SEQ_CONNECTION_STRING: "http://host.docker.internal:5341"
       RETRY_DELAY: "10000"
-    
+      REDIS_CONNECTION_STRING: "host.docker.internal:6379"
+  website:
+    image: website
+    container_name: websitecontainer
+    build:      
+      context: .
+      dockerfile: ./Website/Dockerfile
+    ports:
+      - 5008:80
+    volumes:
+      - .%USERPROFILE%\.aspnet\https:/https/
+    environment:
+      FACADE_CONNECTION_STRING: "http://host.docker.internal:5002"
+      SEQ_CONNECTION_STRING: "http://host.docker.internal:5341"

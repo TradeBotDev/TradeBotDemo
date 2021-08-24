@@ -44,30 +44,39 @@ namespace TradeMarket.Model.UserContexts.Builders
 
         private delegate Task<UserContext> BuildContextDeligate(string sessionId,string slotName,string tradeMarketName,CancellationToken token);
 
-        internal BitmexWebsocketClient CreateWebsocketClient()
+        internal BitmexWebsocketClient CreateWebsocketClient(ILogger logger)
         {
+            var log = logger.ForContext("Method", nameof(CreateWebsocketClient));
+            logger.Information("Creating new BitmexWebsocketClient");
             var communicator = new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketTestnetUrl);
             var res = new BitmexWebsocketClient(communicator);
             communicator.Start();
             return res;
         }
 
-        internal async Task<UserContext> BuildUserContextAsync(string sessionId, string slotName, string tradeMarketName,CancellationToken token)
+        internal async Task<UserContext> BuildUserContextAsync(
+            string sessionId, 
+            string slotName, 
+            string tradeMarketName,
+            CancellationToken token,
+            Serilog.ILogger logger)
         {
             return await Task.Run(async () =>
             {
+                var log = logger.ForContext("Method", nameof(BuildUserContextAsync));
                 _builder.AddUniqueInformation(slotName,sessionId);
                 var keySecretPair = await _accountClient.GetUserInfoAsync(sessionId);
                 var userContextBuilder = new UserContextBuilder(_builder);
                 userContextBuilder
                 .AddKeySecret(key:keySecretPair.Key,secret: keySecretPair.Secret)
-                .AddWebSocketClient(CreateWebsocketClient())
+                .AddWebSocketClient(CreateWebsocketClient(log))
                 .AddTradeMarket(_tradeMarketFactory.GetTradeMarket(tradeMarketName));
-                return await userContextBuilder.InitUser(token);
+                return await userContextBuilder.InitUser(token,log);
             });
         }
 
-        internal async Task<CommonContext> BuildCommonContextAsync(string sessioid,string slotName,string tradeMarketName,CancellationToken token)
+        internal async Task<CommonContext> BuildCommonContextAsync(
+            string sessioid,string slotName,string tradeMarketName,CancellationToken token)
         {
             return await Task.Run(() =>
             {
@@ -85,9 +94,14 @@ namespace TradeMarket.Model.UserContexts.Builders
         private readonly SemaphoreSlim _userContextSemaphore = new SemaphoreSlim(1);
 
 
-        public async Task<UserContext> GetUserContextAsync(ContextFilter filter, CancellationToken token)
+        public async Task<UserContext> GetUserContextAsync(
+            ContextFilter filter, 
+            CancellationToken token,
+            ILogger logger)
         {
+            var log = logger.ForContext<ContextDirector>().ForContext("Method", nameof(GetUserContextAsync));
             UserContext userContext = null;
+            log.Debug("Locking {@Semephore}", _userContextSemaphore);
             await _userContextSemaphore.WaitAsync();
             try
             {
@@ -98,21 +112,26 @@ namespace TradeMarket.Model.UserContexts.Builders
                 if (userContext is null)
                 {
                     Log.Logger.Information("Creating new UserContext");
-                    userContext = await BuildUserContextAsync(filter.SessionId, filter.SlotName, filter.TradeMarketName,token);
+                    userContext = await BuildUserContextAsync(filter.SessionId, filter.SlotName, filter.TradeMarketName,token,log);
                     RegisteredUserContexts.Add(userContext);
                 }
             }
             finally
             {
+                log.Debug("Releasing {@Semephore}", _userContextSemaphore);
                 _userContextSemaphore.Release();
             }
+            log = log.ForContext("Context", userContext);
             try
             {
+                log.Debug("Awaiting Autharization Task");
                 return await userContext.AutharizationCompleted.Task;
             }
             catch
             {
+                log.Warning("Autharization failer");
                 RegisteredUserContexts.Remove(userContext);
+                log.Warning("Removed context");
                 throw;
             }
         }
