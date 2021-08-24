@@ -70,6 +70,7 @@ services:
       RELAY_CONNECTION_STRING: "http://host.docker.internal:5004"
       ASPNETCORE_ENVIRONMENT: "Development"
       HISTORY_CONNECTION_STRING: "http://host.docker.internal:5007"
+      SEQ_CONNECTION_STRING: "http://host.docker.internal:5341"
       TRADEMARKET_CONNECTION_STRING: "http://host.docker.internal:5005"
   relay:
     image: relay
@@ -85,6 +86,7 @@ services:
       ALGORITHM_CONNECTION_STRING: "http://host.docker.internal:5006"
       FORMER_CONNECTION_STRING: "http://host.docker.internal:5003"
       ASPNETCORE_ENVIRONMENT: "Development"
+      SEQ_CONNECTION_STRING: "http://host.docker.internal:5341"
       TRADEMARKET_CONNECTION_STRING: "http://host.docker.internal:5005"
   algorithm:
     image: algorithm
@@ -97,6 +99,7 @@ services:
     volumes:
       - .%USERPROFILE%\.aspnet\https:/https/
     environment:
+      SEQ_CONNECTION_STRING: "http://host.docker.internal:5341"
       FORMER_CONNECTION_STRING: "http://host.docker.internal:5003"
       ASPNETCORE_ENVIRONMENT: "Development"
   history:
@@ -125,6 +128,7 @@ services:
     environment:
       HISTORY_CONNECTION_STRING: "http://host.docker.internal:5007"
       TRADEMARKET_CONNECTION_STRING: "http://host.docker.internal:5005"
+      SEQ_CONNECTION_STRING: "http://host.docker.internal:5341"
       RETRY_DELAY: "10000"
   website:
     image: website
