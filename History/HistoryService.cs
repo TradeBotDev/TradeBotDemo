@@ -19,15 +19,15 @@ namespace History
         private static readonly ObservableCollection<BalanceChange> BalanceCollection = new();
         private static readonly ObservableCollection<OrderChange> OrderCollection = new();
 
-        public override async Task<PublishEventResponse> PublishEvent(PublishEventRequest request, ServerCallContext context)
+        public override async Task<PublishEventResponse> PublishEvent(PublishEventRequest request,
+            ServerCallContext context)
         {
-            switch (request.EventTypeCase)
-            {
-                case PublishEventRequest.EventTypeOneofCase.None:
-                    break;
-                case PublishEventRequest.EventTypeOneofCase.Balance:
-                    using (var db = new DataContext())
-                    {
+            await using (var db = new DataContext())
+                switch (request.EventTypeCase)
+                {
+                    case PublishEventRequest.EventTypeOneofCase.None:
+                        break;
+                    case PublishEventRequest.EventTypeOneofCase.Balance:
                         BalanceWrapper bw = Converter.ToBalanceWrapper(request.Balance.Balance);
                         BalanceChange bc = new BalanceChange
                         {
@@ -39,13 +39,13 @@ namespace History
                         db.Add(bw);
                         db.Add(bc);
                         db.SaveChanges();
-                        Log.Information("{@Where}: Recorded a change of balance for user {@User}", "History", bc.SessionId);
+                        Log.Information("{@Where}: Recorded a change of balance for user {@User}", "History",
+                            bc.SessionId);
                         Log.Information("{@Where}: New balance: " + bw.Value + bw.Currency, "History");
-                    }
-                    break;
-                case PublishEventRequest.EventTypeOneofCase.Order:
-                    using (var db = new DataContext())
-                    {
+
+                        break;
+                    case PublishEventRequest.EventTypeOneofCase.Order:
+
                         OrderWrapper ow = Converter.ToOrderWrapper(request.Order.Order);
                         OrderChange oc = new OrderChange
                         {
@@ -57,71 +57,66 @@ namespace History
                             SlotName = request.Order.SlotName
                         };
                         OrderCollection.Add(oc);
-                        if (oc.ChangesType == ChangesType.CHANGES_TYPE_DELETE && oc.Message != "Removed by user" && oc.Message != "")
+                        if (oc.ChangesType == ChangesType.CHANGES_TYPE_DELETE && oc.Message != "Removed by user" &&
+                            oc.Message != "")
                         {
                             db.Add(ow);
                             db.Add(oc);
                             db.SaveChanges();
                         }
+
                         Log.Information("{@Where}: Recorded a change of order {@Order}", "History", ow.OrderIdOnTM);
                         Log.Information("{@Where}: Order change: " + oc.Message, "History");
-                    }
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
             return new PublishEventResponse();
         }
 
         private static void Handler(NotifyCollectionChangedEventArgs args, SubscribeEventsRequest request,
-            IAsyncStreamWriter<SubscribeEventsResponse> responseStream,
-            TaskCompletionSource<SubscribeEventsResponse> taskCompletionSource, ServerCallContext context)
+            IAsyncStreamWriter<SubscribeEventsResponse> responseStream, ServerCallContext context)
         {
             BalanceChange updateBalance;
             OrderChange updateOrder;
-            try
+            if (context.CancellationToken.IsCancellationRequested) 
+                throw new RpcException(Status.DefaultCancelled);
+            Task.Run(async () =>
             {
-                if (context.CancellationToken.IsCancellationRequested) throw new Exception();
-                Task.Run(async () =>
+                if (args.NewItems[0].GetType().FullName.Contains("BalanceChange"))
                 {
-
-                    if (args.NewItems[0].GetType().FullName.Contains("BalanceChange"))
+                    updateBalance = (BalanceChange)args.NewItems[0];
+                    if (updateBalance.SessionId != request.Sessionid) return;
+                    await responseStream.WriteAsync(new SubscribeEventsResponse
                     {
-                        updateBalance = (BalanceChange)args.NewItems[0];
-                        if (updateBalance.SessionId != request.Sessionid) return;
-                        await responseStream.WriteAsync(new SubscribeEventsResponse
+                        Balance = new PublishBalanceEvent
                         {
-                            Balance = new PublishBalanceEvent
-                            {
-                                Balance = Converter.ToBalance(updateBalance.Balance),
-                                Sessionid = updateBalance.SessionId,
-                                Time = Timestamp.FromDateTime(new DateTime(updateBalance.Time.Year, updateBalance.Time.Month, updateBalance.Time.Day, 0, 0, 0).ToUniversalTime())
-                            }
-                        });
-                    }
-                    if (args.NewItems[0].GetType().FullName.Contains("OrderChange"))
+                            Balance = Converter.ToBalance(updateBalance.Balance),
+                            Sessionid = updateBalance.SessionId,
+                            Time = Timestamp.FromDateTime(new DateTime(updateBalance.Time.Year, updateBalance.Time.Month, updateBalance.Time.Day, 0, 0, 0).ToUniversalTime())
+                        }
+                    });
+                }
+                if (args.NewItems[0].GetType().FullName.Contains("OrderChange"))
+                {
+                    updateOrder = (OrderChange)args.NewItems[0];
+                    if (updateOrder.SessionId != request.Sessionid) return;
+                    await responseStream.WriteAsync(new SubscribeEventsResponse
                     {
-                        updateOrder = (OrderChange)args.NewItems[0];
-                        if (updateOrder.SessionId != request.Sessionid) return;
-                        await responseStream.WriteAsync(new SubscribeEventsResponse
+                        Order = new PublishOrderEvent
                         {
-                            Order = new PublishOrderEvent
-                            {
-                                ChangesType = (TradeBot.Common.v1.ChangesType)updateOrder.ChangesType,
-                                Order = Converter.ToOrder(updateOrder.Order),
-                                Sessionid = updateOrder.SessionId,
-                                Time = Timestamp.FromDateTime(updateOrder.Time.ToUniversalTime()),
-                                Message = updateOrder.Message,
-                                SlotName = updateOrder.SlotName
-                            }
-                        });
-                    }
-                }).Wait();
-            }
-            catch (Exception e)
-            {
-                taskCompletionSource.SetCanceled();
-            }
+                            ChangesType = (TradeBot.Common.v1.ChangesType)updateOrder.ChangesType,
+                            Order = Converter.ToOrder(updateOrder.Order),
+                            Sessionid = updateOrder.SessionId,
+                            Time = Timestamp.FromDateTime(updateOrder.Time.ToUniversalTime()),
+                            Message = updateOrder.Message,
+                            SlotName = updateOrder.SlotName
+                        }
+                    });
+                }
+            }).Wait();
         }
 
         public override async Task<SubscribeEventsResponse> SubscribeEvents(SubscribeEventsRequest request,
@@ -129,11 +124,16 @@ namespace History
         {
             var taskCompletionSource = new TaskCompletionSource<SubscribeEventsResponse>();
 
+            void CollectionOnCollectionChanged(object o, NotifyCollectionChangedEventArgs args)
+            {
+                Handler(args, request, responseStream, context);
+            }
             try
             {
-                if (context.CancellationToken.IsCancellationRequested) throw new RpcException(Status.DefaultCancelled);
                 
-                BalanceCollection.CollectionChanged += (_, args) => Handler(args, request, responseStream, taskCompletionSource, context);
+                context.CancellationToken.Register(() => { taskCompletionSource.SetCanceled(); });
+                BalanceCollection.CollectionChanged += CollectionOnCollectionChanged;
+                
                 List<OrderChange> orderChanges = GetOrderChangesByUser(request.Sessionid);
                 foreach (var record in orderChanges)
                 {
@@ -151,17 +151,20 @@ namespace History
                     });
                 }
 
-                OrderCollection.CollectionChanged += (_, args) => Handler(args, request, responseStream, taskCompletionSource, context);
+                OrderCollection.CollectionChanged += CollectionOnCollectionChanged;
+
                 List<BalanceChange> balanceChanges = GetBalanceChangesByUser(request.Sessionid);
                 if (balanceChanges.Count > 0)
                 {
                     BalanceChange currentBalance = balanceChanges.ElementAt(0);
                     foreach (var record in balanceChanges)
                     {
-                        if (record.Time.Year != currentBalance.Time.Year || record.Time.Month != currentBalance.Time.Month
-                            || record.Time.Day != currentBalance.Time.Day)
+                        if (record.Time.Year != currentBalance.Time.Year || record.Time.Month !=
+                                                                         currentBalance.Time.Month
+                                                                         || record.Time.Day != currentBalance.Time.Day)
                         {
-                            var a = Timestamp.FromDateTime(new DateTime(currentBalance.Time.Year, currentBalance.Time.Month, currentBalance.Time.Day, 0, 0, 0).ToUniversalTime());
+                            var a = Timestamp.FromDateTime(new DateTime(currentBalance.Time.Year,
+                                currentBalance.Time.Month, currentBalance.Time.Day, 0, 0, 0).ToUniversalTime());
                             await responseStream.WriteAsync(new SubscribeEventsResponse
                             {
                                 Balance = new PublishBalanceEvent
@@ -172,29 +175,30 @@ namespace History
                                 }
                             });
                         }
+
                         currentBalance = record;
                     }
-                }
+                } 
+                await taskCompletionSource.Task;
             }
             catch (RpcException e)
             {
-                if (e.StatusCode != StatusCode.Cancelled) Log.Error("History:" + e.Message);
-                taskCompletionSource.SetCanceled();
+                Log.Error("History:" + e.Message);
             }
+            finally
+            {
+                BalanceCollection.CollectionChanged -= CollectionOnCollectionChanged;
+                OrderCollection.CollectionChanged -= CollectionOnCollectionChanged;
+            }
+
             return await taskCompletionSource.Task;
         }
 
         private static List<OrderChange> GetOrderChangesByUser(string user)
         {
-            try
-            {
-                var db = new DataContext();
-                return db.OrderRecords.Include(x => x.Order).ToList();
-            }
-            catch (Exception e)
-            {
-                throw;
-            }
+
+            var db = new DataContext();
+            return db.OrderRecords.Include(x => x.Order).ToList();
 
         }
 

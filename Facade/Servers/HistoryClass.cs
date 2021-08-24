@@ -4,6 +4,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using History = TradeBot.History.HistoryService.v1.HistoryService.HistoryServiceClient;
 using Ref = TradeBot.Facade.FacadeService.v1;
@@ -27,7 +28,6 @@ namespace Facade
                 Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", nameof(History_SubscribeEvents), request.Sessionid);
                 while (await response.ResponseStream.MoveNext(context.CancellationToken))
                 {
-                    if (context.CancellationToken.IsCancellationRequested) throw new Exception();
                     switch (response.ResponseStream.Current.EventTypeCase)
                     {
                         case TradeBot.History.HistoryService.v1.SubscribeEventsResponse.EventTypeOneofCase.Balance:
