@@ -26,11 +26,18 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         {
             await Task.Run(async () =>
             {
-                foreach (var data in response.Data)
+                try
                 {
-                    e?.Invoke(typeof(BookPublisher), new(data, response.Action));
-                    Log.Information("Get {@Info}", data);
-                    await _redisClient.Send($"Bitmex_{data.Symbol}_{data.Id}", data, "Bitmex_Book25");
+                    foreach (var data in response.Data)
+                    {
+                        e?.Invoke(typeof(BookPublisher), new(data, response.Action));
+                        Log.Information("Get {@Info}", data);
+                        await _redisClient.Send($"Bitmex_{data.Symbol}_{data.Id}", data, "Bitmex_Book25");
+                    }
+                }catch(Exception e)
+                {
+                    Log.Warning(e.Message);
+                    Log.Warning(e.StackTrace);
                 }
             });
         };

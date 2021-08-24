@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,7 +20,7 @@ namespace Algorithm
 
             Log.Logger = new LoggerConfiguration().MinimumLevel.Debug()
                 .WriteTo.Console()
-                .WriteTo.Seq("http://localhost:5341")
+                .WriteTo.Seq(Environment.GetEnvironmentVariable("SEQ_CONNECTION_STRING"))
                 .CreateLogger();
 
             CreateHostBuilder(args).Build().Run();
