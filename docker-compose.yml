@@ -123,5 +123,6 @@ services:
     environment:
       HISTORY_CONNECTION_STRING: "http://host.docker.internal:5007"
       TRADEMARKET_CONNECTION_STRING: "http://host.docker.internal:5005"
+      SEQ_CONNECTION_STRING: "http://host.docker.internal:5341"
       RETRY_DELAY: "10000"
     
