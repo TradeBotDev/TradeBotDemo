@@ -16,7 +16,7 @@ namespace AccountGRPC
 			// Создание и запуск сервера, если операционной системой не является Windows.
 			if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 			{
-				int.TryParse(Environment.GetEnvironmentVariable("METRICS_PORT") ?? "6000", out int port);
+				int.TryParse(Environment.GetEnvironmentVariable("METRICS_PORT") ?? "9464", out int port);
 				string host = Environment.GetEnvironmentVariable("METRICS_HOST") ?? "*";
 				var server = new MetricServer(hostname: host, port: port);
 				server.Start();
