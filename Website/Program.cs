@@ -1,5 +1,9 @@
+using System;
+using System.Runtime.InteropServices;
+
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+
 using Prometheus;
 using Serilog;
 
@@ -9,6 +13,14 @@ namespace Website
 	{
 		public static void Main(string[] args)
 		{
+			// Создание и запуск сервера, если операционной системой не является Windows.
+			if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+			{
+				string host = Environment.GetEnvironmentVariable("METRICS_HOST") ?? "*";
+                int.TryParse(Environment.GetEnvironmentVariable("METRICS_PORT") ?? "6008", out int port);
+				var server = new MetricServer(hostname: host, port: port);
+				server.Start();
+			}
 			CreateHostBuilder(args).Build().Run();
 		}
 
