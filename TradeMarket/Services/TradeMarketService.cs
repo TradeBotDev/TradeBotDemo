@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using Serilog.Context;
 using Serilog.Enrichers;
 using Serilog.Core.Enrichers;
+using Bitmex.Client.Websocket.Responses;
 
 namespace TradeMarket.Services
 {
@@ -113,63 +114,93 @@ namespace TradeMarket.Services
         /// <summary>
         /// Записывает в переданный поток ответы на запрос клиента
         /// </summary>
-        private async Task WriteStreamAsync<TResponse>(IServerStreamWriter<TResponse> stream, TResponse reply) where TResponse : IMessage<TResponse>
+        private async Task WriteStreamAsync<TResponse>(IServerStreamWriter<TResponse> stream, TResponse response) where TResponse : IMessage<TResponse>
         {
             try
             {
-                Log.Information("Sent message {@message}",reply);
-                await stream.WriteAsync(reply);
+                Log.Information("Sent message {@message}",response);
+                await stream.WriteAsync(response);
                 Log.Information("Message sent succesful");
             }
             catch 
             {
                 //TODO что делать когда разорвется соеденение ?
                 Log.Logger.Error("Connection was interrupted by network services.");
-                //throw;
+                throw;
             }
         }
 
-        public async Task SubscribeToUserTopic<TRequest, TResponse, TModel>(Func<EventHandler<IPublisher<TModel>.ChangedEventArgs>, CancellationToken, Task<List<TModel>>> subscribe, Func<EventHandler<IPublisher<TModel>.ChangedEventArgs>, Task> unsubscribe, EventHandler<IPublisher<TModel>.ChangedEventArgs> handler, TRequest request, IServerStreamWriter<TResponse> responseStream, ServerCallContext context)
+        public async Task SubscribeToUserTopic<TRequest, TResponse, TModel>(
+            Func<EventHandler<IPublisher<TModel>.ChangedEventArgs>, CancellationToken, Task<List<TModel>>> subscribe,
+            Func<EventHandler<IPublisher<TModel>.ChangedEventArgs>, Task> unsubscribe,
+            TRequest request,
+            IServerStreamWriter<TResponse> responseStream,
+            Func<TModel, bool> filter,
+            Func<TModel, BitmexAction, TResponse> converter,
+            ServerCallContext context)
+            where TResponse : IMessage<TResponse>
+            where TRequest : IMessage<TRequest>
         {
-            try
+            void Handler(object sender, IPublisher<TModel>.ChangedEventArgs args)
             {
-                Log.Information("Canceletion requested : {@Token}", context.CancellationToken.IsCancellationRequested);
-
-                //Добавляем заголовки ответа по контексту пользователя user из запроса
-                var meta = await MoveInfoToMetadataAsync(context.RequestHeaders);
-                await context.WriteResponseHeadersAsync(meta);
-                Log.Information("Wrote Response Headers {@Meta}", context.ResponseTrailers);
-                //подписываемся на обновления
-                var cache = await subscribe(handler, context.CancellationToken);
-                Log.Information("Cache Contains {@CacheCount} elements", cache.Count);
-
-                    
-                //кидаем данные из кэша
-                Parallel.ForEach(cache, data => handler(this, new(data, Bitmex.Client.Websocket.Responses.BitmexAction.Partial)));
-               
-                //ожидаем пока клиенты отменят подписку
-                await AwaitCancellation(context.CancellationToken);
-                Log.Information("Connection was Canceled");
-                context.Status = Status.DefaultSuccess;
+                //переводим из языка сервиса на язык протофайлов
+                Log.Information("Sent position");
+                var response = converter(args.Changed, args.Action);
+                if (filter is null || filter(args.Changed))
+                {
+                    try
+                    {
+                        WriteStreamAsync(responseStream, response).Wait();
+                    }
+                    catch
+                    {
+                        Log.Error("Exception catched");
+                        throw;
+                    }
+                }
             }
-            catch (Exception e)
+            await Task.Run(async () =>
             {
-                //записываем ошибку в логер
-                Log.Error(e.Message);
-                Log.Error(e.StackTrace);
-                //ставим статус "Отмена" в заголовке ответа
-                context.Status = Status.DefaultCancelled;
-            }
-            finally
-            {
-                //отписываемся от обновлений по книге
-                Log.Information("Finnaly unsubscribed before");
-                await unsubscribe(handler);
-                Log.Information("Finnaly unsubscribed after");
+                try
+                {
+                    Log.Information("Canceletion requested : {@Token}", context.CancellationToken.IsCancellationRequested);
 
+                    //Добавляем заголовки ответа по контексту пользователя user из запроса
+                    var meta = await MoveInfoToMetadataAsync(context.RequestHeaders);
+                    await context.WriteResponseHeadersAsync(meta);
+                    Log.Information("Wrote Response Headers {@Meta}", context.ResponseTrailers);
+                    //подписываемся на обновления
+                    var cache = await subscribe(Handler, context.CancellationToken);
+                    Log.Information("Cache Contains {@CacheCount} elements", cache.Count);
+
+
+                    //кидаем данные из кэша
+                    Parallel.ForEach(cache, data => Handler(this, new(data, Bitmex.Client.Websocket.Responses.BitmexAction.Partial)));
+
+                    //ожидаем пока клиенты отменят подписку
+                    await AwaitCancellation(context.CancellationToken);
+                    Log.Information("Connection was Canceled");
+                    context.Status = Status.DefaultSuccess;
+                }
+                catch (Exception e)
+                {
+                    //записываем ошибку в логер
+                    Log.Error(e.Message);
+                    Log.Error(e.StackTrace);
+                    //ставим статус "Отмена" в заголовке ответа
+                    context.Status = Status.DefaultCancelled;
+                }
+                finally
+                {
+                    //отписываемся от обновлений по книге
+                    Log.Information("Finnaly unsubscribed before");
+                    await unsubscribe(Handler);
+                    Log.Information("Finnaly unsubscribed after");
+
+                }
             }
+            );
         }
-
         #endregion
 
         #region Order Commands
@@ -308,23 +339,7 @@ namespace TradeMarket.Services
 
         public async override Task SubscribePrice(SubscribePriceRequest request, IServerStreamWriter<SubscribePriceResponse> responseStream, ServerCallContext context)
         {
-            void WriteToStreamAsync(object sender, IPublisher<Instrument>.ChangedEventArgs args)
-            {
-               Task.Run(async () =>
-               {
-                   try {
-                       //переводим из языка сервиса на язык протофайлов
-                       Log.Information("Sent Price");
-                       var response = ConvertService.ConvertInstrument(args.Changed, args.Action);
-                       await WriteStreamAsync(responseStream, response);
-                   }catch(Exception e)
-                   {
-                       Log.Error("Error {@Error}", e.Message);
-                       //throw;
-                   }
-                   
-                   }).Wait();
-            }
+           
             using (LogContext.Push(new PropertyEnricher("RPC Method", context.Method), new PropertyEnricher("RequestId", Guid.NewGuid().ToString()), new PropertyEnricher("UserSessionId", context.RequestHeaders.Get("sessionid"))))
             {
                 Log.Information("Starting subscriprion for {@Topic}", "price");
@@ -333,61 +348,63 @@ namespace TradeMarket.Services
                 await SubscribeToUserTopic<SubscribePriceRequest, SubscribePriceResponse, Instrument>(
                     common.SubscribeToInstrumentUpdate, 
                     common.UnSubscribeFromInstrumentUpdate, 
-                    WriteToStreamAsync,
-                    request, responseStream, context);
+                    request, 
+                    responseStream, 
+                    (x) => x.Symbol == context.RequestHeaders.GetValue("slot"),
+                    ConvertService.ConvertInstrument,
+                    context);
             }
         }
 
         public async override Task SubscribeMargin(SubscribeMarginRequest request, IServerStreamWriter<SubscribeMarginResponse> responseStream, ServerCallContext context)
         {
-            async void WriteToStreamAsync(object sender, IPublisher<Margin>.ChangedEventArgs args)
-            {
-                //переводим из языка сервиса на язык протофайлов
-                Log.Information("Sent margin");
-
-                var response = ConvertService.ConvertMargin(args.Changed, args.Action);
-                await WriteStreamAsync(responseStream, response);
-
-            }
             Log.Information("Starting subscriprion for {@Topic}", "margin");
 
             var user = await GetUserContextAsync(context.RequestHeaders,ContextFilter.GetTradeMarketContextFilter, context.CancellationToken);
-            await SubscribeToUserTopic<SubscribeMarginRequest, SubscribeMarginResponse, Margin>(user.SubscribeToUserMargin, user.UnSubscribeFromUserMargin, WriteToStreamAsync, request, responseStream, context);
+            await SubscribeToUserTopic<SubscribeMarginRequest, SubscribeMarginResponse, Margin>(
+                user.SubscribeToUserMargin, 
+                user.UnSubscribeFromUserMargin,
+                request, 
+                responseStream, 
+                null,
+                ConvertService.ConvertMargin,
+                context);
 
 
         }
 
         public async override Task SubscribePosition(SubscribePositionRequest request, IServerStreamWriter<SubscribePositionResponse> responseStream, ServerCallContext context)
         {
-            async void WriteToStreamAsync(object sender, IPublisher<Position>.ChangedEventArgs args)
-            {
-                //переводим из языка сервиса на язык протофайлов
-                Log.Information("Sent position");
-                var response = ConvertService.ConvertPosition(args.Changed, args.Action);
-                await WriteStreamAsync(responseStream, response);
 
-            }
+
             Log.Information("Starting subscriprion for {@Topic}", "position");
 
             var user = await GetUserContextAsync(context.RequestHeaders,ContextFilter.GetTradeMarketContextFilter, context.CancellationToken);
-            await SubscribeToUserTopic<SubscribePositionRequest, SubscribePositionResponse, Position>(user.SubscribeToUserPositions, user.UnSubscribeFromUserPositions, WriteToStreamAsync, request, responseStream, context);
+            await SubscribeToUserTopic<SubscribePositionRequest, SubscribePositionResponse, Position>(
+                user.SubscribeToUserPositions, 
+                user.UnSubscribeFromUserPositions,
+                request, 
+                responseStream, 
+                (x) => x.Symbol == context.RequestHeaders.GetValue("slot"),
+                ConvertService.ConvertPosition,
+                context);
         }
 
 
         public async override Task SubscribeMyOrders(SubscribeMyOrdersRequest request, IServerStreamWriter<SubscribeMyOrdersResponse> responseStream, ServerCallContext context)
         {
-            async void WriteToStreamAsync(object sender, IPublisher<Order>.ChangedEventArgs args)
-            {
-                //переводим из языка сервиса на язык протофайлов
-                Log.Information("Sent User Order");
-                var response = ConvertService.ConvertMyOrder(args.Changed, args.Action);
-                await WriteStreamAsync(responseStream, response);
-
-            }
+           
             Log.Information("Starting subscriprion for {@Topic}", "user orders");
 
             var user = await GetUserContextAsync(context.RequestHeaders,ContextFilter.GetTradeMarketContextFilter,context.CancellationToken);
-            await SubscribeToUserTopic<SubscribeMyOrdersRequest, SubscribeMyOrdersResponse, Order>(user.SubscribeToUserOrders, user.UnSubscribeFromUserOrders, WriteToStreamAsync, request, responseStream, context);
+            await SubscribeToUserTopic<SubscribeMyOrdersRequest, SubscribeMyOrdersResponse, Order>(
+                user.SubscribeToUserOrders, 
+                user.UnSubscribeFromUserOrders,
+                request, 
+                responseStream,
+                null,
+                ConvertService.ConvertMyOrder,
+                context);
 
         }
 
@@ -397,25 +414,17 @@ namespace TradeMarket.Services
         /// </summary>
         public override async Task SubscribeOrders(TradeBot.TradeMarket.TradeMarketService.v1.SubscribeOrdersRequest request, IServerStreamWriter<SubscribeOrdersResponse> responseStream, ServerCallContext context)
         {
-
-            //тут void потому что ивент по другому не позволяет 
-            async void WriteToStreamAsync(object sender, Model.Publishers.IPublisher<Bitmex.Client.Websocket.Responses.Books.BookLevel>.ChangedEventArgs args)
-            {
-                //переводим из языка сервиса на язык протофайлов
-                var response = ConvertService.ConvertBookOrders(args.Changed, args.Action);
-                //Проверяем подходит ли ордер из бирже по сигнатуре запроса {<продажа,покупка> , <открыт,закрыт>}
-                if (IsOrderSuitForSignature(response.Response.Order.Signature, request.Request.Signature))
-                {
-                    Log.Information("Sent BookLevel");
-
-                    //если ордер подходит то записываем его в поток ответов
-                    await WriteStreamAsync(responseStream, response);
-                }
-            }
             Log.Information("Starting subscriprion for {@Topic}", "booklevel25");
 
             var common = await GetUserContextAsync(context.RequestHeaders,ContextFilter.GetCommonContextFilter,context.CancellationToken);
-            await SubscribeToUserTopic<SubscribeOrdersRequest, SubscribeOrdersResponse, BookLevel>(common.SubscribeToBook25UpdatesAsync, common.UnSubscribeFromBook25UpdatesAsync, WriteToStreamAsync, request, responseStream, context);
+            await SubscribeToUserTopic<SubscribeOrdersRequest, SubscribeOrdersResponse, BookLevel>(
+                common.SubscribeToBook25UpdatesAsync, 
+                common.UnSubscribeFromBook25UpdatesAsync,
+                request, 
+                responseStream,
+                null,
+                ConvertService.ConvertBookOrders,
+                context);
         }
 
         /// <summary>
@@ -423,20 +432,17 @@ namespace TradeMarket.Services
         /// </summary>
         public async override Task SubscribeBalance(SubscribeBalanceRequest request, IServerStreamWriter<SubscribeBalanceResponse> responseStream, ServerCallContext context)
         {
-
-            //тут void потому что ивент по другому не позволяет 
-            async void WriteToStreamAsync(object sender, IPublisher<Wallet>.ChangedEventArgs args)
-            {
-                //переводим из языка сервиса на язык протофайлов
-                var response = ConvertService.ConvertBalance(args.Changed, args.Action);
-                Log.Information("Sent  Balance");
-                await WriteStreamAsync(responseStream, response);
-
-            }
             Log.Information("Starting subscriprion for {@Topic}", "balance");
             //находим общий контекст т.к. подписка на стаканы не требует логина в систему биржи
             var user = await GetUserContextAsync(context.RequestHeaders,ContextFilter.GetTradeMarketContextFilter ,context.CancellationToken);
-            await SubscribeToUserTopic<SubscribeBalanceRequest,SubscribeBalanceResponse,Wallet>(user.SubscribeToBalance, user.UnSubscribeFromBalance, WriteToStreamAsync, request, responseStream, context);
+            await SubscribeToUserTopic<SubscribeBalanceRequest,SubscribeBalanceResponse,Wallet>(
+                user.SubscribeToBalance, 
+                user.UnSubscribeFromBalance,
+                request,
+                responseStream, 
+                null,
+                ConvertService.ConvertBalance,
+                context);
         }
 
         #endregion
