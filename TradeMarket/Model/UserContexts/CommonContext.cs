@@ -13,7 +13,7 @@ namespace TradeMarket.Model.UserContexts
     {
         public TradeMarket.Model.TradeMarkets.TradeMarket TradeMarket { get; internal set; }
 
-        public async Task<List<BookLevel>> SubscribeToBook25UpdatesAsync(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, CancellationToken token)
+        /*public async Task<List<BookLevel>> SubscribeToBook25UpdatesAsync(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, CancellationToken token)
         {
             return await TradeMarket.SubscribeToBook25(handler, this, token);
         }
@@ -29,7 +29,7 @@ namespace TradeMarket.Model.UserContexts
 
         public async Task UnSubscribeFromInstrumentUpdate(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler) {
             await TradeMarket.UnSubscribeFromInstruments(handler,this);
-        }
+        }*/
 
         public CommonContext(IContext context) : base(context) { }
 

@@ -30,7 +30,7 @@ namespace TradeMarket
 
 
             AccountClient._accountClient = _account;
-            _factory.SubscribeToLifeLineTopics(_factory.GetTradeMarket("bitmex") as BitmexTradeMarket, stoppingToken);
+            _factory.SubscribeToLifeLineTopics(_factory.GetTradeMarket("bitmex") as BitmexTradeMarket, stoppingToken,Log.ForContext<Worker>());
 
             while (!stoppingToken.IsCancellationRequested)
             {

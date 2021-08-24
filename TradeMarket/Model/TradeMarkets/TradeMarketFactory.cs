@@ -44,11 +44,11 @@ namespace TradeMarket.Model.TradeMarkets
                 .Result;
         }
 
-        public TradeMarket SubscribeToLifeLineTopics(BitmexTradeMarket tm,CancellationToken token)
+        public TradeMarket SubscribeToLifeLineTopics(BitmexTradeMarket tm,CancellationToken token,ILogger logger)
         {
             return new BitmexTradeMarketBuilder(tm)
-                .StartPingPong(token)
-                .ReadErrors(token)
+                .StartPingPong(token,logger)
+                .ReadErrors(token,logger)
                 .Result;
         }
 

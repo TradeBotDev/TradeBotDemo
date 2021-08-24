@@ -22,14 +22,15 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         private readonly SubscribeRequestBase _bookSubscribeRequest;
         private readonly CancellationToken _token;
 
-        private static Action<BookResponse, EventHandler<IPublisher<BookLevel>.ChangedEventArgs>> _OnBookUpdated = async (response, e) =>
+        private static Action<BookResponse, EventHandler<IPublisher<BookLevel>.ChangedEventArgs>,ILogger> _OnBookUpdated = async (response, e,logger) =>
         {
             await Task.Run(async () =>
             {
+                var log = logger.ForContext<BookPublisher>();
                 foreach (var data in response.Data)
                 {
                     e?.Invoke(typeof(BookPublisher), new(data, response.Action));
-                    Log.Information("Get {@Info}", data);
+                    log.Information("Response : {@Response}", data);
                     await _redisClient.Send($"Bitmex_{data.Symbol}_{data.Id}", data, "Bitmex_Book25");
                 }
             });
@@ -97,20 +98,26 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
             }
         }
 
-        protected async Task SubscribeAsync(SubscribeRequestBase bookSubscribeRequest, CancellationToken token)
+        protected async Task SubscribeAsync(SubscribeRequestBase bookSubscribeRequest, CancellationToken token,ILogger logger)
         {
-            await base.SubscribeAsync(bookSubscribeRequest, _stream, token);
+            await base.SubscribeAsync(bookSubscribeRequest, _stream, token,logger);
         }
 
-        public async override Task Start()
+        public async override Task Start(ILogger logger)
         {
-            await SubscribeAsync(_bookSubscribeRequest, _token);
+            var log = logger
+                .ForContext<BookPublisher>()
+                .ForContext("Method", nameof(Start));
+            await SubscribeAsync(_bookSubscribeRequest, _token,log);
         }
 
-        public async override Task Stop()
+        public async override Task Stop(ILogger logger)
         {
-            await UnSubscribeAsync(_bookSubscribeRequest);
-            ClearCahce();
+            var log = logger
+                .ForContext<BookPublisher>()
+                .ForContext("Method", nameof(Stop));
+            await UnSubscribeAsync(_bookSubscribeRequest,log);
+            ClearCahce(log);
         }
     }
 }
