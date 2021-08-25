@@ -30,7 +30,7 @@ namespace Algorithm.DataManipulation
         public void SendTrend (int decision)
         {
             var response = Client.SendAlgorithmDecision(new SendAlgorithmDecisionRequest { Decision = decision }, _metadata);
-            Log.Information("{@Where}:Sent " + decision, "Algorithm");
+            Log.Information("{@Where}:Sent " + decision + " for user {@User}", "Algorithm", _metadata.GetValue("sessionid"));
         }
     }
 }
