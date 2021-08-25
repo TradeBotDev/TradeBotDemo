@@ -33,10 +33,19 @@ namespace Algorithm.DataManipulation
             if (GetAlgoByMeta(metadata).GetState()!=configRequest.Switch)
             {
                 GetAlgoByMeta(metadata).ChangeState();
+                if (GetAlgoByMeta(metadata).GetState())
+                {
+                    //RedisReader.DeleteRecordFromRedis(metadata);
+                }
+                else
+                {
+                    //.SendNewRecordToRedis(metadata, configRequest.Config.AlgorithmInfo);
+                }
                 return;
             }
 
             GetAlgoByMeta(metadata).ChangeSetting(configRequest.Config.AlgorithmInfo);
+            //RedisReader.UpdateRecordInRedis(metadata, configRequest.Config.AlgorithmInfo);
         }
         public static void SendNewConfig(Metadata metadata, AlgorithmInfo settings)
         {
@@ -56,6 +65,7 @@ namespace Algorithm.DataManipulation
                 orderPublisher.OrderIncomingEvent += GetAlgoByMeta(metadata).NewOrderAlert;
                 GetAlgoByMeta(metadata).ChangeSetting(setting);
                 GetAlgoByMeta(metadata).ChangeState();
+                //RedisReader.SendNewRecordToRedis(metadata, setting);
             }
         }
 

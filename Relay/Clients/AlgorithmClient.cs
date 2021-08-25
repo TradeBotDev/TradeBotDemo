@@ -8,6 +8,8 @@ using TradeBot.Algorithm.AlgorithmService.v1;
 using TradeBot.Common.v1;
 using UpdateServerConfigRequest = TradeBot.Algorithm.AlgorithmService.v1.UpdateServerConfigRequest;
 using Grpc.Net.ClientFactory;
+using Serilog;
+
 namespace Relay.Clients
 {
     public class AlgorithmClient
@@ -23,6 +25,10 @@ namespace Relay.Clients
         {
             return _client.AddOrder(meta).RequestStream;
         }
+        public IClientStreamWriter<AddOrderRequest> ReConncet(Metadata meta)
+        {
+            return _client.AddOrder(meta).RequestStream;
+        }
 
         public async Task WriteOrder(IClientStreamWriter<AddOrderRequest> stream,Order order)
         {
@@ -35,21 +41,34 @@ namespace Relay.Clients
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Console.WriteLine(e.Message);
                 throw;
             }
         }
 
         public async Task UpdateConfig(TradeBot.Common.v1.UpdateServerConfigRequest update ,Metadata meta)
         {
-            await _client.UpdateServerConfigAsync(new UpdateServerConfigRequest()
+            while (true)
             {
-                Request = new TradeBot.Common.v1.UpdateServerConfigRequest()
+                try
                 {
-                    Config = update.Config,
-                    Switch =update.Switch
+                    await _client.UpdateServerConfigAsync(new UpdateServerConfigRequest()
+                    {
+                        Request = new TradeBot.Common.v1.UpdateServerConfigRequest()
+                        {
+                            Config = update.Config,
+                            Switch = update.Switch
+                        }
+                    }, meta);
+                    break;
+
                 }
-            },meta);
+                catch (Exception e)
+                {
+                    Log.Error("{@Where}: Exception {@Exception}","Relay", e.Message);
+                    throw;
+                }
+            }
         }
         
     }
