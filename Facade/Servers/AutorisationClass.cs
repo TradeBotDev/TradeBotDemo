@@ -40,13 +40,11 @@ namespace Facade
             TradeBot.Account.AccountService.v1.LoginResponse response = null;
             async Task<TradeBot.Account.AccountService.v1.LoginResponse> task()
             {
-                var loginrequest = new TradeBot.Account.AccountService.v1.LoginRequest
-                {
-                    Email = request.Email,
+                response = await ClientAccount.LoginAsync(new TradeBot.Account.AccountService.v1.LoginRequest 
+                { 
+                    Email=request.Email,
                     Password = request.Password
-                };
-                response =await ClientAccount.LoginAsync(loginrequest);
-                Log.Information("Loggin Completed With Result {@LoginResult}", response);
+                });
                 return response;
             }
             await Generalization.ConnectionTester(task, methodName, request);
@@ -124,6 +122,21 @@ namespace Facade
             }
 
             return await Generalization.ReturnResponse(accountDataResponse, methodName);
+        }
+        public async Task<Ref.IsValidSessionResponse> Account_IsValidSession(Ref.IsValidSessionRequest request,ServerCallContext context,string methodName)
+        {
+            TradeBot.Account.AccountService.v1.IsValidSessionResponse response = null;
+            async Task<TradeBot.Account.AccountService.v1.IsValidSessionResponse> task()
+            {
+                var perem = request == null ? context.RequestHeaders.GetValue("sessionid") : request.SessionId;
+                response = await ClientAccount.IsValidSessionAsync(new TradeBot.Account.AccountService.v1.IsValidSessionRequest
+                {
+                    SessionId = perem
+                });
+                return response;
+            }
+            await Generalization.ConnectionTester(task, methodName, request);
+            return new Ref.IsValidSessionResponse { IsValid = response.IsValid, Message = response.Message };
         }
         #endregion
 

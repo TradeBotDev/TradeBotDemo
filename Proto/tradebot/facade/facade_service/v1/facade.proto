@@ -11,28 +11,23 @@ service FacadeService{
 		Подписка на изменение баланса пользователя (ЕДИНСТВЕННОГО)
 	*/
 	rpc SubscribeBalance(SubscribeBalanceRequest) returns (stream SubscribeBalanceResponse);
-
 	/*
 		Аутентификция на бирже по токену
 	*/
 	rpc AuthenticateToken(AuthenticateTokenRequest) returns (AuthenticateTokenResponse);
-
 	/*
 		Список доступных слотов на бирже
 	*/
 	rpc Slots(SlotsRequest) returns (stream SlotsResponse);
-
 	/*
 		Клиент говорит обновиться серверу
 	*/
 	rpc UpdateServerConfig (UpdateServerConfigRequest) returns (UpdateServerConfigResponse);
-
 	/*
 		Подписка на логи нужного сервиса
 	*/
 	//TODO в каждом сервисе нужно написать 
 	rpc SubscribeLogsTM(SubscribeLogsRequest) returns (stream SubscribeLogsResponse);
-
 	/*
 		Подписка на логи релэя
 	*/

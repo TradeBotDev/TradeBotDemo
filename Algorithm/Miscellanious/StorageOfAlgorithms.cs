@@ -39,7 +39,7 @@ namespace Algorithm.DataManipulation
                 }
                 else
                 {
-                    //.SendNewRecordToRedis(metadata, configRequest.Config.AlgorithmInfo);
+                    //RedisReader.SendNewRecordToRedis(metadata, configRequest.Config.AlgorithmInfo);
                 }
                 return;
             }
