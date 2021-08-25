@@ -1,6 +1,4 @@
-﻿using Serilog;
-
-namespace AccountGRPC.Validation.Messages
+﻿namespace AccountGRPC.Validation.Messages
 {
     public class SuccessfulValidationMessage : ValidationMessage
     {
@@ -10,7 +8,7 @@ namespace AccountGRPC.Validation.Messages
 
         public SuccessfulValidationMessage()
         {
-            Log.Information("Успешная валидация.");
+            logger.Information("{@Class} - Успешная валидация.", GetType().Name);
         }
     }
 }
