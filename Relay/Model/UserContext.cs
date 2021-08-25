@@ -81,10 +81,10 @@ namespace Relay.Model
             }).Wait();
         }
 
-        public void UpdateConfig(TradeBot.Common.v1.UpdateServerConfigRequest update)
+        public async void UpdateConfig(TradeBot.Common.v1.UpdateServerConfigRequest update)
         {
-            _ = _algorithmClient.UpdateConfig(update, Meta);
-            _ = _formerClient.UpdateConfig(update, Meta);
+            await _algorithmClient.UpdateConfig(update, Meta);
+            await _formerClient.UpdateConfig(update, Meta);
         }
 
         public async Task SubscribeForOrders()

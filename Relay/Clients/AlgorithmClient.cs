@@ -48,27 +48,30 @@ namespace Relay.Clients
 
         public async Task UpdateConfig(TradeBot.Common.v1.UpdateServerConfigRequest update ,Metadata meta)
         {
-            while (true)
+            await Task.Run(async () =>
             {
-                try
+                while (true)
                 {
-                    await _client.UpdateServerConfigAsync(new UpdateServerConfigRequest()
+                    try
                     {
-                        Request = new TradeBot.Common.v1.UpdateServerConfigRequest()
+                        await _client.UpdateServerConfigAsync(new UpdateServerConfigRequest()
                         {
-                            Config = update.Config,
-                            Switch = update.Switch
-                        }
-                    }, meta);
-                    break;
+                            Request = new TradeBot.Common.v1.UpdateServerConfigRequest()
+                            {
+                                Config = update.Config,
+                                Switch = update.Switch
+                            }
+                        }, meta);
+                        break;
 
+                    }
+                    catch (Exception e)
+                    {
+                        Log.ForContext("sessionId", meta.GetValue("sessionid")).ForContext("slot", meta.GetValue("slot")).Error("{@Where}: Exception {@Exception}", "Relay", e.Message);
+                        await Task.Delay(5000);
+                    }
                 }
-                catch (Exception e)
-                {
-                    Log.ForContext("sessionId", meta.GetValue("sessionid")).ForContext("slot", meta.GetValue("slot")).Error("{@Where}: Exception {@Exception}","Relay", e.Message);
-                    await Task.Delay(5000);
-                }
-            }
+            });
         }
         
     }

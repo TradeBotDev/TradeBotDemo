@@ -21,22 +21,25 @@ namespace Relay.Clients
 
         public async Task UpdateConfig(TradeBot.Common.v1.UpdateServerConfigRequest update, Metadata meta)
         {
-            while (true)
+            await Task.Run(async () =>
             {
-                try
+                while (true)
                 {
-                    await _client.UpdateServerConfigAsync(new TradeBot.Former.FormerService.v1.UpdateServerConfigRequest
+                    try
                     {
-                        Request = update
-                    }, meta);
-                    break;
+                        await _client.UpdateServerConfigAsync(new TradeBot.Former.FormerService.v1.UpdateServerConfigRequest
+                        {
+                            Request = update
+                        }, meta);
+                        break;
+                    }
+                    catch (RpcException e)
+                    {
+                        Log.ForContext("sessionId", meta.GetValue("sessionid")).ForContext("slot", meta.GetValue("slot")).Error("{@Where}: {@MethodName} Exception {@Exception}", "Relay", nameof(UpdateConfig), e.Message);
+                        await Task.Delay(5000);
+                    }
                 }
-                catch (RpcException e)
-                {
-                    Log.ForContext("sessionId", meta.GetValue("sessionid")).ForContext("slot", meta.GetValue("slot")).Error("{@Where}: {@MethodName} Exception {@Exception}", "Relay", nameof(UpdateConfig),e.Message);
-                    await Task.Delay(5000);
-                }
-            }
+            });
         }
 
         public Task<TradeBot.Relay.RelayService.v1.DeleteOrderResponse> SendDeleteOrder(TradeBot.Relay.RelayService.v1.DeleteOrderRequest request, ServerCallContext context)
