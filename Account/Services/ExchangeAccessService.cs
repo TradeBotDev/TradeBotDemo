@@ -13,15 +13,18 @@ namespace AccountGRPC
 {
     public class ExchangeAccessService : ExchangeAccess.ExchangeAccessBase
     {
+        // Логгирование.
+        protected readonly ILogger logger = Log.ForContext("Where", "AccountService");
+
         // Добавить биржу для конкретного пользователя.
         public override async Task<AddExchangeAccessResponse> AddExchangeAccess(AddExchangeAccessRequest request, ServerCallContext context)
         {
-            Log.Information($"AddExchangeAccess получил запрос: " +
+            logger.Information("{@Service} - {@Method} получил запрос: " +
                 $"SessionId - {request.SessionId}, " +
                 $"Code - {request.Code}, " +
                 $"ExchangeName - {request.ExchangeName}, " +
                 $"Token - {request.Token}, " +
-                $"Secret - {request.Secret}.");
+                $"Secret - {request.Secret}.", GetType().Name, "AddExchangeAccess");
 
             using (var database = new Models.AccountContext())
             {
@@ -79,7 +82,9 @@ namespace AccountGRPC
         // Получение данных всех бирж пользователя.
         public override async Task<AllExchangesBySessionResponse> AllExchangesBySession(AllExchangesBySessionRequest request, ServerCallContext context)
         {
-            Log.Information($"AllExchangesBySession получил запрос: SessionId - {request.SessionId}.");
+            logger.Information("{@Service} - {@Method} получил запрос: " +
+                $"SessionId - {request.SessionId}.", GetType().Name, "AllExchangesBySession");
+
             using (var database = new Models.AccountContext())
             {
                 // Получение данных о входе по текущему Id сессии.
@@ -88,7 +93,7 @@ namespace AccountGRPC
                     .Include(account => account.Account);
 
                 // В случае, если аккаунт не найден среди вошедших, возвращается сообщение об ошибке.
-                if (login.Count() == 0)
+                if (!login.Any())
                     return await Task.FromResult(AllExchangesBySessionReplies.AccountNotFound());
                 else if (LoggedAccountsManagement.TimeOutAction(request.SessionId))
                     return await Task.FromResult(AllExchangesBySessionReplies.TimePassed());
@@ -99,7 +104,7 @@ namespace AccountGRPC
                     .Where(exchange => exchange.Account.AccountId == login.First().Account.AccountId);
 
                 // Ошибка в случае, если биржи не найдены.
-                if (exchangeAccesses.Count() == 0)
+                if (!exchangeAccesses.Any())
                     return await Task.FromResult(AllExchangesBySessionReplies.ExchangesNotFound());
 
                 // Формирование ответа со всей необходимой информацией о добавленных биржах.
@@ -111,7 +116,9 @@ namespace AccountGRPC
         // Удалить биржу из аккаунта пользователя.
         public override async Task<DeleteExchangeAccessResponse> DeleteExchangeAccess(DeleteExchangeAccessRequest request, ServerCallContext context)
         {
-            Log.Information($"DeleteExchangeAccess получил запрос: SessionId - {request.SessionId}, Code - {request.Code}.");
+            logger.Information("{@Service} - {@Method} получил запрос: " +
+                $"SessionId - {request.SessionId}, " +
+                $"Code - {request.Code}.", GetType().Name, "DeleteExchangeAccess");
 
             using (var database = new Models.AccountContext())
             {
@@ -147,7 +154,10 @@ namespace AccountGRPC
         // Получение данных конкретной биржи пользователя.
         public override async Task<ExchangeBySessionResponse> ExchangeBySession(ExchangeBySessionRequest request, ServerCallContext context)
         {
-            Log.Information($"ExchangeBySession получил запрос: SessionId - {request.SessionId}, Code - {request.Code}.");
+            logger.Information("{@Service} - {@Method} получил запрос: " +
+                $"SessionId - {request.SessionId}, " +
+                $"Code - {request.Code}.", GetType().Name, "ExchangeBySession");
+
             using (var database = new Models.AccountContext())
             {
                 // Получение данных о входе по текущему Id сессии.
@@ -156,7 +166,7 @@ namespace AccountGRPC
                     .Include(account => account.Account);
 
                 // В случае, если аккаунт не найден среди вошедших, возвращается сообщение об ошибке.
-                if (login.Count() == 0)
+                if (!login.Any())
                     return await Task.FromResult(ExchangeBySessionReplies.AccountNotFound());
                 else if (LoggedAccountsManagement.TimeOutAction(request.SessionId))
                     return await Task.FromResult(ExchangeBySessionReplies.TimePassed());
@@ -168,7 +178,7 @@ namespace AccountGRPC
                         exchange.Account.AccountId == login.First().Account.AccountId);
 
                 // Если такой биржи не было найдено, возвращается сообщение об ошибке.
-                if (exchangeAccesses.Count() == 0)
+                if (!exchangeAccesses.Any())
                     return await Task.FromResult(ExchangeBySessionReplies.ExchangeNotFound());
 
                 // В случае успешного получения доступа к бирже она возвращается в качестве ответа.

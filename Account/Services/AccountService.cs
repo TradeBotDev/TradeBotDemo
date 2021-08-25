@@ -48,7 +48,7 @@ namespace AccountGRPC
 
                 // Проверка на наличие зарегистрированных аккаунтов с данными из запроса, и в
                 // случае их отсутствия отправляет ответ с сообщением об ошибке.
-                if (accounts.Count() == 0)
+                if (!accounts.Any())
                     return await Task.FromResult(LoginReplies.AccountNotFound());
 
                 // Проверка на то, есть ли сессия с пользователем, который пытается войти в аккаунт, и
@@ -142,27 +142,25 @@ namespace AccountGRPC
             }
 
             // В случае успешной прохождении валидации используется база данных.
-            using (var database = new Models.AccountContext())
+            using var database = new Models.AccountContext();
+            // Получение всех пользователей с таким же Email-адресом и паролем, как в запросе.
+            var accountsWithThisEmail = database.Accounts.Where(accounts => accounts.Email == request.Email);
+
+            // В случае наличия аккаунтов с таким же Email-адресом, как в запросе, возвращается
+            // ответ сервера с ошибкой, сообщающей об этом.
+            if (accountsWithThisEmail.Any())
+                return await Task.FromResult(RegisterReplies.AccountExists());
+
+            // В случае отсутствия пользователей с тем же Email-адресом, добавление в базу данных
+            // нового пользователя с данными из базы данных.
+            database.Add(new Models.Account()
             {
-                // Получение всех пользователей с таким же Email-адресом и паролем, как в запросе.
-                var accountsWithThisEmail = database.Accounts.Where(accounts => accounts.Email == request.Email);
-
-                // В случае наличия аккаунтов с таким же Email-адресом, как в запросе, возвращается
-                // ответ сервера с ошибкой, сообщающей об этом.
-                if (accountsWithThisEmail.Count() > 0)
-                    return await Task.FromResult(RegisterReplies.AccountExists());
-
-                // В случае отсутствия пользователей с тем же Email-адресом, добавление в базу данных
-                // нового пользователя с данными из базы данных.
-                database.Add(new Models.Account()
-                {
-                    Email = request.Email,
-                    Password = request.Password
-                });
-                // Сохранение изменений базы данных и возвращение ответа.
-                database.SaveChanges();
-                return await Task.FromResult(RegisterReplies.SuccessfulRegister());
-            }
+                Email = request.Email,
+                Password = request.Password
+            });
+            // Сохранение изменений базы данных и возвращение ответа.
+            database.SaveChanges();
+            return await Task.FromResult(RegisterReplies.SuccessfulRegister());
         }
 
         // Метод проверки валидности текущей сессии.
@@ -194,7 +192,7 @@ namespace AccountGRPC
             var checkAccount = database.LoggedAccounts.Where(account => account.SessionId == request.SessionId);
 
             // Производится проверка на то, является ли текущий пользователь вошедшим (по Id сессии).
-            if (checkAccount.Count() == 0)
+            if (!checkAccount.Any())
                 return await Task.FromResult(AccountDataReplies.AccountNotFound());
             else if (LoggedAccountsManagement.TimeOutAction(request.SessionId))
                 return await Task.FromResult(AccountDataReplies.TimePassed());
