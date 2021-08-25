@@ -36,11 +36,7 @@ namespace Relay.Model
             //_tradeMarketStream = _tradeMarketClient.OpenStream(meta);
             _tradeMarketClient.OrderRecievedEvent += _tradeMarketClient_OrderRecievedEvent;
         }
-        public IAsyncStreamReader<SubscribeOrdersResponse> ReConnect()
-        {
-            _tradeMarketStream = _tradeMarketClient.OpenStream(Meta);
-            return _tradeMarketStream;
-        }
+        
 
         public void StatusOfWork()
         {
@@ -56,7 +52,7 @@ namespace Relay.Model
                 IsWorking = false;
                 //прокинуть openstream
                 //_tradeMarketClient.OrderRecievedEvent += _tradeMarketClient_OrderRecievedEvent;
-                ReConnect();
+                 _tradeMarketStream=_tradeMarketClient.ReConnect(Meta);
                 Log.Information("The bot is starting...");
             }
         }
@@ -66,8 +62,21 @@ namespace Relay.Model
         {
             Log.Information("{@Where}: Sending order Price={@Price} : Quantity={@Quantity} : Id={@Id}", "Relay",e.Price,e.Quantity,e.Id);
             Task.Run(async()=> 
-            { 
-                await _algorithmClient.WriteOrder(_algorithmStream, e);
+            {
+                while(true)
+                    {
+                    try
+                    {
+                        await _algorithmClient.WriteOrder(_algorithmStream, e);
+                        break;
+                    }
+                    catch (RpcException e)
+                    {
+                        _algorithmClient.ReConncet(Meta);
+                        Log.Error("{@Where}: Exception={@Exception}", "Relay", e.Message);
+                        await Task.Delay(5000);
+                    }
+                }
             }).Wait();
         }
 

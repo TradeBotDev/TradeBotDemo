@@ -39,7 +39,10 @@ namespace Relay.Clients
             }, meta);
             return response.ResponseStream;
         }
-
+        public IAsyncStreamReader<SubscribeOrdersResponse> ReConnect(Metadata Meta)
+        {
+            return OpenStream(Meta);
+        }
 
 
         public IAsyncEnumerable<Order> SubscribeForOrders(IAsyncStreamReader<SubscribeOrdersResponse> stream)
@@ -61,8 +64,9 @@ namespace Relay.Clients
                     }
                     catch (RpcException e)
                     {
-                        Log.Error(e.Message);
-                        if(e.StatusCode==StatusCode.Cancelled) break;
+                        Log.Information("{@Where}:Exception {@Exception}", "Relay",e.Message);
+                        if (e.StatusCode==StatusCode.Cancelled) break;
+                        await Task.Delay(5000);
                     }
                 }
             });
