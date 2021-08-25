@@ -9,16 +9,20 @@ using Microsoft.EntityFrameworkCore;
 using TradeBot.Account.AccountService.v1;
 using AccountGRPC.AccountMessages;
 using AccountGRPC.Validation;
-using Microsoft.Extensions.Configuration;
 
 namespace AccountGRPC
 {
     public class AccountService : Account.AccountBase
     {
+        // Логгирование.
+        protected readonly ILogger logger = Log.ForContext("Where", "AccountService");
+
         // Метод входа в аккаунт по запросу клиента.
         public override async Task<LoginResponse> Login(LoginRequest request, ServerCallContext context)
         {
-            Log.Information($"Login получил запрос: Email - {request.Email}, Password - {request.Password}.");
+            logger.Information("{@Service} - {@Method} получил запрос: " +
+                $"Email - {request.Email}, " +
+                $"Password - {request.Password}.", GetType().Name, "Login");
 
             // Валидация полей запроса
             var validationResult = Validate.LoginFields(request);
@@ -82,7 +86,10 @@ namespace AccountGRPC
         // Метод выхода из аккаунта
         public override async Task<LogoutResponse> Logout(LogoutRequest request, ServerCallContext context)
         {
-            Log.Information($"Logout получил запрос: SessionId - {request.SessionId},  SaveExchangeAccesses - {request.SaveExchangeAccesses}.");
+            logger.Information("{@Service} - {@Method} получил запрос: " +
+                $"SessionId - {request.SessionId}, " +
+                $"SaveExchangeAccesses - {request.SaveExchangeAccesses}.", GetType().Name, "Logout");
+
             using (var database = new Models.AccountContext())
             {
                 // В случае, если аккаунт не был найден среди вошедших, появляется сообщение об ошибке.
@@ -115,7 +122,10 @@ namespace AccountGRPC
         // Метод регистрации аккаунта по запросу клиента.
         public override async Task<RegisterResponse> Register(RegisterRequest request, ServerCallContext context)
         {
-            Log.Information($"Register получил запрос: Email - {request.Email}, Password - {request.Password}, VerifyPassword - {request.VerifyPassword}.");
+            logger.Information("{@Service} - {@Method} получил запрос: " +
+                $"Email - {request.Email}, " +
+                $"Password - {request.Password}, " +
+                $"VerifyPassword - {request.VerifyPassword}.", GetType().Name, "Register");
 
             // Валидация полей запроса
             var validationResult = Validate.RegisterFields(request);
@@ -158,7 +168,9 @@ namespace AccountGRPC
         // Метод проверки валидности текущей сессии.
         public override async Task<IsValidSessionResponse> IsValidSession(IsValidSessionRequest request, ServerCallContext context)
         {
-            Log.Information($"IsValidSession получил запрос: SessionId - {request.SessionId}.");
+            logger.Information("{@Service} - {@Method} получил запрос: " +
+                $"SessionId - {request.SessionId}.", GetType().Name, "IsValidSession");
+
             using (var database = new Models.AccountContext())
             {
                 // Проверка на наличие вошедших пользователем с тем же Id сессии, что
@@ -175,30 +187,30 @@ namespace AccountGRPC
         // Метод получения информации о текущем пользователе по Id сессии.
         public override async Task<AccountDataResponse> AccountData(AccountDataRequest request, ServerCallContext context)
         {
-            Log.Information($"AccountData получил запрос: SessionId - {request.SessionId}.");
-            using (var database = new Models.AccountContext())
+            logger.Information("{@Service} - {@Method} получил запрос: " +
+                $"SessionId - {request.SessionId}.", GetType().Name, "AccountData");
+
+            using var database = new Models.AccountContext();
+            var checkAccount = database.LoggedAccounts.Where(account => account.SessionId == request.SessionId);
+
+            // Производится проверка на то, является ли текущий пользователь вошедшим (по Id сессии).
+            if (checkAccount.Count() == 0)
+                return await Task.FromResult(AccountDataReplies.AccountNotFound());
+            else if (LoggedAccountsManagement.TimeOutAction(request.SessionId))
+                return await Task.FromResult(AccountDataReplies.TimePassed());
+
+            // Если текущий пользователь вошедший, то сервер возвращает данные этого пользователя.
+            else
             {
-                var checkAccount = database.LoggedAccounts.Where(account => account.SessionId == request.SessionId);
+                // Получение данных вошедшего пользователя.
+                var login = database.LoggedAccounts
+                    .Where(login => login.SessionId == request.SessionId)
+                    .Include(account => account.Account)
+                    .Include(exchange => exchange.Account.ExchangeAccesses).First();
 
-                // Производится проверка на то, является ли текущий пользователь вошедшим (по Id сессии).
-                if (checkAccount.Count() == 0)
-                    return await Task.FromResult(AccountDataReplies.AccountNotFound());
-                else if (LoggedAccountsManagement.TimeOutAction(request.SessionId))
-                    return await Task.FromResult(AccountDataReplies.TimePassed());
-
-                // Если текущий пользователь вошедший, то сервер возвращает данные этого пользователя.
-                else
-                {
-                    // Получение данных вошедшего пользователя.
-                    var login = database.LoggedAccounts
-                        .Where(login => login.SessionId == request.SessionId)
-                        .Include(account => account.Account)
-                        .Include(exchange => exchange.Account.ExchangeAccesses).First();
-
-                    // Формирование ответа.
-                    var reply = AccountDataReplies.SuccessfulGettingAccountData(login);
-                    return await Task.FromResult(reply);
-                }
+                // Формирование ответа.
+                var reply = AccountDataReplies.SuccessfulGettingAccountData(login);
+                return await Task.FromResult(reply);
             }
         }
     }
