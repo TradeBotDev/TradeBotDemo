@@ -15,12 +15,23 @@ namespace Website.Controllers
     [Authorize]
     public class AccountController : Controller
     {
+        private ILogger logger;
+
+        // Добавление Id сессии в конструктор логгера.
+        public AccountController()
+            => logger = Log.ForContext<AccountController>()
+            .ForContext("Where", "Website");
+
         // Метод, показывающий страницу аккаунта с биржами при get-запросе.
         [Route("Account")]
         [HttpGet]
         public async Task<IActionResult> Account()
         {
-            Log.Information("AccountController: метод Account принял запрос GET.");
+            logger = logger.ForContext("SessionId", User.Identity.Name)
+                .ForContext("Method", nameof(Account))
+                .ForContext<HttpGetAttribute>();
+
+            logger.Information("{@Controller}: метод {@Method} принял запрос GET.", GetType().Name, "Account");
 
             // Проверка лицензии и передача ее результата в представление через ViewBag.
             var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
@@ -50,7 +61,12 @@ namespace Website.Controllers
         [HttpPost]
         public async Task<IActionResult> Account(ExchangeAccessCode exchangeCode)
         {
-            Log.Information($"AccountController: метод Account принял запрос POST с данными: exchangeCode - {exchangeCode}.");
+            logger = logger.ForContext("SessionId", User.Identity.Name)
+                .ForContext("Method", nameof(Account))
+                .ForContext<HttpPostAttribute>();
+
+            logger.Information("{@Controller}: метод {@Method} принял запрос POST с данными: " +
+                $"exchangeCode - {exchangeCode}.", GetType().Name, "Account");
 
             // Проверка лицензии и передача ее результата в представление через ViewBag.
             var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
