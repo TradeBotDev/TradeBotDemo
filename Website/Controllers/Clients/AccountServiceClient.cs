@@ -7,16 +7,18 @@ namespace Website.Controllers.Clients
 {
 	public static class AccountServiceClient
 	{
-		// Клиент сервиса аккаунтов для того, чтобы можно было получить к нему доступ.
-		//private static Account.AccountClient client = new(AccountServiceConnection.GetConnection());
-		private static FacadeService.FacadeServiceClient client = new(AccountServiceConnection.GetConnection());
+		// Логгирование.
+		private static readonly ILogger logger = Log.ForContext("Where", "Website");
+
+		// Клиент Афсфву для того, чтобы можно было получить доступ к AccountService.
+		private static readonly FacadeService.FacadeServiceClient client = new(AccountServiceConnection.GetConnection());
 
 		// Метод входа в аккаунт.
 		public static async Task<LoginResponse> Login(LoginModel model)
 		{
-			Log.Information($"AccountServiceClient: метод Login принял запрос: " +
+			logger.Information("{@Class}: метод {@Method} принял запрос: " +
 				$"Email - {model.Email}, " +
-				$"Password - {model.Password}.");
+				$"Password - {model.Password}.", "AccountServiceClient", "Register");
 
 			var request = new LoginRequest
 			{
@@ -29,9 +31,9 @@ namespace Website.Controllers.Clients
 		// Метод выхода из аккаунта.
 		public static async Task<LogoutResponse> Logout(string sessionId, bool saveExchangeAccesses)
 		{
-			Log.Information($"AccountServiceClient: метод Logout принял запрос: " +
+			logger.Information("{@Class}: метод {@Method} принял запрос: " +
 				$"sessionId - {sessionId}, " +
-				$"saveExchangeAccesses - {saveExchangeAccesses}.");
+				$"saveExchangeAccesses - {saveExchangeAccesses}.", "AccountServiceClient", "Logout");
 
 			var request = new LogoutRequest
 			{
@@ -44,10 +46,10 @@ namespace Website.Controllers.Clients
 		// Метод регистрации.
 		public static async Task<RegisterResponse> Register(RegisterModel model)
 		{
-			Log.Information($"AccountServiceClient: метод Register принял запрос: " +
+			logger.Information("{@Class}: метод {@Method} принял запрос: " +
 				$"Email - {model.Email}, " +
 				$"Password - {model.Password}, " +
-				$"VerifyPassword - {model.VerifyPassword}.");
+				$"VerifyPassword - {model.VerifyPassword}.", "AccountServiceClient", "Register");
 
 			var request = new RegisterRequest
 			{
@@ -61,22 +63,20 @@ namespace Website.Controllers.Clients
 		// Метод проверки сессии на валидность.
 		public static async Task<IsValidSessionResponse> IsValidSession(string sessionId)
 		{
-			Log.Information($"AccountServiceClient: метод IsValidSession принял запрос: sessionId - {sessionId}.");
-			var request = new IsValidSessionRequest
-			{
-				SessionId = sessionId
-			};
+			logger.Information("{@Class}: метод {@Method} принял запрос: " +
+				$"sessionId - {sessionId}.", "AccountServiceClient", "Register");
+
+			var request = new IsValidSessionRequest { SessionId = sessionId };
 			return await client.IsValidSessionAsync(request);
 		}
 
 		// Метод получения информации из аккаунта.
 		public static async Task<AccountDataResponse> AccountData(string sessionId)
 		{
-			Log.Information($"AccountServiceClient: метод AccountData принял запрос: sessionId - {sessionId}.");
-			var request = new AccountDataRequest
-			{
-				SessionId = sessionId
-			};
+			logger.Information("{@Class}: метод {@Method} принял запрос: " +
+				$"sessionId - {sessionId}.", "AccountServiceClient", "Register");
+
+			var request = new AccountDataRequest { SessionId = sessionId };
 			return await client.AccountDataAsync(request);
 		}
 	}

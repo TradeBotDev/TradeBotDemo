@@ -8,19 +8,21 @@ namespace Website.Controllers.Clients
 {
 	public static class LicenseClient
 	{
-		// Клиент сервиса лицензий для того, чтобы можно было получить к нему доступ.
-		//private static License.LicenseClient client = new(AccountServiceConnection.GetConnection());
-		private static FacadeService.FacadeServiceClient client = new(AccountServiceConnection.GetConnection());
+		// Логгирование.
+		private static readonly ILogger logger = Log.ForContext("Where", "Website");
+
+		// Клиент Facade для того, чтобы можно было получить доступ к LicenseService.
+		private static readonly FacadeService.FacadeServiceClient client = new(AccountServiceConnection.GetConnection());
 
 		// Метод установки лицензии для пользователя по Id сессии.
 		public static async Task<SetLicenseResponse> SetLicense(string sessionId, ProductCode product, CreditCardModel model)
 		{
-			Log.Information($"LicenseClient: метод SetLicense принял запрос: " +
+			Log.Information("{@Class}: метод {@Method} принял запрос: " +
 				$"sessionId - {sessionId}, " +
 				$"product - {product}, " +
 				$"CardNumber - {model.CardNumber}, " +
 				$"Date - {model.Date}, " +
-				$"CVV - {model.CVV}.");
+				$"CVV - {model.CVV}.", "LicenseClient", "SetLicense");
 
 			var request = new SetLicenseRequest
 			{
@@ -36,7 +38,9 @@ namespace Website.Controllers.Clients
 		// Метод проверки на то, есть ли лицензия у текущего пользователя.
 		public static async Task<CheckLicenseResponse> CheckLicense(string sessionId, ProductCode product)
 		{
-			Log.Information($"LicenseClient: метод CheckLicense принял запрос: sessionId - {sessionId}, product - {product}");
+			Log.Information("{@Class}: метод {@Method} принял запрос: " +
+				$"sessionId - {sessionId}, " +
+				$"product - {product}", "LicenseClient", "CheckLicense");
 			
 			// Если Id сессии является null, в запросе отправляется просто пустая строка (gRPC не умеет пересылать null).
 			// В таком случае сработает валидация уже в самом сервисе и вернется сообщение об ошибке.
