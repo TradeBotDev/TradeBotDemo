@@ -5,10 +5,13 @@ namespace AccountGRPC.LicenseMessages
 {
     public static class CheckLicenseReplies
     {
+        // Логгирование.
+        private static readonly ILogger logger = Log.ForContext("Where", "AccountService");
+
         public static CheckLicenseResponse LicenseIsExists()
         {
             const string Message = "Данный пользователь обладает лицензией на продукт.";
-            Log.Information(Message);
+            logger.Information("{@Replies} - " + Message, nameof(CheckLicenseReplies));
 
             return new CheckLicenseResponse
             {
@@ -21,7 +24,7 @@ namespace AccountGRPC.LicenseMessages
         public static CheckLicenseResponse LicenseIsNotExists()
         {
             const string Message = "Произошла ошибка проверки лицензии: данный пользователь не обладает лицензией на продукт.";
-            Log.Information(Message);
+            logger.Information("{@Replies} - " + Message, nameof(CheckLicenseReplies));
 
             return new CheckLicenseResponse
             {
@@ -34,7 +37,7 @@ namespace AccountGRPC.LicenseMessages
         public static CheckLicenseResponse AccountNotFound()
         {
             const string Message = "Произошла ошибка проверки лицензии: пользователь не найден.";
-            Log.Information(Message);
+            logger.Information("{@Replies} - " + Message, nameof(CheckLicenseReplies));
 
             return new CheckLicenseResponse
             {

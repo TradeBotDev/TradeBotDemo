@@ -5,10 +5,13 @@ namespace AccountGRPC.AccountMessages
 {
     public static class DeleteExchangeAccessReplies
     {
+        // Логгирование.
+        private static readonly ILogger logger = Log.ForContext("Where", "AccountService");
+
         public static DeleteExchangeAccessResponse SuccessfulDeleting()
         {
             const string Message = "Данные биржи для данного пользователя успешно удалены.";
-            Log.Information(Message);
+            logger.Information("{@Replies} - " + Message, nameof(DeleteExchangeAccessReplies));
 
             return new DeleteExchangeAccessResponse
             {
@@ -20,7 +23,7 @@ namespace AccountGRPC.AccountMessages
         public static DeleteExchangeAccessResponse AccountNotFound()
         {
             const string Message = "Произошла ошибка: пользователь не найден.";
-            Log.Information(Message);
+            logger.Information("{@Replies} - " + Message, nameof(DeleteExchangeAccessReplies));
 
             return new DeleteExchangeAccessResponse
             {
@@ -32,7 +35,7 @@ namespace AccountGRPC.AccountMessages
         public static DeleteExchangeAccessResponse TimePassed()
         {
             const string Message = "Произошла ошибка: время сессии вышло.";
-            Log.Information(Message);
+            logger.Information("{@Replies} - " + Message, nameof(DeleteExchangeAccessReplies));
 
             return new DeleteExchangeAccessResponse
             {
@@ -44,7 +47,7 @@ namespace AccountGRPC.AccountMessages
         public static DeleteExchangeAccessResponse ExchangeNotFound()
         {
             const string Message = "Произошла ошибка: данные биржи не найдены.";
-            Log.Information(Message);
+            logger.Information("{@Replies} - " + Message, nameof(DeleteExchangeAccessReplies));
 
             return new DeleteExchangeAccessResponse
             {
