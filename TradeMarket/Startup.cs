@@ -12,16 +12,10 @@ using Prometheus;
 using Prometheus.SystemMetrics;
 using StackExchange.Redis;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using TradeBot.Account.AccountService.v1;
 using TradeMarket.Clients;
-using TradeMarket.DataTransfering;
 using TradeMarket.DataTransfering.Bitmex.Rest.Client;
-using TradeMarket.Model;
 using TradeMarket.Model.TradeMarkets;
-using TradeMarket.Model.UserContexts;
 using TradeMarket.Model.UserContexts.Builders;
 using TradeMarket.Services;
 
