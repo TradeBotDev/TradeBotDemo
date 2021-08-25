@@ -61,7 +61,7 @@ namespace Relay.Services
         public override async Task<StartBotResponse> StartBot(StartBotRequest request, ServerCallContext context)
         {
             var user = GetUserContext(context.RequestHeaders);
-            Log.Information("{@Where} StartBot Request Started For user {@context}", "Relay", user);
+            Log.ForContext("sessionId", user.Meta.GetValue("sessionid")).ForContext("slot", user.Meta.GetValue("slot")).Information("{@Where} StartBot Request Started For user {@context}", "Relay", user);
             user.StatusOfWork();
             user.SubscribeForOrders();
             RaiseService.AddToRedis(request.Config,context.RequestHeaders);

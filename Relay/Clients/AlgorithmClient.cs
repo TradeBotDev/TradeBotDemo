@@ -65,8 +65,8 @@ namespace Relay.Clients
                 }
                 catch (Exception e)
                 {
-                    Log.Error("{@Where}: Exception {@Exception}","Relay", e.Message);
-                    throw;
+                    Log.ForContext("sessionId", meta.GetValue("sessionid")).ForContext("slot", meta.GetValue("slot")).Error("{@Where}: Exception {@Exception}","Relay", e.Message);
+                    await Task.Delay(5000);
                 }
             }
         }

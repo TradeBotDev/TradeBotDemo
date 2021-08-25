@@ -30,12 +30,11 @@ namespace Relay.Clients
                         Request = update
                     }, meta);
                     break;
-
                 }
-                catch (Exception e)
+                catch (RpcException e)
                 {
-                    Log.Information("{@Where}: Exception {@Exception}", "Relay",e.Message);
-                    throw;
+                    Log.ForContext("sessionId", meta.GetValue("sessionid")).ForContext("slot", meta.GetValue("slot")).Error("{@Where}: {@MethodName} Exception {@Exception}", "Relay", nameof(UpdateConfig),e.Message);
+                    await Task.Delay(5000);
                 }
             }
         }
