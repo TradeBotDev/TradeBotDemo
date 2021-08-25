@@ -13,8 +13,9 @@ namespace Former.Models
         private readonly TradeMarketClient _tradeMarketClient;
         private readonly Metadata _metadata;
         private readonly HistoryClient _historyClient;
+        private readonly double _slotMultiplier;
 
-        internal Former(Storage storage, Configuration configuration, TradeMarketClient tradeMarketClient, Metadata metadata, HistoryClient historyClient)
+        internal Former(Storage storage, Configuration configuration, TradeMarketClient tradeMarketClient, Metadata metadata, HistoryClient historyClient, double slotMultiplier)
         {
             _storage = storage;
             _storage.PlaceOrderEvent += PlaceCounterOrder;
@@ -22,6 +23,7 @@ namespace Former.Models
             _tradeMarketClient = tradeMarketClient;
             _metadata = metadata;
             _historyClient = historyClient;
+            _slotMultiplier = slotMultiplier;
         }
         /// <summary>
         /// Обвновляет конфигурацию в Former (позволяет изменять конфигурацию во время работы)
@@ -45,6 +47,7 @@ namespace Former.Models
                 ? oldOrder.Price - oldOrder.Price * _configuration.RequiredProfit
                 : oldOrder.Price + oldOrder.Price * _configuration.RequiredProfit;
 
+            _storage.SpentBalance -= _storage.LotSize == 1 ? Math.Abs(price * _slotMultiplier * quantity) : Math.Abs( quantity / price);
             //ответ при добавлении контр-ордера в соответсвующий список (необходимо для логов)
             var addResponse = false;
             //выставляем контр ордер с рассчитанной ценой и отрицательным числом контрактов, так как контр ордер должен иметь противоположное число 
@@ -64,7 +67,7 @@ namespace Former.Models
                     LastUpdateDate = DateTimeOffset.Now
                 };
                 addResponse = _storage.AddOrder(placeResponse.OrderId, newOrder, _storage.CounterOrders);
-
+                _storage.SpentBalance += _storage.LotSize == 1 ? Math.Abs(newOrder.Price * _slotMultiplier *  newOrder.Quantity) : Math.Abs( newOrder.Quantity / newOrder.Price);
                 //сообщаем о выставлении контр-ордера истории
                 await _historyClient.WriteOrder(newOrder, ChangesType.CHANGES_TYPE_INSERT, Converters.ConvertMetadata(_metadata), "Counter order placed");
                 Log.Information(
@@ -119,16 +122,17 @@ namespace Former.Models
         /// <summary>
         /// Возвращает false, если текущий баланс и маржа не позволяют выставить ордер на покупку/продажу, иначе true
         /// </summary>
-        private bool CheckPossibilityPlacingOrder(OrderType type)
+        private bool CheckPossibilityPlacingOrder(OrderType type, double quantity, double price)
         {
             if (_storage.LotSize == 0) return false;
             //вычисляем предполагаемую стоимость ордера по рыночной цене в биткоинах
-            var orderCost = (_configuration.ContractValue * _storage.LotSize) / (type == OrderType.ORDER_TYPE_SELL ? _storage.SellMarketPrice : _storage.BuyMarketPrice);
+            var orderCost = _storage.LotSize == 1
+                ? Math.Abs(price * _slotMultiplier * quantity)
+                : Math.Abs(quantity / price);
             //конвертируем баланс в биткоины (XBT), так как он приходит от биржи в сатоши (XBt)
-            var totalBalance = ConvertSatoshiToXBT(_storage.TotalBalance);
-            var availableBalance = ConvertSatoshiToXBT(_storage.AvailableBalance);
+            var allowedBalance = ConvertSatoshiToXBT(_storage.AllowedBalance);
             //проверяем, возможно ли выставить с текущим общим и доступным балансом с учётом настройки
-            if (totalBalance * (_configuration.AvailableBalance - 1) + availableBalance > orderCost) return true;
+            if (allowedBalance - _storage.SpentBalance > orderCost) return true;
             Log.Debug("{@Where}: Cannot place {@Type} order. Insufficient balance.", "Former", type);
             return false;
         }
@@ -151,16 +155,15 @@ namespace Former.Models
             if (_storage.PlaceLocker) return;
             //тип выставляемого ордера в зависимости от решения алгоритма
             var orderType = decision > 0 ? OrderType.ORDER_TYPE_BUY : OrderType.ORDER_TYPE_SELL;
+            //размер заказа в зависимости от решения алгоритма (на продажу размер отрицательный) с учётом настройки ContractValue
+            var quantity = orderType == OrderType.ORDER_TYPE_BUY ? (_configuration.ContractValue * _storage.LotSize) : -(_configuration.ContractValue * _storage.LotSize);
+            //цена выставляемого ордера в зависимости от решения алгоритма (тип рыночной цены)
+            var price = orderType == OrderType.ORDER_TYPE_BUY ? _storage.BuyMarketPrice : _storage.SellMarketPrice;
 
             //проверяем можно ли поставить ордер такого типа в текущей позиции
             if (!CheckPosition(orderType)) return;
             //проверяем возможность выставления ордера исходя из имеющегося баланса 
-            if (!CheckPossibilityPlacingOrder(orderType)) return;
-
-            //размер заказа в зависимости от решения алгоритма (на продажу размер отрицательный) с учётом настройки ContractValue
-            var quantity = orderType == OrderType.ORDER_TYPE_BUY ? (_configuration.ContractValue * _storage.LotSize) : -(_configuration.ContractValue*_storage.LotSize);
-            //цена выставляемого ордера в зависимости от решения алгоритма (тип рыночной цены)
-            var price = orderType == OrderType.ORDER_TYPE_BUY ? _storage.BuyMarketPrice : _storage.SellMarketPrice;
+            if (!CheckPossibilityPlacingOrder(orderType, quantity, price)) return;
 
             //отправляем запрос на биржу выставить ордер по рыночной цене 
             var placeResponse = await _tradeMarketClient.PlaceOrder(price, quantity, Converters.ConvertMetadata(_metadata));
@@ -169,6 +172,7 @@ namespace Former.Models
 
             if (response.Code == ReplyCode.REPLY_CODE_SUCCEED)
             {
+                _storage.SpentBalance += _storage.LotSize == 1 ? Math.Abs(price * _slotMultiplier * quantity) : Math.Abs( quantity / price);
                 //в случае успешного выставления ордера, вносим его в список своих ордеров
                 var newOrder = new Order
                 {
@@ -211,7 +215,7 @@ namespace Former.Models
         {
             foreach (var (key, value) in _storage.MyOrders)
             {
-                
+                _storage.SpentBalance = 0;
                 var deleteResponse = await _tradeMarketClient.DeleteOrder(key, Converters.ConvertMetadata(_metadata));
                 var response = Converters.ConvertDefaultResponse(deleteResponse.Response);
                 Log.Information(
