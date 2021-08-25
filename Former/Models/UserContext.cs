@@ -37,8 +37,8 @@ namespace Former.Models
             _tradeMarketClient = new TradeMarketClient();
 
             _storage = new Storage();
-            _former = new Former(_storage, null, _tradeMarketClient, Meta, _historyClient);
-            _updateHandlers = new UpdateHandlers(_storage, null, _tradeMarketClient, Meta, _historyClient);
+            _former = new Former(_storage, null, _tradeMarketClient, Meta, _historyClient, Constance.SlotsMultipliers[Meta.Slot]);
+            _updateHandlers = new UpdateHandlers(_storage, null, _tradeMarketClient, Meta, _historyClient, Constance.SlotsMultipliers[Meta.Slot]);
 
         }
 
@@ -77,7 +77,6 @@ namespace Former.Models
             _tradeMarketClient.UpdatePosition -= _storage.UpdatePosition;
             _tradeMarketClient.UpdateLotSize -= _storage.UpdateLotSize;
             //очищаем хранилище
-            _storage.ClearStorage();
             _isSubscribesAttached = false;
             Log.Information("{@Where}: Former has been stopped!", "Former");
         }
@@ -90,7 +89,7 @@ namespace Former.Models
         {
             await _former.FormOrder(decision);
         }
-
+        
 
         /// <summary>
         /// Вытаскиваем метод формера наружу, чтобы можно было из юзер контекста запросить удаление своих ордеров
@@ -106,6 +105,7 @@ namespace Former.Models
         {
             _former.SetConfiguration(configuration);
             _updateHandlers.SetConfiguration(configuration);
+            _storage.BalanceMultiplier = configuration.AvailableBalance;
         }
     }
 }
