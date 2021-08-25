@@ -30,6 +30,7 @@ namespace Former.Clients
         private static int _retryDelay;
         private static string _connectionString;
         private CancellationTokenSource _token;
+        private readonly ILogger _logger;
 
         private readonly TradeMarketService.TradeMarketServiceClient _client;
 
@@ -39,8 +40,9 @@ namespace Former.Clients
             _retryDelay = retryDelay;
         }
 
-        internal TradeMarketClient()
+        internal TradeMarketClient(ILogger logger)
         {
+            _logger = logger.ForContext<TradeMarketClient>();
             _client = new TradeMarketService.TradeMarketServiceClient(GrpcChannel.ForAddress(_connectionString));
         }
 
@@ -63,10 +65,10 @@ namespace Former.Clients
                     if (e.StatusCode == StatusCode.Cancelled) break;
                     if (attempts > 3)
                     {
-                        Log.Error("{@Where}: Error {@ExceptionMessage}. Retrying...\r\n{@ExceptionStackTrace}", "Former", e.Message, e.StackTrace);
+                        _logger.Error("Error {@ExceptionMessage}. Retrying...\r\n{@ExceptionStackTrace}", e.Message, e.StackTrace);
                         throw new RpcException(e.Status);
                     }
-                    Log.Error("{@Where}: Error {@ExceptionMessage}. Retrying...\r\n{@ExceptionStackTrace}", "Former", e.Message, e.StackTrace);
+                    _logger.Error("Error {@ExceptionMessage}. Retrying...\r\n{@ExceptionStackTrace}", e.Message, e.StackTrace);
                     Thread.Sleep(_retryDelay);
                     attempts++;
                 }
@@ -84,22 +86,21 @@ namespace Former.Clients
         private async Task ObserveMarketPrices(Metadata meta)
         {
             using var call = _client.SubscribePrice(new SubscribePriceRequest(), meta);
-            Log.Information("Subscribe market prices");
+            _logger.ForContext("Method","ObserveMarketPrices").Information("Subscribe market prices");
             async Task ObserveMarketPricesFunc()
             {
+                var responseHeaders = await call.ResponseHeadersAsync;
                 while (await call.ResponseStream.MoveNext(_token.Token))
                 {
-                    if (EventFilter(call.ResponseHeadersAsync.Result, meta))
+                    if (EventFilter(responseHeaders, meta))
                     {
                         await UpdateMarketPrices?.Invoke(call.ResponseStream.Current.BidPrice, call.ResponseStream.Current.AskPrice);
                         await UpdateLotSize?.Invoke(call.ResponseStream.Current.LotSize);
                     }
                 }
             }
-
             await ConnectionTester(ObserveMarketPricesFunc);
-
-            Log.Information("Unsubscribe market prices");
+            _logger.ForContext("Method","ObserveMarketPrices").Information("Unsubscribe market prices");
         }
 
         /// <summary>
@@ -108,16 +109,17 @@ namespace Former.Clients
         private async Task ObserveBalance(Metadata meta)
         {
             using var call = _client.SubscribeMargin(new SubscribeMarginRequest(), meta);
-            Log.Information("Subscribe balance");
+            _logger.ForContext("Method","ObserveBalance").Information("Subscribe balance");
             async Task ObserveBalanceFunc()
             {
+                var responseHeaders = await call.ResponseHeadersAsync;
                 while (await call.ResponseStream.MoveNext(_token.Token))
                 {
-                    if (EventFilter(call.ResponseHeadersAsync.Result, meta)) await UpdateBalance?.Invoke((int)call.ResponseStream.Current.Margin.AvailableMargin, (int)call.ResponseStream.Current.Margin.MarginBalance);
+                    if (EventFilter(responseHeaders, meta)) await UpdateBalance?.Invoke((int)call.ResponseStream.Current.Margin.AvailableMargin, (int)call.ResponseStream.Current.Margin.MarginBalance);
                 }
             }
             await ConnectionTester(ObserveBalanceFunc);
-            Log.Information("Unsubscribe balance");
+            _logger.ForContext("Method","ObserveBalance").Information("Unsubscribe balance");
         }
 
         /// <summary>
@@ -126,17 +128,17 @@ namespace Former.Clients
         private async Task ObserveMyOrders(Metadata meta)
         {
             using var call = _client.SubscribeMyOrders(new SubscribeMyOrdersRequest(), meta);
-            Log.Information("Subscribe my orders");
+            _logger.ForContext("Method","ObserveMyOrders").Information("Subscribe my orders");
             async Task ObserveMyOrdersFunc()
             {
+                var responseHeaders = await call.ResponseHeadersAsync;
                 while (await call.ResponseStream.MoveNext(_token.Token))
                 {
-                    if (EventFilter(call.ResponseHeadersAsync.Result, meta)) await UpdateMyOrders?.Invoke(Converters.ConvertOrder(call.ResponseStream.Current.Changed), (ChangesType)call.ResponseStream.Current.ChangesType);
+                    if (EventFilter(responseHeaders, meta)) await UpdateMyOrders?.Invoke(Converters.ConvertOrder(call.ResponseStream.Current.Changed), (ChangesType)call.ResponseStream.Current.ChangesType);
                 }
             }
-
             await ConnectionTester(ObserveMyOrdersFunc);
-            Log.Information("Unsubscribe my orders");
+            _logger.ForContext("Method","ObserveMyOrders").Information("Unsubscribe my orders");
         }
 
         /// <summary>
@@ -145,19 +147,18 @@ namespace Former.Clients
         private async Task ObservePositions(Metadata meta)
         {
             using var call = _client.SubscribePosition(new SubscribePositionRequest(), meta);
-            Log.Information("Subscribe position");
-
+            _logger.ForContext("Method","ObservePositions").Information("Subscribe position");
             async Task ObservePositionFunc()
             {
+                var responseHeaders = await call.ResponseHeadersAsync;
                 while (await call.ResponseStream.MoveNext(_token.Token))
                 {
-                    if (EventFilter(call.ResponseHeadersAsync.Result, meta)) await UpdatePosition?.Invoke(call.ResponseStream.Current.CurrentQty);
+                    if (EventFilter(responseHeaders, meta)) await UpdatePosition?.Invoke(call.ResponseStream.Current.CurrentQty);
                 }
                 
             }
-
             await ConnectionTester(ObservePositionFunc);
-            Log.Information("Unsubscribe position");
+            _logger.ForContext("Method","ObservePositions").Information("Unsubscribe position");
         }
 
         /// <summary>
@@ -237,7 +238,7 @@ namespace Former.Clients
         internal void StopObserving()
         {
             _token.Cancel();
-            Log.Information("Cancel token");
+            _logger.ForContext("Method","StopObserving").Information("Cancel token");
         }
     }
 }

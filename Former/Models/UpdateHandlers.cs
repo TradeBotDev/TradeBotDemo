@@ -17,8 +17,9 @@ namespace Former.Models
         private double _oldMarketBuyPrice;
         private double _oldMarketSellPrice;
         private int _oldTotalBalance;
+        private readonly ILogger _logger;
         
-        internal UpdateHandlers(Storage storage, Configuration configuration, TradeMarketClient tradeMarketClient, Metadata metadata, HistoryClient historyClient, double slotMultiplier)
+        internal UpdateHandlers(Storage storage, Configuration configuration, TradeMarketClient tradeMarketClient, Metadata metadata, HistoryClient historyClient, double slotMultiplier, ILogger logger)
         {
             _storage = storage;
             _storage.HandleUpdateEvent += MainUpdateHandler;
@@ -27,6 +28,7 @@ namespace Former.Models
             _tradeMarketClient = tradeMarketClient;
             _historyClient = historyClient;
             _slotMultiplier = slotMultiplier;
+            _logger = logger.ForContext<UpdateHandlers>();
         }
 
         /// <summary>
@@ -57,9 +59,9 @@ namespace Former.Models
             {
                 _storage.SpentBalance += _storage.LotSize == 1 ? Math.Abs(order.Price * _slotMultiplier) *  order.Quantity : Math.Abs( order.Quantity / order.Price);
                 await _historyClient.WriteOrder(order, ChangesType.CHANGES_TYPE_PARTITIAL, Converters.ConvertMetadata(_metadata), "Counter order initialized");
-                Log.Information(
-                    "{@Where}: Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sended to history",
-                    "Former", order.Id, order.Price, order.Quantity, ChangesType.CHANGES_TYPE_PARTITIAL,
+                _logger.ForContext("Method", "OrderUpdateHandle").Information(
+                    "Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sent to history",
+                    order.Id, order.Price, order.Quantity, ChangesType.CHANGES_TYPE_PARTITIAL,
                     "Counter order initialized");
             }
 
@@ -67,9 +69,9 @@ namespace Former.Models
             {
                 _storage.SpentBalance -= _storage.LotSize == 1 ? Math.Abs(order.Price * _slotMultiplier *  order.Quantity) : Math.Abs( order.Quantity / order.Price);
                 await _historyClient.WriteOrder(FormatDeletedOrder(order), ChangesType.CHANGES_TYPE_DELETE, Converters.ConvertMetadata( _metadata), "Counter order filled");
-                Log.Information(
-                    "{@Where}: Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sended to history",
-                    "Former", order.Id, order.Price, order.Quantity, ChangesType.CHANGES_TYPE_DELETE,
+                _logger.ForContext("Method", "OrderUpdateHandle").Information(
+                    "Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sent to history",
+                    order.Id, order.Price, order.Quantity, ChangesType.CHANGES_TYPE_DELETE,
                     "Counter order filled");
             }
         }
@@ -100,7 +102,6 @@ namespace Former.Models
             //с помощью метода FitPrices
             _oldMarketSellPrice = _storage.SellMarketPrice;
             _oldMarketBuyPrice = _storage.BuyMarketPrice;
-            //Log.Information("{@Where}: Buy market price: {@BuyMarketPrice}, Sell market price: {@SellMarketPrice}", "Former",_storage.BuyMarketPrice, _storage.SellMarketPrice);
             if (!_storage.FitPricesLocker && !_storage.MyOrders.IsEmpty) await FitPrices();
         }
 
@@ -147,9 +148,9 @@ namespace Former.Models
                     //в случае положительного ответа обновляем его в своём списке и сообщаем об изменениях истории
                     UpdateOrderPrice(order, fairPrice);
                     await _historyClient.WriteOrder(order, ChangesType.CHANGES_TYPE_UPDATE, Converters.ConvertMetadata(_metadata), "Order amended");
-                    Log.Information(
-                        "{@Where}: Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sended to history",
-                        "Former", order.Id, order.Price, order.Quantity, ChangesType.CHANGES_TYPE_UPDATE,
+                    _logger.ForContext("Method", "FitPrices").Information(
+                        "Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sent to history",
+                        order.Id, order.Price, order.Quantity, ChangesType.CHANGES_TYPE_UPDATE,
                         "Order amended");
                 }
                 else if (response.Message.Contains("Invalid ordStatus"))
@@ -158,15 +159,15 @@ namespace Former.Models
                     //при получении ошибки Invalid ordStatus мы понимаем, что пытаемся изменить ордер, которого нет на бирже, 
                     //но при этом он есть у нас в списках, поэтому мы удаляем его из своих списков и сообщаем об удалении истории
                     await _historyClient.WriteOrder(order, ChangesType.CHANGES_TYPE_DELETE, Converters.ConvertMetadata(_metadata), "");
-                    Log.Information(
-                        "{@Where}: Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sended to history",
-                        "Former", order.Id, order.Price, order.Quantity, ChangesType.CHANGES_TYPE_DELETE,
+                    _logger.ForContext("Method", "FitPrices").Information(
+                        "Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sent to history",
+                        order.Id, order.Price, order.Quantity, ChangesType.CHANGES_TYPE_DELETE,
                         "");
                     var removeResponse = _storage.RemoveOrder(key, _storage.MyOrders);
-                    Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed cause cannot be amended {@ResponseCode} ", "Former", order.Id, order.Price, order.Quantity, order.Signature.Type, removeResponse ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
+                    _logger.ForContext("Method", "FitPrices").Information("My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed cause cannot be amended {@ResponseCode} ", order.Id, order.Price, order.Quantity, order.Signature.Type, removeResponse ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
                 }
                 else return;
-                Log.Information("{@Where}: Order {@Id} amended with {@Price} {@ResponseCode} {@ResponseMessage}", "Former", key, fairPrice, response.Code.ToString(), response.Code == ReplyCode.REPLY_CODE_SUCCEED ? "" : response.Message);
+                _logger.ForContext("Method", "FitPrices").Information("Order {@Id} amended with {@Price} {@ResponseCode} {@ResponseMessage}", key, fairPrice, response.Code.ToString(), response.Code == ReplyCode.REPLY_CODE_SUCCEED ? "" : response.Message);
             }
             _storage.FitPricesLocker = false;
         }

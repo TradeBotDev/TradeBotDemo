@@ -32,10 +32,13 @@ namespace Former.Models
         internal int AllowedBalance;
         internal double BalanceMultiplier;
         internal double SpentBalance;
+
+        private readonly ILogger _logger;
         
 
-        internal Storage()
+        internal Storage(ILogger logger)
         {
+            _logger = logger.ForContext<Storage>();
             MyOrders = new ConcurrentDictionary<string, Order>();
             CounterOrders = new ConcurrentDictionary<string, Order>();
         }
@@ -48,12 +51,12 @@ namespace Former.Models
             if (bid > 0)
             {
                 BuyMarketPrice = bid;
-                Log.Information("New buy market price {@BuyMarketPrice}", bid);
+                _logger.ForContext("Method","UpdateMarketPrices").Information("New buy market price {@BuyMarketPrice}", bid);
             }
             if (ask > 0)
             {
                 SellMarketPrice = ask;
-                Log.Information("New sell market price {@SellMarketPrice}", ask);
+                _logger.ForContext("Method","UpdateMarketPrices").Information("New sell market price {@SellMarketPrice}", ask);
             }
             //необоходимо сообщить об изменениях UpdateHandler, чтобы тот проверил необходимость подгонки своих ордеров
             await HandleUpdateEvent.Invoke();
@@ -63,7 +66,7 @@ namespace Former.Models
         {
             if (lotSize <= 0) return Task.CompletedTask;
             LotSize = lotSize;
-            Log.Information("{@Where}: Lot size: {@LotSize}", "Former", lotSize);
+            _logger.ForContext("Method","UpdateLotSize").Information("Lot size: {@LotSize}", LotSize);
             return Task.CompletedTask;
         }
 
@@ -95,7 +98,7 @@ namespace Former.Models
                     //если он имеет не нулевую, то это означает, что ордер исполнился частично и необходимо сообщить формеру о необходимости 
                     //выставить частичный контр-ордер (если ордер имеет нулевую Quantity, то обновилась цена)
                     var updateMyOrderResponse = UpdateOrder(newComingOrder, MyOrders);
-                    Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} updated {@ResponseCode}", "Former", myOldOrder.Id, myOldOrder.Price, myOldOrder.Quantity, myOldOrder.Signature.Type, updateMyOrderResponse ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
+                    _logger.ForContext("Method","UpdateMyOrderList").Information("My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} updated {@ResponseCode}", myOldOrder.Id, myOldOrder.Price, myOldOrder.Quantity, myOldOrder.Signature.Type, updateMyOrderResponse ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
                     LockPlacingOrders(true);
                     if (Math.Abs(newComingOrder.Quantity) < Math.Abs(myOldOrder.Quantity)) await PlaceOrderEvent.Invoke(myOldOrder, newComingOrder);
                     LockPlacingOrders(false);
@@ -103,13 +106,13 @@ namespace Former.Models
                 case ChangesType.CHANGES_TYPE_UPDATE when itsCounterOrder:
                     //просто обновляется цена у контр-ордера
                     var updateCounterOrderResponse = UpdateOrder(newComingOrder, CounterOrders);
-                    Log.Information("{@Where}: Counter order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} updated {@ResponseCode}", "Former", counterOldOrder.Id, counterOldOrder.Price, counterOldOrder.Quantity, counterOldOrder.Signature.Type, updateCounterOrderResponse ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
+                    _logger.ForContext("Method","UpdateMyOrderList").Information("Counter order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} updated {@ResponseCode}", counterOldOrder.Id, counterOldOrder.Price, counterOldOrder.Quantity, counterOldOrder.Signature.Type, updateCounterOrderResponse ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
                     break;
                 case ChangesType.CHANGES_TYPE_DELETE when itsMyOrder:
                     //если оредр пришёл с пометкой Delete и при этом является моим орером, то необходимо удалить его из списка
                     //своих ордеров, и сообщить формеру о необходимости выставить полный контр-ордер
                     var removeMyOrderResponse = RemoveOrder(id, MyOrders);
-                    Log.Information("{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed {@ResponseCode}", "Former", myOldOrder.Id, myOldOrder.Price, myOldOrder.Quantity, myOldOrder.Signature.Type, removeMyOrderResponse ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
+                    _logger.ForContext("Method","UpdateMyOrderList").Information("My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed {@ResponseCode}", myOldOrder.Id, myOldOrder.Price, myOldOrder.Quantity, myOldOrder.Signature.Type, removeMyOrderResponse ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
                     LockPlacingOrders(true);
                     await PlaceOrderEvent.Invoke(myOldOrder, newComingOrder);
                     LockPlacingOrders(false);
@@ -119,7 +122,7 @@ namespace Former.Models
                     //контр ордеров, и сообщить об этом UpdateHandler, чтобы он сообщил об этом истории.
                     var removeCounterOrderResponse = RemoveOrder(id, CounterOrders);
                     HandleUpdateEvent?.Invoke(newComingOrder, ChangesType.CHANGES_TYPE_DELETE);
-                    Log.Information("{@Where}: Counter order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed {@ResponseCode}", "Former", counterOldOrder.Id, counterOldOrder.Price, counterOldOrder.Quantity, counterOldOrder.Signature.Type, removeCounterOrderResponse ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
+                    _logger.ForContext("Method","UpdateMyOrderList").Information("Counter order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed {@ResponseCode}", counterOldOrder.Id, counterOldOrder.Price, counterOldOrder.Quantity, counterOldOrder.Signature.Type, removeCounterOrderResponse ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
                     break;
                 case ChangesType.CHANGES_TYPE_INSERT:
                     //пришедший ордер не помещается в список моих ордеров здесь, потому что это делается только по событию из алгоритма, во избежание
@@ -138,7 +141,7 @@ namespace Former.Models
         internal Task UpdatePosition(double positionQuantity)
         {
             if (PositionSize == (int)positionQuantity) return Task.CompletedTask;
-            Log.Information("{@Where}: Current position: {@Position}", "Former", positionQuantity);
+            _logger.ForContext("Method","UpdatePosition").Information("Current position: {@Position}", positionQuantity);
             PositionSize = (int)positionQuantity;
             return Task.CompletedTask;
         }
@@ -152,7 +155,7 @@ namespace Former.Models
             if (availableBalance > 0)
             {
                 AvailableBalance = availableBalance;
-                Log.Information("{@Where}: Balance updated. Available balance: {@AvailableBalance}, Total balance: {@TotalBalance}", "Former", AvailableBalance, TotalBalance);
+                _logger.ForContext("Method","UpdateBalance").Information("Balance updated. Available balance: {@AvailableBalance}, Total balance: {@TotalBalance}", AvailableBalance, TotalBalance);
             }
             if (totalBalance > 0)
             {

@@ -17,6 +17,7 @@ namespace Former.Models
         private readonly UpdateHandlers _updateHandlers;
         private readonly HistoryClient _historyClient;
         private bool _isSubscribesAttached;
+        private readonly ILogger _logger;
 
         internal Metadata Meta { get; }
 
@@ -28,17 +29,21 @@ namespace Former.Models
                 Trademarket = tradeMarket,
                 Slot = slot
             };
+            _logger = Log.ForContext("SessionId", Meta.Sessionid)
+                         .ForContext("Slot", Meta.Slot)
+                         .ForContext("Where", "Former");
+
             if (!int.TryParse(Environment.GetEnvironmentVariable("RETRY_DELAY"), out var retryDelay)) retryDelay = 10000;
 
             HistoryClient.Configure(Environment.GetEnvironmentVariable("HISTORY_CONNECTION_STRING"), retryDelay);
-            _historyClient = new HistoryClient();
+            _historyClient = new HistoryClient(_logger, Converters.ConvertMetadata(Meta));
 
             TradeMarketClient.Configure(Environment.GetEnvironmentVariable("TRADEMARKET_CONNECTION_STRING"), retryDelay);
-            _tradeMarketClient = new TradeMarketClient();
+            _tradeMarketClient = new TradeMarketClient(_logger);
 
-            _storage = new Storage();
-            _former = new Former(_storage, null, _tradeMarketClient, Meta, _historyClient, Constance.SlotsMultipliers[Meta.Slot]);
-            _updateHandlers = new UpdateHandlers(_storage, null, _tradeMarketClient, Meta, _historyClient, Constance.SlotsMultipliers[Meta.Slot]);
+            _storage = new Storage(_logger);
+            _former = new Former(_storage, null, _tradeMarketClient, Meta, _historyClient, Constance.SlotsMultipliers[Meta.Slot], _logger);
+            _updateHandlers = new UpdateHandlers(_storage, null, _tradeMarketClient, Meta, _historyClient, Constance.SlotsMultipliers[Meta.Slot], _logger);
 
         }
 
@@ -58,7 +63,7 @@ namespace Former.Models
             //запускаем подписки на сервис с данными
             _tradeMarketClient.StartObserving(Converters.ConvertMetadata(Meta));
             _isSubscribesAttached = true;
-            Log.Information("{@Where}: Former has been started!", "Former");
+            _logger.Information("Former has been started!");
         }
 
         /// <summary>
@@ -78,10 +83,9 @@ namespace Former.Models
             _tradeMarketClient.UpdateLotSize -= _storage.UpdateLotSize;
             //очищаем хранилище
             _isSubscribesAttached = false;
-            Log.Information("{@Where}: Former has been stopped!", "Former");
+            _logger.Information("Former has been stopped!");
         }
-
-
+        
         /// <summary>
         /// Вытаскиваем метод формера наружу, чтобы можно было из юзер контекста запросить формирование ордера
         /// </summary>
@@ -90,7 +94,6 @@ namespace Former.Models
             await _former.FormOrder(decision);
         }
         
-
         /// <summary>
         /// Вытаскиваем метод формера наружу, чтобы можно было из юзер контекста запросить удаление своих ордеров
         /// </summary>
@@ -98,6 +101,7 @@ namespace Former.Models
         {
             await _former.RemoveAllMyOrders();
         }
+
         /// <summary>
         /// Выставляем конфигурацию, где это необходимо.
         /// </summary>

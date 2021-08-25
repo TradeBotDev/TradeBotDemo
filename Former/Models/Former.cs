@@ -14,8 +14,9 @@ namespace Former.Models
         private readonly Metadata _metadata;
         private readonly HistoryClient _historyClient;
         private readonly double _slotMultiplier;
+        private readonly ILogger _logger;
 
-        internal Former(Storage storage, Configuration configuration, TradeMarketClient tradeMarketClient, Metadata metadata, HistoryClient historyClient, double slotMultiplier)
+        internal Former(Storage storage, Configuration configuration, TradeMarketClient tradeMarketClient, Metadata metadata, HistoryClient historyClient, double slotMultiplier, ILogger logger)
         {
             _storage = storage;
             _storage.PlaceOrderEvent += PlaceCounterOrder;
@@ -24,6 +25,7 @@ namespace Former.Models
             _metadata = metadata;
             _historyClient = historyClient;
             _slotMultiplier = slotMultiplier;
+            _logger = logger.ForContext<Former>();
         }
         /// <summary>
         /// Обвновляет конфигурацию в Former (позволяет изменять конфигурацию во время работы)
@@ -70,9 +72,9 @@ namespace Former.Models
                 _storage.SpentBalance += _storage.LotSize == 1 ? Math.Abs(newOrder.Price * _slotMultiplier *  newOrder.Quantity) : Math.Abs( newOrder.Quantity / newOrder.Price);
                 //сообщаем о выставлении контр-ордера истории
                 await _historyClient.WriteOrder(newOrder, ChangesType.CHANGES_TYPE_INSERT, Converters.ConvertMetadata(_metadata), "Counter order placed");
-                Log.Information(
-                    "{@Where}: Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sended to history",
-                    "Former", newOrder.Id, newOrder.Price, newOrder.Quantity, ChangesType.CHANGES_TYPE_INSERT,
+                _logger.ForContext("Method", "PlaceCounterOrder").Information(
+                    "Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sent to history",
+                     newOrder.Id, newOrder.Price, newOrder.Quantity, ChangesType.CHANGES_TYPE_INSERT,
                     "Counter order placed");
                 //сообщаем об исполнении старого ордера истории
                 if (Convert.ToInt32(quantity) == Convert.ToInt32(oldOrder.Quantity))
@@ -80,29 +82,29 @@ namespace Former.Models
                     
                     await _historyClient.WriteOrder(FormatDeletedOrder(oldOrder), ChangesType.CHANGES_TYPE_DELETE,
                         Converters.ConvertMetadata(_metadata), "Initial order filled");
-                    Log.Information(
-                        "{@Where}: Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sended to history",
-                        "Former", oldOrder.Id, oldOrder.Price, oldOrder.Quantity, ChangesType.CHANGES_TYPE_DELETE,
+                    _logger.ForContext("Method", "PlaceCounterOrder").Information(
+                        " Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sent to history",
+                        oldOrder.Id, oldOrder.Price, oldOrder.Quantity, ChangesType.CHANGES_TYPE_DELETE,
                         "Initial order filled");
                 }
                 else
                 {
                     await _historyClient.WriteOrder(newComingOrder, ChangesType.CHANGES_TYPE_UPDATE, Converters.ConvertMetadata(_metadata),
                         "Initial order partially filled");
-                    Log.Information(
-                        "{@Where}: Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sended to history",
-                        "Former", newComingOrder.Id, newComingOrder.Price, newComingOrder.Quantity, ChangesType.CHANGES_TYPE_UPDATE,
+                    _logger.ForContext("Method", "PlaceCounterOrder").Information(
+                        "Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sent to history",
+                        newComingOrder.Id, newComingOrder.Price, newComingOrder.Quantity, ChangesType.CHANGES_TYPE_UPDATE,
                         "Initial order partially filled");
                 }
             }
 
-            Log.Information(
-                "{@Where}: Counter order {@Id} price: {@Price}, quantity: {@Quantity} placed {@ResponseCode} {@ResponseMessage}",
-                "Former", oldOrder.Id, price, -quantity, placeResponse.Response.Code,
+            _logger.ForContext("Method", "PlaceCounterOrder").Information(
+                "Counter order {@Id} price: {@Price}, quantity: {@Quantity} placed {@ResponseCode} {@ResponseMessage}",
+                oldOrder.Id, price, -quantity, placeResponse.Response.Code,
                 response.Code == ReplyCode.REPLY_CODE_SUCCEED ? "" : placeResponse.Response.Message);
-            Log.Information(
-                "{@Where}: Order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@ResponseCode} added to counter orders list {@ResponseMessage}",
-                "Former", placeResponse.OrderId, price, -quantity, type,
+            _logger.ForContext("Method", "PlaceCounterOrder").Information(
+                "Order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@ResponseCode} added to counter orders list {@ResponseMessage}",
+                placeResponse.OrderId, price, -quantity, type,
                 addResponse ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
         }
 
@@ -133,7 +135,7 @@ namespace Former.Models
             var allowedBalance = ConvertSatoshiToXBT(_storage.AllowedBalance);
             //проверяем, возможно ли выставить с текущим общим и доступным балансом с учётом настройки
             if (allowedBalance - _storage.SpentBalance > orderCost) return true;
-            Log.Debug("{@Where}: Cannot place {@Type} order. Insufficient balance.", "Former", type);
+            _logger.ForContext("Method", "CheckPossibilityPlacingOrder").Debug("Cannot place {@Type} order. Insufficient balance.", type);
             return false;
         }
 
@@ -183,22 +185,22 @@ namespace Former.Models
                     LastUpdateDate = DateTimeOffset.Now
                 };
                 var addResponse = _storage.AddOrder(id, newOrder, _storage.MyOrders);
-                Log.Information(
-                    "{@Where}: Order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} added to my orders list {@ResponseCode}",
-                    "Former", id, price, quantity, orderType,
+                _logger.ForContext("Method", "FormOrder").Information(
+                    "Order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} added to my orders list {@ResponseCode}",
+                    id, price, quantity, orderType,
                     addResponse ? ReplyCode.REPLY_CODE_SUCCEED : ReplyCode.REPLY_CODE_FAILURE);
                 //сообщаем сервису истории о новом ордере
                 await _historyClient.WriteOrder(newOrder, ChangesType.CHANGES_TYPE_INSERT,
                     Converters.ConvertMetadata(_metadata), "Initial order placed");
-                Log.Information(
-                    "{@Where}: Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sended to history",
-                    "Former", newOrder.Id, newOrder.Price, newOrder.Quantity, ChangesType.CHANGES_TYPE_INSERT,
+                _logger.ForContext("Method", "FormOrder").Information(
+                    "Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sent to history",
+                    newOrder.Id, newOrder.Price, newOrder.Quantity, ChangesType.CHANGES_TYPE_INSERT,
                     "Initial order placed");
             }
 
-            Log.Information(
-                "{@Where}: Order {@Id} price: {@Price}, quantity: {@Quantity} placed for {@Type} {@ResponseCode} {@ResponseMessage}",
-                "Former", id, price, quantity, orderType, response.Code.ToString(),
+            _logger.ForContext("Method", "FormOrder").Information(
+                "Order {@Id} price: {@Price}, quantity: {@Quantity} placed for {@Type} {@ResponseCode} {@ResponseMessage}",
+                id, price, quantity, orderType, response.Code.ToString(),
                 response.Code == ReplyCode.REPLY_CODE_FAILURE ? response.Message : "");
         }
 
@@ -218,9 +220,9 @@ namespace Former.Models
                 _storage.SpentBalance = 0;
                 var deleteResponse = await _tradeMarketClient.DeleteOrder(key, Converters.ConvertMetadata(_metadata));
                 var response = Converters.ConvertDefaultResponse(deleteResponse.Response);
-                Log.Information(
-                    "{@Where}: My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed {@ResponseCode}",
-                    "Former", value.Id, value.Price, value.Quantity, value.Signature.Type,
+                _logger.ForContext("Method", "RemoveAllMyOrders").Information(
+                    "My order {@Id}, price: {@Price}, quantity: {@Quantity}, type: {@Type} removed {@ResponseCode}",
+                    value.Id, value.Price, value.Quantity, value.Signature.Type,
                     response.Code == ReplyCode.REPLY_CODE_SUCCEED
                         ? ReplyCode.REPLY_CODE_SUCCEED
                         : ReplyCode.REPLY_CODE_FAILURE);
@@ -229,9 +231,9 @@ namespace Former.Models
                     _storage.MyOrders.TryRemove(key, out _);
                     await _historyClient.WriteOrder(value, ChangesType.CHANGES_TYPE_DELETE, Converters.ConvertMetadata(_metadata),
                         "Removed by user");
-                    Log.Information(
-                        "{@Where}: Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sended to history",
-                        "Former", value.Id, value.Price, value.Quantity, ChangesType.CHANGES_TYPE_DELETE,
+                    _logger.ForContext("Method", "RemoveAllMyOrders").Information(
+                        "Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sent to history",
+                        value.Id, value.Price, value.Quantity, ChangesType.CHANGES_TYPE_DELETE,
                         "Removed by user");
                 }
                 else return;

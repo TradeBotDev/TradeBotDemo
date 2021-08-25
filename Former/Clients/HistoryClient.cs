@@ -16,6 +16,8 @@ namespace Former.Clients
     {
         private static int _retryDelay;
         private static string _connectionString;
+        private readonly ILogger _logger;
+        private Metadata _metadata;
 
         private readonly HistoryService.HistoryServiceClient _client;
 
@@ -25,8 +27,10 @@ namespace Former.Clients
             _retryDelay = retryDelay;
         }
 
-        public HistoryClient()
+        public HistoryClient(ILogger logger, Metadata metadata)
         {
+            _metadata = metadata;
+            _logger = logger.ForContext<HistoryClient>();
             _client = new HistoryService.HistoryServiceClient(GrpcChannel.ForAddress(_connectionString));
         }
 
@@ -45,12 +49,22 @@ namespace Former.Clients
                 }
                 catch (RpcException e)
                 {
-                    if (e.StatusCode == StatusCode.Cancelled || attempts > 3) break;
-                    Log.Error("{@Where}: Error {@ExceptionMessage}. Retrying...\r\n{@ExceptionStackTrace}", "Former", e.Message, e.StackTrace);
+                    if (e.StatusCode == StatusCode.Cancelled) break;
+                    if (attempts > 3)
+                    {
+                        _logger.Error("Error {@ExceptionMessage}. Retrying...\r\n{@ExceptionStackTrace}", e.Message, e.StackTrace);
+                        throw new RpcException(e.Status);
+                    }
+                    _logger.Error("Error {@ExceptionMessage}. Retrying...\r\n{@ExceptionStackTrace}", e.Message, e.StackTrace);
                     Thread.Sleep(_retryDelay);
                     attempts++;
                 }
             }
+        }
+
+        private bool EventFilter(Metadata incomingMeta, Metadata filteringMeta)
+        {
+            return filteringMeta.GetValue("sessionid") == incomingMeta.GetValue("sessionid") && filteringMeta.GetValue("trademarket") == incomingMeta.GetValue("trademarket") && filteringMeta.GetValue("slot") == incomingMeta.GetValue("slot");
         }
 
         /// <summary>
@@ -58,6 +72,7 @@ namespace Former.Clients
         /// </summary>
         internal async Task<PublishEventResponse> WriteBalance(double balance, Metadata meta)
         {
+            if (!EventFilter(meta, _metadata)) return new PublishEventResponse();
             PublishEventResponse response = null;
 
             async Task PublishBalanceUpdateFunc()
@@ -86,6 +101,7 @@ namespace Former.Clients
         internal async Task<PublishEventResponse> WriteOrder(Order order, ChangesType changesType, Metadata meta,
             string message)
         {
+            if (!EventFilter(meta, _metadata)) return new PublishEventResponse();
             PublishEventResponse response = null;
 
             async Task PublishOrderUpdateFunc()

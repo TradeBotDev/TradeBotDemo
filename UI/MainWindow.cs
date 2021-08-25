@@ -23,8 +23,8 @@ namespace UI
         private readonly Dictionary<string, int> _sensitivityMap;
         private readonly FacadeClient _facadeClient;
         private bool _loggedIn;
-        private PointPairList _balanceList = new ();
-        private PointPairList _orderList = new ();
+        private readonly PointPairList _balanceList = new ();
+        private readonly PointPairList _orderList = new ();
         private struct IncomingMessage
         {
             public string SlotName;
