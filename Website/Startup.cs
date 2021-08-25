@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+
+using Prometheus;
+using Prometheus.SystemMetrics;
 using Serilog;
 
 namespace Website
@@ -20,7 +23,7 @@ namespace Website
 			// Получение строки подключения к Seq.
 			string seqConnection = Environment.GetEnvironmentVariable("SEQ_CONNECTION_STRING");
 			if (seqConnection == null)
-				seqConnection = Configuration.GetConnectionString("Seq");
+				seqConnection = configuration.GetConnectionString("Seq");
 
 			// Добавление нового логгера, который будет выводить всю информацию в консоль.
 			Log.Logger = new LoggerConfiguration()
@@ -44,6 +47,7 @@ namespace Website
 			services.AddControllersWithViews();
 			services.AddServerSideBlazor();
 			services.AddHttpContextAccessor();
+			services.AddSystemMetrics();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -65,6 +69,7 @@ namespace Website
 			app.UseRouting();
 			app.UseAuthentication();
 			app.UseAuthorization();
+			app.UseHttpMetrics();
 
 			app.UseEndpoints(endpoints =>
 			{
