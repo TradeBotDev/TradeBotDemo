@@ -29,6 +29,11 @@ namespace Former.Models
 
         internal int LotSize;
 
+        internal int AllowedBalance;
+        internal double BalanceMultiplier;
+        internal double SpentBalance;
+        
+
         internal Storage()
         {
             MyOrders = new ConcurrentDictionary<string, Order>();
@@ -73,7 +78,8 @@ namespace Former.Models
             //если пришедший ордер нашёлся в списке контр оредров, то это контр-ордер, о чём сигнализирует переменная itsCounterOrder
             var itsCounterOrder = CounterOrders.TryGetValue(id, out var counterOldOrder);
 
-            newComingOrder = InitOrderFromTM(newComingOrder);
+            if (itsMyOrder) newComingOrder = InitOrderFromTM(newComingOrder, myOldOrder);
+            if (itsCounterOrder) newComingOrder = InitOrderFromTM(newComingOrder, counterOldOrder);
 
             switch (changesType)
             {
@@ -85,7 +91,7 @@ namespace Former.Models
                     HandleUpdateEvent?.Invoke(newComingOrder, ChangesType.CHANGES_TYPE_PARTITIAL);
                     return;
                 case ChangesType.CHANGES_TYPE_UPDATE when itsMyOrder:
-                    //если оредр пришёл с пометкой Update и при этом является моим орером, то мы обновляем его в списке своих ордеров, а также
+                    //если ордер пришёл с пометкой Update и при этом является моим орером, то мы обновляем его в списке своих ордеров, а также
                     //если он имеет не нулевую, то это означает, что ордер исполнился частично и необходимо сообщить формеру о необходимости 
                     //выставить частичный контр-ордер (если ордер имеет нулевую Quantity, то обновилась цена)
                     var updateMyOrderResponse = UpdateOrder(newComingOrder, MyOrders);
@@ -142,6 +148,7 @@ namespace Former.Models
         /// </summary>
         internal Task UpdateBalance(int availableBalance, int totalBalance)
         {
+            if (BalanceMultiplier <= 0) return Task.CompletedTask;
             if (availableBalance > 0)
             {
                 AvailableBalance = availableBalance;
@@ -150,6 +157,7 @@ namespace Former.Models
             if (totalBalance > 0)
             {
                 TotalBalance = totalBalance;
+                AllowedBalance = Convert.ToInt32(totalBalance * BalanceMultiplier);
                 //необходимо сообщить UpdateHandler, чтобы он передал обновлённый баланс в историю
                 HandleUpdateEvent?.Invoke();
             }
@@ -185,15 +193,19 @@ namespace Former.Models
         /// <summary>
         /// Из-за того, что инициализонные ордера приходят с биржи с положительным числом контрактов независимо от типа ордера, необходимо самому проинициализировать число контрактов
         /// </summary>
-        private Order InitOrderFromTM(Order newComingOrder)
+        private Order InitOrderFromTM(Order newComingOrder, Order oldOrder)
         {
             return new Order
             {
                 Id = newComingOrder.Id,
                 Price = newComingOrder.Price,
                 LastUpdateDate = newComingOrder.LastUpdateDate,
-                Signature = newComingOrder.Signature,
-                Quantity = newComingOrder.Signature.Type == OrderType.ORDER_TYPE_SELL ? -Math.Abs(newComingOrder.Quantity) : Math.Abs(newComingOrder.Quantity)
+                Signature = new OrderSignature
+                {
+                    Status = newComingOrder.Signature.Status,
+                    Type = oldOrder.Signature.Type
+                },
+                Quantity = oldOrder.Quantity > 0 ? newComingOrder.Quantity : -newComingOrder.Quantity
             };
 
         }
@@ -214,20 +226,6 @@ namespace Former.Models
             PlaceLocker = needLock;
             FitPricesLocker = needLock;
         }
-        /// <summary>
-        /// Приводит все поля хранилища в исходное положение
-        /// </summary>
-        internal void ClearStorage()
-        {
-            MyOrders.Clear();
-            CounterOrders.Clear();
-            AvailableBalance = 0;
-            SellMarketPrice = 0;
-            TotalBalance = 0;
-            PositionSize = 0;
-            BuyMarketPrice = 0;
-            FitPricesLocker = false;
-            PlaceLocker = false;
-        }
+
     }
 }

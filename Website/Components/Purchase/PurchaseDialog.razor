@@ -19,11 +19,11 @@
 
             <!--Поля ввода данных карты.-->
             <p>Номер карты:</p>
-            <InputText @bind-Value="creditCard.CardNumber" class="form_input" maxlength="16" />
+            <InputText @bind-Value="creditCard.CardNumber" class="form_input" maxlength="19" placeholder="XXXX-XXXX-XXXX-XXXX"/>
             <p>Дата:</p>
-            <InputText class="form_input" @bind-Value="creditCard.Date" type="number" maxlength="4" />
+            <InputText @bind-Value="creditCard.Date" class="form_input" maxlength="4" type="number" placeholder="MMYY" />
             <p>CVV-код: </p>
-            <InputText class="form_input" @bind-Value="creditCard.CVV" type="number" maxlength="3" />
+            <InputText @bind-Value="creditCard.CVV" class="form_input" maxlength="3" type="number" placeholder="XXX" />
 
             <input class="button form_button" type="submit" value="Купить" />
             <!--Закрывает форму.-->

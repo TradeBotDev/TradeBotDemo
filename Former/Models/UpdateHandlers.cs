@@ -13,13 +13,12 @@ namespace Former.Models
         private readonly TradeMarketClient _tradeMarketClient;
         private readonly Metadata _metadata;
         private readonly HistoryClient _historyClient;
-
+        private readonly double _slotMultiplier;
         private double _oldMarketBuyPrice;
         private double _oldMarketSellPrice;
         private int _oldTotalBalance;
-
-
-        internal UpdateHandlers(Storage storage, Configuration configuration, TradeMarketClient tradeMarketClient, Metadata metadata, HistoryClient historyClient)
+        
+        internal UpdateHandlers(Storage storage, Configuration configuration, TradeMarketClient tradeMarketClient, Metadata metadata, HistoryClient historyClient, double slotMultiplier)
         {
             _storage = storage;
             _storage.HandleUpdateEvent += MainUpdateHandler;
@@ -27,6 +26,7 @@ namespace Former.Models
             _metadata = metadata;
             _tradeMarketClient = tradeMarketClient;
             _historyClient = historyClient;
+            _slotMultiplier = slotMultiplier;
         }
 
         /// <summary>
@@ -55,6 +55,7 @@ namespace Former.Models
             //здесь сообщается истории об инициализации оредра или о его удалении (это касается только контр-ордеров)
             if (changesType == ChangesType.CHANGES_TYPE_PARTITIAL)
             {
+                _storage.SpentBalance += _storage.LotSize == 1 ? Math.Abs(order.Price * _slotMultiplier) *  order.Quantity : Math.Abs( order.Quantity / order.Price);
                 await _historyClient.WriteOrder(order, ChangesType.CHANGES_TYPE_PARTITIAL, Converters.ConvertMetadata(_metadata), "Counter order initialized");
                 Log.Information(
                     "{@Where}: Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sended to history",
@@ -64,6 +65,7 @@ namespace Former.Models
 
             if (changesType == ChangesType.CHANGES_TYPE_DELETE)
             {
+                _storage.SpentBalance -= _storage.LotSize == 1 ? Math.Abs(order.Price * _slotMultiplier *  order.Quantity) : Math.Abs( order.Quantity / order.Price);
                 await _historyClient.WriteOrder(FormatDeletedOrder(order), ChangesType.CHANGES_TYPE_DELETE, Converters.ConvertMetadata( _metadata), "Counter order filled");
                 Log.Information(
                     "{@Where}: Order {@Id} price: {@Price}, quantity {@Quantity}, change type {@ChangeType}, message {@Message} sended to history",
@@ -152,6 +154,7 @@ namespace Former.Models
                 }
                 else if (response.Message.Contains("Invalid ordStatus"))
                 {
+                    _storage.SpentBalance -= _storage.LotSize == 1 ? Math.Abs(order.Price * _slotMultiplier *  order.Quantity) : Math.Abs( order.Quantity / order.Price);
                     //при получении ошибки Invalid ordStatus мы понимаем, что пытаемся изменить ордер, которого нет на бирже, 
                     //но при этом он есть у нас в списках, поэтому мы удаляем его из своих списков и сообщаем об удалении истории
                     await _historyClient.WriteOrder(order, ChangesType.CHANGES_TYPE_DELETE, Converters.ConvertMetadata(_metadata), "");

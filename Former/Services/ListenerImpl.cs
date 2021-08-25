@@ -32,7 +32,7 @@ namespace Former.Services
                     userContext.UnsubscribeStorage();
                     RedisClient.DeleteMetaEntries();
                     RedisClient.DeleteConfigurations(Meta.GetMetaList());
-                    Contexts.ClearContexts();
+                    Contexts.RemoveContext(metadata);
                 }
                 else
                 {
