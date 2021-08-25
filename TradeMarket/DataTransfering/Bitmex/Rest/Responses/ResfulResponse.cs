@@ -9,7 +9,7 @@ using TradeMarket.DataTransfering.Bitmex.Rest.Requests;
 
 namespace TradeMarket.DataTransfering.Bitmex.Rest.Responses
 {
-    public class BitmexResfulResponse<MessageType>
+    public class ResfulResponse<MessageType>
     {
         [JsonProperty("error")]
         public ErrorResponse Error { get; set; } = null;
@@ -22,14 +22,14 @@ namespace TradeMarket.DataTransfering.Bitmex.Rest.Responses
 
         public HttpStatusCode Code { get; private set; }
 
-        public BitmexResfulResponse()
+        public ResfulResponse()
         {
 
         }
 
-        public async static Task<BitmexResfulResponse<MessageType>> Create(HttpResponseMessage response)
+        public async static Task<ResfulResponse<MessageType>> Create(HttpResponseMessage response)
         {
-            var result = new BitmexResfulResponse<MessageType>();
+            var result = new ResfulResponse<MessageType>();
             await result._ReadContent(response.Content);
             result._TryParse();
             result.Code = response.StatusCode;
@@ -46,7 +46,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Rest.Responses
             };
             if (IsResponseError())
             {
-                Error = JsonConvert.DeserializeObject<BitmexResfulResponse<MessageType>>(_responseContent,serializerSettings).Error;
+                Error = JsonConvert.DeserializeObject<ResfulResponse<MessageType>>(_responseContent,serializerSettings).Error;
                 return;
             }
             //HTML прилетает только если превышен тикрейт

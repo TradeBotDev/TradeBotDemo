@@ -200,7 +200,7 @@ namespace TradeMarket.Services
         #endregion
 
         #region Commands to Response Converters
-        public static TradeBot.TradeMarket.TradeMarketService.v1.PlaceOrderResponse ConvertPlaceOrderResponse(BitmexResfulResponse<Order> response)
+        public static TradeBot.TradeMarket.TradeMarketService.v1.PlaceOrderResponse ConvertPlaceOrderResponse(ResfulResponse<Order> response)
         {
             return new()
             {
@@ -209,7 +209,7 @@ namespace TradeMarket.Services
             };
         }
 
-        public static TradeBot.TradeMarket.TradeMarketService.v1.AmmendOrderResponse ConvertAmmendOrderResponse(BitmexResfulResponse<Order> response)
+        public static TradeBot.TradeMarket.TradeMarketService.v1.AmmendOrderResponse ConvertAmmendOrderResponse(ResfulResponse<Order> response)
         {
             return new()
             {
@@ -217,7 +217,7 @@ namespace TradeMarket.Services
             };
         }
 
-        public static TradeBot.TradeMarket.TradeMarketService.v1.DeleteOrderResponse ConvertDeleteOrderResponse(BitmexResfulResponse<Order[]> response)
+        public static TradeBot.TradeMarket.TradeMarketService.v1.DeleteOrderResponse ConvertDeleteOrderResponse(ResfulResponse<Order[]> response)
         {
             return new()
             {
@@ -225,7 +225,7 @@ namespace TradeMarket.Services
             };
         }
 
-        public static DefaultResponse ResponseFromOrder(BitmexResfulResponse<Order> response)
+        public static DefaultResponse ResponseFromOrder(ResfulResponse<Order> response)
         {
             if (response.Error is not null)
             {
@@ -250,7 +250,7 @@ namespace TradeMarket.Services
             };
         }
 
-        public static DefaultResponse ResponseFromOrder(BitmexResfulResponse<Order[]> response)
+        public static DefaultResponse ResponseFromOrder(ResfulResponse<Order[]> response)
         {
             if (response.Error is not null)
             {

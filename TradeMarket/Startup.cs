@@ -39,7 +39,6 @@ namespace TradeMarket
             services.AddSingleton<TradeMarketFactory>();
             services.AddSingleton<ContextDirector>();
             services.AddSingleton<CommonContextBuilder>();
-            services.AddSingleton<UserContextBuilder>();
             services.AddSingleton<ContextBuilder>();
             services.AddSingleton((sp) => {
                 var communicator = new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketTestnetUrl);
@@ -47,7 +46,7 @@ namespace TradeMarket
                 communicator.Start();
                 return res;
             });
-            services.AddSingleton(new BitmexRestfulClient(BitmexRestufllLink.Testnet));
+            services.AddSingleton(new RestfulClient(BitmexRestufllLink.Testnet));
             services.AddSystemMetrics();
         }
 

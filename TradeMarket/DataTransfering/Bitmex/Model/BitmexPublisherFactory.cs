@@ -24,55 +24,65 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
     {
         private IConnectionMultiplexer _multiplexer;
 
-        public BitmexPublisherFactory(IConnectionMultiplexer multiplexer)
+        private BitmexWebsocketClient _client;
+
+
+        public BitmexPublisherFactory(IConnectionMultiplexer multiplexer,BitmexWebsocketClient client)
         {
+            _client = client;
             _multiplexer = multiplexer;
         }
 
-        public IPublisher<bool> CreateAuthenticationPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token)
+        public IPublisher<bool> CreateAuthenticationPublisher(Context context, CancellationToken token)
         {
-            return new AuthenticationPublisher(client, client.Streams.AuthenticationStream, context.Key,context.Secret,token);
+            var con = context as BitmexContext;
+            return new AuthenticationPublisher(con.WSClient, con.WSClient.Streams.AuthenticationStream, context.Key,context.Secret,token);
         }
 
-        public IPublisher<BookLevel> CreateBook25Publisher(BitmexWebsocketClient client, IContext context, CancellationToken token)
+        public IPublisher<BookLevel> CreateBook25Publisher(Context context, CancellationToken token)
         {
-            //TODO добавить мультиплексер
-            return new BookPublisher(client, client.Streams.Book25Stream,_multiplexer,new Book25SubscribeRequest(context.Signature.SlotName), token);
+            
+            return new BookPublisher(_client, _client.Streams.Book25Stream,_multiplexer,new Book25SubscribeRequest(context.Signature.SlotName), token);
         }
 
-        public IPublisher<string> CreateErrorPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token)
+        public IPublisher<string> CreateErrorPublisher(Context context, CancellationToken token)
         {
-            return new ErrorPublisher(client, client.Streams.ErrorStream, token);
+            return new ErrorPublisher(_client, _client.Streams.ErrorStream, token);
         }
 
-        public IPublisher<Instrument> CreateInstrumentPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token)
+        public IPublisher<Instrument> CreateInstrumentPublisher(Context context, CancellationToken token)
         {
-            return new InstrumentPublisher(client, client.Streams.InstrumentStream,new(context.Signature.SlotName),token);
+            var con = context as BitmexContext; 
+            return new InstrumentPublisher(con.WSClient, con.WSClient.Streams.InstrumentStream,new(context.Signature.SlotName),token);
         }
 
-        public IPublisher<string> CreatePingPongPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token)
+        public IPublisher<string> CreatePingPongPublisher( Context context, CancellationToken token)
         {
-            return new PingPongPublisher(client,client.Streams.PongStream,token);
+            return new PingPongPublisher(_client, _client.Streams.PongStream,token);
         }
 
-        public IPublisher<Margin> CreateUserMarginPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token)
+        public IPublisher<Margin> CreateUserMarginPublisher(Context context, CancellationToken token)
         {
-            return new UserMarginPublisher(client, client.Streams.MarginStream,new MarginSubscribeRequest(), token);
+            var con = context as BitmexContext;
+            return new UserMarginPublisher(con.WSClient, con.WSClient.Streams.MarginStream,new MarginSubscribeRequest(), token);
         }
 
-        public IPublisher<Order> CreateUserOrderPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token)
+        public IPublisher<Order> CreateUserOrderPublisher(Context context, CancellationToken token)
         {
-            return new UserOrderPublisher(client, client.Streams.OrderStream,new OrderSubscribeRequest(), token);
+            var con = context as BitmexContext;
+            return new UserOrderPublisher(con.WSClient, con.WSClient.Streams.OrderStream,new OrderSubscribeRequest(), token);
         }
 
-        public IPublisher<Position> CreateUserPositionPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token)
+        public IPublisher<Position> CreateUserPositionPublisher(Context context, CancellationToken token)
         {
-            return new UserPositionPublisher(client, client.Streams.PositionStream,new PositionSubscribeRequest(), token);
+            var con = context as BitmexContext;
+            return new UserPositionPublisher(con.WSClient, con.WSClient.Streams.PositionStream,new PositionSubscribeRequest(), token);
         }
 
-        public IPublisher<Wallet> CreateWalletPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token)
+        public IPublisher<Wallet> CreateWalletPublisher(Context context, CancellationToken token)
         {
-            return new UserWalletPublisher(client, client.Streams.WalletStream,new WalletSubscribeRequest(), token);
+            var con = context as BitmexContext;
+            return new UserWalletPublisher(con.WSClient, con.WSClient.Streams.WalletStream,new WalletSubscribeRequest(), token);
         }
     }
 }

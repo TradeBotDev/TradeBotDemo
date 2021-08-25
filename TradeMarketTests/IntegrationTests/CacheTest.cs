@@ -34,10 +34,10 @@ namespace TradeMarketTests.IntegrationTests
                 .AddCommonClient(client)
                 .AddPublisherFactory(publisherFactory)
                 .Result;
-            var context = new UserContext();
+            var context = new BitmexContext();
             var iContextBuilder = new ContextBuilder();
             iContextBuilder.AddUniqueInformation("XBTUSD", "123");
-            var contextBuilder = new UserContextBuilder(iContextBuilder);
+            var contextBuilder = new BitmexContextBuilder(iContextBuilder);
             contextBuilder
                 .AddTradeMarket(tm)
                 .AddKeySecret(key: "0n8sicC9Y8v3iuwtDDkJ44IO", secret: "PhVLNBRGA199lGgrQ2bbf59Ux7yRsgwkn-sfigW7rMOPoPWh")

@@ -6,8 +6,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using TradeMarket.DataTransfering.Bitmex.Model;
 using TradeMarket.DataTransfering.Bitmex.Rest.Client;
 using TradeMarket.Model.Publishers;
+using TradeMarket.Model.UserContexts;
 
 namespace TradeMarket.Model.TradeMarkets
 {
@@ -19,7 +21,7 @@ namespace TradeMarket.Model.TradeMarkets
 
         public ITradeMarketBuilder AddCommonClient(BitmexWebsocketClient client);
 
-        public ITradeMarketBuilder AddCommonClient(BitmexRestfulClient client);
+        public ITradeMarketBuilder AddCommonClient(RestfulClient client);
 
         public ITradeMarketBuilder AddConnectionMultiplexer(IConnectionMultiplexer multiplexer);
 
@@ -29,7 +31,7 @@ namespace TradeMarket.Model.TradeMarkets
 
         public void Reset();
 
-        public TradeMarket Result { get; }
+        public TradeMarkets.TradeMarket Result { get; }
 
     }
 }

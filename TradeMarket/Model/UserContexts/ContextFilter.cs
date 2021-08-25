@@ -26,7 +26,7 @@ namespace TradeMarket.Model.UserContexts
 
     public class ContextFilter
     {
-        public Func<UserContext, bool> Filter { get; }
+        public Func<Context, bool> Filter { get; }
         public ContextFilterType Type { get; }
 
         private FilterParameter _sessionId { get; }
@@ -38,7 +38,6 @@ namespace TradeMarket.Model.UserContexts
             get
             {
                 return _sessionId.Value;
-                //return _sessionId.ShouldBeUsed ? _sessionId.Value : null;
             }
         }
         
@@ -47,7 +46,6 @@ namespace TradeMarket.Model.UserContexts
             get
             {
                 return _slotName.Value;
-                //return _slotName.ShouldBeUsed ? _slotName.Value : null;
             }
         }
 
@@ -56,7 +54,6 @@ namespace TradeMarket.Model.UserContexts
             get
             {
                 return _tradeMarketName.Value;
-                //return _tradeMarketName.ShouldBeUsed ? _tradeMarketName.Value : null;
             }
         }
 
@@ -68,7 +65,7 @@ namespace TradeMarket.Model.UserContexts
             _tradeMarketName = tradeMarketName;
         }
 
-        public Func<UserContext, bool> Func { 
+        public Func<Context, bool> Func { 
             get => 
                 (context) => context.IsEquevalentTo(
                     sessionId: _sessionId.ShouldBeUsed ? SessionId : null, 

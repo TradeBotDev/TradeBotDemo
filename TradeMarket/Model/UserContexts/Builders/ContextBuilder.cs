@@ -7,12 +7,12 @@ namespace TradeMarket.Model.UserContexts.Builders
 {
     public class ContextBuilder
     {
-        private ContextBase _context;
-        internal ContextBase Context { 
+        private Context _context;
+        internal Context Context { 
             get
             {
-                var result = _context.Clone() as ContextBase;
-                _context = new ContextBase();
+                var result = _context.Clone() as Context;
+                _context = new Context();
                 return result;
             }
             set
@@ -21,7 +21,7 @@ namespace TradeMarket.Model.UserContexts.Builders
             }
         }
 
-        public ContextBuilder() { Context = new ContextBase(); }
+        public ContextBuilder() { Context = new Context(); }
 
         public ContextBuilder AddUniqueInformation(string slotName, string sessionId)
         {
@@ -29,5 +29,20 @@ namespace TradeMarket.Model.UserContexts.Builders
             _context.Signature.SlotName = slotName;
             return this;
         }
+        public ContextBuilder AddTradeMarket(TradeMarkets.TradeMarket tradeMarket)
+        {
+            Context.TradeMarket = tradeMarket;
+            Context.Signature.TradeMarketName = tradeMarket.Name;
+            return this;
+        }
+
+        public ContextBuilder AddKeySecret(string key, string secret)
+        {
+            Context.Key = key;
+            Context.Secret = secret;
+            return this;
+        }
+
+       
     }
 }

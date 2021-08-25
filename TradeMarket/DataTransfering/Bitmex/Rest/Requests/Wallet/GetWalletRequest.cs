@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace TradeMarket.DataTransfering.Bitmex.Rest.Requests.Wallets
 {
-    public class GetWalletRequest : BitmexRestfulRequest<Wallet>
+    public class GetWalletRequest : RestfulRequest<Wallet>
     {
         public GetWalletRequest(string key, string secret, string currency)
             : base(key, secret, HttpMethod.Get, "/api/v1/user/wallet",

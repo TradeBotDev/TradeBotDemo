@@ -11,18 +11,19 @@ using System.Threading.Tasks;
 using TradeMarket.DataTransfering.Bitmex;
 using TradeMarket.DataTransfering.Bitmex.Model;
 using TradeMarket.DataTransfering.Bitmex.Rest.Client;
+using TradeMarket.Model.UserContexts;
 
 namespace TradeMarket.Model.TradeMarkets
 {
     public class TradeMarketFactory
     {
         private BitmexWebsocketClient _wsClient;
-        private BitmexRestfulClient _restClient;
+        private RestfulClient _restClient;
         private IConnectionMultiplexer _multiplexer;
 
         private IDictionary<string, TradeMarket> _tradeMarkets;
 
-        public TradeMarketFactory(IConnectionMultiplexer multiplexer,BitmexWebsocketClient wsClient,BitmexRestfulClient restClient)
+        public TradeMarketFactory(IConnectionMultiplexer multiplexer,BitmexWebsocketClient wsClient,RestfulClient restClient)
         {
             _wsClient = wsClient;
             _restClient = restClient;
@@ -34,7 +35,9 @@ namespace TradeMarket.Model.TradeMarkets
         
         public TradeMarket BuildBitmexTradeMarket()
         {
-            var publisherFactory = new BitmexPublisherFactory(_multiplexer);
+            var wsClient = ClientsFactory.CreateWebsocketClient(BitmexValues.ApiWebsocketTestnetUrl);
+            var restClient = ClientsFactory.CreateRestfulClient(BitmexRestufllLink.Testnet);
+            var publisherFactory = new BitmexPublisherFactory(_multiplexer,wsClient);
             return new BitmexTradeMarketBuilder()
                 .AddCommonClient(_wsClient)
                 .AddCommonClient(_restClient)

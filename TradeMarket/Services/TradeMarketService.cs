@@ -38,7 +38,7 @@ namespace TradeMarket.Services
         /// <summary>
         /// Переводит заголовки запроса в язык сервиса и предоставляет контекст пользователя по переданым заголовкам
         /// </summary>
-        public async Task<UserContext> GetUserContextAsync(Metadata meta, ContextFilter.GetFilter getFilter, CancellationToken token, ILogger logger)
+        public async Task<Context> GetUserContextAsync(Metadata meta, ContextFilter.GetFilter getFilter, CancellationToken token, ILogger logger)
         {
             return await Task.Run(async () =>
             {
@@ -54,7 +54,7 @@ namespace TradeMarket.Services
         /// <summary>
         /// Метод заполняет заголовки для ответов по предоставленному контексту пользователя 
         /// </summary>
-        public async Task<Metadata> AddInfoToMetadataAsync(IContext user)
+        public async Task<Metadata> AddInfoToMetadataAsync(Context user)
         {
             return await Task.Run(() =>
             {
@@ -224,7 +224,7 @@ namespace TradeMarket.Services
                    ForContext("UserSessionId", context.RequestHeaders.GetValue("sessionid")).
                    ForContext("Command", "Place");
 
-            UserContext user = null;
+            Context user = null;
             try
             {
                 logger.Information("Request : {@Request}", request);
@@ -332,7 +332,7 @@ namespace TradeMarket.Services
                    ForContext("RequestId", Guid.NewGuid().ToString()).
                    ForContext("UserSessionId", context.RequestHeaders.GetValue("sessionid")).
                    ForContext("Command", "Delete");
-            UserContext user = null;
+            Context user = null;
             try
             {
                 logger.Information("Request : {@Request}", request);
@@ -382,7 +382,6 @@ namespace TradeMarket.Services
                 ForContext("Topic", "Instrument");
 
             logger.Information("Request : {@Request}", request);
-
 
             var common = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetCommonContextFilter, context.CancellationToken, logger);
             await SubscribeToUserTopic<SubscribePriceRequest, SubscribePriceResponse, Instrument>(

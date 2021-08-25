@@ -9,9 +9,8 @@ using TradeMarket.Model.Publishers;
 
 namespace TradeMarket.Model.UserContexts
 {
-    public class CommonContext : ContextBase
+    public class CommonContext : Context
     {
-        public TradeMarket.Model.TradeMarkets.TradeMarket TradeMarket { get; internal set; }
 
         /*public async Task<List<BookLevel>> SubscribeToBook25UpdatesAsync(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, CancellationToken token)
         {
@@ -31,7 +30,7 @@ namespace TradeMarket.Model.UserContexts
             await TradeMarket.UnSubscribeFromInstruments(handler,this);
         }*/
 
-        public CommonContext(IContext context) : base(context) { }
+        public CommonContext(Context context) : base(context) { }
 
         public CommonContext() : base() { }
 

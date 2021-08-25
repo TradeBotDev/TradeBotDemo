@@ -9,7 +9,7 @@ using TradeMarket.DataTransfering.Bitmex.Rest.Responses;
 
 namespace TradeMarket.DataTransfering.Bitmex.Rest.Requests
 {
-    public class BitmexRestfulRequest<ResultType> : HttpRequestMessage
+    public class RestfulRequest<ResultType> : HttpRequestMessage
     {
         public static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings
         {
@@ -18,7 +18,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Rest.Requests
         };
 
         public UserAuthentication Authentication;
-        public BitmexRestfulRequest(string key,string secret,HttpMethod method, string uri,string postdata) : base(method, uri) {
+        public RestfulRequest(string key,string secret,HttpMethod method, string uri,string postdata) : base(method, uri) {
             Authentication = new UserAuthentication(key, secret, method, uri, postdata);
             if(postdata is not null)
             {

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using TradeMarket.DataTransfering.Bitmex.Rest.Client;
 using TradeMarket.Model.Publishers;
 using TradeMarket.Model.TradeMarkets;
+using TradeMarket.Model.UserContexts;
 
 namespace TradeMarket.DataTransfering.Bitmex.Model
 {
@@ -41,7 +42,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
             return this;
         }
 
-        public ITradeMarketBuilder AddCommonClient(BitmexRestfulClient client)
+        public ITradeMarketBuilder AddCommonClient(RestfulClient client)
         {
             _tradeMarket.CommonRestClient = client;
             return this;
@@ -67,7 +68,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
 
         public ITradeMarketBuilder ReadErrors(CancellationToken token,ILogger logger)
         {
-            var errorPub = _tradeMarket.PublisherFactory.CreateErrorPublisher(_tradeMarket.CommonWSClient, null, token);
+            var errorPub = _tradeMarket.PublisherFactory.CreateErrorPublisher( null, token);
             errorPub.Start(logger);
             return this;
         }
@@ -79,7 +80,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
 
         public ITradeMarketBuilder StartPingPong(CancellationToken token,ILogger logger)
         {
-            var pingPongPub = _tradeMarket.PublisherFactory.CreatePingPongPublisher(_tradeMarket.CommonWSClient, null, token);
+            var pingPongPub = _tradeMarket.PublisherFactory.CreatePingPongPublisher( null, token);
             pingPongPub.Start(logger);
             return this;
         }

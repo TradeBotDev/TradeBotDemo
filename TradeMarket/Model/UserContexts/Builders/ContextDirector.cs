@@ -1,8 +1,5 @@
-﻿using Bitmex.Client.Websocket;
-using Bitmex.Client.Websocket.Client;
-using Bitmex.Client.Websocket.Websockets;
+﻿using Bitmex.Client.Websocket.Client;
 using Serilog;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -21,9 +18,9 @@ namespace TradeMarket.Model.UserContexts.Builders
 
         private readonly BitmexWebsocketClient _commonWSClient;
 
-        private readonly BitmexRestfulClient _restClient;
+        private readonly RestfulClient _restClient;
 
-        public ContextDirector(ContextBuilder builder,BitmexWebsocketClient wsClient,BitmexRestfulClient restClient, AccountClient accountClient, TradeMarketFactory tradeMarketFactory)
+        public ContextDirector(ContextBuilder builder, BitmexWebsocketClient wsClient, RestfulClient restClient, AccountClient accountClient, TradeMarketFactory tradeMarketFactory)
         {
             _builder = builder;
             _accountClient = accountClient;
@@ -37,52 +34,42 @@ namespace TradeMarket.Model.UserContexts.Builders
 
         }
 
-        public BitmexWebsocketClient GetNewBitmexWebSocketClient()
-        {
-            return new BitmexWebsocketClient(new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketTestnetUrl));
-        }
 
-        private delegate Task<UserContext> BuildContextDeligate(string sessionId,string slotName,string tradeMarketName,CancellationToken token);
 
-        internal BitmexWebsocketClient CreateWebsocketClient(ILogger logger)
-        {
-            var log = logger.ForContext("Method", nameof(CreateWebsocketClient));
-            logger.Information("Creating new BitmexWebsocketClient");
-            var communicator = new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketTestnetUrl);
-            var res = new BitmexWebsocketClient(communicator);
-            communicator.Start();
-            return res;
-        }
+        private delegate Task<Context> BuildContextDeligate(string sessionId, string slotName, string tradeMarketName, CancellationToken token);
 
-        internal async Task<UserContext> BuildUserContextAsync(
-            string sessionId, 
-            string slotName, 
+
+        internal async Task<Context> BuildContextAsync(
+            string sessionId,
+            string slotName,
             string tradeMarketName,
             CancellationToken token,
             Serilog.ILogger logger)
         {
             return await Task.Run(async () =>
             {
-                var log = logger.ForContext("Method", nameof(BuildUserContextAsync));
-                _builder.AddUniqueInformation(slotName,sessionId);
+                var log = logger.ForContext<ContextDirector>().ForContext("Method", nameof(BuildContextAsync));
                 var keySecretPair = await _accountClient.GetUserInfoAsync(sessionId);
-                var userContextBuilder = new UserContextBuilder(_builder);
-                userContextBuilder
-                .AddKeySecret(key:keySecretPair.Key,secret: keySecretPair.Secret)
-                .AddWebSocketClient(CreateWebsocketClient(log))
-                .AddTradeMarket(_tradeMarketFactory.GetTradeMarket(tradeMarketName));
-                return await userContextBuilder.InitUser(token,log);
+                var tradeMarket = _tradeMarketFactory.GetTradeMarket(tradeMarketName);
+                _builder
+                    .AddUniqueInformation(slotName, sessionId)
+                    .AddKeySecret(key: keySecretPair.Key, secret: keySecretPair.Secret)
+                    .AddTradeMarket(tradeMarket);
+                ;
+
+                return await tradeMarket.BuildContextAsync(_builder, token, logger);
             });
         }
 
-        internal async Task<CommonContext> BuildCommonContextAsync(
-            string sessioid,string slotName,string tradeMarketName,CancellationToken token)
+        internal async Task<Context> BuildCommonContextAsync(
+            string sessioid, string slotName, string tradeMarketName, CancellationToken token)
         {
             return await Task.Run(() =>
             {
-                return new CommonContextBuilder(_builder.AddUniqueInformation(slotName, null))
+                return new CommonContext();
+                /*return new CommonContextBuilder(_builder.AddUniqueInformation(slotName, null))
                    .AddTradeMarket(_tradeMarketFactory.GetTradeMarket(tradeMarketName))
-                   .Result;
+                   .Result;*/
             });
         }
 
@@ -90,17 +77,17 @@ namespace TradeMarket.Model.UserContexts.Builders
         /// <summary>
         /// список пользователей которые уже вошли в сервис
         /// </summary>
-        private List<UserContext> RegisteredUserContexts = new List<UserContext>();
+        private List<Context> RegisteredUserContexts = new List<Context>();
         private readonly SemaphoreSlim _userContextSemaphore = new SemaphoreSlim(1);
 
 
-        public async Task<UserContext> GetUserContextAsync(
-            ContextFilter filter, 
+        public async Task<Context> GetUserContextAsync(
+            ContextFilter filter,
             CancellationToken token,
             ILogger logger)
         {
             var log = logger.ForContext<ContextDirector>().ForContext("Method", nameof(GetUserContextAsync));
-            UserContext userContext = null;
+            Context userContext = null;
             log.Debug("Locking {@Semephore}", _userContextSemaphore);
             await _userContextSemaphore.WaitAsync();
             try
@@ -112,7 +99,7 @@ namespace TradeMarket.Model.UserContexts.Builders
                 if (userContext is null)
                 {
                     Log.Logger.Information("Creating new UserContext");
-                    userContext = await BuildUserContextAsync(filter.SessionId, filter.SlotName, filter.TradeMarketName,token,log);
+                    userContext = await BuildContextAsync(filter.SessionId, filter.SlotName, filter.TradeMarketName, token, log);
                     RegisteredUserContexts.Add(userContext);
                 }
             }
@@ -136,6 +123,6 @@ namespace TradeMarket.Model.UserContexts.Builders
             }
         }
         #endregion
-       
+
     }
 }

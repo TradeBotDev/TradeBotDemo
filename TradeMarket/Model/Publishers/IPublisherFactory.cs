@@ -17,28 +17,28 @@ namespace TradeMarket.Model.Publishers
 {
     public interface IPublisherFactory
     {
-        public delegate IPublisher<T> Create<T>(BitmexWebsocketClient client, IContext context, CancellationToken token);
+        public delegate IPublisher<T> Create<T>(Context context, CancellationToken token);
 
         #region Common Publishers
-        public IPublisher<BookLevel> CreateBook25Publisher(BitmexWebsocketClient client, IContext context, CancellationToken token);
+        public IPublisher<BookLevel> CreateBook25Publisher(Context context, CancellationToken token);
         
-        public IPublisher<Instrument> CreateInstrumentPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token);
+        public IPublisher<Instrument> CreateInstrumentPublisher(Context context, CancellationToken token);
 
         #endregion
         #region Users Publishres
-        public IPublisher<Order> CreateUserOrderPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token);
+        public IPublisher<Order> CreateUserOrderPublisher(Context context, CancellationToken token);
 
-        public IPublisher<Margin> CreateUserMarginPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token);
+        public IPublisher<Margin> CreateUserMarginPublisher(Context context, CancellationToken token);
 
-        public IPublisher<Position> CreateUserPositionPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token);
+        public IPublisher<Position> CreateUserPositionPublisher(Context context, CancellationToken token);
 
-        public IPublisher<bool> CreateAuthenticationPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token);
+        public IPublisher<bool> CreateAuthenticationPublisher(Context context, CancellationToken token);
 
-        public IPublisher<Wallet> CreateWalletPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token);
+        public IPublisher<Wallet> CreateWalletPublisher(Context context, CancellationToken token);
 
-        public IPublisher<string> CreatePingPongPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token);
+        public IPublisher<string> CreatePingPongPublisher(Context context, CancellationToken token);
 
-        public IPublisher<string> CreateErrorPublisher(BitmexWebsocketClient client, IContext context, CancellationToken token);
+        public IPublisher<string> CreateErrorPublisher(Context context, CancellationToken token);
         #endregion
     }
 }
