@@ -3,6 +3,7 @@
 # docker run --rm -it -p 5000:80 -e ASPNETCORE_URLS="http://+;" -e POSTGRES_CONNECTION_STRING=Host=host.docker.internal;Port=5432;Database=account;Username=postgres;Password=password account
 # docker run -p 6379:6379 -d redis
 # docker run --name seq -d -e ACCEPT_EULA=Y -p 5341:80 datalust/seq:latest
+# docker-compose build 
 version: "3.9"
 
 services:

@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using TradeMarket.DataTransfering;
 
@@ -16,20 +17,26 @@ namespace TradeMarket
     {
         public static async Task Main(string[] args)
         {
-            Log.Logger = new LoggerConfiguration()
-               .MinimumLevel.Verbose()
+            var loggerConfiguration = new LoggerConfiguration()
+                .MinimumLevel.Verbose()
                .WriteTo.Console()
-               .WriteTo.Seq("http://localhost:5341")
                .Enrich.WithEnvironmentName()
                .Enrich.WithMemoryUsage()
                .Enrich.WithThreadName()
                .Enrich.WithThreadId()
-               .Enrich.FromLogContext()
-               .CreateLogger()
-               ;
-            var server = new MetricServer(hostname: "localhost", port: 6005);
-            server.Start();
+               .Enrich.FromLogContext();
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                loggerConfiguration.WriteTo.Seq(Environment.GetEnvironmentVariable("SEQ_CONNECTION_STRING"));
+                var server = new MetricServer(hostname: "*", port: 6005);
+                server.Start();
+            }
+            else
+            {
+                loggerConfiguration.WriteTo.Seq("http://localhost:5341");
+            }
 
+            Log.Logger = loggerConfiguration.CreateLogger();
             CreateHostBuilder(args).Build().Run();
         }
 

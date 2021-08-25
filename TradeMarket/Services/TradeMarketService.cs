@@ -168,7 +168,13 @@ namespace TradeMarket.Services
 
                     //Добавляем заголовки ответа по контексту пользователя user из запроса
                     var meta = await MoveInfoToMetadataAsync(context.RequestHeaders);
+                    log.Information("Prepared meta for Response Headers is {@Meta}",meta);
+
                     await context.WriteResponseHeadersAsync(meta);
+                    foreach(var elem in meta)
+                    {
+                        context.ResponseTrailers.Add(elem);
+                    }
                     log.Information("Wrote Response Headers {@Meta}", context.ResponseTrailers);
                     //подписываемся на обновления
                     var cache = await subscribe(Handler, context.CancellationToken, log);
