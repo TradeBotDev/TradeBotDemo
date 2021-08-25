@@ -25,15 +25,16 @@ namespace TradeMarket
                .Enrich.WithThreadName()
                .Enrich.WithThreadId()
                .Enrich.FromLogContext();
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            //если дебаг, а он на винде, то сек должен быть внутри системы запущен. если в докере то там развернут сек
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                loggerConfiguration.WriteTo.Seq("http://localhost:5341");
+            }
+            else
             {
                 loggerConfiguration.WriteTo.Seq(Environment.GetEnvironmentVariable("SEQ_CONNECTION_STRING"));
                 var server = new MetricServer(hostname: "*", port: 6005);
                 server.Start();
-            }
-            else
-            {
-                loggerConfiguration.WriteTo.Seq("http://localhost:5341");
             }
 
             Log.Logger = loggerConfiguration.CreateLogger();
