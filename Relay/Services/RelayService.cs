@@ -29,9 +29,12 @@ namespace Relay.Services
         public RelayService(AlgorithmClient algorithm, TradeMarketClient tradeMarket, FormerClient former)
         {
             Log.Information("new RelayService");
-            _algorithmClient = algorithm;
-            _tradeMarketClient = tradeMarket;
-            _formerClient = former;
+            //_algorithmClient = algorithm;
+            //_tradeMarketClient = tradeMarket;
+            //_formerClient = former;
+            _algorithmClient= new Clients.AlgorithmClient(Environment.GetEnvironmentVariable("ALGORITHM_CONNECTION_STRING"));
+            _formerClient = new Clients.FormerClient(Environment.GetEnvironmentVariable("FORMER_CONNECTION_STRING"));
+            _tradeMarketClient = new Clients.TradeMarketClient(Environment.GetEnvironmentVariable("TRADEMARKET_CONNECTION_STRING"));
         }
         public void RelayService2(AlgorithmClient algorithm, TradeMarketClient tradeMarket, FormerClient former,Metadata meta,Config config)
         {
@@ -61,7 +64,7 @@ namespace Relay.Services
         public override async Task<StartBotResponse> StartBot(StartBotRequest request, ServerCallContext context)
         {
             var user = GetUserContext(context.RequestHeaders);
-            Log.Information("{@Where} StartBot Request Started For user {@context}", "Relay", user);
+            Log.ForContext("sessionId", user.Meta.GetValue("sessionid")).ForContext("slot", user.Meta.GetValue("slot")).Information("{@Where} StartBot Request Started For user {@context}", "Relay", user);
             user.StatusOfWork();
             user.SubscribeForOrders();
             RaiseService.AddToRedis(request.Config,context.RequestHeaders);
@@ -87,7 +90,8 @@ namespace Relay.Services
         }
         public async override Task<DeleteOrderResponse> DeleteOrder(DeleteOrderRequest request, ServerCallContext context)
         {
-            await _formerClient.SendDeleteOrder(new DeleteOrderRequest {},context);
+            var user = GetUserContext(context.RequestHeaders);
+            await user._formerClient.SendDeleteOrder(new DeleteOrderRequest {},context);
             return await Task.FromResult(new DeleteOrderResponse { });
         }
         public async override Task<UpdateServerConfigResponse> UpdateServerConfig(UpdateServerConfigRequest request,

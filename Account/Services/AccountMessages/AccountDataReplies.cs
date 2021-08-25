@@ -5,10 +5,13 @@ namespace AccountGRPC.AccountMessages
 {
     public static class AccountDataReplies
     {
+        // Логгирование.
+        private static readonly ILogger logger = Log.ForContext("Where", "AccountService");
+
         public static AccountDataResponse AccountNotFound()
         {
             const string Message = "Ошибка при получении данных текущего аккаунта: пользователь не найден.";
-            Log.Information(Message);
+            logger.Information("{@Replies} - " + Message, nameof(AccountDataReplies));
 
             return new AccountDataResponse
             {
@@ -21,7 +24,7 @@ namespace AccountGRPC.AccountMessages
         public static AccountDataResponse TimePassed()
         {
             const string Message = "Ошибка при получении данных текущего аккаунта: время сессии вышло.";
-            Log.Information(Message);
+            logger.Information("{@Replies} - " + Message, nameof(AccountDataReplies));
 
             return new AccountDataResponse
             {
@@ -34,7 +37,7 @@ namespace AccountGRPC.AccountMessages
         public static AccountDataResponse SuccessfulGettingAccountData(Models.LoggedAccount currentAccount)
         {
             const string Message = "Получение данных текущего пользователя завершено успешно.";
-            Log.Information(Message);
+            logger.Information("{@Replies} - " + Message, nameof(AccountDataReplies));
 
             var reply = new AccountDataResponse
             {

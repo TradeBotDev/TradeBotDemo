@@ -39,10 +39,13 @@ namespace Relay.Clients
             }, meta);
             return response.ResponseStream;
         }
+        public IAsyncStreamReader<SubscribeOrdersResponse> ReConnect(Metadata Meta)
+        {
+            return OpenStream(Meta);
+        }
 
 
-
-        public IAsyncEnumerable<Order> SubscribeForOrders(IAsyncStreamReader<SubscribeOrdersResponse> stream)
+        public IAsyncEnumerable<Order> SubscribeForOrders(IAsyncStreamReader<SubscribeOrdersResponse> stream,Metadata Meta)
         {
             _token = new CancellationTokenSource();
             System.Threading.Channels.Channel<Order> channel = System.Threading.Channels.Channel.CreateUnbounded<Order>();
@@ -61,8 +64,9 @@ namespace Relay.Clients
                     }
                     catch (RpcException e)
                     {
-                        Log.Error(e.Message);
-                        if(e.StatusCode==StatusCode.Cancelled) break;
+                        Log.ForContext("sessionId", Meta.GetValue("sessionid")).ForContext("slot", Meta.GetValue("slot")).Information("{@Where}:Exception {@Exception}", "Relay",e.Message);
+                        if (e.StatusCode==StatusCode.Cancelled) break;
+                        await Task.Delay(5000);
                     }
                 }
             });

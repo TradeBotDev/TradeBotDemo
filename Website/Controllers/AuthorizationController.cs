@@ -14,11 +14,22 @@ namespace Website.Controllers
 {
     public class AuthorizationController : Controller
     {
+        private ILogger logger;
+
+        // Добавление Id сессии в конструктор логгера.
+        public AuthorizationController()
+            => logger = Log.ForContext<AuthorizationController>()
+            .ForContext("Where", "Website");
+
         // Метод, показывающий страницу входа в аккаунт.
         [HttpGet]
         public async Task<IActionResult> Login()
         {
-            Log.Information("AuthorizationController: метод Login принял запрос GET.");
+            logger = logger.ForContext("SessionId", User.Identity.Name)
+                .ForContext("Method", nameof(Login))
+                .ForContext<HttpGetAttribute>();
+
+            logger.Information("{@Controller}: метод {@Method} принял запрос GET.", GetType().Name, "Login");
 
             // Проверка лицензии и передача ее результата в представление через ViewBag.
             var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
@@ -30,9 +41,13 @@ namespace Website.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginModel model)
         {
-            Log.Information("AuthorizationController: метод Login принял запрос POST с данными: " +
+            logger = logger.ForContext("SessionId", User.Identity.Name)
+                .ForContext("Method", nameof(Login))
+                .ForContext<HttpPostAttribute>();
+
+            logger.Information("{@Controller}: метод {@Login} принял запрос POST с данными: " +
                 $"Email - {model.Email}, " +
-                $"Password - {model.Password}.");
+                $"Password - {model.Password}.", GetType().Name, "Login");
 
             // Проверка лицензии и передача ее результата в представление через ViewBag.
             var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
@@ -62,7 +77,11 @@ namespace Website.Controllers
         [HttpGet]
         public async Task<IActionResult> Register()
         {
-            Log.Information("AuthorizationController: метод Register принял запрос GET.");
+            logger = logger.ForContext("SessionId", User.Identity.Name)
+                .ForContext("Method", nameof(Register))
+                .ForContext<HttpGetAttribute>();
+
+            logger.Information("{@Controller}: метод {@Register} принял запрос GET.", GetType().Name, "Register");
 
             // Проверка лицензии и передача ее результата в представление через ViewBag.
             var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
@@ -74,10 +93,14 @@ namespace Website.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(RegisterModel model)
         {
-            Log.Information("AuthorizationController: метод Register принял запрос POST с данными: " +
+            logger = logger.ForContext("SessionId", User.Identity.Name)
+                .ForContext("Method", nameof(Register))
+                .ForContext<HttpPostAttribute>();
+
+            logger.Information("{@Controller}: метод {@Method} принял запрос POST с данными: " +
                 $"Email - {model.Email}, " +
                 $"Password - {model.Password}, " +
-                $"VerifyPassword - {model.VerifyPassword}.");
+                $"VerifyPassword - {model.VerifyPassword}.", GetType().Name, "Register");
 
             // Проверка лицензии и передача ее результата в представление через ViewBag.
             var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);
@@ -108,10 +131,14 @@ namespace Website.Controllers
         [HttpPost]
         public async Task<IActionResult> Logout(LogoutModel model)
         {
-            Log.Information("AuthorizationController: метод Logout принял запрос POST с данными: " +
+            logger = logger.ForContext("SessionId", User.Identity.Name)
+                .ForContext("Method", nameof(Logout))
+                .ForContext<HttpPostAttribute>();
+
+            logger.Information("{@Controller}: метод {@Logout} принял запрос POST с данными: " +
                 $"Button - {model.Button}, " + // ¯\_(ツ)_/¯
                 $"PreviousUrl - {model.PreviousUrl}, " +
-                $"SaveExchanges - {model.SaveExchanges}.");
+                $"SaveExchanges - {model.SaveExchanges}.", GetType().Name, "Logout");
 
             // Проверка лицензии и передача ее результата в представление через ViewBag.
             var haveLicense = await Clients.LicenseClient.CheckLicense(User.Identity.Name, ProductCode.Tradebot);

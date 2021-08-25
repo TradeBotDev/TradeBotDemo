@@ -6,10 +6,13 @@ namespace AccountGRPC.AccountMessages
 {
     public static class AllExchangesBySessionReplies
     {
+        // Логгирование.
+        private static readonly ILogger logger = Log.ForContext("Where", "AccountService");
+
         public static AllExchangesBySessionResponse SuccessfulGetting(IQueryable<Models.ExchangeAccess> exchangesFromAccount)
         {
             const string Message = "Получение информации о биржах завершено успешно.";
-            Log.Information(Message);
+            logger.Information("{@Replies} - " + Message, nameof(AllExchangesBySessionReplies));
 
             AllExchangesBySessionResponse reply = new AllExchangesBySessionResponse
             {
@@ -34,7 +37,7 @@ namespace AccountGRPC.AccountMessages
         public static AllExchangesBySessionResponse AccountNotFound()
         {
             const string Message = "Произошла ошибка получение данных бирж: пользователь не существует.";
-            Log.Information(Message);
+            logger.Information("{@Replies} - " + Message, nameof(AllExchangesBySessionReplies));
 
             return new AllExchangesBySessionResponse
             {
@@ -46,7 +49,7 @@ namespace AccountGRPC.AccountMessages
         public static AllExchangesBySessionResponse TimePassed()
         {
             const string Message = "Произошла ошибка получение данных бирж: время сессии вышло.";
-            Log.Information(Message);
+            logger.Information("{@Replies} - " + Message, nameof(AllExchangesBySessionReplies));
 
             return new AllExchangesBySessionResponse
             {
@@ -58,7 +61,7 @@ namespace AccountGRPC.AccountMessages
         public static AllExchangesBySessionResponse ExchangesNotFound()
         {
             const string Message = "Ошибка при получении бирж: данные не найдены.";
-            Log.Information(Message);
+            logger.Information("{@Replies} - " + Message, nameof(AllExchangesBySessionReplies));
 
             return new AllExchangesBySessionResponse
             {

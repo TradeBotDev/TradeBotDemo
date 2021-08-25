@@ -5,10 +5,13 @@ namespace AccountGRPC.LicenseMessages
 {
     public static class SetLicenseReplies
     {
+        // Логгирование.
+        private static readonly ILogger logger = Log.ForContext("Where", "AccountService");
+
         public static SetLicenseResponse LicenseIsExists()
         {
             const string Message = "Произошла ошибка добавления лицензии: лицензия уже существует на данный продукт.";
-            Log.Information(Message);
+            logger.Information("{@Replies} - " + Message, nameof(SetLicenseReplies));
 
             return new SetLicenseResponse
             {
@@ -20,7 +23,7 @@ namespace AccountGRPC.LicenseMessages
         public static SetLicenseResponse AccountNotFound()
         {
             const string Message = "Произошла ошибка добавления лицензии: пользователь не найден.";
-            Log.Information(Message);
+            logger.Information("{@Replies} - " + Message, nameof(SetLicenseReplies));
 
             return new SetLicenseResponse
             {
@@ -32,7 +35,7 @@ namespace AccountGRPC.LicenseMessages
         public static SetLicenseResponse SuccessfulSettingLicense()
         {
             const string Message = "Успешное добавление лицензии.";
-            Log.Information(Message);
+            logger.Information("{@Replies} - " + Message, nameof(SetLicenseReplies));
 
             return new SetLicenseResponse
             {

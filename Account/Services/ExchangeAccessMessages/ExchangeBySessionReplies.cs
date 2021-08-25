@@ -5,10 +5,13 @@ namespace AccountGRPC.AccountMessages
 {
     public static class ExchangeBySessionReplies
     {
+        // Логгирование.
+        private static readonly ILogger logger = Log.ForContext("Where", "AccountService");
+
         public static ExchangeBySessionResponse AccountNotFound()
         {
             const string Message = "Произошла ошибка: пользователь не найден.";
-            Log.Information(Message);
+            logger.Information("{@Replies} - " + Message, nameof(ExchangeBySessionReplies));
 
             return new ExchangeBySessionResponse
             {
@@ -21,7 +24,7 @@ namespace AccountGRPC.AccountMessages
         public static ExchangeBySessionResponse TimePassed()
         {
             const string Message = "Произошла ошибка: время сессии вышло.";
-            Log.Information(Message);
+            logger.Information("{@Replies} - " + Message, nameof(ExchangeBySessionReplies));
 
             return new ExchangeBySessionResponse
             {
@@ -34,7 +37,7 @@ namespace AccountGRPC.AccountMessages
         public static ExchangeBySessionResponse ExchangeNotFound()
         {
             const string Message = "Произошла ошибка: биржа не найдена.";
-            Log.Information(Message);
+            logger.Information("{@Replies} - " + Message, nameof(ExchangeBySessionReplies));
 
             return new ExchangeBySessionResponse
             {
@@ -47,7 +50,7 @@ namespace AccountGRPC.AccountMessages
         public static ExchangeBySessionResponse SuccessfulGettingExchangeAccess(Models.ExchangeAccess exchangeAccess)
         {
             const string Message = "Успешное получение информации о доступе пользователя бирже.";
-            Log.Information(Message);
+            logger.Information("{@Replies} - " + Message, nameof(ExchangeBySessionReplies));
 
             return new ExchangeBySessionResponse
             {

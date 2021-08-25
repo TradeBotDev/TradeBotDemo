@@ -11,7 +11,7 @@ namespace Website.Controllers.Clients
 		// Метод, который подключается к сервису и возвращает подключение. 
 		public static GrpcChannel GetConnection()
 		{
-			Log.Information($"AccountServiceConnection: вызван метод GetConnection.");
+			Log.Information("{@Class}: вызван метод {@Method}.", "AccountServiceConnection", "GetConnection");
 
 			// Получение из переменной окружения адреса Facade.
 			string connectionString = Environment.GetEnvironmentVariable("FACADE_CONNECTION_STRING");

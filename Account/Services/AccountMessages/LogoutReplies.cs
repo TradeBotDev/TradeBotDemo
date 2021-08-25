@@ -5,10 +5,13 @@ namespace AccountGRPC.AccountMessages
 {
     public static class LogoutReplies
     {
+        // Логгирование.
+        private static readonly ILogger logger = Log.ForContext("Where", "AccountService");
+
         public static LogoutResponse SuccessfulLogout()
         {
             const string Message = "Произведен выход из аккаунта.";
-            Log.Information(Message);
+            logger.Information("{@Replies} - " + Message, nameof(LogoutReplies));
 
             return new LogoutResponse
             {
@@ -20,7 +23,7 @@ namespace AccountGRPC.AccountMessages
         public static LogoutResponse AccountNotFound()
         {
             const string Message = "Ошибка при выходе из аккаунта: вы уже вышли из аккаунта";
-            Log.Information(Message);
+            logger.Information("{@Replies} - " + Message, nameof(LogoutReplies));
 
             return new LogoutResponse
             {
