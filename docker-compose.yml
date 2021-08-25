@@ -49,6 +49,8 @@ services:
     build:      
       context: .
       dockerfile: ./TradeMarket/Dockerfile
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - 5005:80
     volumes:
@@ -83,6 +85,8 @@ services:
     build:      
       context: .
       dockerfile: ./Relay/Dockerfile
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - 5004:80
     volumes:
@@ -100,6 +104,8 @@ services:
     build:      
       context: .
       dockerfile: ./Algorithm/Dockerfile
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - 5006:80
     volumes:
@@ -114,6 +120,8 @@ services:
     build:      
       context: .
       dockerfile: ./History/Dockerfile
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - 5007:80
     volumes:
@@ -128,6 +136,8 @@ services:
     build:      
       context: .
       dockerfile: ./Former/Dockerfile
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - 5003:80
     volumes:
