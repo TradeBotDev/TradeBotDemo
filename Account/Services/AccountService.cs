@@ -54,7 +54,7 @@ namespace AccountGRPC
                 // Проверка на то, есть ли сессия с пользователем, который пытается войти в аккаунт, и
                 // в случае, если он вошел, возвращается его Id сессии
                 var existingLogin = database.LoggedAccounts.Where(account => account.AccountId == accounts.First().AccountId);
-                if (existingLogin.Count() > 0)
+                if (existingLogin.Any())
                 {
                     string newSessionId = Guid.NewGuid().ToString();
                     existingLogin.First().SessionId = newSessionId;
