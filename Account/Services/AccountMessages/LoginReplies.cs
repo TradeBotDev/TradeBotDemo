@@ -5,10 +5,13 @@ namespace AccountGRPC.AccountMessages
 {
     public static class LoginReplies
     {
+        // Логгирование.
+        private static readonly ILogger logger = Log.ForContext("Where", "AccountService");
+
         public static LoginResponse SuccessfulLogin(string sessionId)
         {
             const string Message = "Произведен вход в аккаунт.";
-            Log.Information($"{Message} SessionId: {sessionId}.");
+            logger.Information("{@Replies} - " + $"{Message} SessionId: {sessionId}", nameof(LoginReplies));
 
             return new LoginResponse
             {
@@ -21,7 +24,7 @@ namespace AccountGRPC.AccountMessages
         public static LoginResponse AlreadySignedIn(string sessionId)
         {
             const string Message = "Вы уже вошли в аккаунт.";
-            Log.Information($"{Message} SessionId: {sessionId}.");
+            logger.Information("{@Replies} - " + $"{Message} SessionId: {sessionId}", nameof(LoginReplies));
 
             return new LoginResponse
             {
@@ -34,7 +37,7 @@ namespace AccountGRPC.AccountMessages
         public static LoginResponse AccountNotFound()
         {
             const string Message = "Ошибка при входе: пользователь не найден.";
-            Log.Information(Message);
+            logger.Information("{@Replies} - " + Message, nameof(LoginReplies));
 
             return new LoginResponse
             {

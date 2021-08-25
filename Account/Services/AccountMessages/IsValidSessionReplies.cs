@@ -5,10 +5,13 @@ namespace AccountGRPC.AccountMessages
 {
     public static class IsValidSessionReplies
     {
+        // Логгирование.
+        private static readonly ILogger logger = Log.ForContext("Where", "AccountService");
+
         public static IsValidSessionResponse IsValid()
         {
             const string Message = "Операция является валидной.";
-            Log.Information(Message);
+            logger.Information("{@Replies} - " + Message, nameof(IsValidSessionReplies));
 
             return new IsValidSessionResponse
             {
@@ -20,7 +23,7 @@ namespace AccountGRPC.AccountMessages
         public static IsValidSessionResponse IsNotValid()
         {
             const string Message = "Произошла ошибка: операция не является валидной.";
-            Log.Information(Message);
+            logger.Information("{@Replies} - " + Message, nameof(IsValidSessionReplies));
 
             return new IsValidSessionResponse
             {
