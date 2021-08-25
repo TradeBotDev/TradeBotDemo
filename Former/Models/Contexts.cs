@@ -25,9 +25,12 @@ namespace Former.Models
             }
         }
 
-        public static void ClearContexts()
+        public static void RemoveContext(Metadata metadata)
         {
-            UserContexts.Clear();
+            var toDelete = UserContexts.Find(x =>
+                x.Slot == metadata.Slot && x.SessionId == metadata.Sessionid && x.TradeMarket == metadata.Trademarket);
+            UserContexts.Remove(toDelete);
+
         }
     }
 }

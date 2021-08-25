@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using System.IO;
+
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 
@@ -6,9 +9,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-using System;
-using System.IO;
 using Serilog;
+using Prometheus;
+using Prometheus.SystemMetrics;
+
 using AccountGRPC.Models;
 
 namespace AccountGRPC
@@ -41,6 +45,7 @@ namespace AccountGRPC
         {
             services.AddGrpc();
             services.AddDbContext<AccountContext>();
+            services.AddSystemMetrics();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -52,6 +57,7 @@ namespace AccountGRPC
             }
 
             app.UseRouting();
+            app.UseGrpcMetrics();
 
             app.UseEndpoints(endpoints =>
             {
