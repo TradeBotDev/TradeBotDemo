@@ -31,6 +31,7 @@ namespace History
                         BalanceWrapper bw = Converter.ToBalanceWrapper(request.Balance.Balance);
                         BalanceChange bc = new BalanceChange
                         {
+
                             SessionId = request.Balance.Sessionid,
                             Time = request.Balance.Time.ToDateTime(),
                             Balance = bw,
@@ -76,7 +77,7 @@ namespace History
             return new PublishEventResponse();
         }
 
-        private static void Handler(NotifyCollectionChangedEventArgs args, string sessionId,
+        private static void Handler(NotifyCollectionChangedEventArgs args, Metadata metadata,
             IAsyncStreamWriter<SubscribeEventsResponse> responseStream)
         {
             BalanceChange updateBalance;
@@ -86,7 +87,7 @@ namespace History
                 if (args.NewItems[0].GetType().FullName.Contains("BalanceChange"))
                 {
                     updateBalance = (BalanceChange)args.NewItems[0];
-                    if (updateBalance.SessionId != sessionId) return;
+                    if (updateBalance.SessionId != metadata.GetValue("sessionid")) return;
                     await responseStream.WriteAsync(new SubscribeEventsResponse
                     {
                         Balance = new PublishBalanceEvent
@@ -100,7 +101,7 @@ namespace History
                 if (args.NewItems[0].GetType().FullName.Contains("OrderChange"))
                 {
                     updateOrder = (OrderChange)args.NewItems[0];
-                    if (updateOrder.SessionId != sessionId) return;
+                    if (updateOrder.SessionId != metadata.GetValue("sessionid") || updateOrder.SlotName != metadata.GetValue("slot")) return;
                     await responseStream.WriteAsync(new SubscribeEventsResponse
                     {
                         Order = new PublishOrderEvent
@@ -124,7 +125,7 @@ namespace History
 
             void CollectionOnCollectionChanged(object o, NotifyCollectionChangedEventArgs args)
             {
-                Handler(args, request.Sessionid, responseStream);
+                Handler(args, context.RequestHeaders, responseStream);
             }
             try
             {

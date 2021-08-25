@@ -36,7 +36,7 @@ namespace Former.Models
             if (!int.TryParse(Environment.GetEnvironmentVariable("RETRY_DELAY"), out var retryDelay)) retryDelay = 10000;
 
             HistoryClient.Configure(Environment.GetEnvironmentVariable("HISTORY_CONNECTION_STRING"), retryDelay);
-            _historyClient = new HistoryClient(_logger, Converters.ConvertMetadata(Meta));
+            _historyClient = new HistoryClient(_logger);
 
             TradeMarketClient.Configure(Environment.GetEnvironmentVariable("TRADEMARKET_CONNECTION_STRING"), retryDelay);
             _tradeMarketClient = new TradeMarketClient(_logger);

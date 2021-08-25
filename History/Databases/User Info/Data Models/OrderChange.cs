@@ -15,10 +15,10 @@ namespace History.DataBase
         public int OrderId { get; set; }
         public OrderWrapper Order { get; set; }
         public string SessionId { get; set; }
+        public string SlotName { get; set; }
         public ChangesType ChangesType { get; set; }
         public string Message { get; set; }
         public DateTime Time { get; set; }
-        public string SlotName { get; set; }
     }
     public enum ChangesType
     {
