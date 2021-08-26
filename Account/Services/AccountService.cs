@@ -63,7 +63,7 @@ namespace AccountGRPC
                     existingLogin.First().LoginDate = DateTime.Now;
                     database.SaveChanges();
 
-                    return await Task.FromResult(LoginReplies.AlreadySignedIn(newSessionId));
+                    return await Task.FromResult(LoginReplies.AlreadySignedIn(newSessionId, accounts.First().AccountId));
                 }
 
                 // В случае наличия зарегистрированного аккаунта с данными из запроса генерируется
