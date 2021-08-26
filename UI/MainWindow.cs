@@ -247,7 +247,7 @@ namespace UI
         {
             if (!string.IsNullOrEmpty(message.Message))
             {
-                var incomingString = $"[{message.Time}] {message.Message}\r\n" + $"Order {message.Id}, price: {message.Price}, quantity: {message.Qty}, type: {message.Type}\r\n\r\n";
+                var incomingString = $"[{message.Time}] {message.SlotName}: {message.Message}\r\n" + $"Order {message.Id}, price: {message.Price}, quantity: {message.Qty}, type: {message.Type}\r\n\r\n";
                 EventConsole.Text += incomingString;
             }
         }
@@ -310,14 +310,16 @@ namespace UI
             WriteToJson(_configurations);
             ActiveOrdersDataGridView.Rows.Clear();
             FilledOrdersDataGridView.Rows.Clear();
-            await _facadeClient.StartBot(slotName, GetConfig());
-            WriteMessageToEventConsole($"Bot has been started on {slotName}!");
+            var response = await _facadeClient.StartBot(slotName, GetConfig());
+            WriteMessageToEventConsole(response.Code == ReplyCode.Succeed
+                ? $"Bot has been started on {slotName}!"
+                : $"Bot cannot be started on {slotName}!");
         }
 
         private async void Stop(string slotName)
         {
-            CheckConnection(await _facadeClient.StopBot(slotName,GetConfig()));
-            WriteMessageToEventConsole("Bot has been stopped!");
+            CheckConnection(await _facadeClient.StopBot(slotName, GetConfig()));
+            WriteMessageToEventConsole($"Bot has been stopped on {slotName}!");
         }
 
         private Config GetConfig()
