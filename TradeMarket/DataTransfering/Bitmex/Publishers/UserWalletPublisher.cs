@@ -92,6 +92,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         {
             var log = logger.ForContext<UserWalletPublisher>();
             await UnSubscribeAsync(_request,log);
+            await base.Stop(log);
             ClearCahce(log);
         }
     }

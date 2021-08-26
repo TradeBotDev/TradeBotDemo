@@ -67,6 +67,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         public async override Task Stop(ILogger logger)
         {
             await Task.Run(() => ClearCahce(logger));
+            await base.Stop(logger);
         }
     }
 }

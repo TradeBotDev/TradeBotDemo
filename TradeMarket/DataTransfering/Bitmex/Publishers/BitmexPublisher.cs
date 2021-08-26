@@ -28,7 +28,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         public event EventHandler<IPublisher<TModel>.ChangedEventArgs> Changed;
 
 
-        private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+        internal CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         protected readonly BitmexWebsocketClient _client;
 
         protected List<TModel> _cache;
@@ -111,6 +111,12 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
 
         public abstract Task Start(ILogger logger);
 
-        public abstract Task Stop(ILogger logger);
+        public async virtual Task Stop(ILogger logger)
+        {
+            await Task.Run(() =>
+            {
+                cancellationTokenSource.Cancel();
+            });
+        }
     }
 }

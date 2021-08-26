@@ -106,6 +106,8 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         {
             var log = logger.ForContext<UserOrderPublisher>();
             await UnSubscribeAsync(_request,logger);
+            await base.Stop(log);
+            ClearCahce(log);
         }
     }
 }
