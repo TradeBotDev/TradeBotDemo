@@ -16,7 +16,7 @@ namespace AccountGRPC
 {
     public class AccountService : Account.AccountBase
     {
-        HashAlgorithm sha = SHA256.Create();
+        SHA256 sha = SHA256.Create();
 
         // Логгирование.
         protected readonly ILogger logger = Log.ForContext("Where", "AccountService");
@@ -60,8 +60,9 @@ namespace AccountGRPC
                 var existingLogin = database.LoggedAccounts.Where(account => account.AccountId == accounts.First().AccountId);
                 if (existingLogin.Any())
                 {
-                    byte[] newSiByteArray = Encoding.UTF8.GetBytes(request.Email);
-                    string newSessionId = sha.ComputeHash(newSiByteArray).ToString();
+                    byte[] newLoginByteArray = Encoding.UTF8.GetBytes(request.Email);
+                    byte[] newLoginHash = sha.ComputeHash(newLoginByteArray);
+                    string newSessionId = Encoding.UTF8.GetString(newLoginHash, 0, newLoginHash.Length);
                     existingLogin.First().SessionId = newSessionId;
                     existingLogin.First().LoginDate = DateTime.Now;
                     database.SaveChanges();
@@ -72,8 +73,9 @@ namespace AccountGRPC
                 // В случае наличия зарегистрированного аккаунта с данными из запроса генерируется
                 // Id сессии, а также полученный пользователь добавляется в таблицу с вошедшими
                 // пользователями.
-                byte[] siByteArray = Encoding.UTF8.GetBytes(request.Email);
-                string sessionId = sha.ComputeHash(siByteArray).ToString();
+                byte[] emailByteArray = Encoding.UTF8.GetBytes(request.Email);
+                byte[] emailHash = sha.ComputeHash(emailByteArray);
+                string sessionId = Encoding.UTF8.GetString(emailHash, 0, emailHash.Length);
                 var loggedAccount = new Models.LoggedAccount
                 {
                     SessionId = sessionId,
