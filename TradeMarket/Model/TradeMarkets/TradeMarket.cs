@@ -53,30 +53,7 @@ namespace TradeMarket.Model.TradeMarkets
         #endregion
 
         #region Users Publishers
-        public async Task<IPublisher<T>> CreatePublisherAsync<T>(Context context,CancellationToken token, IPublisherFactory.Create<T> create)
-        {
-            return await Task.Run(() =>
-            {
-                var publisher = create(context,token);
-                Log.Information("Created {@Publisher} for {@Context}", publisher,context);
-                return publisher;
-            });
-        }
-        public async Task<List<T>> SubscribeToAsync<T>(IPublisher<T> publisher,EventHandler<IPublisher<T>.ChangedEventArgs> handler, ILogger logger)
-        {
-            var log = logger;
-            if(publisher is null)
-            {
-                throw new ArgumentException($"Publisher {nameof(publisher)} was null.");
-            }
-            if(publisher.IsWorking == false)
-            {
-                await publisher.Start(log);
-            }
-            publisher.Changed += handler;
-            log.Information("Added Handler for Publisher", handler, publisher);
-            return publisher.Cache;
-        }
+       
 
         public async Task<List<T>> SubscribeToAsync<T>(
             IDictionary<Context,IPublisher<T>> publisher, 
@@ -101,22 +78,34 @@ namespace TradeMarket.Model.TradeMarkets
         public IDictionary<Context, IPublisher<Order>> OrderPublisher { get; internal set; } = new ConcurrentDictionary<Context, IPublisher<Order>>();
         public IDictionary<Context, IPublisher<Margin>> MarginPublisher { get; internal set; } = new ConcurrentDictionary<Context, IPublisher<Margin>>();
         public IDictionary<Context, IPublisher<bool>> AuthenticationPublisher { get; internal set; } = new ConcurrentDictionary<Context, IPublisher<bool>>();
-        #endregion
 
-        #region Subscribe Methods
-        #region Common Subscriptions
-        public abstract Task<List<BookLevel>> SubscribeToBook25Async(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, Context context, CancellationToken token, ILogger logger);
-        public abstract Task<List<Instrument>> SubscribeToInstrumentsAsync(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler, Context context, CancellationToken token, ILogger logger);
-        #endregion
-        #region User Subscriptions
-        public abstract Task<List<Position>> SubscribeToUserPositionsAsync(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, Context context, CancellationToken token, ILogger logger);
-        public abstract Task<List<Margin>> SubscribeToUserMarginAsync(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, Context context, CancellationToken token, ILogger logger);
-        public abstract Task<List<Order>> SubscribeToUserOrdersAsync(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, Context context, CancellationToken token, ILogger logger);
-        public abstract Task<List<Wallet>> SubscribeToBalanceAsync(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, Context context, CancellationToken token, ILogger logger);
-        #endregion
-        #endregion
 
-        #region Unsubscribe Methods
+
+
+        public async Task<IPublisher<T>> CreatePublisherAsync<T>(Context context, CancellationToken token, IPublisherFactory.Create<T> create)
+        {
+            return await Task.Run(() =>
+            {
+                var publisher = create(context, token);
+                Log.Information("Created {@Publisher} for {@Context}", publisher, context);
+                return publisher;
+            });
+        }
+        public async Task<List<T>> SubscribeToAsync<T>(IPublisher<T> publisher, EventHandler<IPublisher<T>.ChangedEventArgs> handler, ILogger logger)
+        {
+            var log = logger;
+            if (publisher is null)
+            {
+                throw new ArgumentException($"Publisher {nameof(publisher)} was null.");
+            }
+            if (publisher.IsWorking == false)
+            {
+                await publisher.Start(log);
+            }
+            publisher.Changed += handler;
+            log.Information("Added Handler for Publisher", handler, publisher);
+            return publisher.Cache;
+        }
         public async Task UnsubscribeFromAsync<T>(IPublisher<T> publisher, EventHandler<IPublisher<T>.ChangedEventArgs> handler, ILogger logger)
         {
             await Task.Run(() =>
@@ -151,17 +140,7 @@ namespace TradeMarket.Model.TradeMarkets
             });
         }
 
-        #region Common Subscriptions
-        public abstract Task UnSubscribeFromBook25Async(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, Context context, ILogger logger);
-        public abstract Task UnSubscribeFromInstrumentsAsync(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler, Context context, ILogger logger);
-        #endregion
-        #region User Subscriptions
-        public abstract Task UnSubscribeFromUserPositionsAsync(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, Context context, ILogger logger);
-        public abstract Task UnSubscribeFromUserMarginAsync(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, Context context, ILogger logger);
-        public abstract Task UnSubscribeFromUserOrdersAsync(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, Context context, ILogger logger);
-        public abstract Task UnSubscribeFromBalanceAsync(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, Context context, ILogger logger);
-        #endregion
-        #endregion
+      
 
         #region Commands
 
