@@ -124,6 +124,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
                 .ForContext<BookPublisher>()
                 .ForContext("Method", nameof(Stop));
             await UnSubscribeAsync(_bookSubscribeRequest,log);
+            await base.Stop(logger);
             ClearCahce(log);
         }
     }

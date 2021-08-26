@@ -71,6 +71,8 @@ namespace TradeMarket.DataTransfering.Bitmex.Publishers
         public async override Task Stop(ILogger logger)
         {
             var log = logger.ForContext<PingPongPublisher>();
+            await base.Stop(log);
+
             ClearCahce(log);
         }
     }
