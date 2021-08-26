@@ -262,7 +262,7 @@ namespace UI
         {
             var incomingMessage = new IncomingMessage
             {
-                SlotName = metadata.GetValue("slot"),
+                SlotName = orderEvent.Slot,
                 Qty = orderEvent.Order.Quantity,
                 Price = orderEvent.Order.Price,
                 Type = orderEvent.Order.Signature.Type,

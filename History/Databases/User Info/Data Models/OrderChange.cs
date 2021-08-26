@@ -19,6 +19,7 @@ namespace History.DataBase
         public DateTime Time { get; set; }
         public string UserId { get; set; }
         public string Slot { get; set; }
+        public string SessionId { get; set; }
     }
     public enum ChangesType
     {

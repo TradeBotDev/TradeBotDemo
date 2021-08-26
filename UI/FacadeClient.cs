@@ -12,7 +12,7 @@ namespace UI
 {
     class FacadeClient
     {
-        private readonly FacadeService.FacadeServiceClient _client = new(GrpcChannel.ForAddress("http://23.88.34.174:5002"));
+        private readonly FacadeService.FacadeServiceClient _client = new(GrpcChannel.ForAddress("http://localhost:5002"));
         private Metadata _meta;
 
         public delegate void OrdersUpdate(PublishOrderEvent order, Metadata metadata);
@@ -81,16 +81,21 @@ namespace UI
         {
             _token = new CancellationTokenSource();
             using var call = _client.SubscribeEvents(new SubscribeEventsRequest { Sessionid = _meta.GetValue("sessionid") }, _meta);
-
+            var slotName = _meta.GetValue("slot");
+            var sessionid = _meta.GetValue("sessionid");
+            var responseHeaders = await call.ResponseHeadersAsync;
             while (await call.ResponseStream.MoveNext(_token.Token))
             {
                 switch (call.ResponseStream.Current.EventTypeCase)
                 {
                     case SubscribeEventsResponse.EventTypeOneofCase.Balance:
-                        HandleBalanceUpdate?.Invoke(call.ResponseStream.Current.Balance, _meta);
+                        HandleBalanceUpdate?.Invoke(call.ResponseStream.Current.Balance, responseHeaders);
                         break;
                     case SubscribeEventsResponse.EventTypeOneofCase.Order:
-                        HandleOrderUpdate?.Invoke(call.ResponseStream.Current.Order, _meta);
+                        
+                        if (call.ResponseStream.Current.Order.Slot == slotName &&
+                            call.ResponseStream.Current.Order.Sessionid == sessionid) 
+                            HandleOrderUpdate?.Invoke(call.ResponseStream.Current.Order, responseHeaders);
                         break;
                     case SubscribeEventsResponse.EventTypeOneofCase.None:
                         break;

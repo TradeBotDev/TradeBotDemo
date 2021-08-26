@@ -31,6 +31,8 @@ message PublishOrderEvent{
 	google.protobuf.Timestamp time = 2;
 	tradebot.common.v1.Order order = 3;
 	string message = 4;
+	string sessionid = 5;
+	string slot = 6;
 }
 message PublishEventResponse{
 	google.protobuf.Empty empty = 1;

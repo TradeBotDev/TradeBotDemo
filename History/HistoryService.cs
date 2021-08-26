@@ -28,8 +28,8 @@ namespace History
                     case PublishEventRequest.EventTypeOneofCase.None:
                         break;
                     case PublishEventRequest.EventTypeOneofCase.Balance:
-                        BalanceWrapper bw = Converter.ToBalanceWrapper(request.Balance.Balance);
-                        BalanceChange bc = new BalanceChange
+                        var bw = Converter.ToBalanceWrapper(request.Balance.Balance);
+                        var bc = new BalanceChange
                         {
                             Time = request.Balance.Time.ToDateTime(),
                             Balance = bw,
@@ -44,16 +44,16 @@ namespace History
 
                         break;
                     case PublishEventRequest.EventTypeOneofCase.Order:
-
-                        OrderWrapper ow = Converter.ToOrderWrapper(request.Order.Order);
-                        OrderChange oc = new OrderChange
+                        var ow = Converter.ToOrderWrapper(request.Order.Order);
+                        var oc = new OrderChange
                         {
-                            ChangesType = (DataBase.ChangesType)request.Order.ChangesType,
+                            ChangesType = (ChangesType)request.Order.ChangesType,
                             Order = ow,
                             Message = request.Order.Message,
                             Time = request.Order.Time.ToDateTime(),
                             UserId = context.RequestHeaders.GetValue("userid"),
-                            Slot = context.RequestHeaders.GetValue("slot")
+                            Slot = context.RequestHeaders.GetValue("slot"),
+                            SessionId = context.RequestHeaders.GetValue("sessionid")
                         };
                         OrderCollection.Add(oc);
                         if (oc.ChangesType == ChangesType.CHANGES_TYPE_DELETE && oc.Message != "Removed by user" &&
@@ -98,7 +98,9 @@ namespace History
                 if (args.NewItems[0].GetType().FullName.Contains("OrderChange"))
                 {
                     updateOrder = (OrderChange)args.NewItems[0];
-                    if (updateOrder.UserId != metadata.GetValue("userid") || updateOrder.Slot != metadata.GetValue("slot")) return;
+                    if (updateOrder.UserId != metadata.GetValue("userid") || 
+                        updateOrder.Slot != metadata.GetValue("slot")||
+                        updateOrder.SessionId != metadata.GetValue("sessionid")) return;
                     await responseStream.WriteAsync(new SubscribeEventsResponse
                     {
                         Order = new PublishOrderEvent
@@ -106,7 +108,9 @@ namespace History
                             ChangesType = (TradeBot.Common.v1.ChangesType)updateOrder.ChangesType,
                             Order = Converter.ToOrder(updateOrder.Order),
                             Time = Timestamp.FromDateTime(updateOrder.Time.ToUniversalTime()),
-                            Message = updateOrder.Message
+                            Message = updateOrder.Message,
+                            Slot = updateOrder.Slot,
+                            Sessionid = updateOrder.SessionId
                         }
                     });
                 }

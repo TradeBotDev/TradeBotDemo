@@ -51,7 +51,9 @@ namespace Facade
                                     ChangesType = response.ResponseStream.Current.Order.ChangesType,
                                     Message = response.ResponseStream.Current.Order.Message,
                                     Order = response.ResponseStream.Current.Order.Order,
-                                    Time = response.ResponseStream.Current.Order.Time
+                                    Time = response.ResponseStream.Current.Order.Time,
+                                    Slot = response.ResponseStream.Current.Order.Slot,
+                                    Sessionid = response.ResponseStream.Current.Order.Sessionid
                                 }
                             });
                             break;
