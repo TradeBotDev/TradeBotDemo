@@ -1,6 +1,9 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
 
 using Grpc.Core;
 using Serilog;
@@ -14,6 +17,8 @@ namespace AccountGRPC
 {
     public class AccountService : Account.AccountBase
     {
+        HashAlgorithm sha = SHA256.Create();
+
         // Логгирование.
         protected readonly ILogger logger = Log.ForContext("Where", "AccountService");
 
@@ -56,7 +61,8 @@ namespace AccountGRPC
                 var existingLogin = database.LoggedAccounts.Where(account => account.AccountId == accounts.First().AccountId);
                 if (existingLogin.Any())
                 {
-                    string newSessionId = request.Email.GetHashCode().ToString();
+                    byte[] newSiByteArray = Encoding.UTF8.GetBytes(request.Email);
+                    string newSessionId = sha.ComputeHash(newSiByteArray).ToString();
                     existingLogin.First().SessionId = newSessionId;
                     existingLogin.First().LoginDate = DateTime.Now;
                     database.SaveChanges();
@@ -67,7 +73,8 @@ namespace AccountGRPC
                 // В случае наличия зарегистрированного аккаунта с данными из запроса генерируется
                 // Id сессии, а также полученный пользователь добавляется в таблицу с вошедшими
                 // пользователями.
-                string sessionId = request.Email.GetHashCode().ToString();
+                byte[] siByteArray = Encoding.UTF8.GetBytes(request.Email);
+                string sessionId = sha.ComputeHash(siByteArray).ToString();
                 var loggedAccount = new Models.LoggedAccount
                 {
                     SessionId = sessionId,
