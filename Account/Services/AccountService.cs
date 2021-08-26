@@ -62,7 +62,7 @@ namespace AccountGRPC
                 {
                     byte[] newLoginByteArray = Encoding.Unicode.GetBytes(request.Email);
                     byte[] newLoginHash = sha.ComputeHash(newLoginByteArray);
-                    string newSessionId = Encoding.Unicode.GetString(newLoginHash, 0, newLoginHash.Length);
+                    string newSessionId = Encoding.ASCII.GetString(newLoginHash, 0, newLoginHash.Length);
                     existingLogin.First().SessionId = newSessionId;
                     existingLogin.First().LoginDate = DateTime.Now;
                     database.SaveChanges();
@@ -75,7 +75,7 @@ namespace AccountGRPC
                 // пользователями.
                 byte[] emailByteArray = Encoding.Unicode.GetBytes(request.Email);
                 byte[] emailHash = sha.ComputeHash(emailByteArray);
-                string sessionId = Encoding.Unicode.GetString(emailHash, 0, emailHash.Length);
+                string sessionId = Encoding.ASCII.GetString(emailHash, 0, emailHash.Length);
                 var loggedAccount = new Models.LoggedAccount
                 {
                     SessionId = sessionId,
