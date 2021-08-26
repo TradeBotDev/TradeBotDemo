@@ -309,8 +309,6 @@ namespace UI
         private async void Start(string slotName)
         {
             WriteToJson(_configurations);
-            ActiveOrdersDataGridView.Rows.Clear();
-            FilledOrdersDataGridView.Rows.Clear();
             var response = await _facadeClient.StartBot(slotName, GetConfig());
             WriteMessageToEventConsole(response.Code == ReplyCode.Succeed
                 ? $"Bot has been started on {slotName}!"
@@ -426,8 +424,7 @@ namespace UI
                 if (MessageBox.Show(@"Are you sure you want to stop bot?", @"Stop bot",
                     MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
-                    Stop(ActiveSlotsDataGridView.Rows[ActiveSlotsDataGridView.CurrentRow.Index].Cells[0]
-                        .EditedFormattedValue.ToString());
+                    Stop(ActiveSlotsDataGridView.Rows[ActiveSlotsDataGridView.CurrentRow.Index].Cells[0].EditedFormattedValue.ToString());
                     cellCheckBox.Value = false;
                 }
             }
