@@ -231,7 +231,7 @@ namespace TradeMarket.Services
                 //ищем конеткст пользователя
                 user = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetFullContextFilter, context.CancellationToken, logger);
                 //отправляем запрос на биржу. TODO как работает тут токен отмены
-                var response = await user.PlaceOrder(request.Value, request.Price, context.CancellationToken, logger);
+                var response = await user.PlaceOrderAsync(request.Value, request.Price, context.CancellationToken, logger);
 
                 //ставим статус запроса как успешный
                 context.Status = Status.DefaultSuccess;
@@ -296,7 +296,7 @@ namespace TradeMarket.Services
                     case QuantityType.Unspecified: throw new RpcException(Status.DefaultCancelled, $"{nameof(request.QuantityType)} should be specified");
                 }
                 //отправляем запрос на биржу
-                var response = await user.AmmendOrder(request.Id, price, quantity, leavesQuantity, context.CancellationToken, logger);
+                var response = await user.AmmendOrderAsync(request.Id, price, quantity, leavesQuantity, context.CancellationToken, logger);
                 //ставим статус запроса как успешный
                 context.Status = Status.DefaultSuccess;
                 //конвертируем из внутреннего типа сервиса в тип grpc
@@ -341,7 +341,7 @@ namespace TradeMarket.Services
                 user = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetFullContextFilter, context.CancellationToken, logger);
 
                 //отправляем запрос на биржу. TODO как работает тут токен отмены
-                var response = await user.DeleteOrder(request.OrderId, context.CancellationToken, logger);
+                var response = await user.DeleteOrderAsync(request.OrderId, context.CancellationToken, logger);
 
                 //ставим статус запроса как успешный
                 context.Status = Status.DefaultSuccess;
@@ -386,7 +386,7 @@ namespace TradeMarket.Services
             var common = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetCommonContextFilter, context.CancellationToken, logger);
             await SubscribeToUserTopic<SubscribePriceRequest, SubscribePriceResponse, Instrument>(
                 common.SubscribeToInstrumentUpdate,
-                common.UnSubscribeFromInstrumentUpdate,
+                common.UnSubscribeFromInstrumentUpdateAsync,
                 request,
                 responseStream,
                 (x) => x.Symbol == context.RequestHeaders.GetValue("slot"),
@@ -412,7 +412,7 @@ namespace TradeMarket.Services
             var user = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetTradeMarketContextFilter, context.CancellationToken, logger);
             await SubscribeToUserTopic<SubscribeMarginRequest, SubscribeMarginResponse, Margin>(
                 user.SubscribeToUserMargin,
-                user.UnSubscribeFromUserMargin,
+                user.UnSubscribeFromUserMarginAsync,
                 request,
                 responseStream,
                 null,
@@ -436,7 +436,7 @@ namespace TradeMarket.Services
             var user = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetTradeMarketContextFilter, context.CancellationToken, logger);
             await SubscribeToUserTopic<SubscribePositionRequest, SubscribePositionResponse, Position>(
                 user.SubscribeToUserPositions,
-                user.UnSubscribeFromUserPositions,
+                user.UnSubscribeFromUserPositionsAsync,
                 request,
                 responseStream,
                 (x) => x.Symbol == context.RequestHeaders.GetValue("slot"),
@@ -460,10 +460,10 @@ namespace TradeMarket.Services
             var user = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetTradeMarketContextFilter, context.CancellationToken, logger);
             await SubscribeToUserTopic<SubscribeMyOrdersRequest, SubscribeMyOrdersResponse, Order>(
                 user.SubscribeToUserOrders,
-                user.UnSubscribeFromUserOrders,
+                user.UnSubscribeFromUserOrdersAsync,
                 request,
                 responseStream,
-                null,
+                (x) => x.Symbol == context.RequestHeaders.GetValue("slot"),
                 ConvertService.ConvertMyOrder,
                 context,
                 logger);
@@ -517,7 +517,7 @@ namespace TradeMarket.Services
             var user = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetTradeMarketContextFilter, context.CancellationToken, logger);
             await SubscribeToUserTopic<SubscribeBalanceRequest, SubscribeBalanceResponse, Wallet>(
                 user.SubscribeToBalance,
-                user.UnSubscribeFromBalance,
+                user.UnSubscribeFromBalanceAsync,
                 request,
                 responseStream,
                 null,

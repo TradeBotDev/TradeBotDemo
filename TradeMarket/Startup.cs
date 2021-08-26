@@ -43,7 +43,7 @@ namespace TradeMarket
             services.AddSingleton((sp) => {
                 var communicator = new BitmexWebsocketCommunicator(BitmexValues.ApiWebsocketTestnetUrl);
                 var res = new BitmexWebsocketClient(communicator);
-                communicator.Start();
+                //communicator.Start();
                 return res;
             });
             services.AddSingleton(new RestfulClient(BitmexRestufllLink.Testnet));

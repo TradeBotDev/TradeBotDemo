@@ -38,7 +38,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
 
         public ITradeMarketBuilder AddCommonClient(BitmexWebsocketClient client)
         {
-            _tradeMarket.CommonWSClient = client;
+            //_tradeMarket.CommonWSClient = client;
             return this;
         }
 
@@ -50,7 +50,6 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
 
         public ITradeMarketBuilder AddConnectionMultiplexer(IConnectionMultiplexer multiplexer)
         {
-            _tradeMarket.Multiplexer = multiplexer;
             return this;
         }
 

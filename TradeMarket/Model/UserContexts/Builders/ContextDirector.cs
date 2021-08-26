@@ -48,6 +48,7 @@ namespace TradeMarket.Model.UserContexts.Builders
         {
             return await Task.Run(async () =>
             {
+                _builder.Reset();
                 var log = logger.ForContext<ContextDirector>().ForContext("Method", nameof(BuildContextAsync));
                 var keySecretPair = await _accountClient.GetUserInfoAsync(sessionId);
                 var tradeMarket = _tradeMarketFactory.GetTradeMarket(tradeMarketName);
@@ -93,12 +94,12 @@ namespace TradeMarket.Model.UserContexts.Builders
             try
             {
                 //el.IsEquevalentTo(sessionId, slotName, tradeMarketName)
-                Log.Logger.Information("Getting UserContext");
+                log.Information("Getting UserContext");
                 userContext = RegisteredUserContexts.FirstOrDefault(filter.Func);
-                Log.Logger.Information("Contained UserContext's count {@Count}", RegisteredUserContexts.Count);
+                log.Information("Contained UserContext's count {@Count}", RegisteredUserContexts.Count);
                 if (userContext is null)
                 {
-                    Log.Logger.Information("Creating new UserContext");
+                    log.Information("Creating new UserContext");
                     userContext = await BuildContextAsync(filter.SessionId, filter.SlotName, filter.TradeMarketName, token, log);
                     RegisteredUserContexts.Add(userContext);
                 }

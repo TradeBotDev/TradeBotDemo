@@ -22,11 +22,13 @@ namespace TradeMarket.Model.TradeMarkets
 {
     public abstract class TradeMarket
     {
-        public IConnectionMultiplexer Multiplexer { get; internal set; }
 
         public string Name { get; internal set; }
 
         public IPublisherFactory PublisherFactory { get; internal set; }
+
+        public RestfulClient CommonRestClient { get; set; }
+
 
         public TradeMarket() { }
 
@@ -39,11 +41,6 @@ namespace TradeMarket.Model.TradeMarkets
         public abstract Task<Context> BuildContextAsync(ContextBuilder builder,CancellationToken token, ILogger logger);
 
 
-        #region Common Clients
-        public BitmexWebsocketClient CommonWSClient { get; internal set; }
-        public RestfulClient CommonRestClient { get; internal set; }
-        #endregion
-
         #region Common Publishers
         //IContext = CommonContext
         public IDictionary<Context, IPublisher<BookLevel>> Book25Publisher { get; internal set; } = new ConcurrentDictionary<Context, IPublisher<BookLevel>>();
@@ -52,8 +49,6 @@ namespace TradeMarket.Model.TradeMarkets
 
         #endregion
 
-        #region Users Publishers
-       
 
         public async Task<List<T>> SubscribeToAsync<T>(
             IDictionary<Context,IPublisher<T>> publisher, 
@@ -87,7 +82,7 @@ namespace TradeMarket.Model.TradeMarkets
             return await Task.Run(() =>
             {
                 var publisher = create(context, token);
-                Log.Information("Created {@Publisher} for {@Context}", publisher, context);
+                //Log.Information("Created {@Publisher} for {@Context}", publisher, context);
                 return publisher;
             });
         }

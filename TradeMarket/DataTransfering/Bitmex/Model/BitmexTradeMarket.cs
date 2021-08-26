@@ -24,7 +24,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
 {
     public class BitmexTradeMarket : TradeMarket.Model.TradeMarkets.TradeMarket
     {
-        
+
         public BitmexTradeMarket() : base() { }
 
         public BitmexTradeMarket(string name, BitmexPublisherFactory factory) : base(name, factory) { }

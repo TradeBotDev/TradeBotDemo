@@ -33,6 +33,7 @@ namespace TradeMarket.Model.UserContexts
             Signature.TradeMarketName = other.Signature.TradeMarketName;
             Key = other.Key;
             Secret = other.Secret;
+            TradeMarket = other.TradeMarket;
         }
 
         public Context() : this(new ContextSignature())
@@ -69,50 +70,50 @@ namespace TradeMarket.Model.UserContexts
         }
         public async Task<List<Instrument>> SubscribeToInstrumentUpdate(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler, CancellationToken token, ILogger logger)
         {
-            return await TradeMarket.SubscribeToInstrumentsAsync(handler, this, token, logger);
+            return await TradeMarket.SubscribeToAsync(TradeMarket.InstrumentPublisher, handler, this, TradeMarket.PublisherFactory.CreateInstrumentPublisher, token, logger);
         }
 
         public async Task UnSubscribeFromBook25UpdatesAsync(EventHandler<IPublisher<BookLevel>.ChangedEventArgs> handler, ILogger logger)
         {
             await TradeMarket.UnsubscribeFromAsync(TradeMarket.Book25Publisher, this, handler, logger);
         }
-        public async Task UnSubscribeFromInstrumentUpdate(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler, ILogger logger)
+        public async Task UnSubscribeFromInstrumentUpdateAsync(EventHandler<IPublisher<Instrument>.ChangedEventArgs> handler, ILogger logger)
         {
             await TradeMarket.UnsubscribeFromAsync(TradeMarket.InstrumentPublisher, this, handler, logger);
         }
-        public async Task UnSubscribeFromUserPositions(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, ILogger logger)
+        public async Task UnSubscribeFromUserPositionsAsync(EventHandler<IPublisher<Position>.ChangedEventArgs> handler, ILogger logger)
         {
             await TradeMarket.UnsubscribeFromAsync(TradeMarket.PositionPublisher, this, handler, logger);
         }
-        public async Task UnSubscribeFromUserMargin(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, ILogger logger)
+        public async Task UnSubscribeFromUserMarginAsync(EventHandler<IPublisher<Margin>.ChangedEventArgs> handler, ILogger logger)
         {
             await TradeMarket.UnsubscribeFromAsync(TradeMarket.MarginPublisher, this, handler, logger);
         }
-        public async Task UnSubscribeFromUserOrders(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, ILogger logger)
+        public async Task UnSubscribeFromUserOrdersAsync(EventHandler<IPublisher<Order>.ChangedEventArgs> handler, ILogger logger)
         {
             await TradeMarket.UnsubscribeFromAsync(TradeMarket.OrderPublisher, this, handler, logger);
         }
-        public async Task UnSubscribeFromBalance(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, ILogger logger)
+        public async Task UnSubscribeFromBalanceAsync(EventHandler<IPublisher<Wallet>.ChangedEventArgs> handler, ILogger logger)
         {
             await TradeMarket.UnsubscribeFromAsync(TradeMarket.WalletPublishers, this, handler, logger);
         }
 
-        public async Task<ResfulResponse<Order>> PlaceOrder(double quontity, double price, CancellationToken token, ILogger logger)
+        public async Task<ResfulResponse<Order>> PlaceOrderAsync(double quontity, double price, CancellationToken token, ILogger logger)
         {
             return await TradeMarket.PlaceOrderAsync(quontity, price, this, token, logger);
         }
 
-        public async Task<ResfulResponse<Order[]>> DeleteOrder(string id, CancellationToken token, ILogger logger)
+        public async Task<ResfulResponse<Order[]>> DeleteOrderAsync(string id, CancellationToken token, ILogger logger)
         {
             return await TradeMarket.DeleteOrderAsync(id, this, token, logger);
         }
 
-        public async Task<ResfulResponse<Order>> AmmendOrder(string id, double? price, long? Quantity, long? LeavesQuantity, CancellationToken token, ILogger logger)
+        public async Task<ResfulResponse<Order>> AmmendOrderAsync(string id, double? price, long? Quantity, long? LeavesQuantity, CancellationToken token, ILogger logger)
         {
             return await TradeMarket.AmmendOrderAsync(id, price, Quantity, LeavesQuantity, this, token, logger);
         }
 
-        public async Task<bool> AutheticateUser(CancellationToken token, ILogger logger)
+        public async Task<bool> AutheticateUserAsync(CancellationToken token, ILogger logger)
         {
             bool result = await TradeMarket.AutheticateUserAsync(this, token, logger);
             if (result == true)

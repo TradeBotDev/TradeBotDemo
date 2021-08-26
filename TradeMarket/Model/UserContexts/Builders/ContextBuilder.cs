@@ -12,13 +12,18 @@ namespace TradeMarket.Model.UserContexts.Builders
             get
             {
                 var result = _context.Clone() as Context;
-                _context = new Context();
                 return result;
             }
             set
             {
                 _context = value;
             }
+        }
+
+        public void Reset()
+        {
+            _context = new Context();
+
         }
 
         public ContextBuilder() { Context = new Context(); }
@@ -31,15 +36,15 @@ namespace TradeMarket.Model.UserContexts.Builders
         }
         public ContextBuilder AddTradeMarket(TradeMarkets.TradeMarket tradeMarket)
         {
-            Context.TradeMarket = tradeMarket;
-            Context.Signature.TradeMarketName = tradeMarket.Name;
+            _context.TradeMarket = tradeMarket;
+            _context.Signature.TradeMarketName = tradeMarket.Name;
             return this;
         }
 
         public ContextBuilder AddKeySecret(string key, string secret)
         {
-            Context.Key = key;
-            Context.Secret = secret;
+            _context.Key = key;
+            _context.Secret = secret;
             return this;
         }
 
