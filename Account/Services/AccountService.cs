@@ -60,9 +60,7 @@ namespace AccountGRPC
                 var existingLogin = database.LoggedAccounts.Where(account => account.AccountId == accounts.First().AccountId);
                 if (existingLogin.Any())
                 {
-                    byte[] newLoginByteArray = Encoding.Unicode.GetBytes(request.Email);
-                    byte[] newLoginHash = sha.ComputeHash(newLoginByteArray);
-                    string newSessionId = Encoding.ASCII.GetString(newLoginHash, 0, newLoginHash.Length);
+                    string newSessionId = Guid.NewGuid().ToString();
                     existingLogin.First().SessionId = newSessionId;
                     existingLogin.First().LoginDate = DateTime.Now;
                     database.SaveChanges();
@@ -73,9 +71,7 @@ namespace AccountGRPC
                 // В случае наличия зарегистрированного аккаунта с данными из запроса генерируется
                 // Id сессии, а также полученный пользователь добавляется в таблицу с вошедшими
                 // пользователями.
-                byte[] emailByteArray = Encoding.Unicode.GetBytes(request.Email);
-                byte[] emailHash = sha.ComputeHash(emailByteArray);
-                string sessionId = Encoding.ASCII.GetString(emailHash, 0, emailHash.Length);
+                string sessionId = Guid.NewGuid().ToString();
                 var loggedAccount = new Models.LoggedAccount
                 {
                     SessionId = sessionId,
