@@ -16,8 +16,6 @@ namespace AccountGRPC
 {
     public class AccountService : Account.AccountBase
     {
-        private readonly SHA256 sha = SHA256.Create();
-
         // Логгирование.
         protected readonly ILogger logger = Log.ForContext("Where", "AccountService");
 
