@@ -367,7 +367,7 @@ namespace UI
 
         private void OnValidatingTextBox(object sender, CancelEventArgs e)
         {
-            if (ActiveOrdersDataGridView.RowCount <= 0) return;
+            if (ActiveSlotsDataGridView.RowCount <= 0) return;
             if (!double.TryParse(((TextBox)sender).Text, out _))
             {
                 e.Cancel = true;
@@ -383,13 +383,12 @@ namespace UI
 
         private void ConfigUpdatePriceRangeOnTextChanged(object sender, EventArgs e)
         {
-            ConfigUpdatePriceRangeTxb.TextChanged -= ConfigUpdatePriceRangeOnTextChanged;
             if (ConfigUpdatePriceRangeTxb.Text.IndexOf(',') == ConfigUpdatePriceRangeTxb.Text.Length - 1) return;
             if (!double.TryParse(ConfigUpdatePriceRangeTxb.Text, out var value)) return;
-
             var floor = Math.Floor(value);
-            
-            ConfigUpdatePriceRangeTxb.Text = (floor + (value - floor < 0.5 ? 0.0 : 0.5)).ToString(CultureInfo.InvariantCulture);
+
+            ConfigUpdatePriceRangeTxb.TextChanged -= ConfigUpdatePriceRangeOnTextChanged;
+            ConfigUpdatePriceRangeTxb.Text = (floor + (value - floor < 0.5 ? 0.0 : 0.5)).ToString(CultureInfo.CurrentCulture);
             ConfigUpdatePriceRangeTxb.TextChanged += ConfigUpdatePriceRangeOnTextChanged;
         }
 
@@ -600,13 +599,6 @@ namespace UI
             var parameter = new ProcessStartInfo { Verb = "open", FileName = "explorer", Arguments = "https://testnet.bitmex.com/app/trade/XBTUSD" };
             Process.Start(parameter);
             OurWebsiteLnkLbl1.LinkVisited = true;
-        }
-
-        private async void SetLicense_ButtonClick(object sender, EventArgs e)
-        {
-            if (_loggedIn) {
-                await _facadeClient.RegisterLicense();
-            }
         }
 
         #endregion
