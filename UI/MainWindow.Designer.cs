@@ -115,7 +115,6 @@ namespace UI
             this.SignInGroupBox = new System.Windows.Forms.GroupBox();
             this.panel5 = new System.Windows.Forms.Panel();
             this.LoggedGroupBox = new System.Windows.Forms.GroupBox();
-            this.SetLicenseBtn = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.OurWebsiteLnkLbl1 = new System.Windows.Forms.LinkLabel();
             this.SessionIDLbl = new System.Windows.Forms.Label();
@@ -129,6 +128,7 @@ namespace UI
             this.LeftPanel = new System.Windows.Forms.Panel();
             this.RightPanel = new System.Windows.Forms.Panel();
             this.ErrorProviderSignUp = new System.Windows.Forms.ErrorProvider(this.components);
+            this.ToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.Tabs.SuspendLayout();
             this.LogsPage.SuspendLayout();
             this.GraphicsPage.SuspendLayout();
@@ -291,7 +291,7 @@ namespace UI
             this.FilledOrdersDataGridView.AllowUserToDeleteRows = false;
             this.FilledOrdersDataGridView.AllowUserToResizeColumns = false;
             this.FilledOrdersDataGridView.AllowUserToResizeRows = false;
-            this.FilledOrdersDataGridView.BackgroundColor = System.Drawing.SystemColors.Control;
+            this.FilledOrdersDataGridView.BackgroundColor = System.Drawing.Color.White;
             this.FilledOrdersDataGridView.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.FilledOrdersDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.FilledOrdersDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
@@ -323,7 +323,7 @@ namespace UI
             this.SlotName.MinimumWidth = 6;
             this.SlotName.Name = "SlotName";
             this.SlotName.ReadOnly = true;
-            this.SlotName.Width = 176;
+            this.SlotName.Width = 172;
             // 
             // dataGridViewTextBoxColumn2
             // 
@@ -331,7 +331,7 @@ namespace UI
             this.dataGridViewTextBoxColumn2.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
             this.dataGridViewTextBoxColumn2.ReadOnly = true;
-            this.dataGridViewTextBoxColumn2.Width = 176;
+            this.dataGridViewTextBoxColumn2.Width = 172;
             // 
             // ExecutePrice
             // 
@@ -339,7 +339,7 @@ namespace UI
             this.ExecutePrice.MinimumWidth = 6;
             this.ExecutePrice.Name = "ExecutePrice";
             this.ExecutePrice.ReadOnly = true;
-            this.ExecutePrice.Width = 176;
+            this.ExecutePrice.Width = 172;
             // 
             // dataGridViewTextBoxColumn7
             // 
@@ -347,7 +347,7 @@ namespace UI
             this.dataGridViewTextBoxColumn7.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
             this.dataGridViewTextBoxColumn7.ReadOnly = true;
-            this.dataGridViewTextBoxColumn7.Width = 176;
+            this.dataGridViewTextBoxColumn7.Width = 172;
             // 
             // Time
             // 
@@ -355,7 +355,7 @@ namespace UI
             this.Time.MinimumWidth = 6;
             this.Time.Name = "Time";
             this.Time.ReadOnly = true;
-            this.Time.Width = 176;
+            this.Time.Width = 172;
             // 
             // dataGridViewTextBoxColumn8
             // 
@@ -363,7 +363,7 @@ namespace UI
             this.dataGridViewTextBoxColumn8.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn8.Name = "dataGridViewTextBoxColumn8";
             this.dataGridViewTextBoxColumn8.ReadOnly = true;
-            this.dataGridViewTextBoxColumn8.Width = 176;
+            this.dataGridViewTextBoxColumn8.Width = 172;
             // 
             // ActiveOrdersPage
             // 
@@ -381,7 +381,7 @@ namespace UI
             this.ActiveOrdersDataGridView.AllowUserToDeleteRows = false;
             this.ActiveOrdersDataGridView.AllowUserToResizeColumns = false;
             this.ActiveOrdersDataGridView.AllowUserToResizeRows = false;
-            this.ActiveOrdersDataGridView.BackgroundColor = System.Drawing.SystemColors.Control;
+            this.ActiveOrdersDataGridView.BackgroundColor = System.Drawing.Color.White;
             this.ActiveOrdersDataGridView.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.ActiveOrdersDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.ActiveOrdersDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
@@ -413,7 +413,7 @@ namespace UI
             this.dataGridViewTextBoxColumn3.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
             this.dataGridViewTextBoxColumn3.ReadOnly = true;
-            this.dataGridViewTextBoxColumn3.Width = 176;
+            this.dataGridViewTextBoxColumn3.Width = 172;
             // 
             // dataGridViewTextBoxColumn4
             // 
@@ -421,7 +421,7 @@ namespace UI
             this.dataGridViewTextBoxColumn4.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
             this.dataGridViewTextBoxColumn4.ReadOnly = true;
-            this.dataGridViewTextBoxColumn4.Width = 176;
+            this.dataGridViewTextBoxColumn4.Width = 172;
             // 
             // dataGridViewTextBoxColumn5
             // 
@@ -429,7 +429,7 @@ namespace UI
             this.dataGridViewTextBoxColumn5.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
             this.dataGridViewTextBoxColumn5.ReadOnly = true;
-            this.dataGridViewTextBoxColumn5.Width = 176;
+            this.dataGridViewTextBoxColumn5.Width = 172;
             // 
             // Type
             // 
@@ -437,7 +437,7 @@ namespace UI
             this.Type.MinimumWidth = 6;
             this.Type.Name = "Type";
             this.Type.ReadOnly = true;
-            this.Type.Width = 176;
+            this.Type.Width = 172;
             // 
             // dataGridViewTextBoxColumn6
             // 
@@ -445,7 +445,7 @@ namespace UI
             this.dataGridViewTextBoxColumn6.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
             this.dataGridViewTextBoxColumn6.ReadOnly = true;
-            this.dataGridViewTextBoxColumn6.Width = 176;
+            this.dataGridViewTextBoxColumn6.Width = 172;
             // 
             // OrderID
             // 
@@ -453,7 +453,7 @@ namespace UI
             this.OrderID.MinimumWidth = 6;
             this.OrderID.Name = "OrderID";
             this.OrderID.ReadOnly = true;
-            this.OrderID.Width = 176;
+            this.OrderID.Width = 172;
             // 
             // ConfigAvailableBalanceTxb
             // 
@@ -464,6 +464,7 @@ namespace UI
             this.ConfigAvailableBalanceTxb.Name = "ConfigAvailableBalanceTxb";
             this.ConfigAvailableBalanceTxb.Size = new System.Drawing.Size(90, 26);
             this.ConfigAvailableBalanceTxb.TabIndex = 1;
+            this.ToolTip.SetToolTip(this.ConfigAvailableBalanceTxb, "Доступный баланс в процентах от общего баланса");
             // 
             // ConfigRequiredProfitTxb
             // 
@@ -474,6 +475,7 @@ namespace UI
             this.ConfigRequiredProfitTxb.Name = "ConfigRequiredProfitTxb";
             this.ConfigRequiredProfitTxb.Size = new System.Drawing.Size(90, 26);
             this.ConfigRequiredProfitTxb.TabIndex = 2;
+            this.ToolTip.SetToolTip(this.ConfigRequiredProfitTxb, "Профит в процентах от цены заказа по текущему курсу");
             // 
             // ConfigUpdatePriceRangeTxb
             // 
@@ -484,6 +486,9 @@ namespace UI
             this.ConfigUpdatePriceRangeTxb.Name = "ConfigUpdatePriceRangeTxb";
             this.ConfigUpdatePriceRangeTxb.Size = new System.Drawing.Size(90, 26);
             this.ConfigUpdatePriceRangeTxb.TabIndex = 4;
+            this.ToolTip.SetToolTip(this.ConfigUpdatePriceRangeTxb, "Интервал цены, в пределах которого заказ не будет \r\nперевыставлен формером\r\n(так " +
+        "как рыночная цена изменяется, ордера необходимо изменять вместе с ней)");
+            this.ConfigUpdatePriceRangeTxb.TextChanged += new System.EventHandler(this.ConfigUpdatePriceRangeOnTextChanged);
             // 
             // ConfigAvailableBalanceLbl
             // 
@@ -772,9 +777,10 @@ namespace UI
             this.RemoveRowButton.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.RemoveRowButton.Location = new System.Drawing.Point(696, 293);
             this.RemoveRowButton.Name = "RemoveRowButton";
-            this.RemoveRowButton.Size = new System.Drawing.Size(62, 29);
+            this.RemoveRowButton.Size = new System.Drawing.Size(62, 30);
             this.RemoveRowButton.TabIndex = 23;
             this.RemoveRowButton.Text = "-";
+            this.ToolTip.SetToolTip(this.RemoveRowButton, "Удалить валютную пару");
             this.RemoveRowButton.UseVisualStyleBackColor = true;
             this.RemoveRowButton.Click += new System.EventHandler(this.RemoveRowButton_Click);
             // 
@@ -783,9 +789,10 @@ namespace UI
             this.AddRowButton.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.AddRowButton.Location = new System.Drawing.Point(635, 293);
             this.AddRowButton.Name = "AddRowButton";
-            this.AddRowButton.Size = new System.Drawing.Size(62, 29);
+            this.AddRowButton.Size = new System.Drawing.Size(62, 30);
             this.AddRowButton.TabIndex = 22;
             this.AddRowButton.Text = "+";
+            this.ToolTip.SetToolTip(this.AddRowButton, "Добавить валютную пару");
             this.AddRowButton.UseVisualStyleBackColor = true;
             this.AddRowButton.Click += new System.EventHandler(this.AddRowButton_Click);
             // 
@@ -797,7 +804,7 @@ namespace UI
             "XBTUSD",
             "ETHUSD",
             "DOGEUSD"});
-            this.SlotsComboBox.Location = new System.Drawing.Point(537, 293);
+            this.SlotsComboBox.Location = new System.Drawing.Point(537, 294);
             this.SlotsComboBox.Name = "SlotsComboBox";
             this.SlotsComboBox.Size = new System.Drawing.Size(99, 28);
             this.SlotsComboBox.TabIndex = 25;
@@ -902,6 +909,7 @@ namespace UI
             this.UpdateConfigButton.Size = new System.Drawing.Size(182, 43);
             this.UpdateConfigButton.TabIndex = 17;
             this.UpdateConfigButton.Text = "Update configuration";
+            this.ToolTip.SetToolTip(this.UpdateConfigButton, "Обновить настройки на время работы бота");
             this.UpdateConfigButton.UseVisualStyleBackColor = true;
             this.UpdateConfigButton.Click += new System.EventHandler(this.UpdateConfigButton_Click);
             // 
@@ -914,6 +922,7 @@ namespace UI
             this.RemoveMyOrdersButton.Size = new System.Drawing.Size(182, 43);
             this.RemoveMyOrdersButton.TabIndex = 16;
             this.RemoveMyOrdersButton.Text = "Remove my orders";
+            this.ToolTip.SetToolTip(this.RemoveMyOrdersButton, "Удалить все первичные заказы");
             this.RemoveMyOrdersButton.UseVisualStyleBackColor = true;
             this.RemoveMyOrdersButton.Click += new System.EventHandler(this.RemoveMyOrdersButton_Click);
             // 
@@ -921,13 +930,13 @@ namespace UI
             // 
             this.ConfigRequiredProfitLbl.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ConfigRequiredProfitLbl.AutoSize = true;
-            this.ConfigRequiredProfitLbl.Location = new System.Drawing.Point(49, 180);
+            this.ConfigRequiredProfitLbl.Location = new System.Drawing.Point(48, 179);
             this.ConfigRequiredProfitLbl.Margin = new System.Windows.Forms.Padding(3);
             this.ConfigRequiredProfitLbl.Name = "ConfigRequiredProfitLbl";
             this.ConfigRequiredProfitLbl.Padding = new System.Windows.Forms.Padding(5);
-            this.ConfigRequiredProfitLbl.Size = new System.Drawing.Size(126, 30);
+            this.ConfigRequiredProfitLbl.Size = new System.Drawing.Size(127, 30);
             this.ConfigRequiredProfitLbl.TabIndex = 26;
-            this.ConfigRequiredProfitLbl.Text = "Required Profit";
+            this.ConfigRequiredProfitLbl.Text = "Required profit";
             // 
             // BalanceLabel
             // 
@@ -976,6 +985,7 @@ namespace UI
             this.ConfigIntervalOfAnalysisTxb.Name = "ConfigIntervalOfAnalysisTxb";
             this.ConfigIntervalOfAnalysisTxb.Size = new System.Drawing.Size(90, 28);
             this.ConfigIntervalOfAnalysisTxb.TabIndex = 15;
+            this.ToolTip.SetToolTip(this.ConfigIntervalOfAnalysisTxb, "За какой период анализировать график");
             // 
             // ConfigVolumeOfContractsTxb
             // 
@@ -994,6 +1004,8 @@ namespace UI
             this.ConfigVolumeOfContractsTxb.Name = "ConfigVolumeOfContractsTxb";
             this.ConfigVolumeOfContractsTxb.Size = new System.Drawing.Size(90, 28);
             this.ConfigVolumeOfContractsTxb.TabIndex = 14;
+            this.ToolTip.SetToolTip(this.ConfigVolumeOfContractsTxb, "Размер заказа \r\n(у каждой валютной пары есть минимальный размер заказа, и эта нас" +
+        "тройка показывает\r\nсколько минимальных частей будет будет выставлено)");
             // 
             // ConfigAlgorithmSensivityTxb
             // 
@@ -1011,18 +1023,19 @@ namespace UI
             this.ConfigAlgorithmSensivityTxb.Name = "ConfigAlgorithmSensivityTxb";
             this.ConfigAlgorithmSensivityTxb.Size = new System.Drawing.Size(90, 28);
             this.ConfigAlgorithmSensivityTxb.TabIndex = 13;
+            this.ToolTip.SetToolTip(this.ConfigAlgorithmSensivityTxb, "Чуствительность алгоритма при анализе");
             // 
             // ConfigAlgorithmSensLbl
             // 
             this.ConfigAlgorithmSensLbl.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ConfigAlgorithmSensLbl.AutoSize = true;
-            this.ConfigAlgorithmSensLbl.Location = new System.Drawing.Point(23, 148);
+            this.ConfigAlgorithmSensLbl.Location = new System.Drawing.Point(15, 148);
             this.ConfigAlgorithmSensLbl.Margin = new System.Windows.Forms.Padding(3);
             this.ConfigAlgorithmSensLbl.Name = "ConfigAlgorithmSensLbl";
             this.ConfigAlgorithmSensLbl.Padding = new System.Windows.Forms.Padding(5);
-            this.ConfigAlgorithmSensLbl.Size = new System.Drawing.Size(152, 30);
+            this.ConfigAlgorithmSensLbl.Size = new System.Drawing.Size(160, 30);
             this.ConfigAlgorithmSensLbl.TabIndex = 12;
-            this.ConfigAlgorithmSensLbl.Text = "Algorithm sensivity";
+            this.ConfigAlgorithmSensLbl.Text = "Algorithm sensitivity";
             // 
             // SignUpGroupBox
             // 
@@ -1127,7 +1140,6 @@ namespace UI
             // LoggedGroupBox
             // 
             this.LoggedGroupBox.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.LoggedGroupBox.Controls.Add(this.SetLicenseBtn);
             this.LoggedGroupBox.Controls.Add(this.label3);
             this.LoggedGroupBox.Controls.Add(this.OurWebsiteLnkLbl1);
             this.LoggedGroupBox.Controls.Add(this.SessionIDLbl);
@@ -1145,17 +1157,6 @@ namespace UI
             this.LoggedGroupBox.TabStop = false;
             this.LoggedGroupBox.Text = "Signed in as ";
             this.LoggedGroupBox.Visible = false;
-            // 
-            // SetLicenseBtn
-            // 
-            this.SetLicenseBtn.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.SetLicenseBtn.Location = new System.Drawing.Point(673, 260);
-            this.SetLicenseBtn.Name = "SetLicenseBtn";
-            this.SetLicenseBtn.Size = new System.Drawing.Size(85, 61);
-            this.SetLicenseBtn.TabIndex = 28;
-            this.SetLicenseBtn.Text = "Set license";
-            this.SetLicenseBtn.UseVisualStyleBackColor = true;
-            this.SetLicenseBtn.Click += new System.EventHandler(this.SetLicense_ButtonClick);
             // 
             // label3
             // 
@@ -1276,13 +1277,14 @@ namespace UI
             this.Controls.Add(this.Tabs);
             this.Controls.Add(this.RightPanel);
             this.Controls.Add(this.LeftPanel);
+            this.Controls.Add(this.LoggedGroupBox);
             this.Controls.Add(this.MainMenuGroupBox);
             this.Controls.Add(this.SignUpGroupBox);
             this.Controls.Add(this.SignInGroupBox);
-            this.Controls.Add(this.LoggedGroupBox);
             this.Name = "TradeBotUi";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "TradeBot";
+            this.Load += new System.EventHandler(this.TradeBotUi_Load);
             this.Tabs.ResumeLayout(false);
             this.LogsPage.ResumeLayout(false);
             this.GraphicsPage.ResumeLayout(false);
@@ -1383,6 +1385,15 @@ namespace UI
         private System.Windows.Forms.Panel SignUpPanel;
         private System.Windows.Forms.Panel panel5;
         private System.Windows.Forms.Label LicenseNumberLbl;
+        private System.Windows.Forms.Label SessionIDLbl;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.LinkLabel OurWebsiteLnkLbl;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.LinkLabel OurWebsiteLnkLbl1;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.LinkLabel BitmexWebsiteLnkLbl;
+        private System.Windows.Forms.ErrorProvider ErrorProviderSignUp;
         private System.Windows.Forms.DataGridViewTextBoxColumn SlotName;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
         private System.Windows.Forms.DataGridViewTextBoxColumn ExecutePrice;
@@ -1395,16 +1406,7 @@ namespace UI
         private System.Windows.Forms.DataGridViewTextBoxColumn Type;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn6;
         private System.Windows.Forms.DataGridViewTextBoxColumn OrderID;
-        private System.Windows.Forms.Label SessionIDLbl;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.LinkLabel OurWebsiteLnkLbl;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.LinkLabel OurWebsiteLnkLbl1;
-        private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.LinkLabel BitmexWebsiteLnkLbl;
-        private System.Windows.Forms.ErrorProvider ErrorProviderSignUp;
-        private System.Windows.Forms.Button SetLicenseBtn;
+        private System.Windows.Forms.ToolTip ToolTip;
     }
 }
 

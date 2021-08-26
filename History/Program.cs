@@ -27,7 +27,7 @@ namespace History
                 {
                     foreach (var record in balanceRecords)
                     {
-                        Log.Information("{@Where}: User: {@User}, new balance: {@Balance}, time of change: {@Time}", "History", record.SessionId, record.Balance.Value.ToString() + record.Balance.Currency, record.Time);
+                        Log.Information("{@Where}: User: {@User}, new balance: {@Balance}, time of change: {@Time}", "History", record.UserId, record.Balance.Value.ToString() + record.Balance.Currency, record.Time);
                     }
                 }
                 Log.Information("{@Where}: Order records:", "History");
@@ -36,7 +36,7 @@ namespace History
                 {
                     foreach (var record in orderRecords)
                     {
-                        Log.Information("{@Where}: User: {@User}, order id: {@Order}, type of change: {@Time}", "History", record.SessionId, record.Order.OrderIdOnTM, record.ChangesType);
+                        Log.Information("{@Where}: User: {@User}, order id: {@Order}, type of change: {@Time}", "History", record.UserId, record.Order.OrderIdOnTM, record.ChangesType);
                     }
                 }
             }

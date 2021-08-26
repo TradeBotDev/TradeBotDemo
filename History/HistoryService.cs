@@ -31,16 +31,15 @@ namespace History
                         BalanceWrapper bw = Converter.ToBalanceWrapper(request.Balance.Balance);
                         BalanceChange bc = new BalanceChange
                         {
-                            SessionId = request.Balance.Sessionid,
                             Time = request.Balance.Time.ToDateTime(),
                             Balance = bw,
+                            UserId = context.RequestHeaders.GetValue("userid")
                         };
                         BalanceCollection.Add(bc);
                         db.Add(bw);
                         db.Add(bc);
                         db.SaveChanges();
-                        Log.Information("{@Where}: Recorded a change of balance for user {@User}", "History",
-                            bc.SessionId);
+                        Log.Information("{@Where}: Recorded a change of balance for user {@User}", "History", bc.UserId);
                         Log.Information("{@Where}: New balance: " + bw.Value + bw.Currency, "History");
 
                         break;
@@ -49,12 +48,12 @@ namespace History
                         OrderWrapper ow = Converter.ToOrderWrapper(request.Order.Order);
                         OrderChange oc = new OrderChange
                         {
-                            SessionId = request.Order.Sessionid,
                             ChangesType = (DataBase.ChangesType)request.Order.ChangesType,
                             Order = ow,
                             Message = request.Order.Message,
                             Time = request.Order.Time.ToDateTime(),
-                            SlotName = request.Order.SlotName
+                            UserId = context.RequestHeaders.GetValue("userid"),
+                            Slot = context.RequestHeaders.GetValue("slot")
                         };
                         OrderCollection.Add(oc);
                         if (oc.ChangesType == ChangesType.CHANGES_TYPE_DELETE && oc.Message != "Removed by user" &&
@@ -76,7 +75,7 @@ namespace History
             return new PublishEventResponse();
         }
 
-        private static void Handler(NotifyCollectionChangedEventArgs args, string sessionId,
+        private static void Handler(NotifyCollectionChangedEventArgs args, Metadata metadata,
             IAsyncStreamWriter<SubscribeEventsResponse> responseStream)
         {
             BalanceChange updateBalance;
@@ -86,13 +85,12 @@ namespace History
                 if (args.NewItems[0].GetType().FullName.Contains("BalanceChange"))
                 {
                     updateBalance = (BalanceChange)args.NewItems[0];
-                    if (updateBalance.SessionId != sessionId) return;
+                    if (updateBalance.UserId != metadata.GetValue("userid")) return;
                     await responseStream.WriteAsync(new SubscribeEventsResponse
                     {
                         Balance = new PublishBalanceEvent
                         {
                             Balance = Converter.ToBalance(updateBalance.Balance),
-                            Sessionid = updateBalance.SessionId,
                             Time = Timestamp.FromDateTime(new DateTime(updateBalance.Time.Year, updateBalance.Time.Month, updateBalance.Time.Day, 0, 0, 0).ToUniversalTime())
                         }
                     });
@@ -100,17 +98,15 @@ namespace History
                 if (args.NewItems[0].GetType().FullName.Contains("OrderChange"))
                 {
                     updateOrder = (OrderChange)args.NewItems[0];
-                    if (updateOrder.SessionId != sessionId) return;
+                    if (updateOrder.UserId != metadata.GetValue("userid") || updateOrder.Slot != metadata.GetValue("slot")) return;
                     await responseStream.WriteAsync(new SubscribeEventsResponse
                     {
                         Order = new PublishOrderEvent
                         {
                             ChangesType = (TradeBot.Common.v1.ChangesType)updateOrder.ChangesType,
                             Order = Converter.ToOrder(updateOrder.Order),
-                            Sessionid = updateOrder.SessionId,
-                            Time = Timestamp.FromDateTime(new DateTime(updateOrder.Time.Year, updateOrder.Time.Month, updateOrder.Time.Day, 0, 0, 0).ToUniversalTime()),
-                            Message = updateOrder.Message,
-                            SlotName = updateOrder.SlotName
+                            Time = Timestamp.FromDateTime(updateOrder.Time.ToUniversalTime()),
+                            Message = updateOrder.Message
                         }
                     });
                 }
@@ -124,7 +120,7 @@ namespace History
 
             void CollectionOnCollectionChanged(object o, NotifyCollectionChangedEventArgs args)
             {
-                Handler(args, request.Sessionid, responseStream);
+                Handler(args, context.RequestHeaders, responseStream);
             }
             try
             {
@@ -132,7 +128,7 @@ namespace History
                 {
                     taskCompletionSource.SetCanceled();
                 });
-                await SendAlreadyPresentData(request.Sessionid, responseStream);
+                await SendAlreadyPresentData(context.RequestHeaders.GetValue("userid"), responseStream);
                 BalanceCollection.CollectionChanged += CollectionOnCollectionChanged;
                 OrderCollection.CollectionChanged += CollectionOnCollectionChanged;
                 await taskCompletionSource.Task;
@@ -152,18 +148,18 @@ namespace History
         private static List<OrderChange> GetOrderChangesByUser(string user)
         {
             var db = new DataContext();
-            return db.OrderRecords.Include(x => x.Order).ToList().FindAll(x => x.SessionId == user);
+            return db.OrderRecords.Include(x => x.Order).ToList().FindAll(x => x.UserId == user);
         }
 
         private static List<BalanceChange> GetBalanceChangesByUser(string user)
         {
             var db = new DataContext();
-            return db.BalanceRecords.Include(x => x.Balance).ToList().FindAll(x => x.SessionId == user);
+            return db.BalanceRecords.Include(x => x.Balance).ToList().FindAll(x => x.UserId == user);
         }
 
-        private static async Task SendAlreadyPresentData(string sessionId, IAsyncStreamWriter<SubscribeEventsResponse> responseStream)
+        private static async Task SendAlreadyPresentData(string userid, IAsyncStreamWriter<SubscribeEventsResponse> responseStream)
         {
-            var orderChanges = GetOrderChangesByUser(sessionId);
+            var orderChanges = GetOrderChangesByUser(userid);
             foreach (var record in orderChanges)
             {
                 await responseStream.WriteAsync(new SubscribeEventsResponse
@@ -172,14 +168,12 @@ namespace History
                     {
                         ChangesType = (TradeBot.Common.v1.ChangesType)ChangesType.CHANGES_TYPE_PARTITIAL,
                         Order = Converter.ToOrder(record.Order),
-                        Sessionid = record.SessionId,
-                        Time = Timestamp.FromDateTime(new DateTime(record.Time.Year, record.Time.Month, record.Time.Day, 0, 0, 0).ToUniversalTime()),
-                        Message = record.Message,
-                        SlotName = record.SlotName
+                        Time = Timestamp.FromDateTime(record.Time.ToUniversalTime()),
+                        Message = record.Message
                     }
                 });
             }
-            var balanceChanges = GetBalanceChangesByUser(sessionId);
+            var balanceChanges = GetBalanceChangesByUser(userid);
             if (balanceChanges.Count > 0)
             {
                 var currentBalance = balanceChanges.ElementAt(0);
@@ -192,7 +186,6 @@ namespace History
                             Balance = new PublishBalanceEvent
                             {
                                 Balance = Converter.ToBalance(currentBalance.Balance),
-                                Sessionid = currentBalance.SessionId,
                                 Time = Timestamp.FromDateTime(new DateTime(currentBalance.Time.Year, currentBalance.Time.Month, currentBalance.Time.Day, 0, 0, 0).ToUniversalTime())
                             }
                         });

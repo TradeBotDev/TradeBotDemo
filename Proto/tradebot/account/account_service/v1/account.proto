@@ -29,6 +29,7 @@ message LoginResponse {
 	AccountActionCode result = 1;
 	string message = 2;
 	string session_id = 3;
+	int32 account_id = 4;
 }
 
 // Запрос на выход из аккаунта.

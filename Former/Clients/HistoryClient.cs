@@ -17,7 +17,6 @@ namespace Former.Clients
         private static int _retryDelay;
         private static string _connectionString;
         private readonly ILogger _logger;
-        private Metadata _metadata;
 
         private readonly HistoryService.HistoryServiceClient _client;
 
@@ -27,9 +26,8 @@ namespace Former.Clients
             _retryDelay = retryDelay;
         }
 
-        public HistoryClient(ILogger logger, Metadata metadata)
+        public HistoryClient(ILogger logger)
         {
-            _metadata = metadata;
             _logger = logger.ForContext<HistoryClient>();
             _client = new HistoryService.HistoryServiceClient(GrpcChannel.ForAddress(_connectionString));
         }
@@ -62,17 +60,11 @@ namespace Former.Clients
             }
         }
 
-        private bool EventFilter(Metadata incomingMeta, Metadata filteringMeta)
-        {
-            return filteringMeta.GetValue("sessionid") == incomingMeta.GetValue("sessionid") && filteringMeta.GetValue("trademarket") == incomingMeta.GetValue("trademarket") && filteringMeta.GetValue("slot") == incomingMeta.GetValue("slot");
-        }
-
         /// <summary>
         /// Отправляет обновлённый баланс в сервис истории с указанием валюты и времени.
         /// </summary>
         internal async Task<PublishEventResponse> WriteBalance(double balance, Metadata meta)
         {
-            if (!EventFilter(meta, _metadata)) return new PublishEventResponse();
             PublishEventResponse response = null;
 
             async Task PublishBalanceUpdateFunc()
@@ -85,10 +77,9 @@ namespace Former.Clients
                         {
                             Currency = "XBT", Value = (balance * 0.00000001).ToString(CultureInfo.InvariantCulture)
                         }),
-                        Sessionid = meta.GetValue("sessionid"),
                         Time = new Timestamp { Seconds = DateTimeOffset.Now.ToUnixTimeSeconds() }
                     }
-                });
+                }, meta);
             }
 
             await ConnectionTester(PublishBalanceUpdateFunc);
@@ -101,7 +92,6 @@ namespace Former.Clients
         internal async Task<PublishEventResponse> WriteOrder(Order order, ChangesType changesType, Metadata meta,
             string message)
         {
-            if (!EventFilter(meta, _metadata)) return new PublishEventResponse();
             PublishEventResponse response = null;
 
             async Task PublishOrderUpdateFunc()
@@ -111,11 +101,11 @@ namespace Former.Clients
                     Order = new PublishOrderEvent
                     {
                         ChangesType = (TradeBot.Common.v1.ChangesType)changesType,
-                        Order = Converters.ConvertOrder(order), Sessionid = meta.GetValue("sessionid"),
+                        Order = Converters.ConvertOrder(order), 
                         Time = new Timestamp { Seconds = DateTimeOffset.Now.ToUnixTimeSeconds() },
-                        Message = message, SlotName = meta.GetValue("slot")
+                        Message = message
                     }
-                });
+                },meta);
             }
 
             await ConnectionTester(PublishOrderUpdateFunc);

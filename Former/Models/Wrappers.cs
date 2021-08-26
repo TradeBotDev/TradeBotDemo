@@ -16,6 +16,7 @@ namespace Former.Models
         public string Sessionid;
         public string Trademarket;
         public string Slot;
+        public string UserId;
     }
 
     public class AlgorithmInfo

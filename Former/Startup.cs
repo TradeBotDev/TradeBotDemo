@@ -23,7 +23,7 @@ namespace Former
             foreach (var ctx in contexts)
             {
                 var configuration = RedisClient.ReadConfiguration(ctx).Result;
-                var userContext = Contexts.GetUserContext(ctx.Sessionid, ctx.Trademarket, ctx.Slot);
+                var userContext = Contexts.GetUserContext(ctx.Sessionid, ctx.Trademarket, ctx.Slot, ctx.UserId);
                 userContext.SetConfiguration(configuration);
                 userContext.SubscribeStorageToMarket();
             }

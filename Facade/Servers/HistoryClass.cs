@@ -24,7 +24,7 @@ namespace Facade
         {
             try
             {
-                using var response = Client.SubscribeEvents(new TradeBot.History.HistoryService.v1.SubscribeEventsRequest { Sessionid = request.Sessionid }, context.RequestHeaders);
+                using var response = Client.SubscribeEvents(new TradeBot.History.HistoryService.v1.SubscribeEventsRequest (), context.RequestHeaders);
                 Log.Information("{@Where}: {@MethodName} \n args: request={@request}", "Facade", nameof(History_SubscribeEvents), request.Sessionid);
                 while (await response.ResponseStream.MoveNext(context.CancellationToken))
                 {
@@ -36,7 +36,6 @@ namespace Facade
                             {
                                 Balance = new Ref.PublishBalanceEvent
                                 {
-                                    Sessionid = response.ResponseStream.Current.Balance.Sessionid,
                                     Balance = response.ResponseStream.Current.Balance.Balance,
                                     Time = response.ResponseStream.Current.Balance.Time
                                 }
@@ -51,10 +50,8 @@ namespace Facade
                                 {
                                     ChangesType = response.ResponseStream.Current.Order.ChangesType,
                                     Message = response.ResponseStream.Current.Order.Message,
-                                    Sessionid = response.ResponseStream.Current.Order.Sessionid,
                                     Order = response.ResponseStream.Current.Order.Order,
-                                    Time = response.ResponseStream.Current.Order.Time,
-                                    SlotName = response.ResponseStream.Current.Order.SlotName
+                                    Time = response.ResponseStream.Current.Order.Time
                                 }
                             });
                             break;

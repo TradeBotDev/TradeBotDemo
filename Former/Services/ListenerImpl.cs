@@ -22,8 +22,8 @@ namespace Former.Services
                 var metadata = Converters.ConvertMetadata(context.RequestHeaders);
 
                 //От релея приходят метаданные, по которым создаётся контекст 
-                var userContext = Contexts.GetUserContext(metadata.Sessionid, metadata.Trademarket, metadata.Slot);
-                Meta.GetMetadata(metadata.Sessionid, metadata.Trademarket, metadata.Slot);
+                var userContext = Contexts.GetUserContext(metadata.Sessionid, metadata.Trademarket, metadata.Slot, metadata.UserId);
+                Meta.GetMetadata(metadata.Sessionid, metadata.Trademarket, metadata.Slot, metadata.UserId);
 
                 //если поле Switch установленно в false, значит мы начинаем работу (или продолжаем её), если установлено в true
                 //то необходимо остановить работу формера, то есть отписаться от трейдмаркета.
@@ -54,7 +54,7 @@ namespace Former.Services
         public override async Task<DeleteOrderResponse> DeleteOrder(DeleteOrderRequest request, ServerCallContext context)
         {
             var meta = context.RequestHeaders.ToDictionary(x => x.Key, x => x.Value);
-            await Contexts.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"]).RemoveAllMyOrders();
+            await Contexts.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"], meta["userid"]).RemoveAllMyOrders();
             return new DeleteOrderResponse();
         }
 
@@ -65,7 +65,7 @@ namespace Former.Services
             ServerCallContext context)
         {
             var meta = context.RequestHeaders.ToDictionary(x => x.Key, x => x.Value);
-            await Contexts.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"]).FormOrder(request.Decision);
+            await Contexts.GetUserContext(meta["sessionid"], meta["trademarket"], meta["slot"], meta["userid"]).FormOrder(request.Decision);
             return new SendAlgorithmDecisionResponse();
         }
     }

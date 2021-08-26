@@ -120,17 +120,19 @@ namespace Former.Models
             {
                 Sessionid = metadata.GetValue("sessionid"),
                 Trademarket = metadata.GetValue("trademarket"),
-                Slot = metadata.GetValue("slot")
+                Slot = metadata.GetValue("slot"),
+                UserId = metadata.GetValue("userid")
             };
         }
 
         public static Grpc.Core.Metadata ConvertMetadata(Metadata metadata)
         {
-            return new Grpc.Core.Metadata()
+            return new Grpc.Core.Metadata
             {
                 {"sessionid", metadata.Sessionid},
                 {"trademarket", metadata.Trademarket},
                 {"slot", metadata.Slot},
+                {"userid", metadata.UserId}
             };
         }
     }

@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using Grpc.Core;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using TradeBot.Common.v1;
@@ -247,7 +248,7 @@ namespace UI
         {
             if (!string.IsNullOrEmpty(message.Message))
             {
-                var incomingString = $"[{message.Time}] {message.Message}\r\n" + $"Order {message.Id}, price: {message.Price}, quantity: {message.Qty}, type: {message.Type}\r\n\r\n";
+                var incomingString = $"[{message.Time}] {message.SlotName}: {message.Message}\r\n" + $"Order {message.Id}, price: {message.Price}, quantity: {message.Qty}, type: {message.Type}\r\n\r\n";
                 EventConsole.Text += incomingString;
             }
         }
@@ -257,11 +258,11 @@ namespace UI
             if (!string.IsNullOrEmpty(message)) EventConsole.Text += $"[{DateTime.Now:HH:mm:ss}] {message}\r\n\r\n";
         }
 
-        private void HandleOrderUpdate(PublishOrderEvent orderEvent)
+        private void HandleOrderUpdate(PublishOrderEvent orderEvent, Metadata metadata)
         {
             var incomingMessage = new IncomingMessage
             {
-                SlotName = orderEvent.SlotName,
+                SlotName = metadata.GetValue("slot"),
                 Qty = orderEvent.Order.Quantity,
                 Price = orderEvent.Order.Price,
                 Type = orderEvent.Order.Signature.Type,
@@ -299,7 +300,7 @@ namespace UI
             }
         }
 
-        private void HandleBalanceUpdate(PublishBalanceEvent balanceUpdate)
+        private void HandleBalanceUpdate(PublishBalanceEvent balanceUpdate, Metadata metadata)
         {
             BalanceLabel.Text = $"{balanceUpdate.Balance.Value} {balanceUpdate.Balance.Currency}";
             ProcessBalanceUpdate(balanceUpdate.Balance.Value, balanceUpdate.Time);
@@ -310,14 +311,16 @@ namespace UI
             WriteToJson(_configurations);
             ActiveOrdersDataGridView.Rows.Clear();
             FilledOrdersDataGridView.Rows.Clear();
-            await _facadeClient.StartBot(slotName, GetConfig());
-            WriteMessageToEventConsole($"Bot has been started on {slotName}!");
+            var response = await _facadeClient.StartBot(slotName, GetConfig());
+            WriteMessageToEventConsole(response.Code == ReplyCode.Succeed
+                ? $"Bot has been started on {slotName}!"
+                : $"Bot cannot be started on {slotName}!");
         }
 
         private async void Stop(string slotName)
         {
-            CheckConnection(await _facadeClient.StopBot(slotName,GetConfig()));
-            WriteMessageToEventConsole("Bot has been stopped!");
+            CheckConnection(await _facadeClient.StopBot(slotName, GetConfig()));
+            WriteMessageToEventConsole($"Bot has been stopped on {slotName}!");
         }
 
         private Config GetConfig()
@@ -367,7 +370,7 @@ namespace UI
 
         private void OnValidatingTextBox(object sender, CancelEventArgs e)
         {
-            if (ActiveOrdersDataGridView.RowCount <= 0) return;
+            if (ActiveSlotsDataGridView.RowCount <= 0) return;
             if (!double.TryParse(((TextBox)sender).Text, out _))
             {
                 e.Cancel = true;
@@ -383,13 +386,12 @@ namespace UI
 
         private void ConfigUpdatePriceRangeOnTextChanged(object sender, EventArgs e)
         {
-            ConfigUpdatePriceRangeTxb.TextChanged -= ConfigUpdatePriceRangeOnTextChanged;
             if (ConfigUpdatePriceRangeTxb.Text.IndexOf(',') == ConfigUpdatePriceRangeTxb.Text.Length - 1) return;
             if (!double.TryParse(ConfigUpdatePriceRangeTxb.Text, out var value)) return;
-
             var floor = Math.Floor(value);
-            
-            ConfigUpdatePriceRangeTxb.Text = (floor + (value - floor < 0.5 ? 0.0 : 0.5)).ToString(CultureInfo.InvariantCulture);
+
+            ConfigUpdatePriceRangeTxb.TextChanged -= ConfigUpdatePriceRangeOnTextChanged;
+            ConfigUpdatePriceRangeTxb.Text = (floor + (value - floor < 0.5 ? 0.0 : 0.5)).ToString(CultureInfo.CurrentCulture);
             ConfigUpdatePriceRangeTxb.TextChanged += ConfigUpdatePriceRangeOnTextChanged;
         }
 
@@ -602,13 +604,6 @@ namespace UI
             OurWebsiteLnkLbl1.LinkVisited = true;
         }
 
-        private async void SetLicense_ButtonClick(object sender, EventArgs e)
-        {
-            if (_loggedIn) {
-                await _facadeClient.RegisterLicense();
-            }
-        }
-
         #endregion
 
         #region DrawGraphs
@@ -693,8 +688,13 @@ namespace UI
             pane.YAxis.Scale.Min = 0;
         }
 
+
         #endregion
 
-
+        private void TradeBotUi_Load(object sender, EventArgs e)
+        {
+            DrawGraph(BalanceGraph, _balanceList);
+            DrawGraph(OrderGraph, _orderList);
+        }
     }
 }
