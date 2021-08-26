@@ -514,7 +514,7 @@ namespace TradeMarket.Services
             logger.Information("Request : {@Request}", request);
 
             //находим общий контекст т.к. подписка на стаканы не требует логина в систему биржи
-            var user = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetTradeMarketContextFilter, context.CancellationToken, logger);
+            var user = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetCommonContextFilter, context.CancellationToken, logger);
             await SubscribeToUserTopic<SubscribeBalanceRequest, SubscribeBalanceResponse, Wallet>(
                 user.SubscribeToBalance,
                 user.UnSubscribeFromBalanceAsync,

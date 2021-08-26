@@ -53,7 +53,7 @@ namespace TradeMarket.DataTransfering.Bitmex.Model
         public IPublisher<Instrument> CreateInstrumentPublisher(Context context, CancellationToken token)
         {
             var con = context as BitmexContext; 
-            return new InstrumentPublisher(con.WSClient, con.WSClient.Streams.InstrumentStream,new(context.Signature.SlotName),token);
+            return new InstrumentPublisher(con.WSClient, con.WSClient.Streams.InstrumentStream,new(),token);
         }
 
         public IPublisher<string> CreatePingPongPublisher( Context context, CancellationToken token)
