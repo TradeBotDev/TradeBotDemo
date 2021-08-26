@@ -109,7 +109,7 @@ namespace History
                             ChangesType = (TradeBot.Common.v1.ChangesType)updateOrder.ChangesType,
                             Order = Converter.ToOrder(updateOrder.Order),
                             Sessionid = updateOrder.SessionId,
-                            Time = Timestamp.FromDateTime(new DateTime(updateOrder.Time.Year, updateOrder.Time.Month, updateOrder.Time.Day, 0, 0, 0).ToUniversalTime()),
+                            Time = Timestamp.FromDateTime(updateOrder.Time.ToUniversalTime()),
                             Message = updateOrder.Message,
                             SlotName = updateOrder.SlotName
                         }
@@ -174,7 +174,7 @@ namespace History
                         ChangesType = (TradeBot.Common.v1.ChangesType)ChangesType.CHANGES_TYPE_PARTITIAL,
                         Order = Converter.ToOrder(record.Order),
                         Sessionid = record.SessionId,
-                        Time = Timestamp.FromDateTime(new DateTime(record.Time.Year, record.Time.Month, record.Time.Day, 0, 0, 0).ToUniversalTime()),
+                        Time = Timestamp.FromDateTime(record.Time.ToUniversalTime()),
                         Message = record.Message,
                         SlotName = record.SlotName
                     }

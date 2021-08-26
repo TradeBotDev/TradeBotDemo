@@ -693,8 +693,13 @@ namespace UI
             pane.YAxis.Scale.Min = 0;
         }
 
+
         #endregion
 
-
+        private void TradeBotUi_Load(object sender, EventArgs e)
+        {
+            DrawGraph(BalanceGraph, _balanceList);
+            DrawGraph(OrderGraph, _orderList);
+        }
     }
 }

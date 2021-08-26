@@ -32,13 +32,13 @@ namespace UI
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
             this.BalanceGraph = new ZedGraph.ZedGraphControl();
             this.OrderGraph = new ZedGraph.ZedGraphControl();
             this.Tabs = new System.Windows.Forms.TabControl();
@@ -50,20 +50,8 @@ namespace UI
             this.ClosedOrdersPage = new System.Windows.Forms.TabPage();
             this.FilledOrdersPage = new System.Windows.Forms.TabPage();
             this.FilledOrdersDataGridView = new System.Windows.Forms.DataGridView();
-            this.SlotName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ExecutePrice = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Time = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ActiveOrdersPage = new System.Windows.Forms.TabPage();
             this.ActiveOrdersDataGridView = new System.Windows.Forms.DataGridView();
-            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Type = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.OrderID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ConfigAvailableBalanceTxb = new System.Windows.Forms.TextBox();
             this.ConfigRequiredProfitTxb = new System.Windows.Forms.TextBox();
             this.ConfigUpdatePriceRangeTxb = new System.Windows.Forms.TextBox();
@@ -129,6 +117,18 @@ namespace UI
             this.LeftPanel = new System.Windows.Forms.Panel();
             this.RightPanel = new System.Windows.Forms.Panel();
             this.ErrorProviderSignUp = new System.Windows.Forms.ErrorProvider(this.components);
+            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Type = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.OrderID = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SlotName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ExecutePrice = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Time = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Tabs.SuspendLayout();
             this.LogsPage.SuspendLayout();
             this.GraphicsPage.SuspendLayout();
@@ -291,7 +291,7 @@ namespace UI
             this.FilledOrdersDataGridView.AllowUserToDeleteRows = false;
             this.FilledOrdersDataGridView.AllowUserToResizeColumns = false;
             this.FilledOrdersDataGridView.AllowUserToResizeRows = false;
-            this.FilledOrdersDataGridView.BackgroundColor = System.Drawing.SystemColors.Control;
+            this.FilledOrdersDataGridView.BackgroundColor = System.Drawing.Color.White;
             this.FilledOrdersDataGridView.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.FilledOrdersDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.FilledOrdersDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
@@ -308,62 +308,14 @@ namespace UI
             this.FilledOrdersDataGridView.ReadOnly = true;
             this.FilledOrdersDataGridView.RowHeadersVisible = false;
             this.FilledOrdersDataGridView.RowHeadersWidth = 51;
-            dataGridViewCellStyle1.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.WindowText;
-            this.FilledOrdersDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle8.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle8.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle8.SelectionBackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle8.SelectionForeColor = System.Drawing.SystemColors.WindowText;
+            this.FilledOrdersDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle8;
             this.FilledOrdersDataGridView.RowTemplate.Height = 29;
             this.FilledOrdersDataGridView.Size = new System.Drawing.Size(1059, 533);
             this.FilledOrdersDataGridView.TabIndex = 0;
-            // 
-            // SlotName
-            // 
-            this.SlotName.HeaderText = "Slot name";
-            this.SlotName.MinimumWidth = 6;
-            this.SlotName.Name = "SlotName";
-            this.SlotName.ReadOnly = true;
-            this.SlotName.Width = 176;
-            // 
-            // dataGridViewTextBoxColumn2
-            // 
-            this.dataGridViewTextBoxColumn2.HeaderText = "Quantity";
-            this.dataGridViewTextBoxColumn2.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
-            this.dataGridViewTextBoxColumn2.ReadOnly = true;
-            this.dataGridViewTextBoxColumn2.Width = 176;
-            // 
-            // ExecutePrice
-            // 
-            this.ExecutePrice.HeaderText = "Execute Price";
-            this.ExecutePrice.MinimumWidth = 6;
-            this.ExecutePrice.Name = "ExecutePrice";
-            this.ExecutePrice.ReadOnly = true;
-            this.ExecutePrice.Width = 176;
-            // 
-            // dataGridViewTextBoxColumn7
-            // 
-            this.dataGridViewTextBoxColumn7.HeaderText = "Type";
-            this.dataGridViewTextBoxColumn7.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
-            this.dataGridViewTextBoxColumn7.ReadOnly = true;
-            this.dataGridViewTextBoxColumn7.Width = 176;
-            // 
-            // Time
-            // 
-            this.Time.HeaderText = "Time";
-            this.Time.MinimumWidth = 6;
-            this.Time.Name = "Time";
-            this.Time.ReadOnly = true;
-            this.Time.Width = 176;
-            // 
-            // dataGridViewTextBoxColumn8
-            // 
-            this.dataGridViewTextBoxColumn8.HeaderText = "ID";
-            this.dataGridViewTextBoxColumn8.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn8.Name = "dataGridViewTextBoxColumn8";
-            this.dataGridViewTextBoxColumn8.ReadOnly = true;
-            this.dataGridViewTextBoxColumn8.Width = 176;
             // 
             // ActiveOrdersPage
             // 
@@ -381,7 +333,7 @@ namespace UI
             this.ActiveOrdersDataGridView.AllowUserToDeleteRows = false;
             this.ActiveOrdersDataGridView.AllowUserToResizeColumns = false;
             this.ActiveOrdersDataGridView.AllowUserToResizeRows = false;
-            this.ActiveOrdersDataGridView.BackgroundColor = System.Drawing.SystemColors.Control;
+            this.ActiveOrdersDataGridView.BackgroundColor = System.Drawing.Color.White;
             this.ActiveOrdersDataGridView.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.ActiveOrdersDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.ActiveOrdersDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
@@ -398,62 +350,14 @@ namespace UI
             this.ActiveOrdersDataGridView.ReadOnly = true;
             this.ActiveOrdersDataGridView.RowHeadersVisible = false;
             this.ActiveOrdersDataGridView.RowHeadersWidth = 51;
-            dataGridViewCellStyle2.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.WindowText;
-            this.ActiveOrdersDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle9.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle9.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle9.SelectionBackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle9.SelectionForeColor = System.Drawing.SystemColors.WindowText;
+            this.ActiveOrdersDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle9;
             this.ActiveOrdersDataGridView.RowTemplate.Height = 29;
             this.ActiveOrdersDataGridView.Size = new System.Drawing.Size(1059, 533);
             this.ActiveOrdersDataGridView.TabIndex = 1;
-            // 
-            // dataGridViewTextBoxColumn3
-            // 
-            this.dataGridViewTextBoxColumn3.HeaderText = "Slot name";
-            this.dataGridViewTextBoxColumn3.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
-            this.dataGridViewTextBoxColumn3.ReadOnly = true;
-            this.dataGridViewTextBoxColumn3.Width = 176;
-            // 
-            // dataGridViewTextBoxColumn4
-            // 
-            this.dataGridViewTextBoxColumn4.HeaderText = "Quantity";
-            this.dataGridViewTextBoxColumn4.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
-            this.dataGridViewTextBoxColumn4.ReadOnly = true;
-            this.dataGridViewTextBoxColumn4.Width = 176;
-            // 
-            // dataGridViewTextBoxColumn5
-            // 
-            this.dataGridViewTextBoxColumn5.HeaderText = "Execute Price";
-            this.dataGridViewTextBoxColumn5.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
-            this.dataGridViewTextBoxColumn5.ReadOnly = true;
-            this.dataGridViewTextBoxColumn5.Width = 176;
-            // 
-            // Type
-            // 
-            this.Type.HeaderText = "Type";
-            this.Type.MinimumWidth = 6;
-            this.Type.Name = "Type";
-            this.Type.ReadOnly = true;
-            this.Type.Width = 176;
-            // 
-            // dataGridViewTextBoxColumn6
-            // 
-            this.dataGridViewTextBoxColumn6.HeaderText = "Time";
-            this.dataGridViewTextBoxColumn6.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
-            this.dataGridViewTextBoxColumn6.ReadOnly = true;
-            this.dataGridViewTextBoxColumn6.Width = 176;
-            // 
-            // OrderID
-            // 
-            this.OrderID.HeaderText = "ID";
-            this.OrderID.MinimumWidth = 6;
-            this.OrderID.Name = "OrderID";
-            this.OrderID.ReadOnly = true;
-            this.OrderID.Width = 176;
             // 
             // ConfigAvailableBalanceTxb
             // 
@@ -772,7 +676,7 @@ namespace UI
             this.RemoveRowButton.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.RemoveRowButton.Location = new System.Drawing.Point(696, 293);
             this.RemoveRowButton.Name = "RemoveRowButton";
-            this.RemoveRowButton.Size = new System.Drawing.Size(62, 29);
+            this.RemoveRowButton.Size = new System.Drawing.Size(62, 30);
             this.RemoveRowButton.TabIndex = 23;
             this.RemoveRowButton.Text = "-";
             this.RemoveRowButton.UseVisualStyleBackColor = true;
@@ -783,7 +687,7 @@ namespace UI
             this.AddRowButton.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.AddRowButton.Location = new System.Drawing.Point(635, 293);
             this.AddRowButton.Name = "AddRowButton";
-            this.AddRowButton.Size = new System.Drawing.Size(62, 29);
+            this.AddRowButton.Size = new System.Drawing.Size(62, 30);
             this.AddRowButton.TabIndex = 22;
             this.AddRowButton.Text = "+";
             this.AddRowButton.UseVisualStyleBackColor = true;
@@ -797,7 +701,7 @@ namespace UI
             "XBTUSD",
             "ETHUSD",
             "DOGEUSD"});
-            this.SlotsComboBox.Location = new System.Drawing.Point(537, 293);
+            this.SlotsComboBox.Location = new System.Drawing.Point(537, 294);
             this.SlotsComboBox.Name = "SlotsComboBox";
             this.SlotsComboBox.Size = new System.Drawing.Size(99, 28);
             this.SlotsComboBox.TabIndex = 25;
@@ -810,26 +714,26 @@ namespace UI
             this.ActiveSlotsDataGridView.AllowUserToResizeRows = false;
             this.ActiveSlotsDataGridView.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ActiveSlotsDataGridView.BackgroundColor = System.Drawing.Color.White;
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.ActiveSlotsDataGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle10.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle10.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle10.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle10.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle10.SelectionForeColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle10.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.ActiveSlotsDataGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle10;
             this.ActiveSlotsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.ActiveSlotsDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Slot,
             this.Launch});
-            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle6.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.ActiveSlotsDataGridView.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle13.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle13.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle13.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle13.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle13.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle13.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle13.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.ActiveSlotsDataGridView.DefaultCellStyle = dataGridViewCellStyle13;
             this.ActiveSlotsDataGridView.GridColor = System.Drawing.SystemColors.Control;
             this.ActiveSlotsDataGridView.Location = new System.Drawing.Point(537, 12);
             this.ActiveSlotsDataGridView.MultiSelect = false;
@@ -837,11 +741,11 @@ namespace UI
             this.ActiveSlotsDataGridView.ReadOnly = true;
             this.ActiveSlotsDataGridView.RowHeadersVisible = false;
             this.ActiveSlotsDataGridView.RowHeadersWidth = 51;
-            dataGridViewCellStyle7.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle7.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle7.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            this.ActiveSlotsDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle7;
+            dataGridViewCellStyle14.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle14.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle14.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle14.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            this.ActiveSlotsDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle14;
             this.ActiveSlotsDataGridView.RowTemplate.Height = 29;
             this.ActiveSlotsDataGridView.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.ActiveSlotsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
@@ -852,12 +756,12 @@ namespace UI
             // 
             // Slot
             // 
-            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle4.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.WindowText;
-            this.Slot.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle11.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle11.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle11.SelectionBackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle11.SelectionForeColor = System.Drawing.SystemColors.WindowText;
+            this.Slot.DefaultCellStyle = dataGridViewCellStyle11;
             this.Slot.HeaderText = "Slot name";
             this.Slot.MinimumWidth = 6;
             this.Slot.Name = "Slot";
@@ -868,13 +772,13 @@ namespace UI
             // 
             // Launch
             // 
-            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle5.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle5.NullValue = false;
-            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.WindowText;
-            this.Launch.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle12.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle12.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle12.NullValue = false;
+            dataGridViewCellStyle12.SelectionBackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle12.SelectionForeColor = System.Drawing.SystemColors.WindowText;
+            this.Launch.DefaultCellStyle = dataGridViewCellStyle12;
             this.Launch.HeaderText = "Launch";
             this.Launch.MinimumWidth = 6;
             this.Launch.Name = "Launch";
@@ -921,13 +825,13 @@ namespace UI
             // 
             this.ConfigRequiredProfitLbl.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ConfigRequiredProfitLbl.AutoSize = true;
-            this.ConfigRequiredProfitLbl.Location = new System.Drawing.Point(49, 180);
+            this.ConfigRequiredProfitLbl.Location = new System.Drawing.Point(48, 179);
             this.ConfigRequiredProfitLbl.Margin = new System.Windows.Forms.Padding(3);
             this.ConfigRequiredProfitLbl.Name = "ConfigRequiredProfitLbl";
             this.ConfigRequiredProfitLbl.Padding = new System.Windows.Forms.Padding(5);
-            this.ConfigRequiredProfitLbl.Size = new System.Drawing.Size(126, 30);
+            this.ConfigRequiredProfitLbl.Size = new System.Drawing.Size(127, 30);
             this.ConfigRequiredProfitLbl.TabIndex = 26;
-            this.ConfigRequiredProfitLbl.Text = "Required Profit";
+            this.ConfigRequiredProfitLbl.Text = "Required profit";
             // 
             // BalanceLabel
             // 
@@ -1016,13 +920,13 @@ namespace UI
             // 
             this.ConfigAlgorithmSensLbl.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ConfigAlgorithmSensLbl.AutoSize = true;
-            this.ConfigAlgorithmSensLbl.Location = new System.Drawing.Point(23, 148);
+            this.ConfigAlgorithmSensLbl.Location = new System.Drawing.Point(15, 148);
             this.ConfigAlgorithmSensLbl.Margin = new System.Windows.Forms.Padding(3);
             this.ConfigAlgorithmSensLbl.Name = "ConfigAlgorithmSensLbl";
             this.ConfigAlgorithmSensLbl.Padding = new System.Windows.Forms.Padding(5);
-            this.ConfigAlgorithmSensLbl.Size = new System.Drawing.Size(152, 30);
+            this.ConfigAlgorithmSensLbl.Size = new System.Drawing.Size(160, 30);
             this.ConfigAlgorithmSensLbl.TabIndex = 12;
-            this.ConfigAlgorithmSensLbl.Text = "Algorithm sensivity";
+            this.ConfigAlgorithmSensLbl.Text = "Algorithm sensitivity";
             // 
             // SignUpGroupBox
             // 
@@ -1268,6 +1172,102 @@ namespace UI
             // 
             this.ErrorProviderSignUp.ContainerControl = this;
             // 
+            // dataGridViewTextBoxColumn3
+            // 
+            this.dataGridViewTextBoxColumn3.HeaderText = "Slot name";
+            this.dataGridViewTextBoxColumn3.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
+            this.dataGridViewTextBoxColumn3.ReadOnly = true;
+            this.dataGridViewTextBoxColumn3.Width = 172;
+            // 
+            // dataGridViewTextBoxColumn4
+            // 
+            this.dataGridViewTextBoxColumn4.HeaderText = "Quantity";
+            this.dataGridViewTextBoxColumn4.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
+            this.dataGridViewTextBoxColumn4.ReadOnly = true;
+            this.dataGridViewTextBoxColumn4.Width = 172;
+            // 
+            // dataGridViewTextBoxColumn5
+            // 
+            this.dataGridViewTextBoxColumn5.HeaderText = "Execute Price";
+            this.dataGridViewTextBoxColumn5.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
+            this.dataGridViewTextBoxColumn5.ReadOnly = true;
+            this.dataGridViewTextBoxColumn5.Width = 172;
+            // 
+            // Type
+            // 
+            this.Type.HeaderText = "Type";
+            this.Type.MinimumWidth = 6;
+            this.Type.Name = "Type";
+            this.Type.ReadOnly = true;
+            this.Type.Width = 172;
+            // 
+            // dataGridViewTextBoxColumn6
+            // 
+            this.dataGridViewTextBoxColumn6.HeaderText = "Time";
+            this.dataGridViewTextBoxColumn6.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
+            this.dataGridViewTextBoxColumn6.ReadOnly = true;
+            this.dataGridViewTextBoxColumn6.Width = 172;
+            // 
+            // OrderID
+            // 
+            this.OrderID.HeaderText = "ID";
+            this.OrderID.MinimumWidth = 6;
+            this.OrderID.Name = "OrderID";
+            this.OrderID.ReadOnly = true;
+            this.OrderID.Width = 172;
+            // 
+            // SlotName
+            // 
+            this.SlotName.HeaderText = "Slot name";
+            this.SlotName.MinimumWidth = 6;
+            this.SlotName.Name = "SlotName";
+            this.SlotName.ReadOnly = true;
+            this.SlotName.Width = 172;
+            // 
+            // dataGridViewTextBoxColumn2
+            // 
+            this.dataGridViewTextBoxColumn2.HeaderText = "Quantity";
+            this.dataGridViewTextBoxColumn2.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
+            this.dataGridViewTextBoxColumn2.ReadOnly = true;
+            this.dataGridViewTextBoxColumn2.Width = 172;
+            // 
+            // ExecutePrice
+            // 
+            this.ExecutePrice.HeaderText = "Execute Price";
+            this.ExecutePrice.MinimumWidth = 6;
+            this.ExecutePrice.Name = "ExecutePrice";
+            this.ExecutePrice.ReadOnly = true;
+            this.ExecutePrice.Width = 172;
+            // 
+            // dataGridViewTextBoxColumn7
+            // 
+            this.dataGridViewTextBoxColumn7.HeaderText = "Type";
+            this.dataGridViewTextBoxColumn7.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
+            this.dataGridViewTextBoxColumn7.ReadOnly = true;
+            this.dataGridViewTextBoxColumn7.Width = 172;
+            // 
+            // Time
+            // 
+            this.Time.HeaderText = "Time";
+            this.Time.MinimumWidth = 6;
+            this.Time.Name = "Time";
+            this.Time.ReadOnly = true;
+            this.Time.Width = 172;
+            // 
+            // dataGridViewTextBoxColumn8
+            // 
+            this.dataGridViewTextBoxColumn8.HeaderText = "ID";
+            this.dataGridViewTextBoxColumn8.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn8.Name = "dataGridViewTextBoxColumn8";
+            this.dataGridViewTextBoxColumn8.ReadOnly = true;
+            this.dataGridViewTextBoxColumn8.Width = 172;
+            // 
             // TradeBotUi
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -1283,6 +1283,7 @@ namespace UI
             this.Name = "TradeBotUi";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "TradeBot";
+            this.Load += new System.EventHandler(this.TradeBotUi_Load);
             this.Tabs.ResumeLayout(false);
             this.LogsPage.ResumeLayout(false);
             this.GraphicsPage.ResumeLayout(false);
@@ -1383,6 +1384,16 @@ namespace UI
         private System.Windows.Forms.Panel SignUpPanel;
         private System.Windows.Forms.Panel panel5;
         private System.Windows.Forms.Label LicenseNumberLbl;
+        private System.Windows.Forms.Label SessionIDLbl;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.LinkLabel OurWebsiteLnkLbl;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.LinkLabel OurWebsiteLnkLbl1;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.LinkLabel BitmexWebsiteLnkLbl;
+        private System.Windows.Forms.ErrorProvider ErrorProviderSignUp;
+        private System.Windows.Forms.Button SetLicenseBtn;
         private System.Windows.Forms.DataGridViewTextBoxColumn SlotName;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
         private System.Windows.Forms.DataGridViewTextBoxColumn ExecutePrice;
@@ -1395,16 +1406,6 @@ namespace UI
         private System.Windows.Forms.DataGridViewTextBoxColumn Type;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn6;
         private System.Windows.Forms.DataGridViewTextBoxColumn OrderID;
-        private System.Windows.Forms.Label SessionIDLbl;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.LinkLabel OurWebsiteLnkLbl;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.LinkLabel OurWebsiteLnkLbl1;
-        private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.LinkLabel BitmexWebsiteLnkLbl;
-        private System.Windows.Forms.ErrorProvider ErrorProviderSignUp;
-        private System.Windows.Forms.Button SetLicenseBtn;
     }
 }
 
