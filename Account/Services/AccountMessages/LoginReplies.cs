@@ -8,7 +8,7 @@ namespace AccountGRPC.AccountMessages
         // Логгирование.
         private static readonly ILogger logger = Log.ForContext("Where", "AccountService");
 
-        public static LoginResponse SuccessfulLogin(string sessionId)
+        public static LoginResponse SuccessfulLogin(string sessionId, int accountId)
         {
             const string Message = "Произведен вход в аккаунт.";
             logger.Information("{@Replies} - " + $"{Message} SessionId: {sessionId}", nameof(LoginReplies));
@@ -16,6 +16,7 @@ namespace AccountGRPC.AccountMessages
             return new LoginResponse
             {
                 SessionId = sessionId,
+                AccountId = accountId,
                 Result = AccountActionCode.Successful,
                 Message = Message
             };

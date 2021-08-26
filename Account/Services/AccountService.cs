@@ -83,7 +83,7 @@ namespace AccountGRPC
                 database.SaveChanges();
 
                 // Ответ сервера об успешном входе в аккаунт.
-                return await Task.FromResult(LoginReplies.SuccessfulLogin(sessionId));
+                return await Task.FromResult(LoginReplies.SuccessfulLogin(sessionId, accounts.First().AccountId));
             }
         }
 

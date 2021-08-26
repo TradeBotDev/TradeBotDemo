@@ -42,13 +42,13 @@ namespace Facade
             {
                 response = await ClientAccount.LoginAsync(new TradeBot.Account.AccountService.v1.LoginRequest 
                 { 
-                    Email=request.Email,
+                    Email = request.Email,
                     Password = request.Password
                 });
                 return response;
             }
             await Generalization.ConnectionTester(task, methodName, request);
-            return await Generalization.ReturnResponse(new Ref.LoginResponse { SessionId = response.SessionId, Message = response.Message, Result = (Ref.AccountActionCode)response.Result }, methodName);
+            return await Generalization.ReturnResponse(new Ref.LoginResponse { SessionId = response.SessionId, AccountId = response.AccountId, Message = response.Message, Result = (Ref.AccountActionCode)response.Result }, methodName);
         }
         public async Task<Ref.LogoutResponse> Account_Logout(Ref.LogoutRequest request, ServerCallContext context, string methodName)
         {
