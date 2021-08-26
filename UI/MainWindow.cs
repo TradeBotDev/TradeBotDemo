@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using Grpc.Core;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using TradeBot.Common.v1;
@@ -257,11 +258,11 @@ namespace UI
             if (!string.IsNullOrEmpty(message)) EventConsole.Text += $"[{DateTime.Now:HH:mm:ss}] {message}\r\n\r\n";
         }
 
-        private void HandleOrderUpdate(PublishOrderEvent orderEvent)
+        private void HandleOrderUpdate(PublishOrderEvent orderEvent, Metadata metadata)
         {
             var incomingMessage = new IncomingMessage
             {
-                SlotName = orderEvent.SlotName,
+                SlotName = metadata.GetValue("slot"),
                 Qty = orderEvent.Order.Quantity,
                 Price = orderEvent.Order.Price,
                 Type = orderEvent.Order.Signature.Type,
@@ -299,7 +300,7 @@ namespace UI
             }
         }
 
-        private void HandleBalanceUpdate(PublishBalanceEvent balanceUpdate)
+        private void HandleBalanceUpdate(PublishBalanceEvent balanceUpdate, Metadata metadata)
         {
             BalanceLabel.Text = $"{balanceUpdate.Balance.Value} {balanceUpdate.Balance.Currency}";
             ProcessBalanceUpdate(balanceUpdate.Balance.Value, balanceUpdate.Time);

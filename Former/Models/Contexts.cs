@@ -12,13 +12,13 @@ namespace Former.Models
         private static readonly object locker = new ();
 
         //Получает контекст пользователя по его sessionId, trademarket name, slot name если он уже существует или создаёт новый
-        public static UserContext GetUserContext(string sessionId, string tradeMarket, string slot)
+        public static UserContext GetUserContext(string sessionId, string tradeMarket, string slot, string userid)
         {
             lock (locker)
             {
                 var result = UserContexts.FirstOrDefault(el => el.SessionId == sessionId && el.TradeMarket == tradeMarket && el.Slot == slot);
                 if (result is not null) return result;
-                result = new UserContext(sessionId, tradeMarket, slot);
+                result = new UserContext(sessionId, tradeMarket, slot, userid);
                 UserContexts.Add(result);
                 Log.Information("Created new context {@sessionid}, {@trademarket}, {@slot}, number Of contexts {@NumberOfContexts}", sessionId, tradeMarket, slot, UserContexts.Count);
                 return result;

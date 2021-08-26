@@ -21,13 +21,14 @@ namespace Former.Models
 
         internal Metadata Meta { get; }
 
-        internal UserContext(string sessionId, string tradeMarket, string slot)
+        internal UserContext(string sessionId, string tradeMarket, string slot, string userid)
         {
             Meta = new Metadata
             {
                 Sessionid = sessionId,
                 Trademarket = tradeMarket,
-                Slot = slot
+                Slot = slot,
+                UserId = userid
             };
             _logger = Log.ForContext("SessionId", Meta.Sessionid)
                          .ForContext("Slot", Meta.Slot)

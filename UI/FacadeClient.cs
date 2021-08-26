@@ -15,10 +15,10 @@ namespace UI
         private readonly FacadeService.FacadeServiceClient _client = new(GrpcChannel.ForAddress("http://localhost:5002"));
         private Metadata _meta;
 
-        public delegate void OrdersUpdate(PublishOrderEvent order);
+        public delegate void OrdersUpdate(PublishOrderEvent order, Metadata metadata);
         public OrdersUpdate HandleOrderUpdate;
 
-        public delegate void BalanceUpdate(PublishBalanceEvent balance);
+        public delegate void BalanceUpdate(PublishBalanceEvent balance, Metadata metadata);
         public BalanceUpdate HandleBalanceUpdate;
         
         private CancellationTokenSource _token;
@@ -87,10 +87,10 @@ namespace UI
                 switch (call.ResponseStream.Current.EventTypeCase)
                 {
                     case SubscribeEventsResponse.EventTypeOneofCase.Balance:
-                        HandleBalanceUpdate?.Invoke(call.ResponseStream.Current.Balance);
+                        HandleBalanceUpdate?.Invoke(call.ResponseStream.Current.Balance, _meta);
                         break;
                     case SubscribeEventsResponse.EventTypeOneofCase.Order:
-                        HandleOrderUpdate?.Invoke(call.ResponseStream.Current.Order);
+                        HandleOrderUpdate?.Invoke(call.ResponseStream.Current.Order, _meta);
                         break;
                     case SubscribeEventsResponse.EventTypeOneofCase.None:
                         break;
@@ -176,7 +176,8 @@ namespace UI
                 {
                     { "sessionid", sessionId },
                     { "slot", "XBTUSD" },
-                    { "trademarket", "bitmex" }
+                    { "trademarket", "bitmex" },
+                    { "userid", logResponse.AccountId.ToString()}
                 };
 
                 await RegisterLicense();

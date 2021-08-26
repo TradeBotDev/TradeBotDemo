@@ -22,25 +22,22 @@ message PublishEventRequest{
 }
 
 message PublishBalanceEvent{
-	string sessionid = 1;
-	google.protobuf.Timestamp time = 2;
-	tradebot.common.v1.Balance balance = 3;
+	google.protobuf.Timestamp time = 1;
+	tradebot.common.v1.Balance balance = 2;
 }
 
 message PublishOrderEvent{
-	string sessionid = 1;
-	tradebot.common.v1.ChangesType changes_type = 2;
-	google.protobuf.Timestamp time = 3;
-	tradebot.common.v1.Order order = 4;
-	string message = 5;
-	string slot_name = 6;
+	tradebot.common.v1.ChangesType changes_type = 1;
+	google.protobuf.Timestamp time = 2;
+	tradebot.common.v1.Order order = 3;
+	string message = 4;
 }
 message PublishEventResponse{
 	google.protobuf.Empty empty = 1;
 }
 
 message SubscribeEventsRequest {
-	string sessionid = 1;
+	google.protobuf.Empty empty = 1;
 }
 
 message SubscribeEventsResponse{

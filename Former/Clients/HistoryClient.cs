@@ -77,7 +77,6 @@ namespace Former.Clients
                         {
                             Currency = "XBT", Value = (balance * 0.00000001).ToString(CultureInfo.InvariantCulture)
                         }),
-                        Sessionid = meta.GetValue("sessionid"),
                         Time = new Timestamp { Seconds = DateTimeOffset.Now.ToUnixTimeSeconds() }
                     }
                 }, meta);
@@ -103,9 +102,8 @@ namespace Former.Clients
                     {
                         ChangesType = (TradeBot.Common.v1.ChangesType)changesType,
                         Order = Converters.ConvertOrder(order), 
-                        Sessionid = meta.GetValue("sessionid"),
                         Time = new Timestamp { Seconds = DateTimeOffset.Now.ToUnixTimeSeconds() },
-                        Message = message, SlotName = meta.GetValue("slot")
+                        Message = message
                     }
                 },meta);
             }
