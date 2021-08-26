@@ -15,8 +15,8 @@ namespace TradeMarket.Model
         {
             var communicator = new BitmexWebsocketCommunicator(connectionString);
             var res = new BitmexWebsocketClient(communicator);
-            communicator.Start();
             communicator.ReconnectTimeout = null;
+            communicator.Start();
             return res;
         }
 
