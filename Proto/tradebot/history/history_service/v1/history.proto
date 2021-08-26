@@ -24,6 +24,8 @@ message PublishEventRequest{
 message PublishBalanceEvent{
 	google.protobuf.Timestamp time = 1;
 	tradebot.common.v1.Balance balance = 2;
+	string sessionid = 3;
+	string slot = 4;
 }
 
 message PublishOrderEvent{

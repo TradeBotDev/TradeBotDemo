@@ -16,5 +16,7 @@ namespace History.DataBase
         public int BalanceId { get; set; }
         public BalanceWrapper Balance { get; set; }
         public string UserId { get; set; }
+        public string Slot { get; set; }
+        public string Sessionid { get; set; }
     }
 }

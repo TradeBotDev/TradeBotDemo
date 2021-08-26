@@ -37,7 +37,9 @@ namespace Facade
                                 Balance = new Ref.PublishBalanceEvent
                                 {
                                     Balance = response.ResponseStream.Current.Balance.Balance,
-                                    Time = response.ResponseStream.Current.Balance.Time
+                                    Time = response.ResponseStream.Current.Balance.Time,
+                                    Sessionid = response.ResponseStream.Current.Balance.Sessionid,
+                                    Slot = response.ResponseStream.Current.Balance.Slot
                                 }
                             });
                             break;

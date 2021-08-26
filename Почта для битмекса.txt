@@ -8,7 +8,7 @@ secret - gU8G7ukCtuwVTPyLXxTz97wnfL4h_23KLcomYsiZc4d4hKnD
 
 и еще мой
 crossfirelet@gmail.com
-key - k42jT36Y9E_1lvyv3y2q7OL9 
+key - k42jT36Y9E_1lvyv3y2q7OL9
 secret - _qUdJO3dSkcofjCaTgEyQQGtx66JDbbZOWXwXQEcvuI3CX46
 
 tradebottestnet1@mail.ru

@@ -12,7 +12,7 @@ namespace UI
 {
     class FacadeClient
     {
-        private readonly FacadeService.FacadeServiceClient _client = new(GrpcChannel.ForAddress("http://localhost:5002"));
+        private readonly FacadeService.FacadeServiceClient _client = new(GrpcChannel.ForAddress("http://23.88.34.174:5002"));
         private Metadata _meta;
 
         public delegate void OrdersUpdate(PublishOrderEvent order, Metadata metadata);
@@ -89,7 +89,9 @@ namespace UI
                 switch (call.ResponseStream.Current.EventTypeCase)
                 {
                     case SubscribeEventsResponse.EventTypeOneofCase.Balance:
-                        HandleBalanceUpdate?.Invoke(call.ResponseStream.Current.Balance, responseHeaders);
+                        if (call.ResponseStream.Current.Balance.Slot == slotName &&
+                            call.ResponseStream.Current.Balance.Sessionid == sessionid) 
+                            HandleBalanceUpdate?.Invoke(call.ResponseStream.Current.Balance, responseHeaders);
                         break;
                     case SubscribeEventsResponse.EventTypeOneofCase.Order:
                         

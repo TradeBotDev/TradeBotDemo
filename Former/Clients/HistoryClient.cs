@@ -75,7 +75,8 @@ namespace Former.Clients
                     {
                         Balance = Converters.ConvertBalance(new Balance
                         {
-                            Currency = "XBT", Value = (balance * 0.00000001).ToString(CultureInfo.InvariantCulture)
+                            Currency = "XBT", 
+                            Value = (balance * 0.00000001).ToString(CultureInfo.InvariantCulture)
                         }),
                         Time = new Timestamp { Seconds = DateTimeOffset.Now.ToUnixTimeSeconds() }
                     }

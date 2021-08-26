@@ -33,7 +33,9 @@ namespace History
                         {
                             Time = request.Balance.Time.ToDateTime(),
                             Balance = bw,
-                            UserId = context.RequestHeaders.GetValue("userid")
+                            UserId = context.RequestHeaders.GetValue("userid"),
+                            Sessionid = context.RequestHeaders.GetValue("sessionid"),
+                            Slot = context.RequestHeaders.GetValue("slot")
                         };
                         BalanceCollection.Add(bc);
                         db.Add(bw);
@@ -91,7 +93,9 @@ namespace History
                         Balance = new PublishBalanceEvent
                         {
                             Balance = Converter.ToBalance(updateBalance.Balance),
-                            Time = Timestamp.FromDateTime(new DateTime(updateBalance.Time.Year, updateBalance.Time.Month, updateBalance.Time.Day, 0, 0, 0).ToUniversalTime())
+                            Time = Timestamp.FromDateTime(new DateTime(updateBalance.Time.Year, updateBalance.Time.Month, updateBalance.Time.Day, 0, 0, 0).ToUniversalTime()),
+                            Sessionid = updateBalance.Sessionid,
+                            Slot = updateBalance.Slot
                         }
                     });
                 }
