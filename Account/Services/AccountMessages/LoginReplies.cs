@@ -22,7 +22,7 @@ namespace AccountGRPC.AccountMessages
             };
         }
 
-        public static LoginResponse AlreadySignedIn(string sessionId)
+        public static LoginResponse AlreadySignedIn(string sessionId, int accountId)
         {
             const string Message = "Вы уже вошли в аккаунт.";
             logger.Information("{@Replies} - " + $"{Message} SessionId: {sessionId}", nameof(LoginReplies));
@@ -30,6 +30,7 @@ namespace AccountGRPC.AccountMessages
             return new LoginResponse
             {
                 SessionId = sessionId,
+                AccountId = accountId,
                 Result = AccountActionCode.Successful,
                 Message = Message
             };

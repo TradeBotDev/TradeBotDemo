@@ -666,8 +666,8 @@ namespace UI
                 pane.YAxis.Scale.Min = list.Last().Y - 0.01;
                 pane.YAxis.Scale.Max = list.Last().Y + 0.01;
 
-                pane.XAxis.Scale.Min = new XDate(list.Last().X - 1);
-                pane.XAxis.Scale.Max = new XDate(list.Last().X + 1);
+                pane.XAxis.Scale.Min = new XDate(list.Last().X - 3);
+                pane.XAxis.Scale.Max = new XDate(list.Last().X + 3);
             }
             catch (Exception e)
             {
