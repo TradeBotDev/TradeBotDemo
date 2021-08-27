@@ -77,6 +77,7 @@ namespace TradeMarket.Model.UserContexts
         public static ContextFilter GetFullContextFilter(string sessionId, string slotName,string tradeMarketName)=> new( new(sessionId,true), new(slotName,true), new(tradeMarketName,true), ContextFilterType.Full);
         public static ContextFilter GetCommonContextFilter(string sessionId, string slotName, string tradeMarketName) => new(new(sessionId,false), new(slotName, true), new(tradeMarketName, true), ContextFilterType.Common);
         public static ContextFilter GetTradeMarketContextFilter(string sessionId, string slotName, string tradeMarketName) => new(new(sessionId,false), new(slotName,false), new(tradeMarketName,true), ContextFilterType.TradeMarket);
+        public static ContextFilter GetTradeMarketAndUserContextFilter(string sessionId, string slotName, string tradeMarketName) => new(new(sessionId, true), new(slotName, false), new(tradeMarketName, true), ContextFilterType.TradeMarket);
 
 
     }

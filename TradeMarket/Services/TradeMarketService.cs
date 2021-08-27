@@ -409,7 +409,7 @@ namespace TradeMarket.Services
 
 
 
-            var user = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetTradeMarketContextFilter, context.CancellationToken, logger);
+            var user = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetTradeMarketAndUserContextFilter, context.CancellationToken, logger);
             await SubscribeToUserTopic<SubscribeMarginRequest, SubscribeMarginResponse, Margin>(
                 user.SubscribeToUserMargin,
                 user.UnSubscribeFromUserMarginAsync,
@@ -433,7 +433,7 @@ namespace TradeMarket.Services
                ForContext("Topic", "Position");
             logger.Information("Request : {@Request}", request);
 
-            var user = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetTradeMarketContextFilter, context.CancellationToken, logger);
+            var user = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetTradeMarketAndUserContextFilter, context.CancellationToken, logger);
             await SubscribeToUserTopic<SubscribePositionRequest, SubscribePositionResponse, Position>(
                 user.SubscribeToUserPositions,
                 user.UnSubscribeFromUserPositionsAsync,
@@ -457,7 +457,7 @@ namespace TradeMarket.Services
                ForContext("Topic", "Orders");
             logger.Information("Request : {@Request}", request);
 
-            var user = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetTradeMarketContextFilter, context.CancellationToken, logger);
+            var user = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetTradeMarketAndUserContextFilter, context.CancellationToken, logger);
             await SubscribeToUserTopic<SubscribeMyOrdersRequest, SubscribeMyOrdersResponse, Order>(
                 user.SubscribeToUserOrders,
                 user.UnSubscribeFromUserOrdersAsync,
@@ -514,7 +514,7 @@ namespace TradeMarket.Services
             logger.Information("Request : {@Request}", request);
 
             //находим общий контекст т.к. подписка на стаканы не требует логина в систему биржи
-            var user = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetTradeMarketContextFilter, context.CancellationToken, logger);
+            var user = await GetUserContextAsync(context.RequestHeaders, ContextFilter.GetFullContextFilter, context.CancellationToken, logger);
             await SubscribeToUserTopic<SubscribeBalanceRequest, SubscribeBalanceResponse, Wallet>(
                 user.SubscribeToBalance,
                 user.UnSubscribeFromBalanceAsync,
